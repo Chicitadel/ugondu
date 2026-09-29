@@ -27,6 +27,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/health', (req: Request, res: Response) => {
+    res.json({ status: 'ok', service: 'repository-adapter' });
+});
+
 // [en] Supported repository provider enum
 type RepositoryProvider =
     | 'github'

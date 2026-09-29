@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import axios from 'axios';
 
 const app = express();
 app.use(cors());
@@ -7,7 +8,11 @@ app.use(express.json());
 
 const subscribers: Map<string, string[]> = new Map();
 
-app.post('/v1/events/publish', (req: Request, res: Response): any => {
+app.get('/health', (req: Request, res: Response) => {
+    res.json({ status: 'ok', service: 'event-bus' });
+});
+
+app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any> => {
     const { event, payload } = req.body;
     
     if (!event) {
@@ -16,14 +21,22 @@ app.post('/v1/events/publish', (req: Request, res: Response): any => {
 
     console.log(`[en] Dispatching event: ${event}`);
     
-    // In production, dispatch to Kafka/RabbitMQ here.
-    // For now, simple console-based verification to prove the isolated context
     const subs = subscribers.get(event) || [];
     console.log(`[en] Notified ${subs.length} subscribers for ${event}`);
 
+    // Real webhook dispatch
+    for (const webhookUrl of subs) {
+        try {
+            await axios.post(webhookUrl, { event, payload }, { timeout: 5000 });
+            console.log(`[en] Successfully delivered to ${webhookUrl}`);
+        } catch (error: any) {
+            console.error(`[en] Delivery failed to ${webhookUrl}: ${error.message}`);
+        }
+    }
+
     return res.status(200).json({
         dispatched: true,
-        message: `[en] Event ${event} dispatched successfully.`
+        message: `[en] Event ${event} dispatched successfully to ${subs.length} subscribers.`
     });
 });
 

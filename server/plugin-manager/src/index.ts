@@ -15,6 +15,10 @@ interface PluginMetadata {
     description: string;
 }
 
+app.get('/health', (req: Request, res: Response) => {
+    res.json({ status: 'ok', service: 'plugin-manager' });
+});
+
 app.get('/v1/plugins', (req: Request, res: Response): any => {
     try {
         if (!fs.existsSync(PLUGINS_DIR)) {

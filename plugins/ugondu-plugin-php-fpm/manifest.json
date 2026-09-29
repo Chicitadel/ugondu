@@ -1,0 +1,18 @@
+{
+  "name": "ugondu-plugin-php-fpm",
+  "version": "1.0.0",
+  "description": "[en] PHP-FPM and Opcache reset plugin for cPanel and DirectAdmin.",
+  "author": "Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "hooks": ["post-sync"],
+  "options": {
+    "reload_fpm": {
+      "type": "boolean",
+      "default": true
+    },
+    "clear_opcache": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

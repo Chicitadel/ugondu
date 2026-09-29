@@ -10,6 +10,10 @@ app.use(express.json());
 const PRIVATE_SIGNING_KEY = process.env.UGONDU_PRIVATE_KEY || randomBytes(32).toString('hex');
 const BILLING_GATEWAY_URL = process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1';
 
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'engine-core' });
+});
+
 app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
     const { repositoryUrl, branch, fileMap, targetEnvironment, token } = req.body;
     
@@ -40,14 +44,42 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             {
                 action: 'FETCH_REPOSITORY',
                 payload: { url: repositoryUrl, branch }
-            },
-            {
-                action: 'SYNC_ENVIRONMENT',
-                payload: { strategy }
             }
         ];
 
-        // [en] 3. Enforce Rollback/Retention feature flag
+        // [en] 3. Plugin Discovery and Injection
+        try {
+            const PLUGIN_MANAGER_URL = process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1';
+            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`).catch(() => null);
+            
+            if (pluginsResponse && pluginsResponse.data && Array.isArray(pluginsResponse.data.plugins)) {
+                let injectedCount = 0;
+                const maxPlugins = capabilities.maxPlugins === 'unlimited' ? Infinity : (capabilities.maxPlugins || 1);
+
+                for (const pluginName of pluginsResponse.data.plugins) {
+                    if (injectedCount >= maxPlugins) {
+                        console.log(`[en] Notice: Max plugins (${maxPlugins}) reached for ${edition} edition. Skipping ${pluginName}.`);
+                        break;
+                    }
+
+                    const execResponse = await axios.post(`${PLUGIN_MANAGER_URL}/plugins/${pluginName}/execute`, { payload: {} }).catch(() => null);
+                    if (execResponse && execResponse.data && Array.isArray(execResponse.data.injectedSteps)) {
+                        steps.push(...execResponse.data.injectedSteps);
+                        injectedCount++;
+                    }
+                }
+            }
+        } catch (pluginErr) {
+            console.error(`[en] Plugin execution failed:`, pluginErr);
+        }
+
+        // Add the core environment sync step after plugins
+        steps.push({
+            action: 'SYNC_ENVIRONMENT',
+            payload: { strategy }
+        });
+
+        // [en] 4. Enforce Rollback/Retention feature flag
         if (capabilities.allowRollback) {
             steps.push({
                 action: 'PRUNE_RELEASES',

@@ -16,6 +16,10 @@ const EDITIONS = {
     ENTERPRISE: 'enterprise'
 };
 
+app.get('/health', (req: Request, res: Response) => {
+    res.json({ status: 'ok', service: 'billing-gateway' });
+});
+
 app.post('/v1/authorize', async (req: Request, res: Response): Promise<any> => {
     const { token, repositoryUrl } = req.body;
     

@@ -2,5 +2,7 @@
   "name": "ugondu-plugin-node",
   "version": "1.0.0",
   "description": "[en] Node.js build and dependency resolution plugin for Ugondu.",
-  "author": "Ujomor Systems Engineering Authority"
+  "author": "Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "hooks": ["pre-sync"]
 }
