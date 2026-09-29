@@ -1,0 +1,158 @@
+# ==============================================================================
+# EAORCS DOMAIN OWNERSHIP INVENTORY
+# Project        : EAORCS - Enterprise Autonomous Operation & Regulatory Compliance System
+# Module         : .governance/domain_ownership_inventory.yaml
+# Version        : 2026.3.1-LTS
+# Author         : Ujomor Systems & Enterprise Governance Authority
+# Organization   : Ujomor Systems & Enterprise Governance
+# Created Date   : 2026-08-10
+# Last Modified  : 2026-08-10
+# Classification : ENTERPRISE
+# Governance     : Security Reviewed / Architecture Controlled / Protocol Frozen
+# Standard       : UAIGOS-3.0.0-ENTERPRISE / ISO 27001 / SOC 2 / OWASP ASVS / NIST
+# ==============================================================================
+
+version: "2026.3.1-LTS"
+governance_framework: "UAIGOS-3.0.0"
+classification: "ENTERPRISE"
+author: "Ujomor Systems & Enterprise Governance Authority"
+organization: "Ujomor Systems & Enterprise Governance"
+domain_isolation_mode: "STRICT_PURIFIED"
+
+owned_domains:
+  - domain_id: "governance"
+    name: "Platform Governance & Architecture Enforcement"
+    owner: "Ujomor Systems Engineering & Governance Authority"
+    paths:
+      - "engine/governance"
+      - ".governance"
+      - "tests/governance"
+    allowed_capabilities:
+      - "enforce_precedence"
+      - "verify_decision_integrity"
+      - "gate_release_pipeline"
+      - "audit_domain_ownership"
+      - "enforce_artifact_classification"
+    prohibitions:
+      - "compute_license_tier_pricing"
+      - "process_commercial_invoicing"
+      - "execute_direct_neural_inference"
+
+  - domain_id: "seos"
+    name: "System Execution & Operational Security"
+    owner: "Ujomor Systems Engineering & Governance Authority"
+    paths:
+      - "engine/seos"
+      - "bin"
+      - "cli"
+    allowed_capabilities:
+      - "bind_execution_evidence"
+      - "dispatch_scheduler_events"
+      - "verify_stream_boundaries"
+      - "audit_execution_proof_chain"
+    prohibitions:
+      - "calculate_billing_rates"
+      - "issue_commercial_licenses"
+      - "train_ai_models"
+
+  - domain_id: "compliance"
+    name: "Regulatory Compliance & Standards Enforcement"
+    owner: "Ujomor Systems Engineering & Governance Authority"
+    paths:
+      - "engine/compliance"
+      - "tests/compliance"
+    allowed_capabilities:
+      - "verify_compliance_controls"
+      - "generate_audit_manifests"
+      - "attest_security_posture"
+    prohibitions:
+      - "execute_commercial_transactions"
+
+  - domain_id: "evidence"
+    name: "Evidence Generation & Provenance Fabric"
+    owner: "Ujomor Systems Engineering & Governance Authority"
+    paths:
+      - "engine/evidence"
+      - "tests/evidence"
+    allowed_capabilities:
+      - "sign_evidence_envelope"
+      - "verify_proof_chain"
+      - "bind_attestation_seal"
+    prohibitions:
+      - "run_internal_rating_engine"
+
+  - domain_id: "federation"
+    name: "Capability-Neutral Federation & Sovereignty Broker"
+    owner: "Ujomor Systems Engineering & Governance Authority"
+    paths:
+      - "engine/federation"
+      - "adapters"
+      - "tests/federation"
+    allowed_capabilities:
+      - "resolve_external_contracts"
+      - "detect_registry_tampering"
+      - "broker_capability_neutral_delegation"
+    prohibitions:
+      - "hardcode_service_endpoints"
+      - "bind_vendor_urls_in_core"
+
+  - domain_id: "runtime"
+    name: "Runtime Kernel & Intelligence Subsystems"
+    owner: "Ujomor Systems Engineering & Governance Authority"
+    paths:
+      - "engine/runtime"
+      - "tests/runtime"
+    allowed_capabilities:
+      - "schedule_utcf_ticks"
+      - "evaluate_council_policies"
+      - "manage_subsystem_lifecycle"
+    prohibitions:
+      - "bypass_opaque_delegation_contracts"
+
+delegated_domains:
+  - domain_id: "licensing"
+    name: "Commercial Entitlement & Licensing Domain"
+    delegation_envelope: "engine/licensing/LicensingDelegationEnvelope.js"
+    prohibited_internal_implementations:
+      - "computeLicenseFee"
+      - "calculateLicensePrice"
+      - "internalLicenseQuotaCalc"
+      - "generateLicenseKeyInternal"
+      - "inlineTierRating"
+    required_evidence_protocol: "OPAQUE_LICENSING_DELEGATION_ENVELOPE"
+
+  - domain_id: "commercial"
+    name: "Billing Rating & Commercial Financial Domain"
+    delegation_envelope: "engine/commercial/BillingDelegationEnvelope.js"
+    prohibited_internal_implementations:
+      - "calculateInvoiceTotal"
+      - "generateInvoicePDF"
+      - "internalBillingRating"
+      - "computeUsageChargeInternal"
+      - "processPaymentGatewayInline"
+    required_evidence_protocol: "OPAQUE_BILLING_DELEGATION_ENVELOPE"
+
+  - domain_id: "ai"
+    name: "AI Model Neural Inference Domain"
+    delegation_envelope: "engine/ai/AiDelegationEnvelope.js"
+    prohibited_internal_implementations:
+      - "executeNeuralInference"
+      - "directLlmInferenceCall"
+      - "evaluateModelWeightsDirect"
+      - "runTensorflowInferenceInternal"
+    required_evidence_protocol: "OPAQUE_AI_DELEGATION_ENVELOPE"
+
+  - domain_id: "identity"
+    name: "Identity & Credential Brokerage Domain"
+    delegation_envelope: "engine/identity/IdentityDelegationEnvelope.js"
+    prohibited_internal_implementations:
+      - "generateMasterPasswordHash"
+      - "validateSsoAssertionInternal"
+    required_evidence_protocol: "OPAQUE_IDENTITY_DELEGATION_ENVELOPE"
+
+  - domain_id: "support"
+    name: "Support SLA & Ticketing Domain"
+    delegation_envelope: "engine/support/SupportDelegationEnvelope.js"
+    prohibited_internal_implementations:
+      - "computeSlaViolationPenalty"
+    required_evidence_protocol: "OPAQUE_SUPPORT_DELEGATION_ENVELOPE"

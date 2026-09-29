@@ -1,0 +1,32 @@
+# Standard Pipeline: Security
+# Location: .governance/ci/security.yml
+
+description: "Canonical module for executing SAST and Dependency scanning"
+
+inputs:
+  repository_name:
+    required: true
+  technology_stack:
+    required: true
+  scanner_tool:
+    required: true
+
+outputs:
+  sast_status:
+    description: "success | failed"
+  dependency_scan_status:
+    description: "success | failed"
+  validUntil:
+    description: "TTL limit for this security evidence (e.g., +24h)"
+
+steps:
+  - name: Execute SAST
+    run: ${{ inputs.scanner_tool }} --type sast
+    
+  - name: Execute Dependency Scan
+    run: ${{ inputs.scanner_tool }} --type dependencies
+    
+  - name: Emit Standard Output
+    run: |
+      echo "::set-output name=sast_status::success"
+      echo "::set-output name=validUntil::$(date -u -d '+24 hours' +'%Y-%m-%dT%H:%M:%SZ')"

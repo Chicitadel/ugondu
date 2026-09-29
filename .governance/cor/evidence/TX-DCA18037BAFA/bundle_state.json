@@ -1,0 +1,10 @@
+{
+  "state": "PUBLISHED",
+  "transactionId": "TX-DCA18037BAFA",
+  "snapshotHash": "487422dd98963f2c45cd639c79129cb2064f694270a7ee3816d37414be9aab3f",
+  "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "resultDigest": "r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1",
+  "preparedAt": "2026-09-13T10:11:02.339Z",
+  "publishedAt": "2026-09-13T10:11:02.339Z",
+  "publicationRevision": null
+}

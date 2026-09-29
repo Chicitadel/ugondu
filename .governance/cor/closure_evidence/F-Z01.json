@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "3_of_3_pass",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "728bf69f2d57e34a236d5c3013982d9612b5d184",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "tests/certification/evidence_isolation.test.js"
+  ],
+  "remediationCommit": "afcee27fc5d36bce9c3a80806c016bd983f9594a",
+  "verificationCommand": "npx jest tests/certification/evidence_isolation.test.js (3/3 pass)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-Z01"
+}

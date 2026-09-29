@@ -1,0 +1,312 @@
+{
+  "schemaVersion": "2.0.0",
+  "auditCycle": "AUDIT-003",
+  "baseline": "0df4bed82540d622e2a0204df894e80ff1743d34",
+  "remediationHead": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+  "classifiedAt": "2026-09-13T22:34:06.132Z",
+  "audit002LedgerDigest": "73ba38dbd8f9f15b39d9ded099c1510306ec54e6da2db4ba9bb59acf8a3d741d",
+  "audit002LedgerNote": "AUDIT-002 finding_ledger.json is READ-ONLY. This file is the AUDIT-003 extension ledger only.",
+  "findingUniverse": {
+    "totalParents": 17,
+    "frozen": 6,
+    "open": 11,
+    "note": "Count is discovered from physical evidence. Not a ceiling, not a target."
+  },
+  "frozenFindings": [
+    {
+      "id": "F-B01",
+      "status": "INDEPENDENTLY_PROTECTED",
+      "note": "Frozen — closure forbidden"
+    },
+    {
+      "id": "F-C01",
+      "status": "INDEPENDENTLY_PROTECTED",
+      "note": "Frozen — closure forbidden"
+    },
+    {
+      "id": "F-D01",
+      "status": "INDEPENDENTLY_PROTECTED",
+      "note": "Frozen — closure forbidden"
+    },
+    {
+      "id": "F-G01",
+      "status": "INDEPENDENTLY_PROTECTED",
+      "note": "Frozen — closure forbidden"
+    },
+    {
+      "id": "F-H01",
+      "status": "INDEPENDENTLY_PROTECTED",
+      "note": "Frozen — closure forbidden. Three sub-findings classified below."
+    },
+    {
+      "id": "F-I01",
+      "status": "INDEPENDENTLY_PROTECTED",
+      "note": "Frozen — closure forbidden"
+    }
+  ],
+  "openFindings": [
+    {
+      "id": "F-L01",
+      "remediationCommit": "44cd358319508b6e16809a448ab28b11529f4f1c",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "stream": "A",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_l01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "57e9d968ee17aae4f932aa83ecd6871e31fc4dc0dfe7699f541e49f13b312919"
+    },
+    {
+      "id": "F-L02",
+      "remediationCommit": "44cd358319508b6e16809a448ab28b11529f4f1c",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "stream": "A",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_l02.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "d58cae045ccf7396ef265931e4ead068f6bc3c18cc7d1e821ec59f0448a2e1fc"
+    },
+    {
+      "id": "F-C02",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "testOverrides.manifestResult ternary confirmed removed in AUDIT-002. No AUDIT-003 remediation needed.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_c02.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "9c400d2e2555c1c5ff6594c12f5873a66f2ce0a3d01a28f0647daa9292560720"
+    },
+    {
+      "id": "F-W01",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "testOverrides bypass removed in AUDIT-002. No AUDIT-003 remediation needed.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_w01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "03626b4bcfe5f7d2decb1265d841b4e21387b5d33e869064a98d323fbe8c5cc1"
+    },
+    {
+      "id": "F-B02",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "0 this.timeout() calls confirmed at baseline.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_b02.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "7e4e6a054b5e8cdbe9b12c4f7a5f9c4a9b43f28b13015fbc738b85bb6b2a9069"
+    },
+    {
+      "id": "F-T01",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "18/18 adversarial cases pass at c628e9e5.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_t01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "4c0734eaaa056c309d18fefcdd820f89c6824d16a27e80f8cd89ca679c7275e8"
+    },
+    {
+      "id": "F-T02",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "Evidence isolation tests intact.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_t02.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "d7240b994ec8975bc2d920f928443806acaed010fa814dc697e99f3ba86227d7"
+    },
+    {
+      "id": "F-Z01",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": ".gitignore entry and isolation tests intact.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_z01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "80438badd2352b9584080344b34cf1245f7a51be9395a9d63d067e7495375da4"
+    },
+    {
+      "id": "F-AA01",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "scope_guard.js L1 constants and authorized file list intact.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_aa01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "d9da32080a839abcf1115f2df2293aa94c5648ab1b5575643a1f45a3672a0ca4"
+    },
+    {
+      "id": "F-G8-01",
+      "remediationCommit": "bce53c1d04f3a7e7abc1e5e52f2e4e5ee6e4f1a7",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "stream": "D",
+      "note": "EAORCS_TEST_FIXTURE and NODE_ENV=test removed from production authority path in SnapshotFreezeEngine.js and CertificationDryRun.js.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_g8_01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "88e100cc91b71efba00022a5ee6cede7c4df63e87c21c59b56db1a7b66b36427"
+    },
+    {
+      "id": "F-EV01",
+      "status": "INDEPENDENTLY_VERIFIED",
+      "note": "evidenceOutputPath with hex validation present in certify.js.",
+      "physicalVerificationAt": "2026-09-14T06:15:41.491Z",
+      "physicalVerificationHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+      "evidenceFile": "f_ev01.evidence.json",
+      "independentVerificationAt": "2026-09-14T06:16:41.618Z",
+      "independentVerificationHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+      "kVerificationDigest": "d013fb8b337628559211fae8fa4fa108ff1c4d4daccee49fb9f74c50f0eae82a"
+    }
+  ],
+  "subordinateFindings": [
+    {
+      "id": "F-D01-R1",
+      "parent": "F-D01",
+      "status": "CLASSIFIED_SUBORDINATE"
+    },
+    {
+      "id": "F-H01-R1",
+      "parent": "F-H01",
+      "remediationCommit": "6f6f8bda82ccd204077b274a44a20c477da8fd95",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "status": "REMEDIATION_IMPLEMENTED",
+      "stream": "B",
+      "note": "runFinalCorGate now awaited; result validated for COR-PASS."
+    },
+    {
+      "id": "F-PUB-01-R1",
+      "parent": "F-H01",
+      "status": "CLASSIFIED_SUBORDINATE"
+    },
+    {
+      "id": "F-L01-R1",
+      "parent": "F-L01",
+      "remediationCommit": "44cd358319508b6e16809a448ab28b11529f4f1c",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "status": "REMEDIATION_IMPLEMENTED",
+      "stream": "A",
+      "note": "strictWorktreeCheck no longer gates physical integrity throws."
+    }
+  ],
+  "candidateClassifications": [
+    {
+      "id": "C-F-PUB-01",
+      "classifiedAs": "NEW_PARENT_FINDING",
+      "newId": "F-PUB-01",
+      "remediationCommit": "df2ea7544c06de07b45d1f27e45664518ae77d08",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "stream": "F",
+      "note": "certify.js orchestration: MB-01 spawnSync, MB-02 await, MB-04 CONTROL_ROOT bundle. Formerly C-F-PUB-01."
+    },
+    {
+      "id": "C-F-EV02",
+      "classifiedAs": "NEW_PARENT_FINDING",
+      "newId": "F-EV02",
+      "remediationCommit": "af2a812e07e4af477d2bf21a94b589c14455561b",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "stream": "C",
+      "note": "record_audit_subject.js rewritten as consumer-only, schema v2, EVIDENCE_OUTPUT_ROOT."
+    },
+    {
+      "id": "C-F-SNAP-01",
+      "classifiedAs": "SUBORDINATE_OF",
+      "parent": "F-G8-01",
+      "newId": "F-G8-01-R1",
+      "remediationCommit": "bce53c1d04f3a7e7abc1e5e52f2e4e5ee6e4f1a7",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "stream": "D",
+      "note": "3 silent catches in SnapshotFreezeEngine — subordinate to env-isolation defect F-G8-01."
+    },
+    {
+      "id": "C-F-RPT-01",
+      "classifiedAs": "NEW_PARENT_FINDING",
+      "newId": "F-RPT-01",
+      "remediationCommit": "9e1648748ca093bd52072f9db9e479e33cce562d",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "stream": "E",
+      "note": "ReportModelBuilder synthetic digest fallbacks removed."
+    },
+    {
+      "id": "C-F-CRT-01",
+      "classifiedAs": "SUBORDINATE_OF",
+      "parent": "F-PUB-01",
+      "newId": "F-PUB-01-R2",
+      "remediationCommit": "df2ea7544c06de07b45d1f27e45664518ae77d08",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "stream": "F",
+      "note": "Stream P bypass in certify.js — subordinate to F-PUB-01."
+    },
+    {
+      "id": "C-F-H01-R2",
+      "classifiedAs": "SUBORDINATE_OF",
+      "parent": "F-H01",
+      "newId": "F-H01-R2",
+      "status": "PENDING_G_GATE",
+      "note": "final_cor_gate.js L197: .length not set equality. G-Gate required (frozen file)."
+    },
+    {
+      "id": "C-F-H01-R3",
+      "classifiedAs": "SUBORDINATE_OF",
+      "parent": "F-H01",
+      "newId": "F-H01-R3",
+      "status": "PENDING_G_GATE",
+      "note": "final_cor_gate.js L153: REMOTE_CI_PROOF_HASH env authority. G-Gate required (frozen file)."
+    },
+    {
+      "id": "C-F-H01-R4",
+      "classifiedAs": "SUBORDINATE_OF",
+      "parent": "F-H01",
+      "newId": "F-H01-R4",
+      "status": "PENDING_G_GATE",
+      "note": "final_cor_gate.js L239: finality:SEALED semantic conflict. G-Gate required (frozen file)."
+    },
+    {
+      "id": "C-F-DRY-01",
+      "classifiedAs": "SUBORDINATE_OF",
+      "parent": "F-G8-01",
+      "newId": "F-G8-01-R2",
+      "remediationCommit": "bce53c1d04f3a7e7abc1e5e52f2e4e5ee6e4f1a7",
+      "mergedAt": "c628e9e5ac44c2616fc70c52e2c386eeee317673",
+      "stream": "D",
+      "note": "CertificationDryRun.js EAORCS_TEST_FIXTURE+NODE_ENV production write — subordinate to F-G8-01."
+    }
+  ],
+  "revisedFindingUniverse": {
+    "totalParents": 20,
+    "note": "17 original + 3 new parents classified from candidates (F-PUB-01, F-EV02, F-RPT-01). MB-05 subordinate findings are NOT promoted to parents.",
+    "frozen": 6,
+    "openParents": 14,
+    "subordinateObligations": 8
+  },
+  "gGateAuthorization": {
+    "status": "AUTHORIZED_BY_STREAM_I",
+    "authorizedModifications": [
+      "F-H01-R2",
+      "F-H01-R3",
+      "F-H01-R4"
+    ],
+    "targetFile": "scripts/final_cor_gate.js",
+    "prerequisite": "Stream I classification complete and committed",
+    "note": "G-Gate may now modify final_cor_gate.js for F-H01-R2/R3/R4 only. All other frozen-file invariants remain."
+  },
+  "streamJCompletedAt": "2026-09-14T06:15:41.491Z",
+  "streamJHead": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "streamKCompletedAt": "2026-09-14T06:16:41.618Z",
+  "streamKHead": "b44d9d240e5341c0aba6c624d57639e91646fd41"
+}

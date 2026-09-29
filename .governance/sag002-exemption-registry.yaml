@@ -1,0 +1,47 @@
+# Universal Autonomous AI Governance Operating System (UAIGOS)
+# SAG-002 Line Count Exemption Registry
+# Format Version: 1.0.0 | Effective: 2026-08-09
+# Authority: Systems Architecture Group / Ujomor Engineering
+
+version: "1.0.0"
+governance_policy: "SAG-002 File Manageability Constitution"
+waiver_authority: "Systems Architecture Group"
+
+exemptions:
+  # Generated Artifacts & Search Indexes
+  - file_pattern: "**/package-lock.json"
+    category: "GENERATED_ARTIFACT"
+    reason: "Npm dependency lockfile asset"
+  - file_pattern: "**/engineering-intelligence-report.yaml"
+    category: "GENERATED_ARTIFACT"
+    reason: "CI/CD intelligence report"
+  - file_pattern: "**/lighthouse-accessibility.json"
+    category: "GENERATED_ARTIFACT"
+    reason: "Automated audit report"
+  - file_pattern: "**/search.index.json"
+    category: "SEARCH_INDEX"
+    reason: "Static text search index"
+  - file_pattern: "**/mandatag-sdk.php"
+    category: "SDK_BUNDLE"
+    reason: "Standalone distribution bundle"
+
+  # Static Translation & Data Arrays
+  - file_pattern: "**/resources/lang/**/common.php"
+    category: "TRANSLATION_ASSET"
+    reason: "Static key-value translation array dictionary"
+  - file_pattern: "**/data/*.json"
+    category: "STATIC_DATA"
+    reason: "Static data JSON payload"
+
+  # Test Suites & Security Penetration Harnesses
+  - file_pattern: "**/tests/E2EJourneyTest.php"
+    category: "TEST_HARNESS"
+    reason: "Comprehensive platform integration test harness"
+  - file_pattern: "**/tests/SecurityPenetrationTest.php"
+    category: "TEST_HARNESS"
+    reason: "Automated security penetration test suite"
+
+  # Third-Party Vendor Dependencies
+  - file_pattern: "**/ThirdParty/MaxMind/**"
+    category: "THIRD_PARTY_VENDOR"
+    reason: "Upstream GeoIP database reader library"

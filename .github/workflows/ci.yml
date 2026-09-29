@@ -1,0 +1,171 @@
+# =============================================================================
+# Ugondu Platform — CI/CD Pipeline
+# Air Roofers Ltd — Ujomor Systems Engineering Authority
+# Classification: COMMERCIAL | INTERNAL
+#
+# Triggered on: push to main/develop, pull requests, manual dispatch
+# =============================================================================
+
+name: Ugondu CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, 'release/**']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  GO_VERSION: '1.22'
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ${{ github.repository_owner }}/ugondu
+
+jobs:
+
+  # ─────────────────────────────────────────────────────────────────
+  # [en] Build and Lint all TypeScript microservices
+  # ─────────────────────────────────────────────────────────────────
+  build-services:
+    name: Build Microservices
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [engine-core, billing-gateway, plugin-manager, event-bus]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: server/${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies — ${{ matrix.service }}
+        working-directory: server/${{ matrix.service }}
+        run: npm ci
+
+      - name: Build TypeScript — ${{ matrix.service }}
+        working-directory: server/${{ matrix.service }}
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.service }}
+          path: server/${{ matrix.service }}/dist/
+          retention-days: 1
+
+  # ─────────────────────────────────────────────────────────────────
+  # [en] Build and vet Go thin-client
+  # ─────────────────────────────────────────────────────────────────
+  build-client:
+    name: Build Go Thin-Client
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: client/go.mod
+
+      - name: Vet Go source
+        working-directory: client
+        run: go vet ./...
+
+      - name: Build ugondu client binary (linux/amd64)
+        working-directory: client
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: '0'
+        run: go build -ldflags="-s -w" -o ugondu-linux-amd64 .
+
+      - name: Upload client binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ugondu-client-linux-amd64
+          path: client/ugondu-linux-amd64
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────
+  # [en] Integration Tests — Services must be running
+  # ─────────────────────────────────────────────────────────────────
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [build-services]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download all dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: false
+
+      - name: Install service dependencies
+        run: |
+          cd server/billing-gateway && npm ci --omit=dev
+          cd ../engine-core && npm ci --omit=dev
+          cd ../plugin-manager && npm ci --omit=dev
+          cd ../event-bus && npm ci --omit=dev
+
+      - name: Start services in background
+        env:
+          IDENTITY_AUTHORITY_URL: https://identity.airroofers.eu/api/v1
+          UGONDU_PRIVATE_KEY: ci-test-key-not-for-production
+        run: |
+          node server/billing-gateway/dist/index.js &
+          sleep 2
+          BILLING_GATEWAY_URL=http://localhost:4002/v1 node server/engine-core/dist/index.js &
+          node server/plugin-manager/dist/index.js &
+          node server/event-bus/dist/index.js &
+          sleep 3
+
+      - name: Run Billing Gateway tests
+        run: node tests/billing-gateway.test.js
+
+      - name: Run Engine Core tests
+        run: node tests/engine-core.test.js
+
+      - name: Run Plugin Manager tests
+        run: node tests/plugin-manager.test.js
+
+  # ─────────────────────────────────────────────────────────────────
+  # [en] Docker Build Validation (no push on PRs)
+  # ─────────────────────────────────────────────────────────────────
+  docker-validate:
+    name: Validate Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-services]
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build all images via Compose
+        run: docker compose build
+
+      - name: Smoke test compose up
+        run: |
+          UGONDU_PRIVATE_KEY=ci-key docker compose up -d
+          sleep 10
+          docker compose ps
+          docker compose down

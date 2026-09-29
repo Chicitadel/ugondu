@@ -1,0 +1,21 @@
+{
+  "transactionId": "TX-97CADEB60EED",
+  "lifecycleId": "LIFECYCLE-STREAM-X-1789294224221",
+  "executionId": "EXE-STREAM-X-1789294224221",
+  "certificationSubjectId": "eaorcs-local-subject",
+  "executionContractDigest": null,
+  "actorContext": null,
+  "environmentDigest": null,
+  "closure": null,
+  "targetFingerprint": "18b525369b00d074969a464ab56858e22bdedb45afb6f64fcdef1371de6a3b0a",
+  "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "inputSnapshotHash": "e3fb9e806cf46bac9584e7cd6199c80c82c32b13bdd6a8497e4fa7331cabb7e1",
+  "publicationRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sourceProvider": "LOCAL_GIT",
+  "candidateStateDigest": "420dc180c45e0935d5601ce89cd44af2db42b106ab13bc18de36b7802d457d0e",
+  "decision": "APPROVED",
+  "stagedEntriesCount": 3,
+  "stagedGatesCount": 12,
+  "supersedesTransactionId": null,
+  "committedAt": "2026-09-13T10:10:24.370Z"
+}

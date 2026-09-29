@@ -1,0 +1,132 @@
+{
+  "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+  "transactionId": "TX-F74499EEB33E",
+  "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "snapshotHash": "eb7983f8234e14004782811c0795ef460e2fa168f03f9f3e2c05a0dddbc8f7fb",
+  "resultDigest": "r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1",
+  "reportHash": "8c6829de7f5a74cfdbbec40f76409cbd4e71582955b1fd88c11070bc9bfd713b",
+  "entries": [
+    {
+      "path": "audit.bench.entry.0",
+      "value": {
+        "status": "PASS",
+        "index": 0
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.577Z"
+    },
+    {
+      "path": "audit.bench.entry.1",
+      "value": {
+        "status": "PASS",
+        "index": 1
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.577Z"
+    },
+    {
+      "path": "audit.bench.entry.2",
+      "value": {
+        "status": "PASS",
+        "index": 2
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.577Z"
+    },
+    {
+      "path": "audit.bench.entry.3",
+      "value": {
+        "status": "PASS",
+        "index": 3
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.577Z"
+    },
+    {
+      "path": "audit.bench.entry.4",
+      "value": {
+        "status": "PASS",
+        "index": 4
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.578Z"
+    },
+    {
+      "path": "audit.bench.entry.5",
+      "value": {
+        "status": "PASS",
+        "index": 5
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.578Z"
+    },
+    {
+      "path": "audit.bench.entry.6",
+      "value": {
+        "status": "PASS",
+        "index": 6
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.578Z"
+    },
+    {
+      "path": "audit.bench.entry.7",
+      "value": {
+        "status": "PASS",
+        "index": 7
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.578Z"
+    },
+    {
+      "path": "audit.bench.entry.8",
+      "value": {
+        "status": "PASS",
+        "index": 8
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.578Z"
+    },
+    {
+      "path": "audit.bench.entry.9",
+      "value": {
+        "status": "PASS",
+        "index": 9
+      },
+      "lifecycleId": "LIFECYCLE-BENCHMARK-1789428992392",
+      "executionId": "EXE-BENCHMARK-1789428992392",
+      "sourceCommit": "d38243367fe85a25e499ba0b895a7e83be4f7640",
+      "sourceTreeHash": "8c3ecc412583081646ebd92cc9ef6981f77e48f58d4e5d308ca7abbaa36c81ff",
+      "stagedAt": "2026-09-14T23:36:32.578Z"
+    }
+  ],
+  "ledgerHeadHash": "de57ce3458ea99dd3da8d04e9817e10009d43b6cce5c5d760fe3382d3fc3e622",
+  "generatedAt": "2026-09-14T23:36:32.623Z"
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "REMOTE_CI_QUALIFICATION_RECEIPT",
+  "status": "PENDING",
+  "certificationSubject": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "publicationHEAD": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "candidateHead": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "originMain": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "remoteCiSha": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "timestamp": "2026-08-26T09:32:11.427Z",
+  "headCommit": "3a5f6fa1887cb0f1302f18c54a23edf42d92e500",
+  "remoteHead": "3a5f6fa1887cb0f1302f18c54a23edf42d92e500",
+  "sourceTreeHash": "6357b10bf4e823c4505cb4854abcd14e489cdf47d60aa95575d9b79eac355282",
+  "contentDigest": "a90ba64865fcffc8b029b96e104a71c23fbe04650dc4d75d750d6426cff86e62",
+  "receiptDigest": "4aff2c389813a36cdbff6b277f2bc2c9fa1b8c72e42c1886e8457ed5634be28b"
+}
+

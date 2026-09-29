@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "eaorcs/evidence-summary/v1",
+  "auditCycle": "AUDIT-003",
+  "stream": "J",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "findingCount": 11,
+  "findings": [
+    {
+      "id": "F-L01",
+      "exitCode": 0,
+      "digest": "8a70f7f0908680a244e706a761b1a3b0e18f627cc86d6525a46e60febf323322"
+    },
+    {
+      "id": "F-L02",
+      "exitCode": 0,
+      "digest": "a5052a0918e6e1f7c0938b0f70609167f02ba6ea4c338a4bbdb7860a0159a639"
+    },
+    {
+      "id": "F-G8-01",
+      "exitCode": 0,
+      "digest": "c21c476206af3688dd1430037eda0d2d9327de98c8fa7d043fd4ceac98fdba8d"
+    },
+    {
+      "id": "F-EV01",
+      "exitCode": 0,
+      "digest": "24cf767a46a79be5a69d4adc36ade537ae5306871b8f1e8b5fcaf5003d3998b6"
+    },
+    {
+      "id": "F-AA01",
+      "exitCode": 0,
+      "digest": "03fcd7e40a0955c728431e399767d503ad60ae1d41869aee316dfe387352e394"
+    },
+    {
+      "id": "F-B02",
+      "exitCode": 0,
+      "digest": "81318217bb098dd3cee787d4440cb825d885ad99c95010b5a8ce0d686e624fe5"
+    },
+    {
+      "id": "F-T01",
+      "exitCode": 0,
+      "digest": "fa0352b6ac2847a8fd448c4eb5dc60158c157cfa419dc3a0dd5a42d9faa5d28a"
+    },
+    {
+      "id": "F-Z01",
+      "exitCode": 0,
+      "digest": "fd12fa8ccc1f93c3ca2e614bf439dce7ea4b1e5bcdf378d8ebccd4795b593d0e"
+    },
+    {
+      "id": "F-C02",
+      "exitCode": 0,
+      "digest": "140057dc04d180291fd3a611210594b87c752876df5b544fdc87d9d331d89493"
+    },
+    {
+      "id": "F-W01",
+      "exitCode": 0,
+      "digest": "193118b5fe69b3893b28bddecf7b2a524922f6eabdaf98834e58542552fcf8f5"
+    },
+    {
+      "id": "F-T02",
+      "exitCode": 0,
+      "digest": "fe968bf87831090a4956688f16b8bc9979bcf968ca9a1fb6010d0ea38a21aba6"
+    }
+  ],
+  "evidenceSummaryDigest": "3eb35dd43e0adedc6d2af6a1b053d83376d70b6ce0e40da31a3fd745d41807b9"
+}

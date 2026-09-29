@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info:
+  title: Air Roofers Trust API
+  version: 1.0.0
+  description: Frozen contract for Trust scoring (Risk, Fraud, Geolocation anomaly)
+paths:
+  /trust/evaluate:
+    post:
+      summary: Evaluate request risk score
+  /trust/certificates:
+    get:
+      summary: Retrieve public certificates for validation

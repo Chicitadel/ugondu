@@ -1,0 +1,24 @@
+contract_id: INFRA-STATIC-001
+type: infrastructure_contract
+name: Static Assets Distribution Contract
+version: 1.0.0
+status: active
+description: Governs the structure and delivery of static assets.
+
+requirements:
+  structure:
+    allowed_namespaces:
+      - "apps"
+      - "brands"
+      - "global"
+      - "manifests"
+    prohibited_files:
+      - ".git"
+      - ".idea"
+  delivery:
+    packaging:
+      method: "zip"
+      tool: "build_zip_static.php"
+    backward_compatibility:
+      required: true
+      method: "301 Redirects"

@@ -1,0 +1,10 @@
+{
+  "state": "PUBLISHED",
+  "transactionId": "TX-AFD500379A34",
+  "snapshotHash": "28cf64882cf5f47f4ec0b1eb1adc2dd1eb93c6aeaacdd818a9b9914f065cdfb4",
+  "subjectDigest": "7e57d3fe25e1164e2b5c0a41fea888bd1284ed1c28888fc6f542309e04eddbc0",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "preparedAt": "2026-09-13T09:23:20.266Z",
+  "publishedAt": "2026-09-13T09:23:20.266Z",
+  "publicationRevision": null
+}

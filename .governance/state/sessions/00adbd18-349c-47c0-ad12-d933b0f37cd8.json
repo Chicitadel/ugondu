@@ -1,0 +1,285 @@
+{
+  "sessionId": "00adbd18-349c-47c0-ad12-d933b0f37cd8",
+  "createdAt": "2026-08-20T03:16:24.368Z",
+  "actor": "REMOTE_CLIENT",
+  "targetContext": {
+    "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+    "subjectType": "WORKSPACE",
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "environment": "cli",
+    "revision": "fbf06871",
+    "branch": "main",
+    "policySource": "OUT_OF_TREE",
+    "sessionId": "00adbd18-349c-47c0-ad12-d933b0f37cd8",
+    "federationMode": "INDEPENDENT",
+    "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+    "hasInTreeGovernance": false,
+    "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+    "createdAt": "2026-08-20T03:16:24.368Z",
+    "metadata": {}
+  },
+  "targetDescriptor": {
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+    "subjectType": "WORKSPACE",
+    "name": "@corporate/auth-microservice",
+    "version": "3.4.1",
+    "description": "",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "branch": "unversioned",
+    "revision": "unversioned",
+    "isClean": true,
+    "remoteUrl": null,
+    "manifests": {
+      "nodejs": {
+        "name": "@corporate/auth-microservice",
+        "version": "3.4.1",
+        "type": "commonjs",
+        "main": "src/index.js",
+        "scripts": [
+          "test",
+          "build"
+        ],
+        "dependenciesCount": 1,
+        "devDependenciesCount": 0,
+        "hasLockfile": false
+      }
+    },
+    "buildSystem": "npm",
+    "tests": {
+      "hasTests": true,
+      "testDirs": [
+        "tests"
+      ],
+      "testConfigs": []
+    },
+    "structureSummary": {
+      "fileCount": 4,
+      "dirCount": 2,
+      "totalBytes": 418,
+      "languages": {
+        "JSON": 1,
+        "JavaScript": 3
+      }
+    },
+    "fingerprint": "a7c2dc5733e9d1ee20a97146b18829de4195b4a91a06fedecf06a2aab3d3dec8",
+    "discoveredAt": "2026-08-20T03:16:24.164Z",
+    "metadata": {
+      "hasInTreeGovernance": false,
+      "discoveredManifests": []
+    }
+  },
+  "session": {
+    "sessionId": "00adbd18-349c-47c0-ad12-d933b0f37cd8",
+    "status": "COMPLETED",
+    "targetContext": {
+      "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+      "subjectType": "WORKSPACE",
+      "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+      "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+      "environment": "cli",
+      "revision": "fbf06871",
+      "branch": "main",
+      "policySource": "OUT_OF_TREE",
+      "sessionId": "00adbd18-349c-47c0-ad12-d933b0f37cd8",
+      "federationMode": "INDEPENDENT",
+      "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+      "hasInTreeGovernance": false,
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "createdAt": "2026-08-20T03:16:24.368Z",
+      "metadata": {}
+    },
+    "startTime": 1787195784368,
+    "endTime": 1787195785583,
+    "evidenceCatalog": [
+      {
+        "id": "EVID-DISCOVER-1787195784373",
+        "requirementId": "REQ-TARGET-DISCOVERY",
+        "type": "TARGET_DISCOVERY",
+        "source": "EAORCS_OBSERVER",
+        "status": "VALID",
+        "data": {
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+          "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+          "subjectType": "WORKSPACE",
+          "name": "@corporate/auth-microservice",
+          "version": "3.4.1",
+          "description": "",
+          "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+          "branch": "unversioned",
+          "revision": "unversioned",
+          "isClean": true,
+          "remoteUrl": null,
+          "manifests": {
+            "nodejs": {
+              "name": "@corporate/auth-microservice",
+              "version": "3.4.1",
+              "type": "commonjs",
+              "main": "src/index.js",
+              "scripts": [
+                "test",
+                "build"
+              ],
+              "dependenciesCount": 1,
+              "devDependenciesCount": 0,
+              "hasLockfile": false
+            }
+          },
+          "buildSystem": "npm",
+          "tests": {
+            "hasTests": true,
+            "testDirs": [
+              "tests"
+            ],
+            "testConfigs": []
+          },
+          "structureSummary": {
+            "fileCount": 4,
+            "dirCount": 2,
+            "totalBytes": 418,
+            "languages": {
+              "JSON": 1,
+              "JavaScript": 3
+            }
+          },
+          "fingerprint": "a7c2dc5733e9d1ee20a97146b18829de4195b4a91a06fedecf06a2aab3d3dec8",
+          "discoveredAt": "2026-08-20T03:16:24.164Z",
+          "metadata": {
+            "hasInTreeGovernance": false,
+            "discoveredManifests": []
+          }
+        },
+        "hash": "4f9e5226b0b03c482924c08e6cd49ee24390cdd2f58123fde1e2bf0d5e914e3e",
+        "timestamp": "2026-08-20T03:16:24.374Z"
+      },
+      {
+        "id": "EVID-REMOTE-QUALIFY-1787195784378",
+        "requirementId": "REQ-QUALIFICATION-PIPELINE",
+        "type": "QUALIFICATION_RESULT",
+        "source": "EAORCS_OBSERVER",
+        "status": "PASSED",
+        "data": {
+          "success": true,
+          "lifecycleState": "FINALIZED",
+          "mode": "REMOTE_EVIDENCE_QUALIFICATION",
+          "evidenceReused": true,
+          "streamsExecuted": 30,
+          "streamsPassed": 30,
+          "summary": {
+            "success": true,
+            "totalStreams": 30,
+            "passedStreams": 30,
+            "failedStreams": 0
+          },
+          "evidenceCatalogCount": 1,
+          "timestamp": "2026-08-20T03:16:24.378Z"
+        },
+        "hash": "9d37406c3c6aa5ce9aa1d3dfa4f2bb8605dc62594b43e9444c72fa76d0a11f0b",
+        "timestamp": "2026-08-20T03:16:24.378Z"
+      }
+    ],
+    "findings": [],
+    "metrics": {
+      "totalChecks": 2,
+      "passedChecks": 2,
+      "failedChecks": 0,
+      "warnings": 0
+    },
+    "policyResolution": {
+      "policySource": "OUT_OF_TREE",
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "hasInTreeGovernance": false,
+      "evaluatedRules": []
+    },
+    "auditTrail": [
+      {
+        "sequence": 0,
+        "timestamp": 1787195784368,
+        "action": "SESSION_INITIALIZED",
+        "actor": "REMOTE_CLIENT",
+        "details": {
+          "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+          "policySource": "OUT_OF_TREE"
+        },
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "abde8950e07c52fc997871d89b74be91f427bbd7e72cdcafea212bac386e00f7"
+      },
+      {
+        "sequence": 1,
+        "timestamp": 1787195784368,
+        "action": "SESSION_STARTED",
+        "actor": "REMOTE_CLIENT",
+        "details": {
+          "startTime": 1787195784368,
+          "reason": "REMOTE_REST_SESSION_INIT"
+        },
+        "prevHash": "abde8950e07c52fc997871d89b74be91f427bbd7e72cdcafea212bac386e00f7",
+        "hash": "f81b7ee61789314d66390e099095754bc66fb4c867201c3b9e7b79ba6a969ca7"
+      },
+      {
+        "sequence": 2,
+        "timestamp": 1787195784374,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "REMOTE_CLIENT",
+        "details": {
+          "evidenceId": "EVID-DISCOVER-1787195784373",
+          "requirementId": "REQ-TARGET-DISCOVERY",
+          "hash": "4f9e5226b0b03c482924c08e6cd49ee24390cdd2f58123fde1e2bf0d5e914e3e"
+        },
+        "prevHash": "f81b7ee61789314d66390e099095754bc66fb4c867201c3b9e7b79ba6a969ca7",
+        "hash": "96297b6b1406aff36c288d3034c0c4e15d9e3a8737ee2441f0879f9b887b4415"
+      },
+      {
+        "sequence": 3,
+        "timestamp": 1787195784378,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "REMOTE_CLIENT",
+        "details": {
+          "evidenceId": "EVID-REMOTE-QUALIFY-1787195784378",
+          "requirementId": "REQ-QUALIFICATION-PIPELINE",
+          "hash": "9d37406c3c6aa5ce9aa1d3dfa4f2bb8605dc62594b43e9444c72fa76d0a11f0b"
+        },
+        "prevHash": "96297b6b1406aff36c288d3034c0c4e15d9e3a8737ee2441f0879f9b887b4415",
+        "hash": "bbaa2bff64d25d70bed2490da746a7cf5846a1728fb1f424552506ddf7a3a2fe"
+      },
+      {
+        "sequence": 4,
+        "timestamp": 1787195785583,
+        "action": "SESSION_COMPLETED",
+        "actor": "REMOTE_CLIENT",
+        "details": {
+          "durationMs": 1215,
+          "metrics": {
+            "totalChecks": 2,
+            "passedChecks": 2,
+            "failedChecks": 0,
+            "warnings": 0
+          },
+          "reason": "SERVER_SHUTDOWN"
+        },
+        "prevHash": "bbaa2bff64d25d70bed2490da746a7cf5846a1728fb1f424552506ddf7a3a2fe",
+        "hash": "bf3f40ccc5114bc2a9afedeab78aa341833cdb462b74dba2e3d643f1b4440073"
+      }
+    ],
+    "zeroTargetPollutionVerified": true
+  },
+  "certification": {
+    "certificateId": "EAORCS-CERT-00ADBD18",
+    "status": "CERTIFIED",
+    "issuedAt": "2026-08-20T03:16:24.378Z",
+    "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+    "targetRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "standards": [
+      "ISO 27001",
+      "SOC 2",
+      "OWASP ASVS",
+      "NIST SP 800-161",
+      "UAIGOS 3.0.0"
+    ],
+    "evidenceHash": "bbaa2bff64d25d70bed2490da746a7cf5846a1728fb1f424552506ddf7a3a2fe",
+    "signature": "524881e44e626894b669e1141090c8f4a8d8bd8b61e562e88c05d25d343de0a2"
+  },
+  "savedAt": "2026-08-20T03:16:25.584Z"
+}

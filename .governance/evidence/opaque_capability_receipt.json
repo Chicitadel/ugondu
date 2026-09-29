@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "OPAQUE_CAPABILITY_FEDERATION_RECEIPT",
+  "gateId": "GATE-COR-OPAQUE-CAPABILITY-BOUNDARY",
+  "subject": "jean-doe-corp-user",
+  "tenant": "tenant-air-roofers-001",
+  "timestamp": "2026-08-20T06:46:51.322Z",
+  "gitHead": "d930907dff29c289d1844c5d6a0fc87ac1201a19",
+  "simulationScore": 100,
+  "verified": true,
+  "stagesEvaluated": 9,
+  "stagesPassed": 9,
+  "stagesFailed": 0,
+  "invariants": {
+    "zeroLocalCommercialKnowledge": true,
+    "opaqueCapabilityDecisionsOnly": true,
+    "liveServerBoundaryEnforced": true,
+    "immediateRevocationPropagated": true,
+    "tamperResistanceVerified": true,
+    "replayAttackBlocked": true,
+    "automatedThreatMitigationActive": true
+  },
+  "stages": [
+    {
+      "stage": 1,
+      "name": "FEDERATION_CAPABILITY_UNAUTHORIZED_DENIED",
+      "expected": "DENIED",
+      "actual": "CAPABILITY_DECISION_REQUIRED",
+      "passed": true
+    },
+    {
+      "stage": 2,
+      "name": "OPAQUE_FEDERATION_ALLOW_ACCESS_GRANTED",
+      "expected": "ACCESS_GRANTED",
+      "actual": "ACCESS_GRANTED",
+      "passed": true
+    },
+    {
+      "stage": 3,
+      "name": "SOVEREIGN_PLUGIN_EXECUTION_ALLOWED",
+      "expected": "ALLOWED",
+      "actual": "PLUGIN_EXECUTION_SUCCESS",
+      "passed": true
+    },
+    {
+      "stage": 4,
+      "name": "REVOCATION_PROPAGATED_IMMEDIATELY_ALL_DENIED",
+      "expected": "ALL_DENIED",
+      "actual": "API:REVOKED_RECEIPT_REPLAY, PLUGIN:REVOKED_RECEIPT_REPLAY, DIRECT:CAPABILITY_DECISION_REQUIRED",
+      "passed": true
+    },
+    {
+      "stage": 5,
+      "name": "CORE_CAPABILITY_UNPROTECTED_ALLOWED",
+      "expected": "ALLOWED",
+      "actual": "PLUGIN_EXECUTION_SUCCESS",
+      "passed": true
+    },
+    {
+      "stage": 6,
+      "name": "LOCAL_TAMPER_RESISTANCE_SERVER_DENIED",
+      "expected": "SERVER_DENIED",
+      "actual": "LOCAL_TAMPER_DETECTED",
+      "passed": true
+    },
+    {
+      "stage": 7,
+      "name": "REVOKED_RECEIPT_REPLAY_INTERCEPTED",
+      "expected": "REVOKED_RECEIPT_REPLAY",
+      "actual": "REVOKED_RECEIPT_REPLAY",
+      "passed": true
+    },
+    {
+      "stage": 8,
+      "name": "REPEATED_ATTACKS_AUTOMATED_MITIGATION",
+      "expected": "AUTOMATED_MITIGATION",
+      "actual": "SECURITY_RESTRICTION",
+      "passed": true
+    },
+    {
+      "stage": 9,
+      "name": "REACTIVATION_FRESH_DECISION_VALIDATION",
+      "expected": "OLD_DENIED_NEW_ALLOWED",
+      "actual": "OLD:REVOKED_RECEIPT_REPLAY, NEW:ACCESS_GRANTED",
+      "passed": true
+    }
+  ],
+  "receiptHash": "fd523b80818d67bc8368ae82422beaa370f680c2104d4a1519c7622dea5ddfbd"
+}

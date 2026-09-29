@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "40df9b59_explicit_arg",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "752af4ebc10d109d94cc34ffb2181908151bbbbf",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "scripts/verify_evidence_integrity.js"
+  ],
+  "remediationCommit": "40df9b5974739fc7cc2651294788b68af5f84071",
+  "verificationCommand": "grep -n 'process.cwd' scripts/verify_evidence_integrity.js (0 hits for ci_proof)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-EV01"
+}

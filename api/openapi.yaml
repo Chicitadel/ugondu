@@ -1,0 +1,118 @@
+openapi: 3.1.0
+info:
+  title: Ugondu Universal Delivery API
+  description: "[en] Commercial deployment intelligence and thin-client orchestration API."
+  version: "1.0.0"
+  contact:
+    name: Ujomor Systems Engineering Authority
+servers:
+  - url: https://api.ugondu.airroofers.eu/v1
+    description: "[en] Production Governance Gateway"
+paths:
+  /deploy/resolve:
+    post:
+      summary: "[en] Resolve Deployment Recipe"
+      description: "[en] Submits repository context and returns a cryptographic execution recipe."
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeploymentContext'
+      responses:
+        '200':
+          description: "[en] Recipe Resolved Successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionRecipe'
+        '402':
+          description: "[en] Payment Required or License Exhausted"
+  /telemetry/report:
+    post:
+      summary: "[en] Submit Execution Telemetry"
+      description: "[en] Clients post step-by-step execution results back to the audit ledger."
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutionTelemetry'
+      responses:
+        '201':
+          description: "[en] Telemetry recorded."
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    DeploymentContext:
+      type: object
+      required:
+        - repositoryUrl
+        - branch
+        - fileMap
+        - targetEnvironment
+      properties:
+        repositoryUrl:
+          type: string
+        branch:
+          type: string
+        fileMap:
+          type: object
+          additionalProperties:
+            type: string
+            description: "File path to SHA-256 hash map."
+        targetEnvironment:
+          type: string
+          enum: [cpanel, directadmin, cloud, kubernetes, baremetal]
+    ExecutionRecipe:
+      type: object
+      required:
+        - transactionId
+        - edition
+        - strategy
+        - steps
+        - signature
+      properties:
+        transactionId:
+          type: string
+        edition:
+          type: string
+          enum: [community, professional, enterprise]
+        strategy:
+          type: string
+          enum: [quota-sync, atomic, direct]
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+              payload:
+                type: object
+        signature:
+          type: string
+          description: "Cryptographic signature verifying the recipe authenticity."
+    ExecutionTelemetry:
+      type: object
+      required:
+        - transactionId
+        - status
+      properties:
+        transactionId:
+          type: string
+        status:
+          type: string
+          enum: [SUCCESS, FAILED, ROLLBACK]
+        logs:
+          type: array
+          items:
+            type: string

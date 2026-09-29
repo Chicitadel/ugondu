@@ -1,0 +1,12 @@
+{
+  "lifecycleId": "run_1787831069740_75612_l1onj8",
+  "subjectDigest": "1af2758ff03b8ddf39a50ac4f93626b1040475d9c9486d65e94f1b541a38286d",
+  "headCommit": "1af2758ff03b8ddf39a50ac4f93626b1040475d9c9486d65e94f1b541a38286d",
+  "treeHash": "1af2758ff03b8ddf39a50ac4f93626b1040475d9c9486d65e94f1b541a38286d",
+  "ledgerHeadHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "evidenceRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "snapshotHash": "31a9a2caf077dd346bb931cb1b2210c83d1878403665e67914b2e16f68b5eddd",
+  "executionReceiptDigest": "TX-1787831072116",
+  "reportHash": "99ca3aa56795dcbeefa1546677a9c09b096d296725dff4d3fcf5487ea9b4d3b5",
+  "decision": "RELEASE_APPROVED"
+}

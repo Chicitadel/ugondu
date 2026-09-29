@@ -1,0 +1,54 @@
+{
+  "genesisDiscoveryDate": "2026-09-05T12:38:53.786Z",
+  "claims": [
+    {
+      "baselineId": "CERTIFICATION_EXECUTION_AUTHORITY",
+      "protectionClass": "EVOLVABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.784Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    },
+    {
+      "baselineId": "CERTIFICATION_SNAPSHOT_FREEZE",
+      "protectionClass": "EVOLVABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.786Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    },
+    {
+      "baselineId": "CERTIFICATION_REPORT_GENERATION",
+      "protectionClass": "EVOLVABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.786Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    },
+    {
+      "baselineId": "CERTIFICATION_PUBLICATION_ENGINE",
+      "protectionClass": "EVOLVABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.786Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    },
+    {
+      "baselineId": "CERTIFICATION_FINAL_GATE",
+      "protectionClass": "EVOLVABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.786Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    },
+    {
+      "baselineId": "CERTIFICATION_STREAM_REGISTRY",
+      "protectionClass": "IMMUTABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.786Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    },
+    {
+      "baselineId": "CERTIFICATION_EVIDENCE_ROOT",
+      "protectionClass": "IMMUTABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "discoveredAt": "2026-09-05T12:38:53.786Z",
+      "sourceClaim": "Historical Waves A-AB Completion"
+    }
+  ]
+}

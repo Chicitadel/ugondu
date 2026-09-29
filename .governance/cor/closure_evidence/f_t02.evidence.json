@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-T02",
+  "description": "Evidence isolation tests pass",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:16:00.290Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var r=require('child_process').spawnSync('pwsh',['-NoProfile','-Command','npx jest tests/certification/evidence_isolation.test.js --no-coverage --testTimeout=60000 2>&1'],{cwd:process.cwd(),encoding:'utf8',timeout:120000,stdio:['pipe','pipe','pipe']});var out=(r.stdout||'')+(r.stderr||'');var m=out.match(/Tests:\\s+(\\d+) passed/);var n=m?parseInt(m[1]):0;if(n<1){process.stdout.write('FAIL: '+n+' evidence isolation tests passed');process.exit(1);}process.stdout.write('PASS: F-T02 '+n+' evidence isolation tests pass');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "dee94c129cd6f861208ae49444f50add2070b4e51699a1e7a66a0398c434681e",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-T02 3 evidence isolation tests pass",
+  "executionEvidenceDigest": "fe968bf87831090a4956688f16b8bc9979bcf968ca9a1fb6010d0ea38a21aba6",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

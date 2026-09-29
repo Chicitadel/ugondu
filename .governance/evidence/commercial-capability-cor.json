@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "governanceModel": "UAIGOS-3.0.0",
+  "receiptId": "EVID-COMM-CAP-COR-20260817-001",
+  "receiptType": "COMMERCIAL_CAPABILITY_COR_GATE",
+  "lifecycleId": "LC-2efd6bbb55c2",
+  "executionId": "EXE-COR-2efd6bbb55c2",
+  "headCommit": "2efd6bbb55c2af4414174d7b9aac86f1dfbcba8e",
+  "sourceCommit": "2efd6bbb55c2af4414174d7b9aac86f1dfbcba8e",
+  "sourceTreeHash": "3594432f7428b12785ba53f5e7612a300e951262905f43f60c0e6ff22a5345f1",
+  "executedAt": "2026-08-25T19:36:30.383Z",
+  "gateName": "commercialCapabilitySecurity",
+  "policy": "SEC-CAP-001",
+  "result": {
+    "status": "PASSED",
+    "gateEvaluation": "PASS",
+    "noClientSideGating": true,
+    "serverAuthoritative": true,
+    "zeroTrustDefaultDeny": true,
+    "abuseTelemetryConnected": true,
+    "cryptographicVerification": true,
+    "binaryReleaseIndex": 100,
+    "violations": []
+  },
+  "authority": "Systems Engineering & Security Governance Authority",
+  "organization": "Ujomor Systems & Enterprise Governance Authority",
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED",
+  "standards": [
+    "ISO 27001",
+    "SOC 2",
+    "OWASP ASVS Level 3",
+    "NIST SP 800-161",
+    "UAIGOS 3.0.0"
+  ],
+  "contentDigest": "ffc5c764c652450eb6635bd82fae0443799085bd6ed453eeecc0b9b8e952b0a8"
+}

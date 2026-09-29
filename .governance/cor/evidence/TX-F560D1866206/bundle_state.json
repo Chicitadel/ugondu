@@ -1,0 +1,10 @@
+{
+  "state": "PUBLISHED",
+  "transactionId": "TX-F560D1866206",
+  "snapshotHash": "2c21e77c3d9b353df8312d38d5e3aef2beab06ec9ffef7918cc04a5e71a0266d",
+  "subjectDigest": "a10bca131e97058689cab618832ad742f9bd5c1428177268c5e36cc0a04e1f4f",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "preparedAt": "2026-09-12T15:37:55.285Z",
+  "publishedAt": "2026-09-12T15:37:55.285Z",
+  "publicationRevision": null
+}

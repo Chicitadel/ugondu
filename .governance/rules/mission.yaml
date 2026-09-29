@@ -1,0 +1,4 @@
+name: mission
+description: Consular workflows, visa, and residency pipelines.
+rules:
+  - require-consular-auth

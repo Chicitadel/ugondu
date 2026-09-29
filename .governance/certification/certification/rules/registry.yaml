@@ -1,0 +1,10 @@
+domain: Registry
+rules:
+  - name: RegistryIntegrity
+    type: RegistrySnapshot
+    severity: Critical
+    assert: "signature == valid"
+    outcomes:
+      success: PASS
+      failure: FAIL
+      missing: INCONCLUSIVE

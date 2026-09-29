@@ -1,0 +1,23 @@
+# Program F (Products): MediaDNA Shell Manifest
+extends: airroofers/base-web-product
+
+product:
+  id: mediadna
+  type: saas_product
+  maturity: experimental
+
+governance:
+  capability_catalog: "1.x"
+  manifest_schema: "1.x"
+  planning_standard: "2.x"
+
+capabilities:
+  identity:
+    enabled: true
+    provider: keycloak
+  storage:
+    enabled: true
+    provider: mysql
+  cms:
+    enabled: true
+    provider: wordpress

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-T01",
+  "description": "18/18 adversarial certification bypass tests pass",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:42.854Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var r=require('child_process').spawnSync('pwsh',['-NoProfile','-Command','npx jest tests/certification/bypass_regression_adversarial.test.js --no-coverage --testTimeout=60000 2>&1'],{cwd:process.cwd(),encoding:'utf8',timeout:120000,stdio:['pipe','pipe','pipe']});var out=(r.stdout||'')+(r.stderr||'');var m=out.match(/Tests:\\s+(\\d+) passed/);var n=m?parseInt(m[1]):0;if(n<18){process.stdout.write('FAIL: '+n+'/18 adversarial tests passed');process.exit(1);}process.stdout.write('PASS: F-T01 18/18 adversarial bypass tests pass');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "d9e88fdc749d27a70618d38bb89953812cd5d5ab5ce6b4a5cb118ffb1e1e0da6",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-T01 18/18 adversarial bypass tests pass",
+  "executionEvidenceDigest": "fa0352b6ac2847a8fd448c4eb5dc60158c157cfa419dc3a0dd5a42d9faa5d28a",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

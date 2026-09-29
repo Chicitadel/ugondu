@@ -1,0 +1,655 @@
+{
+  "reportId": "REP-68E8DB0ECE1B",
+  "transactionId": "TX-68E8DB0ECE1B",
+  "certificationRunId": "TX-1789298212165",
+  "targetFingerprint": "357ae8637fbd0f219f53347af444ea9fffd4238d788ee3ee87391360e265a826",
+  "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+  "sourceProvider": "LOCAL_GIT",
+  "sourceTreeDigest": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+  "inputSnapshotHash": "80faaf9827246aee0aad09b1e93f5fcf672212e976ff666e207d2bac0c2cd607",
+  "finalSnapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4",
+  "snapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4",
+  "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "snapshot": {
+    "transactionId": "TX-68E8DB0ECE1B",
+    "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+    "executionId": "TX-1789298212165",
+    "certificationSubjectId": "eaorcs-local-subject",
+    "executionContractDigest": null,
+    "actorContext": null,
+    "environmentDigest": null,
+    "closure": null,
+    "subject": {
+      "commit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+      "tree": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c"
+    },
+    "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+    "subjectCommit": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+    "sourceProvider": "LOCAL_GIT",
+    "publicationRevision": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+    "ledgerSubjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+    "evidenceSubjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+    "decisionSubjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+    "targetFingerprint": "357ae8637fbd0f219f53347af444ea9fffd4238d788ee3ee87391360e265a826",
+    "sourceCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+    "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+    "sourceTreeDigest": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+    "inputSnapshotHash": "80faaf9827246aee0aad09b1e93f5fcf672212e976ff666e207d2bac0c2cd607",
+    "finalSnapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4",
+    "snapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4",
+    "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+    "ledgerRootHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+    "candidateStateDigest": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+    "evidenceRootHash": "110bc12d40c02020134b0407f67e437923072228299e60bf035b03cf2673a8a7",
+    "findingsRootHash": "4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4",
+    "gateResultsRootHash": "dd92ac26aaf53be4c453a3c27cc9ad3c76eee2c94eacaf992e6f7e5dbe30497e",
+    "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+    "scoresRootHash": "3188f91d318a4d35cc9d600f022bc420dadbba14a78dce9571d86ce87c071060",
+    "scores": {},
+    "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "streamDefinitionDigest": "ad54994f18ecb2689af59c19b34cedf7bd22fc42b9e7b10108d4fc0382b3d2f7",
+    "providerContractDigest": "1f98f2fd4086acaa1528031520e9b3ca059aaea85dbe29b0e844b1eaa17bcced",
+    "telemetryReceipts": [
+      {
+        "schemaVersion": "2026.3.1",
+        "governanceModel": "UAIGOS-3.0.0",
+        "receiptId": "RAW-TEL-FF7D991B-0FDC-4CAB-ADBF-3C73E0E60ABC",
+        "source": "LIVE_EXECUTION",
+        "workloadId": "CERTIFICATION_PIPELINE_AUTHORITATIVE",
+        "subjectHash": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "samples": [
+          {
+            "sampleIndex": 1,
+            "wallMs": 142483.57,
+            "cpuUserMs": 0,
+            "cpuSystemMs": 0,
+            "cpuTotalMs": 107672,
+            "peakRssMb": 4.04,
+            "heapUsedMb": 0,
+            "spawns": 0,
+            "subprocessDepth": 0,
+            "cacheHitRatio": 0,
+            "recomputations": 4,
+            "harnessStartupMs": 0,
+            "harnessTeardownMs": 0,
+            "harnessOverheadMs": 0,
+            "engineWallMs": 142483.57,
+            "timestamp": "2026-09-13T11:16:52.168Z"
+          }
+        ],
+        "wallMs": 142483.57,
+        "wallClockMs": 142483.57,
+        "cpuUserMs": 0,
+        "cpuSystemMs": 0,
+        "cpuTotalMs": 107672,
+        "peakRssMb": 4.04,
+        "heapUsedMb": 0,
+        "spawns": 0,
+        "spawnsCount": 0,
+        "subprocessDepth": 0,
+        "maxDepth": 0,
+        "cacheHitRatio": 0,
+        "recomputations": 4,
+        "evidenceRecomputations": 4,
+        "harnessStartupMs": 0,
+        "harnessTeardownMs": 0,
+        "harnessOverheadMs": 0,
+        "engineWallMs": 142483.57,
+        "measurementTimestamp": "2026-09-13T11:16:52.168Z",
+        "timestamp": "2026-09-13T11:16:52.168Z",
+        "capturedAt": "2026-09-13T11:16:52.168Z",
+        "headCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+        "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+        "executionId": "TX-1789298212165",
+        "metadata": {},
+        "receiptHash": "b43970a9c4ddc4ba455cf16856fbd0772ac1ca84c85ccad5f78cf212cd8854be",
+        "contentDigest": "b43970a9c4ddc4ba455cf16856fbd0772ac1ca84c85ccad5f78cf212cd8854be",
+        "isFrozen": true
+      }
+    ],
+    "rawTelemetryReceipt": {
+      "schemaVersion": "2026.3.1",
+      "governanceModel": "UAIGOS-3.0.0",
+      "receiptId": "RAW-TEL-FF7D991B-0FDC-4CAB-ADBF-3C73E0E60ABC",
+      "source": "LIVE_EXECUTION",
+      "workloadId": "CERTIFICATION_PIPELINE_AUTHORITATIVE",
+      "subjectHash": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+      "samples": [
+        {
+          "sampleIndex": 1,
+          "wallMs": 142483.57,
+          "cpuUserMs": 0,
+          "cpuSystemMs": 0,
+          "cpuTotalMs": 107672,
+          "peakRssMb": 4.04,
+          "heapUsedMb": 0,
+          "spawns": 0,
+          "subprocessDepth": 0,
+          "cacheHitRatio": 0,
+          "recomputations": 4,
+          "harnessStartupMs": 0,
+          "harnessTeardownMs": 0,
+          "harnessOverheadMs": 0,
+          "engineWallMs": 142483.57,
+          "timestamp": "2026-09-13T11:16:52.168Z"
+        }
+      ],
+      "wallMs": 142483.57,
+      "wallClockMs": 142483.57,
+      "cpuUserMs": 0,
+      "cpuSystemMs": 0,
+      "cpuTotalMs": 107672,
+      "peakRssMb": 4.04,
+      "heapUsedMb": 0,
+      "spawns": 0,
+      "spawnsCount": 0,
+      "subprocessDepth": 0,
+      "maxDepth": 0,
+      "cacheHitRatio": 0,
+      "recomputations": 4,
+      "evidenceRecomputations": 4,
+      "harnessStartupMs": 0,
+      "harnessTeardownMs": 0,
+      "harnessOverheadMs": 0,
+      "engineWallMs": 142483.57,
+      "measurementTimestamp": "2026-09-13T11:16:52.168Z",
+      "timestamp": "2026-09-13T11:16:52.168Z",
+      "capturedAt": "2026-09-13T11:16:52.168Z",
+      "headCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+      "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+      "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+      "executionId": "TX-1789298212165",
+      "metadata": {},
+      "receiptHash": "b43970a9c4ddc4ba455cf16856fbd0772ac1ca84c85ccad5f78cf212cd8854be",
+      "contentDigest": "b43970a9c4ddc4ba455cf16856fbd0772ac1ca84c85ccad5f78cf212cd8854be",
+      "isFrozen": true
+    },
+    "decision": "APPROVED",
+    "decisionEnvelope": {
+      "schemaVersion": "2.0.0",
+      "decisionId": "DEC-A590BFF8FE469A1C",
+      "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+      "executionId": "TX-1789298212165",
+      "subject": {
+        "repository": "eaorcs",
+        "commit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "tree": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c"
+      },
+      "qualification": {
+        "executionCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "executionTree": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+        "streams": 0,
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0
+      },
+      "gates": {
+        "physicalQualification": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "governance": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "traceability": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "hardcodeLocalization": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "pluginIntegrity": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "domainZero": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "federatedIntegration": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "automationSafety": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "manualOperation": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "federationNonOverlap": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "commercialCapabilitySecurity": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "physicalArchitecture": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        }
+      },
+      "ledger": {
+        "state": "EVIDENCE_SEALED",
+        "digest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e",
+        "evidenceRootDigest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e",
+        "entriesCount": 0
+      },
+      "publication": {
+        "commit": null,
+        "tree": null
+      },
+      "authorityBindings": {
+        "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+        "gateDefinitionDigest": "bf478464e0e16004dbc6d944b590b98f1b73305ff2fe5fa2c2a3ff95f0c9c4ce",
+        "decisionRuleDigest": "4a2b57e765871287f28f9ecd1f94e57dfa2f7e374b1ade8c62f33d110f2ea501",
+        "evidenceRootDigest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e"
+      },
+      "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+      "gateDefinitionDigest": "bf478464e0e16004dbc6d944b590b98f1b73305ff2fe5fa2c2a3ff95f0c9c4ce",
+      "decisionRuleDigest": "4a2b57e765871287f28f9ecd1f94e57dfa2f7e374b1ade8c62f33d110f2ea501",
+      "evidenceRootDigest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e",
+      "decision": "APPROVED",
+      "certificationStatus": "APPROVED",
+      "publicationStatus": "AUTHORIZED",
+      "corStatus": "APPROVED",
+      "candidateEnvelopeDigest": "3d1f4c16930250e1d63b472a62d6e71df4c53e659879716ca166a9e3c225594a",
+      "sealedAt": "2026-09-13T11:16:52.177Z",
+      "evaluatedAt": "2026-09-13T11:16:52.172Z",
+      "envelopeDigest": "5923904dbbcce81bfcb4ed0090a7222ce4338e79ca9d5134e191f859cdb88d74"
+    },
+    "evidence": {
+      "evidence.pipeline.stream.results": {
+        "totalStreams": 32,
+        "passedStreams": 22,
+        "failedStreams": 0,
+        "skippedStreams": 0,
+        "status": "VERIFIED_CLEAN",
+        "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+        "executionId": "TX-1789298212165",
+        "timestamp": "2026-09-13T11:16:52.168Z"
+      }
+    },
+    "findings": [],
+    "gates": {
+      "physicalQualification": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "governance": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "traceability": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "hardcodeLocalization": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "pluginIntegrity": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "domainZero": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "federatedIntegration": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "automationSafety": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "manualOperation": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "federationNonOverlap": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "commercialCapabilitySecurity": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "physicalArchitecture": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      }
+    },
+    "entries": [
+      {
+        "path": "audit.certification.pipeline_evaluation",
+        "value": {
+          "status": "CERTIFIED",
+          "totalStreams": 32,
+          "passed": true
+        },
+        "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+        "executionId": "TX-1789298212165",
+        "sourceCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+        "stagedAt": "2026-09-13T11:16:52.171Z"
+      }
+    ],
+    "phase": "TRANSACTION_FROZEN",
+    "createdAt": "2026-09-13T11:16:52.167Z",
+    "openedAt": "2026-09-13T11:16:52.167Z",
+    "committedAt": null,
+    "frozenAt": "2026-09-13T11:16:52.179Z",
+    "isFrozen": true,
+    "state": "READY_TO_COMMIT",
+    "blueprintDigest": "DEFAULT_BLUEPRINT",
+    "transactionDigest": "05809ba0ed75028a30cfb727ae52adfcd645ea1756b0f7dc910b257966873599",
+    "evidenceRootDigest": "110bc12d40c02020134b0407f67e437923072228299e60bf035b03cf2673a8a7"
+  },
+  "ledgerSubjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+  "evidenceSubjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+  "decisionSubjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+  "decision": "APPROVED",
+  "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+  "evidenceRootHash": "110bc12d40c02020134b0407f67e437923072228299e60bf035b03cf2673a8a7",
+  "findingsRootHash": "4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4",
+  "reportModelHash": "c85408287cbc2333624660856d93c9b210b9b424b0f001c1739f41efbf151682",
+  "manifest": {
+    "reportId": "REP-68E8DB0ECE1B",
+    "transactionId": "TX-68E8DB0ECE1B",
+    "certificationRunId": "TX-1789298212165",
+    "targetFingerprint": "357ae8637fbd0f219f53347af444ea9fffd4238d788ee3ee87391360e265a826",
+    "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+    "inputSnapshotHash": "80faaf9827246aee0aad09b1e93f5fcf672212e976ff666e207d2bac0c2cd607",
+    "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+    "evidenceRootHash": "110bc12d40c02020134b0407f67e437923072228299e60bf035b03cf2673a8a7",
+    "findingsRootHash": "4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4",
+    "reportModelHash": "c85408287cbc2333624660856d93c9b210b9b424b0f001c1739f41efbf151682",
+    "generatorVersion": "2026.3.1-LTS",
+    "generatedAt": "2026-09-13T11:16:52.179Z",
+    "atomic": true,
+    "decision": "APPROVED",
+    "snapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4",
+    "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+    "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+  },
+  "sections": {
+    "executiveSummary": {
+      "reportId": "REP-68E8DB0ECE1B",
+      "transactionId": "TX-68E8DB0ECE1B",
+      "certificationRunId": "TX-1789298212165",
+      "targetFingerprint": "357ae8637fbd0f219f53347af444ea9fffd4238d788ee3ee87391360e265a826",
+      "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+      "certificationDecision": "APPROVED",
+      "totalGates": 12,
+      "totalEvidenceEntries": 1,
+      "totalFindings": 0,
+      "scores": {},
+      "generatedAt": "2026-09-13T11:16:52.179Z"
+    },
+    "targetSnapshot": {
+      "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+      "executionId": "TX-1789298212165",
+      "targetFingerprint": "357ae8637fbd0f219f53347af444ea9fffd4238d788ee3ee87391360e265a826",
+      "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+      "sourceCommit": "",
+      "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+      "environmentFingerprint": null,
+      "dependencyLockDigest": null,
+      "installedDependencyFingerprint": null,
+      "runtimeIdentity": null,
+      "pipelineVersion": null,
+      "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+      "inputSnapshotHash": "80faaf9827246aee0aad09b1e93f5fcf672212e976ff666e207d2bac0c2cd607",
+      "finalSnapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4"
+    },
+    "evidenceMatrix": {
+      "evidence.pipeline.stream.results": {
+        "totalStreams": 32,
+        "passedStreams": 22,
+        "failedStreams": 0,
+        "skippedStreams": 0,
+        "status": "VERIFIED_CLEAN",
+        "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+        "executionId": "TX-1789298212165",
+        "timestamp": "2026-09-13T11:16:52.168Z"
+      }
+    },
+    "findingsRegister": [],
+    "scoresAndMetrics": {},
+    "gateEvaluations": {
+      "physicalQualification": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "governance": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "traceability": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "hardcodeLocalization": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "pluginIntegrity": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "domainZero": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "federatedIntegration": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "automationSafety": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "manualOperation": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "federationNonOverlap": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "commercialCapabilitySecurity": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      },
+      "physicalArchitecture": {
+        "status": "PASS",
+        "passed": true,
+        "score": 100
+      }
+    },
+    "decisionEnvelope": {
+      "schemaVersion": "2.0.0",
+      "decisionId": "DEC-A590BFF8FE469A1C",
+      "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+      "executionId": "TX-1789298212165",
+      "subject": {
+        "repository": "eaorcs",
+        "commit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "tree": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c"
+      },
+      "qualification": {
+        "executionCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "executionTree": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+        "streams": 0,
+        "passed": 22,
+        "failed": 0,
+        "skipped": 0
+      },
+      "gates": {
+        "physicalQualification": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "governance": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "traceability": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "hardcodeLocalization": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "pluginIntegrity": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "domainZero": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "federatedIntegration": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "automationSafety": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "manualOperation": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "federationNonOverlap": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "commercialCapabilitySecurity": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        },
+        "physicalArchitecture": {
+          "status": "PASS",
+          "passed": true,
+          "score": 100
+        }
+      },
+      "ledger": {
+        "state": "EVIDENCE_SEALED",
+        "digest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e",
+        "evidenceRootDigest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e",
+        "entriesCount": 0
+      },
+      "publication": {
+        "commit": null,
+        "tree": null
+      },
+      "authorityBindings": {
+        "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+        "gateDefinitionDigest": "bf478464e0e16004dbc6d944b590b98f1b73305ff2fe5fa2c2a3ff95f0c9c4ce",
+        "decisionRuleDigest": "4a2b57e765871287f28f9ecd1f94e57dfa2f7e374b1ade8c62f33d110f2ea501",
+        "evidenceRootDigest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e"
+      },
+      "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+      "gateDefinitionDigest": "bf478464e0e16004dbc6d944b590b98f1b73305ff2fe5fa2c2a3ff95f0c9c4ce",
+      "decisionRuleDigest": "4a2b57e765871287f28f9ecd1f94e57dfa2f7e374b1ade8c62f33d110f2ea501",
+      "evidenceRootDigest": "2d19c7c9aa73d319287d56c4dfadd8ec5513a66c650f8a31c56c6bab019a8a5e",
+      "decision": "APPROVED",
+      "certificationStatus": "APPROVED",
+      "publicationStatus": "AUTHORIZED",
+      "corStatus": "APPROVED",
+      "candidateEnvelopeDigest": "3d1f4c16930250e1d63b472a62d6e71df4c53e659879716ca166a9e3c225594a",
+      "sealedAt": "2026-09-13T11:16:52.177Z",
+      "evaluatedAt": "2026-09-13T11:16:52.172Z",
+      "envelopeDigest": "5923904dbbcce81bfcb4ed0090a7222ce4338e79ca9d5134e191f859cdb88d74"
+    },
+    "ledgerEntries": [
+      {
+        "path": "audit.certification.pipeline_evaluation",
+        "value": {
+          "status": "CERTIFIED",
+          "totalStreams": 32,
+          "passed": true
+        },
+        "lifecycleId": "LIFECYCLE-CERT-1789298212165",
+        "executionId": "TX-1789298212165",
+        "sourceCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+        "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+        "stagedAt": "2026-09-13T11:16:52.171Z"
+      }
+    ],
+    "ecafAuthorization": null,
+    "auditProvenance": {
+      "transactionId": "TX-68E8DB0ECE1B",
+      "subjectDigest": "257465fd00a596cb724e9f0de3d74f8ba83ae93f189da2a45645b097b9f44f18",
+      "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+      "evidenceRootHash": "110bc12d40c02020134b0407f67e437923072228299e60bf035b03cf2673a8a7",
+      "findingsRootHash": "4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4",
+      "scoresRootHash": "3188f91d318a4d35cc9d600f022bc420dadbba14a78dce9571d86ce87c071060",
+      "finalSnapshotHash": "55a1124d4e87c299b279fa1e10d5061b8d90a95f2183e3f7c5e932fc16c5d1c4",
+      "frozenAt": "2026-09-13T11:16:52.179Z",
+      "generatedAt": "2026-09-13T11:16:52.179Z",
+      "generatorVersion": "2026.3.1-LTS"
+    }
+  },
+  "generatorVersion": "2026.3.1-LTS",
+  "generatedAt": "2026-09-13T11:16:52.179Z",
+  "atomic": true
+}

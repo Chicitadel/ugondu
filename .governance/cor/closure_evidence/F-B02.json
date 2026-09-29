@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "18_of_18_pass_no_timeout_errors",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "bb547acd01e5f207f8b8d16f1d9553fb265ff801",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "tests/certification/bypass_regression_adversarial.test.js"
+  ],
+  "remediationCommit": "033ccdd3e0312fff731b3ab15e8ae997819b0f7b",
+  "verificationCommand": "npx jest tests/certification/bypass_regression_adversarial.test.js --testTimeout=30000 (15/15 then 18/18 pass, 0 this.timeout errors)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-B02"
+}

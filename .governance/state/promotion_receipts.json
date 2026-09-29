@@ -1,0 +1,31 @@
+{
+  "receipts": [
+    {
+      "receiptId": "RCPT-TRX-1786698670928-3e3e78df",
+      "transitionId": "TRX-1786698670928-3e3e78df",
+      "previousBaseline": "EAORCS-BL-2026.3.1-SGCP",
+      "promotedBaseline": "EAORCS-BL-2026.3.1-SGCP",
+      "commit": "ab7f5e3998527c68406943c653ec99bb8930209a",
+      "promotedAt": "2026-08-14T09:11:10.928Z",
+      "authoritySignature": "0272b1f3920a73f1c9b5b56f6dbfaee6cb126ecec4b1ca3db5129a4e7b76ab7a"
+    },
+    {
+      "receiptId": "RCPT-TRX-1786698682560-22d48af7",
+      "transitionId": "TRX-1786698682560-22d48af7",
+      "previousBaseline": "EAORCS-BL-2026.3.1-SGCP",
+      "promotedBaseline": "EAORCS-BL-2026.3.1-SGCP",
+      "commit": "fa5da437f59c2ae56f71f8f678318d29a35a8601",
+      "promotedAt": "2026-08-14T09:11:22.560Z",
+      "authoritySignature": "f5e7fe311fd00b55791028494f7a72f09362c6471eba0481056b80201c99ecc0"
+    },
+    {
+      "receiptId": "RCPT-TRX-1786698685873-de7c97f5",
+      "transitionId": "TRX-1786698685873-de7c97f5",
+      "previousBaseline": "EAORCS-BL-2026.3.1-SGCP",
+      "promotedBaseline": "EAORCS-BL-2026.3.1-SGCP",
+      "commit": "cf4b46ee4d6d07e0071bfcea166d8e0b79b6c0a7",
+      "promotedAt": "2026-08-14T09:11:25.874Z",
+      "authoritySignature": "4fddccf74edfa7017b01123d6d79d50430f620277a62f3dfe0f0ec45862cf075"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+schema: "2026.4"
+description: "Governance v1.0 Computed Capability Graph"
+
+capabilities:
+  - id: identity
+    name: "Identity Service"
+    owner: platform-core
+    priority: critical
+    state_computed: IMPLEMENTED
+    dependencies:
+      - id: registry
+        type: runtime
+    dependents:
+      - billing
+      - licensing
+      - customer-hub
+    required_evidence:
+      - type: openapi
+        status: missing
+      - type: health-endpoint
+        status: missing
+      - type: jwt-validation
+        status: missing
+      - type: integration-tests
+        status: missing
+    release:
+      blocking: true
+
+  - id: registry
+    name: "Registry Service"
+    owner: platform-core
+    priority: critical
+    state_computed: IMPLEMENTED
+    dependencies:
+      - id: discovery
+        type: runtime
+    dependents:
+      - identity
+      - billing
+      - website
+    required_evidence:
+      - type: openapi
+        status: missing
+      - type: schema-validation
+        status: missing
+    release:
+      blocking: true
+
+  - id: discovery
+    name: "Discovery Service"
+    owner: platform-core
+    priority: critical
+    state_computed: IMPLEMENTED
+    dependencies: []
+    dependents:
+      - registry
+    required_evidence:
+      - type: integration-tests
+        status: missing
+    release:
+      blocking: true
+
+  - id: billing
+    name: "Billing Service"
+    owner: commerce
+    priority: critical
+    state_computed: INTEGRATED
+    dependencies:
+      - id: identity
+        type: security
+      - id: registry
+        type: runtime
+    dependents:
+      - licensing
+      - customer-hub
+    required_evidence:
+      - type: openapi
+        status: missing
+      - type: audit-enabled
+        status: missing
+    release:
+      blocking: true
+
+  - id: website
+    name: "Commercial Website"
+    owner: frontend
+    priority: normal
+    state_computed: INTEGRATED
+    dependencies:
+      - id: registry
+        type: runtime
+    dependents: []
+    required_evidence:
+      - type: lighthouse-accessibility
+        status: missing
+    release:
+      blocking: false

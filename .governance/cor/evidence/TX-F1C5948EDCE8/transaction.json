@@ -1,0 +1,17 @@
+{
+  "transactionId": "TX-F1C5948EDCE8",
+  "lifecycleId": "LIFECYCLE-SAFETY-1789293626065",
+  "executionId": "EXE-SAFETY-1789293626065",
+  "targetFingerprint": "a6a0131e3255390a8879353e872004fa8896ab9de9062a02deb33e71b3530be9",
+  "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sourceRevision": null,
+  "publicationRevision": null,
+  "inputSnapshotHash": "0f9979b85c8589bfcc1dee13c47d61bf3f6bc70e136727739e5490af74651909",
+  "snapshotHash": "f8a0d0b11b20154d3dd086daee1804c3ab3b72355d7fd3e7362e9f08bed06782",
+  "finalSnapshotHash": "f8a0d0b11b20154d3dd086daee1804c3ab3b72355d7fd3e7362e9f08bed06782",
+  "resultDigest": "r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1",
+  "evidenceRootHash": "e20e4bc16f73f35d389c904c611326568a9441388cec0219683d82f1a6901563",
+  "candidateStateDigest": "a2cfae272ce94f78763c4dd4277b9b5759302dec2181a4b22381a2f04863413b",
+  "decision": "APPROVED",
+  "generatedAt": "2026-09-13T10:00:26.114Z"
+}

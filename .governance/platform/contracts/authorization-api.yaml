@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Air Roofers Authorization API
+  version: 1.0.0
+  description: Frozen contract for Authorization Engine (RBAC, ABAC, Policy evaluation)
+paths:
+  /authorize:
+    post:
+      summary: Evaluate policy against resource
+  /permissions/grant:
+    post:
+      summary: Grant permission to identity
+  /roles:
+    get:
+      summary: List available roles

@@ -1,0 +1,23 @@
+{
+  "policy": "AIR_ROOFERS_GUIDE_5_1",
+  "extensions": [
+    ".js",
+    ".mjs",
+    ".cjs"
+  ],
+  "maxLoc": 500,
+  "scope": "repository-governed-files",
+  "failClosed": true,
+  "exclusions": [
+    ".governance/**",
+    "EAORCS_AUDIT_PACKAGE*/**",
+    "tmp/**",
+    "docs/**",
+    "reports/**",
+    "evidence/**",
+    "node_modules/**",
+    "storage/**",
+    "baselines/**",
+    "packaging/**"
+  ]
+}

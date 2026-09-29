@@ -1,0 +1,10 @@
+{
+  "state": "PUBLISHED",
+  "transactionId": "TX-F38C07873B47",
+  "snapshotHash": "c0edac70b847ef1773509ac51408d34fc172612cead0de977ac652ae35f0fd75",
+  "subjectDigest": "268718672a517d6a46fac1bf9bdf8117f68619a9b2590bf41a3c10047d8a526b",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "preparedAt": "2026-09-13T10:56:47.658Z",
+  "publishedAt": "2026-09-13T10:56:47.658Z",
+  "publicationRevision": null
+}

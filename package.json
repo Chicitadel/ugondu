@@ -1,0 +1,30 @@
+{
+  "name": "@airroofers/ugondu-platform",
+  "version": "1.0.0",
+  "description": "[en] Ugondu Universal Deployment Intelligence Platform — Air Roofers Commercial Product",
+  "private": true,
+  "author": "Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "server/engine-core",
+    "server/billing-gateway",
+    "server/plugin-manager",
+    "server/event-bus"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "start:engine": "cd server/engine-core && node dist/index.js",
+    "start:billing": "cd server/billing-gateway && node dist/index.js",
+    "start:plugins": "cd server/plugin-manager && node dist/index.js",
+    "start:bus": "cd server/event-bus && node dist/index.js",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

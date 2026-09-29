@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "COR_BLOCKER_RECORD",
+  "workflowRunId": "31971200640",
+  "workflowId": 31971200640,
+  "headCommit": "22cd7d25a26b7213767eefa7900868714adfdea9",
+  "targetHEAD": "8f3bd93fdc8c3ffc89a855954790e91c48c999e7",
+  "status": "BLOCKED",
+  "corStatus": "BLOCKED",
+  "phase7": {
+    "passed": 8,
+    "failed": 1
+  },
+  "traceability": {
+    "passed": 67,
+    "failed": 3
+  },
+  "governanceModel": "UAIGOS-3.0.0",
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED",
+  "timestamp": "2026-08-16T22:45:00.000Z",
+  "reason": "Remote workflow 31971200640 failed Phase 7 / Traceability checks against HEAD 8f3bd93fdc8c3ffc89a855954790e91c48c999e7",
+  "contentDigest": "cd48c7dfdd4459c82a89e246d24e1cdf058204982e6f8ba7a1fabccf32fc37c4"
+}

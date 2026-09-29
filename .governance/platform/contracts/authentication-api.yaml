@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Air Roofers Authentication API
+  version: 1.0.0
+  description: Frozen contract for Authentication (Passwords, Passkeys, MFA, Federation)
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate user
+  /auth/mfa/verify:
+    post:
+      summary: Verify MFA token
+  /auth/webauthn:
+    post:
+      summary: Authenticate via Passkey

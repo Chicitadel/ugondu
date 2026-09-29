@@ -1,0 +1,8 @@
+validator: security
+status: passed
+severity: none
+timestamp: 2026-07-17T22:21:00Z
+evidence:
+  - audit.json
+score: 10
+mandatory: true

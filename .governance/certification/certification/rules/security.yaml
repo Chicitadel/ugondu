@@ -1,0 +1,10 @@
+domain: Security
+rules:
+  - name: NoCriticalVulnerabilities
+    type: SecurityAudit
+    severity: Critical
+    assert: "critical == 0"
+    outcomes:
+      success: PASS
+      failure: FAIL
+      missing: INCONCLUSIVE

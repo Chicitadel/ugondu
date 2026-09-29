@@ -1,0 +1,69 @@
+{
+  "totalTracked": 17,
+  "open": [
+    {
+      "id": "F-L01"
+    },
+    {
+      "id": "F-L02"
+    },
+    {
+      "id": "F-C02"
+    },
+    {
+      "id": "F-W01"
+    },
+    {
+      "id": "F-B02"
+    },
+    {
+      "id": "F-T01"
+    },
+    {
+      "id": "F-T02"
+    },
+    {
+      "id": "F-Z01"
+    },
+    {
+      "id": "F-AA01"
+    },
+    {
+      "id": "F-G8-01"
+    },
+    {
+      "id": "F-EV01"
+    }
+  ],
+  "frozenCount": 6,
+  "openCount": 11,
+  "auditCycle": "AUDIT-002",
+  "baseline": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+  "schemaVersion": "1.0.0",
+  "frozen": [
+    {
+      "id": "F-B01",
+      "commit": "e9f57ab0"
+    },
+    {
+      "id": "F-C01",
+      "commit": "824b7106"
+    },
+    {
+      "id": "F-D01",
+      "commit": "14daeff6"
+    },
+    {
+      "id": "F-G01",
+      "commit": "c22ed48d"
+    },
+    {
+      "id": "F-H01",
+      "commit": "824b7106"
+    },
+    {
+      "id": "F-I01",
+      "commit": "e9f57ab0"
+    }
+  ]
+}

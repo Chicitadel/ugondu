@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-G8-01",
+  "description": "EAORCS_TEST_FIXTURE and NODE_ENV removed from production authority live code",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:42.036Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "function strip(s){return s.split('\\n').filter(function(l){var t=l.trim();return !t.startsWith('//')&&!t.startsWith('*')&&!t.startsWith('/*');}).join('\\n');}var sl=strip(require('fs').readFileSync('engine/certification/SnapshotFreezeEngine.js','utf8'));var dl=strip(require('fs').readFileSync('engine/certification/CertificationDryRun.js','utf8'));if(sl.indexOf('EAORCS_TEST_FIXTURE')>=0||sl.indexOf('process.env.NODE_ENV')>=0){process.stdout.write('FAIL: env var in SnapshotFreezeEngine live code');process.exit(1);}if(dl.indexOf('EAORCS_TEST_FIXTURE')>=0||dl.indexOf('process.env.NODE_ENV')>=0){process.stdout.write('FAIL: env var in CertificationDryRun live code');process.exit(1);}process.stdout.write('PASS: F-G8-01 no env-based fixture in SnapshotFreezeEngine or CertificationDryRun live code');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "84026cc6889cdee8f5cbd3ca1de43b08641050df47b5d64ba5ddcbc27da0acd4",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-G8-01 no env-based fixture in SnapshotFreezeEngine or CertificationDryRun live code",
+  "executionEvidenceDigest": "c21c476206af3688dd1430037eda0d2d9327de98c8fa7d043fd4ceac98fdba8d",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

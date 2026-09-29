@@ -1,0 +1,32 @@
+# Standard Pipeline: Build
+# Location: .governance/ci/build.yml
+
+description: "Canonical module for building artifacts and pushing them to a registry"
+
+inputs:
+  repository_name:
+    required: true
+  technology_stack:
+    required: true
+  build_command:
+    required: true
+
+outputs:
+  artifact_checksum:
+    description: "The SHA256 hash of the compiled artifact"
+  build_status:
+    description: "success | failed"
+  duration:
+    description: "Time to complete the build"
+
+steps:
+  - name: Execute Native Build
+    run: ${{ inputs.build_command }}
+    
+  - name: Generate Checksum
+    run: "sha256sum artifact > checksum.txt"
+    
+  - name: Emit Standard Output
+    run: |
+      echo "::set-output name=build_status::success"
+      echo "::set-output name=artifact_checksum::$(cat checksum.txt)"

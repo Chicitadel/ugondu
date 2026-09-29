@@ -1,0 +1,10 @@
+{
+  "state": "PUBLISHED",
+  "transactionId": "TX-CDAD25610051",
+  "snapshotHash": "b2425fa911a97dc4fca15990e8e3654ff97cdd1ba43357469a7e5873bcacc2c6",
+  "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "resultDigest": "r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1",
+  "preparedAt": "2026-09-12T16:52:01.804Z",
+  "publishedAt": "2026-09-12T16:52:01.804Z",
+  "publicationRevision": null
+}

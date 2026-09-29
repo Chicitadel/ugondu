@@ -1,0 +1,11 @@
+{
+  "gateName": "physicalManifest",
+  "policyId": "MANIFEST-GATE-001",
+  "status": "APPROVED",
+  "passed": true,
+  "releaseIndex": 100,
+  "receiptBound": true,
+  "expectedDigest": "482e31346786e3393e7649b1385dbf2c12da43be2a070ee7c89cbcd0b09a750e",
+  "actualDigest": "482e31346786e3393e7649b1385dbf2c12da43be2a070ee7c89cbcd0b09a750e",
+  "executedAt": "2026-09-22T15:57:36.483Z"
+}

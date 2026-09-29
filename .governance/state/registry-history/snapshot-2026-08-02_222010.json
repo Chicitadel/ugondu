@@ -1,0 +1,11 @@
+{
+  "snapshotId": "snapshot-2026-08-02_222010",
+  "timestamp": "2026-08-02T20:20:10.836Z",
+  "reason": "Test Archive",
+  "operator": "SYSTEM",
+  "archiveFileName": "snapshot-2026-08-02_222010.tgz",
+  "signatureAlgorithm": "Ed25519",
+  "signature": "9128eb0dfecdaa5a93c350359c21d483fc0a92714ef4c1d85d285cf5dd1f34fc540e0609390bc873fcc9017cdc4bda35383c44eeb5a7f2546edc8f486c904105",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA9urShy9VlzZAVSV1lnhUhK0kSJo+HbUEp19os96ESL0=\n-----END PUBLIC KEY-----\n",
+  "checksum": "957047cb607459ee3c9df1af94f7262116be0bb6437a90cbd2059af8962f158b"
+}

@@ -1,0 +1,101 @@
+{
+  "activeWaveRegistry": {
+    "eaorcs-repo:39228b57dfaeb62986f31344616a07a72eae2bea": {
+      "admittedAt": "2026-08-27T08:33:08.334Z",
+      "repositoryIdentity": "eaorcs-repo",
+      "immutableCertificationSubject": "39228b57dfaeb62986f31344616a07a72eae2bea"
+    }
+  },
+  "terminalRegistry": {
+    "eaorcs:39228b57dfaeb62986f31344616a07a72eae2bea": {
+      "concludedAt": "2026-08-27T08:33:11.344Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "39228b57dfaeb62986f31344616a07a72eae2bea",
+      "terminalState": "RELEASE_APPROVED"
+    },
+    "eaorcs:d8dc677fb00e613f95602bf7a13f2c7dfc665d5d09b1adf05d75deb1eb9d9193": {
+      "concludedAt": "2026-08-27T08:36:49.968Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "d8dc677fb00e613f95602bf7a13f2c7dfc665d5d09b1adf05d75deb1eb9d9193",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:c16410d1aa01d6efed1e7eafdab959ed1fc57ba071b0fd5b4feac3d4a91e863d": {
+      "concludedAt": "2026-08-27T08:39:34.005Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "c16410d1aa01d6efed1e7eafdab959ed1fc57ba071b0fd5b4feac3d4a91e863d",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:888fe8162d5d159dea73016a120975dba6fe29b0866fa72b5672a4e8968f2f27": {
+      "concludedAt": "2026-08-27T08:40:46.669Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "888fe8162d5d159dea73016a120975dba6fe29b0866fa72b5672a4e8968f2f27",
+      "terminalState": "RELEASE_APPROVED"
+    },
+    "eaorcs:162f309a4e70fe9341a735f05a527e91280cf09b2c7f42a2d62c383fa2218ea6": {
+      "concludedAt": "2026-08-27T08:42:40.700Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "162f309a4e70fe9341a735f05a527e91280cf09b2c7f42a2d62c383fa2218ea6",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:5da3af148aea83f490318e842c42734b6df48f5afd08fed22568d5b68ee2b916": {
+      "concludedAt": "2026-08-27T08:43:29.210Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "5da3af148aea83f490318e842c42734b6df48f5afd08fed22568d5b68ee2b916",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:462acfff8df599d9f0b92463819e44b418146f3caa24abc06103bf8d61fe8830": {
+      "concludedAt": "2026-08-27T08:44:18.045Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "462acfff8df599d9f0b92463819e44b418146f3caa24abc06103bf8d61fe8830",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:3e30ff9399980a00fafed127b566fe7f5a88fcd95d4add4c3a24229a628ab94f": {
+      "concludedAt": "2026-08-27T08:45:28.459Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "3e30ff9399980a00fafed127b566fe7f5a88fcd95d4add4c3a24229a628ab94f",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:e14eae92d67f6ed960344b78e2c4da36f6f0012b21e2745fa62ce33f6c91d7f7": {
+      "concludedAt": "2026-08-27T08:46:21.086Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "e14eae92d67f6ed960344b78e2c4da36f6f0012b21e2745fa62ce33f6c91d7f7",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:ae4da7b9a327c427983fd293714896c849eac66210f61c106e26d71295efb44a": {
+      "concludedAt": "2026-08-27T08:47:46.181Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "ae4da7b9a327c427983fd293714896c849eac66210f61c106e26d71295efb44a",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:963d0faf314e66122d49db0e71a63b20fce883ef5398a2cbce1a4df75d177123": {
+      "concludedAt": "2026-08-27T08:48:32.323Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "963d0faf314e66122d49db0e71a63b20fce883ef5398a2cbce1a4df75d177123",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:9a3c403526d615467f197f8a1a75e767047677ed7e9e96a27fe1a4c72d341091": {
+      "concludedAt": "2026-08-27T08:49:18.598Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "9a3c403526d615467f197f8a1a75e767047677ed7e9e96a27fe1a4c72d341091",
+      "terminalState": "RELEASE_APPROVED"
+    },
+    "eaorcs:015483f691193b26949f2c4228a0bb9591ce2060a276151cede6f000a1113e74": {
+      "concludedAt": "2026-08-27T09:00:02.487Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "015483f691193b26949f2c4228a0bb9591ce2060a276151cede6f000a1113e74",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:0301dc9d8de32fee2041491e0d3ce917b1bd17c79135d4db8b4f34067cb815ba": {
+      "concludedAt": "2026-08-27T09:06:00.713Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "0301dc9d8de32fee2041491e0d3ce917b1bd17c79135d4db8b4f34067cb815ba",
+      "terminalState": "ABORTED"
+    },
+    "eaorcs:1af2758ff03b8ddf39a50ac4f93626b1040475d9c9486d65e94f1b541a38286d": {
+      "concludedAt": "2026-08-27T11:41:38.770Z",
+      "repositoryIdentity": "eaorcs",
+      "immutableCertificationSubject": "1af2758ff03b8ddf39a50ac4f93626b1040475d9c9486d65e94f1b541a38286d",
+      "terminalState": "ABORTED"
+    }
+  }
+}

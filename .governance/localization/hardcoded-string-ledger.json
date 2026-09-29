@@ -1,0 +1,19 @@
+{
+  "ledgerVersion": "2.0.0",
+  "lastUpdated": "2026-08-17T12:00:00.000Z",
+  "integrityHash": "GENESIS_0000000000000000000000000000000000000000000000000000000000000000",
+  "summary": {
+    "totalStrings": 0,
+    "totalRecords": 0,
+    "discovered": 0,
+    "localized": 0,
+    "exempted": 0,
+    "blocked": 0,
+    "purged": 0,
+    "reclassified": 0,
+    "replaced": 0,
+    "retired": 0,
+    "unresolvedCount": 0
+  },
+  "entries": []
+}

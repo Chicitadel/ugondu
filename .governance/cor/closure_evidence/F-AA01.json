@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "scope_guard_pass",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "30b39da50c6d7fbc42421cb4185e7595ceb70577",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    ".governance/cor/scope_guard.js"
+  ],
+  "remediationCommit": "a09f0112edc44bcfb3c90c4be301a6610aed7780",
+  "verificationCommand": "node .governance/cor/scope_guard.js (SCOPE_GUARD: PASS -- 10 files)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-AA01"
+}

@@ -1,0 +1,10 @@
+{
+  "transactionId": "TX-497A05E6CB26",
+  "snapshotHash": "72727cfc4064553bc915141745743eda191ff3ce657469c0cc6f724562dbc613",
+  "files": {
+    "transaction.json": "a539f33b69157822020002942614bdedd2eabc37dd0fd1679c42bd02ab18b216",
+    "certificate.json": "a15cc34a63b1c3bd1703a87e4852e823cb4a712e4ee2c603ebc393bfb68fadca",
+    "ledger.json": "dbb9d0bbde5fc0a698ecdffaddd5fcc6603e7dfdda2f81517b89793bcf836852"
+  },
+  "generatedAt": "2026-09-13T09:28:51.105Z"
+}

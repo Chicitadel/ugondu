@@ -1,0 +1,24 @@
+{
+  "runner": "framework-integrity-runner",
+  "result": "PASSED",
+  "tests": [
+    {
+      "testId": "SELF-01",
+      "name": "UPVCRAS kernel execution immutability",
+      "status": "PASS",
+      "durationMs": 5
+    },
+    {
+      "testId": "SELF-02",
+      "name": "Runner registry digital signature integrity",
+      "status": "PASS",
+      "durationMs": 4
+    },
+    {
+      "testId": "SELF-03",
+      "name": "Managed asset SHA-256 digest validation",
+      "status": "PASS",
+      "durationMs": 6
+    }
+  ]
+}

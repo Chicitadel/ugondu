@@ -1,0 +1,8 @@
+name: ai-governance
+description: AI asset governance and generation integrity.
+rules:
+  - trace-ai-generation
+  - subagent-lifecycle-termination:
+      auto_terminate_on_completion: true
+      require_parent_cleanup: true
+      prohibit_idle_polling_loops: true

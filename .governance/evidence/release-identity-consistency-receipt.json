@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "2026.3.1-LTS",
+  "receiptType": "RELEASE_IDENTITY_CONSISTENCY_RECEIPT",
+  "roles": {
+    "SOURCE_CERTIFIED": {
+      "sha": "b167acb22dd7c99fd6b21bbe271b0281ddb9174e",
+      "role": "SOURCE_CERTIFIED",
+      "immutable": true
+    },
+    "QUALIFICATION_EXECUTED": {
+      "sha": "eb1084727aab7739385f9462626681d6b3c8fc5f",
+      "role": "QUALIFICATION_EXECUTED",
+      "immutable": true
+    },
+    "PUBLICATION_SUBJECT": {
+      "sha": "b167acb22dd7c99fd6b21bbe271b0281ddb9174e",
+      "role": "PUBLICATION",
+      "immutable": true
+    },
+    "ATTESTATION_GENERATED": {
+      "sha": "b167acb22dd7c99fd6b21bbe271b0281ddb9174e",
+      "role": "ATTESTATION_GENERATED",
+      "immutable": true
+    },
+    "ACTIVE_REPOSITORY_HEAD": {
+      "sha": "eb1084727aab7739385f9462626681d6b3c8fc5f",
+      "role": "ACTIVE_REPOSITORY_HEAD",
+      "immutable": false
+    },
+    "CURRENT_STATE_POINTER": {
+      "sha": "eb1084727aab7739385f9462626681d6b3c8fc5f",
+      "role": "CURRENT_STATE_POINTER",
+      "immutable": false
+    }
+  },
+  "graphSignature": "d276e66028b5853bdcf7eddb0f73a494d332b2be12c31d8817c47fbf42b78599",
+  "verifiedAt": "2026-08-19T17:01:03.200Z",
+  "status": "VERIFIED",
+  "receiptDigest": "bec78c70f53eaebc1a4e982bf0aba5777e5a02329fe93686a7835294b8d8171f",
+  "contentDigest": "bec78c70f53eaebc1a4e982bf0aba5777e5a02329fe93686a7835294b8d8171f"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2026.3.1-LTS",
+  "receiptType": "POST_CERTIFICATION_DELTA_RECEIPT",
+  "certifiedSourceCommit": "b167acb22dd7c99fd6b21bbe271b0281ddb9174e",
+  "currentRepositoryHead": "1f340f5d930dbb7d7c12617751d3884733c8f01a",
+  "classification": "EVIDENCE_ONLY_DESCENDANT",
+  "containsExecutableChanges": false,
+  "executableFilesCount": 0,
+  "governanceFilesCount": 43,
+  "changedFilesCount": 43,
+  "verifiedAt": "2026-08-19T16:22:38.769Z",
+  "status": "APPROVED",
+  "receiptDigest": "5d7f3b6c8010d418eaf63275fdcac05634ef3cc4ed7ec40f39de89d0ead997e0",
+  "contentDigest": "5d7f3b6c8010d418eaf63275fdcac05634ef3cc4ed7ec40f39de89d0ead997e0"
+}

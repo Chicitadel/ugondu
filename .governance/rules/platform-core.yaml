@@ -1,0 +1,5 @@
+name: platform-core
+description: Baseline architectural rules, zero-trust matrices, and API contract requirements.
+rules:
+  - require-zero-trust
+  - prevent-drift

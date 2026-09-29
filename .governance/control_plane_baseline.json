@@ -1,0 +1,20 @@
+{
+  "governanceModel": "UAIGOS-3.0.0",
+  "auditBaselineHead": "2751ff6893a95ab003091b62241fec5ab732778c",
+  "timestamp": "2026-08-22T23:06:56.952Z",
+  "totalControlFiles": 11,
+  "controlPlaneFiles": {
+    "engine/governance/RegressionEvidenceEngine.js": "7de56c3afde305c686e0361368823658bef5936a67c7701b20d21a72da515e2f",
+    "engine/governance/UCBRCInvocationContract.js": "1c333089b9e75f453abf808c54aa754d647cd658834c7a2efe9ea542dbf8d9fc",
+    "engine/governance/UniversalSurfaceEnforcementEngine.js": "38a9da3d431f78456bdba79b936fef6412d414c424bf672ae39aba4b84ae68b6",
+    "engine/governance/ModificationTargetRegistry.js": "58c40e10bb700686a59cd2a1704f6604b29a8944cac3ea9354156e2ecda1b8a0",
+    "engine/governance/FrozenBaselineEnforcementEngine.js": "4a7f2e76987b5300caa8636e8e47af65204c711842d8336fc8fb9be75659905a",
+    "engine/governance/ImmutableVerificationCacheEngine.js": "6f4384e53c3bd92bec069755da89829fc468b5e81cfcae3d5be59fecc347b9ea",
+    "engine/release/CanonicalSubjectRegistry.js": "d07453650181cf561d67767ed8a1076682da5367333232829d3b05a831d7fb1a",
+    "engine/trust/AuthorityReconciliationEngine.js": "c540fa931f61d520351d4f1950df08d3b78393ba743a0bdc5874468e3ee38db6",
+    ".governance/frozen_manifest.json": "6f3c1edea3f0a421e7cf7e1605607cbfe4ffce4ed5aa7f69b0771440e0f541be",
+    "tests/governance/zero_drift_enforcement.test.js": "306a39b10f7c32b3900d6006b1bb64615c3a39985df33a7bd806c98987982845",
+    "tests/governance/frozen_baseline_enforcement.test.js": "7ad53a487d5cb95dd2e02db0bdb41fc759943b92c487b8b07e59f5ff61c15171"
+  },
+  "auditBaselineTree": "60dce1b72d7a6294865f375b29681efa3bd0a391"
+}

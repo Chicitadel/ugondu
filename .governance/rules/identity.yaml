@@ -1,0 +1,4 @@
+name: identity
+description: Identity verification governance.
+rules:
+  - enforce-mfa

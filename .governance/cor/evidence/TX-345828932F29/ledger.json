@@ -1,0 +1,25 @@
+{
+  "lifecycleId": "LIFECYCLE-CERT-1789293517888",
+  "transactionId": "TX-345828932F29",
+  "subjectDigest": "51ed6a2cc1d74009790485a066a74cae813d0f38f3e2075d3bdf496911eda94b",
+  "snapshotHash": "0b0ca62ba935571011d5c6fb2c36b147fea0bcd8f3ea9e6ac0256c64b7e136a2",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "reportHash": "66fe38fb9ce5a2cb56bb0914d2014fcad190e250b274ffa7d977e72cc7c4476d",
+  "entries": [
+    {
+      "path": "audit.certification.pipeline_evaluation",
+      "value": {
+        "status": "CERTIFIED",
+        "totalStreams": 32,
+        "passed": true
+      },
+      "lifecycleId": "LIFECYCLE-CERT-1789293517888",
+      "executionId": "TX-1789293517888",
+      "sourceCommit": "150b1a8363f2190d3ba89d61edb47f0e58ae5f51",
+      "sourceTreeHash": "5cde45e9e594f19f75594d5afbe347d81fba98fdd85b9761f25f747895bc7e88",
+      "stagedAt": "2026-09-13T09:58:37.891Z"
+    }
+  ],
+  "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+  "generatedAt": "2026-09-13T09:58:37.896Z"
+}

@@ -1,0 +1,1360 @@
+{
+  "subjectDigest": "a14eeb8e7201d06a75b0f54cf0b7de39266e755f187538c1e57c4bea1ec96149",
+  "treeDigest": "37d4d82734dc7bb7f23e9e4fdbbde12db271bd80",
+  "policyDigest": "081c1c055268ef8b6ebe46f57008d2fcbf9b1e6983af4795513ddf4b8d2473a8",
+  "inventoryDigest": "2ec91ef201259dfc3c1ac9c435d854f2727b402ebdda47edeb8301e0c9243455",
+  "governedFileCount": 2973,
+  "violationCount": 150,
+  "violations": [
+    {
+      "path": "engine/reporting/ReportBundleCompiler.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 2996,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/RealResourceProfiler.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1715,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/TestInventoryReconciler.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1688,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/CertificationLedger.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1479,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/release/qualification_subject_envelope.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1248,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/server/EAORCSRestServer.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1244,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/governance/zero_drift_enforcement.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1208,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "cli/router.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1137,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/intelligence/DeepScanIntelligenceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1106,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/cli/CapabilityExecutionAuthority.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1064,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/DefectRemediationLifecycleVerifier.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 1013,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/pipeline/PlatformConvergenceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 998,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/RealCertificationSafetyInvocator.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 973,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/portal/PersonaWorkspaceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 961,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "certify.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 960,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/security/CapabilityAbuseDetectionEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 936,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/ApiGovernanceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 921,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/HostileFailureReproductionEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 912,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "sdk/public/PublicSdkPackageBuilder.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 908,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "plugins/hardcode-localization/HardcodedStringDetector.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 902,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/docs/DocumentationIntelligenceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 897,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "release/DocumentationIntelligenceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 897,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/portal/EnterpriseDocPortalEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 884,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/remediation/AIRemediationEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 875,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/DomainNeutralityVerifier.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 865,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/registry/UJArchitectureRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 852,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/reporting/ReportProfileEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 849,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/environment/universal_environment_matrix.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 837,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/certification/IncrementalComputationAtomicAssembler.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 836,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "release/DeveloperExperienceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 828,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/knowledge/SoftwareKnowledgeGraphEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 793,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/operations/EnterpriseCommandCenterEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 793,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/portal/BrowserTerminalServerEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 790,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/spec/StandardsRegistryEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 789,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/ProjectRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 786,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/defect_remediation_lifecycle.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 785,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/optimization/AdaptiveAssuranceOptimizer.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 784,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/ExecutionContext.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 772,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/traceability/AcceptanceCriteriaValidator.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 770,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/enterprise/EEOSEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 755,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/reporting/ReportStalenessDetector.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 752,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/spec/OSAPConformanceSuite.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 747,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/workflow/VisualWorkflowDesignerEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 746,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/trust/execution_reality_authority.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 735,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/dcp/DistributionControlPlane.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 720,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/operations/OperationalIntelligenceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 717,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/fabric/EnterpriseDataFabricEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 707,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/CertificationGateEvaluator.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 700,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/RegistryLifecycleManager.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 699,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "plugins/hardcode-localization/HardcodedStringLedger.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 696,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/certification/CertificationPipeline.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 695,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/target/RemoteGovernanceClient.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 693,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/release/SemanticLineageDecoupler.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 691,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/cor_lifecycle_integration_staleness.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 687,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/certification/bypass_regression_adversarial.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 684,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/reporting/DynamicWidgetRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 671,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/workflow/WorkflowEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 671,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/release/ProjectionAuthorityRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 669,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/reporting/ReportMetadataRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 667,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "client/RemoteGovernanceClient.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 649,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/runtime/NativeExecutionAssurance.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 648,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/release/ReleaseIdentityGraph.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 644,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/trust/KeyCeremonyOrchestrator.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 643,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/security/client_gating_bypass_penetration.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 640,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/certification/StaleReportDetector.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 637,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/real_resource_profiler.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 637,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/release/EvidenceAuthorityResolver.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 634,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/federation/federation_truthfulness.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 633,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/certification/CertificationTransaction.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 627,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/utcf/MultiLanguageParserEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 627,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/reporting/DynamicBrandingService.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 625,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/governance/execution_controller_safety.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 624,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/automation/certification_automation_control_plane.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 623,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "scripts/package_external_audit.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 621,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "SCRIPT"
+    },
+    {
+      "path": "tests/certification/atomic_report_stale_detection.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 621,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/plugins/PluginSandbox.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 620,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/intelligence/MerkleRepositoryIndex.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 619,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/two_phase_atomic_certification_benchmark.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 618,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/validation/RealityValidationEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 615,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/trust/LiveTrustOperationsSuite.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 612,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/TechnologyDetector.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 610,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "release/BrowserTerminalServerEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 608,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/certification/CertificationDecisionEnvelope.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 607,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/reports/HtmlDashboardGenerator.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 604,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/collaboration/EnterpriseCollaborationEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 600,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/stale_report_detector.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 595,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/docs/PlatformKnowledgeGraphEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 594,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/RegistryOrchestrator.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 591,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/scoring/DecomposableScoringEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 583,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/platform/PlatformDigitalTwinEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 581,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/environment/native_manual_execution.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 581,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/certification/RemediationConvergenceController.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 579,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/ci/CiReceiptAdapter.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 578,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/verification/CanonicalReleaseVerificationEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 578,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/real_certification_safety_invocator.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 577,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/certification/CertificationDecisionAuthority.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 575,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/simulation/SimulationLaboratoryEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 574,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/compression/stream_k_universal_installability.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 573,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/governance/ImmutableVerificationCacheEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 572,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/virtual_remediation_overlay.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 572,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/twin/DigitalTwinEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 570,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/AutonomousPolicyEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 569,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "bin/generate_demo_project.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 565,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "OTHER"
+    },
+    {
+      "path": "engine/knowledge/EnterpriseGraphEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 565,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/operations/CommandCenterServerEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 561,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/governance/static_safety_scanner.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 561,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/certification/execution_context_boundary.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 558,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/enterprise/EnterpriseCommandCenterEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 557,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/twin/InteractiveDigitalTwinEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 556,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/plugins/PluginRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 555,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/AgentSelectionGovernanceContract.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 554,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/twin/DigitalTwinExplorer.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 553,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/execution/ecaf_authorization.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 553,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/federation/air_roofers_product_integration.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 549,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/release/RemoteReconciliationEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 548,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/EfficiencyTelemetry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 547,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/UniversalChangeBaselineEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 547,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/portal/ExecutiveTrustCenter.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 547,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/governance/ApiContractEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 546,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/release/CanonicalSubjectRegistry.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 546,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/trust/TrustFabricGraph.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 544,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/federation/ScanCapabilityAdapter.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 542,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "client/LocalEvidenceHarvester.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 539,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/docs/DocumentationGovernanceEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 539,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/dry_run_remediation_graph.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 539,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/portal/DeveloperPortalEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 533,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/certification/ReportModelBuilder.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 532,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/migration/PlatformMigrationEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 531,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/observation/ExternalWorkspaceObserver.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 530,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/trust/DependencyAwareScheduler.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 530,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/execution_guard.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 529,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/ide/ide_package_authenticity.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 529,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/governance/RuntimeDomainInventory.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 528,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/ide/ProductionIdeAdapterSuite.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 527,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/security/cross_product_capability_enforcement.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 527,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/validation/ReproducibleAuditEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 524,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/certification/incremental_computation_atomic_assembler.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 524,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/governance/EditionEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 521,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/search/UniversalSearchEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 520,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/studio/GovernanceStudioEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 520,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/security/server_authoritative_capability.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 520,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/governance/AuditManifestEngine.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 517,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/kernel/UnifiedDomainModel.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 517,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/runtime/environment_route_resolution.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 517,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "engine/certification/AtomicBundleCommitter.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 514,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/release/CanonicalReleaseAuthority.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 510,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "engine/intelligence/ProofCarryingScanOptimizer.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 509,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "PRODUCTION"
+    },
+    {
+      "path": "tests/compliance/Phase4_Batch1b_Identity_Governance.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 509,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/runtime/phase4_product_polish.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 509,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    },
+    {
+      "path": "tests/certification/bounded_budget_dryrun_benchmark.test.js",
+      "extension": ".js",
+      "tracked": true,
+      "loc": 504,
+      "limit": 500,
+      "status": "VIOLATION",
+      "classification": "TEST"
+    }
+  ]
+}

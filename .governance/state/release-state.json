@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "stateId": "0eb317cea8df6e4094f62e0692aec1ba449978c7bdd8037e0c7318cda2a29ebd",
+  "capturedAt": "2026-09-20T06:36:03.211Z",
+  "certifiedSourceCommit": "7e50b5c73febfcc29045f8bd9a02ceaa069ded08",
+  "qualificationExecutionCommit": "ec9e1adf4d5430cd172c63d2d2bdd95c4e6a3b51",
+  "publicationCommit": "ec9e1adf4d5430cd172c63d2d2bdd95c4e6a3b51",
+  "repository": {
+    "head": "ec9e1adf4d5430cd172c63d2d2bdd95c4e6a3b51",
+    "tree": "1e6b4677936973fdb5acae13734c8121a7cc8820"
+  },
+  "source": {
+    "sourceTreeHash": "1e6b4677936973fdb5acae13734c8121a7cc8820"
+  },
+  "qualification": {
+    "executionCommit": "ec9e1adf4d5430cd172c63d2d2bdd95c4e6a3b51",
+    "streamCount": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0
+  },
+  "governance": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "security": {
+    "highVulnerabilities": 0,
+    "criticalVulnerabilities": 0
+  },
+  "localRemoteParity": false,
+  "preflight": true,
+  "publication": {
+    "status": "PENDING",
+    "publicationCommit": "ec9e1adf4d5430cd172c63d2d2bdd95c4e6a3b51",
+    "certifiedSourceCommit": "7e50b5c73febfcc29045f8bd9a02ceaa069ded08"
+  }
+}

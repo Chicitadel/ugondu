@@ -1,0 +1,39 @@
+schemaVersion: '2.0'
+repository:
+  name: certify
+  version: 1.0.0
+  commit: local-dev-commit
+  branch: main
+pipeline:
+  id: '97518'
+  started: '2026-07-18T00:06:01.407Z'
+  finished: '2026-07-18T00:06:01.410Z'
+build:
+  status: success
+  duration: 10s
+tests:
+  unit:
+    status: success
+    validUntil: '2026-07-19T00:06:01.409Z'
+security:
+  sast:
+    status: success
+    validUntil: '2026-07-19T00:06:01.409Z'
+  dependency_scan:
+    status: success
+    validUntil: '2026-07-19T00:06:01.409Z'
+artifacts:
+  checksum: 60d4a5475e49f48fe5722c5fe27262998819f6ac9abf4f9e7350bbee1bb24292
+promotion:
+  confidence: 1
+metadata:
+  generatedBy: NodeAdapter-1.0
+  engineVersion: 2.5.0
+  runner: local
+  provenance:
+    source: github.com/airroofers/certify
+provenance:
+  buildIdentity: 375f21bbb47f5e63de53a5e0f50251d6d157ba4520b911e29b39ca8f1b798e9f
+  evidenceIdentity: 567685edb07cc6adb56ed14751bcd2293ce8ca7101a158e3aa2ab0921ada2f4b
+  collectedAt: '2026-07-18T00:06:01.581Z'
+  collectorVersion: 2.5.0

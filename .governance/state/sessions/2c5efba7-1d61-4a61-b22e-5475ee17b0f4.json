@@ -1,0 +1,258 @@
+{
+  "sessionId": "2c5efba7-1d61-4a61-b22e-5475ee17b0f4",
+  "createdAt": "2026-08-20T03:17:29.982Z",
+  "actor": "CUSTOMER_CLIENT",
+  "targetContext": {
+    "subjectId": "subj_disappearance-fixture-1787195848898_ceec84e722ed",
+    "subjectType": "WORKSPACE",
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "environment": "client",
+    "revision": "fbf06871",
+    "branch": "main",
+    "policySource": "OUT_OF_TREE",
+    "sessionId": "2c5efba7-1d61-4a61-b22e-5475ee17b0f4",
+    "federationMode": "INDEPENDENT",
+    "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+    "hasInTreeGovernance": false,
+    "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+    "createdAt": "2026-08-20T03:17:29.981Z",
+    "metadata": {}
+  },
+  "targetDescriptor": {
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+    "subjectId": "subj_disappearance-fixture-1787195848898_ceec84e722ed",
+    "subjectType": "WORKSPACE",
+    "name": "@acme/payment-service",
+    "version": "1.2.0",
+    "description": "Acme Payment Settlement Microservice",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+    "branch": "main",
+    "revision": "unversioned",
+    "isClean": true,
+    "remoteUrl": null,
+    "manifests": {
+      "nodejs": {
+        "name": "@acme/payment-service",
+        "version": "1.2.0",
+        "scripts": [
+          "test"
+        ]
+      }
+    },
+    "buildSystem": "npm",
+    "tests": {
+      "hasTests": true,
+      "testDirs": [
+        "tests"
+      ],
+      "testConfigs": []
+    },
+    "structureSummary": {
+      "fileCount": 3,
+      "dirCount": 2,
+      "totalBytes": 326,
+      "languages": {
+        ".json": 1,
+        ".js": 2
+      }
+    },
+    "fingerprint": "c677ee58e21a28535be2855bbf245cc83fc11ad542c29ea1ab7e377757c9dd71",
+    "discoveredAt": "2026-08-20T03:17:29.777Z",
+    "metadata": {}
+  },
+  "session": {
+    "sessionId": "2c5efba7-1d61-4a61-b22e-5475ee17b0f4",
+    "status": "COMPLETED",
+    "targetContext": {
+      "subjectId": "subj_disappearance-fixture-1787195848898_ceec84e722ed",
+      "subjectType": "WORKSPACE",
+      "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+      "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+      "environment": "client",
+      "revision": "fbf06871",
+      "branch": "main",
+      "policySource": "OUT_OF_TREE",
+      "sessionId": "2c5efba7-1d61-4a61-b22e-5475ee17b0f4",
+      "federationMode": "INDEPENDENT",
+      "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+      "hasInTreeGovernance": false,
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "createdAt": "2026-08-20T03:17:29.981Z",
+      "metadata": {}
+    },
+    "startTime": 1787195849982,
+    "endTime": 1787195850197,
+    "evidenceCatalog": [
+      {
+        "id": "EVID-DISCOVER-1787195849990",
+        "requirementId": "REQ-TARGET-DISCOVERY",
+        "type": "TARGET_DISCOVERY",
+        "source": "EAORCS_OBSERVER",
+        "status": "VALID",
+        "data": {
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+          "subjectId": "subj_disappearance-fixture-1787195848898_ceec84e722ed",
+          "subjectType": "WORKSPACE",
+          "name": "@acme/payment-service",
+          "version": "1.2.0",
+          "description": "Acme Payment Settlement Microservice",
+          "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+          "branch": "main",
+          "revision": "unversioned",
+          "isClean": true,
+          "remoteUrl": null,
+          "manifests": {
+            "nodejs": {
+              "name": "@acme/payment-service",
+              "version": "1.2.0",
+              "scripts": [
+                "test"
+              ]
+            }
+          },
+          "buildSystem": "npm",
+          "tests": {
+            "hasTests": true,
+            "testDirs": [
+              "tests"
+            ],
+            "testConfigs": []
+          },
+          "structureSummary": {
+            "fileCount": 3,
+            "dirCount": 2,
+            "totalBytes": 326,
+            "languages": {
+              ".json": 1,
+              ".js": 2
+            }
+          },
+          "fingerprint": "c677ee58e21a28535be2855bbf245cc83fc11ad542c29ea1ab7e377757c9dd71",
+          "discoveredAt": "2026-08-20T03:17:29.777Z",
+          "metadata": {}
+        },
+        "hash": "5abb6516907b4cfb24f159b4fc069b1f91d2ed6bd1231c1b5772b194ab9a9504",
+        "timestamp": "2026-08-20T03:17:29.990Z"
+      },
+      {
+        "id": "EVID-REMOTE-AUDIT-1787195849995",
+        "requirementId": "REQ-REMOTE-AUDIT",
+        "type": "AUDIT_RESULT",
+        "source": "EAORCS_OBSERVER",
+        "status": "PASSED",
+        "data": {
+          "status": "PASSED",
+          "pass": true,
+          "mode": "REMOTE_EVIDENCE_EVALUATION",
+          "subjectId": "subj_disappearance-fixture-1787195848898_ceec84e722ed",
+          "targetRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+          "evidenceCount": 1,
+          "evidenceItems": [
+            {
+              "id": "EVID-DISCOVER-1787195849990",
+              "type": "TARGET_DISCOVERY",
+              "status": "VALID",
+              "hash": "5abb6516907b4cfb24f159b4fc069b1f91d2ed6bd1231c1b5772b194ab9a9504"
+            }
+          ],
+          "findings": [],
+          "summary": {
+            "totalChecks": 1,
+            "passedChecks": 1,
+            "failedChecks": 0
+          }
+        },
+        "hash": "1015d8c10089b5e4b15501389e02a34e758efd92a71a238e1d099b86b6b4035b",
+        "timestamp": "2026-08-20T03:17:29.996Z"
+      }
+    ],
+    "findings": [],
+    "metrics": {
+      "totalChecks": 2,
+      "passedChecks": 2,
+      "failedChecks": 0,
+      "warnings": 0
+    },
+    "policyResolution": {
+      "policySource": "OUT_OF_TREE",
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "hasInTreeGovernance": false,
+      "evaluatedRules": []
+    },
+    "auditTrail": [
+      {
+        "sequence": 0,
+        "timestamp": 1787195849982,
+        "action": "SESSION_INITIALIZED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "subjectId": "subj_disappearance-fixture-1787195848898_ceec84e722ed",
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\disappearance-fixture-1787195848898",
+          "policySource": "OUT_OF_TREE"
+        },
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "563049cc62279aaa106aa43425da16818db54ec61757eaed126034384343225c"
+      },
+      {
+        "sequence": 1,
+        "timestamp": 1787195849982,
+        "action": "SESSION_STARTED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "startTime": 1787195849982,
+          "reason": "REMOTE_REST_SESSION_INIT"
+        },
+        "prevHash": "563049cc62279aaa106aa43425da16818db54ec61757eaed126034384343225c",
+        "hash": "5f79e151d849dc9475110bdd3a01f3aec201035490670acbc9bf740f34d3b59f"
+      },
+      {
+        "sequence": 2,
+        "timestamp": 1787195849990,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "evidenceId": "EVID-DISCOVER-1787195849990",
+          "requirementId": "REQ-TARGET-DISCOVERY",
+          "hash": "5abb6516907b4cfb24f159b4fc069b1f91d2ed6bd1231c1b5772b194ab9a9504"
+        },
+        "prevHash": "5f79e151d849dc9475110bdd3a01f3aec201035490670acbc9bf740f34d3b59f",
+        "hash": "0e84cd626ed78f528e4df55b6f8afe537508bc894f630eb2893c0ef906bbadd5"
+      },
+      {
+        "sequence": 3,
+        "timestamp": 1787195849996,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "evidenceId": "EVID-REMOTE-AUDIT-1787195849995",
+          "requirementId": "REQ-REMOTE-AUDIT",
+          "hash": "1015d8c10089b5e4b15501389e02a34e758efd92a71a238e1d099b86b6b4035b"
+        },
+        "prevHash": "0e84cd626ed78f528e4df55b6f8afe537508bc894f630eb2893c0ef906bbadd5",
+        "hash": "3e04fe7170afec28e323013ee80c6f7b7d6580ebddf73706a61d053f602465e0"
+      },
+      {
+        "sequence": 4,
+        "timestamp": 1787195850197,
+        "action": "SESSION_COMPLETED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "durationMs": 215,
+          "metrics": {
+            "totalChecks": 2,
+            "passedChecks": 2,
+            "failedChecks": 0,
+            "warnings": 0
+          },
+          "reason": "SERVER_SHUTDOWN"
+        },
+        "prevHash": "3e04fe7170afec28e323013ee80c6f7b7d6580ebddf73706a61d053f602465e0",
+        "hash": "cd217f97e7a8198a24d32bfdf6777593b6c5829afb4e55cb69c8abcd31ebad95"
+      }
+    ],
+    "zeroTargetPollutionVerified": true
+  },
+  "certification": null,
+  "savedAt": "2026-08-20T03:17:30.198Z"
+}

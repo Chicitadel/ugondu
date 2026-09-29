@@ -1,0 +1,66 @@
+# EAORCS CERTIFICATION REPORT: REP-5A317E1F262D
+**Classification**: GOVERNMENT | ENTERPRISE | RESTRICTED  
+**Generated At**: 2026-09-12T11:45:15.492Z  
+**Generator Version**: 2026.3.1-LTS  
+**Atomicity Guarantee**: 100% Atomic Commit  
+
+---
+
+## 1. Executive Summary
+- **Report ID**: `REP-5A317E1F262D`
+- **Transaction ID**: `TX-5A317E1F262D`
+- **Certification Run ID**: `TX-1789213515483`
+- **Target Fingerprint**: `2960546de01901c46d12065a655695dace9fbdac1b9d653bd22dc39966988c7e`
+- **Certification Decision**: **APPROVED**
+- **Total Evaluated Gates**: 12
+- **Total Evidence Entries**: 1
+- **Total Findings**: 0
+
+---
+
+## 2. Target Snapshot & Identity
+- **Lifecycle ID**: `LIFECYCLE-CERT-1789213515483`
+- **Execution ID**: `TX-1789213515483`
+- **Input Snapshot Hash**: `75d66832d0c742dad85ffa7967a9c302a14c10a6d57d335897c368eb275ec091`
+- **Final Snapshot Hash**: `57861dd7f0755d4e45ce88f0e9518a256e6eb697889008f38008988f79704d0d`
+
+---
+
+## 3. Cryptographic Report Manifest
+```json
+{
+  "reportId": "REP-5A317E1F262D",
+  "transactionId": "TX-5A317E1F262D",
+  "certificationRunId": "TX-1789213515483",
+  "targetFingerprint": "2960546de01901c46d12065a655695dace9fbdac1b9d653bd22dc39966988c7e",
+  "subjectDigest": "d46e1e4d3e3e3a38e82a2a9153ceb86041d93c74568f813c2cfb31651ede1e92",
+  "inputSnapshotHash": "75d66832d0c742dad85ffa7967a9c302a14c10a6d57d335897c368eb275ec091",
+  "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+  "evidenceRootHash": "37dc2af8ec662be9ae597231ccad5d3b052bc49e5cf0f3e066402ba349d78624",
+  "findingsRootHash": "4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4",
+  "reportModelHash": "43128c8443bfa9ea6cceeab267c8be96a9258e54b9d7492e570ecac154eff770",
+  "generatorVersion": "2026.3.1-LTS",
+  "generatedAt": "2026-09-12T11:45:15.492Z",
+  "atomic": true,
+  "decision": "APPROVED",
+  "snapshotHash": "57861dd7f0755d4e45ce88f0e9518a256e6eb697889008f38008988f79704d0d",
+  "sourceTreeHash": "76b2b5f28e602f734900bf330465ebf551c2c9abede644732bdb3e8676761570",
+  "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+}
+```
+
+---
+
+## 4. ECAF Authorization
+*No ECAF Authorization Receipt provided.*
+
+---
+
+## 5. Audit Provenance
+- **Report Model Hash**: `43128c8443bfa9ea6cceeab267c8be96a9258e54b9d7492e570ecac154eff770`
+- **Ledger Head Hash**: `6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f`
+- **Evidence Root Hash**: `37dc2af8ec662be9ae597231ccad5d3b052bc49e5cf0f3e066402ba349d78624`
+- **Findings Root Hash**: `4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4`
+- **Scores Root Hash**: `3188f91d318a4d35cc9d600f022bc420dadbba14a78dce9571d86ce87c071060`
+- **Frozen At**: `2026-09-12T11:45:15.492Z`

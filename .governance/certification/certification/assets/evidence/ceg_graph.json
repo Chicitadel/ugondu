@@ -1,0 +1,72 @@
+[
+  {
+    "nodeId": "node-arch",
+    "runnerId": "architecture-runner",
+    "name": "Architecture & Modularity Real Execution Verification",
+    "dependencies": [],
+    "priority": 100,
+    "timeoutMs": 30000,
+    "retryCount": 0,
+    "requiredCapabilities": [],
+    "status": "PASSED",
+    "assignedThread": "worker-thread-1",
+    "workerId": "worker-thread-1",
+    "startTime": "2026-07-24T07:44:10.133Z",
+    "endTime": "2026-07-24T07:44:10.139Z",
+    "executionTimeMs": 6
+  },
+  {
+    "nodeId": "node-api",
+    "runnerId": "api-contract-runner",
+    "name": "API Contract & OpenAPI Conformance Verification",
+    "dependencies": [
+      "node-arch"
+    ],
+    "priority": 85,
+    "timeoutMs": 45000,
+    "retryCount": 1,
+    "requiredCapabilities": [
+      "api"
+    ],
+    "status": "PASSED",
+    "assignedThread": "worker-thread-2",
+    "workerId": "worker-thread-2",
+    "startTime": "2026-07-24T07:44:10.134Z",
+    "endTime": "2026-07-24T07:44:10.139Z",
+    "executionTimeMs": 5
+  },
+  {
+    "nodeId": "node-sec",
+    "runnerId": "security-runner",
+    "name": "Security & OWASP Probe Verification",
+    "dependencies": [
+      "node-api"
+    ],
+    "priority": 80,
+    "timeoutMs": 60000,
+    "retryCount": 0,
+    "requiredCapabilities": [],
+    "status": "PASSED",
+    "assignedThread": "worker-thread-3",
+    "workerId": "worker-thread-3",
+    "startTime": "2026-07-24T07:44:10.135Z",
+    "endTime": "2026-07-24T07:44:10.139Z",
+    "executionTimeMs": 4
+  },
+  {
+    "nodeId": "node-self-val",
+    "runnerId": "framework-integrity-runner",
+    "name": "Framework Self-Validation & Integrity Check",
+    "dependencies": [],
+    "priority": 1,
+    "timeoutMs": 15000,
+    "retryCount": 0,
+    "requiredCapabilities": [],
+    "status": "PASSED",
+    "assignedThread": "worker-thread-4",
+    "workerId": "worker-thread-4",
+    "startTime": "2026-07-24T07:44:10.136Z",
+    "endTime": "2026-07-24T07:44:10.140Z",
+    "executionTimeMs": 4
+  }
+]

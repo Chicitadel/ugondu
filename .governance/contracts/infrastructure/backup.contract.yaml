@@ -1,0 +1,15 @@
+contract_id: INFRA-BACKUP-001
+type: infrastructure_contract
+name: Backup and Recovery Contract
+version: 1.0.0
+status: active
+description: Governance for asset backup and disaster recovery.
+
+requirements:
+  strategy:
+    frequency: "daily"
+    retention: "90 days"
+    immutability: true
+  recovery:
+    rto: "1 hour"
+    rpo: "24 hours"

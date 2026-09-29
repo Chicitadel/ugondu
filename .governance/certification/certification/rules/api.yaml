@@ -1,0 +1,10 @@
+domain: API
+rules:
+  - name: HealthEndpoint
+    type: APIResponse
+    severity: High
+    assert: "status == 200 AND responseTime < 500"
+    outcomes:
+      success: PASS
+      failure: FAIL
+      missing: INCONCLUSIVE

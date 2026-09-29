@@ -1,0 +1,32 @@
+# Standard Pipeline: Evidence Emitter
+# Location: .governance/ci/evidence.yml
+
+description: "Translates aggregated pipeline outputs into the Canonical Evidence Schema and submits to the Collector"
+
+inputs:
+  build_status:
+    required: true
+  security_status:
+    required: true
+  security_ttl:
+    required: true
+  adapter:
+    description: "The ecosystem adapter (e.g., NodeAdapter, PythonAdapter)"
+    required: true
+
+steps:
+  - name: Run Capability Adapter
+    run: |
+      # The adapter translates the raw CI outputs into the strict YAML schema
+      ./adapters/${{ inputs.adapter }}.sh generate-payload
+
+  - name: Submit to Collector
+    run: |
+      curl -X POST https://governance.internal/api/v1/collector \
+        -H "Content-Type: application/yaml" \
+        --data-binary @evidence.yml
+        
+  - name: Await Collector Acknowledgment
+    run: |
+      # Fails the pipeline if the Collector rejects the schema (e.g., missing TTL)
+      check_collector_status()

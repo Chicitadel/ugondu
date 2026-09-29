@@ -1,0 +1,11 @@
+{
+  "snapshotId": "snapshot-2026-08-02_221407",
+  "timestamp": "2026-08-02T20:14:07.443Z",
+  "reason": "Pre-clean-audit security snapshot",
+  "operator": "CLEAN_AUDIT_RUNNER",
+  "archiveFileName": "snapshot-2026-08-02_221407.tgz",
+  "signatureAlgorithm": "Ed25519",
+  "signature": "f47114e26d4c3f5c04544ee4ae4e1ce1aba4ff39fe7b39adaeb3c11427861099f7c34cf59311d6a7f7c4569b37083818e3e94adf987bf8173fc2da6a2301930d",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAai1oOXyUWre/Nb0Ob3M9IYUeZprM6LY4CiamMsoIcAg=\n-----END PUBLIC KEY-----\n",
+  "checksum": "cf5b293578e93f8dd174d4ccf4c92907ebfd0d6717b7e334a46d52e9e51bfd58"
+}

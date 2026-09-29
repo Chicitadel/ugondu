@@ -1,0 +1,5 @@
+name: sovereign
+description: Sovereign hosting and audit trail rules.
+rules:
+  - require-audit-trail
+  - require-domestic-hosting

@@ -1,0 +1,4 @@
+name: runtime
+description: Runtime safety checks and performance guardrails.
+rules:
+  - require-strict-types

@@ -1,0 +1,73 @@
+# /******************************************************************************
+#  * Project        : Enterprise Architecture Operating System & Repository Audit Engine (EAORCS)
+#  * Module         : EAORCS Product Definition
+#  * File           : product.definition.yaml
+#  * Version        : 2026.3.1-LTS
+#  * Author         : Enterprise Architecture Board & Ujomor Platform Engineering
+#  * Organization   : Air Roofers SASU / Ujomor Engineering
+#  * Created Date   : 2026-08-10
+#  * Last Modified  : 2026-08-10
+#  * Classification : GOVERNMENT | ENTERPRISE | RESTRICTED
+#  *
+#  * Governance:
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - UAIGOS / SEOS Baseline 1.0 Certified
+#  *
+#  * Standards:
+#  * - ISO 27001
+#  * - SOC 2 Type II
+#  * - OWASP ASVS v4
+#  * - NIST SP 800-207 (Zero Trust Architecture)
+#  *
+#  * Copyright (c) 2026 Air Roofers SASU / Ujomor Engineering. All Rights Reserved.
+#  ******************************************************************************/
+
+product:
+  id: eaorcs
+  name: Enterprise Architecture Operating System & Repository Audit Engine
+  version: 2026.3.1-LTS
+  organization: Air Roofers SASU / Ujomor Engineering
+  classification: GOVERNMENT | ENTERPRISE
+  baseline: UAIGOS-3.0.0 / SEOS Baseline 1.0
+
+product_boundary:
+  description: Continuous repository intelligence, audit engine, documentation drift detection, and autonomous remediation laboratory.
+  architecture_pattern: MODULAR_MONOLITH
+  sub_engines:
+    - doc-intel: AST parser, documentation generator, digital twin spec validator
+    - gov-council: ADR compliance checker, schema contract verifier, finding generator
+    - fix-lab: Sandbox code remediator, AST diff boundary verifier, automated test runner
+
+federation_adapters:
+  iam:
+    contract: "@airroofers/iam-sdk"
+    endpoint: "https://iam.airroofers.eu"
+  aerobill:
+    contract: "@airroofers/aerobill-sdk"
+    endpoint: "https://billing.airroofers.eu"
+  ai:
+    contract: "@airroofers/ai-client"
+    endpoint: "https://ai.airroofers.eu"
+
+governance:
+  framework: UAIGOS v3.0.0 / SEOS Baseline 1.0
+  standards:
+    - ISO 27001
+    - SOC 2 Type II
+    - OWASP ASVS v4
+    - NIST SP 800-207
+  architecture_freeze: true
+  protocol_freeze: true
+  security_reviewed: true
+  bounded_contexts_enforced: true
+
+certification:
+  decision: CERTIFIED_LTS
+  certification_engine: "certify.js"
+  gate_status:
+    foundational: PASSED
+    engineering: PASSED
+    operational: PASSED
+    production: READY
+

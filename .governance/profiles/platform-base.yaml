@@ -1,0 +1,7 @@
+profile: platform-base
+description: Core platform foundational rules.
+includes:
+  - platform-core
+  - ui
+  - localization
+  - runtime

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0.0",
+  "lastUpdated": "2026-08-17T11:28:47.112Z",
+  "engine": "Air Roofers Plugin Governance Engine",
+  "version": "2026.3.1-LTS",
+  "pluginCount": 1,
+  "plugins": {
+    "cap.plugin.analytics": {
+      "pluginId": "cap.plugin.analytics",
+      "version": "1.0.0",
+      "verification": {
+        "status": "VERIFIED",
+        "inspection": {
+          "status": "INSPECTED",
+          "magic": "0x554A504B",
+          "format": "UJPKG_V2_FROZEN",
+          "packageClass": "UJPKG-PLUGIN",
+          "capabilityId": "cap.plugin.analytics",
+          "version": "1.0.0",
+          "licenseTier": "ENTERPRISE",
+          "issuer": "UJOMOR Governance Directorate",
+          "legalOwnership": {
+            "originator": "UJOMOR Governance Directorate",
+            "owner": "UJOMOR Governance Directorate",
+            "licenseHolder": "Authorized Enterprise Licensee",
+            "ipHolder": "UJOMOR Intellectual Property Trust",
+            "customer": "Enterprise Client",
+            "deploymentRights": "RESTRICTED_ON_PREM_OR_PRIVATE_CLOUD",
+            "modificationRights": "PROHIBITED_WITHOUT_GOVERNANCE_CLEARANCE",
+            "transferRights": "NON_TRANSFERABLE",
+            "expiration": "2036-12-31T23:59:59Z",
+            "supportContract": "ENTERPRISE_L3_SLA"
+          },
+          "integrityHash": "0c21f5d5320cdce259e6dccbcf172db6435e47ed8d3251321a9406b6f3a1e105",
+          "timestamp": "2026-08-17T11:28:46.910Z",
+          "hasValidEd25519Signature": true
+        },
+        "ed25519SignatureVerified": true,
+        "payloadIntegrityVerified": true,
+        "licenseClearanceVerified": true
+      },
+      "sandboxPolicy": {
+        "networkAllowed": false,
+        "fileAccess": "RESTRICTED"
+      },
+      "manifest": {
+        "contractVersion": "1.0.0",
+        "capabilityDescriptor": {
+          "pluginId": "cap.plugin.analytics",
+          "version": "1.0.0",
+          "name": "cap.plugin.analytics",
+          "capabilities": [
+            "cap.plugin.analytics"
+          ]
+        },
+        "permissionDeclaration": {
+          "sandboxMode": "RESTRICTED",
+          "allowedNetworkDomains": [],
+          "allowedFilesystemPaths": [
+            "tmp",
+            "logs",
+            "scratch"
+          ]
+        },
+        "executionHooks": [
+          {
+            "hookStage": "EXECUTE",
+            "entrypoint": "execute"
+          }
+        ]
+      },
+      "contents": {
+        "pluginCode": "ANALYTICS_DATA"
+      },
+      "status": "ACTIVE",
+      "activatedAt": "2026-08-17T11:28:47.110Z"
+    }
+  }
+}

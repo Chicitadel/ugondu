@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-B02",
+  "description": "0 this.timeout() calls in tests/",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:42.450Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var cp=require('child_process');try{var o=cp.execFileSync('git',['grep','-rl','this.timeout(','--','tests/'],{cwd:process.cwd(),encoding:'utf8'}).trim();if(o){process.stdout.write('FAIL: this.timeout() found in: '+o.substring(0,200));process.exit(1);}}catch(e){if(e.status===1){process.stdout.write('PASS: F-B02 zero this.timeout() calls in tests/');}else{process.stdout.write('FAIL: git grep error: '+e.message.substring(0,100));process.exit(1);}}"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "33aa1f20c1aae2ab75b6e28b354128a6078b2f9ef037639cee3e6050e321c8df",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-B02 zero this.timeout() calls in tests/",
+  "executionEvidenceDigest": "81318217bb098dd3cee787d4440cb825d885ad99c95010b5a8ce0d686e624fe5",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

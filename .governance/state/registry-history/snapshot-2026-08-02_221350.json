@@ -1,0 +1,11 @@
+{
+  "snapshotId": "snapshot-2026-08-02_221350",
+  "timestamp": "2026-08-02T20:13:50.207Z",
+  "reason": "Stream 2 Automated Qualification Test",
+  "operator": "QUALIFICATION_RUNNER",
+  "archiveFileName": "snapshot-2026-08-02_221350.tgz",
+  "signatureAlgorithm": "Ed25519",
+  "signature": "1d29ade467c453ecd3d74b9a6144898d6176130454ecf7900936397b428ccb5ca68b99b0ac1bd96a174ce558e6c37d3eb1b1b3c50eb744987cdc3c5eaeef6c02",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAA8yr9uhJGYbhqAzgFxtwdUfshYme4IIN0n9e0RnurzM=\n-----END PUBLIC KEY-----\n",
+  "checksum": "9b524f7295e21e3f24738fa90dea70ba9450c0ef0445b188d84c2460c7f9460e"
+}

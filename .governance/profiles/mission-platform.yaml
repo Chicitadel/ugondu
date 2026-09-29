@@ -1,0 +1,6 @@
+profile: mission-platform
+description: Mission platform standards.
+includes:
+  - platform-base
+  - mission
+  - sovereign

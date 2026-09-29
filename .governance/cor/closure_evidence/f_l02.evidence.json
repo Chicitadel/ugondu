@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-L02",
+  "description": "skip-worktree guard structurally outside try/catch — in bare BLOCK 1",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:41.867Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var s=require('fs').readFileSync('engine/providers/source/LocalWorkspaceSourceProvider.js','utf8');var lines=s.split('\\n');var b1s=lines.findIndex(function(l){return l.indexOf('BLOCK 1: Physical Workspace Integrity')>=0;});var b1e=lines.findIndex(function(l){return l.indexOf('END BLOCK 1')>=0;});var sIdx=lines.findIndex(function(l){return l.indexOf('SKIP_WORKTREE_CERTIFICATION_FORBIDDEN')>=0;});var lIdx=lines.findIndex(function(l){return l.indexOf('lstatSync')>=0;});if(sIdx<b1s||sIdx>b1e){process.stdout.write('FAIL: throw not inside BLOCK1 at L'+(sIdx+1));process.exit(1);}if(sIdx>=lIdx){process.stdout.write('FAIL: throw not before lstat');process.exit(1);}process.stdout.write('PASS: F-L02 SKIP_WORKTREE at L'+(sIdx+1)+' inside BLOCK1 L'+(b1s+1)+'-L'+(b1e+1));"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "049c47009ff4ddbab406c22a37c86eeb5f91252b83f349ce0f8e51cbd6fd30c7",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-L02 SKIP_WORKTREE at L77 inside BLOCK1 L45-L131",
+  "executionEvidenceDigest": "a5052a0918e6e1f7c0938b0f70609167f02ba6ea4c338a4bbdb7860a0159a639",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

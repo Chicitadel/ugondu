@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "2.0.0",
+  "decisionId": "DEC-355030B3D3CBE962",
+  "lifecycleId": "LIFECYCLE-STREAM-X-1789228835251",
+  "executionId": "EXE-STREAM-X-1789228835251",
+  "subject": {
+    "repository": "eaorcs",
+    "commit": "74cba552b692a7f5282238c50ad0ab270fc7b64c",
+    "tree": "3e020c92784b69bc0bb2908621626ec361109edfbb3078e7a142cb40e71f6654"
+  },
+  "qualification": {
+    "executionCommit": "74cba552b692a7f5282238c50ad0ab270fc7b64c",
+    "executionTree": "3e020c92784b69bc0bb2908621626ec361109edfbb3078e7a142cb40e71f6654",
+    "streams": 30,
+    "passed": 30,
+    "failed": 0,
+    "skipped": 0
+  },
+  "gates": {
+    "physicalQualification": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "governance": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "traceability": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "hardcodeLocalization": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "pluginIntegrity": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "domainZero": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "federatedIntegration": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "automationSafety": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "manualOperation": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "federationNonOverlap": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "commercialCapabilitySecurity": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    },
+    "physicalArchitecture": {
+      "passed": true,
+      "status": "PASSED",
+      "score": 100
+    }
+  },
+  "ledger": {
+    "state": "EVIDENCE_SEALED",
+    "digest": "a4b251fbc3ccd00b8381d9dd532237a66a57c3c4287f416e0c206e2ae121321b",
+    "evidenceRootDigest": "a4b251fbc3ccd00b8381d9dd532237a66a57c3c4287f416e0c206e2ae121321b",
+    "entriesCount": 0
+  },
+  "publication": {
+    "commit": null,
+    "tree": null
+  },
+  "authorityBindings": {
+    "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+    "gateDefinitionDigest": "bf478464e0e16004dbc6d944b590b98f1b73305ff2fe5fa2c2a3ff95f0c9c4ce",
+    "decisionRuleDigest": "4a2b57e765871287f28f9ecd1f94e57dfa2f7e374b1ade8c62f33d110f2ea501",
+    "evidenceRootDigest": "a4b251fbc3ccd00b8381d9dd532237a66a57c3c4287f416e0c206e2ae121321b"
+  },
+  "policyDigest": "f12b757778aa23a12c9e088e78a742e869160026fd12dbb14f3f67459832b257",
+  "gateDefinitionDigest": "bf478464e0e16004dbc6d944b590b98f1b73305ff2fe5fa2c2a3ff95f0c9c4ce",
+  "decisionRuleDigest": "4a2b57e765871287f28f9ecd1f94e57dfa2f7e374b1ade8c62f33d110f2ea501",
+  "evidenceRootDigest": "a4b251fbc3ccd00b8381d9dd532237a66a57c3c4287f416e0c206e2ae121321b",
+  "decision": "APPROVED",
+  "evaluatedAt": "2026-09-12T16:00:35.388Z",
+  "envelopeDigest": "9ce61c3a225205e36f5e7420cf2c8e20369c94b16d913129b190bdbaf0661fd5"
+}

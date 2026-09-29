@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "18_of_18_pass",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "bb547acd01e5f207f8b8d16f1d9553fb265ff801",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "tests/certification/bypass_regression_adversarial.test.js"
+  ],
+  "remediationCommit": "9e5cad039ef0d9dd301c6912d20f66d40ec8d337",
+  "verificationCommand": "npx jest --testNamePattern='Case 16' (PASS)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-T01"
+}

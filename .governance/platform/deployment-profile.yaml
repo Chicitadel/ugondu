@@ -1,0 +1,13 @@
+profiles:
+  shared_host:
+    database: mysql
+    storage: MysqlStore
+    telemetry: enabled
+  vps:
+    database: postgres
+    storage: PostgresStore
+    telemetry: enabled
+  docker:
+    database: sqlite
+    storage: FilesystemStore
+    telemetry: disabled

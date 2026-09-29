@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "BASELINE_LOCAL_STATE",
+  "timestamp": "2026-08-16T09:03:00.000Z",
+  "gitHead": "e8b7592fb482507ed601cbfa58765c8f4543730b",
+  "treeHash": "48bced90b216d7bde745515903cc7e060ce9691b4fa4439e095600e29fe9275b",
+  "dirtyFiles": [
+    ".audit/AUDIT_STATE.md",
+    ".governance/cor/qualification-cache-preflight.json",
+    ".governance/evidence/final-release-receipt.json",
+    "docs/api_governance_report.md",
+    "product_readiness_certificate.json"
+  ],
+  "verification": {
+    "allDirtyFilesVerifiedEvidenceOnly": true
+  },
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED",
+  "contentDigest": "0a469f06d35089a7bda4c7a12ee5261ada6140717e6220fed1292591c9edd87f"
+}

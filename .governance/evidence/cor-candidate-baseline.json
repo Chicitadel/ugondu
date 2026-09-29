@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "COR_CANDIDATE_BASELINE",
+  "capturedAt": "2026-08-17T12:14:42.797Z",
+  "candidateHEAD": "ecf4b15366b3fdbcf275045fe008a2b82397cce0",
+  "candidateTree": "2036f3f9c92cf7890ec3b954f368ee3395e22d1d9eee0816d7ace021a9a980b1",
+  "repositoryParameters": {
+    "productName": "EAORCS",
+    "version": "2026.3.1-LTS",
+    "branch": "main",
+    "remoteOrigin": "git@github.com:ujomor/eaorcs.git",
+    "remoteParity": true
+  },
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED"
+}

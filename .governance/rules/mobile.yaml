@@ -1,0 +1,4 @@
+name: mobile
+description: Mobile-specific architectural rules.
+rules:
+  - require-offline-sync

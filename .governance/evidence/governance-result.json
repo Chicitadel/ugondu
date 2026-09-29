@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "type": "GOVERNANCE_RESULT",
+  "certificationStatus": "CERTIFIED",
+  "total": 372,
+  "passed": 372,
+  "failed": 0,
+  "suites": 39,
+  "corMasterSuite": {
+    "streams": 30,
+    "passed": 30,
+    "failed": 0
+  },
+  "waveCompletion": {
+    "wave0": "COMPLETE",
+    "wave1": "COMPLETE",
+    "wave2": "COMPLETE",
+    "wave3": "COMPLETE",
+    "wave4": "COMPLETE",
+    "wave5": "COMPLETE"
+  },
+  "finalGateDecision": "APPROVED",
+  "rawEvidence": "COR_CERTIFIED_GA_READY",
+  "valid": true,
+  "certifiedAt": "2026-09-20T06:36:37.059Z",
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED"
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0.0",
+  "title": "Wave 5 Streams AC, AR, AS, AT, AU Execution Receipt",
+  "executedAt": "2026-09-15T10:04:15.851Z",
+  "result": {
+    "allPassed": true,
+    "testsPassed": 5,
+    "totalTests": 5,
+    "streams": [
+      {
+        "stream": "AC",
+        "status": "PASSED",
+        "detail": "Exact digests computed for PluginContract.js and index.js",
+        "digests": {
+          "PluginContract.js": "d674878c8f6c1d132a91027756cf50ed66011460d50563459faa813243969175",
+          "index.js": "867fc0e1bb58ac95484441e7a2c48c70d1e547cfe547ca3a8aef831496975753"
+        }
+      },
+      {
+        "stream": "AR",
+        "status": "PASSED",
+        "detail": "IDE/CLI API Contract Verified"
+      },
+      {
+        "stream": "AS",
+        "status": "PASSED",
+        "detail": "Plugin Certification Integration Test completed."
+      },
+      {
+        "stream": "AT",
+        "status": "PASSED",
+        "detail": "Mutation resulted in CERTIFICATE_INVALIDATED"
+      },
+      {
+        "stream": "AU",
+        "status": "PASSED",
+        "detail": "COR executed twice, second run reused cache."
+      }
+    ]
+  },
+  "authority": "Systems Engineering & Security Governance Authority / Ujomor Systems"
+}

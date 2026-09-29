@@ -1,0 +1,74 @@
+# ******************************************************************************
+# * Project        : EAORCS v5.1 / Air Roofers Platform Ecosystem
+# * Module         : Unified Parity Gate Policy Contract
+# * File           : .governance/contracts/parity-gate-policy.yaml
+# * Version        : 2026.3.1-LTS
+# * Author         : Systems Engineering & Security Governance Authority
+# * Organization   : Ujomor Systems & Enterprise Governance
+# * Classification : GOVERNMENT | ENTERPRISE | RESTRICTED
+# * Standards      : ISO 27001 | SOC 2 | OWASP ASVS | NIST SP 800-161
+# * Copyright (c) 2026 Ujomor Systems & Enterprise Governance
+# * All Rights Reserved.
+# ******************************************************************************
+
+schemaVersion: "1.0.0"
+policyId: "PARITY-GATE-POLICY-001"
+policyName: "Unified Atomic SHA Parity Gate Policy"
+effectiveDate: "2026-08-16"
+classification: "GOVERNMENT | ENTERPRISE | RESTRICTED"
+
+principle:
+  statement: "SHA parity must never exist as an error state. All evidence projections
+    are structurally bound to the live repository HEAD at all times through mandatory
+    atomic orchestration. No publication, commit, or governance pass is permitted
+    while any projection is stale."
+
+gates:
+  - id: pre-governance-parity-gate
+    trigger: before_any_governance_check
+    script: scripts/unified_parity_gate.js
+    failMode: FAIL_CLOSED
+    description: Re-binds all 17 registered projections to live HEAD before governance suite runs
+
+  - id: post-governance-parity-seal
+    trigger: after_governance_pass
+    script: scripts/capture_release_state.js
+    failMode: FAIL_CLOSED
+    description: Re-seals remote-ci-receipt and current-head-capture to the governance-pass HEAD
+
+  - id: pre-commit-parity-gate
+    trigger: before_evidence_commit
+    script: scripts/unified_parity_gate.js
+    failMode: FAIL_CLOSED
+    description: Must pass 17/17 before any evidence commit is permitted
+
+  - id: post-push-parity-verification
+    trigger: after_remote_push
+    script: scripts/unified_parity_gate.js
+    failMode: FAIL_CLOSED
+    description: Verifies remote HEAD matches all local projections after push
+
+remediationSteps:
+  - step: 1
+    action: "node scripts/capture_release_state.js"
+    output: "Rebinds remote-ci-receipt.json, current-head-capture.json, release-state.json"
+  - step: 2
+    action: "node scripts/regenerate_cert_artifact.js"
+    output: "Rebinds EAORCS-CERT-2026.3.1-LTS.json, final-release-receipt.json, post-publication-attestation.json"
+  - step: 3
+    action: "node scripts/reconcile_shas.js"
+    output: "Reconciles all cross-surface SHA fields and signs with Ed25519"
+  - step: 4
+    action: "node scripts/unified_parity_gate.js"
+    output: "Validates 17/17 projections match HEAD — must be 17/17 before proceeding"
+
+zeroParityDefinition:
+  description: "A system state where ZERO projections are stale relative to the live git HEAD.
+    This is the only valid operating state. Any deviation triggers automatic remediation."
+  requiredProjectionCount: 17
+  acceptableStaleCount: 0
+  acceptableSyntheticCount: 0
+  acceptableMissingCount: 0
+  acceptableRoleMismatchCount: 0
+  acceptableHeadMismatchCount: 0
+  enforcementMode: FAIL_CLOSED

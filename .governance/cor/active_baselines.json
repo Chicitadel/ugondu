@@ -1,0 +1,101 @@
+{
+  "registryVersion": 10,
+  "registryDigest": "bd1eec6a39c4e61fe5d6da279d506c7982166a403ae56d4ee9f5a2e2adf11622",
+  "previousRegistryDigest": "5a5be88252f2b410f1e832346440858ef3ec1ca15ebca975427acab46f9bd189",
+  "createdByTransaction": "TX-1789448777018",
+  "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+  "baselineEntriesDigest": "88aec9386b0f47b74b93c75b093d0e28157922f152aba2e749e7e649ade8c8d6",
+  "entries": [
+    {
+      "baselineId": "CERTIFICATION_EXECUTION_AUTHORITY",
+      "protectionClass": "EVOLVABLE",
+      "status": "RATIFIED",
+      "version": "v10",
+      "dependencies": [],
+      "ratifiedByTransaction": "TX-1789448777018",
+      "physicalManifestDigest": "aa00e8fa7769f096e917dde76ad674beb5616752208aeee335befa8af3313688",
+      "subjectDigest": "171182ece5878eaca4b724306fcc5902f99076c1bd4a3aa5b6f91ff822f68861",
+      "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+      "sourceTreeDigest": "363abac0288915cd0dc6a0e7013cf8f089bb035b2b61ec53868887c6d06a8ec4",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8"
+    },
+    {
+      "baselineId": "CERTIFICATION_SNAPSHOT_FREEZE",
+      "protectionClass": "EVOLVABLE",
+      "status": "RATIFIED",
+      "version": "v10",
+      "dependencies": [],
+      "ratifiedByTransaction": "TX-1789448777018",
+      "physicalManifestDigest": "aa00e8fa7769f096e917dde76ad674beb5616752208aeee335befa8af3313688",
+      "subjectDigest": "171182ece5878eaca4b724306fcc5902f99076c1bd4a3aa5b6f91ff822f68861",
+      "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+      "sourceTreeDigest": "363abac0288915cd0dc6a0e7013cf8f089bb035b2b61ec53868887c6d06a8ec4",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8"
+    },
+    {
+      "baselineId": "CERTIFICATION_REPORT_GENERATION",
+      "protectionClass": "EVOLVABLE",
+      "status": "RATIFIED",
+      "version": "v10",
+      "dependencies": [],
+      "ratifiedByTransaction": "TX-1789448777018",
+      "physicalManifestDigest": "aa00e8fa7769f096e917dde76ad674beb5616752208aeee335befa8af3313688",
+      "subjectDigest": "171182ece5878eaca4b724306fcc5902f99076c1bd4a3aa5b6f91ff822f68861",
+      "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+      "sourceTreeDigest": "363abac0288915cd0dc6a0e7013cf8f089bb035b2b61ec53868887c6d06a8ec4",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8"
+    },
+    {
+      "baselineId": "CERTIFICATION_PUBLICATION_ENGINE",
+      "protectionClass": "EVOLVABLE",
+      "status": "RATIFIED",
+      "version": "v10",
+      "dependencies": [],
+      "ratifiedByTransaction": "TX-1789448777018",
+      "physicalManifestDigest": "aa00e8fa7769f096e917dde76ad674beb5616752208aeee335befa8af3313688",
+      "subjectDigest": "171182ece5878eaca4b724306fcc5902f99076c1bd4a3aa5b6f91ff822f68861",
+      "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+      "sourceTreeDigest": "363abac0288915cd0dc6a0e7013cf8f089bb035b2b61ec53868887c6d06a8ec4",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8"
+    },
+    {
+      "baselineId": "CERTIFICATION_FINAL_GATE",
+      "protectionClass": "EVOLVABLE",
+      "status": "RATIFIED",
+      "version": "v10",
+      "dependencies": [],
+      "ratifiedByTransaction": "TX-1789448777018",
+      "physicalManifestDigest": "aa00e8fa7769f096e917dde76ad674beb5616752208aeee335befa8af3313688",
+      "subjectDigest": "171182ece5878eaca4b724306fcc5902f99076c1bd4a3aa5b6f91ff822f68861",
+      "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+      "sourceTreeDigest": "363abac0288915cd0dc6a0e7013cf8f089bb035b2b61ec53868887c6d06a8ec4",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8"
+    },
+    {
+      "baselineId": "CERTIFICATION_STREAM_REGISTRY",
+      "protectionClass": "IMMUTABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "version": "v1",
+      "dependencies": [],
+      "ratifiedByTransaction": null,
+      "physicalManifestDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "subjectDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sourceRevision": "0000000000000000000000000000000000000000",
+      "sourceTreeDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "dependencyLockDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "baselineId": "CERTIFICATION_EVIDENCE_ROOT",
+      "protectionClass": "IMMUTABLE",
+      "status": "LEGACY_UNVERIFIED",
+      "version": "v1",
+      "dependencies": [],
+      "ratifiedByTransaction": null,
+      "physicalManifestDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "subjectDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sourceRevision": "0000000000000000000000000000000000000000",
+      "sourceTreeDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "dependencyLockDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

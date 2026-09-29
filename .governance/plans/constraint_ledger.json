@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "constraints": [
+    "C-001: Preserve authoritative blueprint",
+    "C-002: EAORCS remains domain-neutral",
+    "C-003: No licensing ownership",
+    "C-004: No billing ownership",
+    "C-005: No commercial ownership",
+    "C-006: No AI/model/inference ownership",
+    "C-007: Canonical federation delegation remains authoritative",
+    "C-008: Zero synthetic PASS",
+    "C-009: Physical verification required",
+    "C-010: Rehearsal must use equivalent validation semantics",
+    "C-011: <=500 LOC governed code",
+    "C-012: Evidence must be physically attributable",
+    "C-013: No automatic PASS filling",
+    "C-014: Consent cannot use wildcard capability",
+    "C-015: COR requires complete mandatory gates",
+    "C-016: Certified subject must match final pushed HEAD"
+  ]
+}

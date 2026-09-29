@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "2.0.0",
+  "repairedAt": "2026-08-26T09:32:11.689Z",
+  "head": "54dcb5c76a9c6fef5bd3f7f543f7d2e0b89dca98",
+  "transactionId": "tx_1787736731430_a743697c",
+  "projectionCount": 17,
+  "repairedCount": 17,
+  "status": "PARITY_CONFIRMED",
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED"
+}

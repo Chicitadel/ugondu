@@ -1,0 +1,22 @@
+# Ugondu — Universal Deployment Intelligence Platform
+# Air Roofers Ltd — Dependency and Build Exclusions
+# =============================================================================
+
+# [en] Node.js artifacts
+node_modules/
+dist/
+*.js.map
+
+# [en] Go build artifacts
+client/ugondu
+client/ugondu.exe
+
+# [en] Environment secrets
+.env
+
+# [en] Logs
+*.log
+
+# [en] OS artifacts
+.DS_Store
+Thumbs.db

@@ -1,0 +1,84 @@
+# ==============================================================================
+# Project        : EAORCS - The Software Trust Platform
+# Module         : Localization & Hard-Code Governance Subsystem
+# File           : hardcoded-string-classification.yaml
+# Version        : 2026.3.1-LTS
+# Author         : Systems Engineering & Security Governance Authority
+# Organization   : Ujomor Systems
+# Created Date   : 2026-08-17
+# Last Modified  : 2026-08-17
+# Classification : ENTERPRISE | GOVERNMENT
+#
+# Governance:
+# - Enterprise Governed
+# - Security Reviewed
+# - Architecture Controlled
+# - Protocol Frozen
+# - Modularization Enforced
+#
+# Standards:
+# - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-161 / UAIGOS 3.0.0 / CMS-STD-009 / SDE-STD-007
+#
+# Signatures:
+# - Architecture Authority
+# - Security Authority
+# - Governance Authority
+# - Deployment Authority
+#
+# Copyright (c) 2026 Ujomor Systems. All Rights Reserved.
+# ==============================================================================
+
+version: "1.0.0"
+taxonomy:
+  UI_TEXT:
+    action: LOCALIZE
+    release: BLOCK
+    description: "User-facing interface labels, buttons, form placeholders, dialogs, and HTML view text"
+  CLI_TEXT:
+    action: LOCALIZE
+    release: BLOCK
+    description: "Command-line help descriptions, banner copy, interactive prompts, and terminal output"
+  ACCESSIBILITY_TEXT:
+    action: LOCALIZE
+    release: BLOCK
+    description: "Screen reader annotations, ARIA attributes, alt text, and accessibility helper descriptions"
+  ERROR_TEXT:
+    action: LOCALIZE
+    release: BLOCK
+    description: "User-visible error messages, exception explanations, and validation failure alerts"
+  WARNING_TEXT:
+    action: LOCALIZE
+    release: BLOCK
+    description: "User-visible warning prompts, deprecation cautions, and operational alerts"
+  SUCCESS_TEXT:
+    action: LOCALIZE
+    release: BLOCK
+    description: "User-visible success confirmations, operation completed messages, and status confirmations"
+  PROTOCOL_CONSTANT:
+    action: ALLOW
+    release: ALLOW
+    description: "Protocol-level constants, MIME types, HTTP verbs, standard cryptographic algorithms, DID prefixes"
+  MACHINE_IDENTIFIER:
+    action: ALLOW
+    release: ALLOW
+    description: "Internal system keys, environment variable names, configuration IDs, UUIDs, hex tokens"
+  FILE_PATH:
+    action: ALLOW
+    release: ALLOW
+    description: "Filesystem paths, schema file names, URI paths, and module import paths"
+  REGEX:
+    action: ALLOW
+    release: ALLOW
+    description: "Regular expression pattern strings and regex flags"
+  TEST_FIXTURE:
+    action: ALLOW_TEST_ONLY
+    release: CONDITIONAL
+    description: "Test assertion literals, mock payloads, and test fixture names within test directories"
+  SECRET_CANDIDATE:
+    action: FORBID
+    release: BLOCK
+    description: "High-entropy secrets, private keys, API tokens, passwords, and sensitive credentials"
+  UNKNOWN:
+    action: BLOCK
+    release: BLOCK
+    description: "Unclassified strings defaulting strictly to blocking behavior"

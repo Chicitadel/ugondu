@@ -1,0 +1,197 @@
+{
+  "reportId": "REP-1789295248601",
+  "transactionId": "TX-1789295248601",
+  "certificationRunId": "TX-1789295248601",
+  "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+  "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+  "sourceProvider": "local",
+  "sourceRevision": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+  "sourceTreeDigest": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+  "inputSnapshotHash": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+  "finalSnapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+  "snapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+  "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "snapshot": {
+    "isFrozen": true,
+    "frozenAt": "2026-09-13T10:27:29.228Z",
+    "phase": "AUTHORITATIVE_CERTIFICATION_COMPLETE",
+    "transactionId": "TX-1789295248601",
+    "certificationRunId": "TX-1789295248601",
+    "executionId": "TX-1789295248601",
+    "lifecycleId": "TX-1789295248601",
+    "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "sourceRevision": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+    "sourceProvider": "local",
+    "sourceTreeHash": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+    "sourceTreeDigest": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+    "inputSnapshotHash": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "finalSnapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+    "evidenceRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "runtimeIdentity": "AirRoofers",
+    "ledgerHeadHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "findingsRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "snapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+    "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "decision": "APPROVED",
+    "policyDigest": "7077b0925b25504cf21e762444014b662d66bb68ab598cf924258561b8e99325",
+    "streamDefinitionDigest": "2a72a654cfaa7f32770f04a680052e5dbf4c826ea7868a77f34d9a6be95f55d7",
+    "providerContractDigest": "b88aaa7b39dab5e961839598820524ca144dd399b27e529e8adcbd8818be9872",
+    "generatedAt": "2026-09-13T10:27:29.228Z",
+    "environmentFingerprint": "48248e19be87f4d383e9956796a46b8213fd95cf50374c017f2f689c94022f07",
+    "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8",
+    "nodeVersion": "v24.17.0",
+    "pipelineVersion": "2026.3.1-LTS",
+    "atomic": true,
+    "ledgerSubjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "evidenceSubjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "decisionSubjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "gates": {
+      "pipeline.gate.default": {
+        "status": "PASS",
+        "passed": true
+      }
+    },
+    "evidence": {
+      "pipeline.receipt": {
+        "type": "EXECUTION_RECEIPT",
+        "status": "VERIFIED",
+        "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+      }
+    },
+    "sections": {
+      "targetSnapshot": {
+        "headCommit": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+        "sourceTreeHash": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+        "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+        "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+        "sourceCommit": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+        "sourceRevision": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+        "lifecycleId": "TX-1789295248601",
+        "executionId": "TX-1789295248601"
+      },
+      "auditProvenance": {
+        "ledgerHeadHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+        "evidenceRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+      },
+      "executiveSummary": {
+        "certificationDecision": "APPROVED"
+      },
+      "evidenceMatrix": {
+        "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17"
+      }
+    },
+    "manifest": {
+      "atomic": true,
+      "decision": "APPROVED",
+      "transactionId": "TX-1789295248601",
+      "snapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+      "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "sourceTreeHash": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+      "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "sourceRevision": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+      "sourceProvider": "local",
+      "environmentFingerprint": "48248e19be87f4d383e9956796a46b8213fd95cf50374c017f2f689c94022f07",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8",
+      "runtimeIdentity": "AirRoofers",
+      "nodeVersion": "v24.17.0",
+      "pipelineVersion": "2026.3.1-LTS"
+    },
+    "blueprintDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "transactionDigest": "TX-1789295248601",
+    "evidenceRootDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+  },
+  "ledgerSubjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+  "evidenceSubjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+  "decisionSubjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+  "decision": "APPROVED",
+  "ledgerHeadHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "evidenceRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "findingsRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "reportModelHash": "d605714ee09d4f0609f1e570f97ea3f5d48a1420a7e55321d546918d3a91dc01",
+  "manifest": {
+    "reportId": "REP-1789295248601",
+    "transactionId": "TX-1789295248601",
+    "certificationRunId": "TX-1789295248601",
+    "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "inputSnapshotHash": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+    "ledgerHeadHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "evidenceRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "findingsRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "reportModelHash": "d605714ee09d4f0609f1e570f97ea3f5d48a1420a7e55321d546918d3a91dc01",
+    "generatorVersion": "2026.3.1-LTS",
+    "generatedAt": "2026-09-13T10:27:29.228Z",
+    "atomic": true,
+    "decision": "APPROVED",
+    "snapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+    "sourceTreeHash": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+    "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+    "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+  },
+  "sections": {
+    "executiveSummary": {
+      "reportId": "REP-1789295248601",
+      "transactionId": "TX-1789295248601",
+      "certificationRunId": "TX-1789295248601",
+      "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "certificationDecision": "APPROVED",
+      "totalGates": 1,
+      "totalEvidenceEntries": 1,
+      "totalFindings": 0,
+      "scores": {},
+      "generatedAt": "2026-09-13T10:27:29.228Z"
+    },
+    "targetSnapshot": {
+      "lifecycleId": "TX-1789295248601",
+      "executionId": "TX-1789295248601",
+      "targetFingerprint": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "sourceCommit": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+      "sourceTreeHash": "68c817db5c67d54c0eb79d78b8dbde498041e8815f3ec52580ef123ea8352607",
+      "environmentFingerprint": "48248e19be87f4d383e9956796a46b8213fd95cf50374c017f2f689c94022f07",
+      "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8",
+      "installedDependencyFingerprint": null,
+      "runtimeIdentity": "AirRoofers",
+      "pipelineVersion": "2026.3.1-LTS",
+      "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+      "inputSnapshotHash": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "finalSnapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4"
+    },
+    "evidenceMatrix": {
+      "pipeline.receipt": {
+        "type": "EXECUTION_RECEIPT",
+        "status": "VERIFIED",
+        "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+      }
+    },
+    "findingsRegister": [],
+    "scoresAndMetrics": {},
+    "gateEvaluations": {
+      "pipeline.gate.default": {
+        "status": "PASS",
+        "passed": true
+      }
+    },
+    "decisionEnvelope": null,
+    "ledgerEntries": [],
+    "ecafAuthorization": null,
+    "auditProvenance": {
+      "transactionId": "TX-1789295248601",
+      "subjectDigest": "1393f2f0526167ef51b9ddba1804378a523df6e5f16c21e8e800ad71ca038b17",
+      "ledgerHeadHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+      "evidenceRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+      "findingsRootHash": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+      "finalSnapshotHash": "46ce3be5018d30e3c082eb2c0ca140f8d6a98080e788576aa3df995c3b04b0a4",
+      "frozenAt": "2026-09-13T10:27:29.228Z",
+      "generatedAt": "2026-09-13T10:27:29.228Z",
+      "generatorVersion": "2026.3.1-LTS"
+    }
+  },
+  "generatorVersion": "2026.3.1-LTS",
+  "generatedAt": "2026-09-13T10:27:29.228Z",
+  "atomic": true
+}

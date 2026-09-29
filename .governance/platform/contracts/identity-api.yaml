@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Air Roofers Identity API
+  version: 1.0.0
+  description: Frozen contract for core Identity primitives (Users, Orgs, Service Accounts)
+paths:
+  /users:
+    post:
+      summary: Provision a new user identity
+  /users/{id}:
+    get:
+      summary: Retrieve user identity
+  /organizations:
+    post:
+      summary: Create organization

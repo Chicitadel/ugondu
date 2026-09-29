@@ -1,0 +1,22 @@
+[
+  {
+    "id": "WP-BUI-001",
+    "title": "Fix Build issue: TypeScript compilation failed",
+    "category": "Build",
+    "priority": 1,
+    "severity": "HIGH",
+    "confidence": 0.95,
+    "estimatedEffort": "Small",
+    "dependencies": [],
+    "blockedBy": [],
+    "repository": "mediadna",
+    "workspace": "root",
+    "provider": "EngineeringIntelligenceEngine",
+    "generatedFrom": "RCA-BLD-002",
+    "acceptanceCriteria": [
+      "build command succeeds without this error"
+    ],
+    "verificationProvider": "pnpm typecheck",
+    "status": "PENDING"
+  }
+]

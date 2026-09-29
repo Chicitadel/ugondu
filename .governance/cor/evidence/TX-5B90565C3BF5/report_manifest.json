@@ -1,0 +1,20 @@
+{
+  "reportId": "REP-5B90565C3BF5",
+  "transactionId": "TX-5B90565C3BF5",
+  "certificationRunId": "TX-1789297631994",
+  "targetFingerprint": "2d00b7cae4d4cae9938c969a66eb1b05a3bf3552f54ee2607aa248dd68d2f5b5",
+  "subjectDigest": "75c7fae3305179316846ce1494cb21f6246fd3e7947a5be871ac1fd732b8dfd1",
+  "inputSnapshotHash": "f7daf7676d381bfb540b914f105de766b3ab6b4f7833d2791e6babb9a01c4198",
+  "ledgerHeadHash": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+  "evidenceRootHash": "2992fc61ab9b75e6b09033d750e98b22135e61a4d04195a86905b0bfebfb96e5",
+  "findingsRootHash": "4394363d77af7a88d5a98947b06529b4c446a4c8987166c6731450d69db760f4",
+  "reportModelHash": "e56baff4e60245b1bee9d1dfbc7d510d5028b2798f9d32848b5e0f38868f5e40",
+  "generatorVersion": "2026.3.1-LTS",
+  "generatedAt": "2026-09-13T11:07:12.004Z",
+  "atomic": true,
+  "decision": "APPROVED",
+  "snapshotHash": "90247af81b194492daea2527f95fd1317c848abe0db0e24cad3221372a898ec3",
+  "sourceTreeHash": "83a525e1951e9d472df5863e6d35a2c5586c9e255ce4d8ff5f38b2389c89430c",
+  "executionReceiptDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41"
+}

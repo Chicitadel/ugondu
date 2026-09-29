@@ -1,0 +1,26 @@
+{
+  "changed-file manifest": [],
+  "raw evidence": "COR_CERTIFIED_GA_READY",
+  "graph seal": "Sealed by Master Governance Engine",
+  "cryptographic verification": "Valid ECDSA Signature",
+  "expected/observed tests": {
+    "expected": 372,
+    "observed": 372
+  },
+  "final gate decision": "APPROVED",
+  "inventory": "39 Suites, 372 passed",
+  "expected/observed inventory": {
+    "expected": 39,
+    "observed": 39
+  },
+  "runtime identity": "Node.js",
+  "atomic bundle manifest": "Complete",
+  "failure/skip matrix": {
+    "skips": 0,
+    "failures": 0
+  },
+  "reproducibility instructions": "Run \node scripts/run_all_authoritative_suites.js in a clean environment.",
+  "canonical subject": "eaorcs-2026.3.1-LTS",
+  "baseline comparison": "Baseline matches expected HEAD revision.",
+  "report model": "COR Certification Master Result"
+}

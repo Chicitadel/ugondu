@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "COR_WORKING_BASELINE",
+  "governanceModel": "UAIGOS-3.0.0",
+  "repository": "Chicitadel/eaorcs",
+  "baselineHEAD": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "certifiedSourceCommit": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "headCommit": "629acb6d3ea38b4285dccd413d6b84a77a1bacb7",
+  "sourceTreeHash": "6fdbbc70598674d2e91256e82286370f35decc263eaa5e53d7dcfff7700ed90c",
+  "lifecycleId": "LC-b162e7d0655e",
+  "executionId": "EXE-COR-b162e7d0655e",
+  "postCertificationEvidenceOnly": true,
+  "deltaClassification": "GOVERNANCE_ONLY",
+  "remoteWorkflow": {
+    "workflowRunId": "31971200640",
+    "workflowId": 31971200640,
+    "status": "APPROVED",
+    "corStatus": "APPROVED"
+  },
+  "metrics": {
+    "governanceSuitesExecuted": 52,
+    "governanceChecksPassed": 459,
+    "governanceChecksFailed": 0,
+    "parityProjections": {
+      "total": 18,
+      "passed": 18,
+      "failed": 0
+    },
+    "phase7": {
+      "passed": 8,
+      "failed": 0
+    },
+    "traceability": {
+      "total": 70,
+      "passed": 70,
+      "failed": 0
+    },
+    "physicalQualification": {
+      "total": 30,
+      "passed": 30,
+      "failed": 0
+    }
+  },
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED",
+  "capturedAt": "2026-08-18T12:31:34.543Z",
+  "timestamp": "2026-08-18T12:31:34.543Z",
+  "receiptDigest": "ec191f581e72ed1dfbb5e9af6b1d7dc1b2dd0ed906d0cf974c0cff4a89ff5dc7",
+  "contentDigest": "bd55d9a368b2c7eae87f42c0b540fca519c80c5511c15866d2f5cd7248bac39e"
+}
+

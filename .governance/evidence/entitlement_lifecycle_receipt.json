@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "ENTITLEMENT_LIFECYCLE_RECEIPT",
+  "gateId": "GATE-COR-ENTITLEMENT-AU-AV",
+  "subject": "jean-doe-corp-user",
+  "tenant": "tenant-air-roofers-001",
+  "timestamp": "2026-08-20T06:46:51.456Z",
+  "gitHead": "d930907dff29c289d1844c5d6a0fc87ac1201a19",
+  "simulationScore": 100,
+  "verified": true,
+  "stagesEvaluated": 9,
+  "stagesPassed": 9,
+  "stagesFailed": 0,
+  "invariants": {
+    "zeroLocalAuthority": true,
+    "liveServerEntitlementEnforced": true,
+    "immediateRevocationPropagated": true,
+    "entitlementVersionInvalidation": true,
+    "tamperResistanceVerified": true,
+    "replayAttackBlocked": true,
+    "automatedThreatResponseActive": true
+  },
+  "stages": [
+    {
+      "stage": 1,
+      "name": "COMMUNITY_TIER_SOVEREIGN_API_DENIED",
+      "expected": "DENIED",
+      "actual": "CAPABILITY_GRANT_REQUIRED",
+      "passed": true
+    },
+    {
+      "stage": 2,
+      "name": "SOVEREIGN_UPGRADE_ACCESS_ALLOWED",
+      "expected": "ALLOWED",
+      "actual": "ACCESS_GRANTED",
+      "passed": true
+    },
+    {
+      "stage": 3,
+      "name": "SOVEREIGN_PLUGIN_EXECUTION_ALLOWED",
+      "expected": "ALLOWED",
+      "actual": "PLUGIN_EXECUTION_SUCCESS",
+      "passed": true
+    },
+    {
+      "stage": 4,
+      "name": "SUBSCRIPTION_CANCELLED_IMMEDIATE_REVOCATION",
+      "expected": "ALL_DENIED",
+      "actual": "API:STALE_ENTITLEMENT_VERSION, PLUGIN:TIER_INSUFFICIENT, DIRECT:CAPABILITY_GRANT_REQUIRED",
+      "passed": true
+    },
+    {
+      "stage": 5,
+      "name": "COMMUNITY_FUNCTIONALITY_ALLOWED",
+      "expected": "ALLOWED",
+      "actual": "PLUGIN_EXECUTION_SUCCESS",
+      "passed": true
+    },
+    {
+      "stage": 6,
+      "name": "LOCAL_PLUGIN_TAMPER_SERVER_DENIED",
+      "expected": "SERVER_DENIED",
+      "actual": "LOCAL_TAMPER_DETECTED",
+      "passed": true
+    },
+    {
+      "stage": 7,
+      "name": "REVOKED_CREDENTIAL_REPLAY_INTERCEPTED",
+      "expected": "REVOKED_GRANT_REPLAY",
+      "actual": "REVOKED_GRANT_REPLAY",
+      "passed": true
+    },
+    {
+      "stage": 8,
+      "name": "REPEATED_ATTACKS_AUTOMATED_BLOCK",
+      "expected": "TEMPORARY_BLOCK_OR_RATE_LIMIT",
+      "actual": "SECURITY_RESTRICTION",
+      "passed": true
+    },
+    {
+      "stage": 9,
+      "name": "REACTIVATION_NEW_GRANT_VALIDATION",
+      "expected": "OLD_DENIED_NEW_ALLOWED",
+      "actual": "OLD:REVOKED_GRANT_REPLAY, NEW:ACCESS_GRANTED",
+      "passed": true
+    }
+  ],
+  "receiptHash": "d390fd7a05ad798f68623811b154582ad638fecc295676a4c6588d8beaff1568"
+}

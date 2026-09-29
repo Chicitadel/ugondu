@@ -1,0 +1,20 @@
+{
+  "governanceModel": "UAIGOS-3.0.0",
+  "auditBaselineHead": "2751ff6893a95ab003091b62241fec5ab732778c",
+  "timestamp": "2026-08-20T19:42:58.954Z",
+  "totalFrozenFiles": 8,
+  "frozenFiles": {
+    "engine/release/RemoteReconciliationEngine.js": "77d54c19dd099aa66139cf458c6d164133ccdede4ffe6cab547e3d6fd243b4e9",
+    "engine/trust/AuthorityReconciliationEngine.js": "c540fa931f61d520351d4f1950df08d3b78393ba743a0bdc5874468e3ee38db6",
+    "engine/release/CanonicalSubjectRegistry.js": "d07453650181cf561d67767ed8a1076682da5367333232829d3b05a831d7fb1a",
+    "certify.js": "c7bee6ffe770f8f643ff86f51f83802f1fe759c3d5ca9f4ac092ed8b8a3fdfce",
+    "tests/qualification/artifact_cross_consistency.test.js": "4c89a8f3ddc7dbad3554ba437cda6ea4c463efa9287a0a6a155c1acb046657e9",
+    "engine/federation/AeroBillRegistryDelegationEngine.js": "1a919e3dc1402c78ef526fa269f57645659af0228bb536cdc7c5d04a3bd36cca",
+    "engine/federation/OpaqueIntelligenceDelegation.js": "a29419d736737dde5956073363413daa7df68237ea11ced1ab1e8a4928cc9ee4",
+    ".github/workflows/reusable-eaorcs-certify.yml": "6e6bbf389b851aa729c524ad7185a020942ce7718d7a68eec8ff6d857d239a1f"
+  },
+  "auditBaselineTree": "60dce1b72d7a6294865f375b29681efa3bd0a391"
+}
+
+
+

@@ -1,0 +1,16 @@
+{
+  "envelopeId": "ENV-6E3B8C02C50BB52F",
+  "schemaVersion": "2026.3.1-LTS",
+  "subjectCommit": "bbbb222233334444555566667777888899990000",
+  "treeHash": "922f9b1b99e209f057b43fb69747af9a8e9b59b5",
+  "qualificationResults": {
+    "commit": "bbbb222233334444555566667777888899990000",
+    "executionId": "EXE-COR-29f25a82f9cf",
+    "result": "PASS",
+    "timestamp": "2026-08-15T06:33:33.211Z"
+  },
+  "timestamp": "2026-08-15T06:33:33.374Z",
+  "issuer": "Ujomor Systems Engineering & Security Governance Authority",
+  "signature": "a601a72a120c94bcd805474a7d3596454ff5902c2419d56a3fbac0217dfbb46e",
+  "contentDigest": "6cb8461c8032f48005aebf15497932391937197c01b2def31f7ead02c09b379b"
+}

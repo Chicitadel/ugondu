@@ -1,0 +1,122 @@
+# /******************************************************************************
+#  * Project        : Enterprise Autonomous Operation & Regulatory Compliance System (EAORCS)
+#  * Module         : Canonical Release Measurement Standard
+#  * File           : .governance/standards/EAORCS-CANONICAL-RELEASE-MEASUREMENT.yaml
+#  * Version        : 1.0.0
+#  * Author         : Systems Engineering & Security Governance Authority
+#  * Organization   : Air Roofers Platform Ecosystem & Ujomor Systems
+#  * Created Date   : 2026-08-15
+#  * Last Modified  : 2026-08-15
+#  * Classification : ENTERPRISE | RESTRICTED
+#  *
+#  * Governance:
+#  * - Enterprise Architecture Controlled
+#  * - Security Reviewed
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - Modularization Enforced
+#  *
+#  * Standards:
+#  * - ISO 27001
+#  * - SOC 2
+#  * - OWASP ASVS
+#  * - NIST
+#  *
+#  * Copyright (c) 2026 Air Roofers Platform Ecosystem & Ujomor Systems
+#  * All Rights Reserved.
+#  ******************************************************************************/
+
+version: 1.0.0
+authority:
+  repository: git
+  branch: main
+  head_resolution: git rev-parse HEAD
+subject:
+  implementation_subject: exact_qualified_commit
+  publication_head: exactly_one_parent_after_subject
+  historical_subjects: evidence_only
+  hardcoded_subject_exceptions: forbidden
+qualification:
+  clean_worktree_required: true
+  source_mutation_after_subject: forbidden
+  executable_mutation_after_subject: forbidden
+  generated_artifact_mutation_after_subject: allowed_only_in_publication_transaction
+measurement:
+  repository_scope: tracked_git_tree
+  implementation_scope: declared_classification_manifest
+  tests_in_scope: true
+  scripts_in_scope: true
+  integrations_in_scope: true
+  adapters_in_scope: true
+  workflows_in_scope: true
+  configuration_in_scope: true
+measurement_contract:
+  included_classifications:
+    - IMPLEMENTATION
+    - INTEGRATION
+    - ADAPTER
+    - CONFIGURATION
+    - DEPLOYMENT
+    - TEST
+    - VERIFICATION
+    - GOVERNANCE
+    - DOCUMENTATION
+  excluded_classifications:
+    - GENERATED_EVIDENCE
+    - RUNTIME_ARTIFACT
+  taxonomy:
+    - IMPLEMENTATION
+    - INTEGRATION
+    - ADAPTER
+    - CONFIGURATION
+    - DEPLOYMENT
+    - TEST
+    - VERIFICATION
+    - GOVERNANCE
+    - DOCUMENTATION
+    - GENERATED_EVIDENCE
+    - RUNTIME_ARTIFACT
+  excluded_patterns:
+    - docs/
+    - .audit/
+    - audit/
+    - audits/
+    - EAORCS_AUDIT/
+    - EAORCS_AUDIT_PACKAGE_v5.1/
+    - .governance/
+    - .github/
+    - baselines/
+    - reports/
+    - logs/
+    - evidence/
+    - certification-runs/
+    - dist/
+    - bundles/
+    - assets/
+    - public/
+    - demos/
+    - EAORCS-CERT
+    - osap_passport
+    - product_readiness
+    - artifact_lineage
+    - digital_twin
+    - Performance_Certificate
+    - ACTIVE_EXECUTION.md
+    - .certification/
+failure_policy:
+  missing_file: fail
+  unreadable_file: fail
+  hash_failure: fail
+  scanner_failure: fail
+  test_failure: fail
+  timeout: fail
+  incomplete_scan: fail
+  skipped_required_surface: fail
+  authority_mismatch: fail
+  undocumented_exclusion: fail
+domain_boundary:
+  local_licensing_logic: forbidden
+  local_billing_logic: forbidden
+  local_commercial_logic: forbidden
+  local_ai_inference_logic: forbidden
+  opaque_federation: required

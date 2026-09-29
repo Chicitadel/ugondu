@@ -1,0 +1,48 @@
+{
+  "lifecycleId": "LIFECYCLE-SAFETY-1789231921754",
+  "transactionId": "TX-CDAD25610051",
+  "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "snapshotHash": "b2425fa911a97dc4fca15990e8e3654ff97cdd1ba43357469a7e5873bcacc2c6",
+  "resultDigest": "r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1r1",
+  "reportHash": "bbb07a3c47073b673f2d27c7f388429d69dda7369d8ef5e284b94716116fd869",
+  "entries": [
+    {
+      "path": "evidence.governance.check_0",
+      "value": {
+        "verified": true,
+        "index": 0
+      },
+      "sourceCommit": "ee2bdf0d229566d531ae66790697b032ac08d78f",
+      "sourceTreeHash": "9a6025729f2966f4f012a481d76e316db6ac557218ed9600e36b206c87e38455",
+      "executionId": "EXE-SAFETY-1789231921754",
+      "lifecycleId": "LIFECYCLE-SAFETY-1789231921754",
+      "stagedAt": "2026-09-12T16:52:01.759Z"
+    },
+    {
+      "path": "evidence.governance.check_1",
+      "value": {
+        "verified": true,
+        "index": 1
+      },
+      "sourceCommit": "ee2bdf0d229566d531ae66790697b032ac08d78f",
+      "sourceTreeHash": "9a6025729f2966f4f012a481d76e316db6ac557218ed9600e36b206c87e38455",
+      "executionId": "EXE-SAFETY-1789231921754",
+      "lifecycleId": "LIFECYCLE-SAFETY-1789231921754",
+      "stagedAt": "2026-09-12T16:52:01.759Z"
+    },
+    {
+      "path": "evidence.governance.check_2",
+      "value": {
+        "verified": true,
+        "index": 2
+      },
+      "sourceCommit": "ee2bdf0d229566d531ae66790697b032ac08d78f",
+      "sourceTreeHash": "9a6025729f2966f4f012a481d76e316db6ac557218ed9600e36b206c87e38455",
+      "executionId": "EXE-SAFETY-1789231921754",
+      "lifecycleId": "LIFECYCLE-SAFETY-1789231921754",
+      "stagedAt": "2026-09-12T16:52:01.759Z"
+    }
+  ],
+  "ledgerHeadHash": "a2cfae272ce94f78763c4dd4277b9b5759302dec2181a4b22381a2f04863413b",
+  "generatedAt": "2026-09-12T16:52:01.804Z"
+}

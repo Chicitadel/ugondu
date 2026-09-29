@@ -1,0 +1,154 @@
+# =============================================================================
+# Ugondu Platform — Docker Compose Orchestration
+# Air Roofers Ltd — Ujomor Systems Engineering Authority
+# Version: 1.0.0 | Classification: COMMERCIAL | INTERNAL
+#
+# Usage:
+#   docker compose up -d                  # Start all services
+#   docker compose logs -f engine-core    # Stream logs
+#   docker compose down                   # Teardown
+# =============================================================================
+
+version: "3.9"
+
+networks:
+  ugondu-internal:
+    driver: bridge
+    internal: true           # [en] Services cannot reach the internet directly
+  ugondu-external:
+    driver: bridge
+
+services:
+
+  # ────────────────────────────────────────────────────
+  # [en] Billing Gateway — License and Edition Authority
+  # ────────────────────────────────────────────────────
+  billing-gateway:
+    build:
+      context: ./server/billing-gateway
+      dockerfile: Dockerfile
+    container_name: ugondu-billing-gateway
+    restart: unless-stopped
+    networks:
+      - ugondu-internal
+    environment:
+      - PORT=4002
+      - IDENTITY_AUTHORITY_URL=${IDENTITY_AUTHORITY_URL:-https://identity.airroofers.eu/api/v1}
+      - BILLING_AUTHORITY_URL=${BILLING_AUTHORITY_URL:-https://billing.airroofers.eu/api/v1}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4002/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ────────────────────────────────────────────────────
+  # [en] Engine Core — DAG and Recipe Computation
+  # ────────────────────────────────────────────────────
+  engine-core:
+    build:
+      context: ./server/engine-core
+      dockerfile: Dockerfile
+    container_name: ugondu-engine-core
+    restart: unless-stopped
+    networks:
+      - ugondu-internal
+      - ugondu-external
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - BILLING_GATEWAY_URL=http://billing-gateway:4002/v1
+      - UGONDU_PRIVATE_KEY=${UGONDU_PRIVATE_KEY}
+    depends_on:
+      billing-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4001/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ────────────────────────────────────────────────────
+  # [en] Plugin Manager — Sandboxed Plugin Execution
+  # ────────────────────────────────────────────────────
+  plugin-manager:
+    build:
+      context: ./server/plugin-manager
+      dockerfile: Dockerfile
+    container_name: ugondu-plugin-manager
+    restart: unless-stopped
+    networks:
+      - ugondu-internal
+    volumes:
+      - ./plugins:/app/plugins:ro    # [en] Plugin directory mounted read-only
+    environment:
+      - PORT=4003
+      - PLUGINS_DIR=/app/plugins
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4003/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ────────────────────────────────────────────────────
+  # [en] Repository Adapter — Universal Provider Detection
+  # ────────────────────────────────────────────────────
+  repository-adapter:
+    build:
+      context: ./server/repository-adapter
+      dockerfile: Dockerfile
+    container_name: ugondu-repository-adapter
+    restart: unless-stopped
+    networks:
+      - ugondu-internal
+    environment:
+      - PORT=4005
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4005/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ────────────────────────────────────────────────────
+  # [en] Event Bus — Isolated Pub/Sub Message Router
+  # ────────────────────────────────────────────────────
+  event-bus:
+    build:
+      context: ./server/event-bus
+      dockerfile: Dockerfile
+    container_name: ugondu-event-bus
+    restart: unless-stopped
+    networks:
+      - ugondu-internal
+    environment:
+      - PORT=4004
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4004/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

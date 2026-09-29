@@ -1,0 +1,241 @@
+{
+  "schemaVersion": "eaorcs/k-verification/v1",
+  "auditCycle": "AUDIT-003",
+  "stream": "K",
+  "kTimestamp": "2026-09-14T06:16:41.618Z",
+  "candidateHead": "b44d9d240e5341c0aba6c624d57639e91646fd41",
+  "jSourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "integrityChecks": {
+    "total": 11,
+    "pass": 11,
+    "fail": 0
+  },
+  "independentVerifications": {
+    "total": 11,
+    "pass": 11,
+    "fail": 0
+  },
+  "findings": [
+    {
+      "id": "F-L01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "68cf27adf3860c6225af5680201b4a66f3f3d2e2615046f6a96492d940316023",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "57e9d968ee17aae4f932aa83ecd6871e31fc4dc0dfe7699f541e49f13b312919",
+      "kTimestamp": "2026-09-14T06:16:43.478Z",
+      "stdoutPreview": "PASS: F-L01 ASSUME_UNCHANGED at L68 inside BLOCK1 L45-L131"
+    },
+    {
+      "id": "F-L02",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "049c47009ff4ddbab406c22a37c86eeb5f91252b83f349ce0f8e51cbd6fd30c7",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "d58cae045ccf7396ef265931e4ead068f6bc3c18cc7d1e821ec59f0448a2e1fc",
+      "kTimestamp": "2026-09-14T06:16:43.752Z",
+      "stdoutPreview": "PASS: F-L02 SKIP_WORKTREE at L77 inside BLOCK1 L45-L131"
+    },
+    {
+      "id": "F-G8-01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "84026cc6889cdee8f5cbd3ca1de43b08641050df47b5d64ba5ddcbc27da0acd4",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "88e100cc91b71efba00022a5ee6cede7c4df63e87c21c59b56db1a7b66b36427",
+      "kTimestamp": "2026-09-14T06:16:44.004Z",
+      "stdoutPreview": "PASS: F-G8-01 no env-based fixture in SnapshotFreezeEngine or CertificationDryRun live code"
+    },
+    {
+      "id": "F-EV01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "d28578df613b5d6214b8c2b981788e3b1551f76306ef5cd526c4b917c65d2f61",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "d013fb8b337628559211fae8fa4fa108ff1c4d4daccee49fb9f74c50f0eae82a",
+      "kTimestamp": "2026-09-14T06:16:44.237Z",
+      "stdoutPreview": "PASS: F-EV01 evidenceOutputPath present in certify.js"
+    },
+    {
+      "id": "F-AA01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "2bdb07717935413ce8e5af094462248082b3ba1fd64297333b4e8f314ffbb7ff",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "d9da32080a839abcf1115f2df2293aa94c5648ab1b5575643a1f45a3672a0ca4",
+      "kTimestamp": "2026-09-14T06:16:44.452Z",
+      "stdoutPreview": "PASS: F-AA01 AUDIT_002_BASELINE FROZEN_FINDING_IDS FROZEN_BLOB_DIGESTS present in scope_guard.js"
+    },
+    {
+      "id": "F-B02",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "33aa1f20c1aae2ab75b6e28b354128a6078b2f9ef037639cee3e6050e321c8df",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "7e4e6a054b5e8cdbe9b12c4f7a5f9c4a9b43f28b13015fbc738b85bb6b2a9069",
+      "kTimestamp": "2026-09-14T06:16:44.691Z",
+      "stdoutPreview": "PASS: F-B02 zero this.timeout() calls in tests/"
+    },
+    {
+      "id": "F-T01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "d9e88fdc749d27a70618d38bb89953812cd5d5ab5ce6b4a5cb118ffb1e1e0da6",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "4c0734eaaa056c309d18fefcdd820f89c6824d16a27e80f8cd89ca679c7275e8",
+      "kTimestamp": "2026-09-14T06:16:45.235Z",
+      "stdoutPreview": "PASS: F-T01 18/18 adversarial bypass tests pass"
+    },
+    {
+      "id": "F-Z01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "219f280a4fefef60c91422ce8f6a3ad8caeff3b326b3a818fc2f08595c8bc8c0",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "80438badd2352b9584080344b34cf1245f7a51be9395a9d63d067e7495375da4",
+      "kTimestamp": "2026-09-14T06:17:02.908Z",
+      "stdoutPreview": "PASS: F-Z01 .gitignore has .nyc_output and coverage entries"
+    },
+    {
+      "id": "F-C02",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "470c165b3f56a3c8649d1cdb13f44462e231fc160d51016c34c86c75f92a0efc",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "9c400d2e2555c1c5ff6594c12f5873a66f2ce0a3d01a28f0647daa9292560720",
+      "kTimestamp": "2026-09-14T06:17:03.139Z",
+      "stdoutPreview": "PASS: F-C02 no testOverrides in LocalWorkspaceSourceProvider live code"
+    },
+    {
+      "id": "F-W01",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "605f0b404e9a05ca4725622475718a05ad3982ea91e0e9c1507f05f8081f1d3e",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "03626b4bcfe5f7d2decb1265d841b4e21387b5d33e869064a98d323fbe8c5cc1",
+      "kTimestamp": "2026-09-14T06:17:03.354Z",
+      "stdoutPreview": "PASS: F-W01 no testOverrides ternary in certify.js or CertificationDryRun.js"
+    },
+    {
+      "id": "F-T02",
+      "kPass": true,
+      "fieldChecks": {
+        "command": true,
+        "arguments": true,
+        "targetRoot": true,
+        "exitCode": true,
+        "stdoutDigest": true,
+        "stderrDigest": true,
+        "verifierVersion": true,
+        "sourceRevisionAncestor": true
+      },
+      "exitCode": 0,
+      "kStdoutDigest": "dee94c129cd6f861208ae49444f50add2070b4e51699a1e7a66a0398c434681e",
+      "kStderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "independentVerificationDigest": "d7240b994ec8975bc2d920f928443806acaed010fa814dc697e99f3ba86227d7",
+      "kTimestamp": "2026-09-14T06:17:03.569Z",
+      "stdoutPreview": "PASS: F-T02 3 evidence isolation tests pass"
+    }
+  ],
+  "kVerificationDigest": "cb10c7d87b32b7b68ce7823e152eec41b3a21abf6e3f85c08d7ba98fd9238ef2"
+}

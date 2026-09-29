@@ -1,0 +1,47 @@
+active_phase: PHASE_36_LIVE_PRODUCTION_OPERATIONAL_VALIDATION_REPRODUCIBILITY_PLATFORM
+active_streams:
+  stream_s1:
+    name: Live Connector Verification Engine
+    target_files:
+      - engine/connectors/LiveConnectorVerificationEngine.js
+      - tests/phase36/stream_s1_live_connector_verification.test.js
+  stream_s2:
+    name: Evidence Provenance Chain Engine
+    target_files:
+      - engine/evidence/EvidenceProvenanceChainEngine.js
+      - tests/phase36/stream_s2_evidence_provenance_chain.test.js
+  stream_s3:
+    name: Independent Reproducibility Engine
+    target_files:
+      - engine/audit/IndependentReproducibilityEngine.js
+      - tests/phase36/stream_s3_independent_reproducibility.test.js
+  stream_s4:
+    name: End-to-End Integration Suite Engine
+    target_files:
+      - engine/integration/EndToEndIntegrationSuiteEngine.js
+      - tests/phase36/stream_s4_end_to_end_integration.test.js
+  stream_s5:
+    name: Runtime Resilience Chaos Engine
+    target_files:
+      - engine/quality/RuntimeResilienceChaosEngine.js
+      - tests/phase36/stream_s5_runtime_resilience_chaos.test.js
+  stream_s6:
+    name: Security Attestation & Penetration Engine
+    target_files:
+      - engine/security/SecurityAttestationEngine.js
+      - tests/phase36/stream_s6_security_attestation.test.js
+  stream_s7:
+    name: Commercial & Procurement Verification Engine
+    target_files:
+      - engine/commercial/CommercialProcurementVerificationEngine.js
+      - tests/phase36/stream_s7_commercial_procurement_verification.test.js
+  stream_s8:
+    name: Operational Observability Dashboard Engine
+    target_files:
+      - engine/operations/OperationalObservabilityDashboardEngine.js
+      - tests/phase36/stream_s8_operational_observability_dashboard.test.js
+  stream_s9:
+    name: Automated Launch Certification Engine
+    target_files:
+      - engine/certification/AutomatedLaunchCertificationEngine.js
+      - tests/phase36/stream_s9_automated_launch_certification.test.js

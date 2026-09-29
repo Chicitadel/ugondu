@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-L01",
+  "description": "assume-unchanged guard structurally outside try/catch — in bare BLOCK 1",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:41.711Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var s=require('fs').readFileSync('engine/providers/source/LocalWorkspaceSourceProvider.js','utf8');var lines=s.split('\\n');var b1s=lines.findIndex(function(l){return l.indexOf('BLOCK 1: Physical Workspace Integrity')>=0;});var b1e=lines.findIndex(function(l){return l.indexOf('END BLOCK 1')>=0;});var aIdx=lines.findIndex(function(l){return l.indexOf('ASSUME_UNCHANGED_CERTIFICATION_FORBIDDEN')>=0;});var lIdx=lines.findIndex(function(l){return l.indexOf('lstatSync')>=0;});if(b1s<0||b1e<0){process.stdout.write('FAIL: BLOCK1 markers not found');process.exit(1);}if(aIdx<b1s||aIdx>b1e){process.stdout.write('FAIL: throw not inside BLOCK1 at L'+(aIdx+1));process.exit(1);}if(aIdx>=lIdx){process.stdout.write('FAIL: throw not before lstat');process.exit(1);}process.stdout.write('PASS: F-L01 ASSUME_UNCHANGED at L'+(aIdx+1)+' inside BLOCK1 L'+(b1s+1)+'-L'+(b1e+1));"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "68cf27adf3860c6225af5680201b4a66f3f3d2e2615046f6a96492d940316023",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-L01 ASSUME_UNCHANGED at L68 inside BLOCK1 L45-L131",
+  "executionEvidenceDigest": "8a70f7f0908680a244e706a761b1a3b0e18f627cc86d6525a46e60febf323322",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

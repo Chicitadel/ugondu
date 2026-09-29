@@ -1,0 +1,30 @@
+{
+  "journalId": "JRNL-C504DD05",
+  "recordedAt": "2026-08-17T14:24:35.900Z",
+  "sessionId": "SESS-5B6BDB23",
+  "mode": "Simulation",
+  "eventHandled": {
+    "type": "FILE_SAVE",
+    "path": "UserService.js",
+    "source": "Notepad"
+  },
+  "policyDecision": {
+    "stage": "MODIFY",
+    "decision": "ASK",
+    "reason": "Stage 'MODIFY' decision resolved from scope 'workspace' (workspace.policy.yaml)",
+    "confidencePct": 95,
+    "resolvedScope": "workspace",
+    "inheritedFrom": "workspace.policy.yaml",
+    "appliedRule": "HierarchicalPolicyResolution",
+    "remembered": false,
+    "requireApproval": true
+  },
+  "kernelStateSummary": {
+    "executionId": "EXE-COR-29f25a82f9cf",
+    "overallScorePct": 85.2,
+    "tasksCount": 2806
+  },
+  "runtimeAction": "SIMULATION_COMPLETED",
+  "checksum": "355b1f88da38fd8b34a50ca85ec7617722b3bd71b8525774e4e1ed2071b31494",
+  "contentDigest": "82018c489d726955a2650a3458581edf016abae712eefef46efc94e3242eea9f"
+}

@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "022cfa37_no_testoverrides_pmd",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "a03007e1a49a450cd0964df6aab26477be9420be",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "scripts/publish_certified_baseline.js"
+  ],
+  "remediationCommit": "022cfa37d8710e7730ae5aea400cdad75f6ceb29",
+  "verificationCommand": "grep -n testOverrides.manifestResult scripts/publish_certified_baseline.js (0 hits)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-W01"
+}

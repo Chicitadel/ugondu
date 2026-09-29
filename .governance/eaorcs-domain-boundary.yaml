@@ -1,0 +1,110 @@
+# ==============================================================================
+# EAORCS DOMAIN BOUNDARY DEFINITION & DELEGATION SPECIFICATION
+# Project        : EAORCS - Enterprise Autonomous Operation & Regulatory Compliance System
+# Module         : .governance/eaorcs-domain-boundary.yaml
+# Version        : 2026.3.1-LTS
+# Author         : Ujomor Systems & Enterprise Governance Authority
+# Organization   : Ujomor Systems & Enterprise Governance
+# Created Date   : 2026-08-10
+# Last Modified  : 2026-08-10
+# Classification : GOVERNMENT | ENTERPRISE | RESTRICTED
+# Standard       : UAIGOS-3.0.0-ENTERPRISE / ISO 27001 / SOC 2 / OWASP ASVS / NIST
+# ==============================================================================
+
+version: "2026.3.1-LTS"
+governance_framework: "UAIGOS-3.0.0"
+domain_isolation_mode: "STRICT_PURIFIED"
+
+owned_domains:
+  - domain_id: "governance"
+    name: "Platform Governance & Architecture Enforcement"
+    scope: "Core architecture decision records, governance gates, ADR management, policy verification, evidence graphs, audit manifests"
+    allowed_operations:
+      - "enforce_precedence"
+      - "verify_decision_integrity"
+      - "gate_release_pipeline"
+      - "audit_domain_ownership"
+    prohibitions:
+      - "compute_license_tier_pricing"
+      - "process_commercial_invoicing"
+      - "execute_direct_neural_inference"
+
+  - domain_id: "seos"
+    name: "System Execution & Operational Security"
+    scope: "Execution evidence binding, deterministic scheduler ticks, execution stream boundary verification, fault-domain isolation"
+    allowed_operations:
+      - "bind_execution_evidence"
+      - "dispatch_scheduler_events"
+      - "verify_stream_boundaries"
+      - "audit_execution_proof_chain"
+    prohibitions:
+      - "calculate_billing_rates"
+      - "issue_commercial_licenses"
+      - "train_ai_models"
+
+  - domain_id: "compliance"
+    name: "Regulatory Compliance & Standards Enforcement"
+    scope: "Regulatory compliance verification, ISO 27001/SOC 2/NIST checks, audit logging, security posture attestation"
+    allowed_operations:
+      - "verify_compliance_controls"
+      - "generate_audit_manifests"
+      - "attest_security_posture"
+    prohibitions:
+      - "execute_commercial_transactions"
+
+  - domain_id: "evidence"
+    name: "Evidence Generation & Provenance Fabric"
+    scope: "Evidence generation, cryptographic signing, proof envelope tracking, RFC 3161 timestamping"
+    allowed_operations:
+      - "sign_evidence_envelope"
+      - "verify_proof_chain"
+      - "bind_attestation_seal"
+    prohibitions:
+      - "run_internal_rating_engine"
+
+delegated_domains:
+  - domain_id: "licensing"
+    name: "Commercial Entitlement & Licensing Domain"
+    delegation_envelope: "engine/licensing/LicensingDelegationEnvelope.js"
+    delegated_responsibilities:
+      - "License tier price calculation"
+      - "License quota rating & entitlement generation"
+      - "Key generation & signing for commercial packages"
+    prohibited_internal_implementations:
+      - "Inline calculation of license fees inside EAORCS core"
+      - "Hardcoded license entitlement limits inside engine logic"
+    required_evidence_protocol: "OPAQUE_LICENSING_DELEGATION_ENVELOPE"
+
+  - domain_id: "commercial"
+    name: "Billing Rating & Commercial Financial Domain"
+    delegation_envelope: "engine/commercial/BillingDelegationEnvelope.js"
+    delegated_responsibilities:
+      - "Rating and usage cost calculations"
+      - "Invoice generation and tax calculation"
+      - "Payment gateway transaction processing"
+    prohibited_internal_implementations:
+      - "Inline rating/charge calculation in core telemetry or scheduler"
+      - "Direct invoice rendering in EAORCS engine core"
+    required_evidence_protocol: "OPAQUE_BILLING_DELEGATION_ENVELOPE"
+
+  - domain_id: "ai"
+    name: "AI Model Neural Inference Domain"
+    delegation_envelope: "engine/ai/AiDelegationEnvelope.js"
+    delegated_responsibilities:
+      - "Neural net model training & weight management"
+      - "LLM inference execution and generation"
+      - "Vector embedding vectorization computation"
+    prohibited_internal_implementations:
+      - "Direct neural network weight evaluation in governance path"
+      - "Unbound LLM prompt execution without observation envelope"
+    required_evidence_protocol: "OPAQUE_AI_DELEGATION_ENVELOPE"
+
+governance_rules:
+  - rule_id: "DOM-R01"
+    name: "Strict Domain Separation"
+    action: "BLOCK"
+    description: "Core EAORCS modules MUST NOT execute internal calculation logic for delegated domains (licensing, billing, AI inference). Operations MUST consume signed opaque delegation envelopes."
+  - rule_id: "DOM-R02"
+    name: "Opaque Evidence Verification"
+    action: "FAIL_CLOSED"
+    description: "All incoming delegated domain envelopes MUST pass cryptographic signature and evidence hash verification prior to state admission."

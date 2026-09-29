@@ -1,0 +1,4 @@
+name: ai-act
+description: EU AI Act readiness constraints.
+rules:
+  - require-explainability

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2026.3.1-LTS",
+  "receiptType": "CURRENT_HEAD_DELTA_RECEIPT",
+  "certifiedSourceCommit": "b167acb22dd7c99fd6b21bbe271b0281ddb9174e",
+  "qualificationExecutionCommit": "b167acb22dd7c99fd6b21bbe271b0281ddb9174e",
+  "classification": "EVIDENCE_ONLY_DESCENDANT",
+  "productionCodeChanges": 0,
+  "testImplementationChanges": 0,
+  "governanceEvidenceChanges": 47,
+  "qualificationRequired": false,
+  "verifiedAt": "2026-08-19T17:04:06.451Z",
+  "status": "APPROVED",
+  "receiptDigest": "d9edd430c9537fdf1663c9bc1734a029e2b58dd96068cb3db6f29ac377b23765",
+  "contentDigest": "d9edd430c9537fdf1663c9bc1734a029e2b58dd96068cb3db6f29ac377b23765"
+}

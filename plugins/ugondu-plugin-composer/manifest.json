@@ -1,0 +1,12 @@
+{
+  "name": "ugondu-plugin-composer",
+  "version": "1.0.0",
+  "description": "[en] PHP Composer dependency resolution and optimization plugin for Ugondu.",
+  "author": "Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "hooks": ["pre-sync"],
+  "options": {
+    "nodev": false,
+    "optimize": true
+  }
+}

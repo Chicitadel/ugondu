@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-AA01",
+  "description": "scope_guard.js L1 constants: AUDIT_002_BASELINE, FROZEN_FINDING_IDS, FROZEN_BLOB_DIGESTS",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:42.317Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var s=require('fs').readFileSync('.governance/cor/scope_guard.js','utf8');if(s.indexOf('AUDIT_002_BASELINE')<0){process.stdout.write('FAIL: AUDIT_002_BASELINE missing');process.exit(1);}if(s.indexOf('FROZEN_FINDING_IDS')<0){process.stdout.write('FAIL: FROZEN_FINDING_IDS missing');process.exit(1);}if(s.indexOf('FROZEN_BLOB_DIGESTS')<0){process.stdout.write('FAIL: FROZEN_BLOB_DIGESTS missing');process.exit(1);}process.stdout.write('PASS: F-AA01 AUDIT_002_BASELINE FROZEN_FINDING_IDS FROZEN_BLOB_DIGESTS present in scope_guard.js');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "2bdb07717935413ce8e5af094462248082b3ba1fd64297333b4e8f314ffbb7ff",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-AA01 AUDIT_002_BASELINE FROZEN_FINDING_IDS FROZEN_BLOB_DIGESTS present in scope_guard.js",
+  "executionEvidenceDigest": "03fcd7e40a0955c728431e399767d503ad60ae1d41869aee316dfe387352e394",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

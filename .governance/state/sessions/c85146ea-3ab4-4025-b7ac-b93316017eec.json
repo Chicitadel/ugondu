@@ -1,0 +1,264 @@
+{
+  "sessionId": "c85146ea-3ab4-4025-b7ac-b93316017eec",
+  "createdAt": "2026-08-20T03:17:04.626Z",
+  "actor": "CUSTOMER_CLIENT",
+  "targetContext": {
+    "subjectId": "subj_eaorcs-external-fixture_02d3530bc648",
+    "subjectType": "WORKSPACE",
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+    "environment": "client",
+    "revision": "91e68fa00962f7c20e1378b2aee6489a919f5e90",
+    "branch": "master",
+    "policySource": "OUT_OF_TREE",
+    "sessionId": "c85146ea-3ab4-4025-b7ac-b93316017eec",
+    "federationMode": "INDEPENDENT",
+    "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+    "hasInTreeGovernance": false,
+    "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+    "createdAt": "2026-08-20T03:17:04.624Z",
+    "metadata": {}
+  },
+  "targetDescriptor": {
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+    "subjectId": "subj_eaorcs-external-fixture_02d3530bc648",
+    "subjectType": "WORKSPACE",
+    "name": "@acme/cloud-gateway",
+    "version": "2.4.0",
+    "description": "Acme High-Performance Cloud API Gateway",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+    "branch": "master",
+    "revision": "unversioned",
+    "isClean": true,
+    "remoteUrl": null,
+    "manifests": {
+      "nodejs": {
+        "name": "@acme/cloud-gateway",
+        "version": "2.4.0",
+        "scripts": [
+          "test",
+          "start"
+        ]
+      }
+    },
+    "buildSystem": "npm",
+    "tests": {
+      "hasTests": true,
+      "testDirs": [
+        "tests"
+      ],
+      "testConfigs": []
+    },
+    "structureSummary": {
+      "fileCount": 7,
+      "dirCount": 2,
+      "totalBytes": 785,
+      "languages": {
+        "[no_ext]": 1,
+        ".json": 1,
+        ".md": 1,
+        ".js": 4
+      }
+    },
+    "fingerprint": "3a3f68d21832f1bfe3745985186952f6ad6815e96272d577eb266b7ca31edd3a",
+    "discoveredAt": "2026-08-20T03:17:04.584Z",
+    "metadata": {}
+  },
+  "session": {
+    "sessionId": "c85146ea-3ab4-4025-b7ac-b93316017eec",
+    "status": "COMPLETED",
+    "targetContext": {
+      "subjectId": "subj_eaorcs-external-fixture_02d3530bc648",
+      "subjectType": "WORKSPACE",
+      "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+      "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+      "environment": "client",
+      "revision": "91e68fa00962f7c20e1378b2aee6489a919f5e90",
+      "branch": "master",
+      "policySource": "OUT_OF_TREE",
+      "sessionId": "c85146ea-3ab4-4025-b7ac-b93316017eec",
+      "federationMode": "INDEPENDENT",
+      "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+      "hasInTreeGovernance": false,
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "createdAt": "2026-08-20T03:17:04.624Z",
+      "metadata": {}
+    },
+    "startTime": 1787195824625,
+    "endTime": 1787195828108,
+    "evidenceCatalog": [
+      {
+        "id": "EVID-DISCOVER-1787195824650",
+        "requirementId": "REQ-TARGET-DISCOVERY",
+        "type": "TARGET_DISCOVERY",
+        "source": "EAORCS_OBSERVER",
+        "status": "VALID",
+        "data": {
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+          "subjectId": "subj_eaorcs-external-fixture_02d3530bc648",
+          "subjectType": "WORKSPACE",
+          "name": "@acme/cloud-gateway",
+          "version": "2.4.0",
+          "description": "Acme High-Performance Cloud API Gateway",
+          "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+          "branch": "master",
+          "revision": "unversioned",
+          "isClean": true,
+          "remoteUrl": null,
+          "manifests": {
+            "nodejs": {
+              "name": "@acme/cloud-gateway",
+              "version": "2.4.0",
+              "scripts": [
+                "test",
+                "start"
+              ]
+            }
+          },
+          "buildSystem": "npm",
+          "tests": {
+            "hasTests": true,
+            "testDirs": [
+              "tests"
+            ],
+            "testConfigs": []
+          },
+          "structureSummary": {
+            "fileCount": 7,
+            "dirCount": 2,
+            "totalBytes": 785,
+            "languages": {
+              "[no_ext]": 1,
+              ".json": 1,
+              ".md": 1,
+              ".js": 4
+            }
+          },
+          "fingerprint": "3a3f68d21832f1bfe3745985186952f6ad6815e96272d577eb266b7ca31edd3a",
+          "discoveredAt": "2026-08-20T03:17:04.584Z",
+          "metadata": {}
+        },
+        "hash": "8307f007f421f79f654832b1b2b2d7203e69523acc450c17419c9172bba2bddb",
+        "timestamp": "2026-08-20T03:17:04.651Z"
+      },
+      {
+        "id": "EVID-REMOTE-AUDIT-1787195824659",
+        "requirementId": "REQ-REMOTE-AUDIT",
+        "type": "AUDIT_RESULT",
+        "source": "EAORCS_OBSERVER",
+        "status": "PASSED",
+        "data": {
+          "status": "PASSED",
+          "pass": true,
+          "mode": "REMOTE_EVIDENCE_EVALUATION",
+          "subjectId": "subj_eaorcs-external-fixture_02d3530bc648",
+          "targetRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+          "evidenceCount": 1,
+          "evidenceItems": [
+            {
+              "id": "EVID-DISCOVER-1787195824650",
+              "type": "TARGET_DISCOVERY",
+              "status": "VALID",
+              "hash": "8307f007f421f79f654832b1b2b2d7203e69523acc450c17419c9172bba2bddb"
+            }
+          ],
+          "findings": [],
+          "summary": {
+            "totalChecks": 1,
+            "passedChecks": 1,
+            "failedChecks": 0
+          }
+        },
+        "hash": "4925fe5dfcb33fbad389361f27ebd83fbecd7c5f14dc7f901be9c275bf1236d5",
+        "timestamp": "2026-08-20T03:17:04.659Z"
+      }
+    ],
+    "findings": [],
+    "metrics": {
+      "totalChecks": 2,
+      "passedChecks": 2,
+      "failedChecks": 0,
+      "warnings": 0
+    },
+    "policyResolution": {
+      "policySource": "OUT_OF_TREE",
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "hasInTreeGovernance": false,
+      "evaluatedRules": []
+    },
+    "auditTrail": [
+      {
+        "sequence": 0,
+        "timestamp": 1787195824625,
+        "action": "SESSION_INITIALIZED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "subjectId": "subj_eaorcs-external-fixture_02d3530bc648",
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\eaorcs-external-fixture",
+          "policySource": "OUT_OF_TREE"
+        },
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "aceb741a4e505479f3c99b2f1de68f5f35a9909c325176acc25ef0b2fa162f7a"
+      },
+      {
+        "sequence": 1,
+        "timestamp": 1787195824625,
+        "action": "SESSION_STARTED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "startTime": 1787195824625,
+          "reason": "REMOTE_REST_SESSION_INIT"
+        },
+        "prevHash": "aceb741a4e505479f3c99b2f1de68f5f35a9909c325176acc25ef0b2fa162f7a",
+        "hash": "4d2cf8d1697fda44ea8c7703d8871b1d5290fc3a3ae4e58af5f0153fd12428f9"
+      },
+      {
+        "sequence": 2,
+        "timestamp": 1787195824651,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "evidenceId": "EVID-DISCOVER-1787195824650",
+          "requirementId": "REQ-TARGET-DISCOVERY",
+          "hash": "8307f007f421f79f654832b1b2b2d7203e69523acc450c17419c9172bba2bddb"
+        },
+        "prevHash": "4d2cf8d1697fda44ea8c7703d8871b1d5290fc3a3ae4e58af5f0153fd12428f9",
+        "hash": "9814b69fdc711324c92fc6a870a259a5b5a548cf5fd883b10575f80a05e324b8"
+      },
+      {
+        "sequence": 3,
+        "timestamp": 1787195824659,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "evidenceId": "EVID-REMOTE-AUDIT-1787195824659",
+          "requirementId": "REQ-REMOTE-AUDIT",
+          "hash": "4925fe5dfcb33fbad389361f27ebd83fbecd7c5f14dc7f901be9c275bf1236d5"
+        },
+        "prevHash": "9814b69fdc711324c92fc6a870a259a5b5a548cf5fd883b10575f80a05e324b8",
+        "hash": "cb79890e8a1a3aa6996cfe599b1b19521b5e01b9ebc8c5ef66b4e265cb7dbb37"
+      },
+      {
+        "sequence": 4,
+        "timestamp": 1787195828108,
+        "action": "SESSION_COMPLETED",
+        "actor": "CUSTOMER_CLIENT",
+        "details": {
+          "durationMs": 3483,
+          "metrics": {
+            "totalChecks": 2,
+            "passedChecks": 2,
+            "failedChecks": 0,
+            "warnings": 0
+          },
+          "reason": "SERVER_SHUTDOWN"
+        },
+        "prevHash": "cb79890e8a1a3aa6996cfe599b1b19521b5e01b9ebc8c5ef66b4e265cb7dbb37",
+        "hash": "62c14a13693b7df8950c0c1991de2cdb0c991c2a2f949762dbd9e2bb3727219a"
+      }
+    ],
+    "zeroTargetPollutionVerified": true
+  },
+  "certification": null,
+  "savedAt": "2026-08-20T03:17:08.109Z"
+}

@@ -1,0 +1,59 @@
+{
+  "reportId": "val-3e4561dc-e997-4ca2-abec-dc3615fc7275",
+  "status": "VALIDATED",
+  "totalAssetsChecked": 8,
+  "validHashes": 8,
+  "mismatchedHashes": 0,
+  "missingFiles": 0,
+  "rules": [
+    {
+      "ruleId": "VAL-HASH-ast-28",
+      "name": "SHA-256 Hash Verification: runner_discovery_evidence.json",
+      "status": "PASS",
+      "details": "Hash matches: 1f7561dee7d0d885c484812b7614fbc6c2a78d56d2f7659c475bdb75951b47c1"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-2f",
+      "name": "SHA-256 Hash Verification: architecture_real_execution.json",
+      "status": "PASS",
+      "details": "Hash matches: 3f15cf31a140db856e36c6352378d733fcc7fe85f265d3b7f3f1411913d55746"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-87",
+      "name": "SHA-256 Hash Verification: api_multi_subsystem_contracts.json",
+      "status": "PASS",
+      "details": "Hash matches: 07eb315f4cd019ad67cb9d4655bdde2bb0f253ea523a16422a3920e1f5c39bac"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-26",
+      "name": "SHA-256 Hash Verification: security_owasp_multi_subsystem.json",
+      "status": "PASS",
+      "details": "Hash matches: 7a1ce82cd35167546b888d61956cda6a88d800a60ae1d27f2b64ba4cf0ced1df"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-a7",
+      "name": "SHA-256 Hash Verification: framework_integrity_report.json",
+      "status": "PASS",
+      "details": "Hash matches: c076a963a0cb26f03c30ccfb983b30a065190b45cfcead6d6c1303ab8e8c0db4"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-71",
+      "name": "SHA-256 Hash Verification: ceg_graph.json",
+      "status": "PASS",
+      "details": "Hash matches: 4d6327c8bad6c34e4da4a82cfb66714d41d7158c9cf37cc4de21fbe4ee284539"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-e8",
+      "name": "SHA-256 Hash Verification: ceg_topology.txt",
+      "status": "PASS",
+      "details": "Hash matches: d197a7855f117c186674bd22d7a170fe508df72360db8a81107115d6fa9e6061"
+    },
+    {
+      "ruleId": "VAL-HASH-ast-d0",
+      "name": "SHA-256 Hash Verification: production_readiness_report.json",
+      "status": "PASS",
+      "details": "Hash matches: 856d62c8703eaf1271051231d84c7a4a7ac4fdde0cc844a44def0b6b454cd08f"
+    }
+  ],
+  "timestamp": "2026-07-26T20:30:28.462Z"
+}

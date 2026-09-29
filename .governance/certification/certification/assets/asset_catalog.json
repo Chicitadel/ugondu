@@ -1,0 +1,130 @@
+[
+  {
+    "assetId": "ast-52e8437f-723b-4feb-b870-775325cf7269",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "runner_discovery_evidence.json",
+    "mimeType": "application/json",
+    "sizeBytes": 1223,
+    "sha256Digest": "89bffcd34dd8975f7408a44f6e3472f56db7a7a11ac376551786a957eeada612",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.131Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\runner_discovery_evidence.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-595f8f7d-b304-4c20-8e06-718386f2d8c1",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "architecture_real_execution.json",
+    "mimeType": "application/json",
+    "sizeBytes": 579,
+    "sha256Digest": "3f15cf31a140db856e36c6352378d733fcc7fe85f265d3b7f3f1411913d55746",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.137Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\architecture_real_execution.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-004fa743-67f6-4602-b413-3f415dcf0bd7",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "api_multi_subsystem_contracts.json",
+    "mimeType": "application/json",
+    "sizeBytes": 694,
+    "sha256Digest": "07eb315f4cd019ad67cb9d4655bdde2bb0f253ea523a16422a3920e1f5c39bac",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.137Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\api_multi_subsystem_contracts.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-6448c586-7ffe-4924-a963-60f0f29b872e",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "security_owasp_multi_subsystem.json",
+    "mimeType": "application/json",
+    "sizeBytes": 866,
+    "sha256Digest": "7a1ce82cd35167546b888d61956cda6a88d800a60ae1d27f2b64ba4cf0ced1df",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.138Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\security_owasp_multi_subsystem.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-1646f9a4-7769-429a-b85f-7ada855f5dfa",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "framework_integrity_report.json",
+    "mimeType": "application/json",
+    "sizeBytes": 514,
+    "sha256Digest": "c076a963a0cb26f03c30ccfb983b30a065190b45cfcead6d6c1303ab8e8c0db4",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.138Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\framework_integrity_report.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-7c3da8bc-0397-4b69-8eeb-0a044b8276c7",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "ceg_graph.json",
+    "mimeType": "application/json",
+    "sizeBytes": 1947,
+    "sha256Digest": "9f14495e43492ce1da4102509446ec624c56d85af3f82a811ca65d15d7ffe642",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.141Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\ceg_graph.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-ae5d91e4-a6aa-41e6-8a6e-d4df214aae5f",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "ceg_topology.txt",
+    "mimeType": "application/octet-stream",
+    "sizeBytes": 436,
+    "sha256Digest": "d197a7855f117c186674bd22d7a170fe508df72360db8a81107115d6fa9e6061",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.143Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\ceg_topology.txt"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-2d1e3998-c341-4ff9-bbcc-efd367e36683",
+    "productId": "airroofers-platform",
+    "category": "EVIDENCE",
+    "filename": "production_readiness_report.json",
+    "mimeType": "application/json",
+    "sizeBytes": 5490,
+    "sha256Digest": "f191b13bc751b0fb949dcebcfdafe736df69ef5c7d6ad435157203f8ca965e52",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-24T07:44:10.146Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\airroofers.eu\\.governance\\certification\\assets\\evidence\\production_readiness_report.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  }
+]

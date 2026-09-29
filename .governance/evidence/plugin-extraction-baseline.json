@@ -1,0 +1,449 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "baseline_id": "BASE-PLUGIN-EXTRACTION-2026.3.1-LTS",
+  "title": "EAORCS Engine Subsystem Classification & Plugin Extraction Baseline",
+  "version": "2026.3.1-LTS",
+  "generated_at": "2026-08-17T13:22:58Z",
+  "classification": "ENTERPRISE | RESTRICTED | GOVERNMENT",
+  "authority": {
+    "author": "Systems Engineering & Security Governance Authority",
+    "organization": "Ujomor Systems & Enterprise Governance",
+    "governance_standards": [
+      "ISO 27001",
+      "SOC 2",
+      "OWASP ASVS Level 3",
+      "NIST SP 800-161",
+      "UAIGOS 3.0.0"
+    ]
+  },
+  "summary": {
+    "total_subsystems_audited": 135,
+    "core_subsystems_count": 8,
+    "required_services_count": 12,
+    "optional_plugins_count": 28,
+    "adapters_count": 15,
+    "legacy_count": 24,
+    "duplicate_pairs_identified": 48,
+    "wave_1_extracted_plugins_count": 4
+  },
+  "wave_1_extractions": [
+    {
+      "capability_id": "eaorcs.digital-twin",
+      "plugin_name": "digital-twin",
+      "source_module": "engine/digitaltwin/DigitalTwinEngine.js",
+      "plugin_target_dir": "plugins/digital-twin",
+      "manifest_path": "plugins/digital-twin/plugin.manifest.json",
+      "entry_point": "plugins/digital-twin/index.js",
+      "status": "EXTRACTED_ACTIVE",
+      "contract_class": "PluginContract",
+      "exposed_methods": [
+        "generateArchitectureTwin",
+        "generateDeploymentAndInfraTwin",
+        "generateSecurityAndRiskTwin",
+        "generateDataAndOpsTwin",
+        "simulateBeforeDeployment"
+      ]
+    },
+    {
+      "capability_id": "eaorcs.predictive-intelligence",
+      "plugin_name": "predictive-intelligence",
+      "source_module": "engine/predictive/PredictiveIntelligenceEngine.js",
+      "plugin_target_dir": "plugins/predictive-intelligence",
+      "manifest_path": "plugins/predictive-intelligence/plugin.manifest.json",
+      "entry_point": "plugins/predictive-intelligence/index.js",
+      "status": "EXTRACTED_ACTIVE",
+      "contract_class": "PluginContract",
+      "exposed_methods": [
+        "predictImpact",
+        "predictArchitectureDegradation",
+        "predictTechnicalDebtGrowth",
+        "predictIncidentsAndFailures",
+        "predictScalingBottlenecksAndExhaustion",
+        "predictPerformanceDecay",
+        "predictSecurityExposure",
+        "predictRegressionProbabilities",
+        "generatePredictiveIntelligenceReport"
+      ]
+    },
+    {
+      "capability_id": "eaorcs.modernization",
+      "plugin_name": "modernization",
+      "source_module": "engine/modernization/ModernizationEngine.js",
+      "plugin_target_dir": "plugins/modernization",
+      "manifest_path": "plugins/modernization/plugin.manifest.json",
+      "entry_point": "plugins/modernization/index.js",
+      "status": "EXTRACTED_ACTIVE",
+      "contract_class": "PluginContract",
+      "exposed_methods": [
+        "recommendFrameworkAndLanguageUpgrades",
+        "analyzeApiAndDbModernization",
+        "analyzeContainerizationAndDecomposition",
+        "generateModernizationRoadmap"
+      ]
+    },
+    {
+      "capability_id": "eaorcs.enterprise-architecture",
+      "plugin_name": "enterprise-architecture",
+      "source_module": "engine/enterprise/EnterpriseArchitectureEngine.js",
+      "plugin_target_dir": "plugins/enterprise-architecture",
+      "manifest_path": "plugins/enterprise-architecture/plugin.manifest.json",
+      "entry_point": "plugins/enterprise-architecture/index.js",
+      "status": "EXTRACTED_ACTIVE",
+      "contract_class": "PluginContract",
+      "exposed_methods": [
+        "mapBusinessCapabilities",
+        "validateTogafArchimateCompliance",
+        "validateDddBoundaries",
+        "analyzeConwaysLaw",
+        "generateEnterpriseCapabilityGraph"
+      ]
+    }
+  ],
+  "engine_subsystem_inventory": [
+    {
+      "domain": "kernel",
+      "path": "engine/kernel/Kernel.js",
+      "classification": "CORE",
+      "capability_id": "eaorcs.core.kernel",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "router",
+      "path": "engine/router/CommandRouter.js",
+      "classification": "CORE",
+      "capability_id": "eaorcs.core.router",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "runtime",
+      "path": "engine/runtime/EAORCSRuntimeEngine.js",
+      "classification": "CORE",
+      "capability_id": "eaorcs.core.runtime",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "execution",
+      "path": "engine/execution/EngineeringTransactionEngine.js",
+      "classification": "CORE",
+      "capability_id": "eaorcs.core.execution",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "compliance",
+      "path": "engine/compliance/CanonicalAuthorityLayer.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.authority",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "governance",
+      "path": "engine/governance/PlatformConstitutionEngine.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.constitution",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "security",
+      "path": "engine/security/AirPackageEngine.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.security",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "packaging",
+      "path": "engine/packaging/CanonicalPackagingEngine.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.packaging",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "telemetry",
+      "path": "engine/telemetry/EvidenceChainEngine.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.telemetry",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "registry",
+      "path": "engine/registry/PlatformRegistry.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.registry",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "plugin",
+      "path": "engine/plugin/PluginRegistry.js",
+      "classification": "REQUIRED SERVICE",
+      "capability_id": "eaorcs.service.plugin-registry",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "digitaltwin",
+      "path": "engine/digitaltwin/DigitalTwinEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.digital-twin",
+      "extraction_status": "EXTRACTED_WAVE_1"
+    },
+    {
+      "domain": "predictive",
+      "path": "engine/predictive/PredictiveIntelligenceEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.predictive-intelligence",
+      "extraction_status": "EXTRACTED_WAVE_1"
+    },
+    {
+      "domain": "modernization",
+      "path": "engine/modernization/ModernizationEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.modernization",
+      "extraction_status": "EXTRACTED_WAVE_1"
+    },
+    {
+      "domain": "enterprise",
+      "path": "engine/enterprise/EnterpriseArchitectureEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.enterprise-architecture",
+      "extraction_status": "EXTRACTED_WAVE_1"
+    },
+    {
+      "domain": "ai",
+      "path": "engine/ai/FederatedAIEngineeringEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.ai-council",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "finance",
+      "path": "engine/finance/FinancialEngineeringEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.financial-engineering",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "supplychain",
+      "path": "engine/supplychain/SupplyChainTrustEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.supply-chain-trust",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "productivity",
+      "path": "engine/productivity/EngineeringProductivityEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.engineering-productivity",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "knowledge",
+      "path": "engine/knowledge/KnowledgeIntelligenceEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.knowledge-intelligence",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "optimization",
+      "path": "engine/optimization/SelfOptimizationEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.self-optimization",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "sovereign",
+      "path": "engine/sovereign/SovereignOfflineEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.sovereign-offline",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "ecosystem",
+      "path": "engine/ecosystem/EcosystemIntelligenceEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.ecosystem-intelligence",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "portfolio",
+      "path": "engine/portfolio/ProgramManagementEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.program-management",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "commercial",
+      "path": "engine/commercial/CommercialEntitlementEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.commercial-entitlement",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "watch",
+      "path": "engine/watch/ContinuousFederationWatchEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.continuous-watch",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "validation",
+      "path": "engine/validation/RealityValidationEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.reality-validation",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "benchmarking",
+      "path": "engine/benchmarking/BenchmarkingEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.benchmarking",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "simulation",
+      "path": "engine/simulation/SimulationEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.simulation",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "remediation",
+      "path": "engine/remediation/RemediationEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.remediation",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "drift",
+      "path": "engine/drift/DriftEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.drift-governance",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "genome",
+      "path": "engine/genome/GenomeEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.genome",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "connectors",
+      "path": "engine/connectors/ConnectorHub.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.connectors",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "portal",
+      "path": "engine/portal/HomeServerEngine.js",
+      "classification": "OPTIONAL PLUGIN",
+      "capability_id": "eaorcs.portal-services",
+      "extraction_status": "CANDIDATE_WAVE_2"
+    },
+    {
+      "domain": "adapters_powershell",
+      "path": "engine/adapters/PowerShellEngineAdapter.js",
+      "classification": "ADAPTER",
+      "capability_id": "eaorcs.adapter.powershell",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "adapters_nodejs",
+      "path": "engine/adapters/NodeJsEngineAdapter.js",
+      "classification": "ADAPTER",
+      "capability_id": "eaorcs.adapter.nodejs",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "adapters_stub",
+      "path": "engine/adapters/StubEngineAdapter.js",
+      "classification": "ADAPTER",
+      "capability_id": "eaorcs.adapter.stub",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "adapters_invocation",
+      "path": "engine/adapters/InvocationAdaptersEngine.js",
+      "classification": "ADAPTER",
+      "capability_id": "eaorcs.adapter.invocation",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "adapters_scan",
+      "path": "engine/federation/ScanCapabilityAdapter.js",
+      "classification": "ADAPTER",
+      "capability_id": "eaorcs.adapter.scan",
+      "extraction_status": "CORE_RETAINED"
+    },
+    {
+      "domain": "duplicate_negotiator",
+      "path": "engine/CapabilityNegotiator.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/CapabilityNegotiator.js",
+      "capability_id": "eaorcs.adapter.negotiator",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_execution_graph",
+      "path": "engine/ExecutionGraph.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/ExecutionGraph.js",
+      "capability_id": "eaorcs.core.graph",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_execution_graph_spec",
+      "path": "engine/ExecutionGraphSpec.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/ExecutionGraphSpec.js",
+      "capability_id": "eaorcs.core.graph-spec",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_plugin_registry",
+      "path": "engine/registry/PluginRegistry.js",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/plugin/PluginRegistry.js",
+      "capability_id": "eaorcs.service.plugin-registry",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_analyzer_registry",
+      "path": "engine/AnalyzerRegistry.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/analyzers/AnalyzerRegistry.js",
+      "capability_id": "eaorcs.analyzers.registry",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_rule_registry",
+      "path": "engine/RuleRegistry.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/analyzers/RuleRegistry.js",
+      "capability_id": "eaorcs.rules.registry",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_engine_index",
+      "path": "engine/index.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/index.js",
+      "capability_id": "eaorcs.facade",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_cyber_weather",
+      "path": "engine/predictive/CyberWeatherEngine.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/predictive/CyberWeatherEngine.js",
+      "capability_id": "eaorcs.predictive.cyber-weather",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    },
+    {
+      "domain": "duplicate_roi_engine",
+      "path": "engine/predictive/RoiEngine.cjs",
+      "classification": "DUPLICATE",
+      "canonical_path": "engine/predictive/RoiEngine.js",
+      "capability_id": "eaorcs.predictive.roi",
+      "extraction_status": "DUPLICATE_IDENTIFIED"
+    }
+  ]
+}

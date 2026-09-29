@@ -1,0 +1,154 @@
+# ******************************************************************************
+# * Product        : EAORCS v5.1 / Air Roofers Platform Ecosystem
+# * Module         : State Projection Registry Contract
+# * File           : .governance/contracts/state-projection-registry.yaml
+# * Version        : 2026.3.1-LTS
+# * Author         : Systems Engineering & Security Governance Authority
+# * Organization   : Ujomor Systems & Enterprise Governance
+# * Classification : ENTERPRISE | RESTRICTED
+# * Standards      : ISO 27001 | SOC 2 | OWASP ASVS | NIST SP 800-53 | NIST SP 800-161 | UAIGOS 3.0.0
+# * Copyright (c) 2026 Ujomor Systems & Enterprise Governance
+# * All Rights Reserved.
+# ******************************************************************************
+
+schemaVersion: "2.0.0"
+canonicalState:
+  path: .governance/state/release-state.json
+
+projections:
+  - id: terminal-certificate
+    path: EAORCS-CERT-2026.3.1-LTS.json
+    required: true
+    headField: payload.repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: certification-pipeline
+    repair: REGENERATE
+
+  - id: terminal-certificate-audit
+    path: docs/audits/EAORCS-CERT-2026.3.1-LTS.json
+    required: true
+    headField: payload.repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: certification-pipeline
+    repair: REGENERATE
+
+  - id: final-release-receipt
+    path: .governance/evidence/final-release-receipt.json
+    required: true
+    headField: finalHead
+    semanticRole: ATTESTATION_GENERATED
+    authority: release-orchestrator
+    repair: REGENERATE
+
+  - id: post-publication-attestation
+    path: .governance/evidence/post-publication-attestation.json
+    required: true
+    headField: finalHead
+    semanticRole: ATTESTATION_GENERATED
+    authority: post-publication-engine
+    repair: REGENERATE
+
+  - id: artifact-lineage
+    path: artifact_lineage.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: lineage-tracker
+    repair: REGENERATE
+
+  - id: product-readiness-certificate
+    path: product_readiness_certificate.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: readiness-engine
+    repair: REGENERATE
+
+  - id: docs-product-readiness-certificate
+    path: docs/product_readiness_certificate.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: readiness-engine
+    repair: REGENERATE
+
+  - id: osap-passport
+    path: osap_passport_2026.3.1-LTS.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: osap-engine
+    repair: REGENERATE
+
+  - id: docs-osap-passport
+    path: docs/osap_passport_2026.3.1-LTS.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: osap-engine
+    repair: REGENERATE
+
+  - id: iso-performance-certificate
+    path: ISO_IEC_25010_Performance_Certificate.json
+    required: true
+    headField: repositoryHeadCommit
+    semanticRole: ATTESTATION_GENERATED
+    authority: performance-benchmark
+    repair: REGENERATE
+
+  - id: digital-twin
+    path: digital_twin.yaml
+    required: true
+    headField: commitHash
+    semanticRole: SOURCE_CERTIFIED
+    authority: digital-twin-engine
+    repair: REGENERATE
+
+  - id: production-freeze-baseline
+    path: baselines/production_freeze_2026.3.0-LTS.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: SOURCE_CERTIFIED
+    authority: certification-ledger
+    repair: IMMUTABLE
+
+  - id: certify-run-output
+    path: docs/certify_run_output.json
+    required: true
+    headField: headCommit
+    semanticRole: QUALIFICATION_EXECUTED
+    authority: certification-evaluator
+    repair: REGENERATE
+
+  - id: governance-result
+    path: .governance/evidence/governance-result.json
+    required: true
+    headField: repositoryHEADSHA
+    semanticRole: ATTESTATION_GENERATED
+    authority: governance-suite
+    repair: REGENERATE
+
+  - id: remote-ci-receipt
+    path: .governance/evidence/remote-ci-receipt.json
+    required: true
+    headField: publicationHEAD
+    semanticRole: QUALIFICATION_EXECUTED
+    authority: remote-ci
+    repair: NONE
+
+  - id: release-state
+    path: .governance/state/release-state.json
+    required: true
+    headField: repository.head
+    semanticRole: ACTIVE_REPOSITORY_HEAD
+    authority: state-authority
+    repair: DERIVE
+
+  - id: current-head-capture
+    path: .governance/evidence/current-head-capture.json
+    required: true
+    headField: head
+    semanticRole: ACTIVE_REPOSITORY_HEAD
+    authority: git
+    repair: DERIVE
+

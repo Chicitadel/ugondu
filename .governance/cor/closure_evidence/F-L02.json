@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "18_of_18_pass",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "094bb411473f66319d993f76953bdd5bf5f0decb",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "engine/providers/source/LocalWorkspaceSourceProvider.js"
+  ],
+  "remediationCommit": "d13854137f2c912a9a2a913d625c5c6fbd556e4e",
+  "verificationCommand": "npx jest tests/certification/bypass_regression_adversarial.test.js --testTimeout=30000 (Case 17, Case 18 pass)",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-L02"
+}

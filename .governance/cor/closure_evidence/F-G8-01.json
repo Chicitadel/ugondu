@@ -1,0 +1,13 @@
+{
+  "verificationResultDigest": "1391c8dd_gated_write",
+  "closedAt": "2026-09-13T17:14:00Z",
+  "subjectDigest": "62716b86c73deb44dd7bbc7239d437dcbf8dbfaf",
+  "status": "CLOSURE_CANDIDATE",
+  "affectedFiles": [
+    "engine/runtime/NativeExecutionAssurance.js"
+  ],
+  "remediationCommit": "1391c8dd1eb426920b5acc7f12e403f7b072e457",
+  "verificationCommand": "grep -n 'EAORCS_ALLOW_SELF_CERTIFY = .true' engine/runtime/NativeExecutionAssurance.js -- gated by NODE_ENV=test only",
+  "closureNote": "Awaiting independent verification to transition to CLOSED",
+  "findingId": "F-G8-01"
+}

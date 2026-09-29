@@ -1,0 +1,114 @@
+[
+  {
+    "assetId": "ast-35644006-a74a-4bc0-b82f-7136822f5174",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "runner_discovery_evidence.json",
+    "mimeType": "application/json",
+    "sizeBytes": 1223,
+    "sha256Digest": "602c97a32003fb07790989a07246d541176c49c7f96fbaa41c4cba56032151a8",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.051Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\runner_discovery_evidence.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-b785a492-cc40-426c-be81-4cdd0fed52a1",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "architecture_real_execution.json",
+    "mimeType": "application/json",
+    "sizeBytes": 579,
+    "sha256Digest": "f4714cff7bad0e4970be84ac2652c701265d959d800699838c25dc142c7f0e14",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.058Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\architecture_real_execution.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-ea5638f5-31c9-4d35-b644-8bda3607a37e",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "api_multi_subsystem_contracts.json",
+    "mimeType": "application/json",
+    "sizeBytes": 2218,
+    "sha256Digest": "5c7c4869839da0c4c0acf403008230ec0619f12288eac9b4750114a46f5bc265",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.058Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\api_multi_subsystem_contracts.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-0783ea17-a67b-42c0-9504-be4c51d70c09",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "framework_integrity_report.json",
+    "mimeType": "application/json",
+    "sizeBytes": 514,
+    "sha256Digest": "c076a963a0cb26f03c30ccfb983b30a065190b45cfcead6d6c1303ab8e8c0db4",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.059Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\framework_integrity_report.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-a5119bbd-3710-4560-8961-501be111444b",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "ceg_graph.json",
+    "mimeType": "application/json",
+    "sizeBytes": 1485,
+    "sha256Digest": "a59bed975e6788a25e5e003df7e067b63ba2cba513918f327fd43521b652f8eb",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.062Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\ceg_graph.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-d9b35fbd-64c4-40db-9a46-cc2736746812",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "ceg_topology.txt",
+    "mimeType": "application/octet-stream",
+    "sizeBytes": 344,
+    "sha256Digest": "61577e715109de4d01f7c5c5f156aabf9d8f69307edb01133f5161f1d9ee21a6",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.064Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\ceg_topology.txt"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  },
+  {
+    "assetId": "ast-b24e693d-ae43-4ebb-b024-c708cba4f061",
+    "productId": "platform-experience",
+    "category": "EVIDENCE",
+    "filename": "production_readiness_report.json",
+    "mimeType": "application/json",
+    "sizeBytes": 5490,
+    "sha256Digest": "7df654bfc6b10dc8b368a229e4bfab092766e2e506d96741c962c895f609ed42",
+    "trustLevel": "LOCAL",
+    "createdAt": "2026-07-26T23:00:58.069Z",
+    "metadata": {
+      "filePath": "D:\\ujomor-platform\\.governance\\certification\\assets\\evidence\\production_readiness_report.json"
+    },
+    "retentionPolicy": "AUDIT_7_YEARS",
+    "referenceCount": 1
+  }
+]

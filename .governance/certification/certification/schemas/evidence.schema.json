@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Artifact Lineage",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "APIResponse",
+        "CoverageReport",
+        "SecurityAudit",
+        "BuildArtifact",
+        "GitSnapshot",
+        "RegistrySnapshot",
+        "SBOM",
+        "ContainerDigest"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "sourcePath": {
+      "type": "string"
+    },
+    "sha256": {
+      "type": "string"
+    },
+    "producedBy": {
+      "type": "string"
+    },
+    "inputCommit": {
+      "type": "string"
+    },
+    "outputCommit": {
+      "type": "string"
+    },
+    "derivedFrom": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "type",
+    "id",
+    "sha256",
+    "producedBy",
+    "inputCommit"
+  ]
+}

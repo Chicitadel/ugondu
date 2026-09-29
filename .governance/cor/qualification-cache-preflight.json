@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0.0",
+  "gate": "COR_QUALIFICATION_CACHE_ISOLATION_PREFLIGHT",
+  "timestamp": "2026-09-13T19:11:28.401Z",
+  "headCommit": "0df4bed82540d622e2a0204df894e80ff1743d34",
+  "cachePath": "D:\\ujomor-platform\\products\\eaorcs-stream-f3\\.governance\\evidence_cache.json",
+  "cacheExisted": false,
+  "cacheDigestBeforeClear": null,
+  "entryCountBeforeClear": 0,
+  "evidenceTypesBeforeClear": [],
+  "action": "CLEAR_BEFORE_PHYSICAL_QUALIFICATION",
+  "reason": "Governance evidence must never satisfy terminal qualification cache reuse."
+}

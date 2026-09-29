@@ -1,0 +1,606 @@
+{
+  "ledgerVersion": "2026.3.1-LTS",
+  "schemaVersion": "1.0.0",
+  "governanceModel": "UAIGOS-3.0.0",
+  "timestamp": "2026-08-14T09:21:02.000Z",
+  "currentBaseline": {
+    "version": "2026.3.1-LTS",
+    "baselineId": "BASELINE-EAORCS-2026.3.1-LTS",
+    "auditBaselineHead": "750e15f766d474e5322dcf03d34024a578cb6445",
+    "promotedAt": "2026-08-13T10:20:18.873Z",
+    "frozenManifestRef": ".governance/frozen_manifest.json",
+    "controlPlaneBaselineRef": ".governance/control_plane_baseline.json",
+    "enforcementPolicy": {
+      "allowInPlaceBypass": false,
+      "requireCandidatePromotion": true,
+      "failClosed": true
+    }
+  },
+  "candidateTransactions": [
+    {
+      "transactionId": "CTX-49597C1D9D2B",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:24:01.002Z",
+      "promotedAt": "2026-08-14T07:24:01.005Z"
+    },
+    {
+      "transactionId": "CTX-709A113E6E4E",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:24:03.475Z",
+      "promotedAt": "2026-08-14T07:24:03.477Z"
+    },
+    {
+      "transactionId": "CTX-7A9F0D61B0D3",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:24:11.819Z",
+      "promotedAt": "2026-08-14T07:24:11.822Z"
+    },
+    {
+      "transactionId": "CTX-F8BB1A227105",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:24:15.112Z",
+      "promotedAt": "2026-08-14T07:24:15.115Z"
+    },
+    {
+      "transactionId": "CTX-C6548A982F59",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:25:31.259Z",
+      "promotedAt": "2026-08-14T07:25:31.263Z"
+    },
+    {
+      "transactionId": "CTX-DF7EF6FE15B4",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:25:42.442Z",
+      "promotedAt": "2026-08-14T07:25:42.445Z"
+    },
+    {
+      "transactionId": "CTX-2B30452C5FF6",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:26:16.646Z",
+      "promotedAt": "2026-08-14T07:26:16.648Z"
+    },
+    {
+      "transactionId": "CTX-D07F8739658B",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:27:56.004Z",
+      "promotedAt": "2026-08-14T07:27:56.007Z"
+    },
+    {
+      "transactionId": "CTX-C8B21036734E",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:28:11.751Z",
+      "promotedAt": "2026-08-14T07:28:11.753Z"
+    },
+    {
+      "transactionId": "CTX-7381FC817992",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:28:28.686Z",
+      "promotedAt": "2026-08-14T07:28:28.688Z"
+    },
+    {
+      "transactionId": "CTX-58DEA80A7ECD",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:31:31.156Z",
+      "promotedAt": "2026-08-14T07:31:31.158Z"
+    },
+    {
+      "transactionId": "CTX-2E4D544E12C0",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:34:55.747Z",
+      "promotedAt": "2026-08-14T07:34:55.749Z"
+    },
+    {
+      "transactionId": "CTX-31B258623D2B",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:56:50.699Z",
+      "promotedAt": "2026-08-14T07:56:50.702Z"
+    },
+    {
+      "transactionId": "CTX-7F6B93D46662",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:57:07.238Z",
+      "promotedAt": "2026-08-14T07:57:07.240Z"
+    },
+    {
+      "transactionId": "CTX-AA536DAFCA25",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:58:11.539Z",
+      "promotedAt": "2026-08-14T07:58:11.542Z"
+    },
+    {
+      "transactionId": "CTX-966CD816D81A",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T07:58:37.600Z",
+      "promotedAt": "2026-08-14T07:58:37.601Z"
+    },
+    {
+      "transactionId": "CTX-3359613C92FA",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:06:19.531Z",
+      "promotedAt": "2026-08-14T08:06:19.533Z"
+    },
+    {
+      "transactionId": "CTX-4C5081790957",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:06:37.644Z",
+      "promotedAt": "2026-08-14T08:06:37.646Z"
+    },
+    {
+      "transactionId": "CTX-23C064D87667",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:07:29.826Z",
+      "promotedAt": "2026-08-14T08:07:29.830Z"
+    },
+    {
+      "transactionId": "CTX-9486D5CDAA4F",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:08:46.623Z",
+      "promotedAt": "2026-08-14T08:08:46.626Z"
+    },
+    {
+      "transactionId": "CTX-5DB84A027082",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:09:02.900Z",
+      "promotedAt": "2026-08-14T08:09:02.902Z"
+    },
+    {
+      "transactionId": "CTX-C5550D700BCC",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:11:49.694Z",
+      "promotedAt": "2026-08-14T08:11:49.696Z"
+    },
+    {
+      "transactionId": "CTX-D97973BD55F5",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:12:07.759Z",
+      "promotedAt": "2026-08-14T08:12:07.761Z"
+    },
+    {
+      "transactionId": "CTX-1AE889844CC2",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:14:02.386Z",
+      "promotedAt": "2026-08-14T08:14:02.388Z"
+    },
+    {
+      "transactionId": "CTX-C78C71906C78",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:19:44.390Z",
+      "promotedAt": "2026-08-14T08:19:44.393Z"
+    },
+    {
+      "transactionId": "CTX-0623AB799080",
+      "author": "Governance Authority",
+      "reason": "Promoting candidate file hashes into baseline",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/RemoteReconciliationEngine.js",
+          "newHash": "752279408457b4ddc9df79a7efa89373d83673fb0863c4715fd918a238236ff5"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "3c809aec4632d0acce65b8929bbb0e400b2edb582d88ace72c394e388e56d700"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T08:20:12.052Z",
+      "promotedAt": "2026-08-14T08:20:12.054Z"
+    },
+    {
+      "transactionId": "CTX-360B83642251",
+      "author": "Governance Authority",
+      "reason": "Promote updated certify.js for COR-3241..3244",
+      "targetFiles": [
+        {
+          "filePath": "certify.js",
+          "newHash": "d3c73180695b3c08500acd7d16222386e26338f47ff06d69ec58aa1d932caef6"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-14T09:04:04.543Z",
+      "promotedAt": "2026-08-14T09:04:04.549Z"
+    },
+    {
+      "transactionId": "CTX-943696A4D3A2",
+      "author": "Systems Engineering & Security Governance Authority",
+      "reason": "Wave O (O86): Extended CanonicalSubjectRegistry with classifyCommit and assertFinalCertificationSubject",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/CanonicalSubjectRegistry.js",
+          "newHash": "d5208a997759cf10f243827c6c905e0a85cc90c6cef7a10828c76c0864ed368d"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-16T12:03:01.513Z",
+      "promotedAt": "2026-08-16T12:03:01.520Z"
+    },
+    {
+      "transactionId": "CTX-F3EDA6B5AF84",
+      "author": "Systems Engineering & Security Governance Authority",
+      "reason": "COR-3206 authorized: BLOCKER-4 requireCurrentHead guard + BLOCKER-6 CERTIFICATION_EXECUTION_HEAD_MISMATCH guard",
+      "targetFiles": [
+        {
+          "filePath": "engine/release/CanonicalSubjectRegistry.js",
+          "newHash": "31bd18226a8a01bb2220a0f1dba4b71da5f7bcae75619d5d58ee0e63def9c7e4"
+        },
+        {
+          "newHash": "5594a7d721848e6e83d3f2d9381a5d0030b2f63a6572e889733680ecbb1a46a2"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-19T07:15:53.699Z",
+      "promotedAt": "2026-08-19T07:15:53.706Z"
+    },
+    {
+      "transactionId": "CTX-21476E18A9B5",
+      "author": "Systems Engineering & Security Governance Authority",
+      "targetFiles": [
+        {
+          "newHash": "c0ddb18d9b540256cd591fcc93e8339e22b4e6da15edfee73038a6b03c608251"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-20T19:34:01.730Z",
+      "promotedAt": "2026-08-20T19:34:01.736Z"
+    },
+    {
+      "transactionId": "CTX-5AA71B0A583C",
+      "author": "Systems Engineering & Security Governance Authority",
+      "targetFiles": [
+        {
+          "newHash": "f2e5a51498743e3ab373aaee4293f0297c86e2863e8bf4039a18ad3164d3466f"
+        },
+        {
+          "filePath": "certify.js",
+          "newHash": "58e0bc9fefc32b35edbf69a6e4ffe761aee0b8ce4fa3806f1cbac4626274c8df"
+        }
+      ],
+      "status": "PROMOTED",
+      "createdAt": "2026-08-20T19:42:58.951Z",
+      "promotedAt": "2026-08-20T19:42:58.956Z"
+    }
+  ],
+  "historicalBaselines": [
+    {
+      "version": "2026.3.0-LTS",
+      "baselineId": "BASELINE-EAORCS-2026.3.0-LTS",
+      "commitHash": "e418a93"
+    },
+    {
+      "version": "2026.1.0-LTS",
+      "baselineId": "BASELINE-EAORCS-2026.1.0-LTS",
+      "commitHash": "855bad0922871bcf167d633e401f8d84e071dd40"
+    }
+  ],
+  "baselines": [
+    {
+      "baselineId": "EAORCS-BL-TEST-1786698281361",
+      "commit": "e97ace788422f13b9a466a51fd9232e43d4b6634",
+      "promotedAt": "2026-08-14T09:04:41.363Z",
+      "transitionId": "TRX-1786698281362-e7234b8a"
+    },
+    {
+      "baselineId": "EAORCS-BL-TEST-1786698304236",
+      "commit": "e97ace788422f13b9a466a51fd9232e43d4b6634",
+      "promotedAt": "2026-08-14T09:05:04.238Z",
+      "transitionId": "TRX-1786698304238-d30eed2e"
+    },
+    {
+      "baselineId": "EAORCS-BL-2026.3.1-SGCP",
+      "commit": "ab7f5e3998527c68406943c653ec99bb8930209a",
+      "promotedAt": "2026-08-14T09:11:10.928Z",
+      "transitionId": "TRX-1786698670928-3e3e78df"
+    },
+    {
+      "baselineId": "EAORCS-BL-2026.3.1-SGCP",
+      "commit": "fa5da437f59c2ae56f71f8f678318d29a35a8601",
+      "promotedAt": "2026-08-14T09:11:22.560Z",
+      "transitionId": "TRX-1786698682560-22d48af7"
+    },
+    {
+      "baselineId": "EAORCS-BL-2026.3.1-SGCP",
+      "commit": "cf4b46ee4d6d07e0071bfcea166d8e0b79b6c0a7",
+      "promotedAt": "2026-08-14T09:11:25.874Z",
+      "transitionId": "TRX-1786698685873-de7c97f5"
+    }
+  ]
+}

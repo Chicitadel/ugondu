@@ -1,0 +1,4 @@
+name: publishing
+description: Publishing workflow and media distribution constraints.
+rules:
+  - require-approval-gate

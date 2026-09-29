@@ -1,0 +1,325 @@
+{
+  "sessionId": "34acd358-055f-4e8f-ab82-355ac3c2cc03",
+  "createdAt": "2026-08-20T03:14:56.628Z",
+  "actor": "TEST_INTEGRATION_SUITE",
+  "targetContext": {
+    "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+    "subjectType": "WORKSPACE",
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "environment": "remote-governance-client",
+    "revision": "fbf06871",
+    "branch": "main",
+    "policySource": "OUT_OF_TREE",
+    "sessionId": "34acd358-055f-4e8f-ab82-355ac3c2cc03",
+    "federationMode": "INDEPENDENT",
+    "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+    "hasInTreeGovernance": false,
+    "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+    "createdAt": "2026-08-20T03:14:56.627Z",
+    "metadata": {}
+  },
+  "targetDescriptor": {
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+    "subjectType": "WORKSPACE",
+    "name": "@corporate/auth-microservice",
+    "version": "3.4.1",
+    "description": "",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "branch": "unversioned",
+    "revision": "unversioned",
+    "isClean": true,
+    "remoteUrl": null,
+    "manifests": {
+      "nodejs": {
+        "name": "@corporate/auth-microservice",
+        "version": "3.4.1",
+        "type": "commonjs",
+        "main": "src/index.js",
+        "scripts": [
+          "test",
+          "build"
+        ],
+        "dependenciesCount": 1,
+        "devDependenciesCount": 0,
+        "hasLockfile": false
+      }
+    },
+    "buildSystem": "npm",
+    "tests": {
+      "hasTests": true,
+      "testDirs": [
+        "tests"
+      ],
+      "testConfigs": []
+    },
+    "structureSummary": {
+      "fileCount": 4,
+      "dirCount": 2,
+      "totalBytes": 418,
+      "languages": {
+        "JSON": 1,
+        "JavaScript": 3
+      }
+    },
+    "fingerprint": "a7c2dc5733e9d1ee20a97146b18829de4195b4a91a06fedecf06a2aab3d3dec8",
+    "discoveredAt": "2026-08-20T03:14:55.448Z",
+    "metadata": {
+      "hasInTreeGovernance": false,
+      "discoveredManifests": []
+    }
+  },
+  "session": {
+    "sessionId": "34acd358-055f-4e8f-ab82-355ac3c2cc03",
+    "status": "COMPLETED",
+    "targetContext": {
+      "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+      "subjectType": "WORKSPACE",
+      "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+      "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+      "environment": "remote-governance-client",
+      "revision": "fbf06871",
+      "branch": "main",
+      "policySource": "OUT_OF_TREE",
+      "sessionId": "34acd358-055f-4e8f-ab82-355ac3c2cc03",
+      "federationMode": "INDEPENDENT",
+      "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+      "hasInTreeGovernance": false,
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "createdAt": "2026-08-20T03:14:56.627Z",
+      "metadata": {}
+    },
+    "startTime": 1787195696628,
+    "endTime": 1787195699175,
+    "evidenceCatalog": [
+      {
+        "id": "EVID-DISCOVER-1787195696636",
+        "requirementId": "REQ-TARGET-DISCOVERY",
+        "type": "TARGET_DISCOVERY",
+        "source": "EAORCS_OBSERVER",
+        "status": "VALID",
+        "data": {
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+          "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+          "subjectType": "WORKSPACE",
+          "name": "@corporate/auth-microservice",
+          "version": "3.4.1",
+          "description": "",
+          "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+          "branch": "unversioned",
+          "revision": "unversioned",
+          "isClean": true,
+          "remoteUrl": null,
+          "manifests": {
+            "nodejs": {
+              "name": "@corporate/auth-microservice",
+              "version": "3.4.1",
+              "type": "commonjs",
+              "main": "src/index.js",
+              "scripts": [
+                "test",
+                "build"
+              ],
+              "dependenciesCount": 1,
+              "devDependenciesCount": 0,
+              "hasLockfile": false
+            }
+          },
+          "buildSystem": "npm",
+          "tests": {
+            "hasTests": true,
+            "testDirs": [
+              "tests"
+            ],
+            "testConfigs": []
+          },
+          "structureSummary": {
+            "fileCount": 4,
+            "dirCount": 2,
+            "totalBytes": 418,
+            "languages": {
+              "JSON": 1,
+              "JavaScript": 3
+            }
+          },
+          "fingerprint": "a7c2dc5733e9d1ee20a97146b18829de4195b4a91a06fedecf06a2aab3d3dec8",
+          "discoveredAt": "2026-08-20T03:14:55.448Z",
+          "metadata": {
+            "hasInTreeGovernance": false,
+            "discoveredManifests": []
+          }
+        },
+        "hash": "f3a52cfe475ba9544c20fb4ed1ba8211f92502e2554d52b6af3719975105184f",
+        "timestamp": "2026-08-20T03:14:56.636Z"
+      },
+      {
+        "id": "EVID-PKG-1787195695455",
+        "requirementId": "REQ-MANIFEST-INTEGRITY",
+        "type": "PACKAGE_MANIFEST_HASH",
+        "source": "REMOTE_CLIENT_TRANSPORT",
+        "status": "VALID",
+        "data": {
+          "file": "package.json",
+          "sha256": "522678fc7d5d6f2bb2e61336a0f7aab30c8ca1853edada19e81e10b084b60614"
+        },
+        "hash": "b707350a1986c66b66f37bb8e565c66455f23bed24a00956c2b296dcd3bdecba",
+        "timestamp": "2026-08-20T03:14:56.643Z"
+      },
+      {
+        "id": "EVID-REMOTE-AUDIT-1787195696655",
+        "requirementId": "REQ-REMOTE-AUDIT",
+        "type": "AUDIT_RESULT",
+        "source": "EAORCS_OBSERVER",
+        "status": "PASSED",
+        "data": {
+          "status": "SUCCESS",
+          "pass": true,
+          "capabilityId": "assurance.audit",
+          "data": "Trust Intelligence Subsystem Posture\n============================================================\nTrust Status Score: 98/100 (ENTERPRISE-RESTRICTED-PLATINUM)\nRoot Authority Anchors: 2 active root certificates\nKey Store Inventory: 3 active cryptographic keys\nRevocation List Status: CLEAN (0 revoked certificates)"
+        },
+        "hash": "3c962043d7e3b1cd9003ba2c642a1eb75bc9e9310211be66dd3c71528d99ab1a",
+        "timestamp": "2026-08-20T03:14:56.656Z"
+      },
+      {
+        "id": "EVID-REMOTE-QUALIFY-1787195699169",
+        "requirementId": "REQ-QUALIFICATION-PIPELINE",
+        "type": "QUALIFICATION_RESULT",
+        "source": "EAORCS_OBSERVER",
+        "status": "FAILED",
+        "data": {
+          "error": "[FAIL_CLOSED] CANONICAL_TREE_HASH_ERROR: Empty tree for commit reference '4dc9d0ea83191ef5e78207f0f3262cb12d4b0995'"
+        },
+        "hash": "a450997b4031823915872c3977fc877d23a9be9155d9dcab7bd7bfd06c96e1f8",
+        "timestamp": "2026-08-20T03:14:59.170Z"
+      }
+    ],
+    "findings": [],
+    "metrics": {
+      "totalChecks": 4,
+      "passedChecks": 3,
+      "failedChecks": 1,
+      "warnings": 0
+    },
+    "policyResolution": {
+      "policySource": "OUT_OF_TREE",
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "hasInTreeGovernance": false,
+      "evaluatedRules": []
+    },
+    "auditTrail": [
+      {
+        "sequence": 0,
+        "timestamp": 1787195696628,
+        "action": "SESSION_INITIALIZED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+          "policySource": "OUT_OF_TREE"
+        },
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "3f40931bd8bf7d7b15e7cb434b867e1fd83ce46a5c9e9698a68846f389b6507e"
+      },
+      {
+        "sequence": 1,
+        "timestamp": 1787195696628,
+        "action": "SESSION_STARTED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "startTime": 1787195696628,
+          "reason": "REMOTE_REST_SESSION_INIT"
+        },
+        "prevHash": "3f40931bd8bf7d7b15e7cb434b867e1fd83ce46a5c9e9698a68846f389b6507e",
+        "hash": "8a6372204c1f2db367acc06430c301e6b793e57528e493cc972aa8153f091bd2"
+      },
+      {
+        "sequence": 2,
+        "timestamp": 1787195696636,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "evidenceId": "EVID-DISCOVER-1787195696636",
+          "requirementId": "REQ-TARGET-DISCOVERY",
+          "hash": "f3a52cfe475ba9544c20fb4ed1ba8211f92502e2554d52b6af3719975105184f"
+        },
+        "prevHash": "8a6372204c1f2db367acc06430c301e6b793e57528e493cc972aa8153f091bd2",
+        "hash": "55b12470e5a214cfbb297ee6beee52ed10b8359d6a872badb8c05375db17166d"
+      },
+      {
+        "sequence": 3,
+        "timestamp": 1787195696643,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "evidenceId": "EVID-PKG-1787195695455",
+          "requirementId": "REQ-MANIFEST-INTEGRITY",
+          "hash": "b707350a1986c66b66f37bb8e565c66455f23bed24a00956c2b296dcd3bdecba"
+        },
+        "prevHash": "55b12470e5a214cfbb297ee6beee52ed10b8359d6a872badb8c05375db17166d",
+        "hash": "a6edc9baf042992018b91f511c3d91cd7ff59b493d68edb3575e402bf0ac0184"
+      },
+      {
+        "sequence": 4,
+        "timestamp": 1787195696656,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "evidenceId": "EVID-REMOTE-AUDIT-1787195696655",
+          "requirementId": "REQ-REMOTE-AUDIT",
+          "hash": "3c962043d7e3b1cd9003ba2c642a1eb75bc9e9310211be66dd3c71528d99ab1a"
+        },
+        "prevHash": "a6edc9baf042992018b91f511c3d91cd7ff59b493d68edb3575e402bf0ac0184",
+        "hash": "71f1eb9df5e3dd7c98159848e691499b8d69d776be2e8f8e7972a4c15498aab7"
+      },
+      {
+        "sequence": 5,
+        "timestamp": 1787195699170,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "evidenceId": "EVID-REMOTE-QUALIFY-1787195699169",
+          "requirementId": "REQ-QUALIFICATION-PIPELINE",
+          "hash": "a450997b4031823915872c3977fc877d23a9be9155d9dcab7bd7bfd06c96e1f8"
+        },
+        "prevHash": "71f1eb9df5e3dd7c98159848e691499b8d69d776be2e8f8e7972a4c15498aab7",
+        "hash": "9004dfb92665aa02f9c5e0450adab105cb3e1bd4a5607999baf3fc9144263699"
+      },
+      {
+        "sequence": 6,
+        "timestamp": 1787195699175,
+        "action": "SESSION_COMPLETED",
+        "actor": "TEST_INTEGRATION_SUITE",
+        "details": {
+          "durationMs": 2547,
+          "metrics": {
+            "totalChecks": 4,
+            "passedChecks": 3,
+            "failedChecks": 1,
+            "warnings": 0
+          },
+          "reason": "SERVER_SHUTDOWN"
+        },
+        "prevHash": "9004dfb92665aa02f9c5e0450adab105cb3e1bd4a5607999baf3fc9144263699",
+        "hash": "df71e7ff7cde2e7c626254ecfdba59c79c8aad440c50c31c044126708684a1b4"
+      }
+    ],
+    "zeroTargetPollutionVerified": true
+  },
+  "certification": {
+    "certificateId": "EAORCS-CERT-34ACD358",
+    "status": "QUALIFICATION_FAILED",
+    "issuedAt": "2026-08-20T03:14:59.170Z",
+    "subjectId": "subj_tmp_client_fixture_target_6027a905a2bb",
+    "targetRoot": "D:\\ujomor-platform\\products\\eaorcs\\tests\\packaging\\tmp_client_fixture_target",
+    "standards": [
+      "ISO 27001",
+      "SOC 2",
+      "OWASP ASVS",
+      "NIST SP 800-161",
+      "UAIGOS 3.0.0"
+    ],
+    "evidenceHash": "9004dfb92665aa02f9c5e0450adab105cb3e1bd4a5607999baf3fc9144263699"
+  },
+  "savedAt": "2026-08-20T03:14:59.176Z"
+}

@@ -1,0 +1,1147 @@
+{
+  "schemaVersion": "1.0.0",
+  "updatedAt": "2026-09-17T04:23:14.617Z",
+  "totalRecordedRuns": 38,
+  "entries": [
+    {
+      "executionId": "run_1789206732268_9272_inkq36",
+      "subjectCommit": "8e4fdfe872a25a34effdc59ab37426aef60f2d35",
+      "lifecycleId": "LC-run_1789206732268_9272_inkq36",
+      "status": "COMPLETED",
+      "totalElapsedMs": 54594,
+      "phaseTimings": {
+        "DISCOVER": 23,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 1,
+        "EXECUTE": 53899,
+        "VERIFY": 1,
+        "DECIDE": 429,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 232
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T09:53:07.497Z"
+    },
+    {
+      "executionId": "run_1789208887730_62572_988v0w",
+      "subjectCommit": "8e4fdfe872a25a34effdc59ab37426aef60f2d35",
+      "lifecycleId": "LC-run_1789208887730_62572_988v0w",
+      "status": "COMPLETED",
+      "totalElapsedMs": 51426,
+      "phaseTimings": {
+        "DISCOVER": 21,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 50745,
+        "VERIFY": 0,
+        "DECIDE": 414,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 233
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T10:28:59.749Z"
+    },
+    {
+      "executionId": "run_1789217252427_78016_hoc1ye",
+      "subjectCommit": "8e4fdfe872a25a34effdc59ab37426aef60f2d35",
+      "lifecycleId": "LC-run_1789217252427_78016_hoc1ye",
+      "status": "COMPLETED",
+      "totalElapsedMs": 55537,
+      "phaseTimings": {
+        "DISCOVER": 21,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 54853,
+        "VERIFY": 0,
+        "DECIDE": 408,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 243
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T12:48:28.666Z"
+    },
+    {
+      "executionId": "run_1789218101271_80448_b2ji1n",
+      "subjectCommit": "8e4fdfe872a25a34effdc59ab37426aef60f2d35",
+      "lifecycleId": "LC-run_1789218101271_80448_b2ji1n",
+      "status": "COMPLETED",
+      "totalElapsedMs": 48946,
+      "phaseTimings": {
+        "DISCOVER": 19,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 48242,
+        "VERIFY": 0,
+        "DECIDE": 436,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 238
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T13:02:30.802Z"
+    },
+    {
+      "executionId": "run_1789218467541_54480_zt6ag2",
+      "subjectCommit": "59dafe60194ef4a866855e439eac966e048f92cb",
+      "lifecycleId": "LC-run_1789218467541_54480_zt6ag2",
+      "status": "COMPLETED",
+      "totalElapsedMs": 35584,
+      "phaseTimings": {
+        "DISCOVER": 21,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 34882,
+        "VERIFY": 0,
+        "DECIDE": 407,
+        "SNAPSHOT": 7,
+        "CERTIFY": 0,
+        "REPORT": 261
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T13:08:23.785Z"
+    },
+    {
+      "executionId": "run_1789240070239_91956_o2jatb",
+      "subjectCommit": "08f52aee7936a0d56b6c18522dc3480936047301",
+      "lifecycleId": "LC-run_1789240070239_91956_o2jatb",
+      "status": "COMPLETED",
+      "totalElapsedMs": 148819,
+      "phaseTimings": {
+        "DISCOVER": 22,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 1,
+        "EXECUTE": 148003,
+        "VERIFY": 0,
+        "DECIDE": 461,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 320
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:10:19.695Z"
+    },
+    {
+      "executionId": "run_1789240226107_60700_daxhyc",
+      "subjectCommit": "08f52aee7936a0d56b6c18522dc3480936047301",
+      "lifecycleId": "LC-run_1789240226107_60700_daxhyc",
+      "status": "COMPLETED",
+      "totalElapsedMs": 148252,
+      "phaseTimings": {
+        "DISCOVER": 25,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 147296,
+        "VERIFY": 0,
+        "DECIDE": 603,
+        "SNAPSHOT": 7,
+        "CERTIFY": 0,
+        "REPORT": 313
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:12:55.555Z"
+    },
+    {
+      "executionId": "run_1789240916190_100052_a0oya8",
+      "subjectCommit": "9d9d8849bcdf099f75ae26dd6fa7b3cd07613ff6",
+      "lifecycleId": "LC-run_1789240916190_100052_a0oya8",
+      "status": "COMPLETED",
+      "totalElapsedMs": 140285,
+      "phaseTimings": {
+        "DISCOVER": 24,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 139573,
+        "VERIFY": 0,
+        "DECIDE": 411,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 265
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:24:17.107Z"
+    },
+    {
+      "executionId": "run_1789241179351_71400_hwau3e",
+      "subjectCommit": "f7bd0daffce6c5de210872a8b69cc6905348f0fb",
+      "lifecycleId": "LC-run_1789241179351_71400_hwau3e",
+      "status": "COMPLETED",
+      "totalElapsedMs": 142582,
+      "phaseTimings": {
+        "DISCOVER": 18,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 141887,
+        "VERIFY": 1,
+        "DECIDE": 424,
+        "SNAPSHOT": 6,
+        "CERTIFY": 0,
+        "REPORT": 240
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:28:42.516Z"
+    },
+    {
+      "executionId": "run_1789241891595_53228_jo4i7l",
+      "subjectCommit": "0af8b42fdd67a1b2312aa308c742e3fc0569e020",
+      "lifecycleId": "LC-run_1789241891595_53228_jo4i7l",
+      "status": "COMPLETED",
+      "totalElapsedMs": 140961,
+      "phaseTimings": {
+        "DISCOVER": 22,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 140293,
+        "VERIFY": 0,
+        "DECIDE": 406,
+        "SNAPSHOT": 5,
+        "CERTIFY": 0,
+        "REPORT": 227
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:40:33.138Z"
+    },
+    {
+      "executionId": "run_1789242148170_40868_ulg9gh",
+      "subjectCommit": "c926bae7b4ab63ec8d47c210386dc41be6557d16",
+      "lifecycleId": "LC-run_1789242148170_40868_ulg9gh",
+      "status": "COMPLETED",
+      "totalElapsedMs": 141186,
+      "phaseTimings": {
+        "DISCOVER": 17,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 1,
+        "EXECUTE": 140194,
+        "VERIFY": 1,
+        "DECIDE": 511,
+        "SNAPSHOT": 7,
+        "CERTIFY": 0,
+        "REPORT": 451
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:44:49.976Z"
+    },
+    {
+      "executionId": "run_1789242451579_34348_5fc125",
+      "subjectCommit": "336d2341d50b9148e951bbaf7e720ae39cc53045",
+      "lifecycleId": "LC-run_1789242451579_34348_5fc125",
+      "status": "COMPLETED",
+      "totalElapsedMs": 143087,
+      "phaseTimings": {
+        "DISCOVER": 24,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 142243,
+        "VERIFY": 0,
+        "DECIDE": 409,
+        "SNAPSHOT": 5,
+        "CERTIFY": 0,
+        "REPORT": 398
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-12T19:49:55.247Z"
+    },
+    {
+      "executionId": "run_1789280810013_24216_iy0nio",
+      "subjectCommit": "a6e0824a49eb227c51b73fe692be0d551558e97c",
+      "lifecycleId": "LC-run_1789280810013_24216_iy0nio",
+      "status": "COMPLETED",
+      "totalElapsedMs": 140844,
+      "phaseTimings": {
+        "DISCOVER": 22,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 140125,
+        "VERIFY": 0,
+        "DECIDE": 443,
+        "SNAPSHOT": 5,
+        "CERTIFY": 0,
+        "REPORT": 241
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T06:29:11.508Z"
+    },
+    {
+      "executionId": "run_1789289048343_99632_unhggh",
+      "subjectCommit": "f2989d44f18a2ed9148521edb1a3bfcc3dde90b5",
+      "lifecycleId": "LC-run_1789289048343_99632_unhggh",
+      "status": "COMPLETED",
+      "totalElapsedMs": 153876,
+      "phaseTimings": {
+        "DISCOVER": 20,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 152738,
+        "VERIFY": 0,
+        "DECIDE": 554,
+        "SNAPSHOT": 8,
+        "CERTIFY": 1,
+        "REPORT": 548
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T08:46:42.836Z"
+    },
+    {
+      "executionId": "run_1789291301990_44020_w7jcp7",
+      "subjectCommit": "75f6fce48f961086c8206e8ec6199a4513bfe2a6",
+      "lifecycleId": "LC-run_1789291301990_44020_w7jcp7",
+      "status": "COMPLETED",
+      "totalElapsedMs": 207301,
+      "phaseTimings": {
+        "DISCOVER": 56,
+        "CONVERGE": 1,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 205721,
+        "VERIFY": 0,
+        "DECIDE": 1142,
+        "SNAPSHOT": 7,
+        "CERTIFY": 0,
+        "REPORT": 366
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T09:25:10.227Z"
+    },
+    {
+      "executionId": "run_1789295103367_38220_2a1b9j",
+      "subjectCommit": "d8f6a800093ab1efb4b6871737d6153ac81347c9",
+      "lifecycleId": "LC-run_1789295103367_38220_2a1b9j",
+      "status": "COMPLETED",
+      "totalElapsedMs": 146206,
+      "phaseTimings": {
+        "DISCOVER": 21,
+        "CONVERGE": 1,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 145380,
+        "VERIFY": 0,
+        "DECIDE": 516,
+        "SNAPSHOT": 7,
+        "CERTIFY": 0,
+        "REPORT": 277
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T10:27:30.186Z"
+    },
+    {
+      "executionId": "run_1789296868480_71264_03l7wv",
+      "subjectCommit": "be65302975879d13760394177a69c6b777165a73",
+      "lifecycleId": "LC-run_1789296868480_71264_03l7wv",
+      "status": "COMPLETED",
+      "totalElapsedMs": 149750,
+      "phaseTimings": {
+        "DISCOVER": 18,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 139479,
+        "VERIFY": 0,
+        "DECIDE": 494,
+        "SNAPSHOT": 9504,
+        "CERTIFY": 0,
+        "REPORT": 249
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T10:56:58.920Z"
+    },
+    {
+      "executionId": "run_1789298068622_87840_sc37ox",
+      "subjectCommit": "fadd8405b2fbde1de97e6775d90afc53f20de5ff",
+      "lifecycleId": "LC-run_1789298068622_87840_sc37ox",
+      "status": "COMPLETED",
+      "totalElapsedMs": 154230,
+      "phaseTimings": {
+        "DISCOVER": 23,
+        "CONVERGE": 1,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 143675,
+        "VERIFY": 0,
+        "DECIDE": 462,
+        "SNAPSHOT": 9813,
+        "CERTIFY": 0,
+        "REPORT": 251
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T11:17:03.474Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789331110504",
+      "status": "COMPLETED",
+      "totalElapsedMs": 9,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T20:25:10.587Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789331718927",
+      "status": "COMPLETED",
+      "totalElapsedMs": 8,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-13T20:35:18.963Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789370669021",
+      "status": "COMPLETED",
+      "totalElapsedMs": 9,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-14T07:24:29.141Z"
+    },
+    {
+      "executionId": "run_1789434169533_101168_jt42ge",
+      "subjectCommit": "8547dd7b25c66b59d846503bc226ef9a26c24481",
+      "lifecycleId": "LC-run_1789434169533_101168_jt42ge",
+      "status": "COMPLETED",
+      "totalElapsedMs": 151493,
+      "phaseTimings": {
+        "DISCOVER": 21,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 144684,
+        "VERIFY": 0,
+        "DECIDE": 414,
+        "SNAPSHOT": 6068,
+        "CERTIFY": 0,
+        "REPORT": 296
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T01:05:29.178Z"
+    },
+    {
+      "executionId": "run_1789436168204_113684_m6znpr",
+      "subjectCommit": "a92ad09e43c90b6ec592dce84552b656f607c637",
+      "lifecycleId": "LC-run_1789436168204_113684_m6znpr",
+      "status": "COMPLETED",
+      "totalElapsedMs": 168637,
+      "phaseTimings": {
+        "DISCOVER": 49,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 1,
+        "EXECUTE": 161069,
+        "VERIFY": 0,
+        "DECIDE": 494,
+        "SNAPSHOT": 6723,
+        "CERTIFY": 0,
+        "REPORT": 289
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T01:39:04.268Z"
+    },
+    {
+      "executionId": "run_1789448597573_122904_s9cxuy",
+      "subjectCommit": "148797a4d831a9db6319d5ac63db417a99551ff0",
+      "lifecycleId": "LC-run_1789448597573_122904_s9cxuy",
+      "status": "COMPLETED",
+      "totalElapsedMs": 180619,
+      "phaseTimings": {
+        "DISCOVER": 26,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 172645,
+        "VERIFY": 1,
+        "DECIDE": 551,
+        "SNAPSHOT": 7121,
+        "CERTIFY": 0,
+        "REPORT": 264
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T05:06:26.122Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789466690607",
+      "status": "COMPLETED",
+      "totalElapsedMs": 8,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T10:04:50.653Z"
+    },
+    {
+      "executionId": "run_1789495948271_127308_9syj9v",
+      "subjectCommit": "87c5dd38e782d074dbe3d40bbe3c3940e283685a",
+      "lifecycleId": "LC-run_1789495948271_127308_9syj9v",
+      "status": "COMPLETED",
+      "totalElapsedMs": 178172,
+      "phaseTimings": {
+        "DISCOVER": 24,
+        "CONVERGE": 1,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 170439,
+        "VERIFY": 1,
+        "DECIDE": 532,
+        "SNAPSHOT": 6901,
+        "CERTIFY": 0,
+        "REPORT": 264
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T18:15:35.026Z"
+    },
+    {
+      "executionId": "run_1789513897092_129380_dlyrnw",
+      "subjectCommit": "99f348d4bcb0a6aa04a1aa9de9e2ee4fe37d07a4",
+      "lifecycleId": "LC-run_1789513897092_129380_dlyrnw",
+      "status": "COMPLETED",
+      "totalElapsedMs": 173906,
+      "phaseTimings": {
+        "DISCOVER": 26,
+        "CONVERGE": 1,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 166574,
+        "VERIFY": 0,
+        "DECIDE": 456,
+        "SNAPSHOT": 6487,
+        "CERTIFY": 1,
+        "REPORT": 352
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T23:14:39.207Z"
+    },
+    {
+      "executionId": "run_1789514576713_127076_qsfpjo",
+      "subjectCommit": "99f348d4bcb0a6aa04a1aa9de9e2ee4fe37d07a4",
+      "lifecycleId": "LC-run_1789514576713_127076_qsfpjo",
+      "status": "COMPLETED",
+      "totalElapsedMs": 167072,
+      "phaseTimings": {
+        "DISCOVER": 25,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 159742,
+        "VERIFY": 0,
+        "DECIDE": 478,
+        "SNAPSHOT": 6463,
+        "CERTIFY": 0,
+        "REPORT": 355
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-15T23:25:51.337Z"
+    },
+    {
+      "executionId": "run_1789517476188_128700_8a8yib",
+      "subjectCommit": "4693f12255df56c8e9bdd822f4fb7ed7e3fe7da6",
+      "lifecycleId": "LC-run_1789517476188_128700_8a8yib",
+      "status": "COMPLETED",
+      "totalElapsedMs": 183283,
+      "phaseTimings": {
+        "DISCOVER": 26,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 175298,
+        "VERIFY": 0,
+        "DECIDE": 565,
+        "SNAPSHOT": 7108,
+        "CERTIFY": 0,
+        "REPORT": 273
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-16T00:14:30.744Z"
+    },
+    {
+      "executionId": "run_1789519287178_56772_bovhv7",
+      "subjectCommit": "4693f12255df56c8e9bdd822f4fb7ed7e3fe7da6",
+      "lifecycleId": "LC-run_1789519287178_56772_bovhv7",
+      "status": "COMPLETED",
+      "totalElapsedMs": 162432,
+      "phaseTimings": {
+        "DISCOVER": 32,
+        "CONVERGE": 1,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 154928,
+        "VERIFY": 0,
+        "DECIDE": 443,
+        "SNAPSHOT": 6762,
+        "CERTIFY": 0,
+        "REPORT": 258
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-16T00:44:16.953Z"
+    },
+    {
+      "executionId": "run_1789544498229_8540_4zguo8",
+      "subjectCommit": "4693f12255df56c8e9bdd822f4fb7ed7e3fe7da6",
+      "lifecycleId": "LC-run_1789544498229_8540_4zguo8",
+      "status": "COMPLETED",
+      "totalElapsedMs": 155125,
+      "phaseTimings": {
+        "DISCOVER": 20,
+        "CONVERGE": 1,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 147503,
+        "VERIFY": 0,
+        "DECIDE": 480,
+        "SNAPSHOT": 6851,
+        "CERTIFY": 0,
+        "REPORT": 262
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-16T07:44:33.257Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789553901879",
+      "status": "COMPLETED",
+      "totalElapsedMs": 15,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-16T10:18:21.956Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789572279395",
+      "status": "COMPLETED",
+      "totalElapsedMs": 84,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-16T15:24:39.864Z"
+    },
+    {
+      "executionId": "run_1789597082541_24300_ib42b2",
+      "subjectCommit": "5fa81fa59cfd044bb01cb8d231a2887847ed210e",
+      "lifecycleId": "LC-run_1789597082541_24300_ib42b2",
+      "status": "COMPLETED",
+      "totalElapsedMs": 209870,
+      "phaseTimings": {
+        "DISCOVER": 22,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 200453,
+        "VERIFY": 0,
+        "DECIDE": 743,
+        "SNAPSHOT": 8226,
+        "CERTIFY": 0,
+        "REPORT": 413
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-16T22:21:43.212Z"
+    },
+    {
+      "executionId": "run_1789612724487_15300_3ep986",
+      "subjectCommit": "a1eda38030e3527dbf74620dc6a253b79b60355a",
+      "lifecycleId": "LC-run_1789612724487_15300_3ep986",
+      "status": "COMPLETED",
+      "totalElapsedMs": 150222,
+      "phaseTimings": {
+        "DISCOVER": 15,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 143470,
+        "VERIFY": 0,
+        "DECIDE": 493,
+        "SNAPSHOT": 5992,
+        "CERTIFY": 1,
+        "REPORT": 243
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-17T02:41:30.598Z"
+    },
+    {
+      "executionId": "run_1789612909341_25312_s2f8gv",
+      "subjectCommit": "b5bd0a646790d1f5ae8084264276edcf22b3a9bf",
+      "lifecycleId": "LC-run_1789612909341_25312_s2f8gv",
+      "status": "COMPLETED",
+      "totalElapsedMs": 152495,
+      "phaseTimings": {
+        "DISCOVER": 17,
+        "CONVERGE": 0,
+        "MATERIALIZE": 1,
+        "FREEZE": 0,
+        "EXECUTE": 145725,
+        "VERIFY": 0,
+        "DECIDE": 485,
+        "SNAPSHOT": 6016,
+        "CERTIFY": 0,
+        "REPORT": 241
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-17T02:44:29.822Z"
+    },
+    {
+      "executionId": "run_1789613082122_14868_xxrkja",
+      "subjectCommit": "a1eda38030e3527dbf74620dc6a253b79b60355a",
+      "lifecycleId": "LC-run_1789613082122_14868_xxrkja",
+      "status": "COMPLETED",
+      "totalElapsedMs": 150851,
+      "phaseTimings": {
+        "DISCOVER": 23,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 143620,
+        "VERIFY": 0,
+        "DECIDE": 476,
+        "SNAPSHOT": 6458,
+        "CERTIFY": 0,
+        "REPORT": 262
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-17T02:47:20.940Z"
+    },
+    {
+      "executionId": "EXE-FIREWALL-001",
+      "subjectCommit": "",
+      "lifecycleId": "LC-1789618994533",
+      "status": "COMPLETED",
+      "totalElapsedMs": 14,
+      "phaseTimings": {
+        "DISCOVER": 0,
+        "CONVERGE": 0,
+        "MATERIALIZE": 0,
+        "FREEZE": 0,
+        "EXECUTE": 0,
+        "VERIFY": 0,
+        "DECIDE": 0,
+        "SNAPSHOT": 0,
+        "CERTIFY": 0,
+        "REPORT": 0
+      },
+      "workload": {
+        "checksCount": 0,
+        "streamsCount": 0,
+        "filesCount": 0
+      },
+      "environment": {
+        "platform": "win32",
+        "arch": "x64",
+        "cpus": 8
+      },
+      "recordedAt": "2026-09-17T04:23:14.617Z"
+    }
+  ]
+}

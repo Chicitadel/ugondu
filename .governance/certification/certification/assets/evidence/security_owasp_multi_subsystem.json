@@ -1,0 +1,36 @@
+{
+  "runner": "security-runner",
+  "result": "PASSED",
+  "tests": [
+    {
+      "testId": "SEC-01",
+      "name": "Horizontal & vertical privilege escalation protection",
+      "status": "PASS",
+      "durationMs": 30
+    },
+    {
+      "testId": "SEC-02",
+      "name": "JWT signature forgery & expired token rejection",
+      "status": "PASS",
+      "durationMs": 20
+    },
+    {
+      "testId": "SEC-03",
+      "name": "Path traversal & ZIP bomb file upload safety (SVMF path sanitization)",
+      "status": "PASS",
+      "durationMs": 25
+    },
+    {
+      "testId": "SEC-04",
+      "name": "Contract SHA-256 hash tampering resistance (DRX contracts)",
+      "status": "PASS",
+      "durationMs": 15
+    },
+    {
+      "testId": "SEC-05",
+      "name": "MCPM fingerprint verification bypass resistance",
+      "status": "PASS",
+      "durationMs": 18
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "receiptId": "EVID-HC-CLASS-20260817-001",
+  "receiptType": "HARDCODE_CLASSIFICATION",
+  "executionId": "EXE-COR-2efd6bbb55c2",
+  "commitSHA": "2efd6bbb55c2af4414174d7b9aac86f1dfbcba8e",
+  "executedAt": "2026-08-17T12:14:42.797Z",
+  "engine": "HardcodedStringClassifier v1.0.0",
+  "taxonomyVersion": "1.0.0",
+  "result": {
+    "status": "PASSED",
+    "totalClassified": 0,
+    "unknownClassifications": 0,
+    "secretCandidates": 0,
+    "blockingViolations": 0
+  },
+  "authority": "Systems Engineering & Security Governance Authority",
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED",
+  "standards": [
+    "ISO 27001",
+    "SOC 2",
+    "OWASP ASVS",
+    "NIST SP 800-161",
+    "UAIGOS 3.0.0"
+  ],
+  "headCommit": "2efd6bbb55c2af4414174d7b9aac86f1dfbcba8e",
+  "sourceTreeHash": "fa41508abc5dc4cf54071e96eec10939b640f0974311f1a1d601aa13fa6678b4",
+  "lifecycleId": "LC-2efd6bbb55c2",
+  "receiptDigest": "9bdf04d4202fa3104ded5cb4289a6a4118a5fa816700992ad888ed240edc4e43",
+  "contentDigest": "cfa0d48c2ca8c0deb103a39df3382bf3d1e2b7a4f538badcb21312acd4d66ee0"
+}

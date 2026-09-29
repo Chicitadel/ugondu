@@ -1,0 +1,10 @@
+{
+  "state": "PUBLISHED",
+  "transactionId": "TX-BAE167B30086",
+  "snapshotHash": "10eaba4a6ed43f94e8ee2a433e803914718bc2d8d7a2c6681b06e21f07a8a1cd",
+  "subjectDigest": "b5373baff36bd806550715f4b4b86dc94b2c5a88fc3e3bb786f664fa99a5518f",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "preparedAt": "2026-09-12T12:23:54.219Z",
+  "publishedAt": "2026-09-12T12:23:54.219Z",
+  "publicationRevision": null
+}

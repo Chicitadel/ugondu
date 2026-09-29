@@ -1,0 +1,10 @@
+{
+  "transactionId": "TX-E17BCD9B6CCC",
+  "snapshotHash": "b6ec1f10c10a3284b153d36fe2cd05780205c60312a9d7d85f034d7e265d8052",
+  "files": {
+    "transaction.json": "4b596d2ee22efb883f5469d8299509a1d64abc6825af514722486223db1b4fbe",
+    "certificate.json": "de5b5f459730457ff95ab3881ed7931d163b7fc549977fd05d646fa1ae03956d",
+    "ledger.json": "f343bf84c4e6fa99e53fa35167b1347d91c2e3c3d7df325e86bd21b9ab2a485b"
+  },
+  "generatedAt": "2026-09-13T06:13:09.265Z"
+}

@@ -1,0 +1,7 @@
+profile: commercial-product
+description: Commercial product capabilities.
+includes:
+  - platform-base
+  - media-governance
+  - ai-governance
+  - publishing

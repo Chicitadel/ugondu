@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: Air Roofers Session API
+  version: 1.0.0
+  description: Frozen contract for Session Management (Tokens, Refresh, Revocation)
+paths:
+  /session/issue:
+    post:
+      summary: Issue session token
+  /session/refresh:
+    post:
+      summary: Refresh active session
+  /session/revoke:
+    post:
+      summary: Revoke session (Logout)

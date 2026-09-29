@@ -1,0 +1,487 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "registryId": "EAORCS-FEDERATED-PRODUCT-REGISTRY-2026",
+  "version": "2026.3.1-LTS",
+  "standard": "UAIGOS-3.0.0",
+  "author": "Ujomor Systems Engineering & Governance Authority",
+  "organization": "Ujomor Systems & Enterprise Governance",
+  "createdDate": "2026-08-19",
+  "classification": "ENTERPRISE | GOVERNMENT",
+  "governance": {
+    "zeroDomainContamination": true,
+    "decoupledEcosystem": true,
+    "externalObservationOnly": true
+  },
+  "products": [
+    {
+      "productId": "EAORCS",
+      "name": "Enterprise Autonomous Operational Readiness & Certification System",
+      "code": "EAORCS",
+      "classification": "PLATFORM_CORE_ASSURANCE",
+      "tier": "SOVEREIGN_SYSTEM",
+      "description": "The Software Trust Platform providing autonomous operational readiness, regulatory verification, and continuous evidence certification.",
+      "endpoints": {
+        "baseUrl": "https://eaorcs.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/docs/openapi.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_mTLS",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "eaorcs:certify",
+          "eaorcs:audit",
+          "eaorcs:read"
+        ],
+        "roles": [
+          "PlatformAdmin",
+          "Auditor",
+          "Certifier",
+          "Viewer"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "ENTERPRISE_CORE",
+        "entitlementEnforcementMode": "FailClosedCryptographic"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "CertificationRunsAndEvidenceUnits",
+        "settlementModel": "EnterpriseSubscriptionAndUsage"
+      },
+      "telemetry": {
+        "namespace": "ujomor.platform.eaorcs",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "platform-assurance-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "GOVERNANCE_AND_ASSURANCE",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/eaorcs"
+      }
+    },
+    {
+      "productId": "AKPATI",
+      "name": "Akpati Intelligent Reasoning Fabric",
+      "code": "AKPATI",
+      "classification": "COMMERCIAL_PRODUCT",
+      "tier": "ENTERPRISE_AI",
+      "description": "Federated AI intelligence and autonomous decision orchestration engine.",
+      "endpoints": {
+        "baseUrl": "https://akpati.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/api/v1/openapi.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_JWT",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "akpati:infer",
+          "akpati:train",
+          "akpati:admin"
+        ],
+        "roles": [
+          "AIArchitect",
+          "InferenceClient",
+          "Viewer"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "TIERED_USAGE",
+        "entitlementEnforcementMode": "TokenBucketQuota"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "InferenceTokensAndComputeSeconds",
+        "settlementModel": "MeteredConsumption"
+      },
+      "telemetry": {
+        "namespace": "ujomor.product.akpati",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "ai-intelligence-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "AI_INTELLIGENCE",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/akpati"
+      }
+    },
+    {
+      "productId": "CIVISCORE",
+      "name": "CiviScore Civic Scoring & Governance Compliance Platform",
+      "code": "CIVISCORE",
+      "classification": "COMMERCIAL_PRODUCT",
+      "tier": "GOVERNMENT_ENTERPRISE",
+      "description": "Civic engagement, compliance scoring, and institutional governance assessment substrate.",
+      "endpoints": {
+        "baseUrl": "https://civiscore.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/v1/api-docs"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_OIDC",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "civiscore:score",
+          "civiscore:audit",
+          "civiscore:admin"
+        ],
+        "roles": [
+          "CivicEvaluator",
+          "InstitutionalAuditor",
+          "PublicViewer"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "MUNICIPAL_ENTERPRISE",
+        "entitlementEnforcementMode": "LeaseKeyVerification"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "ScoredEntitiesAndAuditEvaluations",
+        "settlementModel": "AnnualMunicipalLicensing"
+      },
+      "telemetry": {
+        "namespace": "ujomor.product.civiscore",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "civic-scoring-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "CIVIC_SCORING",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/civiscore"
+      }
+    },
+    {
+      "productId": "AFFIANTOR",
+      "name": "Affiantor Legal, Attestation & Trust Assurance System",
+      "code": "AFFIANTOR",
+      "classification": "COMMERCIAL_PRODUCT",
+      "tier": "LEGAL_ASSURANCE",
+      "description": "Cryptographic legal attestation, smart document verification, and trust witness authority.",
+      "endpoints": {
+        "baseUrl": "https://affiantor.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/openapi.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_mTLS",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "affiantor:attest",
+          "affiantor:verify",
+          "affiantor:notarize"
+        ],
+        "roles": [
+          "LegalNotary",
+          "Signer",
+          "Verifier"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "TRANSACTIONAL_TRUST",
+        "entitlementEnforcementMode": "PerAttestationQuota"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "AttestationSignaturesAndVerifications",
+        "settlementModel": "TieredTransactionSettlement"
+      },
+      "telemetry": {
+        "namespace": "ujomor.product.affiantor",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "attestation-trust-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "LEGAL_ATTESTATION",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/affiantor"
+      }
+    },
+    {
+      "productId": "CONSUNEXIA",
+      "name": "ConsuNexia Consumer & Commerce Intelligence Platform",
+      "code": "CONSUNEXIA",
+      "classification": "COMMERCIAL_PRODUCT",
+      "tier": "COMMERCE_SCALE",
+      "description": "Consumer intelligence, marketplace matching, and commerce analytics engine.",
+      "endpoints": {
+        "baseUrl": "https://consunexia.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/docs/openapi.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_OIDC",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "consunexia:query",
+          "consunexia:analytics",
+          "consunexia:partner"
+        ],
+        "roles": [
+          "MerchantAdmin",
+          "ConsumerClient",
+          "AnalyticsViewer"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "FREEMIUM_TIERED",
+        "entitlementEnforcementMode": "SubscriptionAndRateLimit"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "MarketplaceTransactionsAndAPICalls",
+        "settlementModel": "CommissionAndTieredSubscription"
+      },
+      "telemetry": {
+        "namespace": "ujomor.product.consunexia",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "commerce-intelligence-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "COMMERCE_INTELLIGENCE",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/consunexia"
+      }
+    },
+    {
+      "productId": "UGONDU",
+      "name": "Ugondu Universal Identity, Ledger & Data Gateway",
+      "code": "UGONDU",
+      "classification": "COMMERCIAL_PRODUCT",
+      "tier": "SOVEREIGN_LEDGER",
+      "description": "Decentralized identity gateway, tamper-proof audit ledger, and high-throughput data federation bus.",
+      "endpoints": {
+        "baseUrl": "https://ugondu.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/v1/swagger.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_mTLS",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "ugondu:identity",
+          "ugondu:ledger:write",
+          "ugondu:ledger:read"
+        ],
+        "roles": [
+          "IdentityOperator",
+          "LedgerNode",
+          "Client"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "LEDGER_BANDWIDTH",
+        "entitlementEnforcementMode": "CryptographicNodeSignature"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "LedgerEventsAndBandwidthGigabytes",
+        "settlementModel": "UsageBasedLedgerSettlement"
+      },
+      "telemetry": {
+        "namespace": "ujomor.product.ugondu",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "identity-ledger-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "IDENTITY_AND_LEDGER",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/ugondu"
+      }
+    },
+    {
+      "productId": "DIRSTRUCT",
+      "name": "DirStruct Structural Analysis & Knowledge Graph Engine",
+      "code": "DIRSTRUCT",
+      "classification": "COMMERCIAL_PRODUCT",
+      "tier": "DEVELOPER_ENTERPRISE",
+      "description": "Codebase topology, directory taxonomy, and architectural integrity validation platform.",
+      "endpoints": {
+        "baseUrl": "https://dirstruct.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/docs/openapi.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_JWT",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "dirstruct:scan",
+          "dirstruct:graph",
+          "dirstruct:export"
+        ],
+        "roles": [
+          "LeadArchitect",
+          "Developer",
+          "CI_Bot"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "DEVELOPER_SEAT",
+        "entitlementEnforcementMode": "SeatTokenVerification"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "ScannedRepositoriesAndGraphNodes",
+        "settlementModel": "PerSeatSubscription"
+      },
+      "telemetry": {
+        "namespace": "ujomor.product.dirstruct",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "structural-analysis-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "STRUCTURAL_TOPOLOGY",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "products/dirstruct"
+      }
+    },
+    {
+      "productId": "MANDATAG",
+      "name": "Mandatag Licensing, Digital Rights & Entitlement Authority",
+      "code": "MANDATAG",
+      "classification": "PLATFORM_SERVICE",
+      "tier": "ECOSYSTEM_AUTHORITY",
+      "description": "Centralized cryptographic license generation, revocation, and entitlement enforcement authority.",
+      "endpoints": {
+        "baseUrl": "https://license.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/v1/api.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_mTLS",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "mandatag:issue",
+          "mandatag:revoke",
+          "mandatag:verify"
+        ],
+        "roles": [
+          "LicensingAuthority",
+          "VerificationAgent",
+          "AuditMonitor"
+        ]
+      },
+      "licensing": {
+        "authority": "SELF_AUTHORITATIVE",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "ECOSYSTEM_CORE",
+        "entitlementEnforcementMode": "AsymmetricCryptographicSignatures"
+      },
+      "billing": {
+        "authority": "AEROBILL",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "IssuedLicensesAndVerificationRequests",
+        "settlementModel": "EcosystemInterServiceSettlement"
+      },
+      "telemetry": {
+        "namespace": "ujomor.platform.mandatag",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "licensing-authority-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "LICENSING_AND_RIGHTS",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "platform/mandatag"
+      }
+    },
+    {
+      "productId": "AEROBILL",
+      "name": "AeroBill Commercial Billing, Metering & Revenue Settlement",
+      "code": "AEROBILL",
+      "classification": "PLATFORM_SERVICE",
+      "tier": "ECOSYSTEM_AUTHORITY",
+      "description": "Multi-tenant monetization, real-time consumption metering, and automated invoicing authority.",
+      "endpoints": {
+        "baseUrl": "https://billing.airroofers.eu",
+        "health": "/health",
+        "readiness": "/ready",
+        "metrics": "/metrics",
+        "apiDocs": "/docs/openapi.json"
+      },
+      "iam": {
+        "authProtocol": "OAuth2_mTLS",
+        "tokenIssuer": "auth.identity.federated",
+        "requiredScopes": [
+          "aerobill:charge",
+          "aerobill:meter",
+          "aerobill:invoice",
+          "aerobill:admin"
+        ],
+        "roles": [
+          "BillingAdmin",
+          "CommercialClient",
+          "FinanceAuditor"
+        ]
+      },
+      "licensing": {
+        "authority": "MANDATAG",
+        "licenseServer": "https://license.airroofers.eu",
+        "tieringModel": "ECOSYSTEM_CORE",
+        "entitlementEnforcementMode": "CryptographicTokenValidation"
+      },
+      "billing": {
+        "authority": "SELF_AUTHORITATIVE",
+        "billingServer": "https://billing.airroofers.eu",
+        "meteringUnit": "FinancialTransactionsAndInvoicesProcessed",
+        "settlementModel": "PlatformRevenueSettlement"
+      },
+      "telemetry": {
+        "namespace": "ujomor.platform.aerobill",
+        "collector": "otel-collector.telemetry.federated:4317",
+        "logStream": "billing-metering-stream",
+        "correlationIdHeader": "X-Correlation-ID"
+      },
+      "metadata": {
+        "boundedContext": "COMMERCIAL_BILLING",
+        "domainContaminationRisk": "ZERO",
+        "repositoryPath": "platform/aerobill"
+      }
+    }
+  ]
+}

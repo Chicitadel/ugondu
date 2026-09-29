@@ -1,0 +1,472 @@
+[
+  {
+    "id": "AUD-1785701630251-5",
+    "timestamp": "2026-08-02T20:13:50.251Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "QUALIFICATION_RUNNER",
+    "edition": "COMMUNITY",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_221350",
+      "archiveFileName": "snapshot-2026-08-02_221350.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "1d29ade467c453ecd3d74b9a6144898d6176130454ecf7900936397b428ccb5ca68b99b0ac1bd96a174ce558e6c37d3eb1b1b3c50eb744987cdc3c5eaeef6c02"
+    },
+    "checksum": "378fa8ca3466f9b175339da68e8c8f55da215a0155ba38ffb51facf2f5fd36c0"
+  },
+  {
+    "id": "AUD-1785701647407-866",
+    "timestamp": "2026-08-02T20:14:07.407Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "QUALIFICATION_RUNNER",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_221407",
+      "archiveFileName": "snapshot-2026-08-02_221407.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "509661716a5707823e2ae2741dccea9fdbf54c7e49fbd37144d0e05834c40e4b48d36b5e789cdbe869f9ba2877f45a4bfce64b9b6182c13388aa057679296f0f"
+    },
+    "checksum": "27a5c0d80cd0f6df53fe1d0ee8afba1f0c50bea5af528f611faebdeb7c529feb"
+  },
+  {
+    "id": "AUD-1785701647418-333",
+    "timestamp": "2026-08-02T20:14:07.418Z",
+    "action": "REGISTRY_RESET",
+    "operator": "TEST_OPERATOR",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "TEST_OPERATOR",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "2326bb67a1020755469ec7963077751faa777700ac6f84c8dc8cc17f6fdb6bdd"
+  },
+  {
+    "id": "AUD-1785701647419-715",
+    "timestamp": "2026-08-02T20:14:07.420Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "TEST_OPERATOR",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "TEST_OPERATOR"
+    },
+    "checksum": "be3bb37c4e6374d8f8b1f5690bd905ebf99a21bb53c2d15b509edf30b12638e5"
+  },
+  {
+    "id": "AUD-1785701647438-612",
+    "timestamp": "2026-08-02T20:14:07.438Z",
+    "action": "REGISTRY_ROLLBACK_EXECUTED",
+    "operator": "TEST_ROLLBACK",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_221407",
+      "signatureVerified": true,
+      "operator": "TEST_ROLLBACK"
+    },
+    "checksum": "13d5875c9c1af8bd7255eacf55b5beda248e9af521e6767540e35ebac6bbd2c2"
+  },
+  {
+    "id": "AUD-1785701647447-248",
+    "timestamp": "2026-08-02T20:14:07.447Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "CLEAN_AUDIT_RUNNER",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_221407",
+      "archiveFileName": "snapshot-2026-08-02_221407.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "f47114e26d4c3f5c04544ee4ae4e1ce1aba4ff39fe7b39adaeb3c11427861099f7c34cf59311d6a7f7c4569b37083818e3e94adf987bf8173fc2da6a2301930d"
+    },
+    "checksum": "2027d1cf89bd16270d87832e6253da51e6bffd13b42a01a009d2d78ea5102619"
+  },
+  {
+    "id": "AUD-1785701647989-207",
+    "timestamp": "2026-08-02T20:14:07.990Z",
+    "action": "CLEAN_AUDIT_EXECUTED",
+    "operator": "CLEAN_AUDIT_RUNNER",
+    "edition": "ENTERPRISE",
+    "details": {
+      "newAuditId": "AUD-20260802201407-20349D",
+      "snapshotId": "snapshot-2026-08-02_221407",
+      "artifactsCount": 9
+    },
+    "checksum": "bd449b2cbbd499e792e863f28b1b5c3e8de90a8ba2e850592d06c0e403ea76b9"
+  },
+  {
+    "id": "AUD-1785701648016-344",
+    "timestamp": "2026-08-02T20:14:08.016Z",
+    "action": "REGISTRY_RESET",
+    "operator": "HTTP_TESTER",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "HTTP_TESTER",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "25f137740148a29e2629dd4d27403a1f2624cbdbd180e174a26212a855ed22a1"
+  },
+  {
+    "id": "AUD-1785701648018-231",
+    "timestamp": "2026-08-02T20:14:08.018Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "HTTP_TESTER",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "HTTP_TESTER"
+    },
+    "checksum": "08d98f126cca4d96f59415c956c19e79bf9566e3ad057808c615c7d9094edba1"
+  },
+  {
+    "id": "AUD-1785701994985-255",
+    "timestamp": "2026-08-02T20:19:54.985Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "3865dfa005e8f5468a03f9381c17f803f6068e962ce42d304f13686af13ed3f8"
+  },
+  {
+    "id": "AUD-1785701994988-410",
+    "timestamp": "2026-08-02T20:19:54.988Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "e9887a37759a20019242a0e439c812786a2dbbc3c875576f62110597a4d94b77"
+  },
+  {
+    "id": "AUD-1785702010822-168",
+    "timestamp": "2026-08-02T20:20:10.822Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "0bed0bee1cdf6dbe5e3d4390afedbbc2ec2b39798acf4aac32764071833d0558"
+  },
+  {
+    "id": "AUD-1785702010825-85",
+    "timestamp": "2026-08-02T20:20:10.825Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "5499b5d3bafe417949506647f05fbcbf52375d260f0c337d091d12b59cbdd7d7"
+  },
+  {
+    "id": "AUD-1785702010846-765",
+    "timestamp": "2026-08-02T20:20:10.846Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222010",
+      "archiveFileName": "snapshot-2026-08-02_222010.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "9128eb0dfecdaa5a93c350359c21d483fc0a92714ef4c1d85d285cf5dd1f34fc540e0609390bc873fcc9017cdc4bda35383c44eeb5a7f2546edc8f486c904105"
+    },
+    "checksum": "be706d16a51679e51d525491a5e9e6260593f017c921eb05277c7303502c542a"
+  },
+  {
+    "id": "AUD-1785702026745-431",
+    "timestamp": "2026-08-02T20:20:26.746Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "2ddfa60b68713fe9760876250080667d35ce5a01c7bf8870bfc1cb2aecaf92f4"
+  },
+  {
+    "id": "AUD-1785702026747-178",
+    "timestamp": "2026-08-02T20:20:26.747Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "64559a761ae66a37a928058bba069e2f41df14e6cfa52179cd6a7add1929b898"
+  },
+  {
+    "id": "AUD-1785702026768-903",
+    "timestamp": "2026-08-02T20:20:26.768Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222026",
+      "archiveFileName": "snapshot-2026-08-02_222026.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "cc1192493d235c02f912ba41815c08d7653a91ee9357ad181ff1dadbb3942daefa4006bcfc0ddf0054cec26b45070bc4bfe075452d23f7469195f44706f95302"
+    },
+    "checksum": "eabb10a8892c5507fbc356f3f2518526dc9826476ed966e1392a41a18fb12e3d"
+  },
+  {
+    "id": "AUD-1785702039299-79",
+    "timestamp": "2026-08-02T20:20:39.299Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "dcb48a4dfa02459fdda19389781ae2322b5d26b7a1f68246cfe6a1226aa3d81b"
+  },
+  {
+    "id": "AUD-1785702039301-168",
+    "timestamp": "2026-08-02T20:20:39.301Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "f2b09a72cd42e7dbaf57cc0d49dba6adaf1547090bf310092bebab9848ab8443"
+  },
+  {
+    "id": "AUD-1785702039322-232",
+    "timestamp": "2026-08-02T20:20:39.322Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222039",
+      "archiveFileName": "snapshot-2026-08-02_222039.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "e674ec74208ed1aa8eb6d5580f08963ba8fd17389ddc4b58aa245dc89f2114f0e8a1158eea714f75a26ad71dca06c56b1c86528258b71f35f625bfbcd11f870a"
+    },
+    "checksum": "6b7a967f7dae852fd719cf86c705d18751f8c6952c09266f7238805f315aae41"
+  },
+  {
+    "id": "AUD-1785702052566-216",
+    "timestamp": "2026-08-02T20:20:52.566Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "c146b1fdfdedcb7f967ea137353213f71444f0bfcf79530f529d1343981a2ca1"
+  },
+  {
+    "id": "AUD-1785702052599-773",
+    "timestamp": "2026-08-02T20:20:52.599Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "4b420ad0fb1ed9d85284ea17f6d6724a6f28b90aa928b1bddbeb404d4984802f"
+  },
+  {
+    "id": "AUD-1785702052702-752",
+    "timestamp": "2026-08-02T20:20:52.702Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222052",
+      "archiveFileName": "snapshot-2026-08-02_222052.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "3d8ff54db022968620d4a24fb0fed2b19bbe875f09f0ccdbc7379bc6e8c1d3a257b481d961794339725b871b5aa4b6a4b44798c4d82e649b8e5ad35941579900"
+    },
+    "checksum": "8b92a12d87959e1fcf37a45750a99d43699319aa2201c41c8db37a82242232d3"
+  },
+  {
+    "id": "AUD-1785702074328-64",
+    "timestamp": "2026-08-02T20:21:14.328Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "f217b20d9ae990ed52db48670c85a75bf5c5e0eca03d584d76bab541ea029ab6"
+  },
+  {
+    "id": "AUD-1785702074330-888",
+    "timestamp": "2026-08-02T20:21:14.330Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "0d9aa8f1c32f917702910f55c5e02d4be8ea91098821fd4ceac9a2d4e284e67c"
+  },
+  {
+    "id": "AUD-1785702074348-392",
+    "timestamp": "2026-08-02T20:21:14.348Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222114",
+      "archiveFileName": "snapshot-2026-08-02_222114.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "0c709320396e955bf7c539627ff0b2f134af7e9c597f744255da6e1ae204fbaa67f27eb9231f30a9bbae3e6b5d5a37404c5d04d008bfa366caf49699e4a17b0b"
+    },
+    "checksum": "79bd9cc88fd9e87b185c53532d26d0736ba44b77606332576b9e16209da1f8bf"
+  },
+  {
+    "id": "AUD-1785702107772-860",
+    "timestamp": "2026-08-02T20:21:47.772Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "01958918e07b4475e869f899fe69170c5acfbf716528c52f3d7e2f6080cfc95d"
+  },
+  {
+    "id": "AUD-1785702107774-624",
+    "timestamp": "2026-08-02T20:21:47.774Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "96a5900de8dc11123e87af30c1a9ad0d99b14e247268a7795a47b1dc6194451d"
+  },
+  {
+    "id": "AUD-1785702107796-245",
+    "timestamp": "2026-08-02T20:21:47.796Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222147",
+      "archiveFileName": "snapshot-2026-08-02_222147.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "6d444690485876cb7eaa62cc95859694e14d7135352a93e109fead1e81404489b08ccc6304b9c27058b204969112214e4847065ea9f40b4a48055a23b8966d01"
+    },
+    "checksum": "0fa0f05a46119e979faac132612ad7af95e6e56206ff9f3340893a58d46bf6d0"
+  },
+  {
+    "id": "AUD-1785702124538-120",
+    "timestamp": "2026-08-02T20:22:04.538Z",
+    "action": "REGISTRY_RESET",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "mode": "SOFT_RESET",
+      "operator": "SYSTEM",
+      "description": "Soft reset executed: Transient cache cleared, active registry configuration preserved."
+    },
+    "checksum": "09681d0880c320c12571eb7fc21df22c05712c06433da8e64f3671aab39ea748"
+  },
+  {
+    "id": "AUD-1785702124540-851",
+    "timestamp": "2026-08-02T20:22:04.540Z",
+    "action": "SOFT_RESET_EXECUTED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "flushedCaches": [
+        "transient_memory",
+        "session_cache",
+        "audit_cache"
+      ],
+      "operator": "SYSTEM"
+    },
+    "checksum": "7cadc4196676c0bb54c1ff749541b57ca91b0c3acbf454c4ba0f768f4e701ddf"
+  },
+  {
+    "id": "AUD-1785702124570-754",
+    "timestamp": "2026-08-02T20:22:04.570Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "SYSTEM",
+    "edition": "ENTERPRISE",
+    "details": {
+      "snapshotId": "snapshot-2026-08-02_222204",
+      "archiveFileName": "snapshot-2026-08-02_222204.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "ee2b9758bcf91b29076484ce9155ad9adf141bfd348ccc24d8982be6b4188093a952676476518cbe82b01031309161cb9364552c5a1041e77a27859fc2fc4607"
+    },
+    "checksum": "ac2ad8381a2d36928681edf63c96002b59cae1faf290fede46ad86c0f34e5c6e"
+  },
+  {
+    "id": "AUD-1786976077977-907",
+    "timestamp": "2026-08-17T14:14:37.977Z",
+    "action": "ARCHIVE_SNAPSHOT_CREATED",
+    "operator": "QUALIFICATION_RUNNER",
+    "edition": "COMMUNITY",
+    "details": {
+      "snapshotId": "snapshot-2026-08-17_161437",
+      "archiveFileName": "snapshot-2026-08-17_161437.tgz",
+      "signatureAlgorithm": "Ed25519",
+      "signature": "01152441da185bb385034dc1adc23ebd96158da7bdaf8b0ec8ec0d696bd66188ad9ca7761b7a9819d97faa73a624e46454b3244b0af2cd3a7cbb32542bda060a"
+    },
+    "checksum": "1bec895c3d58d62441256b061bbf2e4d70a8d40f79ebcfa99eff28a2a2f8458f"
+  }
+]

@@ -1,0 +1,4 @@
+name: eu-compliance
+description: Strict European compliance constraints.
+rules:
+  - gdpr-data-isolation

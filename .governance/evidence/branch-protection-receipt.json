@@ -1,0 +1,12 @@
+{
+  "appliedAt": "2026-09-21T06:40:00.000Z",
+  "repo": "Chicitadel/eaorcs",
+  "branch": "main",
+  "enforcementStatus": "BLOCKED_BY_GITHUB_TIER",
+  "apiResponse": {
+    "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+    "status": "403"
+  },
+  "authority": "Ujomor Systems Engineering & Governance Authority",
+  "note": "Free GitHub tier constraint prevents remote enforcement of required status checks via API."
+}

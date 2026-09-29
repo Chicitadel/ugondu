@@ -1,0 +1,174 @@
+{
+  "generatedAt": "2026-09-22T09:49:47.077Z",
+  "headCommit": "cf39e39c44f36c9aac1e3d1ca94d2a9ac859571e",
+  "requirements": [
+    {
+      "id": "COR-A",
+      "description": "HEAD^{tree} resolution in ci_subject_lock.js",
+      "status": "AUTHORIZED_CHANGE",
+      "artifactFile": "scripts/ci_subject_lock.js",
+      "artifactDigest": "2220bb6e788fcaf30deb8de82d55bd2437da913932b0bcbb170e3db822874dae",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-B",
+      "description": "Single-materialization guard in SubjectMaterializer",
+      "status": "AUTHORIZED_CHANGE",
+      "artifactFile": "engine/providers/SubjectMaterializer.js",
+      "artifactDigest": "76ac8922e5981f652df3d6bd1fa8c490a3e6de4ede8dfe63cf40ecda9266e5b1",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-C",
+      "description": "Independent identity contract (subjectDigest, sourceRevision, sourceTreeDigest)",
+      "status": "PASS",
+      "artifactFile": "engine/certification/CanonicalPhysicalManifestV1.js",
+      "artifactDigest": "3c6e2f4a13b5ed21a9443a413a7e16b71e7be8cbf60c331bc2d20d0736449297",
+      "executionTimestamp": "2026-09-22T09:49:46.728Z"
+    },
+    {
+      "id": "COR-D",
+      "description": "Runtime/OS/arch/dependency snapshot binding",
+      "status": "PASS",
+      "artifactFile": "engine/providers/AttestationEngine.js",
+      "artifactDigest": "87cdde4bcf032dec3b86748bba04555b63e78b6494981ebd7d95cac24057ef30",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-E",
+      "description": "Git provenance boundary enforcement",
+      "status": "PASS",
+      "artifactFile": "scripts/final_cor_gate.js",
+      "artifactDigest": "2bce326388dc82038741d5d1563fd522e7a471271573aa28f8f91a620575c742",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-F",
+      "description": "Domain-zero enforcement",
+      "status": "PASS",
+      "artifactFile": "engine/governance/DomainZeroEnforcer.js",
+      "artifactDigest": "7f4f071d12ba6332c1f04489dcff5b757587986b1dfa69af8f74e7c62a3824e2",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-G",
+      "description": "ExecutionProvider startTime/endTime timestamps",
+      "status": "AUTHORIZED_CHANGE",
+      "artifactFile": "engine/providers/ExecutionProvider.js",
+      "artifactDigest": "daebe7e207bdb46bc120a942d57587e6e634cc777cccdee29e780b8af82ade32",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-H",
+      "description": "CertificationPipeline authoritative mode enforcement",
+      "status": "PASS",
+      "artifactFile": "engine/certification/CertificationPipeline.js",
+      "artifactDigest": "a675049ad4fec470580101e9272db5c30cb031b5c20fb3417b6e321b9d484989",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-J",
+      "description": "Snapshot freeze parity / mutation detection",
+      "status": "PASS",
+      "artifactFile": "engine/certification/SnapshotFreezeEngine.js",
+      "artifactDigest": "b37b5a75f26210e83e8e8becd3fa492a2cb9ca83333bc4d81cee0d7a1de25dc6",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-N",
+      "description": "CERTIFICATE_REUSED elimination",
+      "status": "PASS",
+      "artifactFile": "scripts/certify_current_head.js",
+      "artifactDigest": "71e4450044bee64e89e880a7867513687dd81796fadd073eb7084af599442f70",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-O",
+      "description": "Authoritative regression execution (39/39, 372/372)",
+      "status": "PASS",
+      "artifactFile": "runner_receipt.json",
+      "artifactDigest": "aea2f8ddd15679bc6502c036f3aac55bc963188cbf197cc1b2a810963bf5bbb9",
+      "executionTimestamp": "2026-09-22T06:22:11.619Z"
+    },
+    {
+      "id": "COR-P",
+      "description": "AtomicBundleCommitter failure matrix (tmpdir + digest)",
+      "status": "PASS",
+      "artifactFile": "engine/certification/AtomicBundleCommitter.js",
+      "artifactDigest": "5a0ce23079e90724c7f27cb60b4f7518aa2a2f14ce578f1695e458550197b7af",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-Q",
+      "description": "ReleaseTransactionEngine evidenceRoot",
+      "status": "AUTHORIZED_CHANGE",
+      "artifactFile": "engine/release/ReleaseTransactionEngine.js",
+      "artifactDigest": "ec2fd581e521dafec0f76d862cfe66d56a07528991bb113cbecc2559bd0802ac",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-T",
+      "description": "Clean-tree invariant (SUITE-CERT-07)",
+      "status": "PASS",
+      "artifactFile": "tests/certification/dry_run_performance_benchmark.test.js",
+      "artifactDigest": "3bcd334320d7a95660dd1ce6ecb39668eea892f5ee91e3e1f740ca347ba09a55",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-U",
+      "description": "Independent evidence verifier",
+      "status": "AUTHORIZED_CHANGE",
+      "artifactFile": "scripts/independent_verifier.js",
+      "artifactDigest": "6eef26f698ad072f8548946292b55c712f407ab41a4e5ab6af20075a7de5d247",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-W",
+      "description": "Full traceability matrix (this file)",
+      "status": "AUTHORIZED_CHANGE",
+      "artifactFile": "scripts/generate_traceability_matrix.js",
+      "artifactDigest": "c7c8129f34978499a90dd17b7df0ee15c2f424000c1b60486aea51920759269a",
+      "executionTimestamp": "2026-09-22T09:49:47.103Z"
+    },
+    {
+      "id": "COR-Y",
+      "description": "Repeated fresh-run consistency (2 independent runs)",
+      "status": "PENDING",
+      "artifactFile": null,
+      "artifactDigest": null,
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-Z",
+      "description": "Release synchronization control",
+      "status": "PASS",
+      "artifactFile": ".github/workflows/eaorcs-certification.yml",
+      "artifactDigest": "07dbd0f1876370fd9aeacf15a0ba8d6161d786976008880f0b6dab0235ac4981",
+      "executionTimestamp": null
+    },
+    {
+      "id": "COR-AA",
+      "description": "Final COR evidence assembly",
+      "status": "PASS_PARTIAL",
+      "artifactFile": "tests/governance/cor_aa_authoritative_regression.json",
+      "artifactDigest": "076ab4af983a2b43c198076399909f3f1c5f692ca53cf736588b60ffa555a2fb",
+      "executionTimestamp": "2026-09-22T09:49:46.728Z"
+    },
+    {
+      "id": "COR-AC",
+      "description": "Fresh current-HEAD qualification seal",
+      "status": "PASS_PARTIAL",
+      "artifactFile": "tests/governance/cor_ac_fresh_pipeline.json",
+      "artifactDigest": "9c43a1859d46785472199616b4d207aaa7fd5dc4cf1e9e8d9005cd76148a7002",
+      "executionTimestamp": "2026-09-22T09:49:46.728Z"
+    },
+    {
+      "id": "COR-AD",
+      "description": "Commercial operational readiness sign-off",
+      "status": "PASS_PARTIAL",
+      "artifactFile": "tests/governance/cor_ad_publication_gate.json",
+      "artifactDigest": "956a0644fc8f4ac0cf808517a0bcefdffe8a4eb1f20e714788d6208beafe5cc8",
+      "executionTimestamp": "2026-09-22T09:49:46.728Z"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "type": "POST_PUBLICATION_RATIFICATION",
+  "releaseTransactionId": "TX-1A29E40D-B87A-4952-ACB9-9FE1E52A7C5B",
+  "finalPublicationSHA": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "finalPublicationTree": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "finalHead": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "finalTree": "6fdbbc70598674d2e91256e82286370f35decc263eaa5e53d7dcfff7700ed90c",
+  "finalHeadCapturedAt": "2026-08-25T23:56:36.645Z",
+  "publicationAt": "2026-08-26T09:32:11.369Z",
+  "ratificationAt": "2026-08-26T09:32:11.369Z",
+  "verificationStatus": "RATIFIED",
+  "headCommit": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "attestationDigest": "112e5123f0e8a4b1c165fee9a7d408e9bdfbfc57b1eea29fe13df644b5383d56",
+  "publicationHead": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "publicationSHA": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "certifiedSourceCommit": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "qualificationExecutionCommit": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "attestationCommit": "181a33c6bbe002f6fae1c80b481744d9f86cee83",
+  "canonicalSourceTreeHash": "6fdbbc70598674d2e91256e82286370f35decc263eaa5e53d7dcfff7700ed90c",
+  "sourceTreeHash": "6fdbbc70598674d2e91256e82286370f35decc263eaa5e53d7dcfff7700ed90c"
+}
+

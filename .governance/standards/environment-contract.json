@@ -1,0 +1,504 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contractId": "EAORCS-ENV-CONTRACT-2026",
+  "version": "2026.3.1-LTS",
+  "standard": "UAIGOS-3.0.0",
+  "author": "Ujomor Systems Engineering & Governance Authority",
+  "organization": "Ujomor Systems & Enterprise Governance",
+  "createdDate": "2026-08-19",
+  "classification": "ENTERPRISE | GOVERNMENT",
+  "environments": {
+    "SHARED_HOST": {
+      "name": "Shared Web Hosting (cPanel / Plesk / LiteSpeed)",
+      "targetClass": "LOW_RESOURCE_SHARED",
+      "endpoints": {
+        "protocols": [
+          "HTTP",
+          "HTTPS"
+        ],
+        "tlsEnforced": false,
+        "ingress": "WebRootDocumentIngress",
+        "portRange": [
+          80,
+          443
+        ],
+        "loadBalancer": false,
+        "rateLimiting": "ApplicationLevel",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "MySQL",
+          "MariaDB"
+        ],
+        "connectionPooling": false,
+        "sslRequired": false,
+        "migrationStrategy": "SynchronousDDL",
+        "persistenceClass": "SharedRDBMS",
+        "defaultPort": 3306
+      },
+      "queue": {
+        "driver": "DatabaseQueue",
+        "persistence": true,
+        "retryPolicy": "LinearBackoff",
+        "deadLetterSupport": false,
+        "maxConcurrency": 2
+      },
+      "storage": {
+        "driver": "LocalFilesystem",
+        "encryptionAtRest": false,
+        "pathIsolation": "DocumentRootChroot",
+        "backupStrategy": "CPanelArchive",
+        "redundancy": "SingleNode"
+      },
+      "telemetry": {
+        "collectorType": "FileLogger",
+        "protocol": "FileAppend",
+        "metricFormat": "StructuredJsonLog",
+        "logFormat": "JSONL",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "SyncHeaderOnly"
+      },
+      "constraints": {
+        "containerized": false,
+        "rootAccess": false,
+        "systemCron": false,
+        "webCron": true,
+        "maxMemoryMb": 512
+      }
+    },
+    "VPS": {
+      "name": "Virtual Private Server / Dedicated VM",
+      "targetClass": "STANDALONE_VM",
+      "endpoints": {
+        "protocols": [
+          "HTTP",
+          "HTTPS",
+          "WSS"
+        ],
+        "tlsEnforced": true,
+        "ingress": "NginxReverseProxy",
+        "portRange": [
+          80,
+          443,
+          3000,
+          8080
+        ],
+        "loadBalancer": false,
+        "rateLimiting": "ReverseProxyRateLimit",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "MySQL",
+          "MariaDB",
+          "PostgreSQL"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "PhasedMigration",
+        "persistenceClass": "DedicatedRDBMS",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "RedisQueue",
+        "persistence": true,
+        "retryPolicy": "ExponentialBackoff",
+        "deadLetterSupport": true,
+        "maxConcurrency": 16
+      },
+      "storage": {
+        "driver": "LocalFilesystem",
+        "encryptionAtRest": true,
+        "pathIsolation": "SystemUserIsolation",
+        "backupStrategy": "ScheduledRsyncOrS3",
+        "redundancy": "SingleNodeRAID"
+      },
+      "telemetry": {
+        "collectorType": "VectorDaemon",
+        "protocol": "gRPC/HTTP",
+        "metricFormat": "OpenTelemetry/Prometheus",
+        "logFormat": "JSONL",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "W3CTraceContext"
+      },
+      "constraints": {
+        "containerized": false,
+        "rootAccess": true,
+        "systemCron": true,
+        "webCron": false,
+        "maxMemoryMb": 8192
+      }
+    },
+    "DOCKER": {
+      "name": "Containerized Runtime (Docker / Podman / ECS)",
+      "targetClass": "CONTAINER_SINGLE_POD",
+      "endpoints": {
+        "protocols": [
+          "HTTP",
+          "HTTPS",
+          "WSS",
+          "gRPC"
+        ],
+        "tlsEnforced": true,
+        "ingress": "TraefikOrEnvoy",
+        "portRange": [
+          80,
+          443,
+          8080,
+          9090
+        ],
+        "loadBalancer": true,
+        "rateLimiting": "GatewayRateLimit",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "PostgreSQL",
+          "MySQL",
+          "MongoDB"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "ContainerInitContainer",
+        "persistenceClass": "NamedVolumeOrNetworkRDBMS",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "RedisQueue",
+        "persistence": true,
+        "retryPolicy": "ExponentialBackoff",
+        "deadLetterSupport": true,
+        "maxConcurrency": 32
+      },
+      "storage": {
+        "driver": "S3Storage",
+        "encryptionAtRest": true,
+        "pathIsolation": "VolumeMountIsolation",
+        "backupStrategy": "SnapshotOrObjectVersioning",
+        "redundancy": "NetworkStorage"
+      },
+      "telemetry": {
+        "collectorType": "OTelCollectorSidecar",
+        "protocol": "OTLP/gRPC",
+        "metricFormat": "OpenTelemetry",
+        "logFormat": "JSONL_Stdout",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "W3CTraceContext"
+      },
+      "constraints": {
+        "containerized": true,
+        "rootAccess": false,
+        "systemCron": true,
+        "webCron": false,
+        "maxMemoryMb": 16384
+      }
+    },
+    "KUBERNETES": {
+      "name": "Kubernetes Cluster (EKS / AKS / GKE / On-Prem K8s)",
+      "targetClass": "CONTAINER_ORCHESTRATED",
+      "endpoints": {
+        "protocols": [
+          "HTTPS",
+          "gRPC",
+          "WSS"
+        ],
+        "tlsEnforced": true,
+        "ingress": "IngressControllerOrGatewayAPI",
+        "portRange": [
+          443,
+          8443,
+          9090
+        ],
+        "loadBalancer": true,
+        "rateLimiting": "IngressOrMeshRateLimit",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "PostgreSQL",
+          "MySQL",
+          "CockroachDB"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "K8sJobMigration",
+        "persistenceClass": "ManagedCloudRDBMSOrCSI",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "RedisQueue",
+        "persistence": true,
+        "retryPolicy": "ExponentialBackoffWithJitter",
+        "deadLetterSupport": true,
+        "maxConcurrency": 128
+      },
+      "storage": {
+        "driver": "S3Storage",
+        "encryptionAtRest": true,
+        "pathIsolation": "K8sCSIPVCPersistence",
+        "backupStrategy": "VeleroSnapshotAndS3",
+        "redundancy": "MultiAZReplication"
+      },
+      "telemetry": {
+        "collectorType": "OTelDaemonSetAndCollector",
+        "protocol": "OTLP/gRPC",
+        "metricFormat": "OpenTelemetry/Prometheus",
+        "logFormat": "JSONL_Stdout",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "W3CTraceContext"
+      },
+      "constraints": {
+        "containerized": true,
+        "rootAccess": false,
+        "systemCron": false,
+        "webCron": false,
+        "k8sCronJob": true,
+        "hpaAutoscaling": true,
+        "configMaps": true,
+        "secretsVault": true,
+        "maxMemoryMb": 65536
+      }
+    },
+    "CLOUD_AWS": {
+      "name": "AWS Cloud Native Platform",
+      "targetClass": "CLOUD_NATIVE_AWS",
+      "endpoints": {
+        "protocols": [
+          "HTTPS",
+          "gRPC"
+        ],
+        "tlsEnforced": true,
+        "ingress": "ALBOrAPIGateway",
+        "portRange": [
+          443
+        ],
+        "loadBalancer": true,
+        "rateLimiting": "AWSWAFAndAPIGatewayThrottling",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "AuroraPostgreSQL",
+          "AuroraMySQL",
+          "DynamoDB"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "AWSDMSOrFlywayJob",
+        "persistenceClass": "ManagedAuroraCluster",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "SQSQueue",
+        "persistence": true,
+        "retryPolicy": "SQSVisibilityTimeoutExponential",
+        "deadLetterSupport": true,
+        "maxConcurrency": 256
+      },
+      "storage": {
+        "driver": "S3Storage",
+        "encryptionAtRest": true,
+        "pathIsolation": "S3BucketPrefixIAMPolicy",
+        "backupStrategy": "AWSBackupAndS3Replication",
+        "redundancy": "MultiAZMultiRegion"
+      },
+      "telemetry": {
+        "collectorType": "AWSCloudWatchAndXRayOTel",
+        "protocol": "OTLP/CloudWatchLogs",
+        "metricFormat": "CloudWatchEmbeddedMetrics",
+        "logFormat": "JSONL",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "W3CTraceContext"
+      },
+      "constraints": {
+        "containerized": true,
+        "rootAccess": false,
+        "iamRoles": true,
+        "kmsEncryption": true,
+        "multiAzResiliency": true,
+        "maxMemoryMb": 131072
+      }
+    },
+    "CLOUD_AZURE": {
+      "name": "Azure Cloud Native Platform",
+      "targetClass": "CLOUD_NATIVE_AZURE",
+      "endpoints": {
+        "protocols": [
+          "HTTPS",
+          "gRPC"
+        ],
+        "tlsEnforced": true,
+        "ingress": "AzureAppGatewayOrFrontDoor",
+        "portRange": [
+          443
+        ],
+        "loadBalancer": true,
+        "rateLimiting": "AzureFrontDoorWAF",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "AzureDatabaseForPostgreSQL",
+          "CosmosDB",
+          "AzureSQL"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "AzureDatabaseMigrationService",
+        "persistenceClass": "ManagedAzureFlexibleServer",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "ServiceBusQueue",
+        "persistence": true,
+        "retryPolicy": "ServiceBusExponentialRetry",
+        "deadLetterSupport": true,
+        "maxConcurrency": 256
+      },
+      "storage": {
+        "driver": "AzureBlobStorage",
+        "encryptionAtRest": true,
+        "pathIsolation": "AzureBlobContainerRBAC",
+        "backupStrategy": "AzureBackupVaultGRS",
+        "redundancy": "ZoneRedundantGRS"
+      },
+      "telemetry": {
+        "collectorType": "AzureAppInsightsAndMonitor",
+        "protocol": "OTLP/AppInsights",
+        "metricFormat": "AzureMonitorMetrics",
+        "logFormat": "JSONL",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "W3CTraceContext"
+      },
+      "constraints": {
+        "containerized": true,
+        "rootAccess": false,
+        "iamRoles": true,
+        "kmsEncryption": true,
+        "multiAzResiliency": true,
+        "maxMemoryMb": 131072
+      }
+    },
+    "CLOUD_GCP": {
+      "name": "Google Cloud Platform",
+      "targetClass": "CLOUD_NATIVE_GCP",
+      "endpoints": {
+        "protocols": [
+          "HTTPS",
+          "gRPC"
+        ],
+        "tlsEnforced": true,
+        "ingress": "GCPCloudLoadBalancerOrCloudRun",
+        "portRange": [
+          443
+        ],
+        "loadBalancer": true,
+        "rateLimiting": "CloudArmorWAF",
+        "customDomains": true
+      },
+      "database": {
+        "supportedEngines": [
+          "CloudSQLPostgreSQL",
+          "Spanner",
+          "Firestore"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "CloudDatabaseMigrationService",
+        "persistenceClass": "ManagedCloudSQLHA",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "PubSubQueue",
+        "persistence": true,
+        "retryPolicy": "PubSubExponentialBackoff",
+        "deadLetterSupport": true,
+        "maxConcurrency": 256
+      },
+      "storage": {
+        "driver": "GcsStorage",
+        "encryptionAtRest": true,
+        "pathIsolation": "GCSBucketIAMIsolation",
+        "backupStrategy": "CloudStorageBucketLockAndReplication",
+        "redundancy": "DualRegionOrMultiRegion"
+      },
+      "telemetry": {
+        "collectorType": "GCPCloudMonitoringAndTrace",
+        "protocol": "OTLP/CloudLogging",
+        "metricFormat": "GCPMonitoringMetrics",
+        "logFormat": "JSONL",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "W3CTraceContext"
+      },
+      "constraints": {
+        "containerized": true,
+        "rootAccess": false,
+        "iamRoles": true,
+        "kmsEncryption": true,
+        "multiAzResiliency": true,
+        "maxMemoryMb": 131072
+      }
+    },
+    "AIR_GAPPED": {
+      "name": "Air-Gapped Sovereign Secured Environment",
+      "targetClass": "AIR_GAPPED_SOVEREIGN",
+      "endpoints": {
+        "protocols": [
+          "HTTPS",
+          "mTLS"
+        ],
+        "tlsEnforced": true,
+        "ingress": "HardenedLocalReverseProxy",
+        "portRange": [
+          8443
+        ],
+        "loadBalancer": false,
+        "rateLimiting": "StrictLocalThrottling",
+        "customDomains": false
+      },
+      "database": {
+        "supportedEngines": [
+          "HardenedLocalPostgreSQL",
+          "EncryptedSQLite"
+        ],
+        "connectionPooling": true,
+        "sslRequired": true,
+        "migrationStrategy": "OfflineSignedDDLBundle",
+        "persistenceClass": "EncryptedBlockDevice",
+        "defaultPort": 5432
+      },
+      "queue": {
+        "driver": "DatabaseQueue",
+        "persistence": true,
+        "retryPolicy": "DeterministicLinearBackoff",
+        "deadLetterSupport": true,
+        "maxConcurrency": 8
+      },
+      "storage": {
+        "driver": "LocalFilesystem",
+        "encryptionAtRest": true,
+        "pathIsolation": "SELinuxOrAppArmorChroot",
+        "backupStrategy": "CryptographicTapeOrAirGappedOpticalSnapshot",
+        "redundancy": "DualEncryptedRAID"
+      },
+      "telemetry": {
+        "collectorType": "OfflineSignedAuditLogDaemon",
+        "protocol": "LocalUnixSocket",
+        "metricFormat": "StructuredJsonLog",
+        "logFormat": "WORM_Encrypted_JSONL",
+        "correlationIdHeader": "X-Correlation-ID",
+        "tracePropagation": "LocalOnlyCorrelation"
+      },
+      "constraints": {
+        "containerized": true,
+        "rootAccess": false,
+        "zeroOutboundInternet": true,
+        "airGapped": true,
+        "systemCron": true,
+        "webCron": false,
+        "maxMemoryMb": 32768
+      }
+    }
+  }
+}

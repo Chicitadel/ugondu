@@ -1,0 +1,11 @@
+{
+  "lifecycleId": "TX-1789434321633",
+  "transactionId": "TX-1789434321633",
+  "subjectDigest": "504c4d855fb3e582d8ab916e8418fe1e63201a65b9bd7b6faef3ea61a9079c08",
+  "snapshotHash": "26a33ef3864f574ac418458b47808836cb64a181907901e670ac3de9a2418387",
+  "resultDigest": "0d30a89d1e072f630b941fe569ae77c64ea56cb227693df4e0294e00dd21da38",
+  "reportHash": "f4b1891fecaea69d9abf16018cd4fb3320a10bddd53c6d32381e036cf4c410d9",
+  "entries": [],
+  "ledgerHeadHash": "0d30a89d1e072f630b941fe569ae77c64ea56cb227693df4e0294e00dd21da38",
+  "generatedAt": "2026-09-15T01:05:22.251Z"
+}

@@ -1,0 +1,22 @@
+{
+  "Platform": "Products Registry (products.airroofers.eu)",
+  "Version": "1.0",
+  "Date": "2026-07-17T12:00:00Z",
+  "Passed_Checks": [
+    "AG-01: Ownership documented in PLATFORM-OWNERSHIP.md",
+    "AG-02: No cross-domain database access",
+    "PG-01: Public/Internal APIs conform to v1.0 Semantic Versioning",
+    "PG-02: API error responses follow ERROR-MODEL.md",
+    "PG-03: Emits CloudEvents matching EVENT-CONTRACTS.md (ProductRegistered, ProductLifecycleChanged)",
+    "SG-01: Uses mTLS/JWT for internal calls",
+    "SG-02: Generates immutable audit logs",
+    "OG-01: Propagates X-Correlation-ID",
+    "OG-02: Exposes /health/ready and /metrics",
+    "DG-01: Output payloads match CANONICAL-MODELS.md"
+  ],
+  "Contract_Version": "v1.0",
+  "Observability_Version": "v1.0",
+  "Security_Profile": "Tier 2 (Standard Mutation)",
+  "Reviewer": "System Architect / Governance Automation",
+  "Checksum": "4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a"
+}

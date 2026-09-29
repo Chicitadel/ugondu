@@ -1,0 +1,13 @@
+{
+  "registryVersion": "1.0",
+  "blueprint": {
+    "digest": "placeholder"
+  },
+  "frozenPlans": [],
+  "activePlan": {
+    "id": "COR-FINAL-EXECUTION",
+    "digest": "1721fc4973efd60c94f5a26d35c6d4fd6f0ca016cd34dcdfd937be467be76818",
+    "status": "FROZEN"
+  },
+  "constraintsDigest": "ce2c3d5210bbeea079e767ca75fdc5fdddd7cd4b54b250a8538c7e30d70a0feb"
+}

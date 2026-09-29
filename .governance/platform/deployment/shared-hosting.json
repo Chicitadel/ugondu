@@ -1,0 +1,14 @@
+{
+  "profile": "shared_hosting",
+  "description": "Primary deployment environment for legacy compatibility",
+  "capabilities": {
+    "storage": "mysql",
+    "runtime": "node",
+    "webserver": "apache"
+  },
+  "constraints": {
+    "memory_limit": "512M",
+    "disk_limit": "10G",
+    "background_tasks": "cron_only"
+  }
+}

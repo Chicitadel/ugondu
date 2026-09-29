@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-W01",
+  "description": "testOverrides ternary removed from certify.js and CertificationDryRun.js",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:16:00.154Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var files=['certify.js','engine/certification/CertificationDryRun.js'];for(var i=0;i<files.length;i++){var live=require('fs').readFileSync(files[i],'utf8').split('\\n').filter(function(l){var t=l.trim();return !t.startsWith('//')&&!t.startsWith('*');}).join('\\n');if(live.indexOf('testOverrides')>=0){process.stdout.write('FAIL: testOverrides found in '+files[i]);process.exit(1);}}process.stdout.write('PASS: F-W01 no testOverrides ternary in certify.js or CertificationDryRun.js');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "605f0b404e9a05ca4725622475718a05ad3982ea91e0e9c1507f05f8081f1d3e",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-W01 no testOverrides ternary in certify.js or CertificationDryRun.js",
+  "executionEvidenceDigest": "193118b5fe69b3893b28bddecf7b2a524922f6eabdaf98834e58542552fcf8f5",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

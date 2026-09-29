@@ -1,0 +1,112 @@
+# ******************************************************************************
+# * Product        : Enterprise Autonomous Operation & Regulatory Compliance System (EAORCS)
+# * Module         : Unidirectional Authority Graph Contract
+# * File           : .governance/contracts/authority-graph.yaml
+# * Version        : 2026.3.1-LTS (UAIGOS 3.0.0 Enterprise)
+# * Author         : Enterprise Architecture & Security Governance Authority
+# * Organization   : Ujomor Systems & Enterprise Governance
+# * Created Date   : 2026-08-18
+# * Classification : GOVERNMENT | ENTERPRISE | RESTRICTED
+# * Standards      : ISO 27001 | SOC 2 | OWASP ASVS | NIST SP 800-161 | UAIGOS 3.0.0
+# * Copyright (c) 2026 Ujomor Systems & Enterprise Governance. All Rights Reserved.
+# ******************************************************************************
+
+schemaVersion: "2.0.0"
+governanceModel: "UAIGOS-3.0.0"
+topologyType: "DIRECTED_ACYCLIC_GRAPH"
+acyclicEnforced: true
+
+nodes:
+  - id: git-subject
+    role: ROOT_SOURCE_TRUTH
+    authorityLevel: 0
+    description: "Active Git repository HEAD commit and canonical source tree hash"
+    fileReferences:
+      - .git/HEAD
+
+  - id: physical-qualification
+    role: EXECUTION_EVIDENCE_PRODUCER
+    authorityLevel: 1
+    description: "Physical qualification execution across all 30 streams and 52 governance suites"
+    dependsOn:
+      - git-subject
+    producers:
+      - certify.js
+      - tests/governance/run_governance.js
+
+  - id: evidence-receipts
+    role: RAW_EVIDENCE_RECORD
+    authorityLevel: 2
+    description: "Immutable signed evidence receipts emitted from fresh execution"
+    dependsOn:
+      - physical-qualification
+    artifacts:
+      - .governance/evidence/final-release-receipt.json
+      - .governance/evidence/governance-result.json
+      - .governance/evidence/cor-working-baseline.json
+      - .governance/evidence/remote-ci-receipt.json
+
+  - id: certification-ledger
+    role: STATE_LEDGER
+    authorityLevel: 3
+    description: "Sequential tamper-evident certification ledger with 5 lifecycle states"
+    dependsOn:
+      - evidence-receipts
+    engineModule: engine/certification/CertificationLedger.js
+
+  - id: candidate-envelope
+    role: UNSEALED_PROPOSAL
+    authorityLevel: 4
+    description: "Unsealed candidate envelope created with PENDING decision and bound digests"
+    dependsOn:
+      - certification-ledger
+    engineModule: engine/certification/CertificationDecisionEnvelope.js
+
+  - id: sovereign-decision-authority
+    role: INDEPENDENT_DECISION_ENGINE
+    authorityLevel: 5
+    description: "Autonomous derivation of 3-tier status (certification, publication, COR) from 4 gate invariants"
+    dependsOn:
+      - candidate-envelope
+      - certification-ledger
+    engineModule: engine/certification/CertificationDecisionAuthority.js
+
+  - id: sealed-certification
+    role: COMMITTED_ATTESTATION
+    authorityLevel: 6
+    description: "Final immutable sealed certificate envelope signed with Ed25519"
+    dependsOn:
+      - sovereign-decision-authority
+    artifacts:
+      - EAORCS-CERT-2026.3.1-LTS.json
+      - .governance/envelope/latest_envelope.json
+
+  - id: pure-projections
+    role: READ_ONLY_PROJECTION
+    authorityLevel: 7
+    description: "Functional downstream projections derived exclusively from sealed certification"
+    dependsOn:
+      - sealed-certification
+    artifacts:
+      - docs/api_governance_report.md
+      - docs/traceability_report.md
+      - docs/product_readiness_certificate.json
+      - docs/osap_passport_2026.3.1-LTS.json
+      - artifact_lineage.json
+      - digital_twin.yaml
+
+invariants:
+  - id: INV-001
+    name: "Unidirectional Dependency Flow"
+    rule: "Higher authority levels must never depend on or read from lower authority levels"
+    enforced: true
+
+  - id: INV-002
+    name: "Zero Reverse Read Authority"
+    rule: "Downstream projections (Level 7) cannot participate in defining upstream certification authority (Levels 0-6)"
+    enforced: true
+
+  - id: INV-003
+    name: "Fail-Closed Decision Boundary"
+    rule: "Decision authority derives verdicts autonomously from gate invariants without caller overrides"
+    enforced: true

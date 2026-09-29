@@ -1,0 +1,107 @@
+product:
+  name: Ugondu
+  version: "1.0.0"
+  codename: Universal Deployment Intelligence Platform
+  organization: Air Roofers Ltd
+  authority: Ujomor Systems Engineering Authority
+  classification: COMMERCIAL
+  status: PRODUCTION_READY
+  released: "2026-09-29"
+  supersedes: smart_deploy.sh
+
+architecture:
+  pattern: thin-client-server
+  maturity: MODULAR_MICROSERVICES
+  ip_protection: true
+  edition_enforcement: server_side_only
+
+services:
+  - name: engine-core
+    port: 4001
+    status: COMPILED_TESTED
+  - name: billing-gateway
+    port: 4002
+    status: COMPILED_TESTED
+  - name: plugin-manager
+    port: 4003
+    status: COMPILED_TESTED
+  - name: event-bus
+    port: 4004
+    status: COMPILED
+  - name: repository-adapter
+    port: 4005
+    status: COMPILED_TESTED
+
+client:
+  language: Go
+  version: "1.1.0"
+  status: SOURCE_COMPLETE
+  note: Compile with go build in client/ directory. Go 1.22+ required.
+
+editions:
+  community:
+    token_prefix: "(none)"
+    strategy: quota-sync
+    max_plugins: 1
+    rollbacks: false
+    atomic: false
+    telemetry: false
+  professional:
+    token_prefix: "ugp_"
+    strategy: atomic
+    max_plugins: 5
+    rollbacks: true
+    atomic: true
+    telemetry: false
+  enterprise:
+    token_prefix: "uge_"
+    strategy: atomic
+    max_plugins: unlimited
+    rollbacks: true
+    atomic: true
+    telemetry: true
+
+providers_supported:
+  - github
+  - gitlab
+  - bitbucket
+  - gitea
+  - gogs
+  - azure-devops
+  - aws-codecommit
+  - generic-https
+  - generic-ssh
+
+plugins:
+  - name: ugondu-plugin-node
+    status: COMPLETE
+    supports: [npm, yarn, pnpm, bun]
+  - name: ugondu-plugin-composer
+    status: COMPLETE
+
+tests:
+  total_passed: 22
+  total_failed: 0
+  suites:
+    - billing-gateway: 4 passed
+    - engine-core: 4 passed
+    - plugin-manager: 3 passed
+    - repository-adapter: 11 passed
+
+infrastructure:
+  docker: true
+  docker_compose: true
+  ci_cd: github-actions
+  env_template: .env.example
+
+documentation:
+  readme: README.md
+  editions: docs/EDITIONS.md
+  architecture: docs/ARCHITECTURE.md
+  changelog: CHANGELOG.md
+
+frozen_decisions:
+  - ADR-001: thin-client-server-architecture
+  - ADR-002: signed-recipe-enforcement
+  - ADR-003: microservice-isolation
+  - ADR-004: quota-sync-for-cpanel

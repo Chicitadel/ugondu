@@ -1,0 +1,51 @@
+/******************************************************************************
+ * Project        : Akpati Product Platform & EAORCS
+ * Module         : Governance & Architecture Baseline
+ * File           : akpati-v1.0.0.baseline.yaml
+ * Version        : 1.0.0
+ * Author         : Ujomor Platform Architecture & Governance Review Board
+ * Organization   : Ujomor Platform
+ * Created Date   : 2026-07-23
+ * Last Modified  : 2026-08-10
+ * Classification : ENTERPRISE | INTERNAL | SOVEREIGN
+ *
+ * Sign-off Status:
+ * - Architecture           : APPROVED (FROZEN)
+ * - Domain Model           : APPROVED
+ * - Repository Structure   : APPROVED
+ * - Governance             : APPROVED
+ * - Testing Strategy       : APPROVED
+ * - Product Identity       : APPROVED
+ * - Runtime Completeness   : INTEGRATED INTO EAORCS 2026.3.1-LTS
+ * - UI Integration         : DESIGN APPROVED / INTEGRATION IN PROGRESS
+ *
+ * Copyright (c) 2026 Ujomor Platform. All Rights Reserved.
+ ******************************************************************************/
+
+baseline:
+  id: AKPATI-1.0.0-BASELINE
+  productName: Akpati Platform
+  version: 1.0.0
+  status: FROZEN (GOVERNED)
+  frozenOn: 2026-07-23
+  governingAuthority: Architecture Review Board
+
+signOffMatrix:
+  architecture: APPROVED
+  domainModel: APPROVED
+  repositoryStructure: APPROVED
+  governance: APPROVED
+  testingStrategy: APPROVED
+  productIdentity: APPROVED
+  runtimeCompleteness: INTEGRATED_INTO_EAORCS
+  uiIntegration: DESIGN_APPROVED_INTEGRATION_IN_PROGRESS
+
+certifiedBy:
+  certificationEngine: "@ujomor/eaorcs v2026.3.1-LTS"
+  baselineRecord: UPVCRAS-3.0.0
+  digest: HMACSigned(SHA256):C1CA52587C78079F
+
+statement: >
+  Akpati architecture baseline has been consolidated into the unified EAORCS framework.
+  All Cause-Effect Graphs (CEG) and capability registries are mapped directly under
+  the EAORCS digital twin specification.

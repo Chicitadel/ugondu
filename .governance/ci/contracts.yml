@@ -1,0 +1,26 @@
+# Standard Pipeline: Contracts
+# Location: .governance/ci/contracts.yml
+
+description: "Canonical module for executing contract verification"
+
+inputs:
+  repository_name:
+    required: true
+  provider_schema:
+    description: "The OpenAPI or gRPC schema file"
+    required: true
+
+outputs:
+  contract_status:
+    description: "success | failed"
+  validUntil:
+    description: "TTL limit for this contract evidence (e.g., +24h)"
+
+steps:
+  - name: Execute Contract Verification
+    run: "contract-verifier verify --schema ${{ inputs.provider_schema }}"
+    
+  - name: Emit Standard Output
+    run: |
+      echo "::set-output name=contract_status::success"
+      echo "::set-output name=validUntil::$(date -u -d '+24 hours' +'%Y-%m-%dT%H:%M:%SZ')"

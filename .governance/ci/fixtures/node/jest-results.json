@@ -1,0 +1,14 @@
+{
+  "numFailedTestSuites": 0,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 5,
+  "numPassedTests": 42,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 5,
+  "numTotalTests": 42,
+  "startTime": 1672531200000,
+  "success": true
+}

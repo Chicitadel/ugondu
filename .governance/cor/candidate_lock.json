@@ -1,0 +1,9 @@
+{
+  "AUDIT003_LEDGER_DIGEST": "96c872f1dc154702035a907cbe794d822aa52ea1442932926f8e43db70cd8c42",
+  "sealedSubjectRevision": "c19c7e990f25678db3ba251e0105b182d0932a10",
+  "candidateLockedAt": "2026-09-14T08:19:41.8291230+02:00",
+  "AUDIT002_LEDGER_DIGEST": "73ba38dbd8f9f15b39d9ded099c1510306ec54e6da2db4ba9bb59acf8a3d741d",
+  "sealedSubjectDigest": "ebc8c37bf1e38590da77a63428da0995d5107d5b8536cb7f37be1e7412245255",
+  "streamKHead": "c19c7e990f25678db3ba251e0105b182d0932a10",
+  "streamJHead": "b0993f83e7e6fa20dbaa991070b65767bce07def"
+}

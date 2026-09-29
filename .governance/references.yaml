@@ -1,0 +1,139 @@
+# /******************************************************************************
+#  * Project        : Universal Autonomous AI Governance Operating System (UAIGOS)
+#  * Module         : EAORCS Platform Governance & References Descriptor
+#  * File           : references.yaml
+#  * Version        : 2026.3.1-LTS
+#  * Author         : Ujomor Systems & Enterprise Governance Authority
+#  * Organization   : Ujomor Systems & Enterprise Governance
+#  * Created Date   : 2026-08-07
+#  * Last Modified  : 2026-08-07
+#  * Classification : ENTERPRISE | RESTRICTED
+#  *
+#  * Governance:
+#  * - Security Reviewed
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - Modularization Enforced
+#  * - Corporate Policy Governed
+#  *
+#  * CORP: Stream 3 Platform Governance & Master Index
+#  *
+#  * Standards:
+#  * - ISO 27001
+#  * - SOC 2
+#  * - OWASP ASVS
+#  * - NIST
+#  *
+#  * Copyright (c) 2026 Ujomor Systems & Enterprise Governance. All Rights Reserved.
+#  ******************************************************************************/
+
+schema_version: "2026.3.1-LTS"
+
+governance_descriptor:
+  title: "Ujomor Platform Inherited Governance Reference Descriptor"
+  classification: "ENTERPRISE | RESTRICTED"
+  authority: "Ujomor Systems & Enterprise Governance Authority"
+  effective_date: "2026-08-07"
+  master_index: "00_engineering_guide/00_MASTER_GOVERNANCE_INDEX.md"
+
+constitution_framework:
+  name: "UAIGOS Constitution"
+  version: "3.0.0"
+  laws_frozen: 14
+  laws:
+    - id: LAW_01
+      name: "Single Public Facade"
+    - id: LAW_02
+      name: "Deterministic Execution"
+    - id: LAW_03
+      name: "Explainable Decisions"
+    - id: LAW_04
+      name: "Auditable Evidence"
+    - id: LAW_05
+      name: "Reversible Modifications"
+    - id: LAW_06
+      name: "Backward Compliance"
+    - id: LAW_07
+      name: "Explicit Capability Contracts"
+    - id: LAW_08
+      name: "Zero Hidden Side-Effects"
+    - id: LAW_09
+      name: "No AI-Only Dependency"
+    - id: LAW_10
+      name: "Reproducible Outcomes"
+    - id: LAW_11
+      name: "Platform Parity"
+    - id: LAW_12
+      name: "Native Surface Experience"
+    - id: LAW_13
+      name: "Interaction Continuity"
+    - id: LAW_14
+      name: "Rendering Neutrality"
+
+hierarchy_levels:
+  level_0:
+    name: "Corporate Governance"
+    path: "00_engineering_guide/01_Executive_Governance"
+  level_1:
+    name: "UAIGOS Constitution"
+    path: "00_engineering_guide/02_UAIGOS_Constitution"
+  level_2:
+    name: "EAORCS Governance Blueprint"
+    path: "00_engineering_guide/03_EAORCS_Blueprint"
+  level_3:
+    name: "Enterprise Architecture Standards"
+    path: "00_engineering_guide/standards"
+  level_4:
+    name: "Reference Architectures"
+    path: "00_engineering_guide/blueprints"
+  level_5:
+    name: "Product-Specific ADRs"
+    path: "00_engineering_guide/adr"
+  level_6:
+    name: "Implementation Guides"
+    path: "00_engineering_guide"
+  level_7:
+    name: "Generated Documentation"
+    path: "00_engineering_guide/20_Schema_Evidence_Catalog"
+
+schemas:
+  product_schema: "schemas/product.schema.json"
+  architecture_schema: "schemas/architecture.schema.json"
+  constitution_schema: "governance/governance-schemas/constitution.schema.json"
+  evidence_schema: "governance/governance-schemas/evidence.schema.json"
+
+inherited_standards:
+  - id: ISO_27001
+    name: "Information Security Management System"
+  - id: SOC_2
+    name: "System and Organization Controls Type II"
+  - id: OWASP_ASVS
+    name: "Application Security Verification Standard v4.0"
+  - id: NIST_SP_800_207
+    name: "Zero Trust Architecture"
+  - id: GDPR
+    name: "General Data Protection Regulation"
+
+standards_catalog:
+  release_engineering: "00_engineering_guide/standards/Release_Engineering_Standard.md"
+  product_packaging: "00_engineering_guide/Global_Product_Packaging/AR-STD-PKG-001_Global_Product_Packaging_Standard.md"
+  ip_protection: "00_engineering_guide/Global_Product_Packaging/AR-STD-PKG-002_IP_Protection_Standard.md"
+  distribution_governance: "00_engineering_guide/Global_Product_Packaging/AR-STD-PKG-003_Distribution_Governance.md"
+
+active_streams:
+  stream_0:
+    name: "Core Engine Foundation"
+    status: "COMPLETE"
+  stream_1:
+    name: "Phase 1 Integrity Verification (S0, S1, S3)"
+    status: "COMPLETE"
+  stream_3:
+    name: "Platform Governance & Master Index"
+    status: "COMPLETE"
+    owner: "EAORCS Stream Implementer"
+    artifacts:
+      - "00_engineering_guide/00_MASTER_GOVERNANCE_INDEX.md"
+      - "schemas/product.schema.json"
+      - "schemas/architecture.schema.json"
+      - ".governance/references.yaml"
+      - "00_engineering_guide/standards/Release_Engineering_Standard.md"

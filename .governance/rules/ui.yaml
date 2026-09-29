@@ -1,0 +1,4 @@
+name: ui
+description: Shared design tokens and component compliance.
+rules:
+  - enforce-design-system

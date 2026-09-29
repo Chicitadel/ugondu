@@ -1,0 +1,16 @@
+contract_id: INFRA-MONITOR-001
+type: infrastructure_contract
+name: Monitoring & Observability Contract
+version: 1.0.0
+status: active
+description: Enforces observability across infrastructure edge nodes.
+
+requirements:
+  metrics:
+    - "cache_hit_ratio"
+    - "edge_latency"
+    - "bandwidth_usage"
+  logging:
+    structured_logs: true
+    audit_trails: true
+    blocked_requests: true

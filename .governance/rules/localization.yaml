@@ -1,0 +1,4 @@
+name: localization
+description: Shared localization pipelines and translation constraints.
+rules:
+  - require-english-fallback

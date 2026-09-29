@@ -1,0 +1,462 @@
+{
+  "sessionId": "a3ba6a94-b9da-4db7-a076-7cffed11cd35",
+  "createdAt": "2026-09-14T23:05:08.588Z",
+  "actor": "AirRoofers",
+  "targetContext": {
+    "subjectId": "subj_fixture_target_a114d7ab2580",
+    "subjectType": "WORKSPACE",
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "environment": "vscode",
+    "revision": "unversioned",
+    "branch": "main",
+    "policySource": "OUT_OF_TREE",
+    "sessionId": "a3ba6a94-b9da-4db7-a076-7cffed11cd35",
+    "federationMode": "INDEPENDENT",
+    "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+    "hasInTreeGovernance": true,
+    "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+    "createdAt": "2026-09-14T23:05:08.587Z",
+    "metadata": {}
+  },
+  "targetDescriptor": {
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "subjectId": "subj_fixture_target_a114d7ab2580",
+    "subjectType": "WORKSPACE",
+    "name": "@corporate/sample-service",
+    "version": "1.0.0",
+    "description": "",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "branch": "main",
+    "revision": "unversioned",
+    "isClean": true,
+    "remoteUrl": null,
+    "manifests": {
+      "nodejs": {
+        "name": "@corporate/sample-service",
+        "version": "1.0.0",
+        "scripts": []
+      }
+    },
+    "buildSystem": "npm",
+    "tests": {
+      "hasTests": true,
+      "testDirs": [
+        "tests"
+      ],
+      "testConfigs": []
+    },
+    "structureSummary": {
+      "fileCount": 4,
+      "dirCount": 2,
+      "totalBytes": 188,
+      "languages": {
+        ".json": 1,
+        ".js": 3
+      }
+    },
+    "fingerprint": "834a1af2fdbb96ce25d41d57efd5c803bc718b185e55fa51604a6108cfaacf88",
+    "discoveredAt": "2026-09-14T23:05:08.585Z",
+    "metadata": {}
+  },
+  "session": {
+    "sessionId": "a3ba6a94-b9da-4db7-a076-7cffed11cd35",
+    "status": "COMPLETED",
+    "targetContext": {
+      "subjectId": "subj_fixture_target_a114d7ab2580",
+      "subjectType": "WORKSPACE",
+      "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs",
+      "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+      "environment": "vscode",
+      "revision": "unversioned",
+      "branch": "main",
+      "policySource": "OUT_OF_TREE",
+      "sessionId": "a3ba6a94-b9da-4db7-a076-7cffed11cd35",
+      "federationMode": "INDEPENDENT",
+      "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+      "hasInTreeGovernance": true,
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "createdAt": "2026-09-14T23:05:08.587Z",
+      "metadata": {}
+    },
+    "startTime": 1789427108588,
+    "endTime": 1789427116337,
+    "evidenceCatalog": [
+      {
+        "id": "EVID-DISCOVER-1789427108592",
+        "requirementId": "REQ-TARGET-DISCOVERY",
+        "type": "TARGET_DISCOVERY",
+        "source": "EAORCS_OBSERVER",
+        "status": "VALID",
+        "data": {
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs",
+          "subjectId": "subj_fixture_target_a114d7ab2580",
+          "subjectType": "WORKSPACE",
+          "name": "@corporate/sample-service",
+          "version": "1.0.0",
+          "description": "",
+          "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+          "branch": "main",
+          "revision": "unversioned",
+          "isClean": true,
+          "remoteUrl": null,
+          "manifests": {
+            "nodejs": {
+              "name": "@corporate/sample-service",
+              "version": "1.0.0",
+              "scripts": []
+            }
+          },
+          "buildSystem": "npm",
+          "tests": {
+            "hasTests": true,
+            "testDirs": [
+              "tests"
+            ],
+            "testConfigs": []
+          },
+          "structureSummary": {
+            "fileCount": 4,
+            "dirCount": 2,
+            "totalBytes": 188,
+            "languages": {
+              ".json": 1,
+              ".js": 3
+            }
+          },
+          "fingerprint": "834a1af2fdbb96ce25d41d57efd5c803bc718b185e55fa51604a6108cfaacf88",
+          "discoveredAt": "2026-09-14T23:05:08.585Z",
+          "metadata": {}
+        },
+        "hash": "cc7698de2de1b31ca3ae5e13a0ab6e328d446a310575882a9f73fc38c59d7312",
+        "timestamp": "2026-09-14T23:05:08.592Z"
+      },
+      {
+        "id": "EVID-ENV-66aa8fdd3d55",
+        "requirementId": "REQ-HOST-ENVIRONMENT",
+        "type": "CLIENT_RUNTIME_TELEMETRY",
+        "source": "REMOTE_CLIENT_TRANSPORT",
+        "status": "VALID",
+        "data": {
+          "nodeVersion": "v24.17.0",
+          "platform": "win32",
+          "arch": "x64",
+          "osRelease": "10.0.19045",
+          "cpuCount": 8,
+          "totalMemoryBytes": 34349445120,
+          "processUptimeSeconds": 1,
+          "timestamp": "2026-09-14T23:05:08.598Z"
+        },
+        "hash": "66aa8fdd3d55995701d5c2e322d9cb100dc8e877517779c49cec588a2b3eaaba",
+        "timestamp": "2026-09-14T23:05:08.604Z"
+      },
+      {
+        "id": "EVID-GIT-UNKNOWN",
+        "requirementId": "REQ-SOURCE-VERSIONING",
+        "type": "GIT_METADATA_RECEIPT",
+        "source": "REMOTE_CLIENT_TRANSPORT",
+        "status": "VALID",
+        "data": {
+          "hasGit": false,
+          "branch": "unversioned",
+          "revision": "unversioned",
+          "isClean": true,
+          "treeHash": "c6edfb74d3493f20014019891acfed38a2a372b1222f3a9c283676da3c958009"
+        },
+        "hash": "29e44028c284a243bf4ad82c311872a6abbf84ebc0b20bc21efaa127a1186647",
+        "timestamp": "2026-09-14T23:05:08.608Z"
+      },
+      {
+        "id": "EVID-INV-55caa25d6f46",
+        "requirementId": "REQ-SOURCE-INVENTORY-INTEGRITY",
+        "type": "SOURCE_INVENTORY_DIGEST",
+        "source": "REMOTE_CLIENT_TRANSPORT",
+        "status": "VALID",
+        "data": {
+          "fileCount": 4,
+          "totalBytes": 188,
+          "inventoryDigest": "595a29a34b6f9b958339a4a6d734a4aa45ec244b05f94be44e01559e31eebac6",
+          "sample": [
+            {
+              "path": "package.json",
+              "size": 89,
+              "sha256": "37c646e809e006cabaa8e2ce61f8810760901e1a9dd0ab051d381c8c2e99c5c5"
+            },
+            {
+              "path": "src/index.js",
+              "size": 22,
+              "sha256": "1d18f6b91fc8d79c962ab65453e51aae2128dbb962f593675e76b5bb07bf1a3d"
+            },
+            {
+              "path": "test.js",
+              "size": 41,
+              "sha256": "749db5bdeae89c9d1b5e44b43ca4f26501316ba143cd766238682519362d4fd5"
+            },
+            {
+              "path": "tests/index.test.js",
+              "size": 36,
+              "sha256": "afd8dc81fdb0f314c88f1012bf6f044112c47138f2c0d5278687526c47e7f4eb"
+            }
+          ]
+        },
+        "hash": "55caa25d6f46baa69cb50e9b046feea93bd25a047c11327d4508c6450ea90407",
+        "timestamp": "2026-09-14T23:05:08.611Z"
+      },
+      {
+        "id": "EVID-LINT-057271976fa3",
+        "requirementId": "REQ-CODE-QUALITY-LINTER",
+        "type": "LINTER_SECURITY_RECEIPT",
+        "source": "REMOTE_CLIENT_TRANSPORT",
+        "status": "VALID",
+        "data": {
+          "hasLinterConfigurations": false,
+          "configCount": 0,
+          "configs": []
+        },
+        "hash": "057271976fa328b7459014e6d1e58a090a8cf0da84fc3b55e67afed3ffaf6c2c",
+        "timestamp": "2026-09-14T23:05:08.614Z"
+      },
+      {
+        "id": "EVID-TEST-027c1d7bd398",
+        "requirementId": "REQ-LOCAL-TEST-EXECUTION",
+        "type": "TEST_EXECUTION_RECEIPT",
+        "source": "REMOTE_CLIENT_TRANSPORT",
+        "status": "VALID",
+        "data": {
+          "executionId": "EXEC-LOCAL-BASELINE-eae31fee1489",
+          "authorizationId": "AUTH-LOCAL-BASELINE",
+          "subjectId": null,
+          "capability": "execution.test",
+          "command": "node",
+          "args": [
+            "--version"
+          ],
+          "commandDigest": "3313497c6720969a3633cdb6a2175cfa22475fd513760c003dff40751c23c3c7",
+          "exitCode": 0,
+          "stdoutHash": "bd0315bfd23264c0284989188c2aec2a6d03b400e4d558256e35b79d2e941c4e",
+          "stderrHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "resultHash": "7c60492479f5c3176b21e5511fd701a5f33478f070b0b530ee8c9c810cb9bddf",
+          "durationMs": 1,
+          "timestamp": "2026-09-14T23:05:08.603Z",
+          "status": "SUCCESS"
+        },
+        "hash": "027c1d7bd3983cc2fed21d8b0dc9d81e8a79ab2e693ca8340b9a9f702e266ebf",
+        "timestamp": "2026-09-14T23:05:08.616Z"
+      },
+      {
+        "id": "EVID-REMOTE-AUDIT-1789427108620",
+        "requirementId": "REQ-REMOTE-AUDIT",
+        "type": "AUDIT_RESULT",
+        "source": "EAORCS_OBSERVER",
+        "status": "PASSED",
+        "data": {
+          "status": "PASSED",
+          "pass": true,
+          "mode": "REMOTE_EVIDENCE_EVALUATION",
+          "subjectId": "subj_fixture_target_a114d7ab2580",
+          "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+          "evidenceCount": 6,
+          "evidenceItems": [
+            {
+              "id": "EVID-DISCOVER-1789427108592",
+              "type": "TARGET_DISCOVERY",
+              "status": "VALID",
+              "hash": "cc7698de2de1b31ca3ae5e13a0ab6e328d446a310575882a9f73fc38c59d7312"
+            },
+            {
+              "id": "EVID-ENV-66aa8fdd3d55",
+              "type": "CLIENT_RUNTIME_TELEMETRY",
+              "status": "VALID",
+              "hash": "66aa8fdd3d55995701d5c2e322d9cb100dc8e877517779c49cec588a2b3eaaba"
+            },
+            {
+              "id": "EVID-GIT-UNKNOWN",
+              "type": "GIT_METADATA_RECEIPT",
+              "status": "VALID",
+              "hash": "29e44028c284a243bf4ad82c311872a6abbf84ebc0b20bc21efaa127a1186647"
+            },
+            {
+              "id": "EVID-INV-55caa25d6f46",
+              "type": "SOURCE_INVENTORY_DIGEST",
+              "status": "VALID",
+              "hash": "55caa25d6f46baa69cb50e9b046feea93bd25a047c11327d4508c6450ea90407"
+            },
+            {
+              "id": "EVID-LINT-057271976fa3",
+              "type": "LINTER_SECURITY_RECEIPT",
+              "status": "VALID",
+              "hash": "057271976fa328b7459014e6d1e58a090a8cf0da84fc3b55e67afed3ffaf6c2c"
+            },
+            {
+              "id": "EVID-TEST-027c1d7bd398",
+              "type": "TEST_EXECUTION_RECEIPT",
+              "status": "VALID",
+              "hash": "027c1d7bd3983cc2fed21d8b0dc9d81e8a79ab2e693ca8340b9a9f702e266ebf"
+            }
+          ],
+          "findings": [],
+          "summary": {
+            "totalChecks": 6,
+            "passedChecks": 6,
+            "failedChecks": 0
+          }
+        },
+        "hash": "d105394b7ce5e60025929f00311e7434aa45361ab06b9bcb8d712bb63e29a7bf",
+        "timestamp": "2026-09-14T23:05:08.620Z"
+      }
+    ],
+    "findings": [],
+    "metrics": {
+      "totalChecks": 7,
+      "passedChecks": 7,
+      "failedChecks": 0,
+      "warnings": 0
+    },
+    "policyResolution": {
+      "policySource": "OUT_OF_TREE",
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "hasInTreeGovernance": true,
+      "evaluatedRules": []
+    },
+    "auditTrail": [
+      {
+        "sequence": 0,
+        "timestamp": 1789427108588,
+        "action": "SESSION_INITIALIZED",
+        "actor": "AirRoofers",
+        "details": {
+          "subjectId": "subj_fixture_target_a114d7ab2580",
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs",
+          "policySource": "OUT_OF_TREE"
+        },
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "30b159fc4df4e557805354ad023027d4d45b048b03da8748872c27670937e636"
+      },
+      {
+        "sequence": 1,
+        "timestamp": 1789427108588,
+        "action": "SESSION_STARTED",
+        "actor": "AirRoofers",
+        "details": {
+          "startTime": 1789427108588,
+          "reason": "REMOTE_REST_SESSION_INIT"
+        },
+        "prevHash": "30b159fc4df4e557805354ad023027d4d45b048b03da8748872c27670937e636",
+        "hash": "fdcdfde41adf05ea0d13ef2c3bf758eeb56c88e3f4cce67c21eb46418c67cedd"
+      },
+      {
+        "sequence": 2,
+        "timestamp": 1789427108593,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-DISCOVER-1789427108592",
+          "requirementId": "REQ-TARGET-DISCOVERY",
+          "hash": "cc7698de2de1b31ca3ae5e13a0ab6e328d446a310575882a9f73fc38c59d7312"
+        },
+        "prevHash": "fdcdfde41adf05ea0d13ef2c3bf758eeb56c88e3f4cce67c21eb46418c67cedd",
+        "hash": "858884dd7901801f26cb48b0c6159b64ff4b68dbc0236f44e28b5bb3b50a6f06"
+      },
+      {
+        "sequence": 3,
+        "timestamp": 1789427108604,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-ENV-66aa8fdd3d55",
+          "requirementId": "REQ-HOST-ENVIRONMENT",
+          "hash": "66aa8fdd3d55995701d5c2e322d9cb100dc8e877517779c49cec588a2b3eaaba"
+        },
+        "prevHash": "858884dd7901801f26cb48b0c6159b64ff4b68dbc0236f44e28b5bb3b50a6f06",
+        "hash": "3bc83e4f80f73bde0bbda09132beca3a858e11af44799c59166c52f07900ca41"
+      },
+      {
+        "sequence": 4,
+        "timestamp": 1789427108608,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-GIT-UNKNOWN",
+          "requirementId": "REQ-SOURCE-VERSIONING",
+          "hash": "29e44028c284a243bf4ad82c311872a6abbf84ebc0b20bc21efaa127a1186647"
+        },
+        "prevHash": "3bc83e4f80f73bde0bbda09132beca3a858e11af44799c59166c52f07900ca41",
+        "hash": "37f44a219ba8319223983264dde1baa8cead4d1a72a330c3fbdf64c3b0a34b91"
+      },
+      {
+        "sequence": 5,
+        "timestamp": 1789427108611,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-INV-55caa25d6f46",
+          "requirementId": "REQ-SOURCE-INVENTORY-INTEGRITY",
+          "hash": "55caa25d6f46baa69cb50e9b046feea93bd25a047c11327d4508c6450ea90407"
+        },
+        "prevHash": "37f44a219ba8319223983264dde1baa8cead4d1a72a330c3fbdf64c3b0a34b91",
+        "hash": "f47bbc2592b78008e35045ee591d309deddaf2f445d58bf17d71ba5e62254ec9"
+      },
+      {
+        "sequence": 6,
+        "timestamp": 1789427108614,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-LINT-057271976fa3",
+          "requirementId": "REQ-CODE-QUALITY-LINTER",
+          "hash": "057271976fa328b7459014e6d1e58a090a8cf0da84fc3b55e67afed3ffaf6c2c"
+        },
+        "prevHash": "f47bbc2592b78008e35045ee591d309deddaf2f445d58bf17d71ba5e62254ec9",
+        "hash": "e93fe55a1a4274cc19f30e8f2e8205af5c992c2e53ac14759658e506303e6edc"
+      },
+      {
+        "sequence": 7,
+        "timestamp": 1789427108616,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-TEST-027c1d7bd398",
+          "requirementId": "REQ-LOCAL-TEST-EXECUTION",
+          "hash": "027c1d7bd3983cc2fed21d8b0dc9d81e8a79ab2e693ca8340b9a9f702e266ebf"
+        },
+        "prevHash": "e93fe55a1a4274cc19f30e8f2e8205af5c992c2e53ac14759658e506303e6edc",
+        "hash": "e42aea96607a219d6c996d8bb8c06426d2343ab0e92396bd4f32de26e9d2b7bc"
+      },
+      {
+        "sequence": 8,
+        "timestamp": 1789427108620,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "AirRoofers",
+        "details": {
+          "evidenceId": "EVID-REMOTE-AUDIT-1789427108620",
+          "requirementId": "REQ-REMOTE-AUDIT",
+          "hash": "d105394b7ce5e60025929f00311e7434aa45361ab06b9bcb8d712bb63e29a7bf"
+        },
+        "prevHash": "e42aea96607a219d6c996d8bb8c06426d2343ab0e92396bd4f32de26e9d2b7bc",
+        "hash": "8accb5a2ff1b520bb0bcff7418a3b4c7d77b0d6464ecae934480aa2cd450f3c1"
+      },
+      {
+        "sequence": 9,
+        "timestamp": 1789427116337,
+        "action": "SESSION_COMPLETED",
+        "actor": "AirRoofers",
+        "details": {
+          "durationMs": 7749,
+          "metrics": {
+            "totalChecks": 7,
+            "passedChecks": 7,
+            "failedChecks": 0,
+            "warnings": 0
+          },
+          "reason": "SERVER_SHUTDOWN"
+        },
+        "prevHash": "8accb5a2ff1b520bb0bcff7418a3b4c7d77b0d6464ecae934480aa2cd450f3c1",
+        "hash": "9a7d5f6d96d2632b40c13f572a97171595d91e34f88fc5e2a814e8594858f3ba"
+      }
+    ],
+    "zeroTargetPollutionVerified": true
+  },
+  "certification": null,
+  "sessionIntegrityHash": "a413cc6ecc83a849ed1c7fa176bbbd1f52b4443de25282565fd9400a83df69b5",
+  "savedAt": "2026-09-14T23:05:16.339Z"
+}

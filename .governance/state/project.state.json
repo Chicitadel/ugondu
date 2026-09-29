@@ -1,0 +1,112 @@
+{
+  "registryId": "REG-EAORCS-001",
+  "name": "EAORCS Master Governance Registry",
+  "version": "2026.1.0",
+  "status": "ACTIVE",
+  "createdAt": "2026-08-02T20:13:50.261Z",
+  "projects": [],
+  "auditRunCount": 1,
+  "lastReset": {
+    "mode": "SOFT_RESET",
+    "timestamp": "2026-08-02T20:22:04.534Z",
+    "operator": "SYSTEM"
+  },
+  "metadata": {
+    "engine": "RegistryLifecycleManager",
+    "tier": "EAORCS-GOVERNANCE"
+  },
+  "lastSoftReset": {
+    "timestamp": "2026-08-17T14:15:33.499Z",
+    "operator": "SYSTEM"
+  },
+  "updatedAt": "2026-08-17T14:15:33.500Z",
+  "edition": "COMMUNITY",
+  "_checksum": "ffbae85b106bd35acda01ae203b2b5b0312c22641be74f055aca16b90016dbdc",
+  "_signature": "f7915e194488d5f928ce4be265d8f0e6006302eb8161e60ce4e906c6d27794b7",
+  "lastRollback": {
+    "restoredFromSnapshot": "snapshot-2026-08-02_221407",
+    "timestamp": "2026-08-02T20:14:07.435Z",
+    "operator": "TEST_ROLLBACK",
+    "signatureVerified": true
+  },
+  "lastAuditId": "AUD-20260802201407-20349D",
+  "lastAuditTimestamp": "2026-08-02T20:14:07.987Z",
+  "lastAuditManifest": {
+    "bundleId": "EAORCS-BUNDLE-20260802T201407",
+    "timestamp": "2026-08-02T20:14:07.890Z",
+    "targetPlatform": "Enterprise Platform Ecosystem (*.enterprise.local)",
+    "inferredProduct": "Product: Core (55.0% Confidence)",
+    "productName": "Core",
+    "confidence": "55.0% Confidence",
+    "overallReadinessScore": 100,
+    "certificationDecision": "PRODUCTION_READY",
+    "totalStreams": 40,
+    "artifactsCount": 9,
+    "artifacts": [
+      {
+        "name": "manifest.json",
+        "sizeBytes": 0,
+        "sha256": "",
+        "format": "JSON",
+        "path": "manifest.json"
+      },
+      {
+        "name": "findings.json",
+        "sizeBytes": 24141,
+        "sha256": "60284ef1ef77591562fcd985575e8072497e9774fa96e85ddc149603e776e907",
+        "format": "JSON",
+        "path": "findings.json"
+      },
+      {
+        "name": "recommendations.json",
+        "sizeBytes": 97340,
+        "sha256": "183bdc22051786ff769f1058e71e35f536f1e320ea0b434a48c08955cac6156b",
+        "format": "JSON",
+        "path": "recommendations.json"
+      },
+      {
+        "name": "risk_register.json",
+        "sizeBytes": 1185,
+        "sha256": "64fa07134941824bfab30b9e5e03d6f7037d9b4c32330b8f291e6346b68308a7",
+        "format": "JSON",
+        "path": "risk_register.json"
+      },
+      {
+        "name": "findings.sarif.json",
+        "sizeBytes": 35550,
+        "sha256": "d7142e08e930a4cec738c9ca46497f3e6f4449720a53c46b3fefbbd8827ca1ff",
+        "format": "JSON",
+        "path": "findings.sarif.json"
+      },
+      {
+        "name": "sbom.spdx.json",
+        "sizeBytes": 1554,
+        "sha256": "356406129f94e458b6f43180253f145728ff21692f3eadc81e3eee62918c8704",
+        "format": "JSON",
+        "path": "sbom.spdx.json"
+      },
+      {
+        "name": "certificate.json",
+        "sizeBytes": 975,
+        "sha256": "aa6872ad3fffb5f328d6e41ea8cf4f7706d11500097bc2097c63a9f1ee16a90b",
+        "format": "JSON",
+        "path": "certificate.json"
+      },
+      {
+        "name": "index.html",
+        "sizeBytes": 96404,
+        "sha256": "47338317c3c7fed4aab63e2d551000b9deadd86e73b6d21853477667c2c24468",
+        "format": "HTML5",
+        "path": "index.html"
+      },
+      {
+        "name": "readiness-scorecard.html",
+        "sizeBytes": 96404,
+        "sha256": "47338317c3c7fed4aab63e2d551000b9deadd86e73b6d21853477667c2c24468",
+        "format": "HTML5",
+        "path": "readiness-scorecard.html"
+      }
+    ],
+    "generator": "EAORCS ReportBundleCompiler Stream 4 v2026.1-LTS"
+  }
+}

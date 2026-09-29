@@ -1,0 +1,10 @@
+{
+  "transactionId": "TX-CAD2E6AA1F29",
+  "snapshotHash": "f6973d0bed3b10139d7a3a38536325a45a34b2b2edd86e7630390f7d763f07fb",
+  "files": {
+    "transaction.json": "6f393fe70062015ae41ab6f06e632aa794166f42b0bf7894fddb089d203de2af",
+    "certificate.json": "fa400b397b0d4cc9b5acbe5b1608093977568443c00e7eb87f795d6b1d140d0c",
+    "ledger.json": "498bb5a22c0e250b021a8f2b4e8aff889ff2ae497ae7a6a94f188618d5447afe"
+  },
+  "generatedAt": "2026-09-12T12:24:02.193Z"
+}

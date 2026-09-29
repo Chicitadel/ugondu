@@ -1,0 +1,16 @@
+{
+  "gateName": "physicalArchitecture",
+  "policyId": "ARCH-GATE-012",
+  "status": "APPROVED",
+  "passed": true,
+  "releaseIndex": 100,
+  "receiptBound": true,
+  "totalFilesScanned": 27,
+  "violationsCount": 0,
+  "violations": [],
+  "facadeCompliance": "PASSED",
+  "adapterCompliance": "PASSED",
+  "locLimitsCompliance": "PASSED",
+  "domainIsolationCompliance": "PASSED",
+  "executedAt": "2026-09-16T15:33:17.659Z"
+}

@@ -1,0 +1,17 @@
+{
+  "transactionId": "TX-623301FBC36D",
+  "lifecycleId": "LIFECYCLE-CERT-1789213244039",
+  "executionId": "TX-1789213244039",
+  "targetFingerprint": "4a266af1875ed9cda407d29c81a71d00515251a56c3ee445bac2408fdc64bd9b",
+  "subjectDigest": "bd315b01e0a47c6ec018e754353c0c236b7a3a927afd36ff2df4968603e4e215",
+  "sourceRevision": null,
+  "publicationRevision": null,
+  "inputSnapshotHash": "aefc5380ec17a8ac8fb3c730903da27a9104cf29cff10ab640acb338263506a9",
+  "snapshotHash": "646139e64ddef4e901377f6b4093ade6f314b22dc5752130a3681c028c6abe09",
+  "finalSnapshotHash": "646139e64ddef4e901377f6b4093ade6f314b22dc5752130a3681c028c6abe09",
+  "resultDigest": "5a9c177d4ea3928c7fef619982dd406414e3557c0b2293743e362fdfaaa97b41",
+  "evidenceRootHash": "d8ff7f7dd0a94e1afe0e6f09b65f6c3b805e84ae50206f36b8c6330f98a49734",
+  "candidateStateDigest": "6f98fe2a69abfea2bdff4573aa86b03fe5e0b0dbba663f4cd03e8f3fb3accc8f",
+  "decision": "APPROVED",
+  "generatedAt": "2026-09-12T11:40:44.042Z"
+}

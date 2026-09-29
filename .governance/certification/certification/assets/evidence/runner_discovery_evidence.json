@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-07-24T07:44:10.126Z",
+  "kernelVersion": "3.0.0",
+  "discoveredRunners": [
+    {
+      "runnerId": "architecture-runner",
+      "runnerVersion": "3.0.0",
+      "supportedBundles": [
+        "CORE_ENGINEERING"
+      ],
+      "requiredCapabilities": [],
+      "digitalSignature": "SIG_RUNNER_ARCH_V3_10A1",
+      "compatibilityStatus": "COMPATIBLE"
+    },
+    {
+      "runnerId": "api-contract-runner",
+      "runnerVersion": "3.0.0",
+      "supportedBundles": [
+        "CORE_ENGINEERING"
+      ],
+      "requiredCapabilities": [],
+      "digitalSignature": "SIG_RUNNER_API_V3_20B2",
+      "compatibilityStatus": "COMPATIBLE"
+    },
+    {
+      "runnerId": "security-runner",
+      "runnerVersion": "3.0.0",
+      "supportedBundles": [
+        "SECURITY_PENETRATION"
+      ],
+      "requiredCapabilities": [],
+      "digitalSignature": "SIG_RUNNER_SEC_V3_30C3",
+      "compatibilityStatus": "COMPATIBLE"
+    },
+    {
+      "runnerId": "framework-integrity-runner",
+      "runnerVersion": "3.0.0",
+      "supportedBundles": [
+        "CORE_ENGINEERING"
+      ],
+      "requiredCapabilities": [],
+      "digitalSignature": "SIG_RUNNER_SELF_V3_40D4",
+      "compatibilityStatus": "COMPATIBLE"
+    }
+  ]
+}

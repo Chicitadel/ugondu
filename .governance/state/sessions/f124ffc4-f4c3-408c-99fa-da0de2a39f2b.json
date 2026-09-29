@@ -1,0 +1,204 @@
+{
+  "sessionId": "f124ffc4-f4c3-408c-99fa-da0de2a39f2b",
+  "createdAt": "2026-08-20T03:17:16.971Z",
+  "actor": "CLEAN_MACHINE_ISOLATION_AGENT",
+  "targetContext": {
+    "subjectId": "subj_mock-clean-target_96a77954409c",
+    "subjectType": "WORKSPACE",
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+    "environment": "client",
+    "revision": "fbf06871",
+    "branch": "main",
+    "policySource": "OUT_OF_TREE",
+    "sessionId": "f124ffc4-f4c3-408c-99fa-da0de2a39f2b",
+    "federationMode": "INDEPENDENT",
+    "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+    "hasInTreeGovernance": false,
+    "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+    "createdAt": "2026-08-20T03:17:16.969Z",
+    "metadata": {}
+  },
+  "targetDescriptor": {
+    "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+    "subjectId": "subj_mock-clean-target_96a77954409c",
+    "subjectType": "WORKSPACE",
+    "name": "@enterprise/payment-gateway",
+    "version": "2.1.0",
+    "description": "Zero-Trust Payment Gateway Microservice",
+    "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+    "branch": "main",
+    "revision": "unversioned",
+    "isClean": true,
+    "remoteUrl": null,
+    "manifests": {
+      "nodejs": {
+        "name": "@enterprise/payment-gateway",
+        "version": "2.1.0",
+        "scripts": []
+      }
+    },
+    "buildSystem": "npm",
+    "tests": {
+      "hasTests": false,
+      "testDirs": [],
+      "testConfigs": []
+    },
+    "structureSummary": {
+      "fileCount": 1,
+      "dirCount": 0,
+      "totalBytes": 125,
+      "languages": {
+        ".json": 1
+      }
+    },
+    "fingerprint": "d0eed73d62448c32991ef83fad72bf6ca1b49eecaa9acf7a8e7cb57497ec8159",
+    "discoveredAt": "2026-08-20T03:17:16.751Z",
+    "metadata": {}
+  },
+  "session": {
+    "sessionId": "f124ffc4-f4c3-408c-99fa-da0de2a39f2b",
+    "status": "COMPLETED",
+    "targetContext": {
+      "subjectId": "subj_mock-clean-target_96a77954409c",
+      "subjectType": "WORKSPACE",
+      "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+      "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs",
+      "environment": "client",
+      "revision": "fbf06871",
+      "branch": "main",
+      "policySource": "OUT_OF_TREE",
+      "sessionId": "f124ffc4-f4c3-408c-99fa-da0de2a39f2b",
+      "federationMode": "INDEPENDENT",
+      "platformRootDir": "D:\\ujomor-platform\\products\\eaorcs",
+      "hasInTreeGovernance": false,
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "createdAt": "2026-08-20T03:17:16.969Z",
+      "metadata": {}
+    },
+    "startTime": 1787195836971,
+    "endTime": 1787195837023,
+    "evidenceCatalog": [
+      {
+        "id": "EVID-DISCOVER-1787195836977",
+        "requirementId": "REQ-TARGET-DISCOVERY",
+        "type": "TARGET_DISCOVERY",
+        "source": "EAORCS_OBSERVER",
+        "status": "VALID",
+        "data": {
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+          "subjectId": "subj_mock-clean-target_96a77954409c",
+          "subjectType": "WORKSPACE",
+          "name": "@enterprise/payment-gateway",
+          "version": "2.1.0",
+          "description": "Zero-Trust Payment Gateway Microservice",
+          "repositoryRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+          "branch": "main",
+          "revision": "unversioned",
+          "isClean": true,
+          "remoteUrl": null,
+          "manifests": {
+            "nodejs": {
+              "name": "@enterprise/payment-gateway",
+              "version": "2.1.0",
+              "scripts": []
+            }
+          },
+          "buildSystem": "npm",
+          "tests": {
+            "hasTests": false,
+            "testDirs": [],
+            "testConfigs": []
+          },
+          "structureSummary": {
+            "fileCount": 1,
+            "dirCount": 0,
+            "totalBytes": 125,
+            "languages": {
+              ".json": 1
+            }
+          },
+          "fingerprint": "d0eed73d62448c32991ef83fad72bf6ca1b49eecaa9acf7a8e7cb57497ec8159",
+          "discoveredAt": "2026-08-20T03:17:16.751Z",
+          "metadata": {}
+        },
+        "hash": "552d2989e381e1b3070dc469aaf4fe105f6241f102132f5b9ecaf53e80ecd900",
+        "timestamp": "2026-08-20T03:17:16.978Z"
+      }
+    ],
+    "findings": [],
+    "metrics": {
+      "totalChecks": 1,
+      "passedChecks": 1,
+      "failedChecks": 0,
+      "warnings": 0
+    },
+    "policyResolution": {
+      "policySource": "OUT_OF_TREE",
+      "effectivePolicyDir": "D:\\ujomor-platform\\products\\eaorcs\\.governance",
+      "hasInTreeGovernance": false,
+      "evaluatedRules": []
+    },
+    "auditTrail": [
+      {
+        "sequence": 0,
+        "timestamp": 1787195836971,
+        "action": "SESSION_INITIALIZED",
+        "actor": "CLEAN_MACHINE_ISOLATION_AGENT",
+        "details": {
+          "subjectId": "subj_mock-clean-target_96a77954409c",
+          "workspaceRoot": "D:\\ujomor-platform\\products\\eaorcs\\tmp\\mock-clean-target",
+          "policySource": "OUT_OF_TREE"
+        },
+        "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "c002ec9cabf7fa865e922f4c86f4f5e3ac152bed8675e1dadb96d7bdab38e23d"
+      },
+      {
+        "sequence": 1,
+        "timestamp": 1787195836971,
+        "action": "SESSION_STARTED",
+        "actor": "CLEAN_MACHINE_ISOLATION_AGENT",
+        "details": {
+          "startTime": 1787195836971,
+          "reason": "REMOTE_REST_SESSION_INIT"
+        },
+        "prevHash": "c002ec9cabf7fa865e922f4c86f4f5e3ac152bed8675e1dadb96d7bdab38e23d",
+        "hash": "53c6aac86bc6197a03fe61f3d151672070e9d40d26f80a41b1f18c58cada2d7d"
+      },
+      {
+        "sequence": 2,
+        "timestamp": 1787195836978,
+        "action": "EVIDENCE_RECORDED",
+        "actor": "CLEAN_MACHINE_ISOLATION_AGENT",
+        "details": {
+          "evidenceId": "EVID-DISCOVER-1787195836977",
+          "requirementId": "REQ-TARGET-DISCOVERY",
+          "hash": "552d2989e381e1b3070dc469aaf4fe105f6241f102132f5b9ecaf53e80ecd900"
+        },
+        "prevHash": "53c6aac86bc6197a03fe61f3d151672070e9d40d26f80a41b1f18c58cada2d7d",
+        "hash": "55fad0472e9717778ad735ee389511f601b31c47ea4b4c805db947c3dfd0ecd1"
+      },
+      {
+        "sequence": 3,
+        "timestamp": 1787195837023,
+        "action": "SESSION_COMPLETED",
+        "actor": "CLEAN_MACHINE_ISOLATION_AGENT",
+        "details": {
+          "durationMs": 52,
+          "metrics": {
+            "totalChecks": 1,
+            "passedChecks": 1,
+            "failedChecks": 0,
+            "warnings": 0
+          },
+          "reason": "SERVER_SHUTDOWN"
+        },
+        "prevHash": "55fad0472e9717778ad735ee389511f601b31c47ea4b4c805db947c3dfd0ecd1",
+        "hash": "d5da1155cff7cefaaa0952dca4901a4236fccae21874ae6abd2935a13d288746"
+      }
+    ],
+    "zeroTargetPollutionVerified": true
+  },
+  "certification": null,
+  "savedAt": "2026-08-20T03:17:17.024Z"
+}

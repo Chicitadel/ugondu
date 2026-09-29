@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.1.0",
+  "protectedFiles": {
+    ".github/workflows/reusable-eaorcs-certify.yml": "e30b21d13c073e611e5e8c93bde1af712e14654d",
+    "scripts/ratify_baselines.js": "5e301f99007a97912864b1c279698dfd283f3547",
+    "engine/adapters/UniversalProductAdapter.js": "531dbede8e8f7f4c3270b01ae748911041c36838",
+    "engine/providers/SubjectMaterializer.js": "51f2d525af47729e5402c02e41fa84885ca30c5f",
+    "scripts/final_cor_gate.js": "c102e9a7046126bfebb5e8f77cfe0cfe38dc7b72",
+    "engine/certification/CanonicalPhysicalManifestV1.js": "9c2a55daeb83aba8d05e53abeded10725e701de0",
+    "engine/governance/BaselinePhysicalManifest.js": "7edd770743901503144011a0f3f3cd9c09ca34b4"
+  },
+  "generatedAt": "2026-09-13T17:05:00Z",
+  "ledgerDigest": "73ba38dbd8f9f15b39d9ded099c1510306ec54e6da2db4ba9bb59acf8a3d741d",
+  "note": "DERIVED ONLY -- no independent authority. L1 constants in scope_guard.js govern. Discard and regenerate if ledgerDigest mismatches current finding_ledger.json."
+}

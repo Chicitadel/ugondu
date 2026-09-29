@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-Z01",
+  "description": ".gitignore has .nyc_output/ and coverage/ entries",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:59.844Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var g=require('fs').readFileSync('.gitignore','utf8');if(g.indexOf('.nyc_output')<0){process.stdout.write('FAIL: .nyc_output not in .gitignore');process.exit(1);}if(g.indexOf('coverage')<0){process.stdout.write('FAIL: coverage not in .gitignore');process.exit(1);}process.stdout.write('PASS: F-Z01 .gitignore has .nyc_output and coverage entries');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "219f280a4fefef60c91422ce8f6a3ad8caeff3b326b3a818fc2f08595c8bc8c0",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-Z01 .gitignore has .nyc_output and coverage entries",
+  "executionEvidenceDigest": "fd12fa8ccc1f93c3ca2e614bf439dce7ea4b1e5bcdf378d8ebccd4795b593d0e",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

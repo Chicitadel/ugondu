@@ -1,0 +1,9 @@
+profile: government-platform
+description: Government platform compliance.
+includes:
+  - platform-base
+  - sovereign
+  - government
+  - eu-compliance
+  - ai-act
+  - identity

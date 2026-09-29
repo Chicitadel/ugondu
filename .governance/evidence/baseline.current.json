@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "receiptType": "BASELINE_CURRENT_STATE",
+  "timestamp": "2026-08-16T10:23:02.000Z",
+  "branch": "main",
+  "liveHead": "11951085f50b168c8fe5ce705352e7a73469ee70",
+  "liveTree": "56fd3d405b3cc1340ae73aea19b46b703d67a55f",
+  "remoteHead": "11951085f50b168c8fe5ce705352e7a73469ee70",
+  "remoteParity": true,
+  "classification": "GOVERNMENT | ENTERPRISE | RESTRICTED"
+}

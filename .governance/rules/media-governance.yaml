@@ -1,0 +1,4 @@
+name: media-governance
+description: DAM architecture, content rights, and CDN validation rules.
+rules:
+  - enforce-dam-metadata

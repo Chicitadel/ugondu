@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-C02",
+  "description": "No testOverrides/manifestResult in LocalWorkspaceSourceProvider live code",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:59.984Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var live=require('fs').readFileSync('engine/providers/source/LocalWorkspaceSourceProvider.js','utf8').split('\\n').filter(function(l){var t=l.trim();return !t.startsWith('//')&&!t.startsWith('*');}).join('\\n');if(live.indexOf('testOverrides')>=0||live.indexOf('manifestResult')>=0){process.stdout.write('FAIL: testOverrides or manifestResult in live code');process.exit(1);}process.stdout.write('PASS: F-C02 no testOverrides in LocalWorkspaceSourceProvider live code');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "470c165b3f56a3c8649d1cdb13f44462e231fc160d51016c34c86c75f92a0efc",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-C02 no testOverrides in LocalWorkspaceSourceProvider live code",
+  "executionEvidenceDigest": "140057dc04d180291fd3a611210594b87c752876df5b544fdc87d9d331d89493",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

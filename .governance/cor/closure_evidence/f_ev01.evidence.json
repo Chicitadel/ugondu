@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "eaorcs/closure-evidence/v1",
+  "findingId": "F-EV01",
+  "description": "evidenceOutputPath/EVIDENCE_OUTPUT_ROOT present in certify.js",
+  "status": "PHYSICALLY_VERIFIED",
+  "verifierVersion": "AUDIT-003-STREAM-J-v1",
+  "generatedAt": "2026-09-14T06:15:41.491Z",
+  "executionTimestamp": "2026-09-14T06:15:42.196Z",
+  "command": "node",
+  "arguments": [
+    "-e",
+    "var s=require('fs').readFileSync('certify.js','utf8');if(s.indexOf('evidenceOutputPath')<0&&s.indexOf('EVIDENCE_OUTPUT_ROOT')<0){process.stdout.write('FAIL: evidenceOutputPath/EVIDENCE_OUTPUT_ROOT not in certify.js');process.exit(1);}process.stdout.write('PASS: F-EV01 evidenceOutputPath present in certify.js');"
+  ],
+  "targetRoot": "D:\\ujomor-platform\\products\\eaorcs",
+  "sourceRevision": "b0993f83e7e6fa20dbaa991070b65767bce07def",
+  "sourceTreeDigest": "6b14e57a621b61a7e9c7796c28628820e75bb757",
+  "exitCode": 0,
+  "stdoutDigest": "d28578df613b5d6214b8c2b981788e3b1551f76306ef5cd526c4b917c65d2f61",
+  "stderrDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutPreview": "PASS: F-EV01 evidenceOutputPath present in certify.js",
+  "executionEvidenceDigest": "24cf767a46a79be5a69d4adc36ade537ae5306871b8f1e8b5fcaf5003d3998b6",
+  "canonicalFieldsOrdered": [
+    "arguments",
+    "command",
+    "executionTimestamp",
+    "exitCode",
+    "findingId",
+    "sourceRevision",
+    "sourceTreeDigest",
+    "stderrDigest",
+    "stdoutDigest",
+    "targetRoot",
+    "verifierVersion"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Certification Decision",
+  "type": "object",
+  "properties": {
+    "certificationId": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "WARNING",
+        "BLOCK",
+        "INCONCLUSIVE"
+      ]
+    },
+    "rulesEvaluated": {
+      "type": "integer"
+    },
+    "manifestRef": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "certificationId",
+    "decision",
+    "manifestRef",
+    "timestamp"
+  ]
+}

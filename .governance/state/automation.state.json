@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "masterEnabled": false,
+  "autoGovernEnabled": false,
+  "autoCertifyEnabled": false,
+  "scheduleMode": "MANUAL",
+  "selfHealingEnabled": false,
+  "maxRepairRounds": 1,
+  "lastModified": "2026-08-19T20:53:58.459Z",
+  "lastModifiedBy": "CLI_OPERATOR"
+}

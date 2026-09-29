@@ -1,0 +1,4 @@
+name: government
+description: Public-sector workflows and government integration.
+rules:
+  - require-gov-identity

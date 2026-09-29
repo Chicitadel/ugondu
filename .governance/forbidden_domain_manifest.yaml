@@ -1,0 +1,176 @@
+# ==============================================================================
+# EAORCS FORBIDDEN DOMAIN MANIFEST & CANONICAL VOCABULARY RULES
+# Project        : EAORCS - Enterprise Autonomous Operation & Regulatory Compliance System
+# Module         : .governance/forbidden_domain_manifest.yaml
+# Version        : 2026.3.1-LTS
+# Author         : Ujomor Systems & Enterprise Governance Authority
+# Organization   : Ujomor Systems & Enterprise Governance
+# Created Date   : 2026-08-10
+# Last Modified  : 2026-08-10
+# Classification : ENTERPRISE
+# Governance     : Security Reviewed / Architecture Controlled / Protocol Frozen
+# Standard       : UAIGOS-3.0.0-ENTERPRISE / ISO 27001 / SOC 2 / OWASP ASVS / NIST
+# ==============================================================================
+
+version: "2026.3.1-LTS"
+governance_framework: "UAIGOS-3.0.0"
+classification: "ENTERPRISE"
+author: "Ujomor Systems & Enterprise Governance Authority"
+organization: "Ujomor Systems & Enterprise Governance"
+enforcement_mode: "STRICT_PURIFIED"
+
+target_directories:
+  - "engine"
+  - "adapters"
+  - "bin"
+  - "cli"
+  - "tests"
+  - "docs"
+  - "config"
+  - "configs"
+  - "scripts"
+
+target_files:
+  - "README.md"
+  - "package.json"
+
+forbidden_domains:
+  licensing:
+    description: "Internal commercial license fee or quota calculations in core logic"
+    vocabulary:
+      - "computeLicenseFee"
+      - "calculateLicensePrice"
+      - "internalLicenseQuotaCalc"
+      - "generateLicenseKeyInternal"
+      - "inlineTierRating"
+    patterns:
+      - id: "LIC_001"
+        pattern: "function\\s+computeLicenseFee"
+        description: "Internal license fee calculation algorithm"
+      - id: "LIC_002"
+        pattern: "calculateLicensePrice\\s*\\("
+        description: "Internal license pricing calculation"
+      - id: "LIC_003"
+        pattern: "internalLicenseQuotaCalc"
+        description: "Inline license quota calculation"
+      - id: "LIC_004"
+        pattern: "generateLicenseKeyInternal"
+        description: "Inline license key generation without delegation"
+      - id: "LIC_005"
+        pattern: "inlineTierRating"
+        description: "Inline license tier rating logic"
+
+  commercial:
+    description: "Internal commercial billing rating or payment gateway logic"
+    vocabulary:
+      - "calculateInvoiceTotal"
+      - "generateInvoicePDF"
+      - "internalBillingRating"
+      - "computeUsageChargeInternal"
+      - "processPaymentGatewayInline"
+    patterns:
+      - id: "BIL_001"
+        pattern: "function\\s+calculateInvoiceTotal"
+        description: "Internal invoice total calculation algorithm"
+      - id: "BIL_002"
+        pattern: "generateInvoicePDF\\s*\\("
+        description: "Direct invoice document generation in core engine"
+      - id: "BIL_003"
+        pattern: "internalBillingRating"
+        description: "Inline commercial billing rating engine"
+      - id: "BIL_004"
+        pattern: "computeUsageChargeInternal"
+        description: "Internal usage charge calculation"
+      - id: "BIL_005"
+        pattern: "processPaymentGatewayInline"
+        description: "Inline payment gateway transaction processing"
+
+  ai:
+    description: "Direct neural model training/inference execution bypassing AiDelegationEnvelope"
+    vocabulary:
+      - "executeNeuralInference"
+      - "directLlmInferenceCall"
+      - "evaluateModelWeightsDirect"
+      - "runTensorflowInferenceInternal"
+    patterns:
+      - id: "AI_001"
+        pattern: "function\\s+executeNeuralInference"
+        description: "Direct neural inference execution in core logic"
+      - id: "AI_002"
+        pattern: "directLlmInferenceCall\\s*\\("
+        description: "Direct LLM inference call bypassing AiDelegationEnvelope"
+      - id: "AI_003"
+        pattern: "evaluateModelWeightsDirect"
+        description: "Direct neural model weights evaluation"
+      - id: "AI_004"
+        pattern: "runTensorflowInferenceInternal"
+        description: "Internal neural network runtime execution"
+
+  identity:
+    description: "Inline master password hashing or internal SSO validation"
+    vocabulary:
+      - "generateMasterPasswordHash"
+      - "validateSsoAssertionInternal"
+    patterns:
+      - id: "ID_001"
+        pattern: "function\\s+generateMasterPasswordHash"
+        description: "Inline user master credential hashing"
+      - id: "ID_002"
+        pattern: "validateSsoAssertionInternal"
+        description: "Inline SSO token validation bypassing identity delegation"
+
+  support:
+    description: "Inline SLA penalty calculation"
+    vocabulary:
+      - "computeSlaViolationPenalty"
+    patterns:
+      - id: "SUP_001"
+        pattern: "function\\s+computeSlaViolationPenalty"
+        description: "Inline SLA penalty calculation"
+
+forbidden_endpoints:
+  - id: "FEP_001"
+    pattern: "https://identity\\.airroofers\\.eu"
+    description: "Hardcoded identity vendor service URL"
+  - id: "FEP_002"
+    pattern: "https://telemetry\\.airroofers\\.eu"
+    description: "Hardcoded telemetry vendor service URL"
+  - id: "FEP_003"
+    pattern: "https://license\\.airroofers\\.eu"
+    description: "Hardcoded licensing vendor service URL"
+  - id: "FEP_004"
+    pattern: "https://support\\.airroofers\\.eu"
+    description: "Hardcoded support vendor service URL"
+  - id: "FEP_005"
+    pattern: "https://ai\\.airroofers\\.eu"
+    description: "Hardcoded AI vendor service URL"
+  - id: "FEP_006"
+    pattern: "https://billing\\.airroofers\\.eu"
+    description: "Hardcoded billing vendor service URL"
+
+forbidden_states:
+  - id: "FST_001"
+    pattern: "this\\.localCommercialLedger"
+    description: "Unsanctioned local commercial ledger state variable"
+  - id: "FST_002"
+    pattern: "this\\.billingStateStore"
+    description: "Unsanctioned local billing state store"
+  - id: "FST_003"
+    pattern: "this\\.localLicenseTokenCache"
+    description: "Unsanctioned local license token cache"
+
+forbidden_calculations:
+  - id: "FCL_001"
+    pattern: "amount\\s*\\*\\s*taxRate"
+    description: "Inline tax rating calculation in non-delegated module"
+  - id: "FCL_002"
+    pattern: "usageUnits\\s*\\*\\s*unitPrice"
+    description: "Inline usage rating formula in core telemetry"
+
+forbidden_storage:
+  - id: "FSTG_001"
+    pattern: "localStorage\\.setItem\\(['\"]commercial_"
+    description: "Local browser persistence of commercial credentials"
+  - id: "FSTG_002"
+    pattern: "fs\\.writeFileSync\\(['\"].*billing_state"
+    description: "Local unencrypted filesystem persistence of billing states"

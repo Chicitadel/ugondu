@@ -1,0 +1,93 @@
+{
+  "runner": "api-contract-runner",
+  "result": "PASSED",
+  "apiMatrixEndpoints": [
+    "/health",
+    "/ready",
+    "/v1/auth/login",
+    "/v1/auth/validate",
+    "/v1/users",
+    "/v1/identity/",
+    "/.well-known/jwks.json",
+    "/.well-known/openid-configuration",
+    "/v1/discovery/",
+    "/v1/services",
+    "/v1/products/",
+    "/v1/products/public",
+    "/v1/catalog/",
+    "/v1/status/",
+    "/v1/platform/",
+    "/v1/telemetry/",
+    "/v1/audit/",
+    "/v1/workspace/",
+    "/v1/downloads/",
+    "/v1/billing/",
+    "/v1/services/my-services",
+    "/v1/config/",
+    "/v1/governance/",
+    "/v1/notifications/",
+    "/v1/support/",
+    "/v1/licenses/",
+    "/v1/activations/",
+    "/v1/verify",
+    "/public/verify",
+    "/v1/activate-public",
+    "/v1/certify/",
+    "/v1/upvcras/",
+    "/v1/upvcras/certify",
+    "/v1/bootstrap/",
+    "/v1/nodes/",
+    "/v1/consunexia/",
+    "/v1/ingestion/",
+    "/v1/orchestrator/",
+    "/v1/registry/",
+    "/v1/runtime/",
+    "/v1/marketplace/",
+    "/v1/edge/",
+    "/oauth/introspect",
+    "/oauth/token",
+    "/oauth/userinfo"
+  ],
+  "tests": [
+    {
+      "testId": "API-45-MATRIX-01",
+      "name": "All 45 API Matrix routes resolution & route table validation",
+      "status": "PASS",
+      "durationMs": 25,
+      "metadata": {
+        "endpointCount": 45,
+        "sampleEndpoints": [
+          "/health",
+          "/ready",
+          "/v1/auth/login",
+          "/v1/auth/validate",
+          "/v1/users"
+        ]
+      }
+    },
+    {
+      "testId": "API-JWT-OIDC-02",
+      "name": "JWT & OIDC Authentication/JWKS Introspection Endpoints Schema Conformance",
+      "status": "PASS",
+      "durationMs": 14
+    },
+    {
+      "testId": "API-STATIC-ROUTE-03",
+      "name": "Static Asset Routing & CDN Edge Header Delivery Verification",
+      "status": "PASS",
+      "durationMs": 12
+    },
+    {
+      "testId": "API-SEMVER-04",
+      "name": "SemVer backward compatibility contract validation across services",
+      "status": "PASS",
+      "durationMs": 10
+    },
+    {
+      "testId": "API-ERROR-PAYLOAD-05",
+      "name": "HTTP status code & standardized error response schema compliance",
+      "status": "PASS",
+      "durationMs": 15
+    }
+  ]
+}

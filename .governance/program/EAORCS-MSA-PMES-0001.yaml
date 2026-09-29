@@ -1,0 +1,133 @@
+#******************************************************************************
+# Project        : Enterprise Autonomous Operational Readiness & Certification System (EAORCS)
+# Module         : Microservice Architecture Migration Program (PMES)
+# File           : .governance/program/EAORCS-MSA-PMES-0001.yaml
+# Version        : 1.0
+# Author         : Systems Engineering & Governance Architecture Council
+# Organization   : Air Roofers Platform Ecosystem & Ujomor Systems
+# Classification : GOVERNMENT | ENTERPRISE | RESTRICTED
+# Status         : PROPOSED (ARB approval required for FROZEN)
+#******************************************************************************
+
+programId: EAORCS-MSA-MIGRATION-PMES-0001
+version: "1.0"
+status: PROPOSED
+title: "EAORCS Microservice Architecture Migration Program"
+authorityRecord:
+  author: "Systems Engineering & Governance Architecture Council"
+  organization: "Air Roofers Platform Ecosystem & Ujomor Systems"
+  createdDate: "2026-08-15"
+  classifiedAs: "GOVERNMENT | ENTERPRISE | RESTRICTED"
+
+freezeAuthority:
+  requiredApprovalBody: "Architecture Review Board (ARB)"
+  currentState: "PROPOSED — not yet frozen"
+  scheduledHashAlgorithm: "sha256"
+  scheduleHash: null  # Computed at FROZEN state, not at PROPOSED
+
+migrationStrategy: "Strangler Fig Pattern — incremental extraction preserving monolith parity"
+targetArchitecture: "12 Bounded Context Microservices (S01–S12) per BoundedContextCatalog"
+baselineMonolithRef: "REL-2026.3.1-LTS / COR-3390"
+
+phases:
+  - phaseId: "P01"
+    name: "Authority & Baseline Establishment"
+    description: "Freeze the certified monolith baseline. Establish extraction governance."
+    status: IN_PROGRESS
+    deliverables: ["COR-3120 certified baseline", "migration_baseline.yaml", "this PMES document"]
+
+  - phaseId: "P02"
+    name: "Bounded Context Design & Contract Architecture"
+    description: "Finalize S01-S12 contracts. Complete BoundedContextCatalog. Define data ownership per service."
+    status: PLANNED
+    deliverables: ["BoundedContextCatalog.js (complete)", "OpenAPI contract per service", "data ownership matrix"]
+
+  - phaseId: "P03"
+    name: "Edge & Identity Extraction (S01, S09)"
+    description: "Extract Edge/API Gateway (S01) and Security/Authority (S09) as first Strangler Fig services."
+    status: PLANNED
+
+  - phaseId: "P04"
+    name: "Governance & Policy Extraction (S04)"
+    description: "Extract ScanEntitlementService-owning Governance service."
+    status: PLANNED
+
+  - phaseId: "P05"
+    name: "Analysis & Intelligence Extraction (S06)"
+    description: "Extract DeepScanIntelligenceEngine, MerkleRepositoryIndex, ProofCarryingScanOptimizer."
+    status: PLANNED
+
+  - phaseId: "P06"
+    name: "Certification & Readiness Extraction (S08)"
+    description: "Extract CertificationLockEngine, EvidenceLifecycleEngine, DriIndexCalculator."
+    status: PLANNED
+
+  - phaseId: "P07"
+    name: "PMES Schedule Extraction (S03)"
+    description: "Extract ProjectMasterLifecycleScheduleEngine as standalone PMES service."
+    status: PLANNED
+
+  - phaseId: "P08"
+    name: "Observability & Reporting Extraction (S10, S12)"
+    description: "Extract HtmlDashboardGenerator and telemetry as isolated services."
+    status: PLANNED
+
+  - phaseId: "P09"
+    name: "Evidence & Traceability Extraction (S07)"
+    description: "Extract Evidence lifecycle and Audit traceability services."
+    status: PLANNED
+
+  - phaseId: "P10"
+    name: "Execution Orchestration Extraction (S05)"
+    description: "Extract Execution engine and workflow orchestrator."
+    status: PLANNED
+
+  - phaseId: "P11"
+    name: "Federation & Integration Extraction (S11)"
+    description: "Extract Cross-system connectors and federation hub."
+    status: PLANNED
+
+  - phaseId: "P12"
+    name: "Blueprint Service Extraction (S02)"
+    description: "Extract Architecture Blueprint compiler and validator."
+    status: PLANNED
+
+  - phaseId: "P13"
+    name: "Cross-Service Observability Hardening"
+    description: "Distributed tracing, correlation IDs, SLO/SLA across all 12 services."
+    status: PLANNED
+
+  - phaseId: "P14"
+    name: "Security Hardening — Zero Trust"
+    description: "mTLS, workload identity (SPIFFE/SPIRE), RBAC/ABAC per service."
+    status: PLANNED
+
+  - phaseId: "P15"
+    name: "Behavioral Regression Parity"
+    description: "Prove microservice outputs are behaviourally equivalent to monolith."
+    status: PLANNED
+
+  - phaseId: "P16"
+    name: "Shadow Execution"
+    description: "Run monolith and services in parallel; compare results; accumulate confidence."
+    status: PLANNED
+
+  - phaseId: "P17"
+    name: "Controlled Traffic Migration"
+    description: "Canary rollout: 1% → 10% → 50% → 100% traffic shifted to services."
+    status: PLANNED
+
+  - phaseId: "P18"
+    name: "Data Authority Cutover"
+    description: "Final data store ownership transfer. No shared databases after this phase."
+    status: PLANNED
+
+  - phaseId: "P19"
+    name: "Legacy Monolith Retirement"
+    description: "Decommission the monolith runtime. Archive as reference implementation."
+    status: PLANNED
+
+  - phaseId: "P20"
+    name: "Cross-Service Adversarial Assurance & COR"
+    description: "Full adversarial test suite across all 12 services. DRI=100 on microservice baseline. COR declared."
+    status: PLANNED

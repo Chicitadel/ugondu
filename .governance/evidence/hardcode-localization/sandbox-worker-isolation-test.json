@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "title": "Plugin Sandbox Worker Thread Isolation Test Receipt",
+  "executedAt": "2026-08-17T13:59:17.691Z",
+  "result": {
+    "workerIsolationVerified": true,
+    "testsPassed": 5,
+    "testsFailed": 0,
+    "totalTests": 5,
+    "isolationMechanism": "Node.js worker_threads with resourceLimits, hard timeout termination, and module interception",
+    "sandboxIsolation": "SANDBOX_ISOLATION_VERIFIED",
+    "status": "PASSED",
+    "tests": [
+      {
+        "test": "worker_runs_in_isolated_thread",
+        "passed": true,
+        "detail": "Worker threadId: 1"
+      },
+      {
+        "test": "resource_limits_enforced",
+        "passed": true,
+        "detail": "maxOldGenerationSizeMb:64 applied"
+      },
+      {
+        "test": "worker_timeout_termination",
+        "passed": true,
+        "detail": "exit code 1"
+      },
+      {
+        "test": "worker_timeout_termination",
+        "passed": true,
+        "detail": "Worker terminated after 300ms"
+      },
+      {
+        "test": "unauthorized_module_blocked",
+        "passed": true,
+        "detail": "child_process blocked=true,code=ERR_SANDBOX_ACCESS_DENIED"
+      }
+    ]
+  },
+  "standards": [
+    "ISO 27001",
+    "SOC 2",
+    "OWASP ASVS Level 3",
+    "NIST SP 800-161",
+    "UAIGOS 3.0.0"
+  ],
+  "authority": "Systems Engineering & Security Governance Authority / Ujomor Systems",
+  "headCommit": "2efd6bbb55c2af4414174d7b9aac86f1dfbcba8e",
+  "sourceTreeHash": "fa41508abc5dc4cf54071e96eec10939b640f0974311f1a1d601aa13fa6678b4",
+  "lifecycleId": "LC-2efd6bbb55c2",
+  "executionId": "EXE-COR-2efd6bbb55c2",
+  "receiptDigest": "0e22f0f1894904d5fcf51b24b2653f9454e5f397d370dd9c6ff8e44e18383380",
+  "contentDigest": "5a1ddff5c5bede686c92c17e1422bdba94c271f9bffb6164f2e461e7d24e96ad"
+}

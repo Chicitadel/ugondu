@@ -1,0 +1,16 @@
+{
+  "schema": "eaorcs/audit-subject-lock/v2",
+  "recordedAt": "2026-09-15T05:37:27.316Z",
+  "sourceRevision": "148797a4d831a9db6319d5ac63db417a99551ff0",
+  "sourceTreeDigest": "363abac0288915cd0dc6a0e7013cf8f089bb035b2b61ec53868887c6d06a8ec4",
+  "subjectDigest": "171182ece5878eaca4b724306fcc5902f99076c1bd4a3aa5b6f91ff822f68861",
+  "environmentFingerprint": "48248e19be87f4d383e9956796a46b8213fd95cf50374c017f2f689c94022f07",
+  "dependencyLockDigest": "5110c3607d29cdf1163dfedf93b84323e04f4699e8bbdd6ee5de7532e3b292a8",
+  "installedDependencyFingerprint": "a50d2c32cd2ede749ceac955f6b0d4bfcb8322853e8fc162b7fe2e46bca87d3c",
+  "runtimeIdentity": "AirRoofers",
+  "physicalManifestDigest": "b33b21eb3777dfeda0a102107f9904d7783f96b6fd0881cee49b8014f25c6eb2",
+  "branch": "main",
+  "workingTreeClean": false,
+  "nodeVersion": "v24.17.0",
+  "artifactSource": "C:\\Users\\PROFES~1\\AppData\\Local\\Temp\\eaorcs-self-subject-1789450647063.json"
+}

@@ -1,0 +1,25 @@
+{
+  "version": "2026.1.0",
+  "updatedAt": "2026-08-09T14:54:57.095Z",
+  "totalRecords": 1,
+  "entries": [
+    {
+      "calId": "CAL-1786287297088-0001-9F12AF",
+      "findingId": "F001",
+      "claimedLevel": 3,
+      "observedLevel": 1,
+      "downgradedLevel": 1,
+      "gap": 2,
+      "severityCode": 2,
+      "token": "GAP_MATERIAL_GAP",
+      "auditSource": "TEST_AUDIT",
+      "reason": "Testing CAL entry",
+      "timestamp": "2026-08-09T14:54:57.094Z",
+      "status": "OPEN",
+      "metadata": {
+        "category": "GENERAL",
+        "title": "F001"
+      }
+    }
+  ]
+}

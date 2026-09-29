@@ -1,0 +1,29 @@
+{
+  "journalId": "JRNL-40C4228D",
+  "recordedAt": "2026-08-11T05:24:00.916Z",
+  "sessionId": "SESS-7049CE1F",
+  "mode": "Simulation",
+  "eventHandled": {
+    "type": "SIMULATION_TRIGGER",
+    "path": "D:\\ujomor-platform\\products\\eaorcs"
+  },
+  "policyDecision": {
+    "stage": "MODIFY",
+    "decision": "ASK",
+    "reason": "Stage 'MODIFY' decision resolved from scope 'workspace' (workspace.policy.yaml)",
+    "confidencePct": 95,
+    "resolvedScope": "workspace",
+    "inheritedFrom": "workspace.policy.yaml",
+    "appliedRule": "HierarchicalPolicyResolution",
+    "remembered": false,
+    "requireApproval": true
+  },
+  "kernelStateSummary": {
+    "executionId": "EXE-COR-29f25a82f9cf",
+    "overallScorePct": 85.2,
+    "tasksCount": 2673
+  },
+  "runtimeAction": "SIMULATION_COMPLETED",
+  "checksum": "dc007ba8492a9ea1dd7423588f632ca13f6bc1a35f326099ab4b9d7579ad39e3",
+  "contentDigest": "8b7886eec0e8456fc4f7575cfa32b0fd41f52ce616ee6f12bc7022ff9f48ec33"
+}

@@ -1,0 +1,16 @@
+contract_id: INFRA-DEPLOY-001
+type: infrastructure_contract
+name: Deployment Engine Contract
+version: 1.0.0
+status: active
+description: Ensures immutable, deterministic deployments.
+
+requirements:
+  methodology:
+    type: "immutable"
+    artifact: "versioned ZIP payload"
+  validation:
+    pre_deploy_checks:
+      - "Linting"
+      - "Security Headers Validation"
+    rollback_supported: true

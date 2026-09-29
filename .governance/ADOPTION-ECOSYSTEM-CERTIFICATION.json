@@ -1,0 +1,24 @@
+{
+  "certification": "Ecosystem Platform Readiness",
+  "certification_date": "2026-07-17T12:00:00Z",
+  "platforms_certified": [
+    "identity.airroofers.eu",
+    "products.airroofers.eu",
+    "license.airroofers.eu",
+    "billing.airroofers.eu",
+    "portal.airroofers.eu",
+    "hub.airroofers.eu",
+    "operations.airroofers.eu",
+    "telemetry.airroofers.eu"
+  ],
+  "test_results": {
+    "stage_1_infrastructure": "PASSED",
+    "stage_2_domain_platforms": "PASSED",
+    "stage_3_experience_platforms": "PASSED",
+    "stage_4_end_to_end_flow": "PASSED",
+    "stage_5_failure_scenarios": "PASSED"
+  },
+  "evidence_source": "telemetry.airroofers.eu",
+  "certification_result": "ECOSYSTEM_CERTIFIED_RC1",
+  "ecosystem_maturity_level": "Level 3 (Release Candidate 1)"
+}

@@ -1,0 +1,22 @@
+security:
+  zero_trust_required: true
+  deny_by_default: true
+  secrets_isolation_required: true
+  non_repudiation_required: true
+
+testing:
+  unit_tests_required: true
+  integration_tests_required: true
+  contract_tests_required: true
+  stream_qualification_required: true
+
+observability:
+  metrics_required: true
+  tracing_required: true
+  audit_logs_required: true
+  transparency_log_required: true
+
+governance:
+  architecture_freeze_required: true
+  protocol_freeze_required: true
+  human_authority_attribution_required: true

@@ -1,0 +1,14 @@
+policyVersion: "1.0"
+rules:
+  - name: NoCriticalVulnerabilities
+    source: security/npm_audit.log
+    assert: "found 0 vulnerabilities"
+  - name: BuildSucceeded
+    source: builds/vite.log
+    assert: "built in"
+  - name: HealthEndpoint
+    source: api/health_status.json
+    assert: "status == 200"
+  - name: RegistryIntegrity
+    source: registry/services.json
+    assert: "signature == valid"

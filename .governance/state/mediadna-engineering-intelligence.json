@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-08-22T09:39:09.422Z",
+  "capabilities": {
+    "build": {
+      "available": true
+    },
+    "testing": {
+      "available": true
+    },
+    "runtime": {
+      "available": true
+    },
+    "packaging": {
+      "available": true
+    },
+    "deployment": {
+      "available": false
+    }
+  },
+  "findings": [
+    {
+      "code": "RCA-BLD-002",
+      "category": "Build",
+      "message": "TypeScript compilation failed"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+#******************************************************************************
+# Project        : Enterprise Autonomous Operational Readiness & Certification System (EAORCS)
+# Module         : Microservice Migration Baseline State
+# File           : .governance/state/migration_baseline.yaml
+# Version        : 1.0
+# Author         : Systems Engineering & Governance Architecture Council
+# Organization   : Air Roofers Platform Ecosystem & Ujomor Systems
+# Classification : GOVERNMENT | ENTERPRISE | RESTRICTED
+#******************************************************************************
+
+baselineId: EAORCS-MSA-BASELINE-001
+monolithHEAD: "bea690a57addadfcee26af691b61d3a696b70478"
+certifiedBaselineVersion: "REL-2026.3.1-LTS / COR-3390"
+migrationWave: 1
+stranglerFigGateway: NOT_IMPLEMENTED
+extractedServices: []
+frozenDecisions:
+  - id: "FD-001"
+    decision: "12 bounded context microservices (S01-S12) as defined in BoundedContextCatalog"
+    frozen: true
+  - id: "FD-002"
+    decision: "No shared databases between services"
+    frozen: true
+  - id: "FD-003"
+    decision: "Strangler Fig pattern — incremental extraction"
+    frozen: true
+  - id: "FD-004"
+    decision: "EAORCS owns enforcement, not commercial logic issuance"
+    frozen: true

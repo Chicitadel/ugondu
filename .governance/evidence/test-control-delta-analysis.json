@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "2026.3.1-LTS",
+  "receiptType": "TEST_CONTROL_DELTA_ANALYSIS",
+  "parentCommit": "1f340f5d930dbb7d7c12617751d3884733c8f01a",
+  "headCommit": "22cd7d25a26b7213767eefa7900868714adfdea9",
+  "modifiedFile": "tests/governance/cross_surface_authority_consistency.test.js",
+  "mutationSummary": "Line 495 assertion alignment: replaced receipt.repositoryHEADSHA with receipt.finalHead || receipt.finalPublicationSHA to match postAtt.finalHead semantic role and error message.",
+  "classification": "ALLOWED_NONSEMANTIC_TEST_ASSERTION_ALIGNMENT",
+  "qualificationRequired": true,
+  "governanceImpact": "Test suite assertion tightened to prevent false conflation of active repository HEAD with final published certificate subject.",
+  "verifiedAt": "2026-08-19T17:00:28.543Z",
+  "decision": "PROCEED_WITH_FULL_PHYSICAL_QUALIFICATION",
+  "receiptDigest": "8a2b2c2c58328ff16f1403f7c687441e59c78ac51ef7417832911a1983e07054",
+  "contentDigest": "8a2b2c2c58328ff16f1403f7c687441e59c78ac51ef7417832911a1983e07054"
+}
