@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { randomBytes, createHmac } from 'crypto';
 import axios from 'axios';
+import { __t } from '@ugondu/shared';
 
 const app = express();
 app.use(cors());
@@ -18,24 +19,21 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
     const { repositoryUrl, branch, fileMap, targetEnvironment, token } = req.body;
     
     if (!repositoryUrl || !branch || !targetEnvironment || !token) {
-        return res.status(400).json({ error: '[en] Invalid DeploymentContext. Missing required fields or token.' });
+        return res.status(400).json({ error: __t('invalid_ctx') });
     }
 
     try {
-        // [en] 1. Authorize with Billing Gateway to determine Edition capabilities
         const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }).catch(() => null);
         if (!authResponse || !authResponse.data.authorized) {
-            return res.status(402).json({ error: '[en] Deployment blocked by Billing Gateway. License invalid or quota exceeded.' });
+            return res.status(402).json({ error: __t('blocked') });
         }
 
         const { edition, capabilities } = authResponse.data;
 
-        // [en] 2. Determine Strategy Constraints based on Edition
         let strategy = (targetEnvironment === 'cpanel' || targetEnvironment === 'directadmin') ? 'quota-sync' : 'atomic';
         
-        // Community edition force-downgrades to quota-sync and denies atomic deployments
         if (!capabilities.allowAtomic && strategy === 'atomic') {
-            console.log(`[en] Notice: Atomic strategy requested but denied by ${edition} license. Falling back to quota-sync.`);
+            console.log(__t('atomic_denied', edition));
             strategy = 'quota-sync';
         }
         
@@ -47,7 +45,6 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             }
         ];
 
-        // [en] 3. Plugin Discovery and Injection
         try {
             const PLUGIN_MANAGER_URL = process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1';
             const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`).catch(() => null);
@@ -58,7 +55,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
 
                 for (const pluginName of pluginsResponse.data.plugins) {
                     if (injectedCount >= maxPlugins) {
-                        console.log(`[en] Notice: Max plugins (${maxPlugins}) reached for ${edition} edition. Skipping ${pluginName}.`);
+                        console.log(__t('max_plugins', maxPlugins, edition, pluginName));
                         break;
                     }
 
@@ -70,26 +67,24 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
                 }
             }
         } catch (pluginErr) {
-            console.error(`[en] Plugin execution failed:`, pluginErr);
+            console.error(__t('plugin_failed'), pluginErr);
         }
 
-        // Add the core environment sync step after plugins
         steps.push({
             action: 'SYNC_ENVIRONMENT',
             payload: { strategy }
         });
 
-        // [en] 4. Enforce Rollback/Retention feature flag
         if (capabilities.allowRollback) {
             steps.push({
                 action: 'PRUNE_RELEASES',
                 payload: { retention: 3 }
             });
         } else {
-            console.log(`[en] Notice: Rollbacks and release pruning are exclusive to Professional/Enterprise editions.`);
+            console.log(__t('rollback_denied'));
             steps.push({
                 action: 'UPSELL_NOTICE',
-                payload: { message: '[en] Upgrade to Ugondu Professional to enable rollback snapshots.' }
+                payload: { message: __t('upsell_notice') }
             });
         }
 
@@ -105,21 +100,21 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
         });
 
     } catch (err: any) {
-        return res.status(500).json({ error: `[en] Internal Engine Error: ${err.message}` });
+        return res.status(500).json({ error: __t('internal_err', err.message) });
     }
 });
 
 app.post('/v1/telemetry/report', (req, res) => {
     const { transactionId, status, logs } = req.body;
     if (!transactionId || !status) {
-        return res.status(400).json({ error: '[en] Invalid ExecutionTelemetry.' });
+        return res.status(400).json({ error: __t('invalid_telemetry') });
     }
 
-    console.log(`[en] Telemetry Received - TX: ${transactionId} | Status: ${status}`);
-    return res.status(201).json({ message: '[en] Telemetry recorded.' });
+    console.log(__t('telemetry_rec', transactionId, status));
+    return res.status(201).json({ message: __t('telemetry_saved') });
 });
 
 const PORT = process.env.PORT || 4001;
 app.listen(PORT, () => {
-    console.log(`[en] Ugondu Engine Core listening on port ${PORT}`);
+    console.log(__t('listening', 'Ugondu Engine Core', PORT));
 });

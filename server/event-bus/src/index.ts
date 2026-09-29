@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import { __t } from '@ugondu/shared';
 
 const app = express();
 app.use(cors());
@@ -16,27 +17,27 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
     const { event, payload } = req.body;
     
     if (!event) {
-        return res.status(400).json({ error: '[en] Event name required.' });
+        return res.status(400).json({ error: __t('event_req') });
     }
 
-    console.log(`[en] Dispatching event: ${event}`);
+    console.log(__t('dispatching') + ` ${event}`);
     
     const subs = subscribers.get(event) || [];
-    console.log(`[en] Notified ${subs.length} subscribers for ${event}`);
+    console.log(__t('notified', subs.length, event));
 
     // Real webhook dispatch
     for (const webhookUrl of subs) {
         try {
             await axios.post(webhookUrl, { event, payload }, { timeout: 5000 });
-            console.log(`[en] Successfully delivered to ${webhookUrl}`);
+            console.log(__t('delivered', webhookUrl));
         } catch (error: any) {
-            console.error(`[en] Delivery failed to ${webhookUrl}: ${error.message}`);
+            console.error(__t('delivery_failed', webhookUrl, error.message));
         }
     }
 
     return res.status(200).json({
         dispatched: true,
-        message: `[en] Event ${event} dispatched successfully to ${subs.length} subscribers.`
+        message: __t('event_success', event, subs.length)
     });
 });
 
@@ -47,11 +48,11 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
     subs.push(webhookUrl);
     subscribers.set(event, subs);
 
-    console.log(`[en] New subscriber for event: ${event} -> ${webhookUrl}`);
-    return res.status(201).json({ message: '[en] Subscribed.' });
+    console.log(__t('new_sub', event, webhookUrl));
+    return res.status(201).json({ message: __t('subscribed') });
 });
 
 const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {
-    console.log(`[en] Ugondu Event Bus listening on port ${PORT}`);
+    console.log(__t('listening', 'Ugondu Event Bus', PORT));
 });
