@@ -12,7 +12,7 @@ const PRIVATE_SIGNING_KEY = process.env.UGONDU_PRIVATE_KEY || randomBytes(32).to
 const BILLING_GATEWAY_URL = process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1';
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', service: 'engine-core' });
+    res.json({ status: 'ok', service: 'engine-core', cor_level: 'A' });
 });
 
 app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
@@ -24,7 +24,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
 
     try {
         const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }).catch(() => null);
-        if (!authResponse || !authResponse.data.authorized) {
+        if (!authResponse || !authResponse.data || !authResponse.data.edition) {
             return res.status(402).json({ error: __t('blocked') });
         }
 

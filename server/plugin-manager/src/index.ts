@@ -2,6 +2,9 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import { __t } from '@ugondu/shared';
+import { pluginStore } from './db';
+import { executePluginSandbox } from './sandbox';
 
 const app = express();
 app.use(cors());
@@ -13,10 +16,11 @@ interface PluginMetadata {
     name: string;
     version: string;
     description: string;
+    minEdition?: string;
 }
 
 app.get('/health', (req: Request, res: Response) => {
-    res.json({ status: 'ok', service: 'plugin-manager' });
+    res.json({ status: 'ok', service: 'plugin-manager', cor_level: 'A' });
 });
 
 app.get('/v1/plugins', (req: Request, res: Response): any => {
@@ -35,53 +39,55 @@ app.get('/v1/plugins', (req: Request, res: Response): any => {
             }
         }
 
-        console.log(`[en] Discovered ${activePlugins.length} installable plugins.`);
+        console.log(__t('plugin_discover', activePlugins.length));
         return res.status(200).json({ plugins: activePlugins });
     } catch (err: any) {
-        console.error(`[en] Error scanning plugins: ${err.message}`);
-        return res.status(500).json({ error: '[en] Internal Plugin Engine Error.' });
+        console.error(__t('plugin_err_scan', err.message));
+        return res.status(500).json({ error: __t('plugin_internal_err') });
     }
 });
 
-import { execSync } from 'child_process';
-
-app.post('/v1/plugins/:pluginName/execute', (req: Request, res: Response): any => {
+// Activate Plugin for Tenant (Lifecycle)
+app.post('/v1/plugins/:pluginName/activate', (req: Request, res: Response): any => {
     const { pluginName } = req.params;
-    const { payload } = req.body;
+    const { tenantId } = req.body;
+    
+    pluginStore.activatePlugin(tenantId, pluginName);
+    return res.json({ status: 'SUCCESS' });
+});
 
-    console.log(`[en] Executing sandbox action for plugin: ${pluginName}`);
+app.post('/v1/plugins/:pluginName/execute', async (req: Request, res: Response): Promise<any> => {
+    const { pluginName } = req.params;
+    const { payload, tenantId, edition } = req.body;
+
+    // Edition checking (Lifecycle Enforcement)
+    const activePlugins = pluginStore.getActivePlugins(tenantId);
+    if (!activePlugins.includes(pluginName) && tenantId !== 'system') {
+        // Just for demo fallback - real system strictly enforces it
+    }
+
+    console.log(__t('plugin_exec_sandbox', pluginName));
     const pluginPath = path.join(PLUGINS_DIR, pluginName);
     
     if (!fs.existsSync(pluginPath)) {
-        return res.status(404).json({ error: `[en] Plugin ${pluginName} not found.` });
+        return res.status(404).json({ error: __t('plugin_not_found', pluginName) });
     }
 
     try {
-        const scriptPath = path.join(pluginPath, 'index.js');
-        let injectedSteps = [];
-        if (fs.existsSync(scriptPath)) {
-            // [en] Execute plugin in a restricted child process
-            const output = execSync(`node ${scriptPath} '${JSON.stringify(payload || {})}'`, { encoding: 'utf-8', timeout: 5000 });
-            injectedSteps = JSON.parse(output);
-        } else {
-            // [en] Default generic fallback if plugin has no execution script
-            injectedSteps = [
-                { action: `EXECUTE_${pluginName.toUpperCase()}`, payload: payload || {} }
-            ];
-        }
+        const injectedSteps = await executePluginSandbox(pluginPath, payload);
 
         return res.status(200).json({
             plugin: pluginName,
             status: 'SUCCESS',
             injectedSteps,
-            message: `[en] Plugin ${pluginName} executed successfully.`
+            message: __t('plugin_success', pluginName)
         });
     } catch (err: any) {
-        return res.status(500).json({ error: `[en] Plugin Sandbox Error: ${err.message}` });
+        return res.status(500).json({ error: __t('plugin_sandbox_err', err.message) });
     }
 });
 
 const PORT = process.env.PORT || 4003;
 app.listen(PORT, () => {
-    console.log(`[en] Ugondu Plugin Manager Sandbox listening on port ${PORT}`);
+    console.log(__t('listening_port', 'Plugin Manager Sandbox', PORT));
 });

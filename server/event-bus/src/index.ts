@@ -2,15 +2,14 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import { __t } from '@ugondu/shared';
+import { eventStore } from './db';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const subscribers: Map<string, string[]> = new Map();
-
 app.get('/health', (req: Request, res: Response) => {
-    res.json({ status: 'ok', service: 'event-bus' });
+    res.json({ status: 'ok', service: 'event-bus', cor_level: 'A' });
 });
 
 app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any> => {
@@ -22,7 +21,8 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
 
     console.log(__t('dispatching') + ` ${event}`);
     
-    const subs = subscribers.get(event) || [];
+    // Read from persistent datastore
+    const subs = eventStore.getSubscribers(event);
     console.log(__t('notified', subs.length, event));
 
     // Real webhook dispatch
@@ -44,9 +44,8 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
 app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
     const { event, webhookUrl } = req.body;
     
-    const subs = subscribers.get(event) || [];
-    subs.push(webhookUrl);
-    subscribers.set(event, subs);
+    // Write to persistent datastore
+    eventStore.addSubscriber(event, webhookUrl);
 
     console.log(__t('new_sub', event, webhookUrl));
     return res.status(201).json({ message: __t('subscribed') });
