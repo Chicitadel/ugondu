@@ -26,3 +26,7 @@ server/data/
 .service_replay_ledger.json
 **/.service_replay_ledger.json
 
+
+# [en] COR evidence is generated as an external CI/local artifact, never committed
+cor-evidence-bundle.json
+cor-test-results.json
