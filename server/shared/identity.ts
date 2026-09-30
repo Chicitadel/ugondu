@@ -140,13 +140,14 @@ export class DurableTokenReplayStore {
 
 export const durableTokenReplayStore = new DurableTokenReplayStore();
 
-export function signServiceIdentity(issuer: string, audience: string, scope: string = 'execute'): string {
+export function signServiceIdentity(issuer: string, audience: string, scope: string = 'execute', privateKeyPem?: string, signingKeyId?: string): string {
     const activeKey = globalTrustRegistry.getActiveKeyByPurpose('service-identity');
     if (!activeKey) {
         throw new Error(__t('error_service_key_missing'));
     }
 
-    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: activeKey.keyId })).toString('base64url');
+    const keyId = signingKeyId || activeKey.keyId;
+    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: keyId })).toString('base64url');
     const now = Math.floor(Date.now() / 1000);
     const jti = randomBytes(16).toString('hex');
     
@@ -159,12 +160,14 @@ export function signServiceIdentity(issuer: string, audience: string, scope: str
         nbf: now,
         exp: now + 60, // 60 seconds validity
         jti: jti,
-        keyId: activeKey.keyId,
+        keyId: keyId,
         tokenVersion: '1.0'
     };
     
     const payload = Buffer.from(JSON.stringify(payloadObj)).toString('base64url');
-    const privateKeyObj = globalTrustRegistry.getPrivateKeyObject(activeKey.keyId);
+    const pem = privateKeyPem || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY;
+    if (!pem) throw new Error('UGONDU_SERVICE_IDENTITY_PRIVATE_KEY is required for service-token signing');
+    const privateKeyObj = require('crypto').createPrivateKey(pem);
     
     const signature = sign(null, Buffer.from(`${header}.${payload}`), privateKeyObj).toString('base64url');
     return `${header}.${payload}.${signature}`;
