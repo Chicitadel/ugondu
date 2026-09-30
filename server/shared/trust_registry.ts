@@ -36,7 +36,7 @@ import * as path from 'path';
 import { __t } from './i18n';
 
 export type KeyStatus = 'ACTIVE' | 'ROTATED' | 'REVOKED';
-export type KeyPurpose = 'recipe' | 'plugin' | 'language-pack' | 'service-identity';
+export type KeyPurpose = 'recipe' | 'plugin' | 'language-pack' | 'service-identity' | 'evidence';
 
 export interface TrustKey {
     keyId: string;
@@ -79,7 +79,8 @@ export class TrustRegistry {
         const mappings: Array<{ prefix: string; keyId: string; purpose: KeyPurpose }> = [
             { prefix: 'service_identity', keyId: 'key_service_v1', purpose: 'service-identity' },
             { prefix: 'recipe', keyId: 'key_recipe_v1', purpose: 'recipe' },
-            { prefix: 'langpack', keyId: 'key_langpack_v1', purpose: 'language-pack' }
+            { prefix: 'langpack', keyId: 'key_langpack_v1', purpose: 'language-pack' },
+            { prefix: 'evidence', keyId: 'key_evidence_v1', purpose: 'evidence' }
         ];
 
         for (const m of mappings) {
