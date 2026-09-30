@@ -148,9 +148,9 @@ function isPluginRequired(pluginItem: any, reqBody: any): boolean {
 }
 
 app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
-    const { repositoryUrl, branch, fileMap, targetEnvironment, token } = req.body;
+    const { repositoryUrl, branch, fileMap, targetEnvironment, token, projectId, workspaceId, targetId, agentId, agentVersion } = req.body;
     
-    if (!repositoryUrl || !branch || !targetEnvironment || !token) {
+    if (!repositoryUrl || !branch || !targetEnvironment || !token || !projectId || !workspaceId || !targetId || !agentId || !agentVersion) {
         return res.status(400).json({ error: __t('invalid_ctx') });
     }
 
@@ -304,9 +304,23 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
 
         const nonce = randomBytes(16).toString('hex');
         const executionId = `exec_${randomBytes(12).toString('hex')}`;
-        const targetId = req.body.targetId || `tgt_${randomBytes(8).toString('hex')}`;
-        const workspaceId = req.body.workspaceId || `ws_${randomBytes(8).toString('hex')}`;
-        const artifactDigest = `sha256:${randomBytes(32).toString('hex')}`; // Placeholder for actual digest
+        const artifactCanonical = canonicalize(fileMap || {}) || '{}';
+        const artifactDigest = `sha256:${createHash('sha256').update(artifactCanonical, 'utf8').digest('hex')}`;
+        const policyDocument = {
+            edition,
+            targetEnvironment,
+            strategy,
+            capabilities,
+            requiredPlugins: req.body.requiredPlugins || []
+        };
+        const policyHash = createHash('sha256').update(canonicalize(policyDocument) || '{}', 'utf8').digest('hex');
+        const declaredCapabilities = Array.isArray(capabilities.allowedActions)
+            ? capabilities.allowedActions
+            : [];
+        const envelopeCapabilities = {
+            required: Array.from(new Set(steps.map(step => step.action))),
+            allowed: declaredCapabilities
+        };
 
         const activeKey = globalTrustRegistry.getActiveKeyByPurpose('recipe');
         const signingKeyId = activeKey ? activeKey.keyId : keyState.keyId;
@@ -317,18 +331,23 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             issuer: 'ugondu-engine',
             keyId: signingKeyId,
             transactionId,
-            tenantId: authResponse.data.tenantId || 'tenant_unknown',
+            tenantId: authResponse.data.tenantId,
             workspaceId,
-            projectId: 'default',
+            projectId,
             environmentId: targetEnvironment,
             targetId,
+            agentId,
+            agentVersion,
             executionId,
             nonce,
             artifactDigest,
             issuedAt: Date.now(),
-            expiresAt: Date.now() + 1000 * 60 * 5, // 5 mins expiry
+            expiresAt: Date.now() + 1000 * 60 * 5,
             edition,
-            planHash
+            planHash,
+            policyHash,
+            capabilities: envelopeCapabilities,
+            steps
         };
 
         const canonicalEnvelope = canonicalize(envelope) || '{}';
@@ -341,7 +360,8 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             edition,
             canonicalEnvelope,
             canonicalSteps,
-            signature
+            signature,
+            envelope: JSON.parse(canonicalEnvelope)
         });
 
     } catch (err: any) {
