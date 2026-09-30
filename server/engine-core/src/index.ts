@@ -1,6 +1,40 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Engine Core
+ * File           : index.ts
+ * Version        : 2.0.0
+ * Author         : Server & Cryptography Engineering Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-30
+ * Last Modified  : 2026-09-30
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 import express from 'express';
 import cors from 'cors';
-import { randomBytes, generateKeyPairSync, sign } from 'crypto';
+import { randomBytes, generateKeyPairSync, sign, createPrivateKey, createPublicKey, createHash, KeyObject } from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import axios from 'axios';
 import { __t, signServiceIdentity } from '@ugondu/shared';
 import canonicalize from 'canonicalize';
@@ -22,18 +56,86 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ED25519 Keypair generation (in production, load from secure vault)
-const { publicKey, privateKey } = generateKeyPairSync('ed25519');
-const keyId = 'key_' + randomBytes(8).toString('hex');
+// Persistent ED25519 Keypair Management
+const KEYS_DIR = process.env.KEYS_DIR || path.resolve(__dirname, '../keys');
+const PRIV_KEY_PATH = path.join(KEYS_DIR, 'ed25519_private.pem');
+const PUB_KEY_PATH = path.join(KEYS_DIR, 'ed25519_public.pem');
+const KEY_ID_PATH = path.join(KEYS_DIR, 'key_id.txt');
+
+interface KeyState {
+    privateKey: KeyObject;
+    publicKey: KeyObject;
+    keyId: string;
+    publicKeyPem: string;
+}
+
+function loadOrGeneratePersistentKeys(): KeyState {
+    if (!fs.existsSync(KEYS_DIR)) {
+        fs.mkdirSync(KEYS_DIR, { recursive: true });
+    }
+
+    if (fs.existsSync(PRIV_KEY_PATH) && fs.existsSync(PUB_KEY_PATH) && fs.existsSync(KEY_ID_PATH)) {
+        const privPem = fs.readFileSync(PRIV_KEY_PATH, 'utf-8');
+        const pubPem = fs.readFileSync(PUB_KEY_PATH, 'utf-8');
+        const keyId = fs.readFileSync(KEY_ID_PATH, 'utf-8').trim();
+        const privateKey = createPrivateKey(privPem);
+        const publicKey = createPublicKey(pubPem);
+        return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
+    }
+
+    // Generate once, persist with 0600 permissions
+    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+    const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
+    const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
+    const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
+
+    fs.writeFileSync(PRIV_KEY_PATH, privPem, { encoding: 'utf-8', mode: 0o600 });
+    try {
+        fs.chmodSync(PRIV_KEY_PATH, 0o600);
+    } catch {
+        // Fallback for non-POSIX environments
+    }
+    fs.writeFileSync(PUB_KEY_PATH, pubPem, { encoding: 'utf-8' });
+    fs.writeFileSync(KEY_ID_PATH, keyId, { encoding: 'utf-8' });
+
+    return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
+}
+
+const keyState = loadOrGeneratePersistentKeys();
 const BILLING_GATEWAY_URL = process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1';
 
 app.get('/v1/keys', (req, res) => {
-    res.json({ keys: [{ id: keyId, type: 'ed25519', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) }] });
+    res.json({ keys: [{ id: keyState.keyId, type: 'ed25519', publicKey: keyState.publicKeyPem }] });
 });
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'engine-core', cor_level: 'A' });
 });
+
+function isPluginRequired(pluginItem: any, reqBody: any): boolean {
+    const pluginName = typeof pluginItem === 'string' ? pluginItem : (pluginItem?.name || '');
+    if (typeof pluginItem === 'object' && pluginItem !== null) {
+        if (pluginItem.required === true) return true;
+        if (String(pluginItem.failurePolicy || '').toUpperCase() === 'REQUIRED') return true;
+        if (String(pluginItem.policy || '').toUpperCase() === 'REQUIRED') return true;
+    }
+    if (Array.isArray(reqBody.requiredPlugins) && reqBody.requiredPlugins.includes(pluginName)) {
+        return true;
+    }
+    if (reqBody.pluginPolicies && String(reqBody.pluginPolicies[pluginName] || '').toUpperCase() === 'REQUIRED') {
+        return true;
+    }
+    if (Array.isArray(reqBody.plugins)) {
+        for (const p of reqBody.plugins) {
+            if (typeof p === 'object' && p !== null && p.name === pluginName) {
+                if (p.required === true) return true;
+                if (String(p.failurePolicy || '').toUpperCase() === 'REQUIRED') return true;
+                if (String(p.policy || '').toUpperCase() === 'REQUIRED') return true;
+            }
+        }
+    }
+    return false;
+}
 
 app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
     const { repositoryUrl, branch, fileMap, targetEnvironment, token } = req.body;
@@ -66,30 +168,107 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             }
         ];
 
+        // Plugin Resolution with Strict Failure Policy Enforcement
+        const PLUGIN_MANAGER_URL = process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1';
+        const pmAuth = signServiceIdentity('engine-core', 'plugin-manager');
+        let discoveredPlugins: any[] = [];
+
         try {
-            const PLUGIN_MANAGER_URL = process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1';
-            const pmAuth = signServiceIdentity('engine-core', 'plugin-manager');
-            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`, { headers: { Authorization: `Bearer ${pmAuth}` } }).catch(() => null);
-            
+            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`, {
+                headers: { Authorization: `Bearer ${pmAuth}` },
+                timeout: 5000
+            });
             if (pluginsResponse && pluginsResponse.data && Array.isArray(pluginsResponse.data.plugins)) {
-                let injectedCount = 0;
-                const maxPlugins = capabilities.maxPlugins === 'unlimited' ? Infinity : (capabilities.maxPlugins || 1);
+                discoveredPlugins = pluginsResponse.data.plugins;
+            }
+        } catch (pluginFetchErr: any) {
+            console.error(__t('plugin_failed'), pluginFetchErr.message || pluginFetchErr);
+            if ((Array.isArray(req.body.requiredPlugins) && req.body.requiredPlugins.length > 0) ||
+                (req.body.pluginPolicies && Object.values(req.body.pluginPolicies).some(pol => String(pol).toUpperCase() === 'REQUIRED'))) {
+                return res.status(500).json({ error: 'REQUIRED_PLUGIN_FAILED', message: __t('required_plugin_failed', 'discovery') });
+            }
+        }
 
-                for (const pluginName of pluginsResponse.data.plugins) {
-                    if (injectedCount >= maxPlugins) {
-                        console.log(__t('max_plugins', maxPlugins, edition, pluginName));
-                        break;
-                    }
+        // Build target plugin list
+        const targetPlugins: any[] = [];
+        const seenNames = new Set<string>();
 
-                    const execResponse = await axios.post(`${PLUGIN_MANAGER_URL}/plugins/${pluginName}/execute`, { payload: {}, tenantId: authResponse.data.tenantId }, { headers: { Authorization: `Bearer ${pmAuth}` } }).catch(() => null);
-                    if (execResponse && execResponse.data && Array.isArray(execResponse.data.injectedSteps)) {
-                        steps.push(...execResponse.data.injectedSteps);
-                        injectedCount++;
-                    }
+        const addPlugin = (item: any) => {
+            const name = typeof item === 'string' ? item : item?.name;
+            if (name && !seenNames.has(name)) {
+                seenNames.add(name);
+                targetPlugins.push(item);
+            }
+        };
+
+        if (Array.isArray(req.body.plugins) && req.body.plugins.length > 0) {
+            for (const p of req.body.plugins) addPlugin(p);
+        } else {
+            for (const p of discoveredPlugins) addPlugin(p);
+        }
+
+        if (Array.isArray(req.body.requiredPlugins)) {
+            for (const reqName of req.body.requiredPlugins) {
+                if (!seenNames.has(reqName)) {
+                    const found = discoveredPlugins.find(p => (typeof p === 'string' ? p : p?.name) === reqName);
+                    addPlugin(found || { name: reqName, policy: 'REQUIRED' });
                 }
             }
-        } catch (pluginErr) {
-            console.error(__t('plugin_failed'), pluginErr);
+        }
+
+        let injectedCount = 0;
+        const maxPlugins = capabilities.maxPlugins === 'unlimited' ? Infinity : (capabilities.maxPlugins || 1);
+
+        for (const pluginItem of targetPlugins) {
+            const pluginName = typeof pluginItem === 'string' ? pluginItem : pluginItem.name;
+            if (!pluginName) continue;
+
+            const isRequired = isPluginRequired(pluginItem, req.body);
+
+            if (injectedCount >= maxPlugins) {
+                if (isRequired) {
+                    console.error(__t('engine_plugin_limit_exceeded', pluginName, maxPlugins));
+                    return res.status(500).json({ error: 'REQUIRED_PLUGIN_FAILED', message: __t('required_plugin_failed', pluginName) });
+                }
+                console.log(__t('max_plugins', maxPlugins, edition, pluginName));
+                break;
+            }
+
+            let execResponse: any = null;
+            let execFailed = false;
+
+            try {
+                execResponse = await axios.post(
+                    `${PLUGIN_MANAGER_URL}/plugins/${encodeURIComponent(pluginName)}/execute`,
+                    {
+                        payload: {},
+                        tenantId: authResponse.data.tenantId,
+                        edition
+                    },
+                    {
+                        headers: { Authorization: `Bearer ${pmAuth}` },
+                        timeout: 5000
+                    }
+                );
+
+                if (!execResponse || execResponse.status !== 200 || !execResponse.data || execResponse.data.error || !Array.isArray(execResponse.data.injectedSteps)) {
+                    execFailed = true;
+                }
+            } catch (execErr: any) {
+                execFailed = true;
+            }
+
+            if (execFailed) {
+                if (isRequired) {
+                    console.error(__t('engine_required_plugin_failed', pluginName));
+                    return res.status(500).json({ error: 'REQUIRED_PLUGIN_FAILED', message: __t('required_plugin_failed', pluginName) });
+                }
+                console.warn(__t('engine_optional_plugin_skipped', pluginName));
+                continue;
+            }
+
+            steps.push(...execResponse.data.injectedSteps);
+            injectedCount++;
         }
 
         steps.push({
@@ -116,7 +295,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
         const envelope = {
             version: '1.0',
             issuer: 'ugondu-engine',
-            keyId: keyId,
+            keyId: keyState.keyId,
             transactionId,
             tenantId: authResponse.data.tenantId || 'tenant_unknown',
             projectId: 'default',
@@ -131,9 +310,13 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
         };
 
         const canonicalEnvelope = canonicalize(envelope) || '{}';
-        const signature = sign(null, Buffer.from(canonicalEnvelope), privateKey).toString('base64');
+        const signature = sign(null, Buffer.from(canonicalEnvelope), keyState.privateKey).toString('base64');
 
         return res.status(200).json({
+            transactionId,
+            strategy,
+            steps,
+            edition,
             canonicalEnvelope,
             canonicalSteps,
             signature

@@ -1,12 +1,47 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/cmd
+ * File           : cli.go
+ * Version        : 1.2.0
+ * Author         : Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-30
+ * Last Modified  : 2026-09-30
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Corporate Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 package cmd
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"ugondu/client/engine"
 	"ugondu/client/i18n"
@@ -47,7 +82,7 @@ func SuggestCommand(input string, valid []string) string {
 	minDist := 999
 	for _, cmd := range valid {
 		dist := Levenshtein(input, cmd)
-		if dist < minDist && dist <= 2 { // threshold
+		if dist < minDist && dist <= 2 {
 			minDist = dist
 			bestMatch = cmd
 		}
@@ -71,13 +106,15 @@ func PromptDestructive(targetPath string, force bool) bool {
 func PrintHelp() {
 	fmt.Println(i18n.T("cli_title"))
 	fmt.Println(i18n.T("cli_subtitle"))
-	fmt.Println("─────────────────────────────────────────────────────────────")
+	fmt.Println(i18n.T("cli_divider"))
 	fmt.Println(i18n.T("cmd_usage"))
-	fmt.Println("  deploy    - " + i18n.T("cmd_deploy_desc"))
-	fmt.Println("  rollback  - " + i18n.T("cmd_rollback_desc"))
-	fmt.Println("  plugins   - " + i18n.T("cmd_plugins_desc"))
-	fmt.Println("  version   - " + i18n.T("cmd_version_desc"))
-	fmt.Println("  help      - " + i18n.T("cmd_help_desc"))
+	fmt.Println(i18n.T("cmd_deploy_help"))
+	fmt.Println(i18n.T("cmd_resume_help"))
+	fmt.Println(i18n.T("cmd_status_help"))
+	fmt.Println(i18n.T("cmd_rollback_help"))
+	fmt.Println(i18n.T("cmd_plugins_help"))
+	fmt.Println(i18n.T("cmd_version_help"))
+	fmt.Println(i18n.T("cmd_help_help"))
 	fmt.Println("\n" + i18n.T("env_vars"))
 	fmt.Println("  " + i18n.T("env_token"))
 	fmt.Println("  " + i18n.T("env_api_url"))
@@ -85,9 +122,116 @@ func PrintHelp() {
 	fmt.Println("  " + i18n.T("env_locale"))
 }
 
+// SaveTransactionRecipe persists recipe under ~/.ugondu/transactions/<txId>/recipe.json
+func SaveTransactionRecipe(txId string, recipeData []byte) error {
+	txDir, err := engine.GetTransactionDir(txId)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(txDir, 0700); err != nil {
+		return err
+	}
+	_ = os.Chmod(txDir, 0700)
+	recipePath := filepath.Join(txDir, "recipe.json")
+	return os.WriteFile(recipePath, recipeData, 0600)
+}
+
+// LoadTransactionRecipe reads recipe from ~/.ugondu/transactions/<txId>/recipe.json
+func LoadTransactionRecipe(txId string) ([]byte, error) {
+	txDir, err := engine.GetTransactionDir(txId)
+	if err != nil {
+		return nil, err
+	}
+	recipePath := filepath.Join(txDir, "recipe.json")
+	return os.ReadFile(recipePath)
+}
+
+// FindLatestTransactionId scans ~/.ugondu/transactions/ for the latest transaction directory
+func FindLatestTransactionId() (string, error) {
+	txBaseDir, err := engine.GetTransactionsDir()
+	if err != nil {
+		return "", err
+	}
+	entries, err := os.ReadDir(txBaseDir)
+	if err != nil {
+		return "", fmt.Errorf("unable to read transactions directory: %w", err)
+	}
+
+	var latestTxId string
+	var latestModTime time.Time
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		txName := entry.Name()
+		txPath := filepath.Join(txBaseDir, txName)
+
+		var modTime time.Time
+		statePath := filepath.Join(txPath, "state.json")
+		recipePath := filepath.Join(txPath, "recipe.json")
+
+		if sInfo, err := os.Stat(statePath); err == nil {
+			modTime = sInfo.ModTime()
+		} else if rInfo, err := os.Stat(recipePath); err == nil {
+			modTime = rInfo.ModTime()
+		} else if dInfo, err := entry.Info(); err == nil {
+			modTime = dInfo.ModTime()
+		}
+
+		if latestTxId == "" || modTime.After(latestModTime) {
+			latestTxId = txName
+			latestModTime = modTime
+		}
+	}
+
+	if latestTxId == "" {
+		return "", fmt.Errorf("no transactions found in %s", txBaseDir)
+	}
+
+	return latestTxId, nil
+}
+
+func resumeDeployment(targetTxId string, apiURL string) {
+	txId := targetTxId
+	if txId == "" {
+		latest, err := FindLatestTransactionId()
+		if err != nil {
+			fmt.Println(i18n.T("err_cannot_resume", err))
+			os.Exit(1)
+		}
+		txId = latest
+	}
+
+	fmt.Println(i18n.T("resuming_deployment", txId))
+
+	recipeData, err := LoadTransactionRecipe(txId)
+	if err != nil {
+		fmt.Println(i18n.T("no_prev_deployment"))
+		os.Exit(1)
+	}
+
+	env, steps, err := engine.ParseRecipeLocally(recipeData, apiURL)
+	if err != nil {
+		fmt.Println(i18n.T("resume_parse_fail", err))
+		os.Exit(1)
+	}
+
+	logs, err := engine.ExecuteRecipe(env, steps)
+	if err != nil {
+		fmt.Println(i18n.T("exec_failed", err))
+		engine.ReportTelemetry(apiURL, env.TransactionId, "FAILED", append(logs, err.Error()))
+		os.Exit(1)
+	}
+
+	engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
+	fmt.Println(i18n.T("dep_complete"))
+	os.Exit(0)
+}
+
 // ParseAndRun interprets the arguments and routes to the engine
 func ParseAndRun(args []string) {
-	validCommands := []string{"deploy", "rollback", "plugins", "version", "help"}
+	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "version", "help"}
 
 	if len(args) < 2 {
 		fmt.Println(i18n.T("err_no_command"))
@@ -126,50 +270,38 @@ func ParseAndRun(args []string) {
 	}
 	targetEnv := os.Getenv("UGONDU_TARGET_ENV")
 	if targetEnv == "" {
-		targetEnv = "cpanel" // Default
+		targetEnv = "cpanel"
 	}
 
 	force := false
 	resume := false
-	for _, arg := range args {
+	var positional []string
+
+	for _, arg := range args[2:] {
 		if arg == "--force" || arg == "-f" {
 			force = true
-		}
-		if arg == "--resume" {
+		} else if arg == "--resume" || arg == "-r" {
 			resume = true
+		} else if !strings.HasPrefix(arg, "-") {
+			positional = append(positional, arg)
 		}
+	}
+
+	var targetTxId string
+	if len(positional) > 0 {
+		targetTxId = positional[0]
 	}
 
 	switch command {
 	case "deploy":
+		if resume {
+			resumeDeployment(targetTxId, apiURL)
+			return
+		}
+
 		if _, err := os.Stat(".git"); os.IsNotExist(err) {
 			fmt.Println(i18n.T("err_not_repo"))
 			os.Exit(1)
-		}
-
-		if resume {
-			fmt.Println("Resuming previous deployment...")
-			homeDir, _ := os.UserHomeDir()
-			recipePath := filepath.Join(homeDir, ".ugondu", "state", "current_recipe.json")
-			recipeData, err := os.ReadFile(recipePath)
-			if err != nil {
-				fmt.Println("No previous deployment found to resume.")
-				os.Exit(1)
-			}
-			env, steps, err := engine.ParseRecipeLocally(recipeData, apiURL)
-			if err != nil {
-				fmt.Println("Failed to parse previous recipe:", err)
-				os.Exit(1)
-			}
-			logs, err := engine.ExecuteRecipe(env, steps)
-			if err != nil {
-				fmt.Println(i18n.T("exec_failed", err))
-				engine.ReportTelemetry(apiURL, env.TransactionId, "FAILED", append(logs, err.Error()))
-				os.Exit(1)
-			}
-			engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
-			fmt.Println(i18n.T("dep_complete"))
-			os.Exit(0)
 		}
 
 		// Simple destructive prompt test for demo
@@ -196,13 +328,13 @@ func ParseAndRun(args []string) {
 			os.Exit(1)
 		}
 
-		// Save recipe for future resume
-		homeDir, _ := os.UserHomeDir()
-		os.MkdirAll(filepath.Join(homeDir, ".ugondu", "state"), 0755)
-		os.WriteFile(filepath.Join(homeDir, ".ugondu", "state", "current_recipe.json"), rawRecipe, 0644)
+		// Save recipe under ~/.ugondu/transactions/<txId>/recipe.json for future resume
+		if err := SaveTransactionRecipe(env.TransactionId, rawRecipe); err != nil {
+			fmt.Println(i18n.T("warn_persist_recipe", err))
+		}
 
-		fmt.Println(i18n.T("recipe_resolved", env.TransactionId, env.Edition, "atomic-or-quota"))
-		
+		fmt.Println(i18n.T("recipe_resolved", env.TransactionId, env.Edition, i18n.T("strategy_atomic_or_quota")))
+
 		logs, err := engine.ExecuteRecipe(env, steps)
 		if err != nil {
 			fmt.Println(i18n.T("exec_failed", err))
@@ -213,11 +345,62 @@ func ParseAndRun(args []string) {
 		engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
 		fmt.Println(i18n.T("dep_complete"))
 
+	case "resume":
+		resumeDeployment(targetTxId, apiURL)
+
+	case "status":
+		txId := targetTxId
+		if txId == "" {
+			latest, err := FindLatestTransactionId()
+			if err != nil {
+				fmt.Println(i18n.T("err_no_tx_found", err))
+				os.Exit(1)
+			}
+			txId = latest
+		}
+
+		state, err := engine.LoadState(txId)
+		if err != nil {
+			if errors.Is(err, engine.ErrStateNotFound) {
+				fmt.Println(i18n.T("err_tx_state_not_found", txId))
+				os.Exit(1)
+			} else if errors.Is(err, engine.ErrStateCorrupt) {
+				fmt.Println(i18n.T("err_tx_state_corrupt", txId))
+				os.Exit(1)
+			}
+			fmt.Println(i18n.T("err_tx_state_load", txId, err))
+			os.Exit(1)
+		}
+
+		fmt.Println(i18n.T("status_border"))
+		fmt.Println(i18n.T("status_lbl_tx_id", state.TransactionId))
+		fmt.Println(i18n.T("status_lbl_status", state.Status))
+		fmt.Println(i18n.T("status_lbl_tenant_id", state.TenantId))
+		fmt.Println(i18n.T("status_lbl_project_id", state.ProjectId))
+		fmt.Println(i18n.T("status_lbl_env_id", state.EnvironmentId))
+		fmt.Println(i18n.T("status_lbl_plan_hash", state.PlanHash))
+		fmt.Println(i18n.T("status_lbl_policy_hash", state.PolicyHash))
+		fmt.Println(i18n.T("status_lbl_state_hash", state.StateHash))
+		if state.UpdatedAt > 0 {
+			fmt.Println(i18n.T("status_lbl_last_updated", time.Unix(state.UpdatedAt, 0).UTC().Format(time.RFC3339)))
+		}
+		fmt.Println(i18n.T("status_divider"))
+		fmt.Println(i18n.T("status_lbl_steps"))
+		if len(state.Steps) == 0 {
+			fmt.Println(i18n.T("status_lbl_no_steps"))
+		}
+		for _, s := range state.Steps {
+			fmt.Println(i18n.T("status_lbl_step_item", s.Index+1, s.Action, s.Status))
+			for _, logLine := range s.Logs {
+				fmt.Println(i18n.T("status_lbl_log_item", logLine))
+			}
+		}
+		fmt.Println(i18n.T("status_border"))
+
 	case "rollback":
-		// Mock implementation just to show the CLI upgrade hint interception
-		fmt.Println(i18n.T("upsell_notice", "Upgrade to Ugondu Professional to enable one-click atomic rollbacks."))
+		fmt.Println(i18n.T("upsell_notice", i18n.T("upsell_rollback")))
 	case "plugins":
-		fmt.Println(i18n.T("upsell_notice", "Upgrade to Ugondu Professional to remotely manage plugins via CLI."))
+		fmt.Println(i18n.T("upsell_notice", i18n.T("upsell_plugins")))
 	case "version":
 		fmt.Println(i18n.T("cli_title"))
 	case "help":

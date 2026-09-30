@@ -1,3 +1,3 @@
-module airroofers.eu/ugondu/client
+module ugondu/client
 
 go 1.22

@@ -1,3 +1,36 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/engine
+ * File           : universal_os.go
+ * Version        : 1.2.0
+ * Author         : Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-30
+ * Last Modified  : 2026-09-30
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Corporate Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 package engine
 
 import (
@@ -6,7 +39,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 // CopyDir recursively copies a directory tree, replacing `rsync -avz --exclude .git`.
@@ -21,7 +53,7 @@ func CopyDir(src string, dst string, excludeGit bool) error {
 		}
 
 		if excludeGit {
-			if strings.Contains(path, ".git") {
+			if info.Name() == ".git" {
 				if info.IsDir() {
 					return filepath.SkipDir
 				}

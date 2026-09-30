@@ -1,3 +1,36 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/engine
+ * File           : executor.go
+ * Version        : 1.2.0
+ * Author         : Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-30
+ * Last Modified  : 2026-09-30
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Corporate Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 package engine
 
 import (
@@ -9,12 +42,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -52,6 +84,66 @@ type ExecutionRecipe struct {
 	Signature         string `json:"signature"`
 }
 
+// GetKeyCachePath returns the file path for caching public key: ~/.ugondu/keys/<keyId>.pub
+func GetKeyCachePath(keyId string) (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get user home directory: %w", err)
+	}
+	return filepath.Join(home, ".ugondu", "keys", fmt.Sprintf("%s.pub", keyId)), nil
+}
+
+// SaveCachedPublicKey writes public key PEM to local cache ~/.ugondu/keys/<keyId>.pub
+func SaveCachedPublicKey(keyId string, pemData string) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	dir := filepath.Join(home, ".ugondu", "keys")
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+	_ = os.Chmod(dir, 0700)
+	keyPath := filepath.Join(dir, fmt.Sprintf("%s.pub", keyId))
+	return os.WriteFile(keyPath, []byte(pemData), 0600)
+}
+
+// LoadCachedPublicKey reads public key PEM from local cache ~/.ugondu/keys/<keyId>.pub
+func LoadCachedPublicKey(keyId string) (string, error) {
+	keyPath, err := GetKeyCachePath(keyId)
+	if err != nil {
+		return "", err
+	}
+	data, err := os.ReadFile(keyPath)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// VerifyCryptographicBindings ensures recipe fields match the persisted transaction state.
+func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) error {
+	if state == nil || env == nil {
+		return nil
+	}
+	if state.PlanHash != "" && state.PlanHash != env.PlanHash {
+		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: planHash mismatch (state=%s, recipe=%s)", state.PlanHash, env.PlanHash)
+	}
+	if state.TenantId != "" && state.TenantId != env.TenantId {
+		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: tenantId mismatch (state=%s, recipe=%s)", state.TenantId, env.TenantId)
+	}
+	if state.ProjectId != "" && state.ProjectId != env.ProjectId {
+		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: projectId mismatch (state=%s, recipe=%s)", state.ProjectId, env.ProjectId)
+	}
+	if state.EnvironmentId != "" && state.EnvironmentId != env.EnvironmentId {
+		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: environmentId mismatch (state=%s, recipe=%s)", state.EnvironmentId, env.EnvironmentId)
+	}
+	if state.PolicyHash != "" && state.PolicyHash != env.PolicyHash {
+		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: policyHash mismatch (state=%s, recipe=%s)", state.PolicyHash, env.PolicyHash)
+	}
+	return nil
+}
+
 // FetchExecutionRecipe submits context to the API and returns the signed recipe
 func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnvelope, []map[string]interface{}, []byte, error) {
 	fmt.Println(i18n.T("req_recipe"))
@@ -85,7 +177,7 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 		return nil, nil, fmt.Errorf("invalid envelope format")
 	}
 
-	// Fetch Keys
+	// Fetch Keys and cache them locally
 	keysResp, err := http.Get(apiURL + "/keys")
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch public keys: %v", err)
@@ -104,9 +196,9 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 
 	var pubKeyPem string
 	for _, k := range keysData.Keys {
+		_ = SaveCachedPublicKey(k.Id, k.PublicKey)
 		if k.Id == partialEnv.KeyId {
 			pubKeyPem = k.PublicKey
-			break
 		}
 	}
 	if pubKeyPem == "" {
@@ -129,8 +221,6 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 		return nil, nil, fmt.Errorf("execution recipe has expired")
 	}
 
-	// Verify Tenant matches Token (in real system, decode token, for now trust env)
-	
 	// Verify Plan Hash
 	hash := sha256.Sum256([]byte(recipe.CanonicalSteps))
 	if hex.EncodeToString(hash[:]) != env.PlanHash {
@@ -140,12 +230,13 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 	// Unmarshal Steps
 	var steps []map[string]interface{}
 	if err := json.Unmarshal([]byte(recipe.CanonicalSteps), &steps); err != nil {
-		return nil, nil, nil, fmt.Errorf("invalid steps format")
+		return nil, nil, fmt.Errorf("invalid steps format")
 	}
 
 	return &env, steps, body, nil
 }
 
+// ParseRecipeLocally verifies and parses a recipe, prioritizing local public key cache.
 func ParseRecipeLocally(body []byte, apiURL string) (*ExecutionEnvelope, []map[string]interface{}, error) {
 	var recipe ExecutionRecipe
 	if err := json.Unmarshal(body, &recipe); err != nil {
@@ -160,32 +251,38 @@ func ParseRecipeLocally(body []byte, apiURL string) (*ExecutionEnvelope, []map[s
 		return nil, nil, fmt.Errorf("invalid envelope format")
 	}
 
-	// Fetch Keys
-	keysResp, err := http.Get(apiURL + "/keys")
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to fetch public keys: %v", err)
-	}
-	defer keysResp.Body.Close()
-	keysBody, _ := io.ReadAll(keysResp.Body)
-	var keysData struct {
-		Keys []struct {
-			Id        string `json:"id"`
-			PublicKey string `json:"publicKey"`
-		} `json:"keys"`
-	}
-	if err := json.Unmarshal(keysBody, &keysData); err != nil {
-		return nil, nil, fmt.Errorf("failed to parse keys")
-	}
-
-	var pubKeyPem string
-	for _, k := range keysData.Keys {
-		if k.Id == partialEnv.KeyId {
-			pubKeyPem = k.PublicKey
-			break
+	// Attempt reading public key from local cache first (offline-first capability)
+	pubKeyPem, cacheErr := LoadCachedPublicKey(partialEnv.KeyId)
+	if cacheErr != nil || pubKeyPem == "" {
+		// Cache miss: attempt control plane fetch if apiURL provided
+		if apiURL == "" {
+			return nil, nil, fmt.Errorf("public key %s not found in local cache and apiURL is not configured", partialEnv.KeyId)
 		}
-	}
-	if pubKeyPem == "" {
-		return nil, nil, fmt.Errorf("public key not found in registry")
+		keysResp, err := http.Get(apiURL + "/keys")
+		if err != nil {
+			return nil, nil, fmt.Errorf("public key %s not found in local cache and control plane unreachable (%s): %w", partialEnv.KeyId, apiURL, err)
+		}
+		defer keysResp.Body.Close()
+		keysBody, _ := io.ReadAll(keysResp.Body)
+		var keysData struct {
+			Keys []struct {
+				Id        string `json:"id"`
+				PublicKey string `json:"publicKey"`
+			} `json:"keys"`
+		}
+		if err := json.Unmarshal(keysBody, &keysData); err != nil {
+			return nil, nil, fmt.Errorf("failed to parse keys from control plane: %w", err)
+		}
+
+		for _, k := range keysData.Keys {
+			_ = SaveCachedPublicKey(k.Id, k.PublicKey)
+			if k.Id == partialEnv.KeyId {
+				pubKeyPem = k.PublicKey
+			}
+		}
+		if pubKeyPem == "" {
+			return nil, nil, fmt.Errorf("public key %s not found in control plane registry", partialEnv.KeyId)
+		}
 	}
 
 	// Verify Signature
@@ -237,14 +334,32 @@ func verifySignature(envelope string, sigBase64 string, pubKeyPem string) error 
 	return nil
 }
 
-// ExecuteRecipe iterates through the steps and runs them natively
+// ExecuteRecipe iterates through the steps and runs them natively with locking and persistence verification.
 func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]string, error) {
 	var logs []string
 
-	// Load or initialize state machine
+	// 1. Acquire transaction lock
+	lock, err := AcquireTransactionLock(env.TransactionId)
+	if err != nil {
+		return logs, fmt.Errorf("failed to acquire transaction lock: %w", err)
+	}
+	defer func() {
+		_ = ReleaseTransactionLock(lock)
+	}()
+
+	// 2. Load or initialize state machine
 	state, err := LoadState(env.TransactionId)
 	if err != nil {
-		state = InitState(env.TransactionId)
+		if errors.Is(err, ErrStateNotFound) {
+			state = InitStateFromEnvelope(env)
+		} else {
+			return logs, fmt.Errorf("failed to load transaction state: %w", err)
+		}
+	} else {
+		// Existing state found: enforce cryptographic binding verification during resume
+		if bindErr := VerifyCryptographicBindings(state, env); bindErr != nil {
+			return logs, bindErr
+		}
 	}
 
 	if state.Status == "SUCCESS" {
@@ -252,12 +367,14 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 	}
 
 	state.Status = "RUNNING"
-	SaveState(state)
+	if err := SaveState(state); err != nil {
+		return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+	}
 
 	for i, step := range steps {
 		action, _ := step["action"].(string)
 		payload, _ := step["payload"].(map[string]interface{})
-		
+
 		fmt.Printf("%s\n", i18n.T("step_info", i+1, len(steps), action))
 
 		// Check idempotency (skip if already success)
@@ -270,7 +387,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 		}
 
 		if stepState != nil && stepState.Status == "SUCCESS" {
-			fmt.Printf("     -> Skipping already completed step\n")
+			fmt.Printf("     -> %s\n", i18n.T("step_skipped_done"))
 			logs = append(logs, fmt.Sprintf("Skipped step %d (%s) due to idempotency", i, action))
 			continue
 		}
@@ -286,34 +403,47 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 		}
 
 		stepState.Status = "RUNNING"
-		SaveState(state)
+		if err := SaveState(state); err != nil {
+			return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+		}
 
 		handler, exists := ActionRegistry[action]
 		if !exists {
 			stepState.Status = "FAILED"
-			SaveState(state)
+			stepState.CompletedAt = time.Now().Unix()
+			state.Status = "FAILED"
+			if saveErr := SaveState(state); saveErr != nil {
+				return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", saveErr)
+			}
 			return logs, fmt.Errorf("unknown action in recipe: %s", action)
 		}
 
-		stepLogs, err := handler.Execute(env, payload)
+		stepLogs, execErr := handler.Execute(env, payload)
 		logs = append(logs, stepLogs...)
 		stepState.Logs = append(stepState.Logs, stepLogs...)
 
-		if err != nil {
+		if execErr != nil {
 			stepState.Status = "FAILED"
 			stepState.CompletedAt = time.Now().Unix()
 			state.Status = "FAILED"
-			SaveState(state)
-			return logs, err
+			if saveErr := SaveState(state); saveErr != nil {
+				return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", saveErr)
+			}
+			return logs, execErr
 		}
 
 		stepState.Status = "SUCCESS"
 		stepState.CompletedAt = time.Now().Unix()
-		SaveState(state)
+		if err := SaveState(state); err != nil {
+			return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+		}
 	}
 
 	state.Status = "SUCCESS"
-	SaveState(state)
+	if err := SaveState(state); err != nil {
+		return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+	}
+
 	return logs, nil
 }
 

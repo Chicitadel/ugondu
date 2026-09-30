@@ -46,14 +46,71 @@ function post(port, path, body) {
     });
 }
 
+const { spawn } = require('child_process');
+
+function waitForServer(port, retries = 30, interval = 200) {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const check = () => {
+            attempts++;
+            const req = http.get({ hostname: 'localhost', port, path: '/health' }, res => {
+                if (res.statusCode === 200) {
+                    return resolve();
+                }
+                retry();
+            });
+            req.on('error', retry);
+            req.end();
+        };
+
+        const retry = () => {
+            if (attempts >= retries) {
+                return reject(new Error(`Server failed to start on port ${port} after ${retries} attempts`));
+            }
+            setTimeout(check, interval);
+        };
+
+        check();
+    });
+}
+
 const ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4001');
 let passed = 0;
 let failed = 0;
+let serverProcess = null;
 
 async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log('[en] Ugondu Integration Test Suite — Engine Core');
     console.log('[en] ══════════════════════════════════════════════════════');
+
+    // Auto-start server if not already running
+    try {
+        await new Promise((resolve, reject) => {
+            const req = http.get({ hostname: 'localhost', port: ENGINE_PORT, path: '/health' }, res => {
+                if (res.statusCode === 200) return resolve();
+                reject(new Error('Not 200'));
+            });
+            req.on('error', reject);
+            req.end();
+        });
+        console.log(`[en] Using running Engine Core on port ${ENGINE_PORT}`);
+    } catch {
+        console.log(`[en] Spawning Engine Core process on port ${ENGINE_PORT}...`);
+        const serverPath = require('path').resolve(__dirname, '../server/engine-core/dist/index.js');
+        serverProcess = spawn('node', [serverPath], {
+            env: { ...process.env, PORT: String(ENGINE_PORT) },
+            stdio: 'pipe'
+        });
+
+        try {
+            await waitForServer(ENGINE_PORT);
+            console.log(`[en] Engine Core spawned and healthy on port ${ENGINE_PORT}`);
+        } catch (e) {
+            console.error(`[en] Failed to auto-start Engine Core: ${e.message}`);
+            process.exit(1);
+        }
+    }
 
     // [en] Test 1: Missing required fields returns 400
     try {
@@ -123,10 +180,15 @@ async function runTests() {
     console.log(`[en] Results: ${passed} passed, ${failed} failed`);
     console.log('[en] ══════════════════════════════════════════════════════');
 
+    if (serverProcess) {
+        serverProcess.kill('SIGTERM');
+    }
+
     if (failed > 0) process.exit(1);
 }
 
 runTests().catch(err => {
     console.error('[en] Fatal test suite error:', err);
+    if (serverProcess) serverProcess.kill('SIGTERM');
     process.exit(1);
 });

@@ -20,3 +20,6 @@ client/ugondu.exe
 # [en] OS artifacts
 .DS_Store
 Thumbs.db
+
+# [en] Server runtime datastores
+server/data/
