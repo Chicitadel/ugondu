@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/service_token.v1.json",
+  "title": "ServiceIdentityToken",
+  "description": "Canonical Ugondu Asymmetric Service Identity Token Claims Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "iss",
+    "sub",
+    "aud",
+    "scope",
+    "iat",
+    "nbf",
+    "exp",
+    "jti",
+    "keyId",
+    "tokenVersion"
+  ],
+  "properties": {
+    "iss": { "type": "string", "minLength": 1 },
+    "sub": { "type": "string", "minLength": 1 },
+    "aud": { "type": "string", "minLength": 1 },
+    "scope": { "type": "string", "minLength": 1 },
+    "iat": { "type": "integer", "minimum": 0 },
+    "nbf": { "type": "integer", "minimum": 0 },
+    "exp": { "type": "integer", "minimum": 0 },
+    "jti": { "type": "string", "minLength": 16 },
+    "keyId": { "type": "string", "minLength": 1 },
+    "tokenVersion": { "type": "string", "enum": ["1.0.0"] }
+  },
+  "additionalProperties": false
+}

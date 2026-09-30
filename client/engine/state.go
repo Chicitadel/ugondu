@@ -60,19 +60,27 @@ type StepState struct {
 }
 
 type ExecutionState struct {
-	SchemaVersion string       `json:"schemaVersion"`
-	TransactionId string       `json:"transactionId"`
-	PlanHash      string       `json:"planHash"`
-	TenantId      string       `json:"tenantId"`
-	ProjectId     string       `json:"projectId"`
-	EnvironmentId string       `json:"environmentId"`
-	RecipeVersion string       `json:"recipeVersion"`
-	PolicyHash    string       `json:"policyHash"`
-	AgentVersion  string       `json:"agentVersion"`
-	Status        string       `json:"status"`
-	Steps         []*StepState `json:"steps"`
-	UpdatedAt     int64        `json:"updatedAt"`
-	StateHash     string       `json:"stateHash"`
+	SchemaVersion   string       `json:"schemaVersion"`
+	TransactionId   string       `json:"transactionId"`
+	ExecutionId     string       `json:"executionId"`
+	WorkspaceId     string       `json:"workspaceId"`
+	TargetId        string       `json:"targetId"`
+	RecipeSignature string       `json:"recipeSignature"`
+	AgentId         string       `json:"agentId"`
+	AgentVersion    string       `json:"agentVersion"`
+	ExpiresAt       int64        `json:"expiresAt"`
+	PlanHash        string       `json:"planHash"`
+	TenantId        string       `json:"tenantId"`
+	ProjectId       string       `json:"projectId"`
+	EnvironmentId   string       `json:"environmentId"`
+	RecipeVersion   string       `json:"recipeVersion"`
+	PolicyHash      string       `json:"policyHash"`
+	Status          string       `json:"status"`
+	Steps           []*StepState `json:"steps"`
+	UpdatedAt       int64        `json:"updatedAt"`
+	StateSequence   int64        `json:"stateSequence"`
+	PrevStateHash   string       `json:"prevStateHash"`
+	StateHash       string       `json:"stateHash"`
 }
 
 // UnmarshalJSON supports both camelCase and legacy snake_case formats.
@@ -187,6 +195,8 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf("cannot save state: execution state or transaction ID is nil/empty")
 	}
 
+	state.StateSequence++
+	state.PrevStateHash = state.StateHash
 	state.UpdatedAt = time.Now().Unix()
 	hash, err := state.ComputeHash()
 	if err != nil {
@@ -265,18 +275,25 @@ func InitState(txId string) *ExecutionState {
 // InitStateFromEnvelope initializes state bound cryptographically to an execution envelope.
 func InitStateFromEnvelope(env *ExecutionEnvelope) *ExecutionState {
 	s := &ExecutionState{
-		SchemaVersion: "1.0.0",
-		TransactionId: env.TransactionId,
-		PlanHash:      env.PlanHash,
-		TenantId:      env.TenantId,
-		ProjectId:     env.ProjectId,
-		EnvironmentId: env.EnvironmentId,
-		RecipeVersion: env.Version,
-		PolicyHash:    env.PolicyHash,
-		AgentVersion:  env.AgentMinVersion,
-		Status:        "PENDING",
-		Steps:         make([]*StepState, 0),
-		UpdatedAt:     time.Now().Unix(),
+		SchemaVersion:   "1.0.0",
+		TransactionId:   env.TransactionId,
+		ExecutionId:     env.ExecutionId,
+		WorkspaceId:     env.WorkspaceId,
+		TargetId:        env.TargetId,
+		RecipeSignature: env.Signature,
+		AgentId:         env.AgentId,
+		AgentVersion:    env.AgentVersion,
+		ExpiresAt:       env.ExpiresAt,
+		PlanHash:        env.PlanHash,
+		TenantId:        env.TenantId,
+		ProjectId:       env.ProjectId,
+		EnvironmentId:   env.EnvironmentId,
+		RecipeVersion:   env.Version, // or ProtocolVersion if available
+		PolicyHash:      env.PolicyHash,
+		Status:          "PENDING",
+		Steps:           make([]*StepState, 0),
+		UpdatedAt:       time.Now().Unix(),
+		StateSequence:   0,
 	}
 	s.StateHash, _ = s.ComputeHash()
 	return s

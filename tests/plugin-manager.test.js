@@ -38,16 +38,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const { createHmac } = require('crypto');
-
-const INTERNAL_SERVICE_KEY = process.env.INTERNAL_SERVICE_KEY || 'static-dev-key';
-
-function signServiceIdentity(issuer, audience) {
-    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-    const payload = Buffer.from(JSON.stringify({ iss: issuer, aud: audience, exp: Date.now() + 60000 })).toString('base64url');
-    const signature = createHmac('sha256', INTERNAL_SERVICE_KEY).update(`${header}.${payload}`).digest('base64url');
-    return `${header}.${payload}.${signature}`;
-}
+const { signServiceIdentity } = require('../server/shared/dist/identity');
 
 function get(port, path, extraHeaders = {}) {
     return new Promise((resolve, reject) => {

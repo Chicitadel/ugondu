@@ -49,6 +49,7 @@ import (
 
 type ActionHandler interface {
 	Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error)
+	ValidatePreflight(payload map[string]interface{}) error
 }
 
 var ActionRegistry = map[string]ActionHandler{}
@@ -245,6 +246,11 @@ func ValidateComposerInstallPayload(payload map[string]interface{}) (*ComposerIn
 
 type FetchRepositoryAction struct{}
 
+func (a *FetchRepositoryAction) ValidatePreflight(payload map[string]interface{}) error {
+	_, err := ValidateFetchRepositoryPayload(payload)
+	return err
+}
+
 func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	var logs []string
 	p, err := ValidateFetchRepositoryPayload(payload)
@@ -283,6 +289,11 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 type SyncEnvironmentAction struct{}
 
+func (a *SyncEnvironmentAction) ValidatePreflight(payload map[string]interface{}) error {
+	_, err := ValidateSyncEnvironmentPayload(payload)
+	return err
+}
+
 func (a *SyncEnvironmentAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	var logs []string
 	p, err := ValidateSyncEnvironmentPayload(payload)
@@ -319,6 +330,11 @@ func (a *SyncEnvironmentAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 type PruneReleasesAction struct{}
 
+func (a *PruneReleasesAction) ValidatePreflight(payload map[string]interface{}) error {
+	_, err := ValidatePruneReleasesPayload(payload)
+	return err
+}
+
 func (a *PruneReleasesAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	var logs []string
 	p, err := ValidatePruneReleasesPayload(payload)
@@ -339,6 +355,11 @@ func (a *PruneReleasesAction) Execute(env *ExecutionEnvelope, payload map[string
 
 type UpsellNoticeAction struct{}
 
+func (a *UpsellNoticeAction) ValidatePreflight(payload map[string]interface{}) error {
+	_, err := ValidateUpsellNoticePayload(payload)
+	return err
+}
+
 func (a *UpsellNoticeAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	var logs []string
 	p, err := ValidateUpsellNoticePayload(payload)
@@ -353,6 +374,11 @@ func (a *UpsellNoticeAction) Execute(env *ExecutionEnvelope, payload map[string]
 }
 
 type NodeInstallAction struct{}
+
+func (a *NodeInstallAction) ValidatePreflight(payload map[string]interface{}) error {
+	_, err := ValidateNodeInstallPayload(payload)
+	return err
+}
 
 func (a *NodeInstallAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	var logs []string
@@ -417,53 +443,3 @@ func (a *NodeInstallAction) Execute(env *ExecutionEnvelope, payload map[string]i
 	return logs, nil
 }
 
-type ComposerInstallAction struct{}
-
-func (a *ComposerInstallAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
-	var logs []string
-	p, err := ValidateComposerInstallPayload(payload)
-	if err != nil {
-		return logs, fmt.Errorf("COMPOSER_INSTALL validation failure: %w", err)
-	}
-
-	fmt.Printf("     -> %s\n", i18n.T("composer_install_running", p.Command, p.WorkingDirectory))
-
-	cmdName := "composer"
-	args := []string{p.Command}
-	if p.NoDev {
-		args = append(args, "--no-dev", "--optimize-autoloader")
-	}
-
-	var cmd *exec.Cmd
-	if p.TimeoutMs > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.TimeoutMs)*time.Millisecond)
-		defer cancel()
-		cmd = exec.CommandContext(ctx, cmdName, args...)
-	} else {
-		cmd = exec.Command(cmdName, args...)
-	}
-
-	cmd.Dir = p.WorkingDirectory
-
-	var outputBuf bytes.Buffer
-	cmd.Stdout = &outputBuf
-	cmd.Stderr = &outputBuf
-
-	runErr := cmd.Run()
-	outputStr := strings.TrimSpace(outputBuf.String())
-	if outputStr != "" {
-		for _, line := range strings.Split(outputStr, "\n") {
-			lineClean := strings.TrimRight(line, "\r")
-			if lineClean != "" {
-				logs = append(logs, lineClean)
-			}
-		}
-	}
-
-	if runErr != nil {
-		return logs, fmt.Errorf("composer %s failed: %w\n%s", strings.Join(args, " "), runErr, outputStr)
-	}
-
-	logs = append(logs, fmt.Sprintf("Successfully executed composer %s in %s", strings.Join(args, " "), p.WorkingDirectory))
-	return logs, nil
-}

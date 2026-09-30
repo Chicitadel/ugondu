@@ -15,10 +15,13 @@
 
 const assert = require('assert');
 const http = require('http');
+const path = require('path');
+const { spawn } = require('child_process');
+const { signServiceIdentity } = require('../server/shared/dist/identity');
 
-// [en] Simple HTTP POST helper — no external test framework dependencies
-function post(port, path, body) {
+function post(port, path, body, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
+        const serviceToken = signServiceIdentity('engine-core', 'billing-gateway');
         const data = JSON.stringify(body);
         const options = {
             hostname: 'localhost',
@@ -27,7 +30,9 @@ function post(port, path, body) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(data)
+                'Content-Length': Buffer.byteLength(data),
+                'Authorization': `Bearer ${serviceToken}`,
+                ...extraHeaders
             }
         };
         const req = http.request(options, (res) => {
@@ -47,14 +52,67 @@ function post(port, path, body) {
     });
 }
 
+function waitForServer(port, retries = 30, interval = 200) {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const check = () => {
+            attempts++;
+            const req = http.get({ hostname: 'localhost', port, path: '/health' }, res => {
+                if (res.statusCode === 200) return resolve();
+                retry();
+            });
+            req.on('error', retry);
+            req.end();
+        };
+        const retry = () => {
+            if (attempts >= retries) {
+                return reject(new Error(`Server failed to start on port ${port} after ${retries} attempts`));
+            }
+            setTimeout(check, interval);
+        };
+        check();
+    });
+}
+
 const BILLING_PORT = parseInt(process.env.BILLING_PORT || '4002');
 let passed = 0;
 let failed = 0;
+let serverProcess = null;
 
 async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log('[en] Ugondu Integration Test Suite — Billing Gateway');
     console.log('[en] ══════════════════════════════════════════════════════');
+
+    // Auto-start server if not already running
+    try {
+        await new Promise((resolve, reject) => {
+            const req = http.get({ hostname: 'localhost', port: BILLING_PORT, path: '/health' }, res => {
+                if (res.statusCode === 200) return resolve();
+                reject(new Error('Not 200'));
+            });
+            req.on('error', reject);
+            req.end();
+        });
+        console.log(`[en] Using running Billing Gateway on port ${BILLING_PORT}`);
+    } catch {
+        console.log(`[en] Spawning Billing Gateway process on port ${BILLING_PORT}...`);
+        const serverPath = path.resolve(__dirname, '../server/billing-gateway/dist/index.js');
+        serverProcess = spawn('node', [serverPath], {
+            env: { ...process.env, PORT: String(BILLING_PORT), NODE_ENV: 'test' },
+            stdio: 'pipe'
+        });
+
+        try {
+            await waitForServer(BILLING_PORT);
+            console.log(`[en] Billing Gateway spawned and healthy on port ${BILLING_PORT}`);
+        } catch (e) {
+            console.error(`[en] Failed to auto-start Billing Gateway: ${e.message}`);
+            process.exit(1);
+        }
+    }
+
+    try {
 
     // [en] Test 1: Missing token returns 401
     try {
@@ -78,9 +136,9 @@ async function runTests() {
         failed++;
     }
 
-    // [en] Test 3: Professional token prefix resolves professional edition
+    // [en] Test 3: Professional token resolves professional edition
     try {
-        const r = await post(BILLING_PORT, '/v1/authorize', { token: 'ugp_test_professional_key' });
+        const r = await post(BILLING_PORT, '/v1/authorize', { token: 'ugp_demo123' });
         if (r.status === 200) {
             assert.strictEqual(r.body.edition, 'professional', '[en] Expected professional edition');
             assert.strictEqual(r.body.capabilities.allowAtomic, true, '[en] Expected allowAtomic=true');
@@ -96,9 +154,9 @@ async function runTests() {
         failed++;
     }
 
-    // [en] Test 4: Enterprise token prefix resolves enterprise edition
+    // [en] Test 4: Enterprise token resolves enterprise edition
     try {
-        const r = await post(BILLING_PORT, '/v1/authorize', { token: 'uge_test_enterprise_key' });
+        const r = await post(BILLING_PORT, '/v1/authorize', { token: 'uge_corp456' });
         if (r.status === 200) {
             assert.strictEqual(r.body.edition, 'enterprise', '[en] Expected enterprise edition');
             assert.strictEqual(r.body.capabilities.allowTelemetry, true, '[en] Expected allowTelemetry=true');
@@ -112,6 +170,11 @@ async function runTests() {
         console.error('[en] ✗ FAIL: Enterprise token test —', e.message);
         failed++;
     }
+    } finally {
+        if (serverProcess) {
+            serverProcess.kill();
+        }
+    }
 
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log(`[en] Results: ${passed} passed, ${failed} failed`);
@@ -122,5 +185,7 @@ async function runTests() {
 
 runTests().catch(err => {
     console.error('[en] Fatal test suite error:', err);
+    if (serverProcess) serverProcess.kill();
     process.exit(1);
 });
+

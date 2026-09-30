@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatorVersion": "1.0.0",
+  "timestamp": 1790754435,
+  "gitTreeHash": "c76a7fb5d2d9beeb28e29980204b2cd7c9402666",
+  "gitCommitHash": "42dbe9196f817006d7225df969ee076d9eb8882f",
+  "protocolVersion": "1.0.0",
+  "trustRegistryVersion": "v1",
+  "trustKeys": [
+    {
+      "keyId": "key_recipe_v1",
+      "algorithm": "ed25519",
+      "status": "ACTIVE",
+      "purpose": "recipe",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAW0l7OAZeUQZhMnk3etjBWeYiEJK0O5LCFWKiWhRBvQM=\n-----END PUBLIC KEY-----"
+    },
+    {
+      "keyId": "key_service_v1",
+      "algorithm": "ed25519",
+      "status": "ACTIVE",
+      "purpose": "service-identity",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEArLNZN2cPQpTCYMgpl9SVSjgeyG2x92Q5xD1xHxaLZ5U=\n-----END PUBLIC KEY-----"
+    },
+    {
+      "keyId": "key_langpack_v1",
+      "algorithm": "ed25519",
+      "status": "ACTIVE",
+      "purpose": "language-pack",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAUz8IM99c7+M2Bwg9bWR9BSVRI/J6L5LGu3kZ2q9701M=\n-----END PUBLIC KEY-----"
+    }
+  ],
+  "testResults": {
+    "totalSuites": 9,
+    "totalPassed": 9,
+    "totalFailed": 0,
+    "totalSkipped": 0
+  },
+  "adversarialResults": {
+    "attackClassesTested": 50,
+    "passed": 50,
+    "failed": 0
+  },
+  "codeGovernance": {
+    "maxLinesPerFileCompliant": true,
+    "zeroStringHardcodingCompliant": true,
+    "zeroSecretsLeakedCompliant": true,
+    "maxObservedLines": 481
+  },
+  "artifactDigests": {
+    "client/engine/executor.go": "sha256:f330ead0a9b7f73f34490adf361cc8662fd8d82bf0f24a05116cbe68a9c5ddde",
+    "client/engine/safepath.go": "sha256:2d1080081aea518a90e852e02399205cabfb238ecb024ff3e5b3f7f44517253c",
+    "client/engine/archive.go": "sha256:e8570113e52993671c6dcb0eb33b9674c8693f5dc852c73f3d949b4c99787106",
+    "server/shared/identity.ts": "sha256:8394880601319b1692aed35c3ad31382fd8f3a37443f99e21df9158a5aa97cab",
+    "server/shared/ssrf.ts": "sha256:9d436ebaad0e17758c17a1e5c46cec9ed49dbe96dd6894104bc989622a19383d",
+    "server/engine-core/src/index.ts": "sha256:8e8000694c3d174bee130ed0c43bda383f67685c8b09b412d7d5e38f4a21f5ab",
+    "server/shared/schemas/envelope.v1.json": "sha256:47820b3d9e2efdd40c3a25c1b65c3b139a3655c685df7d79b05293d283ed697a"
+  },
+  "evidenceBundleHash": "sha256:97df5da9041b9bf1008b6fcf44bd84dbcdb7a6d69ddcca93d46c9c1ea10857a3",
+  "signature": "ebccd53fa62d9650d9dc578ac1859fd971f728a197893873c557eed01b3e9e1cc69441e6cd535e4328e3d68603c33599dc22736d954fa8564c4ef36cc4d9b20b"
+}

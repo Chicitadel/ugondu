@@ -15,6 +15,8 @@
 
 const assert = require('assert');
 const http = require('http');
+const path = require('path');
+const { spawn } = require('child_process');
 
 function post(port, path, body) {
     return new Promise((resolve, reject) => {
@@ -51,14 +53,67 @@ function get(port, path) {
     });
 }
 
+function waitForServer(port, retries = 30, interval = 200) {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const check = () => {
+            attempts++;
+            const req = http.get({ hostname: 'localhost', port, path: '/health' }, res => {
+                if (res.statusCode === 200) return resolve();
+                retry();
+            });
+            req.on('error', retry);
+            req.end();
+        };
+        const retry = () => {
+            if (attempts >= retries) {
+                return reject(new Error(`Server failed to start on port ${port} after ${retries} attempts`));
+            }
+            setTimeout(check, interval);
+        };
+        check();
+    });
+}
+
 const ADAPTER_PORT = parseInt(process.env.ADAPTER_PORT || '4005');
 let passed = 0;
 let failed = 0;
+let serverProcess = null;
 
 async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log('[en] Ugondu Integration Test Suite — Repository Adapter');
     console.log('[en] ══════════════════════════════════════════════════════');
+
+    // Auto-start server if not already running
+    try {
+        await new Promise((resolve, reject) => {
+            const req = http.get({ hostname: 'localhost', port: ADAPTER_PORT, path: '/health' }, res => {
+                if (res.statusCode === 200) return resolve();
+                reject(new Error('Not 200'));
+            });
+            req.on('error', reject);
+            req.end();
+        });
+        console.log(`[en] Using running Repository Adapter on port ${ADAPTER_PORT}`);
+    } catch {
+        console.log(`[en] Spawning Repository Adapter process on port ${ADAPTER_PORT}...`);
+        const serverPath = path.resolve(__dirname, '../server/repository-adapter/dist/index.js');
+        serverProcess = spawn('node', [serverPath], {
+            env: { ...process.env, PORT: String(ADAPTER_PORT) },
+            stdio: 'pipe'
+        });
+
+        try {
+            await waitForServer(ADAPTER_PORT);
+            console.log(`[en] Repository Adapter spawned and healthy on port ${ADAPTER_PORT}`);
+        } catch (e) {
+            console.error(`[en] Failed to auto-start Repository Adapter: ${e.message}`);
+            process.exit(1);
+        }
+    }
+
+    try {
 
     const testCases = [
         { url: 'https://github.com/example/repo', expected: 'github', tokenEnv: 'UGONDU_GITHUB_TOKEN' },
@@ -126,6 +181,12 @@ async function runTests() {
         failed++;
     }
 
+    } finally {
+        if (serverProcess) {
+            serverProcess.kill();
+        }
+    }
+
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log(`[en] Results: ${passed} passed, ${failed} failed`);
     console.log('[en] ══════════════════════════════════════════════════════');
@@ -135,5 +196,7 @@ async function runTests() {
 
 runTests().catch(err => {
     console.error('[en] Fatal test suite error:', err);
+    if (serverProcess) serverProcess.kill();
     process.exit(1);
 });
+

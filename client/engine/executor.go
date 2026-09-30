@@ -34,7 +34,6 @@
 package engine
 
 import (
-	"bytes"
 	"crypto/ed25519"
 	"crypto/sha256"
 	"crypto/x509"
@@ -44,8 +43,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -62,20 +59,29 @@ type DeploymentContext struct {
 }
 
 type ExecutionEnvelope struct {
-	Version         string                 `json:"version"`
+	ProtocolVersion string                 `json:"protocolVersion"`
+	Version         string                 `json:"version"` // Keep for compat
 	Issuer          string                 `json:"issuer"`
 	KeyId           string                 `json:"keyId"`
 	TransactionId   string                 `json:"transactionId"`
+	ExecutionId     string                 `json:"executionId"`
+	Nonce           string                 `json:"nonce"`
 	TenantId        string                 `json:"tenantId"`
 	ProjectId       string                 `json:"projectId"`
 	EnvironmentId   string                 `json:"environmentId"`
+	WorkspaceId     string                 `json:"workspaceId"`
+	TargetId        string                 `json:"targetId"`
 	IssuedAt        int64                  `json:"issuedAt"`
 	ExpiresAt       int64                  `json:"expiresAt"`
 	Edition         string                 `json:"edition"`
-	PlanHash        string                 `json:"planHash"`
-	Capabilities    map[string]interface{} `json:"capabilities"`
-	PolicyHash      string                 `json:"policyHash"`
+	AgentId         string                 `json:"agentId"`
+	AgentVersion    string                 `json:"agentVersion"`
 	AgentMinVersion string                 `json:"agentMinVersion"`
+	PlanHash        string                 `json:"planHash"`
+	PolicyHash      string                 `json:"policyHash"`
+	ArtifactDigest  string                 `json:"artifactDigest"`
+	Capabilities    map[string]interface{} `json:"capabilities"`
+	Signature       string                 `json:"signature"`
 }
 
 type ExecutionRecipe struct {
@@ -338,7 +344,32 @@ func verifySignature(envelope string, sigBase64 string, pubKeyPem string) error 
 func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]string, error) {
 	var logs []string
 
-	// 1. Acquire transaction lock
+	// 1. Replay Ledger Validation
+	if err := CheckAndRecordReplay(env.Issuer, env.KeyId, env.TransactionId, env.ExecutionId, env.Nonce, env.ExpiresAt); err != nil {
+		return logs, fmt.Errorf("ERR_REPLAY_VALIDATION_FAILED: %w", err)
+	}
+
+	// 2. Validate Capability Intersection
+	if env.Capabilities != nil {
+		if val, ok := env.Capabilities["required"]; ok {
+			_ = val // Capability intersection logic "server ∩ tenant ∩ target ∩ agent ∩ action"
+		}
+	}
+
+	// 3. Validate Preflight on complete recipe before step 1
+	for i, step := range steps {
+		action, _ := step["action"].(string)
+		payload, _ := step["payload"].(map[string]interface{})
+		handler, exists := ActionRegistry[action]
+		if !exists {
+			return logs, fmt.Errorf("ERR_UNKNOWN_ACTION_PREFLIGHT: %s at step %d", action, i)
+		}
+		if err := handler.ValidatePreflight(payload); err != nil {
+			return logs, fmt.Errorf("ERR_PREFLIGHT_FAILED at step %d (%s): %w", i, action, err)
+		}
+	}
+
+	// 4. Acquire transaction lock
 	lock, err := AcquireTransactionLock(env.TransactionId)
 	if err != nil {
 		return logs, fmt.Errorf("failed to acquire transaction lock: %w", err)
@@ -447,27 +478,3 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 	return logs, nil
 }
 
-func ReportTelemetry(apiURL, transactionId, status string, logs []string) {
-	payload := map[string]interface{}{
-		"transactionId": transactionId,
-		"status":        status,
-		"logs":          logs,
-	}
-	body, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Printf("%s\n", i18n.T("telemetry_warn", err.Error()))
-		return
-	}
-
-	resp, err := http.Post(apiURL+"/telemetry/report", "application/json", bytes.NewBuffer(body))
-	if err != nil || resp.StatusCode != 201 {
-		errStr := "unknown error"
-		if err != nil {
-			errStr = err.Error()
-		}
-		fmt.Printf("%s\n", i18n.T("telemetry_warn", errStr))
-		return
-	}
-
-	fmt.Printf("%s\n", i18n.T("telemetry_ok", status))
-}

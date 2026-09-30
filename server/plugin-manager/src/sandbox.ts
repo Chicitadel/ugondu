@@ -71,16 +71,18 @@ export async function executePluginSandbox(pluginPath: string, payload: any): Pr
         const { stdout } = await execFileAsync('docker', [
             'run',
             '--rm',
+            '--init', // process-tree termination
             '--read-only',
-            '--network=none',
+            '--network=none', // no host network
             '--memory=128m',
             '--cpus=0.5',
-            '--user=1000:1000',
+            '--user=10001:10001',
             '--cap-drop=ALL',
             '--security-opt=no-new-privileges',
+            '--security-opt=seccomp=default', // seccomp profile
             '--pids-limit=64',
             '--tmpfs', '/tmp:rw,noexec,nosuid,size=32m',
-            '-v', `${pluginPath}:/plugin:ro`,
+            '-v', `${pluginPath}:/plugin:ro`, // no Docker socket, read-only plugin dir
             'node:20-alpine',
             'node', '/plugin/index.js', JSON.stringify(payload || {})
         ], {

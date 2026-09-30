@@ -104,8 +104,18 @@ function loadOrGeneratePersistentKeys(): KeyState {
 const keyState = loadOrGeneratePersistentKeys();
 const BILLING_GATEWAY_URL = process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1';
 
+import { globalTrustRegistry } from '@ugondu/shared';
+
 app.get('/v1/keys', (req, res) => {
-    res.json({ keys: [{ id: keyState.keyId, type: 'ed25519', publicKey: keyState.publicKeyPem }] });
+    const keys = globalTrustRegistry.getTrustRootAnchor();
+    const result = Object.keys(keys).map(keyId => ({
+        id: keyId,
+        type: keys[keyId].algorithm,
+        publicKey: keys[keyId].publicKey,
+        purpose: keys[keyId].purpose,
+        status: keys[keyId].status
+    }));
+    res.json({ keys: result });
 });
 
 app.get('/health', (req, res) => {
@@ -292,25 +302,37 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
         const canonicalSteps = canonicalize(steps) || '[]';
         const planHash = require('crypto').createHash('sha256').update(canonicalSteps).digest('hex');
 
+        const nonce = randomBytes(16).toString('hex');
+        const executionId = `exec_${randomBytes(12).toString('hex')}`;
+        const targetId = req.body.targetId || `tgt_${randomBytes(8).toString('hex')}`;
+        const workspaceId = req.body.workspaceId || `ws_${randomBytes(8).toString('hex')}`;
+        const artifactDigest = `sha256:${randomBytes(32).toString('hex')}`; // Placeholder for actual digest
+
+        const activeKey = globalTrustRegistry.getActiveKeyByPurpose('recipe');
+        const signingKeyId = activeKey ? activeKey.keyId : keyState.keyId;
+        const signingKey = activeKey ? globalTrustRegistry.getPrivateKeyObject(signingKeyId) : keyState.privateKey;
+
         const envelope = {
             version: '1.0',
             issuer: 'ugondu-engine',
-            keyId: keyState.keyId,
+            keyId: signingKeyId,
             transactionId,
             tenantId: authResponse.data.tenantId || 'tenant_unknown',
+            workspaceId,
             projectId: 'default',
             environmentId: targetEnvironment,
+            targetId,
+            executionId,
+            nonce,
+            artifactDigest,
             issuedAt: Date.now(),
             expiresAt: Date.now() + 1000 * 60 * 5, // 5 mins expiry
             edition,
-            planHash,
-            capabilities,
-            policyHash: 'default-policy',
-            agentMinVersion: '1.0.0'
+            planHash
         };
 
         const canonicalEnvelope = canonicalize(envelope) || '{}';
-        const signature = sign(null, Buffer.from(canonicalEnvelope), keyState.privateKey).toString('base64');
+        const signature = sign(null, Buffer.from(canonicalEnvelope), signingKey).toString('base64');
 
         return res.status(200).json({
             transactionId,

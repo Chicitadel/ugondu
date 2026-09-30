@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/step.v1.json",
+  "title": "ExecutionStep",
+  "description": "Canonical Ugondu Execution Step Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "stepIndex",
+    "action",
+    "payload"
+  ],
+  "properties": {
+    "stepIndex": { "type": "integer", "minimum": 0 },
+    "action": {
+      "type": "string",
+      "enum": [
+        "FETCH_REPOSITORY",
+        "SYNC_ENVIRONMENT",
+        "PRUNE_RELEASES",
+        "UPSELL_NOTICE",
+        "NODE_INSTALL",
+        "COMPOSER_INSTALL",
+        "COPY_FILE",
+        "CREATE_DIRECTORY",
+        "SYMLINK",
+        "SERVICE_RESTART"
+      ]
+    },
+    "payload": { "type": "object" },
+    "timeoutMs": { "type": "integer", "minimum": 100 },
+    "allowFailure": { "type": "boolean" },
+    "idempotency": {
+      "type": "string",
+      "enum": ["idempotent", "conditionally_idempotent", "non_idempotent", "destructive"]
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

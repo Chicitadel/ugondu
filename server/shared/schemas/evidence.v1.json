@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/evidence.v1.json",
+  "title": "COREvidenceBundle",
+  "description": "Canonical Ugondu COR Level A Cryptographic Evidence Bundle Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "generatorVersion",
+    "timestamp",
+    "gitTreeHash",
+    "gitCommitHash",
+    "protocolVersion",
+    "trustRegistryVersion",
+    "trustKeys",
+    "testResults",
+    "adversarialResults",
+    "codeGovernance",
+    "artifactDigests",
+    "evidenceBundleHash",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0.0"] },
+    "generatorVersion": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "integer", "minimum": 0 },
+    "gitTreeHash": { "type": "string", "minLength": 1 },
+    "gitCommitHash": { "type": "string", "minLength": 1 },
+    "protocolVersion": { "type": "string", "enum": ["1.0.0", "1.2.0", "2.0.0"] },
+    "trustRegistryVersion": { "type": "string", "minLength": 1 },
+    "trustKeys": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "testResults": {
+      "type": "object",
+      "required": ["totalSuites", "totalPassed", "totalFailed", "totalSkipped"],
+      "properties": {
+        "totalSuites": { "type": "integer", "minimum": 1 },
+        "totalPassed": { "type": "integer", "minimum": 0 },
+        "totalFailed": { "type": "integer", "minimum": 0 },
+        "totalSkipped": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "adversarialResults": {
+      "type": "object",
+      "required": ["attackClassesTested", "passed", "failed"],
+      "properties": {
+        "attackClassesTested": { "type": "integer", "minimum": 1 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sbom": { "type": "object" },
+    "codeGovernance": {
+      "type": "object",
+      "required": [
+        "maxLinesPerFileCompliant",
+        "zeroStringHardcodingCompliant",
+        "zeroSecretsLeakedCompliant"
+      ],
+      "properties": {
+        "maxLinesPerFileCompliant": { "type": "boolean" },
+        "zeroStringHardcodingCompliant": { "type": "boolean" },
+        "zeroSecretsLeakedCompliant": { "type": "boolean" },
+        "maxObservedLines": { "type": "integer" }
+      }
+    },
+    "artifactDigests": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "evidenceBundleHash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "signature": { "type": "string", "minLength": 20 }
+  },
+  "additionalProperties": false
+}

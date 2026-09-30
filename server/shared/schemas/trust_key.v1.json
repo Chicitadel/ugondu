@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/trust_key.v1.json",
+  "title": "TrustKey",
+  "description": "Canonical Ugondu Trust Key Record Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "keyId",
+    "algorithm",
+    "publicKey",
+    "issuer",
+    "purpose",
+    "status",
+    "createdAt"
+  ],
+  "properties": {
+    "keyId": { "type": "string", "minLength": 1 },
+    "algorithm": { "type": "string", "enum": ["ed25519", "rsa-4096"] },
+    "publicKey": { "type": "string", "minLength": 20 },
+    "issuer": { "type": "string", "minLength": 1 },
+    "purpose": {
+      "type": "string",
+      "enum": ["recipe", "plugin", "language-pack", "service-identity"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "ROTATED", "REVOKED"]
+    },
+    "notBefore": { "type": "integer", "minimum": 0 },
+    "notAfter": { "type": "integer", "minimum": 0 },
+    "createdAt": { "type": "integer", "minimum": 0 },
+    "revokedAt": { "type": ["integer", "null"] },
+    "replacementKeyId": { "type": ["string", "null"] },
+    "registryVersion": { "type": "string" }
+  },
+  "additionalProperties": false
+}

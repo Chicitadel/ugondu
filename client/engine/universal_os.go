@@ -70,7 +70,11 @@ func CopyDir(src string, dst string, excludeGit bool) error {
 			return nil // Skip root directory itself
 		}
 
-		destPath := filepath.Join(dst, relPath)
+		resolver := &SafePathResolver{}
+		destPath, err := resolver.ResolveSafePath(dst, relPath)
+		if err != nil {
+			return fmt.Errorf("ERR_SAFE_PATH: %w", err)
+		}
 
 		if info.IsDir() {
 			return os.MkdirAll(destPath, info.Mode())
@@ -106,12 +110,19 @@ func copyFile(src, dst string, mode os.FileMode) error {
 // AtomicSymlink creates or updates a symlink to point to the new release.
 // Uses temp-link and rename for POSIX atomic replacement.
 func AtomicSymlink(target string, linkName string) error {
+	if _, err := os.Stat(target); err != nil {
+		return fmt.Errorf("ERR_TARGET_NOT_FOUND: %w", err)
+	}
+
 	tempLink := linkName + ".tmp"
 	os.Remove(tempLink)
 
 	if err := os.Symlink(target, tempLink); err != nil {
-		return fmt.Errorf("failed to create temp symlink: %v", err)
+		return fmt.Errorf("ERR_TEMP_SYMLINK_FAILED: %w", err)
 	}
+
+	prevTarget, err := os.Readlink(linkName)
+	hasPrev := (err == nil)
 
 	// os.Rename is atomic on POSIX, replacing existing symlinks.
 	if err := os.Rename(tempLink, linkName); err != nil {
@@ -120,7 +131,10 @@ func AtomicSymlink(target string, linkName string) error {
 			os.Remove(linkName)
 		}
 		if fallbackErr := os.Rename(tempLink, linkName); fallbackErr != nil {
-			return fmt.Errorf("failed atomic swap: %v", fallbackErr)
+			if hasPrev {
+				os.Symlink(prevTarget, linkName)
+			}
+			return fmt.Errorf("ERR_ATOMIC_SWAP_FAILED_WEAKER_GUARANTEE: %v", fallbackErr)
 		}
 	}
 	return nil

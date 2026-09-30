@@ -35,3 +35,5 @@ export * from './ssrf';
 export * from './identity';
 export * from './actions';
 export * from './packs';
+export * from './errors';
+export * from './trust_registry';

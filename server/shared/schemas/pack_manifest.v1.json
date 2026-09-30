@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/pack_manifest.v1.json",
+  "title": "LanguagePackManifest",
+  "description": "Canonical Ugondu Language Pack Manifest Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "packId",
+    "locale",
+    "language",
+    "region",
+    "version",
+    "platformVersion",
+    "minCoreVersion",
+    "maxCoreVersion",
+    "schemaVersion",
+    "publisherId",
+    "keyId",
+    "signatureAlgorithm",
+    "fallbackLocale",
+    "direction",
+    "artifactDigest",
+    "signature",
+    "tokens"
+  ],
+  "properties": {
+    "packId": { "type": "string", "minLength": 1 },
+    "locale": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2,4})?$" },
+    "language": { "type": "string", "minLength": 1 },
+    "region": { "type": "string" },
+    "version": { "type": "string", "minLength": 1 },
+    "platformVersion": { "type": "string", "minLength": 1 },
+    "minCoreVersion": { "type": "string", "minLength": 1 },
+    "maxCoreVersion": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "type": "string", "enum": ["1", "1.0.0"] },
+    "publisherId": { "type": "string", "minLength": 1 },
+    "keyId": { "type": "string", "minLength": 1 },
+    "signatureAlgorithm": { "type": "string", "enum": ["ed25519", "rsa-4096"] },
+    "fallbackLocale": { "type": "string" },
+    "direction": { "type": "string", "enum": ["ltr", "rtl"] },
+    "artifactDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "signature": { "type": "string", "minLength": 20 },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
