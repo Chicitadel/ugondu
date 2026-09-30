@@ -2,7 +2,7 @@
 
 > **Air Roofers Commercial Product** | Ujomor Systems Engineering Authority
 
-Ugondu is a **thin-client / server deployment intelligence platform** that replaces legacy shell deployment scripts with a governed, commercial-grade, edition-based delivery engine. It is the successor to `smart_deploy.sh`.
+Ugondu is a **thin-client / server deployment intelligence platform** that replaces legacy shell deployment scripts with a governed, commercial-grade, edition-based software delivery platform. It is the successor to `smart_deploy.sh`.
 
 ---
 
@@ -37,7 +37,7 @@ Ugondu is a **thin-client / server deployment intelligence platform** that repla
 │              Engine Core (Node.js :4001)            │  ← Governance Server
 │  - Computes DAG of execution steps                  │
 │  - Enforces edition capabilities                    │
-│  - Signs recipe with HMAC-SHA256                    │
+│  - Signs canonical execution recipes with Ed25519                    │
 └──────┬──────────────────────────────────────────────┘
        │                          │
 ┌──────▼──────┐            ┌──────▼──────┐
@@ -64,7 +64,7 @@ Ugondu is a **thin-client / server deployment intelligence platform** that repla
 
 ```bash
 cp .env.example .env
-# Edit .env: set UGONDU_PRIVATE_KEY, IDENTITY_AUTHORITY_URL
+# Configure server-side signing/trust settings and IDENTITY_AUTHORITY_URL; signing private keys remain server-side.
 ```
 
 ### 2. Start the governance server
@@ -101,21 +101,48 @@ ugondu deploy
 
 ---
 
+## Language Packs
+
+Ugondu supports installable, signed language packs without rebuilding the core client. Locale selection is reversible and can use explicit user preference, environment configuration, tenant/project policy, or detected OS locale.
+
+```bash
+ugondu locale current
+ugondu locale detect
+ugondu locale select
+ugondu locale use en-US
+ugondu locale install fr-FR
+ugondu locale update
+ugondu locale reset
+ugondu locale doctor
+```
+
+A one-time override is also available:
+
+```bash
+ugondu --locale en-US deploy
+UGONDU_LOCALE=en-US ugondu deploy
+```
+
+Language packs contain presentation/localization content only. Proprietary server-side planning, governance, licensing, AI, execution logic, credentials, and private keys remain server-side.
+
 ## Plugins
 
-Plugins are discovered from the `plugins/` directory. Each plugin requires a `manifest.json` and an `index.js`.
+Plugins are admitted through the governed plugin lifecycle. Third-party plugins must have a validated manifest, compatible action/capability declarations, provenance/signature verification, and execution isolation. The thin client never receives unrestricted plugin execution logic.
 
 **Bundled plugins:**
 - `ugondu-plugin-node` — npm/yarn/pnpm/bun dependency resolution and build
 - `ugondu-plugin-composer` — PHP Composer dependency resolution
 
-**To install a community plugin:**
+**Plugin lifecycle:**
 ```bash
-# Copy the plugin directory into plugins/
-cp -r my-plugin plugins/
-# Restart the plugin-manager service
-docker compose restart plugin-manager
+ugondu plugin list
+ugondu plugin verify <plugin>
+ugondu plugin install <plugin>
+ugondu plugin update <plugin>
+ugondu plugin remove <plugin>
 ```
+
+Plugin installation is subject to manifest, signature, capability, entitlement, and sandbox policy.
 
 ---
 
