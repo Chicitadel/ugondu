@@ -6,10 +6,12 @@
   "author": "Ujomor Systems Engineering Authority",
   "license": "UNLICENSED",
   "workspaces": [
+    "server/shared",
     "server/engine-core",
     "server/billing-gateway",
     "server/plugin-manager",
-    "server/event-bus"
+    "server/event-bus",
+    "server/repository-adapter"
   ],
   "scripts": {
     "build": "npm run build --workspaces",

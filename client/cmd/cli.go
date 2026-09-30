@@ -113,6 +113,7 @@ func PrintHelp() {
 	fmt.Println(i18n.T("cmd_status_help"))
 	fmt.Println(i18n.T("cmd_rollback_help"))
 	fmt.Println(i18n.T("cmd_plugins_help"))
+	fmt.Println(i18n.T("cmd_locale_help"))
 	fmt.Println(i18n.T("cmd_version_help"))
 	fmt.Println(i18n.T("cmd_help_help"))
 	fmt.Println("\n" + i18n.T("env_vars"))
@@ -231,15 +232,43 @@ func resumeDeployment(targetTxId string, apiURL string) {
 
 // ParseAndRun interprets the arguments and routes to the engine
 func ParseAndRun(args []string) {
-	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "version", "help"}
+	var cleanedArgs []string
+	var cliLocale string
+	systemLocaleMode := false
 
-	if len(args) < 2 {
+	for i := 1; i < len(args); i++ {
+		arg := args[i]
+		if (arg == "--locale" || arg == "-L") && i+1 < len(args) {
+			cliLocale = args[i+1]
+			i++
+		} else if strings.HasPrefix(arg, "--locale=") {
+			cliLocale = strings.TrimPrefix(arg, "--locale=")
+		} else if arg == "--system-locale" {
+			systemLocaleMode = true
+		} else {
+			cleanedArgs = append(cleanedArgs, arg)
+		}
+	}
+
+	if systemLocaleMode {
+		det := i18n.DetectEnvironmentLocale()
+		i18n.SetLocaleWithSource(det.Normalized, i18n.SourceOSDetection)
+	} else if cliLocale != "" {
+		i18n.SetLocaleWithSource(cliLocale, i18n.SourceCliFlag)
+	} else {
+		loc, src := i18n.ResolveEffectiveLocale("")
+		i18n.SetLocaleWithSource(loc, src)
+	}
+
+	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help"}
+
+	if len(cleanedArgs) < 1 {
 		fmt.Println(i18n.T("err_no_command"))
 		PrintHelp()
 		os.Exit(1)
 	}
 
-	command := args[1]
+	command := cleanedArgs[0]
 
 	// Fuzzy Matching Auto-Correct
 	isValid := false
@@ -277,7 +306,7 @@ func ParseAndRun(args []string) {
 	resume := false
 	var positional []string
 
-	for _, arg := range args[2:] {
+	for _, arg := range cleanedArgs[1:] {
 		if arg == "--force" || arg == "-f" {
 			force = true
 		} else if arg == "--resume" || arg == "-r" {
@@ -401,6 +430,8 @@ func ParseAndRun(args []string) {
 		fmt.Println(i18n.T("upsell_notice", i18n.T("upsell_rollback")))
 	case "plugins":
 		fmt.Println(i18n.T("upsell_notice", i18n.T("upsell_plugins")))
+	case "locale":
+		RunLocaleCommand(positional)
 	case "version":
 		fmt.Println(i18n.T("cli_title"))
 	case "help":
