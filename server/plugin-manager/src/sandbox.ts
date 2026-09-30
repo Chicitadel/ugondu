@@ -41,19 +41,15 @@ const execFileAsync = util.promisify(execFile);
 // Strict closed typed-action registry. Arbitrary shell execution is explicitly prohibited to enforce zero-trust isolation.
 const ALLOWED_ACTIONS = new Set([
     'FETCH_REPOSITORY',
-    'NPM_INSTALL',
-    'NPM_BUILD',
-    'COMPOSER_INSTALL',
-    'FILE_COPY',
-    'FILE_DELETE',
-    'DIRECTORY_CREATE',
-    'ATOMIC_RELEASE',
-    'PROCESS_START',
-    'PROCESS_STOP',
-    'HEALTH_CHECK',
     'SYNC_ENVIRONMENT',
     'PRUNE_RELEASES',
-    'UPSELL_NOTICE'
+    'UPSELL_NOTICE',
+    'NODE_INSTALL',
+    'COMPOSER_INSTALL',
+    'COPY_FILE',
+    'CREATE_DIRECTORY',
+    'SYMLINK',
+    'SERVICE_RESTART'
 ]);
 
 // Maximum allowed stdout capture (64KB) to prevent resource exhaustion attacks
