@@ -17,11 +17,17 @@ const assert = require('assert');
 const http = require('http');
 const path = require('path');
 const { spawn } = require('child_process');
-const { signServiceIdentity } = require('../server/shared/dist/identity');
+const { signServiceIdentity, globalTrustRegistry } = require('../server/shared/dist/identity');
+const { generateKeyPairSync } = require('crypto');
+const serviceTestKeys = generateKeyPairSync('ed25519');
+const serviceTestPrivateKey = serviceTestKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const serviceTestPublicKey = serviceTestKeys.publicKey.export({ type: 'spki', format: 'pem' }).toString();
+const SERVICE_TEST_KEY_ID = 'key_service_test_v1';
+globalTrustRegistry.registerKey({ keyId: SERVICE_TEST_KEY_ID, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: serviceTestPublicKey });
 
 function post(port, path, body, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
-        const serviceToken = signServiceIdentity('engine-core', 'billing-gateway');
+        const serviceToken = signServiceIdentity('engine-core', 'billing-gateway', 'execute', serviceTestPrivateKey, SERVICE_TEST_KEY_ID);
         const data = JSON.stringify(body);
         const options = {
             hostname: 'localhost',
