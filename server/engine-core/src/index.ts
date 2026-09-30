@@ -1,15 +1,35 @@
 import express from 'express';
 import cors from 'cors';
-import { randomBytes, createHmac } from 'crypto';
+import { randomBytes, generateKeyPairSync, sign } from 'crypto';
 import axios from 'axios';
-import { __t } from '@ugondu/shared';
+import { __t, signServiceIdentity } from '@ugondu/shared';
+import canonicalize from 'canonicalize';
 
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+    'https://admin.airroofers.eu',
+    'https://governance.airroofers.eu',
+    'https://license.airroofers.eu'
+];
+app.use(cors({
+    origin: function(origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('CORS policy violation'), false);
+        }
+        return callback(null, true);
+    }
+}));
 app.use(express.json());
 
-const PRIVATE_SIGNING_KEY = process.env.UGONDU_PRIVATE_KEY || randomBytes(32).toString('hex');
+// ED25519 Keypair generation (in production, load from secure vault)
+const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+const keyId = 'key_' + randomBytes(8).toString('hex');
 const BILLING_GATEWAY_URL = process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1';
+
+app.get('/v1/keys', (req, res) => {
+    res.json({ keys: [{ id: keyId, type: 'ed25519', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) }] });
+});
 
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'engine-core', cor_level: 'A' });
@@ -23,7 +43,8 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
     }
 
     try {
-        const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }).catch(() => null);
+        const bgAuth = signServiceIdentity('engine-core', 'billing-gateway');
+        const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }, { headers: { Authorization: `Bearer ${bgAuth}` } }).catch(() => null);
         if (!authResponse || !authResponse.data || !authResponse.data.edition) {
             return res.status(402).json({ error: __t('blocked') });
         }
@@ -47,7 +68,8 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
 
         try {
             const PLUGIN_MANAGER_URL = process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1';
-            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`).catch(() => null);
+            const pmAuth = signServiceIdentity('engine-core', 'plugin-manager');
+            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`, { headers: { Authorization: `Bearer ${pmAuth}` } }).catch(() => null);
             
             if (pluginsResponse && pluginsResponse.data && Array.isArray(pluginsResponse.data.plugins)) {
                 let injectedCount = 0;
@@ -59,7 +81,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
                         break;
                     }
 
-                    const execResponse = await axios.post(`${PLUGIN_MANAGER_URL}/plugins/${pluginName}/execute`, { payload: {} }).catch(() => null);
+                    const execResponse = await axios.post(`${PLUGIN_MANAGER_URL}/plugins/${pluginName}/execute`, { payload: {}, tenantId: authResponse.data.tenantId }, { headers: { Authorization: `Bearer ${pmAuth}` } }).catch(() => null);
                     if (execResponse && execResponse.data && Array.isArray(execResponse.data.injectedSteps)) {
                         steps.push(...execResponse.data.injectedSteps);
                         injectedCount++;
@@ -88,14 +110,32 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             });
         }
 
-        const recipePayload = JSON.stringify({ transactionId, strategy, steps, edition });
-        const signature = createHmac('sha256', PRIVATE_SIGNING_KEY).update(recipePayload).digest('hex');
+        const canonicalSteps = canonicalize(steps) || '[]';
+        const planHash = require('crypto').createHash('sha256').update(canonicalSteps).digest('hex');
+
+        const envelope = {
+            version: '1.0',
+            issuer: 'ugondu-engine',
+            keyId: keyId,
+            transactionId,
+            tenantId: authResponse.data.tenantId || 'tenant_unknown',
+            projectId: 'default',
+            environmentId: targetEnvironment,
+            issuedAt: Date.now(),
+            expiresAt: Date.now() + 1000 * 60 * 5, // 5 mins expiry
+            edition,
+            planHash,
+            capabilities,
+            policyHash: 'default-policy',
+            agentMinVersion: '1.0.0'
+        };
+
+        const canonicalEnvelope = canonicalize(envelope) || '{}';
+        const signature = sign(null, Buffer.from(canonicalEnvelope), privateKey).toString('base64');
 
         return res.status(200).json({
-            transactionId,
-            edition,
-            strategy,
-            steps,
+            canonicalEnvelope,
+            canonicalSteps,
             signature
         });
 

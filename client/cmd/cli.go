@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"ugondu/client/engine"
@@ -129,9 +130,13 @@ func ParseAndRun(args []string) {
 	}
 
 	force := false
+	resume := false
 	for _, arg := range args {
 		if arg == "--force" || arg == "-f" {
 			force = true
+		}
+		if arg == "--resume" {
+			resume = true
 		}
 	}
 
@@ -140,6 +145,31 @@ func ParseAndRun(args []string) {
 		if _, err := os.Stat(".git"); os.IsNotExist(err) {
 			fmt.Println(i18n.T("err_not_repo"))
 			os.Exit(1)
+		}
+
+		if resume {
+			fmt.Println("Resuming previous deployment...")
+			homeDir, _ := os.UserHomeDir()
+			recipePath := filepath.Join(homeDir, ".ugondu", "state", "current_recipe.json")
+			recipeData, err := os.ReadFile(recipePath)
+			if err != nil {
+				fmt.Println("No previous deployment found to resume.")
+				os.Exit(1)
+			}
+			env, steps, err := engine.ParseRecipeLocally(recipeData, apiURL)
+			if err != nil {
+				fmt.Println("Failed to parse previous recipe:", err)
+				os.Exit(1)
+			}
+			logs, err := engine.ExecuteRecipe(env, steps)
+			if err != nil {
+				fmt.Println(i18n.T("exec_failed", err))
+				engine.ReportTelemetry(apiURL, env.TransactionId, "FAILED", append(logs, err.Error()))
+				os.Exit(1)
+			}
+			engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
+			fmt.Println(i18n.T("dep_complete"))
+			os.Exit(0)
 		}
 
 		// Simple destructive prompt test for demo
@@ -156,26 +186,31 @@ func ParseAndRun(args []string) {
 			FileMap:           make(map[string]string),
 		}
 
-		fmt.Println("─────────────────────────────────────────────────────────────")
+		fmt.Println("💡")
 		fmt.Println(i18n.T("repo_info", ctx.RepositoryUrl, ctx.Branch, ctx.TargetEnvironment))
-		fmt.Println("─────────────────────────────────────────────────────────────")
+		fmt.Println("💡")
 
-		recipe, err := engine.FetchExecutionRecipe(apiURL, ctx)
+		env, steps, rawRecipe, err := engine.FetchExecutionRecipe(apiURL, ctx)
 		if err != nil {
 			fmt.Printf("%v\n", err)
 			os.Exit(1)
 		}
 
-		fmt.Println(i18n.T("recipe_resolved", recipe.TransactionId, recipe.Edition, recipe.Strategy))
+		// Save recipe for future resume
+		homeDir, _ := os.UserHomeDir()
+		os.MkdirAll(filepath.Join(homeDir, ".ugondu", "state"), 0755)
+		os.WriteFile(filepath.Join(homeDir, ".ugondu", "state", "current_recipe.json"), rawRecipe, 0644)
+
+		fmt.Println(i18n.T("recipe_resolved", env.TransactionId, env.Edition, "atomic-or-quota"))
 		
-		logs, err := engine.ExecuteRecipe(recipe)
+		logs, err := engine.ExecuteRecipe(env, steps)
 		if err != nil {
 			fmt.Println(i18n.T("exec_failed", err))
-			engine.ReportTelemetry(apiURL, recipe.TransactionId, "FAILED", append(logs, err.Error()))
+			engine.ReportTelemetry(apiURL, env.TransactionId, "FAILED", append(logs, err.Error()))
 			os.Exit(1)
 		}
 
-		engine.ReportTelemetry(apiURL, recipe.TransactionId, "SUCCESS", logs)
+		engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
 		fmt.Println(i18n.T("dep_complete"))
 
 	case "rollback":

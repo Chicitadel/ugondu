@@ -10,6 +10,7 @@
   "dependencies": {
     "@ugondu/shared": "file:../shared",
     "axios": "^1.7.7",
+    "canonicalize": "^5.1.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^4.21.0"

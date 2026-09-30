@@ -72,18 +72,26 @@ func copyFile(src, dst string, mode os.FileMode) error {
 }
 
 // AtomicSymlink creates or updates a symlink to point to the new release.
-// Native Go implementation replaces `ln -sfn`.
+// Uses temp-link and rename for POSIX atomic replacement.
 func AtomicSymlink(target string, linkName string) error {
-	// If link exists, remove it first (required on Windows and some Unix systems for atomic replacement)
-	if _, err := os.Lstat(linkName); err == nil {
-		if err := os.Remove(linkName); err != nil {
-			return fmt.Errorf("failed to remove existing symlink: %v", err)
-		}
-	} else if !os.IsNotExist(err) {
-		return fmt.Errorf("failed to check existing symlink: %v", err)
+	tempLink := linkName + ".tmp"
+	os.Remove(tempLink)
+
+	if err := os.Symlink(target, tempLink); err != nil {
+		return fmt.Errorf("failed to create temp symlink: %v", err)
 	}
 
-	return os.Symlink(target, linkName)
+	// os.Rename is atomic on POSIX, replacing existing symlinks.
+	if err := os.Rename(tempLink, linkName); err != nil {
+		// Windows fallback if rename over existing directory symlink fails
+		if _, statErr := os.Lstat(linkName); statErr == nil {
+			os.Remove(linkName)
+		}
+		if fallbackErr := os.Rename(tempLink, linkName); fallbackErr != nil {
+			return fmt.Errorf("failed atomic swap: %v", fallbackErr)
+		}
+	}
+	return nil
 }
 
 // PruneReleases deletes oldest directories in a folder keeping only the most recent N.

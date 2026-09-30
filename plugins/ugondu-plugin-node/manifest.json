@@ -4,5 +4,8 @@
   "description": "[en] Node.js build and dependency resolution plugin for Ugondu.",
   "author": "Ujomor Systems Engineering Authority",
   "minEdition": "community",
-  "hooks": ["pre-sync"]
+  "hooks": [
+    "pre-sync"
+  ],
+  "signature": "Cpf0wbGx8tNx+xDJwU6pwAn199QmFaYTqTBYDj1mABzupkHZSWMlWe4PtRi1BEKiNX6EL+3yYpxRC/Zo4ygBAQ=="
 }

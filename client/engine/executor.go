@@ -2,13 +2,21 @@ package engine
 
 import (
 	"bytes"
+	"crypto/ed25519"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"ugondu/client/i18n"
 )
@@ -21,138 +29,294 @@ type DeploymentContext struct {
 	Token             string            `json:"token"`
 }
 
+type ExecutionEnvelope struct {
+	Version         string                 `json:"version"`
+	Issuer          string                 `json:"issuer"`
+	KeyId           string                 `json:"keyId"`
+	TransactionId   string                 `json:"transactionId"`
+	TenantId        string                 `json:"tenantId"`
+	ProjectId       string                 `json:"projectId"`
+	EnvironmentId   string                 `json:"environmentId"`
+	IssuedAt        int64                  `json:"issuedAt"`
+	ExpiresAt       int64                  `json:"expiresAt"`
+	Edition         string                 `json:"edition"`
+	PlanHash        string                 `json:"planHash"`
+	Capabilities    map[string]interface{} `json:"capabilities"`
+	PolicyHash      string                 `json:"policyHash"`
+	AgentMinVersion string                 `json:"agentMinVersion"`
+}
+
 type ExecutionRecipe struct {
-	TransactionId string                   `json:"transactionId"`
-	Edition       string                   `json:"edition"`
-	Strategy      string                   `json:"strategy"`
-	Steps         []map[string]interface{} `json:"steps"`
-	Signature     string                   `json:"signature"`
+	CanonicalEnvelope string `json:"canonicalEnvelope"`
+	CanonicalSteps    string `json:"canonicalSteps"`
+	Signature         string `json:"signature"`
 }
 
 // FetchExecutionRecipe submits context to the API and returns the signed recipe
-func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionRecipe, error) {
+func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnvelope, []map[string]interface{}, []byte, error) {
 	fmt.Println(i18n.T("req_recipe"))
 
 	payload, err := json.Marshal(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to serialize deployment context: %v", err)
+		return nil, nil, fmt.Errorf("failed to serialize deployment context: %v", err)
 	}
 
 	resp, err := http.Post(apiURL+"/deploy/resolve", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
-		return nil, fmt.Errorf("cannot reach Governance Server at %s: %v", apiURL, err)
+		return nil, nil, fmt.Errorf("cannot reach Governance Server at %s: %v", apiURL, err)
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("server rejected deployment. HTTP %d: %s", resp.StatusCode, string(body))
+		return nil, nil, fmt.Errorf("server rejected deployment. HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
 	var recipe ExecutionRecipe
 	if err := json.Unmarshal(body, &recipe); err != nil {
-		return nil, fmt.Errorf("failed to parse execution recipe: %v", err)
+		return nil, nil, fmt.Errorf("failed to parse execution recipe: %v", err)
 	}
 
-	return &recipe, nil
+	// Unmarshal just enough to get KeyId
+	var partialEnv struct {
+		KeyId string `json:"keyId"`
+	}
+	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &partialEnv); err != nil {
+		return nil, nil, fmt.Errorf("invalid envelope format")
+	}
+
+	// Fetch Keys
+	keysResp, err := http.Get(apiURL + "/keys")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch public keys: %v", err)
+	}
+	defer keysResp.Body.Close()
+	keysBody, _ := io.ReadAll(keysResp.Body)
+	var keysData struct {
+		Keys []struct {
+			Id        string `json:"id"`
+			PublicKey string `json:"publicKey"`
+		} `json:"keys"`
+	}
+	if err := json.Unmarshal(keysBody, &keysData); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse keys")
+	}
+
+	var pubKeyPem string
+	for _, k := range keysData.Keys {
+		if k.Id == partialEnv.KeyId {
+			pubKeyPem = k.PublicKey
+			break
+		}
+	}
+	if pubKeyPem == "" {
+		return nil, nil, fmt.Errorf("public key not found in registry")
+	}
+
+	// Verify Signature
+	if err := verifySignature(recipe.CanonicalEnvelope, recipe.Signature, pubKeyPem); err != nil {
+		return nil, nil, fmt.Errorf("signature verification failed: %v", err)
+	}
+
+	// Unmarshal Full Envelope
+	var env ExecutionEnvelope
+	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &env); err != nil {
+		return nil, nil, fmt.Errorf("invalid envelope format")
+	}
+
+	// Verify Expiry
+	if time.Now().UnixMilli() > env.ExpiresAt {
+		return nil, nil, fmt.Errorf("execution recipe has expired")
+	}
+
+	// Verify Tenant matches Token (in real system, decode token, for now trust env)
+	
+	// Verify Plan Hash
+	hash := sha256.Sum256([]byte(recipe.CanonicalSteps))
+	if hex.EncodeToString(hash[:]) != env.PlanHash {
+		return nil, nil, fmt.Errorf("plan hash mismatch (recipe tampered)")
+	}
+
+	// Unmarshal Steps
+	var steps []map[string]interface{}
+	if err := json.Unmarshal([]byte(recipe.CanonicalSteps), &steps); err != nil {
+		return nil, nil, nil, fmt.Errorf("invalid steps format")
+	}
+
+	return &env, steps, body, nil
+}
+
+func ParseRecipeLocally(body []byte, apiURL string) (*ExecutionEnvelope, []map[string]interface{}, error) {
+	var recipe ExecutionRecipe
+	if err := json.Unmarshal(body, &recipe); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse execution recipe: %v", err)
+	}
+
+	// Unmarshal just enough to get KeyId
+	var partialEnv struct {
+		KeyId string `json:"keyId"`
+	}
+	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &partialEnv); err != nil {
+		return nil, nil, fmt.Errorf("invalid envelope format")
+	}
+
+	// Fetch Keys
+	keysResp, err := http.Get(apiURL + "/keys")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch public keys: %v", err)
+	}
+	defer keysResp.Body.Close()
+	keysBody, _ := io.ReadAll(keysResp.Body)
+	var keysData struct {
+		Keys []struct {
+			Id        string `json:"id"`
+			PublicKey string `json:"publicKey"`
+		} `json:"keys"`
+	}
+	if err := json.Unmarshal(keysBody, &keysData); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse keys")
+	}
+
+	var pubKeyPem string
+	for _, k := range keysData.Keys {
+		if k.Id == partialEnv.KeyId {
+			pubKeyPem = k.PublicKey
+			break
+		}
+	}
+	if pubKeyPem == "" {
+		return nil, nil, fmt.Errorf("public key not found in registry")
+	}
+
+	// Verify Signature
+	if err := verifySignature(recipe.CanonicalEnvelope, recipe.Signature, pubKeyPem); err != nil {
+		return nil, nil, fmt.Errorf("signature verification failed: %v", err)
+	}
+
+	// Unmarshal Full Envelope
+	var env ExecutionEnvelope
+	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &env); err != nil {
+		return nil, nil, fmt.Errorf("invalid envelope format")
+	}
+
+	// Verify Plan Hash
+	hash := sha256.Sum256([]byte(recipe.CanonicalSteps))
+	if hex.EncodeToString(hash[:]) != env.PlanHash {
+		return nil, nil, fmt.Errorf("plan hash mismatch (recipe tampered)")
+	}
+
+	// Unmarshal Steps
+	var steps []map[string]interface{}
+	if err := json.Unmarshal([]byte(recipe.CanonicalSteps), &steps); err != nil {
+		return nil, nil, fmt.Errorf("invalid steps format")
+	}
+
+	return &env, steps, nil
+}
+
+func verifySignature(envelope string, sigBase64 string, pubKeyPem string) error {
+	block, _ := pem.Decode([]byte(pubKeyPem))
+	if block == nil {
+		return fmt.Errorf("failed to parse PEM block")
+	}
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return err
+	}
+	edPubKey, ok := pub.(ed25519.PublicKey)
+	if !ok {
+		return fmt.Errorf("not an ed25519 key")
+	}
+	sig, err := base64.StdEncoding.DecodeString(sigBase64)
+	if err != nil {
+		return err
+	}
+	if !ed25519.Verify(edPubKey, []byte(envelope), sig) {
+		return fmt.Errorf("invalid signature")
+	}
+	return nil
 }
 
 // ExecuteRecipe iterates through the steps and runs them natively
-func ExecuteRecipe(recipe *ExecutionRecipe) ([]string, error) {
-	homeDir, _ := os.UserHomeDir()
+func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]string, error) {
 	var logs []string
 
-	for i, step := range recipe.Steps {
+	// Load or initialize state machine
+	state, err := LoadState(env.TransactionId)
+	if err != nil {
+		state = InitState(env.TransactionId)
+	}
+
+	if state.Status == "SUCCESS" {
+		return logs, fmt.Errorf("FATAL: Recipe %s has already been successfully executed", env.TransactionId)
+	}
+
+	state.Status = "RUNNING"
+	SaveState(state)
+
+	for i, step := range steps {
 		action, _ := step["action"].(string)
 		payload, _ := step["payload"].(map[string]interface{})
 		
-		fmt.Printf("%s\n", i18n.T("step_info", i+1, len(recipe.Steps), action))
+		fmt.Printf("%s\n", i18n.T("step_info", i+1, len(steps), action))
 
-		switch action {
-		case "FETCH_REPOSITORY":
-			url, _ := payload["url"].(string)
-			branch, _ := payload["branch"].(string)
-			fmt.Printf("     -> %s\n", i18n.T("sync_git", url, branch))
-			
-			// Git is the only required external binary for fetching source
-			cmd := exec.Command("git", "pull", url, branch)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				return logs, fmt.Errorf("git pull failed: %v", err)
+		// Check idempotency (skip if already success)
+		var stepState *StepState
+		for _, s := range state.Steps {
+			if s.Index == i {
+				stepState = s
+				break
 			}
-			logs = append(logs, fmt.Sprintf("Fetched latest from %s @ %s", url, branch))
+		}
 
-		case "SYNC_ENVIRONMENT":
-			strategy, _ := payload["strategy"].(string)
-			fmt.Printf("     -> %s\n", i18n.T("sync_files", strategy))
+		if stepState != nil && stepState.Status == "SUCCESS" {
+			fmt.Printf("     -> Skipping already completed step\n")
+			logs = append(logs, fmt.Sprintf("Skipped step %d (%s) due to idempotency", i, action))
+			continue
+		}
 
-			if strategy == "quota-sync" {
-				dest := filepath.Join(homeDir, "public_html")
-				if err := CopyDir(".", dest, true); err != nil {
-					return logs, fmt.Errorf("quota-sync copy failed: %v", err)
-				}
-				logs = append(logs, "Copied files using quota-sync (Native Go)")
-			} else if strategy == "atomic" {
-				releaseDir := filepath.Join(homeDir, "releases", recipe.TransactionId)
-				if err := CopyDir(".", releaseDir, true); err != nil {
-					return logs, fmt.Errorf("failed to copy to release dir: %v", err)
-				}
-				if err := AtomicSymlink(releaseDir, filepath.Join(homeDir, "public_html")); err != nil {
-					return logs, fmt.Errorf("failed to create atomic symlink: %v", err)
-				}
-				fmt.Printf("     -> %s\n", i18n.T("atomic_release", releaseDir))
-				logs = append(logs, fmt.Sprintf("Created atomic release at %s", releaseDir))
+		if stepState == nil {
+			stepState = &StepState{
+				Index:     i,
+				Action:    action,
+				Status:    "PENDING",
+				StartedAt: time.Now().Unix(),
 			}
+			state.Steps = append(state.Steps, stepState)
+		}
 
-		case "PRUNE_RELEASES":
-			retentionF, _ := payload["retention"].(float64)
-			retention := int(retentionF)
-			releasesPath := filepath.Join(homeDir, "releases")
-			fmt.Printf("     -> %s\n", i18n.T("pruning", retention))
-			
-			if err := PruneReleases(releasesPath, retention); err != nil {
-				fmt.Printf("     -> Warning: prune failed: %v\n", err)
-			}
-			logs = append(logs, fmt.Sprintf("Pruned releases to max %d", retention))
+		stepState.Status = "RUNNING"
+		SaveState(state)
 
-		case "SHELL_EXEC":
-			// Sandboxed plugins inject shell_exec commands (cross-platform compatible ideally)
-			command, _ := payload["command"].(string)
-			description, _ := payload["description"].(string)
-			if description != "" {
-				fmt.Printf("     -> [Plugin] %s\n", description)
-			}
-			
-			// Simple shell execution cross-platform wrapper
-			var cmd *exec.Cmd
-			if os.PathSeparator == '\\' {
-				cmd = exec.Command("cmd", "/C", command)
-			} else {
-				cmd = exec.Command("sh", "-c", command)
-			}
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			if err := cmd.Run(); err != nil {
-				return logs, fmt.Errorf("plugin execution failed: %v", err)
-			}
-			logs = append(logs, fmt.Sprintf("Executed plugin step: %s", description))
-
-		case "UPSELL_NOTICE":
-			msg, _ := payload["message"].(string)
-			fmt.Println("     -> ───────────────")
-			fmt.Printf("     -> %s\n", i18n.T("upsell_notice", msg))
-			fmt.Println("     -> ───────────────")
-
-		default:
+		handler, exists := ActionRegistry[action]
+		if !exists {
+			stepState.Status = "FAILED"
+			SaveState(state)
 			return logs, fmt.Errorf("unknown action in recipe: %s", action)
 		}
+
+		stepLogs, err := handler.Execute(env, payload)
+		logs = append(logs, stepLogs...)
+		stepState.Logs = append(stepState.Logs, stepLogs...)
+
+		if err != nil {
+			stepState.Status = "FAILED"
+			stepState.CompletedAt = time.Now().Unix()
+			state.Status = "FAILED"
+			SaveState(state)
+			return logs, err
+		}
+
+		stepState.Status = "SUCCESS"
+		stepState.CompletedAt = time.Now().Unix()
+		SaveState(state)
 	}
 
+	state.Status = "SUCCESS"
+	SaveState(state)
 	return logs, nil
 }
 
-// ReportTelemetry sends execution outcome back to the audit ledger
 func ReportTelemetry(apiURL, transactionId, status string, logs []string) {
 	payload := map[string]interface{}{
 		"transactionId": transactionId,

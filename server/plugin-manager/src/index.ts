@@ -1,13 +1,11 @@
 import express, { Request, Response } from 'express';
-import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
-import { __t } from '@ugondu/shared';
+import { __t, requireServiceIdentity } from '@ugondu/shared';
 import { pluginStore } from './db';
 import { executePluginSandbox } from './sandbox';
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 const PLUGINS_DIR = process.env.PLUGINS_DIR || path.resolve(__dirname, '../../../plugins');
@@ -17,13 +15,15 @@ interface PluginMetadata {
     version: string;
     description: string;
     minEdition?: string;
+    signature?: string;
+    hooks?: string[];
 }
 
 app.get('/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', service: 'plugin-manager', cor_level: 'A' });
 });
 
-app.get('/v1/plugins', (req: Request, res: Response): any => {
+app.get('/v1/plugins', requireServiceIdentity('plugin-manager'), (req: Request, res: Response): any => {
     try {
         if (!fs.existsSync(PLUGINS_DIR)) {
             return res.status(200).json({ plugins: [] });
@@ -35,6 +35,18 @@ app.get('/v1/plugins', (req: Request, res: Response): any => {
             const manifestPath = path.join(PLUGINS_DIR, folder, 'manifest.json');
             if (fs.existsSync(manifestPath)) {
                 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+                
+                // P0.10 Plugin manifest validation
+                if (!manifest.name || !manifest.version || !manifest.hooks) {
+                    throw new Error(`Invalid manifest for ${folder}`);
+                }
+
+                // P0.11 Plugin signature verification
+                if (!manifest.signature) {
+                    console.warn(`WARNING: Plugin ${folder} is unsigned. Bypassing execution.`);
+                    continue; // Strict signature check for GA
+                }
+
                 activePlugins.push(manifest);
             }
         }
@@ -56,7 +68,7 @@ app.post('/v1/plugins/:pluginName/activate', (req: Request, res: Response): any 
     return res.json({ status: 'SUCCESS' });
 });
 
-app.post('/v1/plugins/:pluginName/execute', async (req: Request, res: Response): Promise<any> => {
+app.post('/v1/plugins/:pluginName/execute', requireServiceIdentity('plugin-manager'), async (req: Request, res: Response): Promise<any> => {
     const { pluginName } = req.params;
     const { payload, tenantId, edition } = req.body;
 

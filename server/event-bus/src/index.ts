@@ -1,11 +1,9 @@
 import express, { Request, Response } from 'express';
-import cors from 'cors';
 import axios from 'axios';
-import { __t } from '@ugondu/shared';
+import { __t, NetworkDestinationPolicy } from '@ugondu/shared';
 import { eventStore } from './db';
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 app.get('/health', (req: Request, res: Response) => {
@@ -27,6 +25,10 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
 
     // Real webhook dispatch
     for (const webhookUrl of subs) {
+        if (!NetworkDestinationPolicy.isAllowed(webhookUrl)) {
+            console.error(__t('delivery_failed', webhookUrl, 'SSRF policy rejection'));
+            continue;
+        }
         try {
             await axios.post(webhookUrl, { event, payload }, { timeout: 5000 });
             console.log(__t('delivered', webhookUrl));

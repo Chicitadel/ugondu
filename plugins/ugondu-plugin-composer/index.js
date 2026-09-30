@@ -23,9 +23,10 @@ const optimizeFlag = payload.optimize ? ' --optimize-autoloader' : '';
 
 const steps = [
     {
-        action: 'SHELL_EXEC',
+        action: 'COMPOSER_INSTALL',
         payload: {
-            command: `composer install${noDevFlag}${optimizeFlag}`,
+            nodev: payload.nodev,
+            optimize: payload.optimize,
             description: '[en] Install PHP Composer dependencies'
         }
     }

@@ -4,7 +4,9 @@
   "description": "[en] PHP-FPM and Opcache reset plugin for cPanel and DirectAdmin.",
   "author": "Ujomor Systems Engineering Authority",
   "minEdition": "community",
-  "hooks": ["post-sync"],
+  "hooks": [
+    "post-sync"
+  ],
   "options": {
     "reload_fpm": {
       "type": "boolean",
@@ -14,5 +16,6 @@
       "type": "boolean",
       "default": true
     }
-  }
+  },
+  "signature": "uUDQEB4Hu6FLBMfhWLs/txtcJF+3oUEt8+fjAO7b7tk6KnLjoUriYSBy2V56IYk/PoH/3GYSSEUo061U9707AA=="
 }

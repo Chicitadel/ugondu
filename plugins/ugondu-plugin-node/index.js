@@ -57,16 +57,18 @@ const buildCmd = (() => {
 // [en] Emit injected steps back to the Plugin Manager sandbox executor
 const steps = [
     {
-        action: 'SHELL_EXEC',
+        action: 'NPM_INSTALL',
         payload: {
-            command: installCmd,
+            packageManager: packageManager,
+            installFlags: installFlags,
             description: '[en] Install Node.js dependencies via ' + packageManager
         }
     },
     {
-        action: 'SHELL_EXEC',
+        action: 'NPM_BUILD',
         payload: {
-            command: buildCmd,
+            packageManager: packageManager,
+            buildCommand: buildCommand,
             description: '[en] Build Node.js application artifacts'
         }
     }

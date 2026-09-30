@@ -4,9 +4,12 @@
   "description": "[en] PHP Composer dependency resolution and optimization plugin for Ugondu.",
   "author": "Ujomor Systems Engineering Authority",
   "minEdition": "community",
-  "hooks": ["pre-sync"],
+  "hooks": [
+    "pre-sync"
+  ],
   "options": {
     "nodev": false,
     "optimize": true
-  }
+  },
+  "signature": "hxa/Lg5l6t5pT87SHb3+qyWdbvVFmkCjLIDQ9McDfgjdSzYPlE5llY/kwJPAS3IvAj5jT3doBeqlbtY0rSJ0DA=="
 }

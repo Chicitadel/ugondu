@@ -1,11 +1,9 @@
 import express, { Request, Response } from 'express';
-import cors from 'cors';
 import axios from 'axios';
-import { __t } from '@ugondu/shared';
+import { __t, requireServiceIdentity } from '@ugondu/shared';
 import { tokenStore } from './db';
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 const IDENTITY_AUTHORITY_URL = process.env.IDENTITY_AUTHORITY_URL || 'https://identity.airroofers.eu/api/v1';
@@ -21,12 +19,12 @@ app.get('/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', service: 'billing-gateway', cor_level: 'A' });
 });
 
-// For demonstration of the fully implemented persistent architecture, we pre-seed some valid tokens.
-// In reality, tokens are inserted during customer checkout workflows via webhooks.
-tokenStore.registerToken('ugp_demo123', 'tenant_prof_99', EDITIONS.PROFESSIONAL);
-tokenStore.registerToken('uge_corp456', 'tenant_ent_11', EDITIONS.ENTERPRISE);
+if (process.env.NODE_ENV === 'test') {
+    tokenStore.registerToken('ugp_demo123', 'tenant_prof_99', EDITIONS.PROFESSIONAL);
+    tokenStore.registerToken('uge_corp456', 'tenant_ent_11', EDITIONS.ENTERPRISE);
+}
 
-app.post('/v1/authorize', async (req: Request, res: Response): Promise<any> => {
+app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req: Request, res: Response): Promise<any> => {
     const { token, repositoryUrl } = req.body;
     
     if (!token) {
