@@ -31,45 +31,17 @@ const payload = (() => {
 })();
 
 const packageManager = payload.packageManager || 'npm';
-const buildCommand = payload.buildCommand || 'build';
-const installFlags = payload.installFlags || '--frozen-lockfile';
+const lockfile = payload.lockfile || 'package-lock.json';
 
-// [en] Resolve the correct install command per package manager
-const installCmd = (() => {
-    switch (packageManager) {
-        case 'yarn': return `yarn install ${installFlags}`;
-        case 'pnpm': return `pnpm install ${installFlags}`;
-        case 'bun': return `bun install`;
-        default: return `npm ci`;
-    }
-})();
-
-// [en] Resolve the correct build command per package manager
-const buildCmd = (() => {
-    switch (packageManager) {
-        case 'yarn': return `yarn run ${buildCommand}`;
-        case 'pnpm': return `pnpm run ${buildCommand}`;
-        case 'bun': return `bun run ${buildCommand}`;
-        default: return `npm run ${buildCommand}`;
-    }
-})();
-
-// [en] Emit injected steps back to the Plugin Manager sandbox executor
 const steps = [
     {
-        action: 'NPM_INSTALL',
+        action: 'NODE_INSTALL',
         payload: {
-            packageManager: packageManager,
-            installFlags: installFlags,
-            description: '[en] Install Node.js dependencies via ' + packageManager
-        }
-    },
-    {
-        action: 'NPM_BUILD',
-        payload: {
-            packageManager: packageManager,
-            buildCommand: buildCommand,
-            description: '[en] Build Node.js application artifacts'
+            packageManager,
+            lockfile,
+            workingDirectory: payload.workingDirectory || '.',
+            production: payload.production === true,
+            timeoutMs: payload.timeoutMs || 120000
         }
     }
 ];

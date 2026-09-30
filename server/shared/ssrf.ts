@@ -176,6 +176,13 @@ export class NetworkDestinationPolicy {
     }
 }
 
+export function validateDestination(targetUrl: string): boolean {
+    if (!NetworkDestinationPolicy.isAllowed(targetUrl)) {
+        throw new Error('SSRF_DESTINATION_PROHIBITED');
+    }
+    return true;
+}
+
 export async function safeFetch(url: string, options: any = {}): Promise<any> {
     const isAllowed = await NetworkDestinationPolicy.isAllowedAsync(url);
     if (!isAllowed) throw new Error(__t('error_ssrf_detected'));

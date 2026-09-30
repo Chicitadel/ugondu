@@ -130,7 +130,12 @@ async function runTests() {
             branch: 'main',
             fileMap: {},
             targetEnvironment: 'cpanel',
-            token: 'community_token_123'
+            token: 'community_token_123',
+            projectId: 'proj_default',
+            workspaceId: 'ws_default',
+            targetId: 'tgt_cpanel_01',
+            agentId: 'agent_node_01',
+            agentVersion: '2.0.0'
         });
         // [en] May be 200 or 402 depending on billing gateway availability
         assert.ok([200, 402].includes(r.status), `[en] Expected 200 or 402, got ${r.status}`);

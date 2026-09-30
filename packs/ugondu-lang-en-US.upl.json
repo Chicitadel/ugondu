@@ -12,7 +12,7 @@
   "fallbackLocale": "en-US",
   "direction": "ltr",
   "artifactDigest": "sha256:c36f981d1d99c77c09bcf68fec08b5ecbf2db6461f90e8e8761c6ccb5164a3a9",
-  "signature": "hgjX58vWmfwFQG/GauKV1tMfqQvztjV8Dwv+Gwt9Pjamnpq5Qww6iA2bVp7nYZhPWO5PPs1Jfj92p4AOhxlNBQ==",
+  "signature": "M32jURUhjYaXTeG3zc8VIwt0xUgYvGilbEKXKmzNeK4OT8fpAY5fyT0KxcyDilRDmumB/DKDNMyQkgL5UM74DQ==",
   "tokens": {
     "aborting": "Operation aborted by user.",
     "atomic_denied": "Notice: Atomic strategy requested but denied by %s license. Falling back to quota-sync.",
