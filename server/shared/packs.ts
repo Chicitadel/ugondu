@@ -92,9 +92,9 @@ export function computePackManifestPayload(pack: Partial<LanguagePack>): string 
 
 export function signLanguagePackManifest(pack: Partial<LanguagePack>, privateKeyPem?: string): string {
     const payload = computePackManifestPayload(pack);
-    const privKey = privateKeyPem 
-        ? crypto.createPrivateKey(privateKeyPem)
-        : globalTrustRegistry.getPrivateKeyObject('key_langpack_v1');
+    const pem = privateKeyPem || process.env.UGONDU_LANGPACK_PRIVATE_KEY;
+    if (!pem) throw new Error('UGONDU_LANGPACK_PRIVATE_KEY is required for language-pack signing');
+    const privKey = crypto.createPrivateKey(pem);
     return crypto.sign(null, Buffer.from(payload, 'utf8'), privKey).toString('base64');
 }
 
