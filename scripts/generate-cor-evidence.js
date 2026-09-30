@@ -48,11 +48,8 @@ function runGates(skipEvidence = false) {
 }
 
 function loadEvidenceKey() {
-  const pem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY ||
-    (fs.existsSync(path.join(ROOT, 'server/shared/keys/evidence_private.pem'))
-      ? fs.readFileSync(path.join(ROOT, 'server/shared/keys/evidence_private.pem'), 'utf8')
-      : null);
-  if (!pem) throw new Error('UGONDU_EVIDENCE_PRIVATE_KEY or server/shared/keys/evidence_private.pem is required; unsigned evidence is forbidden');
+  const pem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY || null;
+  if (!pem) throw new Error('UGONDU_EVIDENCE_PRIVATE_KEY is required; repository signing keys are forbidden');
   return crypto.createPrivateKey(pem);
 }
 
