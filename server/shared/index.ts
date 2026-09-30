@@ -44,3 +44,5 @@ export * from './enterprise/rbac';
 export * from './enterprise/policy';
 export * from './sovereign/lease';
 export * from './sovereign/hsm';
+export * from './safepath';
+

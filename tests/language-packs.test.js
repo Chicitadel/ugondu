@@ -134,10 +134,12 @@ async function runLanguagePackTests() {
         incompletePack.artifactDigest = computePackArtifactDigest(incompletePack.tokens);
 
         // Sign with authority key so signature check passes, allowing completeness check to execute
-        const privKey = fs.readFileSync(path.join(__dirname, '../server/shared/keys/langpack_private.pem'), 'utf8');
+        const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+        const privKey = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+        const pubKey = publicKey.export({ type: 'spki', format: 'pem' }).toString();
         incompletePack.signature = signLanguagePackManifest(incompletePack, privKey);
 
-        const result = validateLanguagePackIntegrity(incompletePack);
+        const result = validateLanguagePackIntegrity(incompletePack, pubKey);
         assert.strictEqual(result.valid, false, 'Pack missing security tokens must be rejected');
         assert.ok(result.error.includes('Critical security token missing'), `Expected critical token error, got: ${result.error}`);
         reportPass('100% completeness strictly enforced on all security and destructive action tokens');
@@ -275,9 +277,11 @@ async function runLanguagePackTests() {
             'Private signing key must NEVER be placed in client source directory'
         );
 
-        // 3. Verify server private key exists strictly in secure server authority vault
-        const serverKeyPath = path.join(__dirname, '../server/shared/keys/langpack_private.pem');
-        assert.ok(fs.existsSync(serverKeyPath), 'Server authority private key must exist in server/shared/keys/');
+        // 3. Repository must contain no language-pack private signing authority.
+        assert.ok(
+            !fs.existsSync(path.join(__dirname, '../server/shared/keys/langpack_private.pem')),
+            'Language-pack private signing key must never be stored in the repository'
+        );
 
         reportPass('Client packs strictly isolated: zero server IP, zero private keys, zero proprietary decision trees leaked');
     } catch (e) {

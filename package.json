@@ -23,7 +23,8 @@
     "lint": "npm run lint --workspaces --if-present",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "verify:release-integrity": "node scripts/verify-release-integrity.js"
   },
   "engines": {
     "node": ">=20.0.0",

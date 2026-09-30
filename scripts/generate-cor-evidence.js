@@ -48,11 +48,8 @@ function runGates(skipEvidence = false) {
 }
 
 function loadEvidenceKey() {
-  const pem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY ||
-    (fs.existsSync(path.join(ROOT, 'server/shared/keys/evidence_private.pem'))
-      ? fs.readFileSync(path.join(ROOT, 'server/shared/keys/evidence_private.pem'), 'utf8')
-      : null);
-  if (!pem) throw new Error('UGONDU_EVIDENCE_PRIVATE_KEY or server/shared/keys/evidence_private.pem is required; unsigned evidence is forbidden');
+  const pem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY || null;
+  if (!pem) throw new Error('UGONDU_EVIDENCE_PRIVATE_KEY is required; repository signing keys are forbidden');
   return crypto.createPrivateKey(pem);
 }
 
@@ -72,7 +69,7 @@ function generate() {
     gitTreeHash: git(['rev-parse', 'HEAD^{tree}']),
     gitCommitHash: git(['rev-parse', 'HEAD']),
     protocolVersion: '1.0.0',
-    trustRegistryVersion: 'v1',
+    trustRegistryVersion: 'v2',
     testResults,
     codeGovernance,
     artifactDigests: {}

@@ -76,12 +76,31 @@ export class TrustRegistry {
         }
         if (!keysDir) return;
 
+        // Formally revoked v1 key authorities (compromised in historical commits)
+        const revokedKeys: Array<{ keyId: string; purpose: KeyPurpose; publicKey: string }> = [
+            { keyId: 'key_service_v1', purpose: 'service-identity', publicKey: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEArLNZN2cPQpTCYMgpl9SVSjgeyG2x92Q5xD1xHxaLZ5U=\n-----END PUBLIC KEY-----' },
+            { keyId: 'key_recipe_v1', purpose: 'recipe', publicKey: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAW0l7OAZeUQZhMnk3etjBWeYiEJK0O5LCFWKiWhRBvQM=\n-----END PUBLIC KEY-----' },
+            { keyId: 'key_langpack_v1', purpose: 'language-pack', publicKey: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAUz8IM99c7+M2Bwg9bWR9BSVRI/J6L5LGu3kZ2q9701M=\n-----END PUBLIC KEY-----' },
+            { keyId: 'key_evidence_v1', purpose: 'evidence', publicKey: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAKxR2E/t1h9k8+eR1n8xM7tZfXhX6E7e0p5r7e9u8y1I=\n-----END PUBLIC KEY-----' },
+            { keyId: 'key_plugin_v1', purpose: 'plugin', publicKey: '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAS7VlIOyBTY0I+e7qHNPd7cuxF086dUGMkRExe1RsqG4=\n-----END PUBLIC KEY-----' }
+        ];
+
+        for (const k of revokedKeys) {
+            this.keys.set(k.keyId, {
+                keyId: k.keyId,
+                algorithm: 'ed25519',
+                status: 'REVOKED',
+                purpose: k.purpose,
+                publicKey: k.publicKey
+            });
+        }
+
         const mappings: Array<{ prefix: string; keyId: string; purpose: KeyPurpose }> = [
-            { prefix: 'service_identity', keyId: 'key_service_v1', purpose: 'service-identity' },
-            { prefix: 'recipe', keyId: 'key_recipe_v1', purpose: 'recipe' },
-            { prefix: 'langpack', keyId: 'key_langpack_v1', purpose: 'language-pack' },
-            { prefix: 'evidence', keyId: 'key_evidence_v1', purpose: 'evidence' },
-            { prefix: 'plugin', keyId: 'key_plugin_v1', purpose: 'plugin' }
+            { prefix: 'service_identity', keyId: 'key_service_v2', purpose: 'service-identity' },
+            { prefix: 'recipe', keyId: 'key_recipe_v2', purpose: 'recipe' },
+            { prefix: 'langpack', keyId: 'key_langpack_v2', purpose: 'language-pack' },
+            { prefix: 'evidence', keyId: 'key_evidence_v2', purpose: 'evidence' },
+            { prefix: 'plugin', keyId: 'key_plugin_v2', purpose: 'plugin' }
         ];
 
         for (const m of mappings) {
@@ -99,6 +118,17 @@ export class TrustRegistry {
                     privateKey: privKey
                 });
             }
+        }
+
+        if (process.env.UGONDU_SERVICE_TEST_PUBKEY) {
+            const testKeyId = process.env.UGONDU_SERVICE_TEST_KEY_ID || 'key_service_test_v1';
+            this.keys.set(testKeyId, {
+                keyId: testKeyId,
+                algorithm: 'ed25519',
+                status: 'ACTIVE',
+                purpose: 'service-identity',
+                publicKey: process.env.UGONDU_SERVICE_TEST_PUBKEY
+            });
         }
     }
 

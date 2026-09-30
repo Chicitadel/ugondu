@@ -1,0 +1,59 @@
+name: Ugondu COR Certification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certification:
+    name: Clean-checkout COR certification
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: '20'
+      UGONDU_EVIDENCE_PRIVATE_KEY: ${{ secrets.UGONDU_EVIDENCE_PRIVATE_KEY }}
+
+    steps:
+      - name: Checkout exact release candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build all workspaces
+        run: npm run build
+
+      - name: Verify release integrity
+        run: npm run verify:release-integrity
+
+      - name: Require external evidence signing authority
+        shell: bash
+        run: |
+          test -n "${UGONDU_EVIDENCE_PRIVATE_KEY}" || {
+            echo "UGONDU_EVIDENCE_PRIVATE_KEY is required for certification."
+            exit 1
+          }
+
+      - name: Generate fresh signed COR evidence
+        run: node scripts/generate-cor-evidence.js
+
+      - name: Verify signed evidence
+        run: node tests/evidence-verification.test.js
+
+      - name: Upload certification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ugondu-cor-certification-evidence
+          path: |
+            cor-evidence-bundle.json
+            cor-test-results.json
+          retention-days: 30

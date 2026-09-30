@@ -35,6 +35,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { __t } from './i18n';
 import { globalTrustRegistry } from './trust_registry';
+export { globalTrustRegistry } from './trust_registry';
 
 export const ALLOWED_SERVICE_ISSUERS = new Set<string>([
     'engine-core',
@@ -58,7 +59,12 @@ export interface ServiceTokenPayload {
     tokenVersion: string;
 }
 
-export class DurableTokenReplayStore {
+export interface IReplayAuthority {
+    atomicRecordIfUnseen(compositeKey: string, exp: number): boolean;
+    isReplayed(compositeKey: string): boolean;
+}
+
+export class DurableTokenReplayStore implements IReplayAuthority {
     private ledgerPath: string;
     private entries: Map<string, number> = new Map();
 
@@ -73,9 +79,9 @@ export class DurableTokenReplayStore {
                 const data = JSON.parse(fs.readFileSync(this.ledgerPath, 'utf8'));
                 const now = Math.floor(Date.now() / 1000);
                 if (data && typeof data === 'object') {
-                    for (const [jti, exp] of Object.entries(data)) {
+                    for (const [key, exp] of Object.entries(data)) {
                         if (typeof exp === 'number' && exp > now) {
-                            this.entries.set(jti, exp);
+                            this.entries.set(key, exp);
                         }
                     }
                 }
@@ -86,41 +92,55 @@ export class DurableTokenReplayStore {
     }
 
     private persistLedger(): void {
+        const dir = path.dirname(this.ledgerPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        const obj: Record<string, number> = {};
+        const now = Math.floor(Date.now() / 1000);
+        for (const [key, exp] of this.entries.entries()) {
+            if (exp > now) {
+                obj[key] = exp;
+            }
+        }
+        const tmpPath = `${this.ledgerPath}.tmp.${randomBytes(4).toString('hex')}`;
+        fs.writeFileSync(tmpPath, JSON.stringify(obj), { encoding: 'utf8', mode: 0o600 });
+        fs.renameSync(tmpPath, this.ledgerPath);
+    }
+
+    public isReplayed(compositeKey: string): boolean {
+        const now = Math.floor(Date.now() / 1000);
+        const exp = this.entries.get(compositeKey);
+        if (exp !== undefined) {
+            if (exp > now) {
+                return true;
+            }
+            this.entries.delete(compositeKey);
+        }
+        return false;
+    }
+
+    public recordToken(compositeKey: string, exp: number): void {
+        this.entries.set(compositeKey, exp);
         try {
-            const dir = path.dirname(this.ledgerPath);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            const obj: Record<string, number> = {};
-            const now = Math.floor(Date.now() / 1000);
-            for (const [jti, exp] of this.entries.entries()) {
-                if (exp > now) {
-                    obj[jti] = exp;
-                }
-            }
-            const tmpPath = `${this.ledgerPath}.tmp.${randomBytes(4).toString('hex')}`;
-            fs.writeFileSync(tmpPath, JSON.stringify(obj), { encoding: 'utf8', mode: 0o600 });
-            fs.renameSync(tmpPath, this.ledgerPath);
+            this.persistLedger();
         } catch {
             // Fail closed
         }
     }
 
-    public isReplayed(jti: string): boolean {
-        const now = Math.floor(Date.now() / 1000);
-        const exp = this.entries.get(jti);
-        if (exp !== undefined) {
-            if (exp > now) {
-                return true;
-            }
-            this.entries.delete(jti);
+    public atomicRecordIfUnseen(compositeKey: string, exp: number): boolean {
+        if (this.isReplayed(compositeKey)) {
+            return false;
         }
-        return false;
-    }
-
-    public recordToken(jti: string, exp: number): void {
-        this.entries.set(jti, exp);
-        this.persistLedger();
+        this.entries.set(compositeKey, exp);
+        try {
+            this.persistLedger();
+            return true;
+        } catch {
+            this.entries.delete(compositeKey);
+            return false;
+        }
     }
 
     public reloadFromDisk(): void {
@@ -139,14 +159,24 @@ export class DurableTokenReplayStore {
 }
 
 export const durableTokenReplayStore = new DurableTokenReplayStore();
+let activeReplayAuthority: IReplayAuthority = durableTokenReplayStore;
 
-export function signServiceIdentity(issuer: string, audience: string, scope: string = 'execute'): string {
+export function setReplayAuthority(authority: IReplayAuthority): void {
+    activeReplayAuthority = authority;
+}
+
+export function getReplayAuthority(): IReplayAuthority {
+    return activeReplayAuthority;
+}
+
+export function signServiceIdentity(issuer: string, audience: string, scope: string = 'execute', privateKeyPem?: string, signingKeyId?: string): string {
     const activeKey = globalTrustRegistry.getActiveKeyByPurpose('service-identity');
     if (!activeKey) {
         throw new Error(__t('error_service_key_missing'));
     }
 
-    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: activeKey.keyId })).toString('base64url');
+    const keyId = signingKeyId || activeKey.keyId;
+    const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: keyId })).toString('base64url');
     const now = Math.floor(Date.now() / 1000);
     const jti = randomBytes(16).toString('hex');
     
@@ -159,12 +189,14 @@ export function signServiceIdentity(issuer: string, audience: string, scope: str
         nbf: now,
         exp: now + 60, // 60 seconds validity
         jti: jti,
-        keyId: activeKey.keyId,
+        keyId: keyId,
         tokenVersion: '1.0'
     };
     
     const payload = Buffer.from(JSON.stringify(payloadObj)).toString('base64url');
-    const privateKeyObj = globalTrustRegistry.getPrivateKeyObject(activeKey.keyId);
+    const pem = privateKeyPem || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY;
+    if (!pem) throw new Error('UGONDU_SERVICE_IDENTITY_PRIVATE_KEY is required for service-token signing');
+    const privateKeyObj = require('crypto').createPrivateKey(pem);
     
     const signature = sign(null, Buffer.from(`${header}.${payload}`), privateKeyObj).toString('base64url');
     return `${header}.${payload}.${signature}`;
@@ -191,7 +223,11 @@ export function verifyServiceIdentityToken(
             return { valid: false, error: 'MISSING_KEY_ID', status: 401 };
         }
 
-        globalTrustRegistry.validateKeyStatus(keyId);
+        try {
+            globalTrustRegistry.validateKeyStatus(keyId);
+        } catch (err: any) {
+            return { valid: false, error: err.message === 'ERR_KEY_REVOKED' || err.message?.includes('revoked') ? 'KEY_REVOKED' : 'INVALID_KEY_STATUS', status: 401 };
+        }
         globalTrustRegistry.verifyPurpose(keyId, 'service-identity');
 
         const publicKeyObj = globalTrustRegistry.getPublicKeyObject(keyId);
@@ -207,6 +243,16 @@ export function verifyServiceIdentityToken(
         }
 
         const decodedPayload: ServiceTokenPayload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+
+        // Header / Payload KeyId Consistency (OWASP ASVS 5.0 V9.1)
+        if (header.kid !== decodedPayload.keyId) {
+            return { valid: false, error: 'KEY_ID_MISMATCH', status: 401 };
+        }
+
+        // Subject / Issuer Binding Enforcement (OWASP ASVS 5.0 V9.2)
+        if (decodedPayload.iss !== decodedPayload.sub) {
+            return { valid: false, error: 'SUBJECT_ISSUER_MISMATCH', status: 401 };
+        }
 
         // Issuer Allowlist Enforcement (COR-08 / OWASP ASVS V9.2)
         if (!ALLOWED_SERVICE_ISSUERS.has(decodedPayload.iss)) {
@@ -230,12 +276,13 @@ export function verifyServiceIdentityToken(
             return { valid: false, error: 'TOKEN_EXPIRED', status: 401 };
         }
 
-        // Durable Replay Authority Check (COR-07 / OWASP ASVS V9.1)
-        if (durableTokenReplayStore.isReplayed(decodedPayload.jti)) {
+        // Composite Replay Authority Check & Atomic Persistence (COR-07 / OWASP ASVS V9.1)
+        const compositeKey = `${decodedPayload.iss}:${decodedPayload.keyId}:${decodedPayload.aud}:${decodedPayload.jti}`;
+        const recorded = activeReplayAuthority.atomicRecordIfUnseen(compositeKey, decodedPayload.exp);
+        if (!recorded) {
             return { valid: false, error: 'TOKEN_REPLAYED', status: 401 };
         }
 
-        durableTokenReplayStore.recordToken(decodedPayload.jti, decodedPayload.exp);
         return { valid: true, payload: decodedPayload };
     } catch {
         return { valid: false, error: 'MALFORMED_SERVICE_TOKEN', status: 401 };

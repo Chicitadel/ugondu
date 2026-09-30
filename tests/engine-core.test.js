@@ -79,6 +79,26 @@ let passed = 0;
 let failed = 0;
 let serverProcess = null;
 
+if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY) {
+    const fs = require('fs');
+    const path = require('path');
+    const envPath = path.resolve(__dirname, '../.env');
+    if (fs.existsSync(envPath)) {
+        const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+        for (const line of lines) {
+            const m = line.match(/^([A-Z0-9_]+)="?(.*?)"?$/);
+            if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/\\n/g, '\n');
+        }
+    }
+    if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY) {
+        const { generateKeyPairSync } = require('crypto');
+        const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+        process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+        process.env.UGONDU_SERVICE_TEST_PUBKEY = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+        process.env.UGONDU_SERVICE_TEST_KEY_ID = 'key_service_test_v1';
+    }
+}
+
 async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log('[en] Ugondu Integration Test Suite — Engine Core');

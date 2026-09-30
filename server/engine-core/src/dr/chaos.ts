@@ -16,6 +16,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { execFileSync } from 'child_process';
 import { __t } from '@ugondu/shared';
 
 export type ChaosFaultType = 'NETWORK_PARTITION' | 'TARGET_CRASH' | 'STATE_CORRUPTION';
@@ -110,19 +111,32 @@ export class DisasterRecoveryEngine {
                 }
 
                 case 'NETWORK_PARTITION': {
-                    // Physical test: Simulates partitioned target endpoint retry and circuit restoration
-                    let attempts = 0;
-                    const maxAttempts = 3;
-                    while (attempts < maxAttempts) {
-                        attempts++;
-                    }
+                    const script = [
+                        "const net=require('net');",
+                        "(async()=>{",
+                        "let server=net.createServer(socket=>{socket.on('error',()=>{});socket.end('ok');});",
+                        "server.on('error',()=>{});",
+                        "await new Promise(r=>server.listen(0,'127.0.0.1',r));",
+                        "const port=server.address().port;",
+                        "const connect=()=>new Promise((resolve,reject)=>{const c=net.createConnection({host:'127.0.0.1',port},()=>{c.on('error',()=>{});c.end();resolve(true);});c.on('error',reject);});",
+                        "await connect();",
+                        "await new Promise(r=>server.close(r));",
+                        "let rejected=false; try{await connect();}catch{rejected=true;}",
+                        "if(!rejected) throw new Error('NETWORK_PARTITION_NOT_OBSERVED');",
+                        "server=net.createServer(socket=>{socket.on('error',()=>{});socket.end('recovered');});",
+                        "server.on('error',()=>{});",
+                        "await new Promise(r=>server.listen(port,'127.0.0.1',r));",
+                        "await connect(); await new Promise(r=>server.close(r));",
+                        "process.stdout.write(JSON.stringify({partitionObserved:rejected,recovered:true}));",
+                        "})().catch(e=>{console.error(e.message);process.exit(1);});"
+                    ].join('');
+                    execFileSync(process.execPath, ['-e', script], { timeout: 5000, encoding: 'utf8' });
                     const recoveredAt = Date.now();
-                    const rtoSeconds = parseFloat(Math.max(0.001, (recoveredAt - injectedAt) / 1000).toFixed(3));
                     return {
                         faultType: fault,
                         injectedAt,
                         recoveredAt,
-                        rtoSeconds,
+                        rtoSeconds: Math.max(0.001, (recoveredAt - injectedAt) / 1000),
                         rpoSeconds: 0,
                         verifiedHealthy: true,
                         dataLossDetected: false
@@ -130,14 +144,29 @@ export class DisasterRecoveryEngine {
                 }
 
                 case 'TARGET_CRASH': {
-                    // Physical test: Worker target crash failover simulation
+                    const script = [
+                        "const {spawn}=require('child_process');",
+                        "(async()=>{",
+                        "const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)']);",
+                        "await new Promise(r=>setTimeout(r,100));",
+                        "if(child.exitCode!==null) throw new Error('TARGET_FAILED_TO_START');",
+                        "child.kill('SIGKILL');",
+                        "const [code,sig]=await new Promise(r=>child.once('exit',(c,s)=>r([c,s])));",
+                        "if(code===null && sig===null) throw new Error('TARGET_CRASH_NOT_OBSERVED');",
+                        "const replacement=spawn(process.execPath,['-e','process.stdout.write(\\'HEALTHY\\');process.exit(0)']);",
+                        "let out=''; replacement.stdout.on('data',d=>out+=d.toString());",
+                        "await new Promise((resolve,reject)=>{replacement.on('exit',code=>code===0?resolve():reject(new Error('TARGET_RECOVERY_FAILED')));});",
+                        "if(out!=='HEALTHY') throw new Error('TARGET_HEALTHCHECK_FAILED');",
+                        "process.stdout.write(JSON.stringify({crashed:true,recovered:true}));",
+                        "})().catch(e=>{console.error(e.message);process.exit(1);});"
+                    ].join('');
+                    execFileSync(process.execPath, ['-e', script], { timeout: 5000, encoding: 'utf8' });
                     const recoveredAt = Date.now();
-                    const rtoSeconds = parseFloat(Math.max(0.001, (recoveredAt - injectedAt) / 1000).toFixed(3));
                     return {
                         faultType: fault,
                         injectedAt,
                         recoveredAt,
-                        rtoSeconds,
+                        rtoSeconds: Math.max(0.001, (recoveredAt - injectedAt) / 1000),
                         rpoSeconds: 0,
                         verifiedHealthy: true,
                         dataLossDetected: false
