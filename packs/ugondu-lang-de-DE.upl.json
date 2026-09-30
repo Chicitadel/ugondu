@@ -12,7 +12,7 @@
   "fallbackLocale": "en-US",
   "direction": "ltr",
   "artifactDigest": "sha256:550bd877eef5e2051899ba506fd04b70437e141776d12650970bec8fe7746966",
-  "signature": "GwybA5vipUJpVtklmL0zyRMs2/XnGa01/h7I1+bnuqCPuJJviYRCUmdLq7ZpOltdADVq3/Ci95RxAREouCuQDA==",
+  "signature": "1jNpEou9OMqVZHDhNiRfQ+YjKGDv7rdkifXVXPSX2r0dU3MyKld4YBeNiD+hK3+ZKGkhZQtMsTCkVNBZwL36Cw==",
   "tokens": {
     "aborting": "Vorgang durch Benutzer abgebrochen.",
     "atomic_denied": "Hinweis: Atomare Strategie angefordert, aber durch %s-Lizenz verweigert. Rückfall auf Quota-Sync.",

@@ -55,6 +55,7 @@ async function runLanguagePackTests() {
         validateLanguagePackIntegrity,
         verifyLanguagePackSignature,
         computePackArtifactDigest,
+        signLanguagePackManifest,
         LanguagePackRegistry,
         localeNegotiationMiddleware
     } = shared;
@@ -134,8 +135,7 @@ async function runLanguagePackTests() {
 
         // Sign with authority key so signature check passes, allowing completeness check to execute
         const privKey = fs.readFileSync(path.join(__dirname, '../server/shared/keys/langpack_private.pem'), 'utf8');
-        const payload = `${incompletePack.packId}:${incompletePack.locale}:${incompletePack.version}:${incompletePack.artifactDigest}`;
-        incompletePack.signature = crypto.sign(null, Buffer.from(payload, 'utf8'), privKey).toString('base64');
+        incompletePack.signature = signLanguagePackManifest(incompletePack, privKey);
 
         const result = validateLanguagePackIntegrity(incompletePack);
         assert.strictEqual(result.valid, false, 'Pack missing security tokens must be rejected');

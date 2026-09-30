@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Shared / Language Packs
  * File           : packs.ts
- * Version        : 2.2.0
+ * Version        : 2.3.0
  * Author         : Server & Cryptography Engineering Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
@@ -11,7 +11,7 @@
  *
  * Governance:
  * - Air Roofers Global Localization Standard (STREAM AA / LP-01, LP-05, LP-08)
- * - Cryptographic Supply-Chain Assurance
+ * - Cryptographic Supply-Chain Assurance (OWASP ASVS 5.0 V9.1 / V9.2)
  * - Zero String Hardcoding
  *
  * Standards:
@@ -26,10 +26,8 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-
-export const PACK_AUTHORITY_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAUz8IM99c7+M2Bwg9bWR9BSVRI/J6L5LGu3kZ2q9701M=
------END PUBLIC KEY-----`;
+import canonicalize from 'canonicalize';
+import { globalTrustRegistry } from './trust_registry';
 
 export interface LanguagePack {
     packId: string;
@@ -73,18 +71,53 @@ export function computePackArtifactDigest(tokens: Record<string, string>): strin
     return `sha256:${hash}`;
 }
 
-export function verifyLanguagePackSignature(pack: LanguagePack): boolean {
+export function computePackManifestPayload(pack: Partial<LanguagePack>): string {
+    const canonicalManifest = {
+        artifactDigest: pack.artifactDigest || '',
+        direction: pack.direction || 'ltr',
+        fallbackLocale: pack.fallbackLocale || '',
+        language: pack.language || '',
+        locale: pack.locale || '',
+        maxCoreVersion: pack.maxCoreVersion || '',
+        minCoreVersion: pack.minCoreVersion || '',
+        packId: pack.packId || '',
+        platformVersion: pack.platformVersion || '',
+        publisher: pack.publisher || '',
+        region: pack.region || '',
+        schemaVersion: pack.schemaVersion || '1',
+        version: pack.version || ''
+    };
+    return (canonicalize as any)(canonicalManifest) || JSON.stringify(canonicalManifest);
+}
+
+export function signLanguagePackManifest(pack: Partial<LanguagePack>, privateKeyPem?: string): string {
+    const payload = computePackManifestPayload(pack);
+    const privKey = privateKeyPem 
+        ? crypto.createPrivateKey(privateKeyPem)
+        : globalTrustRegistry.getPrivateKeyObject('key_langpack_v1');
+    return crypto.sign(null, Buffer.from(payload, 'utf8'), privKey).toString('base64');
+}
+
+export function verifyLanguagePackSignature(pack: LanguagePack, publicKeyPem?: string): boolean {
     if (!pack.signature || !pack.artifactDigest) return false;
     try {
-        const payload = `${pack.packId}:${pack.locale}:${pack.version}:${pack.artifactDigest}`;
+        const payload = computePackManifestPayload(pack);
+        const pubKey = publicKeyPem
+            ? crypto.createPublicKey(publicKeyPem)
+            : (() => {
+                const key = globalTrustRegistry.getActiveKeyByPurpose('language-pack');
+                if (!key) throw new Error('No active language-pack key found');
+                return globalTrustRegistry.getPublicKeyObject(key.keyId);
+            })();
+
         const sigBuffer = Buffer.from(pack.signature, 'base64');
-        return crypto.verify(null, Buffer.from(payload, 'utf8'), PACK_AUTHORITY_PUBLIC_KEY, sigBuffer);
+        return crypto.verify(null, Buffer.from(payload, 'utf8'), pubKey, sigBuffer);
     } catch {
         return false;
     }
 }
 
-export function validateLanguagePackIntegrity(pack: LanguagePack): { valid: boolean; error?: string } {
+export function validateLanguagePackIntegrity(pack: LanguagePack, publicKeyPem?: string): { valid: boolean; error?: string } {
     if (!pack.packId || !pack.locale || !pack.version) {
         return { valid: false, error: 'Incomplete pack manifest' };
     }
@@ -93,14 +126,14 @@ export function validateLanguagePackIntegrity(pack: LanguagePack): { valid: bool
         return { valid: false, error: `Unsupported schema version: ${pack.schemaVersion}` };
     }
 
-    // 1. Digest check
+    // 1. Digest check over tokens
     const calculatedDigest = computePackArtifactDigest(pack.tokens || {});
     if (calculatedDigest !== pack.artifactDigest) {
         return { valid: false, error: `Digest mismatch: expected ${pack.artifactDigest}, got ${calculatedDigest}` };
     }
 
-    // 2. ED25519 signature check
-    if (!verifyLanguagePackSignature(pack)) {
+    // 2. ED25519 signature check over complete canonical manifest
+    if (!verifyLanguagePackSignature(pack, publicKeyPem)) {
         return { valid: false, error: 'Cryptographic signature verification failed' };
     }
 

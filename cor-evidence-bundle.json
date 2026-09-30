@@ -1,60 +1,139 @@
 {
   "schemaVersion": "1.0.0",
-  "generatorVersion": "1.0.0",
-  "timestamp": 1790769921,
-  "gitTreeHash": "8df1014fb9561add4b66eb54c91fc0582a696f4a",
-  "gitCommitHash": "ce5bf5da4bbcac31104137caba0416b72b5ea9b8",
+  "generatorVersion": "2.0.0",
+  "timestamp": 1790781216,
+  "gitTreeHash": "35281e5e3d13850b463f0f687136c64c8afa75aa",
+  "gitCommitHash": "844deeb389d37a14ae6b4d546932b60f8ed12137",
   "protocolVersion": "1.0.0",
   "trustRegistryVersion": "v1",
-  "trustKeys": [
-    {
-      "keyId": "key_recipe_v1",
-      "algorithm": "ed25519",
-      "status": "ACTIVE",
-      "purpose": "recipe",
-      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAW0l7OAZeUQZhMnk3etjBWeYiEJK0O5LCFWKiWhRBvQM=\n-----END PUBLIC KEY-----"
-    },
-    {
-      "keyId": "key_service_v1",
-      "algorithm": "ed25519",
-      "status": "ACTIVE",
-      "purpose": "service-identity",
-      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEArLNZN2cPQpTCYMgpl9SVSjgeyG2x92Q5xD1xHxaLZ5U=\n-----END PUBLIC KEY-----"
-    },
-    {
-      "keyId": "key_langpack_v1",
-      "algorithm": "ed25519",
-      "status": "ACTIVE",
-      "purpose": "language-pack",
-      "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAUz8IM99c7+M2Bwg9bWR9BSVRI/J6L5LGu3kZ2q9701M=\n-----END PUBLIC KEY-----"
-    }
-  ],
   "testResults": {
-    "totalSuites": 9,
-    "totalPassed": 9,
-    "totalFailed": 0,
-    "totalSkipped": 0
-  },
-  "adversarialResults": {
-    "attackClassesTested": 50,
-    "passed": 50,
-    "failed": 0
+    "startedAt": 1790781217355,
+    "suites": [
+      {
+        "suite": "tests/schema-validation.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/adversarial-execution.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/evidence-verification.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/billing-gateway.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/engine-core.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/plugin-manager.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/repository-adapter.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/security-regression.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/dora-analytics.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/language-packs.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/localization-dropin.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/roadmap-r1-targets.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/roadmap-r2-r3-upm-compiler.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/roadmap-r5-r6-operations-trends.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/roadmap-r7-r8-ai-migration.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      },
+      {
+        "suite": "tests/roadmap-r9-r10-r11.test.js",
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 0
+      }
+    ],
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "notRun": 0,
+    "total": 16,
+    "completedAt": 1790781257661
   },
   "codeGovernance": {
     "maxLinesPerFileCompliant": true,
-    "zeroStringHardcodingCompliant": true,
-    "zeroSecretsLeakedCompliant": true,
-    "maxObservedLines": 481
+    "maxObservedLines": 489
   },
-  "artifactDigests": {
-    "client/engine/executor.go": "sha256:f330ead0a9b7f73f34490adf361cc8662fd8d82bf0f24a05116cbe68a9c5ddde",
-    "client/engine/safepath.go": "sha256:2d1080081aea518a90e852e02399205cabfb238ecb024ff3e5b3f7f44517253c",
-    "client/engine/archive.go": "sha256:e8570113e52993671c6dcb0eb33b9674c8693f5dc852c73f3d949b4c99787106",
-    "server/shared/identity.ts": "sha256:8394880601319b1692aed35c3ad31382fd8f3a37443f99e21df9158a5aa97cab",
-    "server/shared/ssrf.ts": "sha256:9d436ebaad0e17758c17a1e5c46cec9ed49dbe96dd6894104bc989622a19383d",
-    "server/engine-core/src/index.ts": "sha256:8e8000694c3d174bee130ed0c43bda383f67685c8b09b412d7d5e38f4a21f5ab",
-    "server/shared/schemas/envelope.v1.json": "sha256:47820b3d9e2efdd40c3a25c1b65c3b139a3655c685df7d79b05293d283ed697a"
-  },
-  "evidenceBundleHash": "sha256:20bc55dd15f07fa5d0950d4e6068ae6d1780e4ba7c588fc596de548215cb4663",
-  "signature": "b0b1452867a224a67c4c6f9d80530a3aef352f6d375194ac1f0828cf4e002f02ece25b2137d3c0f37c1034811c56c7392fa7633f3af4e04bc4c27429af439806"
+  "artifactDigests": {},
+  "evidenceBundleHash": "sha256:36f39ce1bd743658643903d078293f10bbf56418bd31a8792baf3f16ba72ea8d",
+  "signature": "ofvmF1Tsw3iyUkGjGggpQz9Y7ds+iFoXt8YizXWfZMI8TPJQnQIXMxq1lKkglMnece+pu2fFUK8tRojcYsayDw=="
 }

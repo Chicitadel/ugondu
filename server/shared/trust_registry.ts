@@ -80,7 +80,8 @@ export class TrustRegistry {
             { prefix: 'service_identity', keyId: 'key_service_v1', purpose: 'service-identity' },
             { prefix: 'recipe', keyId: 'key_recipe_v1', purpose: 'recipe' },
             { prefix: 'langpack', keyId: 'key_langpack_v1', purpose: 'language-pack' },
-            { prefix: 'evidence', keyId: 'key_evidence_v1', purpose: 'evidence' }
+            { prefix: 'evidence', keyId: 'key_evidence_v1', purpose: 'evidence' },
+            { prefix: 'plugin', keyId: 'key_plugin_v1', purpose: 'plugin' }
         ];
 
         for (const m of mappings) {

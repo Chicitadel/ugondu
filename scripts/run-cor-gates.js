@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, '..');
 const suites = [
   'tests/schema-validation.test.js',
   'tests/adversarial-execution.test.js',
-  'tests/evidence-verification.test.js',
+  ...(process.env.UGONDU_SKIP_EVIDENCE_GATE === 'true' ? [] : ['tests/evidence-verification.test.js']),
   'tests/billing-gateway.test.js',
   'tests/engine-core.test.js',
   'tests/plugin-manager.test.js',

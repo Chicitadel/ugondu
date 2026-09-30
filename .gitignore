@@ -23,3 +23,6 @@ Thumbs.db
 
 # [en] Server runtime datastores
 server/data/
+.service_replay_ledger.json
+**/.service_replay_ledger.json
+
