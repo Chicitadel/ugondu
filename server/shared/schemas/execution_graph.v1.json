@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/execution_graph.v1.json",
+  "title": "ExecutionGraphDAG",
+  "description": "Canonical Plan Compiler Execution Graph DAG Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "graphId",
+    "planHash",
+    "nodes",
+    "edges",
+    "rootNodeId",
+    "terminalNodeIds"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0.0"] },
+    "graphId": { "type": "string", "minLength": 1 },
+    "planHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "action", "order", "canRollback"],
+        "properties": {
+          "id": { "type": "string" },
+          "action": { "type": "string" },
+          "order": { "type": "integer", "minimum": 0 },
+          "canRollback": { "type": "boolean" },
+          "rollbackAction": { "type": "string" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" }
+        }
+      }
+    },
+    "rootNodeId": { "type": "string" },
+    "terminalNodeIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

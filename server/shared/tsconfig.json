@@ -6,7 +6,8 @@
     "rootDir": "./",
     "strict": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "declaration": true
   },
-  "include": ["*.ts"]
+  "include": ["**/*.ts"]
 }

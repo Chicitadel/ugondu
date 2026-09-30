@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/telemetry.v1.json",
+  "title": "DeliveryTelemetryEvent",
+  "description": "Canonical Delivery Telemetry Event Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "transactionId",
+    "executionId",
+    "timestamp",
+    "status",
+    "targetEnvironment",
+    "metrics",
+    "logs"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0.0"] },
+    "transactionId": { "type": "string", "minLength": 1 },
+    "executionId": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "integer", "minimum": 0 },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILED", "ROLLED_BACK", "QUARANTINED"]
+    },
+    "targetEnvironment": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "required": ["durationMs", "stepCount"],
+      "properties": {
+        "durationMs": { "type": "integer", "minimum": 0 },
+        "stepCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "logs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

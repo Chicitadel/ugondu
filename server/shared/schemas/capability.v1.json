@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/capability.v1.json",
+  "title": "CapabilityDeclaration",
+  "description": "Canonical Capability Intersection Contract Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "targetId",
+    "provider",
+    "allowedActions",
+    "maxExecutionTimeMs",
+    "allowAtomic",
+    "allowRollback",
+    "allowTelemetry"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0.0"] },
+    "targetId": { "type": "string", "minLength": 1 },
+    "provider": { "type": "string", "minLength": 1 },
+    "allowedActions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "maxExecutionTimeMs": { "type": "integer", "minimum": 1000 },
+    "allowAtomic": { "type": "boolean" },
+    "allowRollback": { "type": "boolean" },
+    "allowTelemetry": { "type": "boolean" },
+    "resourceLimits": {
+      "type": "object",
+      "properties": {
+        "memoryMb": { "type": "integer", "minimum": 16 },
+        "cpuQuota": { "type": "number", "minimum": 0.1 }
+      }
+    }
+  },
+  "additionalProperties": false
+}

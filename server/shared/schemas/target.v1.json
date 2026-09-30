@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/target.v1.json",
+  "title": "TargetSpecification",
+  "description": "Canonical Universal Target Specification Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "targetId",
+    "targetType",
+    "endpoint",
+    "authType",
+    "status",
+    "capabilities"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0.0"] },
+    "targetId": { "type": "string", "minLength": 1 },
+    "targetType": {
+      "type": "string",
+      "enum": ["cpanel", "directadmin", "ssh", "docker", "kubernetes", "cloud", "baremetal"]
+    },
+    "endpoint": { "type": "string" },
+    "authType": {
+      "type": "string",
+      "enum": ["service_token", "ssh_key", "api_token", "tls_client_cert"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ONLINE", "OFFLINE", "DEGRADED", "MAINTENANCE"]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

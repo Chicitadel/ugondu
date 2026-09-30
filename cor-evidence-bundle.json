@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
   "generatorVersion": "1.0.0",
-  "timestamp": 1790754435,
-  "gitTreeHash": "c76a7fb5d2d9beeb28e29980204b2cd7c9402666",
-  "gitCommitHash": "42dbe9196f817006d7225df969ee076d9eb8882f",
+  "timestamp": 1790769921,
+  "gitTreeHash": "8df1014fb9561add4b66eb54c91fc0582a696f4a",
+  "gitCommitHash": "ce5bf5da4bbcac31104137caba0416b72b5ea9b8",
   "protocolVersion": "1.0.0",
   "trustRegistryVersion": "v1",
   "trustKeys": [
@@ -55,6 +55,6 @@
     "server/engine-core/src/index.ts": "sha256:8e8000694c3d174bee130ed0c43bda383f67685c8b09b412d7d5e38f4a21f5ab",
     "server/shared/schemas/envelope.v1.json": "sha256:47820b3d9e2efdd40c3a25c1b65c3b139a3655c685df7d79b05293d283ed697a"
   },
-  "evidenceBundleHash": "sha256:97df5da9041b9bf1008b6fcf44bd84dbcdb7a6d69ddcca93d46c9c1ea10857a3",
-  "signature": "ebccd53fa62d9650d9dc578ac1859fd971f728a197893873c557eed01b3e9e1cc69441e6cd535e4328e3d68603c33599dc22736d954fa8564c4ef36cc4d9b20b"
+  "evidenceBundleHash": "sha256:20bc55dd15f07fa5d0950d4e6068ae6d1780e4ba7c588fc596de548215cb4663",
+  "signature": "b0b1452867a224a67c4c6f9d80530a3aef352f6d375194ac1f0828cf4e002f02ece25b2137d3c0f37c1034811c56c7392fa7633f3af4e04bc4c27429af439806"
 }

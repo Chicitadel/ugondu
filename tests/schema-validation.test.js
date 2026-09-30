@@ -56,7 +56,14 @@ async function runSchemaTests() {
         'service_token.v1.json',
         'state.v1.json',
         'pack_manifest.v1.json',
-        'evidence.v1.json'
+        'evidence.v1.json',
+        'discovery.v1.json',
+        'project_model.v1.json',
+        'capability.v1.json',
+        'target.v1.json',
+        'execution_graph.v1.json',
+        'policy.v1.json',
+        'telemetry.v1.json'
     ];
 
     // Test 1: Verify all 8 schemas exist and are valid JSON

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.eu/schemas/policy.v1.json",
+  "title": "PolicyAsCodeDefinition",
+  "description": "Canonical Enterprise Policy-as-Code Schema v1.0.0",
+  "version": "1.0.0",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "policyName",
+    "enforcement",
+    "rules",
+    "requiredApprovals"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0.0"] },
+    "policyId": { "type": "string", "minLength": 1 },
+    "policyName": { "type": "string", "minLength": 1 },
+    "enforcement": {
+      "type": "string",
+      "enum": ["ENFORCE", "AUDIT", "DISABLED"]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ruleId", "condition", "action"],
+        "properties": {
+          "ruleId": { "type": "string" },
+          "condition": { "type": "string" },
+          "action": { "type": "string", "enum": ["ALLOW", "DENY", "REQUIRE_APPROVAL"] }
+        }
+      }
+    },
+    "requiredApprovals": { "type": "integer", "minimum": 0 },
+    "changeWindow": {
+      "type": "object",
+      "properties": {
+        "allowedDays": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "startHourUtc": { "type": "integer", "minimum": 0, "maximum": 23 },
+        "endHourUtc": { "type": "integer", "minimum": 0, "maximum": 23 }
+      }
+    }
+  },
+  "additionalProperties": false
+}
