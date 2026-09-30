@@ -12,7 +12,8 @@ Phase 3 begins from the independently reconciled state of `stabilization/cor-aud
 2. **Evidence self-reference:** the Phase 2 evidence bundle was committed after generation and therefore its embedded commit/tree identity did not attest the final certifying commit. Phase 3 keeps generated evidence outside the source tree and binds evidence to the exact HEAD/tree being tested.
 3. **DR realism:** state corruption was a real filesystem fault, but the NETWORK_PARTITION and TARGET_CRASH branches only advanced counters/timestamps. Phase 3 replaces those branches with real local TCP and OS-process fault injection.
 4. **Signing separation:** production signing now requires external secret material; repository files provide verification public keys only.
-5. **Release gate:** `scripts/verify-release-integrity.js` rejects tracked private keys and tracked generated certification artifacts and validates evidence-to-HEAD binding when a local evidence bundle is present.
+5. **Replay authority scope:** the current durable replay implementation persists a local ledger but is not yet a transactionally shared multi-node replay authority. Production multi-instance certification therefore requires a centralized/transactional replay store or equivalent service-level coordination.
+6. **Release gate:** `scripts/verify-release-integrity.js` rejects tracked private keys and tracked generated certification artifacts and validates evidence-to-HEAD binding when a local evidence bundle is present.
 
 ## Mandatory Phase 3 gates
 
@@ -62,3 +63,10 @@ Passing the existing 129 assertions is **not by itself** sufficient for COR Leve
 ## External standard reference
 
 The token controls are aligned with OWASP ASVS 5.0 requirements for digital-signature validation, algorithm allowlisting, trusted verification-key sources, validity windows, token purpose, and audience restrictions.
+
+### P3.6 Service identity qualification
+- Bind replay identity to `issuer + keyId + audience + jti`.
+- Validate `iss`/`sub` consistency and token `keyId` consistency with the JOSE header.
+- Make replay recording atomic with verification; a persistence failure must reject the token rather than silently continuing with process-local state.
+- For multi-instance production, use a centralized transactional replay authority rather than a per-process or per-host file.
+- Require TLS or equivalent strong service authentication for internal HTTP service-to-service communication.
