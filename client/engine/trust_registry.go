@@ -65,6 +65,20 @@ var GlobalTrustRegistry = &TrustRegistry{
 	entries: make(map[string]TrustEntry),
 }
 
+func init() {
+	// Revoked v1 keys
+	GlobalTrustRegistry.RegisterKey("key_recipe_v1", StatusRevoked, PurposeRecipe)
+	GlobalTrustRegistry.RegisterKey("key_service_v1", StatusRevoked, PurposeServiceIdentity)
+	GlobalTrustRegistry.RegisterKey("key_langpack_v1", StatusRevoked, PurposeLanguagePack)
+	GlobalTrustRegistry.RegisterKey("key_plugin_v1", StatusRevoked, PurposePlugin)
+
+	// Active rotated v2 keys
+	GlobalTrustRegistry.RegisterKey("key_recipe_v2", StatusActive, PurposeRecipe)
+	GlobalTrustRegistry.RegisterKey("key_service_v2", StatusActive, PurposeServiceIdentity)
+	GlobalTrustRegistry.RegisterKey("key_langpack_v2", StatusActive, PurposeLanguagePack)
+	GlobalTrustRegistry.RegisterKey("key_plugin_v2", StatusActive, PurposePlugin)
+}
+
 var (
 	ErrKeyNotFound = errors.New("ERR_KEY_NOT_FOUND")
 	ErrKeyRevoked  = errors.New("ERR_KEY_REVOKED")

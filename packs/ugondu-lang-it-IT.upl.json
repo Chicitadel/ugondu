@@ -12,7 +12,7 @@
   "fallbackLocale": "en-US",
   "direction": "ltr",
   "artifactDigest": "sha256:6940c6874a5739ffc09f567bff4b8d98691695f3bd23e0b9af6846956a6c46fd",
-  "signature": "WMnz9GOhV+TJWCBh/fw+xH5yzS5wT4hP3H45MpyPvIBuebNK8EGFb4zTNSzfvj8lmFD2/BDrd75fZRpdeSCZBg==",
+  "signature": "89d/2Hb0AWjKSabhcv4OxUrgzuECC5CtNyWI34ECHQ3ePL2a9sGvyK/2m+UxETjlqE6vPGa+On1cwcOV6JDNCw==",
   "tokens": {
     "aborting": "Operazione annullata dall'utente.",
     "atomic_denied": "Avviso: Strategia atomica richiesta ma negata dalla licenza %s. Passaggio a quota-sync.",

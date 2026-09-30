@@ -69,7 +69,7 @@ function generate() {
     gitTreeHash: git(['rev-parse', 'HEAD^{tree}']),
     gitCommitHash: git(['rev-parse', 'HEAD']),
     protocolVersion: '1.0.0',
-    trustRegistryVersion: 'v1',
+    trustRegistryVersion: 'v2',
     testResults,
     codeGovernance,
     artifactDigests: {}

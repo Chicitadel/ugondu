@@ -69,7 +69,7 @@ function get(port, path, extraHeaders = {}) {
 
 function post(port, path, body, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
-        const token = signServiceIdentity('test-suite', 'plugin-manager');
+        const token = signServiceIdentity('test-suite', 'plugin-manager', 'execute', serviceTestPrivateKey, SERVICE_TEST_KEY_ID);
         const data = JSON.stringify(body);
         const headers = {
             'Content-Type': 'application/json',
@@ -151,7 +151,12 @@ async function runTests() {
         const serverDir = path.resolve(__dirname, '../server/plugin-manager');
         serverProcess = spawn('node', ['dist/index.js'], {
             cwd: serverDir,
-            env: { ...process.env, PORT: PLUGIN_PORT.toString() },
+            env: {
+                ...process.env,
+                PORT: PLUGIN_PORT.toString(),
+                UGONDU_SERVICE_TEST_PUBKEY: serviceTestPublicKey,
+                UGONDU_SERVICE_TEST_KEY_ID: SERVICE_TEST_KEY_ID
+            },
             stdio: 'pipe'
         });
         serverStartedByUs = true;

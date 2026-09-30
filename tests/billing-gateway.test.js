@@ -105,7 +105,13 @@ async function runTests() {
         console.log(`[en] Spawning Billing Gateway process on port ${BILLING_PORT}...`);
         const serverPath = path.resolve(__dirname, '../server/billing-gateway/dist/index.js');
         serverProcess = spawn('node', [serverPath], {
-            env: { ...process.env, PORT: String(BILLING_PORT), NODE_ENV: 'test' },
+            env: {
+                ...process.env,
+                PORT: String(BILLING_PORT),
+                NODE_ENV: 'test',
+                UGONDU_SERVICE_TEST_PUBKEY: serviceTestPublicKey,
+                UGONDU_SERVICE_TEST_KEY_ID: SERVICE_TEST_KEY_ID
+            },
             stdio: 'pipe'
         });
 

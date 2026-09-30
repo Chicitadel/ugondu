@@ -13,6 +13,8 @@ client/ugondu.exe
 
 # [en] Environment secrets
 .env
+*_private.pem
+**/*_private.pem
 
 # [en] Logs
 *.log
