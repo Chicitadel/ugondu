@@ -327,7 +327,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
         const signingKey = activeKey ? globalTrustRegistry.getPrivateKeyObject(signingKeyId) : keyState.privateKey;
 
         const envelope = {
-            version: '1.0',
+            protocolVersion: '1.0.0',
             issuer: 'ugondu-engine',
             keyId: signingKeyId,
             transactionId,
@@ -347,7 +347,8 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             planHash,
             policyHash,
             capabilities: envelopeCapabilities,
-            steps
+            steps,
+            agentMinVersion: '1.0.0'
         };
 
         const canonicalEnvelope = canonicalize(envelope) || '{}';
