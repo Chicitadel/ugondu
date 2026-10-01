@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : Architecture Engine
- * File           : generator.ts
+ * Module         : Intent Engine
+ * File           : security-rules.ts
  * Version        : 1.0.0
  * Author         : Air Roofers Engineering
  * Organization   : Air Roofers
@@ -32,20 +32,13 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { ArchitectureCandidate } from '../model/candidate';
-import { VerticalBVps } from '../verticals/vertical-b-vps';
-import { VerticalCCpanel } from '../verticals/vertical-c-cpanel';
+import { SecurityRequirements } from '../model/requirements';
 
-export function generate(input: any): ArchitectureCandidate[] {
-    if (!input) {
-        throw new Error('Input cannot be null or undefined');
-    }
-    
-    // Read input.runtime, input.database, input.requiresTLS, input.targetFamily etc if needed
-    // In this basic version, we generate the viable verticals unconditionally and return them
-    
-    return [
-        VerticalBVps.build(input),
-        VerticalCCpanel.build(input)
-    ];
+export function parseSecurityRequirements(text: string): SecurityRequirements {
+    return {
+        tlsRequired: /(https|tls|ssl|certificate|cert)/i.test(text),
+        privateDatabaseNetwork: /(private database|private db|private network)/i.test(text),
+        secretsManagement: /(secret|secrets manager|vault|credentials)/i.test(text),
+        leastPrivilege: /(least privilege|minimal permission|iam)/i.test(text)
+    };
 }

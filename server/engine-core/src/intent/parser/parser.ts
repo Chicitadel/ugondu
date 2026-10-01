@@ -1,15 +1,16 @@
 /******************************************************************************
- * Project        : Air Roofers Platform
+ * Project        : Ugondu
  * Module         : Intent Engine
  * File           : parser.ts
  * Version        : 1.0.0
- * Author         : Engineering Lead
+ * Author         : Air Roofers Engineering
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,17 +32,28 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { RawIntent } from "../model/raw-intent";
-import { StructuredIntent } from "../model/structured-intent";
+import { DecomposedIntent } from '../model/requirements';
+import { parseApplicationRequirements } from '../rules/application-rules';
+import { parseOperationalRequirements } from '../rules/operational-rules';
+import { parseSecurityRequirements } from '../rules/security-rules';
 
-export class IntentParser {
-    public parse(raw: RawIntent): StructuredIntent {
-        // Core parsing logic integrating schema rules
-        return {
-            id: `struct-${raw.id}`,
-            rawIntentId: raw.id,
-            requirements: [],
-            assumptions: []
-        };
+export function parse(intentText: string): DecomposedIntent {
+    if (!intentText || typeof intentText !== 'string' || intentText.trim() === '') {
+        throw new Error('Intent text cannot be null, undefined, or empty');
     }
+
+    const text = intentText.toLowerCase();
+
+    return {
+        raw: intentText,
+        application: parseApplicationRequirements(text),
+        operational: parseOperationalRequirements(text),
+        security: parseSecurityRequirements(text),
+        availability: {
+            healthCheck: true,
+            restartPolicy: 'always',
+            redundancy: 'single-zone',
+            uptimeTarget: null
+        }
+    };
 }
