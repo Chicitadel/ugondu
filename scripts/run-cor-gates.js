@@ -49,7 +49,12 @@ const suites = [
   'tests/doctor-evidence.test.js',
   'tests/doctor-remediation.test.js',
   'tests/doctor-safety.test.js',
-  'tests/doctor-security.test.js'
+  'tests/doctor-security.test.js',
+  'tests/assurance-resilience.test.js',
+  'tests/assurance-synthetic.test.js',
+  'tests/assurance-backup.test.js',
+  'tests/assurance-rpo-rto.test.js',
+  'tests/assurance-certification.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
