@@ -190,5 +190,8 @@
   "locale_doctor_ok": "✔ Tous les sous-systèmes linguistiques sont sains et vérifiés par signature cryptographique.",
   "locale_doctor_warn": "⚠ Attention : La langue active '%s' présente des jetons manquants ou des avertissements.",
   "cmd_locale_desc": "Gérer les packs de langues, la résolution et les traductions",
-  "cmd_locale_help": "  locale    - Gérer les packs de langues et afficher les diagnostics"
+  "cmd_locale_help": "  locale    - Gérer les packs de langues et afficher les diagnostics",
+  "err_passport_required": "Passport is required for this operation",
+  "err_passport_rejected": "Passport admission rejected"
 }
+

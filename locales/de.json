@@ -190,5 +190,8 @@
   "locale_doctor_ok": "✔ Alle Lokalisierungs-Subsysteme intakt und kryptografisch verifiziert.",
   "locale_doctor_warn": "⚠ Hinweis: Die aktive Sprache '%s' hat fehlende Tokens oder Warnungen.",
   "cmd_locale_desc": "Sprachpakete, Auflösung und Übersetzungen verwalten",
-  "cmd_locale_help": "  locale    - Sprachpakete verwalten und Diagnosen anzeigen"
+  "cmd_locale_help": "  locale    - Sprachpakete verwalten und Diagnosen anzeigen",
+  "err_passport_required": "Passport is required for this operation",
+  "err_passport_rejected": "Passport admission rejected"
 }
+

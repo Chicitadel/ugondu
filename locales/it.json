@@ -190,5 +190,8 @@
   "locale_doctor_ok": "✔ Tutti i sottosistemi di localizzazione sono operativi e verificati crittograficamente.",
   "locale_doctor_warn": "⚠ Avviso: La lingua attiva '%s' presenta token mancanti o avvisi.",
   "cmd_locale_desc": "Gestisci pacchetti linguistici, risoluzione e traduzioni",
-  "cmd_locale_help": "  locale    - Gestisci i pacchetti linguistici e visualizza la diagnostica"
+  "cmd_locale_help": "  locale    - Gestisci i pacchetti linguistici e visualizza la diagnostica",
+  "err_passport_required": "Passport is required for this operation",
+  "err_passport_rejected": "Passport admission rejected"
 }
+

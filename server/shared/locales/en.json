@@ -190,5 +190,7 @@
   "locale_doctor_ok": "✔ All locale subsystems healthy and cryptographically verified.",
   "locale_doctor_warn": "⚠ Notice: Active locale '%s' has missing tokens or warnings.",
   "cmd_locale_desc": "Manage language packs, locale resolution, and translations",
-  "cmd_locale_help": "  locale    - Manage language packs and view localization diagnostics"
+  "cmd_locale_help": "  locale    - Manage language packs and view localization diagnostics",
+  "err_passport_required": "Passport is required for this operation",
+  "err_passport_rejected": "Passport admission rejected"
 }

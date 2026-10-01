@@ -55,13 +55,7 @@ interface PluginMetadata {
 
 export function loadPublicKey(): string {
     const candidatePaths = [
-        process.env.PLUGIN_PUB_KEY_PATH,
-        path.resolve(__dirname, '../../../plugin_pub.pem'),
-        path.resolve(__dirname, '../plugin_pub.pem'),
-        path.resolve(__dirname, '../../plugin_pub.pem'),
-        path.resolve(process.cwd(), 'plugin_pub.pem'),
-        path.resolve(process.cwd(), '../plugin_pub.pem'),
-        path.resolve(PLUGINS_DIR, '../plugin_pub.pem')
+        process.env.PLUGIN_AUTHORITY_PUBLIC_KEY_PATH || path.resolve(__dirname, '../../../../config/trust/plugin_authority.pub.pem')
     ].filter(Boolean) as string[];
 
     for (const candPath of candidatePaths) {

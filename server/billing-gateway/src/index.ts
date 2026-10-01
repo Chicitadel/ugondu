@@ -19,10 +19,7 @@ app.get('/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', service: 'billing-gateway', cor_level: 'A' });
 });
 
-if (process.env.NODE_ENV === 'test') {
-    tokenStore.registerToken('ugp_demo123', 'tenant_prof_99', EDITIONS.PROFESSIONAL);
-    tokenStore.registerToken('uge_corp456', 'tenant_ent_11', EDITIONS.ENTERPRISE);
-}
+
 
 app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req: Request, res: Response): Promise<any> => {
     const { token, repositoryUrl } = req.body;

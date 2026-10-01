@@ -126,3 +126,55 @@ func TestVerifyCryptographicBindings(t *testing.T) {
 		t.Errorf("Expected PolicyHash mismatch error, got nil")
 	}
 }
+func TestSignatureEnforcedDirectCall(t *testing.T) {
+	// Generate dummy key
+	pub, priv, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		t.Fatalf("failed to generate key: %v", err)
+	}
+
+	pubKeyBytes, _ := x509.MarshalPKIXPublicKey(pub)
+	pubKeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: pubKeyBytes,
+	})
+
+	validEnv := &ExecutionEnvelope{
+		TransactionId: "txn-direct-test",
+		PlanHash:      "dummyhash",
+		CanonicalEnvelope: {"transactionId":"txn-direct-test"},
+	}
+	validSig := ed25519.Sign(priv, []byte(validEnv.CanonicalEnvelope))
+	validEnv.Signature = base64.StdEncoding.EncodeToString(validSig)
+
+	steps := []map[string]interface{}{}
+
+	// Test 1: Missing env var
+	os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
+	logs, err := ExecuteRecipe(validEnv, steps)
+	if err == nil {
+		t.Errorf("Expected error due to missing public key env var")
+	}
+	if len(logs) > 0 {
+		t.Errorf("Expected logs to be empty, got %v", logs)
+	}
+
+	// Test 2: Tampered signature
+	os.Setenv("UGONDU_RECIPE_PUBLIC_KEY", string(pubKeyPem))
+	defer os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
+
+	tamperedEnv := &ExecutionEnvelope{
+		TransactionId: "txn-direct-test",
+		PlanHash:      "dummyhash",
+		CanonicalEnvelope: {"transactionId":"txn-direct-test"},
+		Signature:     base64.StdEncoding.EncodeToString([]byte("bad_signature")),
+	}
+
+	logs, err = ExecuteRecipe(tamperedEnv, steps)
+	if err == nil {
+		t.Errorf("Expected error due to invalid signature")
+	}
+	if len(logs) > 0 {
+		t.Errorf("Expected logs to be empty, got %v", logs)
+	}
+}

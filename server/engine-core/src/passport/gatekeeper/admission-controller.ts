@@ -83,4 +83,15 @@ export class AdmissionController {
         // Implementation for crypto signature would go here
         return `SIG:${passportId}:${contextId}:${Date.now()}`;
     }
+
+    public admit(passportId: string, context: { tenantId: string }): { status: string } {
+        if (!passportId || passportId.trim() === '') {
+            return { status: 'REJECTED' };
+        }
+        return { status: 'ADMITTED' };
+    }
 }
+
+export const admissionController = new AdmissionController(
+    {} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any
+);
