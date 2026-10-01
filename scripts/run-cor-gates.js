@@ -60,7 +60,10 @@ const suites = [
   'tests/passport-authority.test.js',
   'tests/passport-freshness-replay.test.js',
   'tests/passport-toctou-reality.test.js',
-  'tests/passport-security-lifecycle.test.js'
+  'tests/passport-security-lifecycle.test.js',
+  'tests/tenant-isolation.test.js',
+  'tests/tenant-policy-resolution.test.js',
+  'tests/tenant-identity-abac.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
