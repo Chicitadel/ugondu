@@ -31,7 +31,10 @@ const suites = [
   'tests/analytics-evidence-kinds.test.js',
   'tests/urre-failure.test.js',
   'tests/urre-restart.test.js',
-  'tests/urre-distributed.test.js'
+  'tests/urre-distributed.test.js',
+  'tests/discovery-contract.test.js',
+  'tests/discovery-integration.test.js',
+  'tests/discovery-adversarial.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
