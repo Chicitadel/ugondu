@@ -28,7 +28,10 @@ const suites = [
   'tests/ssrf-execution.test.js',
   'tests/deployment-lifecycle.test.js',
   'tests/autonomy-authorization.test.js',
-  'tests/analytics-evidence-kinds.test.js'
+  'tests/analytics-evidence-kinds.test.js',
+  'tests/urre-failure.test.js',
+  'tests/urre-restart.test.js',
+  'tests/urre-distributed.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
