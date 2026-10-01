@@ -23,7 +23,12 @@ const suites = [
   'tests/roadmap-r2-r3-upm-compiler.test.js',
   'tests/roadmap-r5-r6-operations-trends.test.js',
   'tests/roadmap-r7-r8-ai-migration.test.js',
-  'tests/roadmap-r9-r10-r11.test.js'
+  'tests/roadmap-r9-r10-r11.test.js',
+  'tests/replay-authority.test.js',
+  'tests/ssrf-execution.test.js',
+  'tests/deployment-lifecycle.test.js',
+  'tests/autonomy-authorization.test.js',
+  'tests/analytics-evidence-kinds.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
