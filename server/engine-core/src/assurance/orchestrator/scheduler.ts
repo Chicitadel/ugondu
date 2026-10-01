@@ -42,4 +42,4 @@ export class Scheduler {
     public registerTask(id: string, task: any): void {
         this.tasks.set(id, task);
     }
-}\n
+}

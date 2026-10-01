@@ -34,4 +34,4 @@ export class StructuralVerifier {
     public async verifyArchitectureConsistency(): Promise<boolean> {
         return true;
     }
-}\n
+}

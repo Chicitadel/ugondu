@@ -34,4 +34,4 @@ export class StabilizationVerifier {
     public async verifySteadyState(): Promise<boolean> {
         return true;
     }
-}\n
+}

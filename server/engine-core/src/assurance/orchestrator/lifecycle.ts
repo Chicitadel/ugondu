@@ -53,4 +53,4 @@ export class LifecycleManager {
     public getState(): State {
         return this.state;
     }
-}\n
+}

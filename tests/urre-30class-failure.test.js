@@ -15,9 +15,9 @@ try {
 function testGate(n, name, fn) {
   try {
     fn();
-    // console.log([PASS] : );
+    // console.log(`[PASS] : ${name}`);
   } catch (e) {
-    console.error([FAIL] : );
+    console.error(`[FAIL] : ${name}`);
     console.error(e);
     process.exit(1);
   }
@@ -31,8 +31,8 @@ FAILURE_SIGNATURES.forEach((sig) => {
 
   // Test by message pattern
   if (sig.messagePatterns.length > 0) {
-    testGate(testCounter++, ${fClass} classified correctly by message, () => {
-      const context = { errorMessage: Error:  occurred, signals: {}, operation: 'test' };
+    testGate(testCounter++, `${fClass} classified correctly by message`, () => {
+      const context = { errorMessage: `Error: ${fClass} occurred`, signals: {}, operation: 'test' };
       const result = detector.classify(context);
       assert.strictEqual(result, fClass);
     });
@@ -40,7 +40,7 @@ FAILURE_SIGNATURES.forEach((sig) => {
 
   // Test by signal
   if (sig.contextSignals.length > 0) {
-    testGate(testCounter++, ${fClass} classified correctly by signal, () => {
+    testGate(testCounter++, `${fClass} classified correctly by signal`, () => {
       const signals = {};
       signals[sig.contextSignals[0]] = true;
       const context = { errorMessage: 'some random error', signals, operation: 'test' };
@@ -51,7 +51,7 @@ FAILURE_SIGNATURES.forEach((sig) => {
 });
 
 // Unknown failure test
-testGate(testCounter++, UNKNOWN_FAILURE classified correctly, () => {
+testGate(testCounter++, `UNKNOWN_FAILURE classified correctly`, () => {
   const context = { errorMessage: 'a totally weird and unrecognised error', signals: { strange: true }, operation: 'test' };
   const result = detector.classify(context);
   assert.strictEqual(result, FailureClass.UNKNOWN_FAILURE);

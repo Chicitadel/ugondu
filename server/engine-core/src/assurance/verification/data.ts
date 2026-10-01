@@ -34,4 +34,4 @@ export class DataIntegrityVerifier {
     public async verifyDataConsistency(): Promise<boolean> {
         return true;
     }
-}\n
+}

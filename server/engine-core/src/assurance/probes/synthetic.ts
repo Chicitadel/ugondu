@@ -40,4 +40,4 @@ export class SyntheticProbe {
             }, Math.random() * 2000);
         });
     }
-}\n
+}

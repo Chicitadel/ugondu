@@ -1,3 +1,4 @@
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Tenant Crypto
@@ -43,7 +44,7 @@ export interface TenantKeyContext {
 export class TenantKeyContextResolver {
     public resolveKeyContext(tenantId: string): TenantKeyContext {
         if (!tenantId) {
-            throw new Error('Tenant ID is required for key resolution. Zero-trust enforced.');
+            throw new Error(__t('err_tenant_id_required'));
         }
         return {
             tenantId,

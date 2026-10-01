@@ -46,4 +46,4 @@ export class PolicyEngine {
     public evaluateAll(context: any): boolean {
         return this.policies.every(p => p.evaluate(context));
     }
-}\n
+}

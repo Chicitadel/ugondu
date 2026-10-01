@@ -35,6 +35,7 @@ import { execFile } from 'child_process';
 import util from 'util';
 import path from 'path';
 import fs from 'fs';
+import { __t } from '@ugondu/shared';
 
 const execFileAsync = util.promisify(execFile);
 
@@ -59,7 +60,7 @@ export async function executePluginSandbox(pluginPath: string, payload: any): Pr
     const scriptPath = path.join(pluginPath, 'index.js');
     
     if (!fs.existsSync(scriptPath)) {
-        throw new Error(`Plugin entrypoint not found at ${scriptPath}`);
+        throw new Error(__t('err_plugin_entrypoint_not_found'));
     }
 
     try {
@@ -99,7 +100,7 @@ export async function executePluginSandbox(pluginPath: string, payload: any): Pr
         
         for (const step of steps) {
             if (!ALLOWED_ACTIONS.has(step.action)) {
-                throw new Error(`REJECT: Action ${step.action} is not in the closed typed-action registry`);
+                throw new Error(__t('err_plugin_action_rejected'));
             }
         }
         

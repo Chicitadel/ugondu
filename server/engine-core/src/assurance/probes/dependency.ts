@@ -38,4 +38,4 @@ export class DependencyProbe {
         }
         return results;
     }
-}\n
+}

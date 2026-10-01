@@ -38,4 +38,4 @@ export class PolicyValidator {
         if (typeof policy.evaluate !== 'function') return false;
         return true;
     }
-}\n
+}

@@ -34,6 +34,7 @@
 import { ExecutionEnvelope } from '../types/passport';
 import { ExecutionTask, ExecutionResult } from '../types/execution';
 import { EngineInternal } from '../engine-internal';
+import { __t } from '@ugondu/shared';
 
 import { TenantContextGuard } from '../tenant/integration/twin-isolation-guard';
 
@@ -46,17 +47,17 @@ export class Executor {
         guard.assertContext(envelope?.securityContext);
 
         if (!envelope || !envelope.signature) {
-            throw new Error('Execution blocked: Missing valid ExecutionEnvelope');
+            throw new Error(__t('err_execution_blocked_no_envelope'));
         }
 
         // Verify the signature structurally (actual key validation done by crypto service)
         if (!envelope.signature.startsWith('SIG:')) {
-            throw new Error('Execution blocked: Invalid ExecutionEnvelope signature format');
+            throw new Error(__t('err_execution_blocked_invalid_sig'));
         }
 
         // Ensure context IDs match
         if (envelope.contextId !== task.contextId) {
-            throw new Error('Execution blocked: Context ID mismatch in ExecutionEnvelope');
+            throw new Error(__t('err_urre_context_id_mismatch'));
         }
 
         return await this.engine.runTask(task);

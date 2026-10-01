@@ -34,4 +34,4 @@ export class ProviderProbe {
     public async checkProviderAvailability(providerId: string): Promise<boolean> {
         return true;
     }
-}\n
+}

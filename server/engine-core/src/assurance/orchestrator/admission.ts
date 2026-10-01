@@ -36,4 +36,4 @@ export class AdmissionController {
         if (context.budget <= 0) return false;
         return true;
     }
-}\n
+}

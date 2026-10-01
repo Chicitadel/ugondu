@@ -58,4 +58,4 @@ export class AssuranceOrchestrator {
             throw error;
         }
     }
-}\n
+}

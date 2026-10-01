@@ -34,4 +34,4 @@ export class PhysicalVerifier {
     public async verifyHardwareMetrics(): Promise<boolean> {
         return true;
     }
-}\n
+}

@@ -34,4 +34,4 @@ export class ApplicationVerifier {
     public async verifyApplicationState(): Promise<boolean> {
         return true;
     }
-}\n
+}

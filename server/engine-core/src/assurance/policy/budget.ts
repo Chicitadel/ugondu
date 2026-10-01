@@ -50,4 +50,4 @@ export class AssuranceBudget {
     public replenish(tokens: number): void {
         this.availableTokens = Math.min(this.maxTokens, this.availableTokens + tokens);
     }
-}\n
+}

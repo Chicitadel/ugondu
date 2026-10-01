@@ -34,4 +34,4 @@ export class RecoveryVerifier {
     public async testRecoveryPaths(): Promise<boolean> {
         return true;
     }
-}\n
+}

@@ -38,4 +38,4 @@ export class ApplicationProbe {
         }
         return results;
     }
-}\n
+}

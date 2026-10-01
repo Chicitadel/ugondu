@@ -37,4 +37,4 @@ export class HealthProbe {
             uptime: process.uptime()
         };
     }
-}\n
+}
