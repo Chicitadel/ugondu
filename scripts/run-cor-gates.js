@@ -37,7 +37,12 @@ const suites = [
   'tests/discovery-adversarial.test.js',
   'tests/intent-validation.test.js',
   'tests/architecture-properties.test.js',
-  'tests/provider-compilation.test.js'
+  'tests/provider-compilation.test.js',
+  'tests/fabric-interfaces.test.js',
+  'tests/fabric-adapters.test.js',
+  'tests/provisioning-engine.test.js',
+  'tests/fabric-04.test.js',
+  'tests/fabric-05.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
