@@ -33,5 +33,19 @@
  ******************************************************************************/
 
 // Implementation for integrity.rs
-pub struct integrity {}
+import { createHash } from 'crypto';
+import { EvidenceItem } from './collector';
 
+export class EvidenceIntegrityChecker {
+  verify(item: EvidenceItem): boolean {
+    const payloadStr = JSON.stringify(item.payload, Object.keys(item.payload).sort());
+    const expected = createHash('sha256').update(payloadStr).digest('hex');
+    return expected === item.hash;
+  }
+
+  assertIntegrity(item: EvidenceItem): void {
+    if (!this.verify(item)) {
+      throw new Error(`Evidence integrity check failed for item '${item.id}'`);
+    }
+  }
+}

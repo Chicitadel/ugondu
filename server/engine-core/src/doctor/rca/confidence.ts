@@ -33,5 +33,13 @@
  ******************************************************************************/
 
 // Implementation for confidence.rs
-pub struct confidence {}
+import { ConfidenceLevel } from '../model/rca_result';
 
+export class ConfidenceScorer {
+  score(evidenceCount: number, consistencyRate: number): ConfidenceLevel {
+    if (evidenceCount >= 5 && consistencyRate >= 0.9) return 'DEFINITIVE';
+    if (evidenceCount >= 3 && consistencyRate >= 0.7) return 'HIGH';
+    if (evidenceCount >= 1 && consistencyRate >= 0.5) return 'MEDIUM';
+    return 'LOW';
+  }
+}

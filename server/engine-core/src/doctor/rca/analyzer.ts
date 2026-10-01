@@ -33,6 +33,24 @@
  ******************************************************************************/
 
 // RCA Analyzer implementation
-// Supports UNKNOWN state.
-pub struct Analyzer {}
+import { IncidentRecord } from '../model/incident';
+import { RcaResult, ConfidenceLevel } from '../model/rca_result';
 
+export class RcaAnalyzer {
+  analyze(incident: IncidentRecord): RcaResult {
+    const evidenceKinds = [...new Set(incident.evidence.map(e => e.kind))];
+    const rootCause = evidenceKinds.length > 0
+      ? `Primary evidence type: ${evidenceKinds[0]}`
+      : 'Root cause undetermined from available evidence';
+    const confidence: ConfidenceLevel = incident.evidence.length >= 3 ? 'HIGH'
+      : incident.evidence.length >= 1 ? 'MEDIUM' : 'LOW';
+    return {
+      incidentId: incident.id,
+      rootCause,
+      contributingFactors: evidenceKinds.slice(1),
+      confidence,
+      recommendedActions: ['Investigate logs', 'Review recent deployments'],
+      analysedAt: new Date(),
+    };
+  }
+}

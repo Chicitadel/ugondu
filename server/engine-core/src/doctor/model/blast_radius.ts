@@ -33,5 +33,10 @@
  ******************************************************************************/
 
 // Implementation for blast_radius.rs
-pub struct blastradius {}
-
+export interface BlastRadius {
+  targetId: string;
+  affectedServices: string[];
+  estimatedDataImpact: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  estimatedAvailabilityImpact: 'NONE' | 'DEGRADED' | 'PARTIAL' | 'FULL_OUTAGE';
+  confidence: number; // 0-1
+}

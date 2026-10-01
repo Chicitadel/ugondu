@@ -33,5 +33,13 @@
  ******************************************************************************/
 
 // Implementation for recovery_contract.rs
-pub struct recoverycontract {}
+export type RecoveryStrategy = 'ROLLBACK' | 'FORWARD_RECOVERY' | 'MANUAL_INTERVENTION' | 'RESTART';
 
+export interface RecoveryContract {
+  incidentId: string;
+  strategy: RecoveryStrategy;
+  steps: string[];
+  estimatedRto: number; // seconds
+  requiredCapabilities: string[];
+  authorisedBy: string;
+}

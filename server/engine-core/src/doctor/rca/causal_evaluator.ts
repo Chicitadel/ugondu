@@ -33,5 +33,12 @@
  ******************************************************************************/
 
 // Implementation for causal_evaluator.rs
-pub struct causalevaluator {}
+import { EvidenceEdge } from '../model/evidence_graph';
 
+export class CausalEvaluator {
+  evaluate(edges: EvidenceEdge[]): string[] {
+    return edges
+      .filter(e => e.relationship === 'CAUSED_BY')
+      .map(e => `${e.from} caused by ${e.to}`);
+  }
+}

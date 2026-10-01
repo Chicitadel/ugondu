@@ -33,5 +33,15 @@
  ******************************************************************************/
 
 // Implementation for verification_contract.rs
-pub struct verificationcontract {}
+export interface VerificationCheck {
+  name: string;
+  description: string;
+  critical: boolean;
+}
 
+export interface VerificationContract {
+  remediationId: string;
+  checks: VerificationCheck[];
+  requiredPassRate: number; // 0-1
+  timeoutMs: number;
+}

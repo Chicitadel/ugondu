@@ -33,5 +33,21 @@
  ******************************************************************************/
 
 // Implementation for detector.rs
-pub struct detector {}
+import { EvidenceItem } from '../evidence/collector';
+import { IncidentRecord } from '../model/incident';
 
+export class IncidentDetector {
+  detect(evidence: EvidenceItem[]): IncidentRecord[] {
+    return evidence
+      .filter(e => e.kind === 'failure' || e.kind === 'anomaly')
+      .map(e => ({
+        id: `inc_${e.id}`,
+        targetId: (e.payload['targetId'] as string) || 'unknown',
+        category: e.kind,
+        fingerprint: e.hash,
+        detectedAt: e.collectedAt,
+        severity: (e.payload['severity'] as string) || 'MEDIUM',
+        evidence: [e],
+      }));
+  }
+}

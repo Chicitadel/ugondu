@@ -33,5 +33,24 @@
  ******************************************************************************/
 
 // Implementation for normalizer.rs
-pub struct normalizer {}
+import { EvidenceItem } from './collector';
 
+export interface NormalizedEvidence {
+  id: string;
+  kind: string;
+  source: string;
+  timestamp: string;
+  summary: string;
+}
+
+export class EvidenceNormalizer {
+  normalize(item: EvidenceItem): NormalizedEvidence {
+    return {
+      id: item.id,
+      kind: item.kind,
+      source: item.source,
+      timestamp: item.collectedAt.toISOString(),
+      summary: `${item.kind} from ${item.source} at ${item.collectedAt.toISOString()}`,
+    };
+  }
+}

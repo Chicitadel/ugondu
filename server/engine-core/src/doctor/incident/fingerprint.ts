@@ -33,5 +33,12 @@
  ******************************************************************************/
 
 // Implementation for fingerprint.rs
-pub struct fingerprint {}
+import { createHash } from 'crypto';
+import { IncidentRecord } from '../model/incident';
 
+export class IncidentFingerprinter {
+  fingerprint(incident: Partial<IncidentRecord>): string {
+    const key = `${incident.targetId}:${incident.category}:${incident.severity}`;
+    return createHash('sha256').update(key).digest('hex').slice(0, 16);
+  }
+}

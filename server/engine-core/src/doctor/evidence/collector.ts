@@ -33,5 +33,31 @@
  ******************************************************************************/
 
 // Implementation for collector.rs
-pub struct collector {}
+import { createHash } from 'crypto';
 
+export interface EvidenceItem {
+  id: string;
+  kind: string;
+  source: string;
+  collectedAt: Date;
+  payload: Record<string, unknown>;
+  hash: string;
+}
+
+export class EvidenceCollector {
+  private items: EvidenceItem[] = [];
+
+  collect(kind: string, source: string, payload: Record<string, unknown>): EvidenceItem {
+    const payloadStr = JSON.stringify(payload, Object.keys(payload).sort());
+    const hash = createHash('sha256').update(payloadStr).digest('hex');
+    const item: EvidenceItem = {
+      id: `ev_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+      kind, source, collectedAt: new Date(), payload, hash,
+    };
+    this.items.push(item);
+    return item;
+  }
+
+  getAll(): EvidenceItem[] { return [...this.items]; }
+  clear(): void { this.items = []; }
+}

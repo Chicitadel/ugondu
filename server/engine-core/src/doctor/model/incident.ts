@@ -33,5 +33,14 @@
  ******************************************************************************/
 
 // Implementation for incident.rs
-pub struct incident {}
+import { EvidenceItem } from '../evidence/collector';
 
+export interface IncidentRecord {
+  id: string;
+  targetId: string;
+  category: string;
+  fingerprint: string;
+  detectedAt: Date;
+  severity: string;
+  evidence: EvidenceItem[];
+}

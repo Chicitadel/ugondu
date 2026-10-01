@@ -33,5 +33,20 @@
  ******************************************************************************/
 
 // Implementation for freshness.rs
-pub struct freshness {}
+export interface FreshnessPolicy {
+  maxAgeMs: number;
+}
 
+export class FreshnessValidator {
+  constructor(private readonly policy: FreshnessPolicy) {}
+
+  isStale(collectedAt: Date): boolean {
+    return Date.now() - collectedAt.getTime() > this.policy.maxAgeMs;
+  }
+
+  assertFresh(collectedAt: Date, label: string): void {
+    if (this.isStale(collectedAt)) {
+      throw new Error(`Evidence '${label}' is stale: collected at ${collectedAt.toISOString()}`);
+    }
+  }
+}

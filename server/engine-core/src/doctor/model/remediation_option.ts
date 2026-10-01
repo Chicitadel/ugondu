@@ -33,5 +33,12 @@
  ******************************************************************************/
 
 // Implementation for remediation_option.rs
-pub struct remediationoption {}
-
+export interface RemediationOption {
+  id: string;
+  description: string;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  estimatedDuration: number; // seconds
+  reversible: boolean;
+  requiresDowntime: boolean;
+  steps: string[];
+}

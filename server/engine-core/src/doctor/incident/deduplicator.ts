@@ -33,5 +33,15 @@
  ******************************************************************************/
 
 // Implementation for deduplicator.rs
-pub struct deduplicator {}
+import { IncidentRecord } from '../model/incident';
 
+export class IncidentDeduplicator {
+  deduplicate(incidents: IncidentRecord[]): IncidentRecord[] {
+    const seen = new Set<string>();
+    return incidents.filter(inc => {
+      if (seen.has(inc.fingerprint)) return false;
+      seen.add(inc.fingerprint);
+      return true;
+    });
+  }
+}

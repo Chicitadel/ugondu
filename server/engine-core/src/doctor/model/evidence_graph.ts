@@ -33,5 +33,15 @@
  ******************************************************************************/
 
 // Implementation for evidence_graph.rs
-pub struct evidencegraph {}
+import { EvidenceItem } from '../evidence/collector';
 
+export interface EvidenceEdge {
+  from: string; // evidence item id
+  to: string;   // evidence item id
+  relationship: 'CAUSED_BY' | 'CORRELATED_WITH' | 'PRECEDED_BY';
+}
+
+export interface EvidenceGraph {
+  nodes: EvidenceItem[];
+  edges: EvidenceEdge[];
+}

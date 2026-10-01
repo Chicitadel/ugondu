@@ -33,5 +33,26 @@
  ******************************************************************************/
 
 // Implementation for correlator.rs
-pub struct correlator {}
+import { IncidentRecord } from '../model/incident';
 
+export interface CorrelationGroup {
+  groupId: string;
+  incidents: IncidentRecord[];
+  correlationReason: string;
+}
+
+export class IncidentCorrelator {
+  correlate(incidents: IncidentRecord[]): CorrelationGroup[] {
+    const groups = new Map<string, IncidentRecord[]>();
+    for (const inc of incidents) {
+      const key = `${inc.targetId}:${inc.category}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(inc);
+    }
+    return Array.from(groups.entries()).map(([key, incs]) => ({
+      groupId: key,
+      incidents: incs,
+      correlationReason: `Same target and category: ${key}`,
+    }));
+  }
+}

@@ -33,5 +33,25 @@
  ******************************************************************************/
 
 // Implementation for timeline.rs
-pub struct timeline {}
+import { EvidenceItem } from '../evidence/collector';
+
+export interface TimelineEntry {
+  timestamp: Date;
+  kind: string;
+  source: string;
+  summary: string;
+}
+
+export class TimelineBuilder {
+  build(evidence: EvidenceItem[]): TimelineEntry[] {
+    return [...evidence]
+      .sort((a, b) => a.collectedAt.getTime() - b.collectedAt.getTime())
+      .map(e => ({
+        timestamp: e.collectedAt,
+        kind: e.kind,
+        source: e.source,
+        summary: `${e.kind} event from ${e.source}`,
+      }));
+  }
+}
 

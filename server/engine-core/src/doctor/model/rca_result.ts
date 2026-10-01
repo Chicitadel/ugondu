@@ -33,5 +33,13 @@
  ******************************************************************************/
 
 // Implementation for rca_result.rs
-pub struct rcaresult {}
+export type ConfidenceLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'DEFINITIVE';
 
+export interface RcaResult {
+  incidentId: string;
+  rootCause: string;
+  contributingFactors: string[];
+  confidence: ConfidenceLevel;
+  recommendedActions: string[];
+  analysedAt: Date;
+}

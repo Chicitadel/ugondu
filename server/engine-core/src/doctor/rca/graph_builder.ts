@@ -33,5 +33,19 @@
  ******************************************************************************/
 
 // Implementation for graph_builder.rs
-pub struct graphbuilder {}
+import { EvidenceItem } from '../evidence/collector';
+import { EvidenceGraph, EvidenceEdge } from '../model/evidence_graph';
 
+export class EvidenceGraphBuilder {
+  build(evidence: EvidenceItem[]): EvidenceGraph {
+    const edges: EvidenceEdge[] = [];
+    for (let i = 1; i < evidence.length; i++) {
+      edges.push({
+        from: evidence[i].id,
+        to: evidence[i - 1].id,
+        relationship: 'PRECEDED_BY',
+      });
+    }
+    return { nodes: evidence, edges };
+  }
+}

@@ -33,5 +33,30 @@
  ******************************************************************************/
 
 // Implementation for contradiction_detector.rs
-pub struct contradictiondetector {}
+import { EvidenceItem } from '../evidence/collector';
 
+export interface Contradiction {
+  item1Id: string;
+  item2Id: string;
+  reason: string;
+}
+
+export class ContradictionDetector {
+  detect(evidence: EvidenceItem[]): Contradiction[] {
+    const contradictions: Contradiction[] = [];
+    for (let i = 0; i < evidence.length; i++) {
+      for (let j = i + 1; j < evidence.length; j++) {
+        if (evidence[i].kind === evidence[j].kind &&
+            evidence[i].source !== evidence[j].source &&
+            evidence[i].hash !== evidence[j].hash) {
+          contradictions.push({
+            item1Id: evidence[i].id,
+            item2Id: evidence[j].id,
+            reason: `Same kind '${evidence[i].kind}' from different sources with different hashes`,
+          });
+        }
+      }
+    }
+    return contradictions;
+  }
+}

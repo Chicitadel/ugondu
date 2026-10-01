@@ -33,5 +33,7 @@
  ******************************************************************************/
 
 // Implementation for index.rs
-pub struct index {}
-
+export { EvidenceCollector, EvidenceItem } from './collector';
+export { FreshnessValidator, FreshnessPolicy } from './freshness';
+export { EvidenceIntegrityChecker } from './integrity';
+export { EvidenceNormalizer } from './normalizer';
