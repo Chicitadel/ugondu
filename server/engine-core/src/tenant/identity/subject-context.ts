@@ -1,9 +1,9 @@
 /******************************************************************************
- * Project        : Ugondu Platform
- * Module         : Tenant Management
+ * Project        : Ugondu
+ * Module         : Tenant Identity
  * File           : subject-context.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
+ * Author         : Phase 14 AI Engineer
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -32,23 +32,30 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-export class SubjectContext {
-  constructor(
-    public readonly subjectId: string,
-    public readonly attributes: Record<string, any>,
-    public readonly roles: string[],
-    public readonly scopes: string[]
-  ) {}
+export interface SubjectContext {
+  readonly id: string;
+  readonly tenantId: string;
+  readonly aliases: ReadonlyArray<string>;
+  readonly attributes: Readonly<Record<string, string | number | boolean>>;
+  readonly isActive: boolean;
+  readonly createdAt: Date;
+}
 
-  public hasRole(role: string): boolean {
-    return this.roles.includes(role);
-  }
-
-  public hasScope(scope: string): boolean {
-    return this.scopes.includes(scope);
-  }
-
-  public getAttribute<T>(key: string): T | undefined {
-    return this.attributes[key] as T;
+export class SubjectContextFactory {
+  public static create(
+    id: string,
+    tenantId: string,
+    aliases: string[] = [],
+    attributes: Record<string, string | number | boolean> = {},
+    isActive: boolean = true
+  ): SubjectContext {
+    return Object.freeze({
+      id,
+      tenantId,
+      aliases: Object.freeze([...aliases]),
+      attributes: Object.freeze({ ...attributes }),
+      isActive,
+      createdAt: new Date(),
+    });
   }
 }

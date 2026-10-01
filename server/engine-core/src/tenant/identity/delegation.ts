@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Tenant Identity
- * File           : abac.ts
+ * File           : delegation.ts
  * Version        : 1.0.0
  * Author         : Phase 14 AI Engineer
  * Organization   : Air Roofers
@@ -34,31 +34,25 @@
 
 import { SubjectContext } from './subject-context';
 
-export interface ABACPolicy {
-  readonly id: string;
-  readonly effect: 'ALLOW' | 'DENY';
-  readonly condition: (subject: SubjectContext, resource: any, environment: any) => boolean;
+export interface DelegationRecord {
+  readonly delegatorId: string;
+  readonly delegateId: string;
+  readonly tenantId: string;
+  readonly scope: ReadonlyArray<string>;
+  readonly expiresAt: Date;
 }
 
-export class ABACManager {
-  private policies: ABACPolicy[] = [];
+export class DelegationManager {
+  private delegations: DelegationRecord[] = [];
 
-  public registerPolicy(policy: ABACPolicy): void {
-    this.policies.push(policy);
+  public grantDelegation(record: DelegationRecord): void {
+    this.delegations.push(record);
   }
 
-  public evaluate(subject: SubjectContext, resource: any, environment: any): 'ALLOW' | 'DENY' {
-    let allowed = false;
-
-    for (const policy of this.policies) {
-      if (policy.condition(subject, resource, environment)) {
-        if (policy.effect === 'DENY') {
-          return 'DENY';
-        }
-        allowed = true;
-      }
-    }
-
-    return allowed ? 'ALLOW' : 'DENY';
+  public getDelegationsForDelegate(delegate: SubjectContext): DelegationRecord[] {
+    const now = new Date();
+    return this.delegations.filter(
+      (d) => d.delegateId === delegate.id && d.tenantId === delegate.tenantId && d.expiresAt > now
+    );
   }
 }

@@ -1,15 +1,16 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : Tenant Integration
+ * File           : evidence-isolation-guard.ts
  * Version        : 1.0.0
- * Author         : Ugondu Engineer
+ * Author         : Elite Phase 14 Ugondu Engineer
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,12 +32,11 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
-
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
-  }
+export class EvidenceIsolationGuard {
+    public secureEvidence(tenantContextGuard: any): void {
+        const derivedTenantId = tenantContextGuard.getDerivedTenantId();
+        if (!derivedTenantId) {
+            throw new Error('Evidence isolation breach. Authority must be derived from TenantContextGuard, not caller-supplied.');
+        }
+    }
 }

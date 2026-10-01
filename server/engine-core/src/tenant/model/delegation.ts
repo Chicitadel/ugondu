@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : tenant/model
+ * File           : delegation.ts
  * Version        : 1.0.0
  * Author         : Ugondu Engineer
  * Organization   : Ujomor Platform
@@ -31,12 +31,9 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
-
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
-  }
+export interface Delegation {
+  readonly id: string;
+  readonly sourceTenantId: string;
+  readonly targetTenantId: string;
+  readonly permissions: ReadonlyArray<string>;
 }

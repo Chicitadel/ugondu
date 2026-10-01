@@ -1,15 +1,16 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : Tenant Authorization
+ * File           : capability-intersection.ts
  * Version        : 1.0.0
- * Author         : Ugondu Engineer
- * Organization   : Ujomor Platform
+ * Author         : Phase 14 AI Engineer
+ * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -27,16 +28,21 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Ujomor Platform
+ * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
-
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
+export class CapabilityIntersection {
+  /**
+   * Evaluates deterministic intersections of capabilities
+   */
+  public static intersect(capabilitiesA: Set<string>, capabilitiesB: Set<string>): Set<string> {
+    const intersection = new Set<string>();
+    for (const cap of capabilitiesA) {
+      if (capabilitiesB.has(cap)) {
+        intersection.add(cap);
+      }
+    }
+    return intersection;
   }
 }

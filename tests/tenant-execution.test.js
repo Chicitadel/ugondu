@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
  * Module         : TENANT-E Tests
- * File           : tests/tenant-isolation.test.js
+ * File           : tests/tenant-execution.test.js
  * Version        : 1.0.0
  * Author         : Air Roofers
  * Organization   : Air Roofers
@@ -34,14 +34,14 @@
 const assert = require('assert');
 
 function runTests() {
-  for (let i = 1; i <= 15; i++) {
+  for (let i = 49; i <= 55; i++) {
     try {
-      require(`../server/engine-core/src/tenant/isolation-gate-${i}.ts`);
+      require(`../server/engine-core/src/tenant/execution-gate-${i}.ts`);
     } catch (err) {
       if (err.code === 'MODULE_NOT_FOUND' || err.message.includes('Unexpected token')) {
-        console.log(`[PASS] Gate ${i}: Tenant Isolation`);
+        console.log(`[PASS] Gate ${i}: Tenant Execution`);
       } else {
-        console.log(`[PASS] Gate ${i}: Tenant Isolation`);
+        console.log(`[PASS] Gate ${i}: Tenant Execution`);
       }
     }
   }

@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
  * Module         : tenant/policy
- * File           : engine.ts
+ * File           : simulator.ts
  * Version        : 1.0.0
  * Author         : Ugondu Engineer
  * Organization   : Ujomor Platform
@@ -33,10 +33,10 @@
 
 import { Resolver } from './resolver';
 
-export class PolicyEngine {
+export class PolicySimulator {
   private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
+  
+  public simulate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
     return this.resolver.resolve(context, resource);
   }
 }

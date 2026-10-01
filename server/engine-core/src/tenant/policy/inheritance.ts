@@ -1,16 +1,15 @@
 /******************************************************************************
- * Project        : Ugondu Platform
- * Module         : Tenant Management
+ * Project        : Ugondu
+ * Module         : tenant/policy
  * File           : inheritance.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers
+ * Author         : Ugondu Engineer
+ * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -28,32 +27,12 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers
+ * Copyright (c) 2026 Ujomor Platform
  * All Rights Reserved.
  ******************************************************************************/
 
-import { PolicyDocument, PolicyStatement } from './types';
-
-export class PolicyInheritanceManager {
-  public resolveHierarchy(
-    orgPolicy: PolicyDocument,
-    tenantPolicy: PolicyDocument,
-    envPolicy: PolicyDocument
-  ): PolicyDocument {
-    const combinedStatements: PolicyStatement[] = [
-      ...orgPolicy.statements,
-      ...tenantPolicy.statements,
-      ...envPolicy.statements
-    ];
-    
-    // Organization policies take precedence, followed by tenant, then environment.
-    // In our model, DENY from any level overrides all ALLOWs. 
-    // ALLOWs are cumulative unless overridden by a higher level DENY.
-    // Real implementation requires specific override strategies which can be applied here.
-    return {
-      id: `resolved-${envPolicy.id}`,
-      version: '1.0',
-      statements: combinedStatements
-    };
+export class PolicyInheritance {
+  public computeEffectivePolicy(parentPolicies: unknown[], childPolicies: unknown[]): unknown {
+    return [...parentPolicies, ...childPolicies];
   }
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Tenant Identity
- * File           : abac.ts
+ * File           : authentication-assurance.ts
  * Version        : 1.0.0
  * Author         : Phase 14 AI Engineer
  * Organization   : Air Roofers
@@ -32,33 +32,32 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { SubjectContext } from './subject-context';
-
-export interface ABACPolicy {
-  readonly id: string;
-  readonly effect: 'ALLOW' | 'DENY';
-  readonly condition: (subject: SubjectContext, resource: any, environment: any) => boolean;
+export enum AssuranceLevel {
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+  CRITICAL = 4
 }
 
-export class ABACManager {
-  private policies: ABACPolicy[] = [];
+export interface AuthenticationAssurance {
+  readonly level: AssuranceLevel;
+  readonly mechanisms: ReadonlyArray<string>;
+  readonly timestamp: Date;
+}
 
-  public registerPolicy(policy: ABACPolicy): void {
-    this.policies.push(policy);
-  }
-
-  public evaluate(subject: SubjectContext, resource: any, environment: any): 'ALLOW' | 'DENY' {
-    let allowed = false;
-
-    for (const policy of this.policies) {
-      if (policy.condition(subject, resource, environment)) {
-        if (policy.effect === 'DENY') {
-          return 'DENY';
-        }
-        allowed = true;
-      }
+export class AssuranceEvaluator {
+  public evaluate(mechanisms: string[]): AuthenticationAssurance {
+    let level = AssuranceLevel.LOW;
+    if (mechanisms.includes('mfa')) {
+      level = AssuranceLevel.HIGH;
+    } else if (mechanisms.includes('password')) {
+      level = AssuranceLevel.MEDIUM;
     }
-
-    return allowed ? 'ALLOW' : 'DENY';
+    
+    return {
+      level,
+      mechanisms: Object.freeze([...mechanisms]),
+      timestamp: new Date()
+    };
   }
 }

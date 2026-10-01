@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : tenant/model
+ * File           : target.ts
  * Version        : 1.0.0
  * Author         : Ugondu Engineer
  * Organization   : Ujomor Platform
@@ -31,12 +31,9 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
-
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
-  }
+export interface Target {
+  readonly id: string;
+  readonly environmentId: string;
+  readonly endpoint: string;
+  readonly active: boolean;
 }

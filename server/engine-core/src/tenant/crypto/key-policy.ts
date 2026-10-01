@@ -1,15 +1,16 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : Tenant Crypto
+ * File           : key-policy.ts
  * Version        : 1.0.0
- * Author         : Ugondu Engineer
+ * Author         : Elite Phase 14 Ugondu Engineer
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,12 +32,20 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
+export interface KeyPolicy {
+    tenantId: string;
+    rotationIntervalDays: number;
+    allowExport: boolean;
+    requireMfaForRotation: boolean;
+}
 
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
-  }
+export class KeyPolicyEnforcer {
+    public validatePolicy(policy: KeyPolicy): void {
+        if (policy.allowExport) {
+            throw new Error('Key export is strictly prohibited by security governance.');
+        }
+        if (policy.rotationIntervalDays > 90) {
+            throw new Error('Key rotation interval cannot exceed 90 days.');
+        }
+    }
 }

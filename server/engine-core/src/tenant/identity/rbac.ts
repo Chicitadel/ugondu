@@ -1,9 +1,9 @@
 /******************************************************************************
- * Project        : Ugondu Platform
- * Module         : Tenant Management
+ * Project        : Ugondu
+ * Module         : Tenant Identity
  * File           : rbac.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
+ * Author         : Phase 14 AI Engineer
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -33,42 +33,43 @@
  ******************************************************************************/
 
 export interface Role {
-  id: string;
-  name: string;
-  permissions: string[];
-  parents: string[]; // Role IDs that this role inherits from
+  readonly id: string;
+  readonly name: string;
+  readonly permissions: ReadonlyArray<string>;
 }
 
-export class RoleManager {
-  constructor(private roles: Map<string, Role>) {}
+export interface RoleBinding {
+  readonly subjectId: string;
+  readonly roleId: string;
+  readonly tenantId: string;
+}
 
-  public hasPermission(roleIds: string[], requiredPermission: string): boolean {
-    const visitedRoles = new Set<string>();
-    for (const roleId of roleIds) {
-      if (this.checkRolePermission(roleId, requiredPermission, visitedRoles)) {
-        return true;
-      }
-    }
-    return false;
+export class RBACManager {
+  private roles: Map<string, Role> = new Map();
+  private bindings: Map<string, RoleBinding[]> = new Map();
+
+  public registerRole(role: Role): void {
+    this.roles.set(role.id, role);
   }
 
-  private checkRolePermission(roleId: string, requiredPermission: string, visited: Set<string>): boolean {
-    if (visited.has(roleId)) return false;
-    visited.add(roleId);
+  public bindRole(binding: RoleBinding): void {
+    const existing = this.bindings.get(binding.subjectId) || [];
+    this.bindings.set(binding.subjectId, [...existing, binding]);
+  }
 
-    const role = this.roles.get(roleId);
-    if (!role) return false;
+  public getSubjectPermissions(subjectId: string, tenantId: string): Set<string> {
+    const subjectBindings = this.bindings.get(subjectId) || [];
+    const permissions = new Set<string>();
 
-    if (role.permissions.includes(requiredPermission)) {
-      return true;
-    }
-
-    for (const parentId of role.parents) {
-      if (this.checkRolePermission(parentId, requiredPermission, visited)) {
-        return true;
+    for (const binding of subjectBindings) {
+      if (binding.tenantId === tenantId) {
+        const role = this.roles.get(binding.roleId);
+        if (role) {
+          role.permissions.forEach(p => permissions.add(p));
+        }
       }
     }
 
-    return false;
+    return permissions;
   }
 }

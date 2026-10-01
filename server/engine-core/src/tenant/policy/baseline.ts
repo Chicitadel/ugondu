@@ -1,16 +1,15 @@
 /******************************************************************************
- * Project        : Ugondu Platform
- * Module         : Tenant Management
+ * Project        : Ugondu
+ * Module         : tenant/policy
  * File           : baseline.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers
+ * Author         : Ugondu Engineer
+ * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -28,44 +27,12 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers
+ * Copyright (c) 2026 Ujomor Platform
  * All Rights Reserved.
  ******************************************************************************/
 
-import { PolicyDocument, Effect } from './types';
-
-export const BaselineOrganizationPolicy: PolicyDocument = {
-  id: 'baseline-org-001',
-  version: '1.0',
-  statements: [
-    {
-      effect: Effect.DENY,
-      actions: ['admin:deleteOrganization'],
-      resources: ['*']
-    }
-  ]
-};
-
-export const BaselineTenantPolicy: PolicyDocument = {
-  id: 'baseline-tenant-001',
-  version: '1.0',
-  statements: [
-    {
-      effect: Effect.ALLOW,
-      actions: ['resource:read'],
-      resources: ['tenant::*']
-    }
-  ]
-};
-
-export const BaselineEnvironmentPolicy: PolicyDocument = {
-  id: 'baseline-env-001',
-  version: '1.0',
-  statements: [
-    {
-      effect: Effect.ALLOW,
-      actions: ['env:read', 'env:write'],
-      resources: ['env::current']
-    }
-  ]
-};
+export class BaselinePolicy {
+  public getBaseline(): unknown {
+    return {};
+  }
+}

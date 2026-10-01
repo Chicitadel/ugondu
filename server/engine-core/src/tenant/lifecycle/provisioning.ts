@@ -1,15 +1,16 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : Tenant Lifecycle
+ * File           : provisioning.ts
  * Version        : 1.0.0
- * Author         : Ugondu Engineer
+ * Author         : Elite Phase 14 Ugondu Engineer
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,12 +32,17 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
+export interface ProvisioningContext {
+    tenantId: string;
+    tier: 'standard' | 'enterprise';
+    region: string;
+}
 
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
-  }
+export class TenantProvisioner {
+    public provision(context: ProvisioningContext): void {
+        if (!context.tenantId) {
+            throw new Error('Tenant ID required for provisioning execution.');
+        }
+        // Allocate resources, setup isolated database schemas, initialize root key
+    }
 }

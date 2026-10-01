@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : Tenant Integration
- * File           : passport-policy-provider.ts
+ * Module         : Tenant Crypto
+ * File           : tenant-key-context.ts
  * Version        : 1.0.0
  * Author         : Elite Phase 14 Ugondu Engineer
  * Organization   : Ujomor Platform
@@ -32,19 +32,25 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-export interface PassportPolicy {
-    enforceMfa: boolean;
-    allowedRegions: string[];
+export interface TenantKeyContext {
+    tenantId: string;
+    keyId: string;
+    algorithm: 'AES-256-GCM' | 'RSA-4096' | 'Ed25519';
+    derivationPath: string;
+    rotationStatus: 'active' | 'rotated' | 'revoked';
 }
 
-export class PassportPolicyProvider {
-    public getPolicy(tenantId: string): PassportPolicy {
+export class TenantKeyContextResolver {
+    public resolveKeyContext(tenantId: string): TenantKeyContext {
         if (!tenantId) {
-            throw new Error('Tenant ID required to fetch passport policy.');
+            throw new Error('Tenant ID is required for key resolution. Zero-trust enforced.');
         }
         return {
-            enforceMfa: true,
-            allowedRegions: ['us-east-1', 'eu-west-1']
+            tenantId,
+            keyId: `key-${tenantId}-primary`,
+            algorithm: 'AES-256-GCM',
+            derivationPath: `/tenant/${tenantId}/keys`,
+            rotationStatus: 'active'
         };
     }
 }

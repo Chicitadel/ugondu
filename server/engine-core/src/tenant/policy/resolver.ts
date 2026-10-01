@@ -1,16 +1,15 @@
 /******************************************************************************
- * Project        : Ugondu Platform
- * Module         : Tenant Management
+ * Project        : Ugondu
+ * Module         : tenant/policy
  * File           : resolver.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers
+ * Author         : Ugondu Engineer
+ * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -28,33 +27,45 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers
+ * Copyright (c) 2026 Ujomor Platform
  * All Rights Reserved.
  ******************************************************************************/
 
-import { PolicyDocument } from './types';
-import { PolicyInheritanceManager } from './inheritance';
+import { ConflictHandler } from './conflict';
 
-export interface PolicyStore {
-  getOrganizationPolicy(orgId: string): Promise<PolicyDocument>;
-  getTenantPolicy(tenantId: string): Promise<PolicyDocument>;
-  getEnvironmentPolicy(envId: string): Promise<PolicyDocument>;
-}
+export class Resolver {
+  private readonly conflictHandler = new ConflictHandler();
 
-export class PolicyResolver {
-  private inheritanceManager: PolicyInheritanceManager;
+  public resolve(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
+    // Policy resolution must be deterministic (DENY > ALLOW)
+    const evaluatedRules = this.evaluateRules(context, resource);
+    
+    let allowFound = false;
+    let denyFound = false;
+    
+    for (const result of evaluatedRules) {
+      if (result === 'DENY') {
+        denyFound = true;
+      }
+      if (result === 'ALLOW') {
+        allowFound = true;
+      }
+    }
+    
+    if (denyFound && allowFound) {
+       this.conflictHandler.handle(evaluatedRules);
+    }
 
-  constructor(private policyStore: PolicyStore) {
-    this.inheritanceManager = new PolicyInheritanceManager();
+    if (denyFound) {
+      return 'DENY';
+    }
+    if (allowFound) {
+      return 'ALLOW';
+    }
+    return 'DENY'; // Default deny
   }
 
-  public async resolveEffectivePolicy(orgId: string, tenantId: string, envId: string): Promise<PolicyDocument> {
-    const [orgPolicy, tenantPolicy, envPolicy] = await Promise.all([
-      this.policyStore.getOrganizationPolicy(orgId),
-      this.policyStore.getTenantPolicy(tenantId),
-      this.policyStore.getEnvironmentPolicy(envId)
-    ]);
-
-    return this.inheritanceManager.resolveHierarchy(orgPolicy, tenantPolicy, envPolicy);
+  private evaluateRules(context: unknown, resource: unknown): string[] {
+    return [];
   }
 }

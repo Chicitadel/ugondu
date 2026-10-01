@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
  * Module         : tenant/policy
- * File           : engine.ts
+ * File           : conflict.ts
  * Version        : 1.0.0
  * Author         : Ugondu Engineer
  * Organization   : Ujomor Platform
@@ -31,12 +31,15 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConflictError';
+  }
+}
 
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
-
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
+export class ConflictHandler {
+  public handle(rules: string[]): never {
+    throw new ConflictError('Policy conflict detected. Resolution requires explicit action, merging is prohibited.');
   }
 }

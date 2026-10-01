@@ -1,10 +1,10 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : Engine Core / Tenant Integration
+ * Module         : Tenant Integration
  * File           : twin-isolation-guard.ts
  * Version        : 1.0.0
- * Author         : Elite Ugondu Engineer
- * Organization   : Air Roofers
+ * Author         : Elite Phase 14 Ugondu Engineer
+ * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
@@ -28,49 +28,19 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers
+ * Copyright (c) 2026 Ujomor Platform
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Tenant } from '../model/tenant';
-
-export interface TwinInstance {
-    instanceId: string;
-    tenantId: string;
-    environmentId: string;
-    payloadHash: string;
-}
-
 export class TwinIsolationGuard {
-    public static enforceIsolation(sourceTwin: TwinInstance, targetTwin: TwinInstance, sourceTenant: Tenant, targetTenant: Tenant): void {
-        // Enforce structural context integrity
-        if (sourceTwin.tenantId !== sourceTenant.getTenantId()) {
-            throw new Error(`Source twin ${sourceTwin.instanceId} metadata mismatch with provided tenant context`);
+    public verifyIsolation(tenantContextGuard: any, resourceContext: any): void {
+        // Enforce that authority is derived from TenantContextGuard and not caller-supplied
+        const derivedTenantId = tenantContextGuard.getDerivedTenantId();
+        if (!derivedTenantId) {
+            throw new Error('Tenant authority mismatch. No subsystem can accept caller-supplied tenant authority; it must be derived from the TenantContextGuard.');
         }
-        if (targetTwin.tenantId !== targetTenant.getTenantId()) {
-            throw new Error(`Target twin ${targetTwin.instanceId} metadata mismatch with provided tenant context`);
-        }
-
-        // Validate cross-tenant boundary violation requests
-        if (sourceTwin.tenantId !== targetTwin.tenantId) {
-            const sourceBoundary = sourceTenant.getRootBoundary();
-            const targetBoundary = targetTenant.getRootBoundary();
-            
-            // Rejects strict separation leaks cryptographically
-            if (!sourceBoundary.verifyCrossBoundary(targetBoundary)) {
-                throw new Error(`SECURITY VIOLATION: Twin instance ${sourceTwin.instanceId} attempted unauthorized cross-tenant boundary access to ${targetTwin.instanceId}`);
-            }
-        }
-
-        // Validate intra-tenant environment boundary integrity
-        const sourceEnv = sourceTenant.getEnvironment(sourceTwin.environmentId);
-        const targetEnv = targetTenant.getEnvironment(targetTwin.environmentId);
-
-        if (sourceEnv.getEnvironmentId() !== targetEnv.getEnvironmentId()) {
-            const envBoundaryCheck = sourceEnv.getBoundary().verifyCrossBoundary(targetEnv.getBoundary());
-            if (!envBoundaryCheck) {
-                throw new Error(`SECURITY VIOLATION: Twin instance ${sourceTwin.instanceId} attempted to cross cryptographic environment boundaries to ${targetTwin.instanceId}`);
-            }
+        if (resourceContext.tenantId !== derivedTenantId) {
+            throw new Error('Isolation breach: resource belongs to a different tenant.');
         }
     }
 }

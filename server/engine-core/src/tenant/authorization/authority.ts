@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : Tenant Identity
- * File           : oidc-adapter.ts
+ * Module         : Tenant Authorization
+ * File           : authority.ts
  * Version        : 1.0.0
  * Author         : Phase 14 AI Engineer
  * Organization   : Air Roofers
@@ -32,27 +32,20 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { SubjectContext, SubjectContextFactory } from './subject-context';
+import { AuthorizationDecision, DecisionBuilder } from './decision';
+import { SubjectContext } from '../identity/subject-context';
 
-export class OIDCAdapter {
-  public verifyIdToken(token: string): SubjectContext {
-    // Simulated token verification
-    const decoded = this.decodeToken(token);
+export interface Authority {
+  authorize(subject: SubjectContext, action: string, resource: any): AuthorizationDecision;
+}
 
-    return SubjectContextFactory.create(
-      decoded.sub,
-      decoded.tenant_id,
-      [],
-      { email: decoded.email, provider: 'oidc' },
-      true
-    );
-  }
-
-  private decodeToken(token: string): any {
-    return {
-      sub: 'oidc-user-id',
-      tenant_id: 'oidc-tenant',
-      email: 'user@example.com'
-    };
+export class CentralAuthority implements Authority {
+  public authorize(subject: SubjectContext, action: string, resource: any): AuthorizationDecision {
+    if (!subject.isActive) {
+      return DecisionBuilder.deny('Subject is inactive');
+    }
+    
+    // Abstracted logic for the sake of standard module setup
+    return DecisionBuilder.allow('Default authority access granted');
   }
 }

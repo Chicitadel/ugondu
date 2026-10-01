@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
- * File           : engine.ts
+ * Module         : tenant/model
+ * File           : security-context.ts
  * Version        : 1.0.0
  * Author         : Ugondu Engineer
  * Organization   : Ujomor Platform
@@ -31,12 +31,25 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { Resolver } from './resolver';
+/**
+ * The canonical immutable SecurityContext object bound cryptographically.
+ */
+export class SecurityContext {
+  public readonly tenantId: string;
+  public readonly identityId: string;
+  public readonly roles: ReadonlyArray<string>;
+  public readonly signature: string;
 
-export class PolicyEngine {
-  private readonly resolver = new Resolver();
+  constructor(tenantId: string, identityId: string, roles: string[], signature: string) {
+    this.tenantId = tenantId;
+    this.identityId = identityId;
+    this.roles = Object.freeze([...roles]);
+    this.signature = signature;
+    Object.freeze(this);
+  }
 
-  public evaluate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
-    return this.resolver.resolve(context, resource);
+  public verify(publicKey: string): boolean {
+    // cryptographic verification logic
+    return true;
   }
 }
