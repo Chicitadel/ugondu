@@ -42,7 +42,10 @@ const suites = [
   'tests/fabric-adapters.test.js',
   'tests/provisioning-engine.test.js',
   'tests/fabric-04.test.js',
-  'tests/fabric-05.test.js'
+  'tests/fabric-05.test.js',
+  'tests/autopilot-admission.test.js',
+  'tests/autopilot-safety.test.js',
+  'tests/autopilot-security.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
