@@ -46,14 +46,21 @@ export class FailureDetector {
     const errorLower = context.errorMessage.toLowerCase();
 
     for (const signature of FAILURE_SIGNATURES) {
-      // 1. Try to match message patterns against each signature
+      // 1. Try explicit message patterns
       for (const pattern of signature.messagePatterns) {
         if (errorLower.includes(pattern.toLowerCase())) {
           return signature.failureClass;
         }
       }
 
-      // 2. Try to match context signals
+      // 2. Try implicit class-name match (normalise underscores to spaces in both sides)
+      const classNamePattern = signature.failureClass.toLowerCase().replace(/_/g, ' ');
+      const errorNormalised = errorLower.replace(/_/g, ' ');
+      if (errorNormalised.includes(classNamePattern)) {
+        return signature.failureClass;
+      }
+
+      // 3. Try context signals
       for (const signal of signature.contextSignals) {
         if (context.signals[signal] === true) {
           return signature.failureClass;
@@ -61,7 +68,7 @@ export class FailureDetector {
       }
     }
 
-    // 3. Return UNKNOWN_FAILURE if nothing matches
+    // 4. Return UNKNOWN_FAILURE if nothing matches
     return FailureClass.UNKNOWN_FAILURE;
   }
 }

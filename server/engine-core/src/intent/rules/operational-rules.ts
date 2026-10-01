@@ -39,7 +39,7 @@ export function parseOperationalRequirements(text: string): OperationalRequireme
         backup: /(backup|backups)/i.test(text),
         rollback: /(rollback|roll back|revert)/i.test(text),
         monitoring: /(monitor|monitoring|observ|alerts|alert)/i.test(text),
-        autoRecovery: /(auto-recover|automatic recovery|self-heal|self healing)/i.test(text),
+        autoRecovery: /(auto[- ]recover|automatic recovery|self[- ]heal|auto recovery|recovery enabled)/i.test(text),
         scaling: /(scale|scaling|autoscal)/i.test(text)
     };
 }
