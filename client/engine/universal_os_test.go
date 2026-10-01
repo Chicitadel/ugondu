@@ -96,3 +96,57 @@ func TestCopyDirExcludesGitOnly(t *testing.T) {
 		t.Errorf("normal.txt should have been copied: %v", err)
 	}
 }
+
+func TestAtomicSymlinkNoGap(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "symlink-test")
+	defer os.RemoveAll(tmpDir)
+
+	targetA := filepath.Join(tmpDir, "targetA")
+	targetB := filepath.Join(tmpDir, "targetB")
+	symlinkPath := filepath.Join(tmpDir, "current")
+
+	os.Mkdir(targetA, 0755)
+	os.Mkdir(targetB, 0755)
+
+	if err := os.Symlink(targetA, symlinkPath); err != nil {
+		t.Fatalf("setup failed: %v", err)
+	}
+
+	done := make(chan struct{})
+	errCh := make(chan error, 1)
+
+	// Goroutine to constantly read the symlink, expecting no "not found" errors
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			default:
+				_, err := os.Readlink(symlinkPath)
+				if err != nil {
+					errCh <- err
+					return
+				}
+			}
+		}
+	}()
+
+	err := AtomicSymlink(targetB, symlinkPath)
+	if err != nil {
+		t.Fatalf("AtomicSymlink failed: %v", err)
+	}
+
+	close(done)
+
+	select {
+	case err := <-errCh:
+		t.Fatalf("Symlink read gap detected: %v", err)
+	default:
+	}
+
+	linked, _ := os.Readlink(symlinkPath)
+	if linked != targetB {
+		t.Fatalf("Expected symlink to point to %s, got %s", targetB, linked)
+	}
+}
+

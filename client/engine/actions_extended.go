@@ -41,6 +41,7 @@ import (
 	"strings"
 	"time"
 
+	"ugondu/client/engine/adapters"
 	"ugondu/client/i18n"
 )
 
@@ -180,9 +181,8 @@ func (a *ServiceRestartAction) Execute(env *ExecutionEnvelope, payload map[strin
 	if err != nil {
 		return nil, err
 	}
-	// Simplified service restart (e.g., using systemctl)
-	cmd := exec.Command("systemctl", "restart", p.ServiceName)
-	err = cmd.Run()
+	adapter := adapters.NewServiceRestartAdapter()
+	err = adapter.Restart(p.ServiceName)
 	if err != nil {
 		return nil, fmt.Errorf("ERR_SERVICE_RESTART_FAILED: %w", err)
 	}

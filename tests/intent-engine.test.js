@@ -18,7 +18,7 @@
  ******************************************************************************/
 
 const assert = require('assert');
-const { parse } = require('../server/engine-core/src/intent/parser/parser');
+const { parse } = require('../server/engine-core/src/intent/parser/parser.ts');
 
 function runTests() {
     // Test 1: 'Node.js app with PostgreSQL and HTTPS'

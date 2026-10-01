@@ -44,6 +44,7 @@ import (
 	"strings"
 	"time"
 
+	"ugondu/client/engine/adapters"
 	"ugondu/client/i18n"
 )
 
@@ -270,16 +271,16 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 	cmd := exec.Command("git", "pull", p.URL, p.Branch)
 	// Ensure token is completely hidden by configuring temp git credential helper
+	var credFile string
 	if err == nil && parsedUrl != nil && parsedUrl.User != nil {
 		homeDir, _ := os.UserHomeDir()
-		credFile := filepath.Join(homeDir, ".git-credentials-temp")
+		credFile = filepath.Join(homeDir, ".git-credentials-temp")
 		_ = os.WriteFile(credFile, []byte(p.URL+"\n"), 0600)
-		cmd = exec.Command("git", "-c", "credential.helper=store --file="+credFile, "pull", displayUrl, p.Branch)
 		defer os.Remove(credFile)
 	}
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+
+	gitAdapter := adapters.NewGitAdapter()
+	if err := gitAdapter.Pull(displayUrl, p.Branch, ".", credFile); err != nil {
 		return logs, fmt.Errorf("git pull failed: %v", err)
 	}
 	logs = append(logs, fmt.Sprintf("Fetched latest from %s @ %s", p.URL, p.Branch))

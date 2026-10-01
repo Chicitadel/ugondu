@@ -35,6 +35,7 @@ package engine
 
 import (
 	"testing"
+	"ugondu/client/engine/adapters"
 )
 
 func TestActionsRegistry(t *testing.T) {
@@ -102,3 +103,28 @@ func TestPayloadValidators(t *testing.T) {
 		t.Errorf("Expected valid strategy quota-sync, err: %v", err)
 	}
 }
+
+func TestGitAdapterArgSanitization(t *testing.T) {
+	adapter := adapters.NewGitAdapter()
+	err := adapter.Pull("https://github.com/repo.git", "../../../etc/passwd", ".", "")
+	if err == nil {
+		t.Errorf("Expected error for branch name with path traversal")
+	}
+	err = adapter.Pull("file:///etc/passwd", "main", ".", "")
+	if err == nil {
+		t.Errorf("Expected error for invalid repo URL scheme")
+	}
+}
+
+func TestServiceAdapterNameValidation(t *testing.T) {
+	adapter := adapters.NewServiceRestartAdapter()
+	err := adapter.Restart("my-service; rm -rf /")
+	if err == nil {
+		t.Errorf("Expected error for service name with semicolon")
+	}
+	err = adapter.Restart("my service")
+	if err == nil {
+		t.Errorf("Expected error for service name with spaces")
+	}
+}
+

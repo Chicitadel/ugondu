@@ -18,7 +18,7 @@
  ******************************************************************************/
 
 const assert = require('assert');
-const { generate } = require('../server/engine-core/src/architecture/generation/generator');
+const { generate } = require('../server/engine-core/src/architecture/generation/generator.ts');
 
 function runTests() {
     // Test 1: `generate({})` returns array with length >= 2
