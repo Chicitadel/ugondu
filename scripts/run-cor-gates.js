@@ -54,7 +54,13 @@ const suites = [
   'tests/assurance-synthetic.test.js',
   'tests/assurance-backup.test.js',
   'tests/assurance-rpo-rto.test.js',
-  'tests/assurance-certification.test.js'
+  'tests/assurance-certification.test.js',
+  'tests/passport-cryptography.test.js',
+  'tests/passport-integrity.test.js',
+  'tests/passport-authority.test.js',
+  'tests/passport-freshness-replay.test.js',
+  'tests/passport-toctou-reality.test.js',
+  'tests/passport-security-lifecycle.test.js'
 ];
 
 const results = { startedAt: Date.now(), suites: [], passed: 0, failed: 0, skipped: 0, notRun: 0 };
