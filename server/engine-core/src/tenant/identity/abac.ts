@@ -1,0 +1,64 @@
+/******************************************************************************
+ * Project        : Ugondu
+ * Module         : Tenant Identity
+ * File           : abac.ts
+ * Version        : 1.0.0
+ * Author         : Phase 14 AI Engineer
+ * Organization   : Air Roofers
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-01
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - AI Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers
+ * All Rights Reserved.
+ ******************************************************************************/
+
+import { SubjectContext } from './subject-context';
+
+export interface ABACPolicy {
+  readonly id: string;
+  readonly effect: 'ALLOW' | 'DENY';
+  readonly condition: (subject: SubjectContext, resource: any, environment: any) => boolean;
+}
+
+export class ABACManager {
+  private policies: ABACPolicy[] = [];
+
+  public registerPolicy(policy: ABACPolicy): void {
+    this.policies.push(policy);
+  }
+
+  public evaluate(subject: SubjectContext, resource: any, environment: any): 'ALLOW' | 'DENY' {
+    let allowed = false;
+
+    for (const policy of this.policies) {
+      if (policy.condition(subject, resource, environment)) {
+        if (policy.effect === 'DENY') {
+          return 'DENY';
+        }
+        allowed = true;
+      }
+    }
+
+    return allowed ? 'ALLOW' : 'DENY';
+  }
+}

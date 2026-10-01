@@ -3,11 +3,11 @@
  * Project        : Ugondu
  * Module         : Analytics
  * File           : dora.ts
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Delivery Intelligence Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -30,7 +30,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DoraAnalyticsEngine = exports.DeploymentStatus = exports.DoraTier = void 0;
+exports.DoraAnalyticsEngine = exports.DeploymentStatus = exports.EvidenceKind = exports.DoraTier = void 0;
 var DoraTier;
 (function (DoraTier) {
     DoraTier["ELITE"] = "ELITE";
@@ -38,6 +38,13 @@ var DoraTier;
     DoraTier["MEDIUM"] = "MEDIUM";
     DoraTier["LOW"] = "LOW";
 })(DoraTier || (exports.DoraTier = DoraTier = {}));
+var EvidenceKind;
+(function (EvidenceKind) {
+    EvidenceKind["MEASURED"] = "MEASURED";
+    EvidenceKind["CALCULATED"] = "CALCULATED";
+    EvidenceKind["BENCHMARK"] = "BENCHMARK";
+    EvidenceKind["PROJECTED"] = "PROJECTED";
+})(EvidenceKind || (exports.EvidenceKind = EvidenceKind = {}));
 var DeploymentStatus;
 (function (DeploymentStatus) {
     DeploymentStatus["SUCCESS"] = "SUCCESS";
@@ -55,7 +62,15 @@ var DoraAnalyticsEngine = /** @class */ (function () {
                 failedDeploymentRecoveryTimeMs: 0,
                 changeFailureRatePercentage: 0,
                 deploymentReworkRatePercentage: 0,
-                performanceTier: DoraTier.LOW
+                performanceTier: DoraTier.LOW,
+                evidenceKinds: {
+                    changeLeadTimeMs: EvidenceKind.MEASURED,
+                    deploymentFrequencyPerDay: EvidenceKind.MEASURED,
+                    failedDeploymentRecoveryTimeMs: EvidenceKind.CALCULATED,
+                    changeFailureRatePercentage: EvidenceKind.CALCULATED,
+                    deploymentReworkRatePercentage: EvidenceKind.CALCULATED,
+                    performanceTier: EvidenceKind.BENCHMARK
+                }
             };
         }
         var successfulEvents = events.filter(function (e) { return e.status === DeploymentStatus.SUCCESS; });
@@ -102,7 +117,15 @@ var DoraAnalyticsEngine = /** @class */ (function () {
             failedDeploymentRecoveryTimeMs: failedDeploymentRecoveryTimeMs,
             changeFailureRatePercentage: changeFailureRatePercentage,
             deploymentReworkRatePercentage: deploymentReworkRatePercentage,
-            performanceTier: performanceTier
+            performanceTier: performanceTier,
+            evidenceKinds: {
+                changeLeadTimeMs: EvidenceKind.MEASURED,
+                deploymentFrequencyPerDay: EvidenceKind.MEASURED,
+                failedDeploymentRecoveryTimeMs: EvidenceKind.CALCULATED,
+                changeFailureRatePercentage: EvidenceKind.CALCULATED,
+                deploymentReworkRatePercentage: EvidenceKind.CALCULATED,
+                performanceTier: EvidenceKind.BENCHMARK
+            }
         };
     };
     DoraAnalyticsEngine.calculateTier = function (freqPerDay, leadTimeMs, mttrMs, cfrPercentage) {

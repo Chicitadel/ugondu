@@ -1,0 +1,45 @@
+/******************************************************************************
+ * Project        : Ugondu
+ * Module         : doctor::model
+ * File           : recovery_contract.rs
+ * Version        : 1.0.0
+ * Author         : Air Roofers Engineering
+ * Organization   : Air Roofers
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-01
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Human Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers
+ * All Rights Reserved.
+ ******************************************************************************/
+
+// Implementation for recovery_contract.rs
+export type RecoveryStrategy = 'ROLLBACK' | 'FORWARD_RECOVERY' | 'MANUAL_INTERVENTION' | 'RESTART';
+
+export interface RecoveryContract {
+  incidentId: string;
+  strategy: RecoveryStrategy;
+  steps: string[];
+  estimatedRto: number; // seconds
+  requiredCapabilities: string[];
+  authorisedBy: string;
+}

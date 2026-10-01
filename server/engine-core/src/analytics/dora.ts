@@ -2,11 +2,11 @@
  * Project        : Ugondu
  * Module         : Analytics
  * File           : dora.ts
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Delivery Intelligence Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -36,6 +36,13 @@ export enum DoraTier {
   LOW = "LOW"
 }
 
+export enum EvidenceKind {
+  MEASURED    = 'MEASURED',
+  CALCULATED  = 'CALCULATED',
+  BENCHMARK   = 'BENCHMARK',
+  PROJECTED   = 'PROJECTED'
+}
+
 export enum DeploymentStatus {
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
@@ -58,6 +65,14 @@ export interface DoraMetricsResult {
   changeFailureRatePercentage: number;
   deploymentReworkRatePercentage: number;
   performanceTier: DoraTier;
+  evidenceKinds: {
+    changeLeadTimeMs:               EvidenceKind;
+    deploymentFrequencyPerDay:      EvidenceKind;
+    failedDeploymentRecoveryTimeMs: EvidenceKind;
+    changeFailureRatePercentage:    EvidenceKind;
+    deploymentReworkRatePercentage: EvidenceKind;
+    performanceTier:                EvidenceKind;
+  };
 }
 
 export class DoraAnalyticsEngine {
@@ -72,7 +87,15 @@ export class DoraAnalyticsEngine {
         failedDeploymentRecoveryTimeMs: 0,
         changeFailureRatePercentage: 0,
         deploymentReworkRatePercentage: 0,
-        performanceTier: DoraTier.LOW
+        performanceTier: DoraTier.LOW,
+        evidenceKinds: {
+          changeLeadTimeMs:               EvidenceKind.MEASURED,
+          deploymentFrequencyPerDay:      EvidenceKind.MEASURED,
+          failedDeploymentRecoveryTimeMs: EvidenceKind.CALCULATED,
+          changeFailureRatePercentage:    EvidenceKind.CALCULATED,
+          deploymentReworkRatePercentage: EvidenceKind.CALCULATED,
+          performanceTier:                EvidenceKind.BENCHMARK
+        }
       };
     }
 
@@ -128,7 +151,15 @@ export class DoraAnalyticsEngine {
       failedDeploymentRecoveryTimeMs,
       changeFailureRatePercentage,
       deploymentReworkRatePercentage,
-      performanceTier
+      performanceTier,
+      evidenceKinds: {
+        changeLeadTimeMs:               EvidenceKind.MEASURED,
+        deploymentFrequencyPerDay:      EvidenceKind.MEASURED,
+        failedDeploymentRecoveryTimeMs: EvidenceKind.CALCULATED,
+        changeFailureRatePercentage:    EvidenceKind.CALCULATED,
+        deploymentReworkRatePercentage: EvidenceKind.CALCULATED,
+        performanceTier:                EvidenceKind.BENCHMARK
+      }
     };
   }
 

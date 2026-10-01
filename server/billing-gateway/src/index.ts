@@ -1,9 +1,21 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import axios from 'axios';
 import { __t, requireServiceIdentity } from '@ugondu/shared';
 import { tokenStore } from './db';
 
 const app = express();
+const allowedOrigins = [
+  process.env.ENGINE_CORE_ORIGIN || 'http://localhost:3000',
+  process.env.ADMIN_ORIGIN || 'https://admin.airroofers.eu',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS policy violation'), false);
+  }
+}));
 app.use(express.json());
 
 const IDENTITY_AUTHORITY_URL = process.env.IDENTITY_AUTHORITY_URL || 'https://identity.airroofers.eu/api/v1';
@@ -19,10 +31,7 @@ app.get('/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', service: 'billing-gateway', cor_level: 'A' });
 });
 
-if (process.env.NODE_ENV === 'test') {
-    tokenStore.registerToken('ugp_demo123', 'tenant_prof_99', EDITIONS.PROFESSIONAL);
-    tokenStore.registerToken('uge_corp456', 'tenant_ent_11', EDITIONS.ENTERPRISE);
-}
+
 
 app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req: Request, res: Response): Promise<any> => {
     const { token, repositoryUrl } = req.body;

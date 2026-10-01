@@ -109,34 +109,27 @@ func copyFile(src, dst string, mode os.FileMode) error {
 
 // AtomicSymlink creates or updates a symlink to point to the new release.
 // Uses temp-link and rename for POSIX atomic replacement.
-func AtomicSymlink(target string, linkName string) error {
+func AtomicSymlink(target string, symlinkPath string) error {
 	if _, err := os.Stat(target); err != nil {
 		return fmt.Errorf("ERR_TARGET_NOT_FOUND: %w", err)
 	}
 
-	tempLink := linkName + ".tmp"
-	os.Remove(tempLink)
-
-	if err := os.Symlink(target, tempLink); err != nil {
-		return fmt.Errorf("ERR_TEMP_SYMLINK_FAILED: %w", err)
+	// Atomic symlink swap — no deployment gap
+	tempPath := symlinkPath + ".next"
+	// Remove stale .next if exists from a previous interrupted attempt
+	os.Remove(tempPath)
+	
+	// Create new link at temp path
+	if err := os.Symlink(target, tempPath); err != nil {
+		return fmt.Errorf("failed to create temp symlink: %w", err)
 	}
-
-	prevTarget, err := os.Readlink(linkName)
-	hasPrev := (err == nil)
-
-	// os.Rename is atomic on POSIX, replacing existing symlinks.
-	if err := os.Rename(tempLink, linkName); err != nil {
-		// Windows fallback if rename over existing directory symlink fails
-		if _, statErr := os.Lstat(linkName); statErr == nil {
-			os.Remove(linkName)
-		}
-		if fallbackErr := os.Rename(tempLink, linkName); fallbackErr != nil {
-			if hasPrev {
-				os.Symlink(prevTarget, linkName)
-			}
-			return fmt.Errorf("ERR_ATOMIC_SWAP_FAILED_WEAKER_GUARANTEE: %v", fallbackErr)
-		}
+	
+	// Atomic rename (POSIX-atomic on Linux/macOS, best-effort on Windows)
+	if err := os.Rename(tempPath, symlinkPath); err != nil {
+		os.Remove(tempPath) // clean up on failure
+		return fmt.Errorf("failed to atomically promote symlink: %w", err)
 	}
+	
 	return nil
 }
 

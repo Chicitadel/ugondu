@@ -13,6 +13,7 @@
  ******************************************************************************/
 
 import { __t } from '@ugondu/shared';
+import { randomUUID } from 'crypto';
 
 export interface TimelineEvent {
     eventId: string;
@@ -28,7 +29,7 @@ export class DeliveryObservabilityEngine {
 
     public recordEvent(phase: TimelineEvent['phase'], details: string, stepIndex?: number, actionName?: string): void {
         this.timeline.push({
-            eventId: `evt_${Date.now()}_${Math.random().toString(16).substring(2, 8)}`,
+            eventId: `evt_${Date.now()}_${randomUUID()}`,
             phase,
             timestamp: Date.now(),
             stepIndex,

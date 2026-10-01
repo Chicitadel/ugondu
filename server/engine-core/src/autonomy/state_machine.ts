@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Autonomy
  * File           : state_machine.ts
- * Version        : 2.1.0
+ * Version        : 2.2.0
  * Author         : Progressive Autonomy Engineering Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE | INTERNAL
  *
  * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
@@ -24,6 +24,60 @@ export interface AutonomyContext {
     rollbackAvailable?: boolean;
     dualApprovalRequired?: boolean;
     auditTrailReachable?: boolean;
+}
+
+export interface FullAutonomyContext {
+    authenticatedAuthority: string;
+    targetAuthorization: boolean;
+    capabilityIntersectionVerified: boolean;
+    policyVersionHash: string;
+    healthEvidence: { healthy: boolean; verifiedAt: number };
+    rollbackReadiness: boolean;
+    executionTrustScore: number;
+    autonomyPolicyLevel: number;
+    policyViolations: string[];
+}
+
+export interface AutonomyGateVerdict {
+    approved: boolean;
+    reason: string;
+    requiredLevel: number;
+    providedLevel: number;
+}
+
+const ALLOWED_AUTONOMY_AUTHORITIES = new Set<string>([
+    'engine-core', 'billing-gateway', 'plugin-manager',
+    'repository-adapter', 'event-bus', 'test-suite'
+]);
+const HEALTH_EVIDENCE_MAX_AGE_SECONDS = 30;
+const MIN_TRUST_SCORE_L5 = 0.95;
+
+export function requireFullAutonomyContext(
+    ctx: FullAutonomyContext,
+    requiredLevel: 5 | 6
+): AutonomyGateVerdict {
+    if (!ctx.authenticatedAuthority || !ALLOWED_AUTONOMY_AUTHORITIES.has(ctx.authenticatedAuthority))
+        return { approved: false, reason: 'INVALID_AUTHENTICATED_AUTHORITY', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (!ctx.targetAuthorization)
+        return { approved: false, reason: 'TARGET_NOT_AUTHORIZED', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (!ctx.capabilityIntersectionVerified)
+        return { approved: false, reason: 'CAPABILITY_INTERSECTION_NOT_VERIFIED', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (!ctx.policyVersionHash || ctx.policyVersionHash.length < 32)
+        return { approved: false, reason: 'POLICY_VERSION_HASH_MISSING', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (!ctx.healthEvidence.healthy)
+        return { approved: false, reason: 'HEALTH_EVIDENCE_NOT_HEALTHY', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (nowSec - ctx.healthEvidence.verifiedAt > HEALTH_EVIDENCE_MAX_AGE_SECONDS)
+        return { approved: false, reason: 'HEALTH_EVIDENCE_STALE', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (!ctx.rollbackReadiness)
+        return { approved: false, reason: 'ROLLBACK_NOT_READY', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (ctx.executionTrustScore < MIN_TRUST_SCORE_L5)
+        return { approved: false, reason: 'TRUST_SCORE_INSUFFICIENT', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (ctx.autonomyPolicyLevel < requiredLevel)
+        return { approved: false, reason: 'AUTONOMY_LEVEL_INSUFFICIENT', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    if (ctx.policyViolations.length > 0)
+        return { approved: false, reason: 'POLICY_VIOLATIONS_PRESENT', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+    return { approved: true, reason: `L${requiredLevel}_FULL_CONTEXT_APPROVED`, requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
 }
 
 export interface AutonomyDecision {

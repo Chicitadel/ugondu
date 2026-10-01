@@ -82,6 +82,7 @@ type ExecutionEnvelope struct {
 	ArtifactDigest  string                 `json:"artifactDigest"`
 	Capabilities    map[string]interface{} `json:"capabilities"`
 	Signature       string                 `json:"signature"`
+	CanonicalEnvelope string               `json:"-"`
 }
 
 type ExecutionRecipe struct {
@@ -301,6 +302,7 @@ func ParseRecipeLocally(body []byte, apiURL string) (*ExecutionEnvelope, []map[s
 	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &env); err != nil {
 		return nil, nil, fmt.Errorf("invalid envelope format")
 	}
+	env.CanonicalEnvelope = recipe.CanonicalEnvelope
 
 	// Verify Plan Hash
 	hash := sha256.Sum256([]byte(recipe.CanonicalSteps))
@@ -343,6 +345,18 @@ func verifySignature(envelope string, sigBase64 string, pubKeyPem string) error 
 // ExecuteRecipe iterates through the steps and runs them natively with locking and persistence verification.
 func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]string, error) {
 	var logs []string
+
+	// Step 0 — Cryptographic Pre-Admission (MUST precede all other checks)
+	pubKeyPem := os.Getenv("UGONDU_RECIPE_PUBLIC_KEY")
+	if pubKeyPem == "" {
+		return logs, fmt.Errorf("%s", i18n.T("err_missing_public_key"))
+	}
+	if env.Signature == "" || env.CanonicalEnvelope == "" {
+		return logs, fmt.Errorf("%s", i18n.T("err_signature_invalid"))
+	}
+	if err := verifySignature(env.CanonicalEnvelope, env.Signature, pubKeyPem); err != nil {
+		return logs, fmt.Errorf("%s: %w", i18n.T("err_signature_invalid"), err)
+	}
 
 	// 1. Replay Ledger Validation
 	if err := CheckAndRecordReplay(env.Issuer, env.KeyId, env.TransactionId, env.ExecutionId, env.Nonce, env.ExpiresAt); err != nil {

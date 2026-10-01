@@ -35,9 +35,10 @@ import cors from 'cors';
 import { randomBytes, generateKeyPairSync, sign, createPrivateKey, createPublicKey, createHash, KeyObject } from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios';
+import { hardenedPost, hardenedGet } from './http/hardened-client';
 import { __t, signServiceIdentity } from '@ugondu/shared';
 import canonicalize from 'canonicalize';
+import { KeyLoader, KeyState } from './crypto/key-loader';
 
 const app = express();
 const allowedOrigins = [
@@ -62,43 +63,22 @@ const PRIV_KEY_PATH = path.join(KEYS_DIR, 'ed25519_private.pem');
 const PUB_KEY_PATH = path.join(KEYS_DIR, 'ed25519_public.pem');
 const KEY_ID_PATH = path.join(KEYS_DIR, 'key_id.txt');
 
-interface KeyState {
-    privateKey: KeyObject;
-    publicKey: KeyObject;
-    keyId: string;
-    publicKeyPem: string;
-}
-
 function loadOrGeneratePersistentKeys(): KeyState {
-    if (!fs.existsSync(KEYS_DIR)) {
-        fs.mkdirSync(KEYS_DIR, { recursive: true });
-    }
-
-    if (fs.existsSync(PRIV_KEY_PATH) && fs.existsSync(PUB_KEY_PATH) && fs.existsSync(KEY_ID_PATH)) {
-        const privPem = fs.readFileSync(PRIV_KEY_PATH, 'utf-8');
-        const pubPem = fs.readFileSync(PUB_KEY_PATH, 'utf-8');
-        const keyId = fs.readFileSync(KEY_ID_PATH, 'utf-8').trim();
-        const privateKey = createPrivateKey(privPem);
-        const publicKey = createPublicKey(pubPem);
+    try {
+        return new KeyLoader().load();
+    } catch (err) {
+        if (process.env.NODE_ENV === 'production') throw err;
+        if (!fs.existsSync(KEYS_DIR)) fs.mkdirSync(KEYS_DIR, { recursive: true });
+        const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+        const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
+        const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
+        const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
+        fs.writeFileSync(PRIV_KEY_PATH, privPem, { encoding: 'utf-8', mode: 0o600 });
+        try { fs.chmodSync(PRIV_KEY_PATH, 0o600); } catch {}
+        fs.writeFileSync(PUB_KEY_PATH, pubPem, { encoding: 'utf-8' });
+        fs.writeFileSync(KEY_ID_PATH, keyId, { encoding: 'utf-8' });
         return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
     }
-
-    // Generate once, persist with 0600 permissions
-    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
-    const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
-    const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
-    const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
-
-    fs.writeFileSync(PRIV_KEY_PATH, privPem, { encoding: 'utf-8', mode: 0o600 });
-    try {
-        fs.chmodSync(PRIV_KEY_PATH, 0o600);
-    } catch {
-        // Fallback for non-POSIX environments
-    }
-    fs.writeFileSync(PUB_KEY_PATH, pubPem, { encoding: 'utf-8' });
-    fs.writeFileSync(KEY_ID_PATH, keyId, { encoding: 'utf-8' });
-
-    return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
 }
 
 const keyState = loadOrGeneratePersistentKeys();
@@ -147,7 +127,9 @@ function isPluginRequired(pluginItem: any, reqBody: any): boolean {
     return false;
 }
 
-app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
+import { passportGuardMiddleware } from './middleware/passport-guard.middleware';
+
+app.post('/v1/deploy/resolve', passportGuardMiddleware, async (req, res): Promise<any> => {
     const { repositoryUrl, branch, fileMap, targetEnvironment, token, projectId, workspaceId, targetId, agentId, agentVersion } = req.body;
     
     if (!repositoryUrl || !branch || !targetEnvironment || !token || !projectId || !workspaceId || !targetId || !agentId || !agentVersion) {
@@ -156,7 +138,8 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
 
     try {
         const bgAuth = signServiceIdentity('engine-core', 'billing-gateway');
-        const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }, { headers: { Authorization: `Bearer ${bgAuth}` } }).catch(() => null);
+        const authResponseStr = await hardenedPost(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }, { headers: { Authorization: `Bearer ${bgAuth}` } }).catch(() => null);
+        const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
         if (!authResponse || !authResponse.data || !authResponse.data.edition) {
             return res.status(402).json({ error: __t('blocked') });
         }
@@ -184,10 +167,11 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
         let discoveredPlugins: any[] = [];
 
         try {
-            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`, {
+            const pluginsResponseStr = await hardenedGet(`${PLUGIN_MANAGER_URL}/plugins`, {
                 headers: { Authorization: `Bearer ${pmAuth}` },
                 timeout: 5000
             });
+            const pluginsResponse = pluginsResponseStr ? { data: JSON.parse(pluginsResponseStr) } : null;
             if (pluginsResponse && pluginsResponse.data && Array.isArray(pluginsResponse.data.plugins)) {
                 discoveredPlugins = pluginsResponse.data.plugins;
             }
@@ -248,7 +232,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
             let execFailed = false;
 
             try {
-                execResponse = await axios.post(
+                const execResponseStr = await hardenedPost(
                     `${PLUGIN_MANAGER_URL}/plugins/${encodeURIComponent(pluginName)}/execute`,
                     {
                         payload: {},
@@ -260,6 +244,7 @@ app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
                         timeout: 5000
                     }
                 );
+                const execResponse = execResponseStr ? { status: 200, data: JSON.parse(execResponseStr) } : null;
 
                 if (!execResponse || execResponse.status !== 200 || !execResponse.data || execResponse.data.error || !Array.isArray(execResponse.data.injectedSteps)) {
                     execFailed = true;

@@ -44,6 +44,7 @@ import (
 	"time"
 
 	"ugondu/client/engine"
+	"ugondu/client/engine/adapters"
 	"ugondu/client/i18n"
 )
 
@@ -441,7 +442,8 @@ func ParseAndRun(args []string) {
 
 // Helpers for git
 func getGitRemoteUrl() string {
-	out, err := runGit("config", "--get", "remote.origin.url")
+	adapter := adapters.NewGitAdapter()
+	out, err := adapter.GetRemoteURL(".")
 	if err != nil {
 		return "local-repo"
 	}
@@ -449,15 +451,10 @@ func getGitRemoteUrl() string {
 }
 
 func getGitBranch() string {
-	out, err := runGit("rev-parse", "--abbrev-ref", "HEAD")
+	adapter := adapters.NewGitAdapter()
+	out, err := adapter.GetBranch(".")
 	if err != nil {
 		return "main"
 	}
 	return strings.TrimSpace(out)
-}
-
-func runGit(args ...string) (string, error) {
-	cmd := exec.Command("git", args...)
-	out, err := cmd.Output()
-	return string(out), err
 }

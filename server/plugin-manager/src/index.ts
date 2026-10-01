@@ -32,6 +32,7 @@
  ******************************************************************************/
 
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -40,6 +41,16 @@ import { pluginStore } from './db';
 import { executePluginSandbox } from './sandbox';
 
 const app = express();
+const allowedOrigins = [
+  process.env.ENGINE_CORE_ORIGIN || 'http://localhost:3000',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS policy violation'), false);
+  }
+}));
 app.use(express.json());
 
 const PLUGINS_DIR = process.env.PLUGINS_DIR || path.resolve(__dirname, '../../../plugins');
@@ -55,13 +66,7 @@ interface PluginMetadata {
 
 export function loadPublicKey(): string {
     const candidatePaths = [
-        process.env.PLUGIN_PUB_KEY_PATH,
-        path.resolve(__dirname, '../../../plugin_pub.pem'),
-        path.resolve(__dirname, '../plugin_pub.pem'),
-        path.resolve(__dirname, '../../plugin_pub.pem'),
-        path.resolve(process.cwd(), 'plugin_pub.pem'),
-        path.resolve(process.cwd(), '../plugin_pub.pem'),
-        path.resolve(PLUGINS_DIR, '../plugin_pub.pem')
+        process.env.PLUGIN_AUTHORITY_PUBLIC_KEY_PATH || path.resolve(__dirname, '../../../../config/trust/plugin_authority.pub.pem')
     ].filter(Boolean) as string[];
 
     for (const candPath of candidatePaths) {

@@ -65,7 +65,13 @@ jobs:
   build-client:
     name: Build Go Thin-Client
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: windows
+            goarch: arm64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -81,19 +87,25 @@ jobs:
         working-directory: client
         run: go vet ./...
 
-      - name: Build ugondu client binary (linux/amd64)
+      - name: Build ugondu client binary (${{ matrix.goos }}/${{ matrix.goarch }})
         working-directory: client
         env:
-          GOOS: linux
-          GOARCH: amd64
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: '0'
-        run: go build -ldflags="-s -w" -o ugondu-linux-amd64 .
+        run: |
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXT=".exe"
+          else
+            EXT=""
+          fi
+          go build -ldflags="-s -w" -o ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT .
 
       - name: Upload client binary
         uses: actions/upload-artifact@v4
         with:
-          name: ugondu-client-linux-amd64
-          path: client/ugondu-linux-amd64
+          name: ugondu-client-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: client/ugondu-${{ matrix.goos }}-${{ matrix.goarch }}*
           retention-days: 7
 
 
