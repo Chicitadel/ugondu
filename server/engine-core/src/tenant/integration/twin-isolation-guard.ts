@@ -44,3 +44,32 @@ export class TwinIsolationGuard {
         }
     }
 }
+
+export class TenantIsolationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'TenantIsolationError';
+    }
+}
+
+export class TenantContextGuard {
+    public assertContext(securityContext: any): void {
+        if (!securityContext) {
+            throw new TenantIsolationError('Security context is null or undefined');
+        }
+        const tenantId = securityContext.tenantId;
+        
+        if (!tenantId || typeof tenantId !== 'string' || tenantId.trim() === '') {
+            throw new TenantIsolationError('tenantId must be a non-empty string');
+        }
+        
+        if (!securityContext.tenant || tenantId !== securityContext.tenant.id) {
+            throw new TenantIsolationError('tenantId does not match securityContext.tenant.id');
+        }
+        
+        if (securityContext.organizationId && securityContext.tenant.organizationId && 
+            securityContext.organizationId !== securityContext.tenant.organizationId) {
+            throw new TenantIsolationError('organizationId is inconsistent with tenantId');
+        }
+    }
+}

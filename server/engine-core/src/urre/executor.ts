@@ -35,10 +35,16 @@ import { ExecutionEnvelope } from '../types/passport';
 import { ExecutionTask, ExecutionResult } from '../types/execution';
 import { EngineInternal } from '../engine-internal';
 
+import { TenantContextGuard } from '../tenant/integration/twin-isolation-guard';
+
 export class Executor {
     constructor(private readonly engine: EngineInternal) {}
 
-    public async execute(envelope: ExecutionEnvelope, task: ExecutionTask): Promise<ExecutionResult> {
+    public async execute(envelope: any, task: ExecutionTask): Promise<ExecutionResult> {
+        // Tenant isolation gate — MUST precede all execution logic
+        const guard = new TenantContextGuard();
+        guard.assertContext(envelope?.securityContext);
+
         if (!envelope || !envelope.signature) {
             throw new Error('Execution blocked: Missing valid ExecutionEnvelope');
         }

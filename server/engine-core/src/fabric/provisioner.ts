@@ -35,10 +35,16 @@ import { ExecutionEnvelope } from '../types/passport';
 import { ProvisioningTask, ProvisioningResult } from '../types/fabric';
 import { FabricController } from '../fabric-controller';
 
+import { TenantContextGuard } from '../tenant/integration/twin-isolation-guard';
+
 export class Provisioner {
     constructor(private readonly controller: FabricController) {}
 
-    public async provision(envelope: ExecutionEnvelope, task: ProvisioningTask): Promise<ProvisioningResult> {
+    public async provision(envelope: any, task: ProvisioningTask): Promise<ProvisioningResult> {
+        // Tenant isolation gate — MUST precede all execution logic
+        const guard = new TenantContextGuard();
+        guard.assertContext(envelope?.securityContext);
+
         if (!envelope || !envelope.signature) {
             throw new Error('Provisioning blocked: Missing valid ExecutionEnvelope');
         }
