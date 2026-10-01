@@ -46,7 +46,7 @@ export enum ResourceState {
 
 export class InvalidTransitionError extends Error {
   constructor(from: ResourceState, to: ResourceState) {
-    super(Invalid state transition:  -> );
+    super(`Invalid state transition: ${from} -> ${to}`);
     this.name = 'InvalidTransitionError';
   }
 }

@@ -49,17 +49,17 @@ export class FabricRegistry {
   
   public resolveCompute(providerId: string): ComputeCapability {
     const adapter = this.computeAdapters.get(providerId);
-    if (!adapter) throw new Error(No compute adapter found for );
+    if (!adapter) throw new Error(`No compute adapter found for provider: ${providerId}`);
     return adapter;
   }
-  
+
   public registerNetworkAdapter(providerId: string, adapter: NetworkCapability): void {
     this.networkAdapters.set(providerId, adapter);
   }
-  
+
   public resolveNetwork(providerId: string): NetworkCapability {
     const adapter = this.networkAdapters.get(providerId);
-    if (!adapter) throw new Error(No network adapter found for );
+    if (!adapter) throw new Error(`No network adapter found for provider: ${providerId}`);
     return adapter;
   }
 }

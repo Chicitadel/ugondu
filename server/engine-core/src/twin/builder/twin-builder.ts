@@ -97,7 +97,7 @@ export class TwinBuilder {
                 }
                 break;
             default:
-                throw new Error(Unknown event type: );
+            throw new Error(`Unknown event type: ${event.eventType}`);
         }
     }
 }
