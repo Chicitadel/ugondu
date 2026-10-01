@@ -32,6 +32,7 @@
  ******************************************************************************/
 
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -40,6 +41,16 @@ import { pluginStore } from './db';
 import { executePluginSandbox } from './sandbox';
 
 const app = express();
+const allowedOrigins = [
+  process.env.ENGINE_CORE_ORIGIN || 'http://localhost:3000',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS policy violation'), false);
+  }
+}));
 app.use(express.json());
 
 const PLUGINS_DIR = process.env.PLUGINS_DIR || path.resolve(__dirname, '../../../plugins');

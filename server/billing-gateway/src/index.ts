@@ -1,9 +1,21 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import axios from 'axios';
 import { __t, requireServiceIdentity } from '@ugondu/shared';
 import { tokenStore } from './db';
 
 const app = express();
+const allowedOrigins = [
+  process.env.ENGINE_CORE_ORIGIN || 'http://localhost:3000',
+  process.env.ADMIN_ORIGIN || 'https://admin.airroofers.eu',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS policy violation'), false);
+  }
+}));
 app.use(express.json());
 
 const IDENTITY_AUTHORITY_URL = process.env.IDENTITY_AUTHORITY_URL || 'https://identity.airroofers.eu/api/v1';

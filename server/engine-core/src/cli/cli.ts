@@ -31,6 +31,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 import { Command } from 'commander';
+import { __t } from '@ugondu/shared';
 import { PassportCompiler } from '../passport/compiler/passport-compiler';
 import { GatekeeperService } from '../passport/gatekeeper/gatekeeper-service';
 import { IntentParser } from '../passport/parser/intent-parser';
@@ -55,9 +56,9 @@ export function bootstrapCli(args: string[]): void {
         const intent = await parser.parseFile(intentFile);
         const passport = await compiler.compile(intent);
         const receipt = await gatekeeper.execute(passport.id, { action: 'deploy' });
-        console.log(`Deploy execution receipt: ${JSON.stringify(receipt, null, 2)}`);
+        console.log(`${__t('cli_deploy_receipt')} ${JSON.stringify(receipt, null, 2)}`);
       } catch (error) {
-        console.error('Deployment failed:', error);
+        console.error(__t('cli_deploy_failed'), error);
         process.exit(1);
       }
     });
@@ -71,9 +72,9 @@ export function bootstrapCli(args: string[]): void {
         const intent = await parser.parseFile(intentFile);
         const passport = await compiler.compile(intent);
         const receipt = await gatekeeper.execute(passport.id, { action: 'move' });
-        console.log(`Move execution receipt: ${JSON.stringify(receipt, null, 2)}`);
+        console.log(`${__t('cli_move_receipt')} ${JSON.stringify(receipt, null, 2)}`);
       } catch (error) {
-        console.error('Move failed:', error);
+        console.error(__t('cli_move_failed'), error);
         process.exit(1);
       }
     });
@@ -87,7 +88,7 @@ export function bootstrapCli(args: string[]): void {
         const intent = await parser.parseFile(intentFile);
         const passport = await compiler.compile(intent);
         const receipt = await gatekeeper.execute(passport.id, { action: 'remediate' });
-        console.log(`Remediation execution receipt: ${JSON.stringify(receipt, null, 2)}`);
+        console.log(`${__t('cli_remediation_receipt')} ${JSON.stringify(receipt, null, 2)}`);
       } catch (error) {
         console.error('Remediation failed:', error);
         process.exit(1);
@@ -101,7 +102,7 @@ export function bootstrapCli(args: string[]): void {
     .action(async (passportId) => {
       try {
         const passport = await compiler.inspect(passportId);
-        console.log(`Passport details:\n${JSON.stringify(passport, null, 2)}`);
+        console.log(`${__t('cli_passport_details')}\n${JSON.stringify(passport, null, 2)}`);
       } catch (error) {
         console.error('Inspection failed:', error);
         process.exit(1);
@@ -117,9 +118,9 @@ export function bootstrapCli(args: string[]): void {
         const intent = await parser.parseFile(intentFile);
         intent.priority = 'EMERGENCY';
         const passport = await compiler.compile(intent);
-        console.log(`Emergency passport created: ${passport.id}`);
+        console.log(`${__t('cli_emergency_created')} ${passport.id}`);
       } catch (error) {
-        console.error('Emergency creation failed:', error);
+        console.error(__t('cli_emergency_failed'), error);
         process.exit(1);
       }
     });

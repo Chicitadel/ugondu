@@ -35,7 +35,7 @@ import cors from 'cors';
 import { randomBytes, generateKeyPairSync, sign, createPrivateKey, createPublicKey, createHash, KeyObject } from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios';
+import { hardenedPost, hardenedGet } from './http/hardened-client';
 import { __t, signServiceIdentity } from '@ugondu/shared';
 import canonicalize from 'canonicalize';
 import { KeyLoader, KeyState } from './crypto/key-loader';
@@ -138,7 +138,8 @@ app.post('/v1/deploy/resolve', passportGuardMiddleware, async (req, res): Promis
 
     try {
         const bgAuth = signServiceIdentity('engine-core', 'billing-gateway');
-        const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }, { headers: { Authorization: `Bearer ${bgAuth}` } }).catch(() => null);
+        const authResponseStr = await hardenedPost(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }, { headers: { Authorization: `Bearer ${bgAuth}` } }).catch(() => null);
+        const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
         if (!authResponse || !authResponse.data || !authResponse.data.edition) {
             return res.status(402).json({ error: __t('blocked') });
         }
@@ -166,10 +167,11 @@ app.post('/v1/deploy/resolve', passportGuardMiddleware, async (req, res): Promis
         let discoveredPlugins: any[] = [];
 
         try {
-            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`, {
+            const pluginsResponseStr = await hardenedGet(`${PLUGIN_MANAGER_URL}/plugins`, {
                 headers: { Authorization: `Bearer ${pmAuth}` },
                 timeout: 5000
             });
+            const pluginsResponse = pluginsResponseStr ? { data: JSON.parse(pluginsResponseStr) } : null;
             if (pluginsResponse && pluginsResponse.data && Array.isArray(pluginsResponse.data.plugins)) {
                 discoveredPlugins = pluginsResponse.data.plugins;
             }
@@ -230,7 +232,7 @@ app.post('/v1/deploy/resolve', passportGuardMiddleware, async (req, res): Promis
             let execFailed = false;
 
             try {
-                execResponse = await axios.post(
+                const execResponseStr = await hardenedPost(
                     `${PLUGIN_MANAGER_URL}/plugins/${encodeURIComponent(pluginName)}/execute`,
                     {
                         payload: {},
@@ -242,6 +244,7 @@ app.post('/v1/deploy/resolve', passportGuardMiddleware, async (req, res): Promis
                         timeout: 5000
                     }
                 );
+                const execResponse = execResponseStr ? { status: 200, data: JSON.parse(execResponseStr) } : null;
 
                 if (!execResponse || execResponse.status !== 200 || !execResponse.data || execResponse.data.error || !Array.isArray(execResponse.data.injectedSteps)) {
                     execFailed = true;
