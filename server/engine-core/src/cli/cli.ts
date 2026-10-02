@@ -30,105 +30,84 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
-import { Command } from 'commander';
 import { __t } from '@ugondu/shared';
 import { PassportCompiler } from '../passport/compiler/passport-compiler';
 import { GatekeeperService } from '../passport/gatekeeper/gatekeeper-service';
 import { IntentParser } from '../passport/parser/intent-parser';
 
-export function bootstrapCli(args: string[]): void {
-  const program = new Command();
-  const compiler = new PassportCompiler();
-  const gatekeeper = new GatekeeperService();
-  const parser = new IntentParser();
+const compiler = new PassportCompiler();
+const gatekeeper = new GatekeeperService();
+const parser = new IntentParser();
 
-  program
-    .name('ugondu')
-    .description('Ugondu Autonomous Orchestration Engine CLI')
-    .version('1.0.0');
-
-  program
-    .command('deploy')
-    .description('Deploy an infrastructure or service intent')
-    .argument('<intentFile>', 'Path to the intent definition file')
-    .action(async (intentFile) => {
-      try {
-        const intent = await parser.parseFile(intentFile);
-        const passport = await compiler.compile(intent);
-        const receipt = await gatekeeper.execute(passport.id, { action: 'deploy' });
-        console.log(`${__t('cli_deploy_receipt')} ${JSON.stringify(receipt, null, 2)}`);
-      } catch (error) {
-        console.error(__t('cli_deploy_failed'), error);
-        process.exit(1);
-      }
-    });
-
-  program
-    .command('move')
-    .description('Move workloads or data between boundaries')
-    .argument('<intentFile>', 'Path to the intent definition file')
-    .action(async (intentFile) => {
-      try {
-        const intent = await parser.parseFile(intentFile);
-        const passport = await compiler.compile(intent);
-        const receipt = await gatekeeper.execute(passport.id, { action: 'move' });
-        console.log(`${__t('cli_move_receipt')} ${JSON.stringify(receipt, null, 2)}`);
-      } catch (error) {
-        console.error(__t('cli_move_failed'), error);
-        process.exit(1);
-      }
-    });
-
-  program
-    .command('remediate')
-    .description('Apply automated remediation from intent')
-    .argument('<intentFile>', 'Path to the remediation intent')
-    .action(async (intentFile) => {
-      try {
-        const intent = await parser.parseFile(intentFile);
-        const passport = await compiler.compile(intent);
-        const receipt = await gatekeeper.execute(passport.id, { action: 'remediate' });
-        console.log(`${__t('cli_remediation_receipt')} ${JSON.stringify(receipt, null, 2)}`);
-      } catch (error) {
-        console.error('Remediation failed:', error);
-        process.exit(1);
-      }
-    });
-
-  program
-    .command('passport inspect')
-    .description('Inspect an existing compiled passport')
-    .argument('<passportId>', 'ID of the passport')
-    .action(async (passportId) => {
-      try {
-        const passport = await compiler.inspect(passportId);
-        console.log(`${__t('cli_passport_details')}\n${JSON.stringify(passport, null, 2)}`);
-      } catch (error) {
-        console.error('Inspection failed:', error);
-        process.exit(1);
-      }
-    });
-
-  program
-    .command('emergency create')
-    .description('Create an emergency intent passport')
-    .argument('<intentFile>', 'Path to the emergency intent')
-    .action(async (intentFile) => {
-      try {
-        const intent = await parser.parseFile(intentFile);
-        intent.priority = 'EMERGENCY';
-        const passport = await compiler.compile(intent);
-        console.log(`${__t('cli_emergency_created')} ${passport.id}`);
-      } catch (error) {
-        console.error(__t('cli_emergency_failed'), error);
-        process.exit(1);
-      }
-    });
-
-  program.parse(args);
+async function runDeploy(intentFile: string): Promise<void> {
+  const intent = await parser.parseFile(intentFile);
+  const passport = await compiler.compile(intent);
+  const receipt = await gatekeeper.execute(passport.id, { action: 'deploy' });
+  console.log(`${__t('cli_deploy_receipt')} ${JSON.stringify(receipt, null, 2)}`);
 }
 
-// If executed directly
+async function runMove(intentFile: string): Promise<void> {
+  const intent = await parser.parseFile(intentFile);
+  const passport = await compiler.compile(intent);
+  const receipt = await gatekeeper.execute(passport.id, { action: 'move' });
+  console.log(`${__t('cli_move_receipt')} ${JSON.stringify(receipt, null, 2)}`);
+}
+
+async function runRemediate(intentFile: string): Promise<void> {
+  const intent = await parser.parseFile(intentFile);
+  const passport = await compiler.compile(intent);
+  const receipt = await gatekeeper.execute(passport.id, { action: 'remediate' });
+  console.log(`${__t('cli_remediation_receipt')} ${JSON.stringify(receipt, null, 2)}`);
+}
+
+async function runPassportInspect(passportId: string): Promise<void> {
+  const passport = await compiler.inspect(passportId);
+  console.log(`${__t('cli_passport_details')}\n${JSON.stringify(passport, null, 2)}`);
+}
+
+async function runEmergencyCreate(intentFile: string): Promise<void> {
+  const intent = await parser.parseFile(intentFile);
+  intent.priority = 'EMERGENCY';
+  const passport = await compiler.compile(intent);
+  console.log(`${__t('cli_emergency_created')} ${passport.id}`);
+}
+
+export async function bootstrapCli(args: string[]): Promise<void> {
+  const [command, ...rest] = args.slice(2);
+
+  try {
+    switch (command) {
+      case 'deploy':
+        await runDeploy(rest[0] ?? '');
+        break;
+      case 'move':
+        await runMove(rest[0] ?? '');
+        break;
+      case 'remediate':
+        await runRemediate(rest[0] ?? '');
+        break;
+      case 'passport':
+        if (rest[0] === 'inspect') await runPassportInspect(rest[1] ?? '');
+        else console.error(`Unknown passport subcommand: ${rest[0]}`);
+        break;
+      case 'emergency':
+        if (rest[0] === 'create') await runEmergencyCreate(rest[1] ?? '');
+        else console.error(`Unknown emergency subcommand: ${rest[0]}`);
+        break;
+      default:
+        console.log('Ugondu CLI v1.0.0');
+        console.log('Commands: deploy, move, remediate, passport inspect, emergency create');
+    }
+  } catch (error) {
+    console.error(__t('cli_deploy_failed'), error);
+    process.exit(1);
+  }
+}
+
 if (require.main === module) {
-  bootstrapCli(process.argv);
+  bootstrapCli(process.argv).catch((err: Error) => {
+    console.error(err.message);
+    process.exit(1);
+  });
 }
+

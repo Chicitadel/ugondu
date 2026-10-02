@@ -26,7 +26,8 @@ function post(port, path, body) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(data)
+                'Content-Length': Buffer.byteLength(data),
+                'X-Ugondu-Passport-Id': 'valid_passport_id'
             }
         };
         const req = http.request(options, (res) => {
@@ -64,9 +65,9 @@ if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY) {
             if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/\\n/g, '\n');
         }
     }
-    if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY) {
+    if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
         const { generateKeyPairSync } = require('crypto');
-        const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+        const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
         process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
         process.env.UGONDU_SERVICE_TEST_PUBKEY = publicKey.export({ type: 'spki', format: 'pem' }).toString();
         process.env.UGONDU_SERVICE_TEST_KEY_ID = 'key_service_test_v1';
@@ -136,6 +137,7 @@ async function runTests() {
             agentVersion: '2.0.0'
         });
         // [en] May be 200 or 402 depending on billing gateway availability
+        console.log(r); if(r.status===500) console.log(r.body.error);
         assert.ok([200, 402].includes(r.status), `[en] Expected 200 or 402, got ${r.status}`);
         if (r.status === 200) {
             assert.ok(r.body.transactionId, '[en] Expected transactionId in response');

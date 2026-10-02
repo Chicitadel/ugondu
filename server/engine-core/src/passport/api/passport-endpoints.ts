@@ -41,7 +41,7 @@ export function setupPassportEndpoints(router: Router): void {
   router.post('/passport/compile', async (req: Request, res: Response) => {
     try {
       const intentPayload = req.body;
-      const parsedIntent = parser.parse(intentPayload);
+      const parsedIntent = await parser.parse(intentPayload);
       const passport = await compiler.compile(parsedIntent);
       
       res.status(200).json({

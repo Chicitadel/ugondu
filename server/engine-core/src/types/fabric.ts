@@ -1,9 +1,9 @@
 /******************************************************************************
  * Project        : Ugondu Platform
- * Module         : Passport Gatekeeper
- * File           : lifecycle.ts
+ * Module         : Fabric Types
+ * File           : fabric.ts
  * Version        : 1.0.0
- * Author         : Engineering Team
+ * Author         : Platform Engineering Team
  * Organization   : Air Roofers
  * Created Date   : 2026-10-02
  * Last Modified  : 2026-10-02
@@ -31,10 +31,19 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-export enum LifecycleState {
-    ISSUED   = 'ISSUED',
-    ACTIVE   = 'ACTIVE',
-    CONSUMED = 'CONSUMED',
-    EXPIRED  = 'EXPIRED',
-    REVOKED  = 'REVOKED'
+export interface ProvisioningTask {
+  contextId: string;
+  targetId: string;
+  resourceType: string;
+  provider: string;
+  config: Record<string, unknown>;
+}
+
+export interface ProvisioningResult {
+  contextId: string;
+  targetId: string;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  resources: Array<{ id: string; type: string; status: string }>;
+  completedAt: Date;
+  error?: string;
 }

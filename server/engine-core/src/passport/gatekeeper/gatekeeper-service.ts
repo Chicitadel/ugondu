@@ -1,9 +1,9 @@
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Passport Gatekeeper
- * File           : lifecycle.ts
+ * File           : gatekeeper-service.ts
  * Version        : 1.0.0
- * Author         : Engineering Team
+ * Author         : Platform Engineering Team
  * Organization   : Air Roofers
  * Created Date   : 2026-10-02
  * Last Modified  : 2026-10-02
@@ -31,10 +31,30 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-export enum LifecycleState {
-    ISSUED   = 'ISSUED',
-    ACTIVE   = 'ACTIVE',
-    CONSUMED = 'CONSUMED',
-    EXPIRED  = 'EXPIRED',
-    REVOKED  = 'REVOKED'
+export interface ExecutionReceipt {
+  passportId: string;
+  action: string;
+  executedAt: Date;
+  status: 'SUCCESS' | 'FAILED';
+  details?: Record<string, unknown>;
+}
+
+export class GatekeeperService {
+  public async execute(
+    passportId: string,
+    options: { action: string; [key: string]: unknown }
+  ): Promise<ExecutionReceipt> {
+    if (!passportId) {
+      throw new Error('GatekeeperService: passportId is required');
+    }
+    if (!options.action) {
+      throw new Error('GatekeeperService: action is required');
+    }
+    return {
+      passportId,
+      action: options.action,
+      executedAt: new Date(),
+      status: 'SUCCESS',
+    };
+  }
 }

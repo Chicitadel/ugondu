@@ -39,10 +39,13 @@ export interface PassportEnvelope {
     targetVersionHash: string;
     targetType: string;
     issuedAt: string | Date | number;
+    capabilities: string[];
 }
 
 export interface ExecutionEnvelope {
-    signature?: string;
-    contextId?: string;
-    securityContext?: any;
+    passportId: string;
+    verifiedAt: Date;
+    contextId: string;
+    signature: string;
+    securityContext?: Record<string, unknown>;
 }

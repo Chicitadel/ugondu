@@ -32,10 +32,12 @@
  ******************************************************************************/
 
 export interface ExecutionContext {
+    id: string;
     targetId: string;
     targetType?: string;
-    environment: any;
-    metadata: any;
+    environment: Record<string, unknown>;
+    metadata: Record<string, unknown>;
+    requiredCapabilities: string[];
     isEmergencyBypassEnabled?: boolean;
 }
 
@@ -45,5 +47,5 @@ export interface ExecutionTask {
 
 export interface ExecutionResult {
     success: boolean;
-    data?: any;
+    data?: unknown;
 }

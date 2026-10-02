@@ -120,7 +120,8 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
 
         if (body) {
             const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
-            if (!requestOptions.headers?.['Content-Type'] && typeof body !== 'string') {
+            const hdrs = requestOptions.headers as Record<string, string | string[] | number | undefined> | undefined;
+            if (!hdrs?.['Content-Type'] && typeof body !== 'string') {
                 req.setHeader('Content-Type', 'application/json');
             }
             req.write(bodyStr);

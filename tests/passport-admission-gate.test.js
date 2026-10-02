@@ -47,6 +47,25 @@ function post(port, path, body, headers = {}) {
     });
 }
 
+if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
+    const fs = require('fs');
+    const path = require('path');
+    const envPath = path.resolve(__dirname, '../.env');
+    if (fs.existsSync(envPath)) {
+        const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+        for (const line of lines) {
+            const m = line.match(/^([A-Z0-9_]+)="?(.*?)"?$/);
+            if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/\\n/g, '\n');
+        }
+    }
+    if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
+        const { generateKeyPairSync } = require('crypto');
+        const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+        process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+        process.env.UGONDU_SERVICE_TEST_PUBKEY = publicKey.export({ type: 'spki', format: 'pem' }).toString();
+        process.env.UGONDU_SERVICE_TEST_KEY_ID = 'key_service_test_v1';
+    }
+}
 
 let ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4005');
 let passed = 0;
@@ -119,8 +138,9 @@ async function runTests() {
     // Test 2: POST with invalid passport id → 403
     try {
         const r = await post(ENGINE_PORT, '/v1/deploy/resolve', validPayload, {
-            'X-Ugondu-Passport-Id': '   '
+            'X-Ugondu-Passport-Id': ['   ']
         });
+        console.log(r);
         assert.strictEqual(r.status, 403, `Expected 403, got ${r.status}`);
         assert.strictEqual(r.body.code, 'PASSPORT_REJECTED');
         console.log('[en] ✓ PASS: Invalid passport ID returns 403');
