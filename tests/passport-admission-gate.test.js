@@ -149,7 +149,7 @@ async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
 
     if (serverProcess) {
-        serverProcess.kill('SIGTERM');
+        serverProcess.close();
     }
 
     if (failed > 0) process.exit(1);
@@ -157,6 +157,6 @@ async function runTests() {
 
 runTests().catch(err => {
     console.error('[en] Fatal test suite error:', err);
-    if (serverProcess) serverProcess.kill('SIGTERM');
+    if (serverProcess) serverProcess.close();
     process.exit(1);
 });
