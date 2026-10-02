@@ -32,7 +32,7 @@
  ******************************************************************************/
 
 import { ExecutionContext } from '../../types/execution';
-import { DatabaseClient } from '../../../infrastructure/database/client';
+import { DatabaseClient } from '../../infrastructure/database/client';
 
 export class EmergencyValidator {
     constructor(private readonly dbClient: DatabaseClient) {}

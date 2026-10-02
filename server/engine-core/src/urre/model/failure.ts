@@ -32,6 +32,11 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+export interface FailureClassification {
+    severity: 'TRANSIENT' | 'RECOVERABLE_STATE_CORRUPTION' | 'CRITICAL_DATA_LOSS' | 'IRREVERSIBLE_SIDE_EFFECT' | string;
+}
+
+
 export enum FailureClass {
   PROCESS_CRASH           = 'PROCESS_CRASH',
   POWER_LOSS              = 'POWER_LOSS',

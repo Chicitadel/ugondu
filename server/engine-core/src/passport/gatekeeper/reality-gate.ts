@@ -33,7 +33,7 @@
 
 import { PassportEnvelope } from '../../types/passport';
 import { ExecutionContext } from '../../types/execution';
-import { DatabaseClient } from '../../../infrastructure/database/client';
+import { DatabaseClient } from '../../infrastructure/database/client';
 
 export class RealityGate {
     constructor(private readonly dbClient: DatabaseClient) {}

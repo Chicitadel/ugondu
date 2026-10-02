@@ -31,7 +31,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { DatabaseClient } from '../../../infrastructure/database/client';
+import { DatabaseClient } from '../../infrastructure/database/client';
 
 export class ConsumptionManager {
     constructor(

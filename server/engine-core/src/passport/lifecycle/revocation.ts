@@ -31,8 +31,8 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { CacheClient } from '../../../infrastructure/cache/client';
-import { DatabaseClient } from '../../../infrastructure/database/client';
+import { CacheClient } from '../../infrastructure/cache/client';
+import { DatabaseClient } from '../../infrastructure/database/client';
 
 export class RevocationManager {
     constructor(

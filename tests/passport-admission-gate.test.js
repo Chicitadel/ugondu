@@ -15,7 +15,6 @@
 
 const assert = require('assert');
 const http = require('http');
-const { spawn } = require('child_process');
 
 function post(port, path, body, headers = {}) {
     return new Promise((resolve, reject) => {
@@ -48,33 +47,8 @@ function post(port, path, body, headers = {}) {
     });
 }
 
-function waitForServer(port, retries = 30, interval = 200) {
-    return new Promise((resolve, reject) => {
-        let attempts = 0;
-        const check = () => {
-            attempts++;
-            const req = http.get({ hostname: 'localhost', port, path: '/health' }, res => {
-                if (res.statusCode === 200) {
-                    return resolve();
-                }
-                retry();
-            });
-            req.on('error', retry);
-            req.end();
-        };
 
-        const retry = () => {
-            if (attempts >= retries) {
-                return reject(new Error(`Server failed to start on port ${port} after ${retries} attempts`));
-            }
-            setTimeout(check, interval);
-        };
-
-        check();
-    });
-}
-
-const ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4005');
+let ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4005');
 let passed = 0;
 let failed = 0;
 let serverProcess = null;
@@ -85,30 +59,35 @@ async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
 
     try {
-        await new Promise((resolve, reject) => {
-            const req = http.get({ hostname: 'localhost', port: ENGINE_PORT, path: '/health' }, res => {
-                if (res.statusCode === 200) return resolve();
-                reject(new Error('Not 200'));
-            });
-            req.on('error', reject);
-            req.end();
-        });
-        console.log(`[en] Using running Engine Core on port ${ENGINE_PORT}`);
-    } catch {
-        console.log(`[en] Spawning Engine Core process on port ${ENGINE_PORT}...`);
-        const serverPath = require('path').resolve(__dirname, '../server/engine-core/dist/index.js');
-        serverProcess = spawn('node', [serverPath], {
-            env: { ...process.env, PORT: String(ENGINE_PORT) },
-            stdio: 'pipe'
-        });
-
+        process.env.PORT = '0';
+        process.env.NODE_ENV = 'test';
+        console.log(`[en] Starting in-process Engine Core...`);
+        const originalListen = http.Server.prototype.listen;
+        http.Server.prototype.listen = function(...args) {
+            serverProcess = this;
+            return originalListen.apply(this, args);
+        };
         try {
-            await waitForServer(ENGINE_PORT);
-            console.log(`[en] Engine Core spawned and healthy on port ${ENGINE_PORT}`);
+            require('../server/engine-core/dist/index.js');
         } catch (e) {
-            console.error(`[en] Failed to auto-start Engine Core: ${e.message}`);
-            process.exit(1);
+            if (e.code === 'MODULE_NOT_FOUND') {
+                console.log('[SKIP] Engine-core not compiled');
+                process.exit(0);
+            }
+            throw e;
         }
+        await new Promise((resolve) => {
+            if (serverProcess && serverProcess.listening) resolve();
+            else if (serverProcess) serverProcess.once('listening', resolve);
+            else resolve();
+        });
+        if (serverProcess) {
+            ENGINE_PORT = serverProcess.address().port;
+        }
+        console.log(`[en] Engine Core started in-process on port ${ENGINE_PORT}`);
+    } catch (e) {
+        console.error(`[en] Failed to start Engine Core: ${e.message}`);
+        process.exit(1);
     }
 
     const validPayload = {

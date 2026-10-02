@@ -13,6 +13,12 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
+export interface Operation {
+    id: string;
+    type: string;
+    status: string;
+}
+
 export type IdempotencyClass = 
   | 'DETERMINISTIC' 
   | 'CONDITIONAL' 

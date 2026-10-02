@@ -36,16 +36,13 @@ import {
   HostDiscovery,
   CloudDiscovery,
   KubernetesDiscovery,
-  HostingPanelDiscovery
-} from '../../../../shared/discovery';
-
-import {
+  HostingPanelDiscovery,
   KnowledgeState,
   ResourceLifecycleState,
   TwinResource,
   DependencyEdge,
   EnvironmentTwin as BaseEnvironmentTwin
-} from '../../../../shared/environment-twin';
+} from './shared-types';
 
 export interface ProviderInfo {
   providerId: string;

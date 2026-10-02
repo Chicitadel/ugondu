@@ -66,19 +66,27 @@ export interface RecoveryPoint {
   policyVersionHash: string;
   evidenceRef: string | null;
   signature: string;
+  id?: string;
+  timestamp?: number;
+  status?: string;
+  metadata?: any;
 }
 
 export interface RecoveryPointCertificate {
   recoveryPointId: string;
-  sourceStateDigest: string;
-  backupArtifactDigest: string;
-  createdAt: number;
-  retentionDays: number;
-  encryptionMethod: string;
-  storageLocation: string;
-  restoreProcedure: string;
-  verificationStatus: string;
-  rpoSeconds: number;
-  rtoSeconds: number;
-  dependencies: string[];
+  sourceStateDigest?: string;
+  backupArtifactDigest?: string;
+  createdAt?: number;
+  retentionDays?: number;
+  encryptionMethod?: string;
+  storageLocation?: string;
+  restoreProcedure?: string;
+  verificationStatus?: string;
+  rpoSeconds?: number;
+  rtoSeconds?: number;
+  dependencies?: string[];
+  verifiedAt?: number;
+  digest?: string;
+  isValid?: boolean;
+  certifiedBy?: string;
 }

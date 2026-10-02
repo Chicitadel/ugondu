@@ -33,7 +33,7 @@
 
 import { PassportEnvelope } from '../../types/passport';
 import { ExecutionContext } from '../../types/execution';
-import { PolicyEngine } from '../../../infrastructure/policy/engine';
+import { PolicyEngine } from '../../infrastructure/policy/engine';
 
 export class PolicyValidator {
     constructor(private readonly policyEngine: PolicyEngine) {}
