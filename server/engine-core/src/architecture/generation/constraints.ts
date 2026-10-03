@@ -33,6 +33,11 @@
  ******************************************************************************/
 export const PRESERVE_UNMANAGED_RESOURCES = true;
 
+/**
+ * @interface Constraints
+ * @description Corporate Governed interface implementation for Constraints
+ * @classification ENTERPRISE
+ */
 export interface Constraints {
   maxResources: number;
 }

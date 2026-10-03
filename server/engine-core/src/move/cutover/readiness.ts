@@ -31,57 +31,78 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 export interface ReadinessCriteria {
     requireZeroReplicationLag: boolean;
     requireActiveHealthChecks: boolean;
     maxAllowedErrorRate: number;
 }
 
+/**
+ * Metric providers backed by the monitoring/replication systems of the deployment.
+ * Each probe is optional at construction; a probe required by the criteria but not
+ * supplied blocks cutover rather than being assumed healthy.
+ */
+export interface ReadinessProbes {
+    replicationLagMs?: () => Promise<number>;
+    systemHealthy?: () => Promise<boolean>;
+    errorRate?: () => Promise<number>;
+}
+
+/**
+ * @interface ReadinessResult
+ * @description Corporate Governed interface implementation for ReadinessResult
+ * @classification ENTERPRISE
+ */
 export interface ReadinessResult {
     isReady: boolean;
     reasons: string[];
 }
 
+/**
+ * @class ReadinessEvaluator
+ * @description Corporate Governed class implementation for ReadinessEvaluator
+ * @classification ENTERPRISE
+ */
 export class ReadinessEvaluator {
+    constructor(private readonly probes: ReadinessProbes = {}) {}
+
     public async evaluate(criteria: ReadinessCriteria): Promise<ReadinessResult> {
         const reasons: string[] = [];
-        
-        // In a real environment, this would query metrics/monitoring systems.
-        // For abstract implementation, we evaluate the criteria strictly.
+
         if (criteria.requireZeroReplicationLag) {
-            const lag = await this.checkReplicationLag();
-            if (lag > 0) {
-                reasons.push(`Replication lag is ${lag}ms (must be 0).`);
+            if (!this.probes.replicationLagMs) {
+                reasons.push(__t('messages.error.readiness_probe_unavailable', { probe: 'replicationLagMs' }));
+            } else {
+                const lag = await this.probes.replicationLagMs();
+                if (!(lag === 0)) {
+                    reasons.push(__t('messages.error.readiness_replication_lag', { lag }));
+                }
             }
         }
 
         if (criteria.requireActiveHealthChecks) {
-            const healthy = await this.checkSystemHealth();
-            if (!healthy) {
-                reasons.push('System health checks failed.');
+            if (!this.probes.systemHealthy) {
+                reasons.push(__t('messages.error.readiness_probe_unavailable', { probe: 'systemHealthy' }));
+            } else if (!(await this.probes.systemHealthy())) {
+                reasons.push(__t('messages.error.readiness_health_failed'));
             }
         }
 
-        const errorRate = await this.getErrorRate();
-        if (errorRate > criteria.maxAllowedErrorRate) {
-            reasons.push(`Error rate ${errorRate} exceeds max allowed ${criteria.maxAllowedErrorRate}.`);
+        if (!this.probes.errorRate) {
+            reasons.push(__t('messages.error.readiness_probe_unavailable', { probe: 'errorRate' }));
+        } else {
+            const errorRate = await this.probes.errorRate();
+            if (!(errorRate <= criteria.maxAllowedErrorRate)) {
+                reasons.push(__t('messages.error.readiness_error_rate', { errorRate, maxAllowed: criteria.maxAllowedErrorRate }));
+            }
         }
 
         return {
             isReady: reasons.length === 0,
             reasons
         };
-    }
-
-    private async checkReplicationLag(): Promise<number> {
-        return Promise.resolve(0); // Mock implementation
-    }
-
-    private async checkSystemHealth(): Promise<boolean> {
-        return Promise.resolve(true); // Mock implementation
-    }
-
-    private async getErrorRate(): Promise<number> {
-        return Promise.resolve(0); // Mock implementation
     }
 }

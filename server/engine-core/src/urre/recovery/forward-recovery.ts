@@ -32,13 +32,26 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { Operation } from '../model/operation';
 
+/**
+ * @interface MitigationStrategy
+ * @description Corporate Governed interface implementation for MitigationStrategy
+ * @classification ENTERPRISE
+ */
 export interface MitigationStrategy {
   canHandle(operation: Operation): boolean;
   mitigate(operation: Operation): Promise<void>;
 }
 
+/**
+ * @class ForwardRecoveryManager
+ * @description Corporate Governed class implementation for ForwardRecoveryManager
+ * @classification ENTERPRISE
+ */
 export class ForwardRecoveryManager {
   private strategies: MitigationStrategy[] = [];
 
@@ -53,6 +66,6 @@ export class ForwardRecoveryManager {
         return;
       }
     }
-    throw new Error('No mitigation strategy found for operation');
+    throw new Error(__t('messages.error.no_mitigation_strategy_found_for_operation'));
   }
 }

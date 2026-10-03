@@ -18,6 +18,11 @@ import { VerificationResult } from './checkpoint';
 
 export type RecoveryPointClass = 'RP0' | 'RP1' | 'RP2' | 'RP3' | 'RP4' | 'RP5';
 
+/**
+ * @interface DatabaseBackupRef
+ * @description Corporate Governed interface implementation for DatabaseBackupRef
+ * @classification ENTERPRISE
+ */
 export interface DatabaseBackupRef {
   backupId: string;
   provider: string;
@@ -26,16 +31,31 @@ export interface DatabaseBackupRef {
   verified: boolean;
 }
 
+/**
+ * @interface InfrastructureSnapshot
+ * @description Corporate Governed interface implementation for InfrastructureSnapshot
+ * @classification ENTERPRISE
+ */
 export interface InfrastructureSnapshot {
   resourceCount: number;
   digest: string;
   timestamp: number;
 }
 
+/**
+ * @interface DnsSnapshot
+ * @description Corporate Governed interface implementation for DnsSnapshot
+ * @classification ENTERPRISE
+ */
 export interface DnsSnapshot {
   records: Array<{ name: string; type: string; value: string }>;
 }
 
+/**
+ * @interface RecoveryPoint
+ * @description Corporate Governed interface implementation for RecoveryPoint
+ * @classification ENTERPRISE
+ */
 export interface RecoveryPoint {
   recoveryPointId: string;
   executionId: string;
@@ -72,6 +92,11 @@ export interface RecoveryPoint {
   metadata?: any;
 }
 
+/**
+ * @interface RecoveryPointCertificate
+ * @description Corporate Governed interface implementation for RecoveryPointCertificate
+ * @classification ENTERPRISE
+ */
 export interface RecoveryPointCertificate {
   recoveryPointId: string;
   sourceStateDigest?: string;

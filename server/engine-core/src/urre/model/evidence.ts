@@ -16,6 +16,11 @@
 import { VerificationResult } from './checkpoint';
 import { URREFailure } from './failure';
 
+/**
+ * @interface RecoveryEvidence
+ * @description Corporate Governed interface implementation for RecoveryEvidence
+ * @classification ENTERPRISE
+ */
 export interface RecoveryEvidence {
   evidenceId: string;
   failure: URREFailure;

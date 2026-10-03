@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,12 +34,22 @@
 
 import { DeliveryPassport } from '../model/passport';
 
+/**
+ * @interface IPassportRegistry
+ * @description Corporate Governed interface implementation for IPassportRegistry
+ * @classification ENTERPRISE
+ */
 export interface IPassportRegistry {
     save(passport: DeliveryPassport): Promise<void>;
     findById(id: string): Promise<DeliveryPassport | null>;
     listBySubject(subjectId: string): Promise<DeliveryPassport[]>;
 }
 
+/**
+ * @class InMemoryPassportRegistry
+ * @description Corporate Governed class implementation for InMemoryPassportRegistry
+ * @classification ENTERPRISE
+ */
 export class InMemoryPassportRegistry implements IPassportRegistry {
     private store = new Map<string, DeliveryPassport>();
 

@@ -31,10 +31,19 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
 
+
+/**
+ * @class SnapshotSync
+ * @description Corporate Governed class implementation for SnapshotSync
+ * @classification ENTERPRISE
+ */
 export class SnapshotSync {
     async performSnapshot(sourceId: string, targetId: string): Promise<number> {
-        console.log(`Performing snapshot from ${sourceId} to ${targetId}`);
+        Logger.info(__t('messages.system.performing_snapshot_from_to', { 'sourceId': sourceId, 'targetId': targetId }));
         // Return bytes synced
         return 1024 * 1024 * 500; // 500MB
     }

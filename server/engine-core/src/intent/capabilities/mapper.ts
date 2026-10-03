@@ -32,13 +32,24 @@
  ******************************************************************************/
 
 import { NormalizedIntent } from "../model/normalized-intent";
+import type { AuthorizationRequirement, RequiredAuthoritySet } from '../model/authorization-requirements';
 
+/**
+ * @interface CapabilityNode
+ * @description Corporate Governed interface implementation for CapabilityNode
+ * @classification ENTERPRISE
+ */
 export interface CapabilityNode {
     id: string;
     name: string;
     dependencies: string[];
 }
 
+/**
+ * @class CapabilityMapper
+ * @description Corporate Governed class implementation for CapabilityMapper
+ * @classification ENTERPRISE
+ */
 export class CapabilityMapper {
     public mapToGraph(intent: NormalizedIntent): CapabilityNode[] {
         const graph: CapabilityNode[] = [];
@@ -53,4 +64,52 @@ export class CapabilityMapper {
         
         return graph;
     }
+}
+
+/**
+ * Map authorization requirements from a NormalizedIntent to a RequiredAuthoritySet.
+ * Called by the Architecture Engine when compiling candidate architectures.
+ *
+ * For each candidate, this produces the authority set that UPPIE will use to:
+ * 1. Check existing authority
+ * 2. Calculate the gap
+ * 3. Compile minimum grants via LeastPrivilegeCompiler
+ */
+export function mapAuthorizationRequirements(
+  requirements: AuthorizationRequirement[],
+  candidateId:  string
+): RequiredAuthoritySet {
+  const permanentGrants = requirements.filter(
+    (r) => r.grantScope === 'PERMANENT'
+  );
+  const temporaryGrants = requirements.filter(
+    (r) => r.grantScope === 'TEMPORARY' || r.grantScope === 'SESSION'
+  );
+
+  const totalGrantCount = requirements.reduce(
+    (sum, r) => sum + r.requiredCapabilities.length, 0
+  );
+
+  const approvalNeeded = requirements.some(
+    (r) => r.approvalScopeHint === 'ADMIN_APPROVAL' || r.approvalScopeHint === 'TEAM_APPROVAL'
+  );
+
+  let complexity: RequiredAuthoritySet['authorityComplexity'];
+  if (totalGrantCount <= 3 && permanentGrants.length === 0) {
+    complexity = 'SIMPLE';
+  } else if (totalGrantCount <= 10) {
+    complexity = 'MODERATE';
+  } else {
+    complexity = 'COMPLEX';
+  }
+
+  void temporaryGrants; // used for future complexity refinement
+
+  return {
+    candidateId,
+    requirements,
+    estimatedGrantCount:     totalGrantCount,
+    estimatedApprovalNeeded: approvalNeeded,
+    authorityComplexity:     complexity,
+  };
 }

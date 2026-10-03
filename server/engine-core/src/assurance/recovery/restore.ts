@@ -31,11 +31,19 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { RecoveryPoint } from './recovery-point';
 import { RestoreAdapter } from '../providers/restore-adapter';
 import { DependencyOrderManager } from './dependency-order';
 
+/**
+ * @class RestoreEngine
+ * @description Corporate Governed class implementation for RestoreEngine
+ * @classification ENTERPRISE
+ */
 export class RestoreEngine {
     constructor(
         private readonly adapter: RestoreAdapter,
@@ -44,7 +52,7 @@ export class RestoreEngine {
 
     public async executeRestore(point: RecoveryPoint): Promise<void> {
         if (!point.isValidated()) {
-            throw new Error(`Restore rejected: RecoveryPoint ${point.id} is not validated.`);
+            throw new Error(__t('messages.error.restore_rejected_recoverypoint_is_not_validat', { 'point_id': point.id }));
         }
 
         const resources = point.context.map(c => c.resourceId);
@@ -53,7 +61,7 @@ export class RestoreEngine {
         for (const resourceId of order) {
             const context = point.context.find(c => c.resourceId === resourceId);
             if (!context) {
-                throw new Error(`Missing context for resource ${resourceId}`);
+                throw new Error(__t('messages.error.missing_context_for_resource', { 'resourceId': resourceId }));
             }
 
             await this.adapter.restoreResource(resourceId, context.stateData, context.checksum);

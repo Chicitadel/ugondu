@@ -31,6 +31,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class CancellationError
+ * @description Corporate Governed class implementation for CancellationError
+ * @classification ENTERPRISE
+ */
 export class CancellationError extends Error {
     constructor(message: string) {
         super(message);
@@ -38,6 +46,11 @@ export class CancellationError extends Error {
     }
 }
 
+/**
+ * @class CancellationToken
+ * @description Corporate Governed class implementation for CancellationToken
+ * @classification ENTERPRISE
+ */
 export class CancellationToken {
     private _isCancelled: boolean = false;
     private listeners: Array<() => void> = [];
@@ -65,11 +78,16 @@ export class CancellationToken {
 
     public throwIfCancelled(): void {
         if (this._isCancelled) {
-            throw new CancellationError('Operation was cancelled');
+            throw new CancellationError(__t('messages.error.operation_was_cancelled'));
         }
     }
 }
 
+/**
+ * @class TimeoutManager
+ * @description Corporate Governed class implementation for TimeoutManager
+ * @classification ENTERPRISE
+ */
 export class TimeoutManager {
     public static runWithTimeout<T>(
         operation: (token: CancellationToken) => Promise<T>,

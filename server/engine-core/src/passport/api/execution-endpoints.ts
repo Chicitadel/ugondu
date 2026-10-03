@@ -30,6 +30,9 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 import { Router, Request, Response } from 'express';
 import { GatekeeperService } from '../gatekeeper/gatekeeper-service';
 
@@ -50,7 +53,7 @@ export function setupExecutionEndpoints(router: Router): void {
     } catch (error) {
       res.status(403).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Execution denied by gatekeeper'
+        error: error instanceof Error ? error.message: __t('ui.responses.execution_denied_by_gatekeeper')
       });
     }
   });

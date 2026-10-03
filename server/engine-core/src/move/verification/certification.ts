@@ -32,6 +32,11 @@
  ******************************************************************************/
 import * as crypto from 'crypto';
 
+/**
+ * @interface MigrationCertificate
+ * @description Corporate Governed interface implementation for MigrationCertificate
+ * @classification ENTERPRISE
+ */
 export interface MigrationCertificate {
     id: string;
     timestamp: string;
@@ -39,6 +44,11 @@ export interface MigrationCertificate {
     signature: string;
 }
 
+/**
+ * @class CertificationAuthority
+ * @description Corporate Governed class implementation for CertificationAuthority
+ * @classification ENTERPRISE
+ */
 export class CertificationAuthority {
     private privateKey: string;
 

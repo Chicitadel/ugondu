@@ -31,17 +31,6 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-export interface PassportEnvelope {
-    id: string;
-    policyId: string;
-    principalId: string;
-    targetId: string;
-    targetVersionHash: string;
-    targetType: string;
-    issuedAt: string | Date | number;
-    capabilities: string[];
-}
-
 export interface ExecutionEnvelope {
     passportId: string;
     verifiedAt: Date;

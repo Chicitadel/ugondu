@@ -37,6 +37,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+/**
+ * @class FileSystemStore
+ * @description Corporate Governed class implementation for FileSystemStore
+ * @classification ENTERPRISE
+ */
 export class FileSystemStore implements IExecutionJournal {
     private journalDir: string;
     private entries: IJournalEntry[] = [];

@@ -1,0 +1,13 @@
+{
+  "checkpointId": "cp_300",
+  "payload": {
+    "checkpointId": "cp_300",
+    "state": "COMMITTED",
+    "data": {
+      "verified": true
+    },
+    "timestamp": 1791057553876
+  },
+  "sha256": "2b92eabeaa91245846f22f6643a7f9c5f4e85175dc7da5da4c1fc6a1c9c29b3b",
+  "persistedAt": 1791057553876
+}

@@ -33,6 +33,11 @@
 
 import { AssuranceLevel } from './assurance';
 
+/**
+ * @interface AssurancePolicy
+ * @description Corporate Governed interface implementation for AssurancePolicy
+ * @classification ENTERPRISE
+ */
 export interface AssurancePolicy {
     readonly policyId: string;
     readonly requiredLevel: AssuranceLevel;

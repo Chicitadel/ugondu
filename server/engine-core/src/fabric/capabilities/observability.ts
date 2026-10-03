@@ -36,5 +36,15 @@ export interface ObservabilityCapability {
   registerMetricSink(config: MetricConfig): Promise<string>;
   registerLogSink(config: LogConfig): Promise<string>;
 }
+/**
+ * @interface MetricConfig
+ * @description Corporate Governed interface implementation for MetricConfig
+ * @classification ENTERPRISE
+ */
 export interface MetricConfig { targetPath: string; resolutionSeconds: number; }
+/**
+ * @interface LogConfig
+ * @description Corporate Governed interface implementation for LogConfig
+ * @classification ENTERPRISE
+ */
 export interface LogConfig { targetPath: string; retentionDays: number; }

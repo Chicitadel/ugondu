@@ -32,13 +32,28 @@
  ******************************************************************************/
 
 import { z } from 'zod';
+import { AuthorityTranslationRecordSchema } from './authority-translation';
+import type { AuthorityTranslationRecord } from './authority-translation';
+import { hasBlockingUntranslatableRules } from './authority-translation';
 
 export const MigrationCertificateSchema = z.object({
-  certificateId: z.string().uuid(),
-  planId: z.string().uuid(),
-  timestamp: z.date(),
-  hash: z.string(),
-  signature: z.string(),
+  certificateId:        z.string().uuid(),
+  planId:               z.string().uuid(),
+  timestamp:            z.date(),
+  hash:                 z.string(),
+  signature:            z.string(),
+  authorityTranslation: AuthorityTranslationRecordSchema.optional(),
 });
 
 export type MigrationCertificate = z.infer<typeof MigrationCertificateSchema>;
+
+export function hasAuthorityTranslation(
+  cert: MigrationCertificate
+): cert is MigrationCertificate & { authorityTranslation: AuthorityTranslationRecord } {
+  return cert.authorityTranslation !== undefined;
+}
+
+export function isCutoverAuthorityReady(cert: MigrationCertificate): boolean {
+  if (!cert.authorityTranslation) return true;  // no authority translation = always ready
+  return !hasBlockingUntranslatableRules(cert.authorityTranslation);
+}

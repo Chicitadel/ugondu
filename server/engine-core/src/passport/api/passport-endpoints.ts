@@ -30,6 +30,9 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 import { Router, Request, Response } from 'express';
 import { PassportCompiler } from '../compiler/passport-compiler';
 import { IntentParser } from '../parser/intent-parser';
@@ -51,7 +54,7 @@ export function setupPassportEndpoints(router: Router): void {
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message: __t('ui.responses.unknown_error')
       });
     }
   });
@@ -64,7 +67,7 @@ export function setupPassportEndpoints(router: Router): void {
       if (!passport) {
         return res.status(404).json({
           success: false,
-          error: 'Passport not found'
+          error: __t('ui.responses.passport_not_found')
         });
       }
 
@@ -75,7 +78,7 @@ export function setupPassportEndpoints(router: Router): void {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message: __t('ui.responses.unknown_error')
       });
     }
   });

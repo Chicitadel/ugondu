@@ -11,7 +11,10 @@
     "server/billing-gateway",
     "server/plugin-manager",
     "server/event-bus",
-    "server/repository-adapter"
+    "server/repository-adapter",
+    "server/uppie",
+    "server/capabilities",
+    "server/tests"
   ],
   "scripts": {
     "build": "npm run build --workspaces",

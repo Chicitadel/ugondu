@@ -29,12 +29,22 @@
 
 import { AutonomyLevel } from './levels';
 
+/**
+ * @interface Capability
+ * @description Corporate Governed interface implementation for Capability
+ * @classification ENTERPRISE
+ */
 export interface Capability {
     actionId: string;
     requiredLevel: AutonomyLevel;
     description: string;
 }
 
+/**
+ * @class CapabilityMatrix
+ * @description Corporate Governed class implementation for CapabilityMatrix
+ * @classification ENTERPRISE
+ */
 export class CapabilityMatrix {
     private capabilities: Map<string, Capability> = new Map();
 

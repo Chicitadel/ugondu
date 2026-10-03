@@ -37,6 +37,11 @@ export interface DiagnosisResult {
   managementAuthority: string;
 }
 
+/**
+ * @class DiagnosisEngine
+ * @description Corporate Governed class implementation for DiagnosisEngine
+ * @classification ENTERPRISE
+ */
 export class DiagnosisEngine {
   diagnose(issue: any): DiagnosisResult {
     return {

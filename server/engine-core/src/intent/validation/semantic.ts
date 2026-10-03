@@ -33,6 +33,11 @@
 
 import { StructuredIntent } from "../model/structured-intent";
 
+/**
+ * @class SemanticValidator
+ * @description Corporate Governed class implementation for SemanticValidator
+ * @classification ENTERPRISE
+ */
 export class SemanticValidator {
     public validate(intent: StructuredIntent): boolean {
         // Enforce meaningful semantic content for requirements

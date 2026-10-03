@@ -1,39 +1,50 @@
 /******************************************************************************
  * Project        : Ugondu Engine Core
- * Module         : Autopilot
+ * Module         : Autopilot / Reconciliation
  * File           : loop.ts
- * Version        : 1.0.0
- * Author         : Architecture Team
- * Organization   : Air Roofers
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-03
  * Classification : ENTERPRISE
- *
- * Governance:
- * - Corporate Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
- *
- * Copyright (c) 2026 Air Roofers
- * All Rights Reserved.
+ * Governance: Corporate Governed / Security Reviewed / Protocol Frozen
+ * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
 export class ReconciliationLoop {
-  start() {
-    // Run loop
-  }
+    private active: boolean = false;
+    private timer: NodeJS.Timeout | null = null;
+    private iterationCount: number = 0;
+
+    public start(intervalMs: number = 5000, onTick?: () => Promise<void>): void {
+        if (this.active) return;
+        this.active = true;
+        this.timer = setInterval(async () => {
+            this.iterationCount++;
+            if (onTick) {
+                try {
+                    await onTick();
+                } catch {
+                    // Suppress and continue loop
+                }
+            }
+        }, intervalMs);
+    }
+
+    public stop(): void {
+        this.active = false;
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+    }
+
+    public isRunning(): boolean {
+        return this.active;
+    }
+
+    public getIterationCount(): number {
+        return this.iterationCount;
+    }
 }

@@ -31,10 +31,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class ConsistencyChecker
+ * @description Corporate Governed class implementation for ConsistencyChecker
+ * @classification ENTERPRISE
+ */
 export class ConsistencyChecker {
     public async verifyDataConsistency(sourceDataHash: string, targetDataHash: string): Promise<boolean> {
         if (!sourceDataHash || !targetDataHash) {
-            throw new Error('Data hashes cannot be empty');
+            throw new Error(__t('messages.error.data_hashes_cannot_be_empty'));
         }
         
         return sourceDataHash === targetDataHash;

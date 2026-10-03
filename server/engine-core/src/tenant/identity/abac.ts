@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,12 +34,22 @@
 
 import { SubjectContext } from './subject-context';
 
+/**
+ * @interface ABACPolicy
+ * @description Corporate Governed interface implementation for ABACPolicy
+ * @classification ENTERPRISE
+ */
 export interface ABACPolicy {
   readonly id: string;
   readonly effect: 'ALLOW' | 'DENY';
   readonly condition: (subject: SubjectContext, resource: any, environment: any) => boolean;
 }
 
+/**
+ * @class ABACManager
+ * @description Corporate Governed class implementation for ABACManager
+ * @classification ENTERPRISE
+ */
 export class ABACManager {
   private policies: ABACPolicy[] = [];
 

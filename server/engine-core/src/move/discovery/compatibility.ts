@@ -34,12 +34,22 @@
 import { MigrationBlocker } from '../model/migration-blocker';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * @interface ArchitectureIR
+ * @description Corporate Governed interface implementation for ArchitectureIR
+ * @classification ENTERPRISE
+ */
 export interface ArchitectureIR {
   version: string;
   extensions: string[];
   capabilities: string[];
 }
 
+/**
+ * @class CompatibilityAnalyzer
+ * @description Corporate Governed class implementation for CompatibilityAnalyzer
+ * @classification ENTERPRISE
+ */
 export class CompatibilityAnalyzer {
   public analyze(source: ArchitectureIR, target: ArchitectureIR): MigrationBlocker[] {
     const blockers: MigrationBlocker[] = [];

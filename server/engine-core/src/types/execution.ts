@@ -41,10 +41,20 @@ export interface ExecutionContext {
     isEmergencyBypassEnabled?: boolean;
 }
 
+/**
+ * @interface ExecutionTask
+ * @description Corporate Governed interface implementation for ExecutionTask
+ * @classification ENTERPRISE
+ */
 export interface ExecutionTask {
     contextId: string;
 }
 
+/**
+ * @interface ExecutionResult
+ * @description Corporate Governed interface implementation for ExecutionResult
+ * @classification ENTERPRISE
+ */
 export interface ExecutionResult {
     success: boolean;
     data?: unknown;

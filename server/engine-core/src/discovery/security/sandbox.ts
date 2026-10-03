@@ -31,6 +31,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class CommandSandbox
+ * @description Corporate Governed class implementation for CommandSandbox
+ * @classification ENTERPRISE
+ */
 export class CommandSandbox {
   private allowedCommands: Set<string> = new Set([
     'uname -a',
@@ -49,7 +57,7 @@ export class CommandSandbox {
    */
   public execute(command: string): string {
     if (!this.allowedCommands.has(command)) {
-      throw new Error(`Sandbox Violation: Command '${command}' is not in the allowed execution list.`);
+      throw new Error(__t('messages.error.sandbox_violation_command_is_not_in_the_allow', { 'command': command }));
     }
 
     // In a real execution environment, this would securely dispatch the command

@@ -39,6 +39,11 @@ export interface SecretFinding {
   redactedLength: number;
 }
 
+/**
+ * @class SecretRedactionEngine
+ * @description Corporate Governed class implementation for SecretRedactionEngine
+ * @classification ENTERPRISE
+ */
 export class SecretRedactionEngine {
   // Common patterns for high-entropy secrets (AWS keys, JWTs, private keys)
   private readonly secretPatterns: Array<{ type: string; regex: RegExp }> = [

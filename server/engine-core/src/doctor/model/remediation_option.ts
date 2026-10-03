@@ -33,6 +33,11 @@
  ******************************************************************************/
 
 // Implementation for remediation_option.rs
+/**
+ * @interface RemediationOption
+ * @description Corporate Governed interface implementation for RemediationOption
+ * @classification ENTERPRISE
+ */
 export interface RemediationOption {
   id: string;
   description: string;

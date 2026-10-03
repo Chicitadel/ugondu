@@ -29,6 +29,11 @@
 
 import { ApdlRule } from './apdl';
 
+/**
+ * @class PolicySimulator
+ * @description Corporate Governed class implementation for PolicySimulator
+ * @classification ENTERPRISE
+ */
 export class PolicySimulator {
     public simulate(context: any, rules: ApdlRule[]): any {
         // Simulate execution of policy rules against a given context

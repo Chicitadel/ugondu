@@ -31,6 +31,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class ConflictError
+ * @description Corporate Governed class implementation for ConflictError
+ * @classification ENTERPRISE
+ */
 export class ConflictError extends Error {
   constructor(message: string) {
     super(message);
@@ -38,8 +46,13 @@ export class ConflictError extends Error {
   }
 }
 
+/**
+ * @class ConflictHandler
+ * @description Corporate Governed class implementation for ConflictHandler
+ * @classification ENTERPRISE
+ */
 export class ConflictHandler {
   public handle(rules: string[]): never {
-    throw new ConflictError('Policy conflict detected. Resolution requires explicit action, merging is prohibited.');
+    throw new ConflictError(__t('messages.error.policy_conflict_detected_resolution_requires_'));
   }
 }

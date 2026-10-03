@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,10 +35,20 @@
 import { AuthorizationDecision, DecisionBuilder } from './decision';
 import { SubjectContext } from '../identity/subject-context';
 
+/**
+ * @interface Authority
+ * @description Corporate Governed interface implementation for Authority
+ * @classification ENTERPRISE
+ */
 export interface Authority {
   authorize(subject: SubjectContext, action: string, resource: any): AuthorizationDecision;
 }
 
+/**
+ * @class CentralAuthority
+ * @description Corporate Governed class implementation for CentralAuthority
+ * @classification ENTERPRISE
+ */
 export class CentralAuthority implements Authority {
   public authorize(subject: SubjectContext, action: string, resource: any): AuthorizationDecision {
     if (!subject.isActive) {

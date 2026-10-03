@@ -31,10 +31,19 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
 
+
+/**
+ * @class TargetProvisioner
+ * @description Corporate Governed class implementation for TargetProvisioner
+ * @classification ENTERPRISE
+ */
 export class TargetProvisioner {
     async provision(resourceId: string, specs: any): Promise<boolean> {
-        console.log(`Provisioning resource ${resourceId}...`);
+        Logger.info(__t('messages.system.provisioning_resource', { 'resourceId': resourceId }));
         return new Promise((resolve) => setTimeout(() => resolve(true), 100));
     }
 }

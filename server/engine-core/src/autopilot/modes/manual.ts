@@ -27,10 +27,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class ManualModeHandler
+ * @description Corporate Governed class implementation for ManualModeHandler
+ * @classification ENTERPRISE
+ */
 export class ManualModeHandler {
     public execute(action: any, context: any): any {
         // Requires explicit user intervention and approval
         // Engine does not proceed without direct input
-        throw new Error('Manual Mode: Action requires direct user execution.');
+        throw new Error(__t('messages.error.manual_mode_action_requires_direct_user_execu'));
     }
 }

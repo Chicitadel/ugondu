@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,10 +32,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class TenantQuarantiner
+ * @description Corporate Governed class implementation for TenantQuarantiner
+ * @classification ENTERPRISE
+ */
 export class TenantQuarantiner {
     public quarantine(tenantId: string, threatLevel: 'moderate' | 'critical'): void {
         if (!tenantId) {
-            throw new Error('Tenant ID required for quarantine execution.');
+            throw new Error(__t('messages.error.tenant_id_required_for_quarantine_execution'));
         }
         // Zero-trust enforcement: isolate completely, block all outbound and inbound
     }

@@ -2,11 +2,11 @@
  * Project        : Ugondu Platform
  * Module         : Fabric Capabilities Engine
  * File           : provisioning-engine.ts
- * Version        : 1.0.0
- * Author         : Platform Engineering Team
- * Organization   : Air Roofers
+ * Version        : 3.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-03
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -31,115 +31,155 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../shared/i18n';
 
 import { FabricRegistry } from './registry';
+import { NODE_HANDLERS } from './engine/NodeHandlers';
+import { preflight } from './engine/Preflight';
+import type { PreflightNode } from './engine/Preflight';
+import { digestOf, provisioningWaves, resolveReferences } from './engine/PlanGraph';
+import { InMemoryProvisioningState, PlanRejectedError, ProvisioningError } from './engine/ProvisioningTypes';
+import type { ArchitectureIR, EnginePolicy, ExecutionPlan, ExecutionPlanNode, IJournal, PlanRejection, ProvisionedRecord, ProvisioningReport, ProvisioningStateStore, RollbackFailure } from './engine/ProvisioningTypes';
+import type { ComputeConfig } from './capabilities/compute';
 
-export interface ArchitectureIR {
-  nodes: ProvisioningNode[];
-  edges: ProvisioningEdge[];
-}
+export * from './engine/ProvisioningTypes';
 
-export interface ProvisioningNode {
-  id: string;
-  type: string;
-  provider: string;
-  config: any;
-}
+const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+const now = (): string => new Date().toISOString();
 
-export interface ProvisioningEdge {
-  from: string;
-  to: string;
-}
-
-export interface UrreJournalEntry {
-  transactionId: string;
-  nodeId: string;
-  action: 'provision' | 'deprovision';
-  status: 'pending' | 'success' | 'failed';
-  timestamp: string;
-}
-
-export interface IJournal {
-  log(entry: Omit<UrreJournalEntry, 'transactionId'>): Promise<void>;
-}
-
+/**
+ * @class ProvisioningEngine
+ * @description Executes an Architecture IR through the provider fabric. A plan the providers cannot faithfully
+ * implement is rejected before anything is changed; an accepted plan runs layer by layer in dependency order
+ * (independent nodes of a layer run concurrently), skips nodes that already exist unchanged, records evidence of
+ * what was requested and resolved, and rolls back everything a failed run created, in reverse order.
+ * @classification ENTERPRISE
+ */
 export class ProvisioningEngine {
-  constructor(private registry: FabricRegistry, private journal: IJournal) {}
+  constructor(
+    private registry: FabricRegistry,
+    private journal: IJournal,
+    private state: ProvisioningStateStore = new InMemoryProvisioningState(),
+    private policy: EnginePolicy = {},
+  ) {}
 
-  public async executePlan(ir: ArchitectureIR): Promise<void> {
-    const sortedNodes = this.topologicalSort(ir);
-    const provisionedIds: string[] = [];
+  /** Shows how the plan would run, or why it would be rejected. Nothing is changed and nothing is journalled. */
+  public async preview(ir: ArchitectureIR): Promise<ExecutionPlan> {
+    const checked = preflight(ir, this.registry, this.policy);
+    const rejected = new Set(checked.rejections.map((r) => r.nodeId));
+    const nodes: ExecutionPlanNode[] = [];
+    for (const n of checked.nodes) {
+      if (!rejected.has(n.node.id)) nodes.push(await this.describe(n));
+    }
+    return { accepted: checked.rejections.length === 0, nodes, rejections: checked.rejections };
+  }
+
+  public async executePlan(ir: ArchitectureIR): Promise<ProvisioningReport> {
+    const checked = preflight(ir, this.registry, this.policy);
+    if (checked.rejections.length > 0) await this.reject(checked.rejections);
+    const waves = provisioningWaves(ir);
+    const checkedById = new Map(checked.nodes.map((n) => [n.node.id, n]));
+    const resources = new Map<string, string>();
+    const report: ProvisioningReport = { provisioned: [], created: [], unchanged: [] };
+    const createdRecords: ProvisionedRecord[] = [];
 
     try {
-      for (const node of sortedNodes) {
-        await this.provisionNode(node);
-        provisionedIds.push(node.id);
+      for (const wave of waves) {
+        const outcomes = await Promise.allSettled(wave.map((node) => this.provisionNode(checkedById.get(node.id) as PreflightNode, resources)));
+        let failure: { error: unknown } | undefined;
+        outcomes.forEach((outcome, i) => {
+          const id = (wave[i] as { id: string }).id;
+          if (outcome.status === 'rejected') { failure ??= { error: outcome.reason }; return; }
+          const { record, isNew } = outcome.value;
+          resources.set(id, record.resourceId);
+          report.provisioned.push(record);
+          (isNew ? report.created : report.unchanged).push(id);
+          if (isNew) createdRecords.push(record);
+        });
+        if (failure) throw failure.error;
       }
     } catch (error) {
-      await this.rollback(provisionedIds.reverse(), ir);
+      const { rolledBack, failures } = await this.rollback(createdRecords.reverse());
+      const message = failures.length === 0
+        ? __t('fabric.engine.plan_failed', { error: messageOf(error) })
+        : __t('fabric.engine.plan_failed_rollback_incomplete', { error: messageOf(error), count: failures.length });
+      throw new ProvisioningError(message, error, rolledBack, failures);
+    }
+    return report;
+  }
+
+  /** Journals every rejection, then refuses the plan. No provider has been called. */
+  private async reject(rejections: PlanRejection[]): Promise<never> {
+    for (const r of rejections) {
+      await this.journal.log({ nodeId: r.nodeId, action: 'provision', status: 'rejected', timestamp: now(), detail: `${r.code}: ${r.reason}` });
+    }
+    const resources = new Set(rejections.map((r) => r.nodeId)).size;
+    throw new PlanRejectedError(__t('fabric.engine.plan_rejected', { count: resources }), rejections);
+  }
+
+  private async describe(n: PreflightNode): Promise<ExecutionPlanNode> {
+    const entry: ExecutionPlanNode = { nodeId: n.node.id, kind: n.kind, provider: n.node.provider, capability: n.capability as 'NATIVE' | 'CONDITIONAL', requested: { ...(n.typed as Record<string, unknown>) } };
+    if (n.mode !== undefined) entry.mode = n.mode;
+    if (n.kind === 'COMPUTE' && this.registry.contractOf(n.node.provider).supportsDryRun) {
+      const adapter = this.registry.resolveCompute(n.node.provider);
+      if (adapter.resolveSizing) entry.resolved = await adapter.resolveSizing(n.typed as ComputeConfig, n.options);
+    }
+    return entry;
+  }
+
+  private async provisionNode(checked: PreflightNode, resources: Map<string, string>): Promise<{ record: ProvisionedRecord; isNew: boolean }> {
+    const { node, kind, options } = checked;
+    const handler = NODE_HANDLERS[kind];
+    const config = resolveReferences(node, resources);
+    const digest = digestOf(kind, node.provider, config, options);
+    const existing = await this.state.get(node.id);
+    if (existing) {
+      if (existing.digest !== digest) throw new Error(__t('fabric.engine.state_conflict', { node: node.id }));
+      await this.journal.log({ nodeId: node.id, action: 'provision', status: 'skipped', timestamp: now(), resourceId: existing.resourceId, evidence: existing.evidence });
+      return { record: existing, isNew: false };
+    }
+
+    const typed = handler.validate(node.id, config);
+    await this.journal.log({ nodeId: node.id, action: 'provision', status: 'pending', timestamp: now() });
+    let outcome: { resourceId: string; resolved: Record<string, string | number | boolean> };
+    try {
+      outcome = await handler.provision(this.registry, node.provider, typed, options);
+    } catch (error) {
+      await this.journal.log({ nodeId: node.id, action: 'provision', status: 'failed', timestamp: now(), detail: messageOf(error) });
       throw error;
     }
+
+    const evidence = { requested: { ...(typed as Record<string, unknown>) }, resolved: outcome.resolved };
+    const record: ProvisionedRecord = { nodeId: node.id, kind, provider: node.provider, digest, resourceId: outcome.resourceId, evidence };
+    try {
+      await this.state.put(record);
+      await this.journal.log({ nodeId: node.id, action: 'provision', status: 'success', timestamp: now(), resourceId: outcome.resourceId, evidence });
+    } catch (error) {
+      // The resource exists but is not recorded: remove it now, or it would be orphaned.
+      await handler.deprovision(this.registry, node.provider, outcome.resourceId).catch(() => undefined);
+      await this.state.remove(node.id).catch(() => undefined);
+      throw error;
+    }
+    return { record, isNew: true };
   }
 
-  private topologicalSort(ir: ArchitectureIR): ProvisioningNode[] {
-    const inDegree = new Map<string, number>();
-    const adj = new Map<string, string[]>();
-    
-    for (const node of ir.nodes) {
-      inDegree.set(node.id, 0);
-      adj.set(node.id, []);
-    }
-    
-    for (const edge of ir.edges) {
-      const edges = adj.get(edge.from) || [];
-      edges.push(edge.to);
-      adj.set(edge.from, edges);
-      inDegree.set(edge.to, (inDegree.get(edge.to) || 0) + 1);
-    }
-    
-    const queue: string[] = [];
-    for (const [id, deg] of inDegree.entries()) {
-      if (deg === 0) queue.push(id);
-    }
-    
-    const sorted: ProvisioningNode[] = [];
-    while (queue.length > 0) {
-      const current = queue.shift()!;
-      const node = ir.nodes.find(n => n.id === current);
-      if (node) sorted.push(node);
-      
-      for (const neighbor of (adj.get(current) || [])) {
-        inDegree.set(neighbor, (inDegree.get(neighbor) || 0) - 1);
-        if (inDegree.get(neighbor) === 0) {
-          queue.push(neighbor);
-        }
+  /** Removes what this run created, newest first. A resource that cannot be removed is reported and never hidden. */
+  private async rollback(records: ProvisionedRecord[]): Promise<{ rolledBack: string[]; failures: RollbackFailure[] }> {
+    const rolledBack: string[] = [];
+    const failures: RollbackFailure[] = [];
+    for (const record of records) {
+      try {
+        await this.journal.log({ nodeId: record.nodeId, action: 'deprovision', status: 'pending', timestamp: now(), resourceId: record.resourceId });
+        await NODE_HANDLERS[record.kind].deprovision(this.registry, record.provider, record.resourceId);
+        await this.state.remove(record.nodeId);
+        await this.journal.log({ nodeId: record.nodeId, action: 'deprovision', status: 'success', timestamp: now(), resourceId: record.resourceId });
+        rolledBack.push(record.nodeId);
+      } catch (error) {
+        failures.push({ nodeId: record.nodeId, resourceId: record.resourceId, error: messageOf(error) });
+        await this.journal.log({ nodeId: record.nodeId, action: 'deprovision', status: 'failed', timestamp: now(), resourceId: record.resourceId, detail: messageOf(error) }).catch(() => undefined);
       }
     }
-    
-    if (sorted.length !== ir.nodes.length) {
-      throw new Error('Cycle detected in Architecture IR DAG');
-    }
-    
-    return sorted;
-  }
-
-  private async provisionNode(node: ProvisioningNode): Promise<void> {
-    await this.journal.log({ nodeId: node.id, action: 'provision', status: 'pending', timestamp: new Date().toISOString() });
-    
-    // Abstract capability dispatch based on node type
-    // e.g. if node.type === 'compute', this.registry.resolveCompute(node.provider).provisionInstance(...)
-    
-    await this.journal.log({ nodeId: node.id, action: 'provision', status: 'success', timestamp: new Date().toISOString() });
-  }
-
-  private async rollback(nodeIds: string[], ir: ArchitectureIR): Promise<void> {
-    for (const id of nodeIds) {
-      const node = ir.nodes.find(n => n.id === id);
-      if (node) {
-        await this.journal.log({ nodeId: id, action: 'deprovision', status: 'pending', timestamp: new Date().toISOString() });
-        // Trigger specific rollback logic via registry adapter...
-        await this.journal.log({ nodeId: id, action: 'deprovision', status: 'success', timestamp: new Date().toISOString() });
-      }
-    }
+    return { rolledBack, failures };
   }
 }

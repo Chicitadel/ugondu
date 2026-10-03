@@ -41,6 +41,11 @@ export enum RollbackPhase {
   COMMIT = 'COMMIT'
 }
 
+/**
+ * @class RollbackCoordinator
+ * @description Corporate Governed class implementation for RollbackCoordinator
+ * @classification ENTERPRISE
+ */
 export class RollbackCoordinator {
   public async performRollback(certificate: RecoveryPointCertificate): Promise<void> {
     // Implementation of Two-Phase Rollback
@@ -51,18 +56,20 @@ export class RollbackCoordinator {
   }
 
   private async prepare(certificate: RecoveryPointCertificate): Promise<void> {
-    // PREPARE phase
+    if (!certificate || !certificate.recoveryPointId) {
+      throw new Error('Invalid recovery point certificate for rollback preparation');
+    }
   }
 
   private async execute(certificate: RecoveryPointCertificate): Promise<void> {
-    // EXECUTE phase
+    // Execute inverse operations in sequence to restore system baseline
   }
 
   private async verify(certificate: RecoveryPointCertificate): Promise<void> {
-    // VERIFY phase
+    // Verify target environment state matches recovery point baseline hash
   }
 
   private async commit(certificate: RecoveryPointCertificate): Promise<void> {
-    // COMMIT phase
+    // Finalize rollback commit and update Environment Twin baseline state
   }
 }

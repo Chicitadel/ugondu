@@ -49,6 +49,11 @@ export enum DeploymentStatus {
   DEGRADED = "DEGRADED"
 }
 
+/**
+ * @interface DeploymentEvent
+ * @description Corporate Governed interface implementation for DeploymentEvent
+ * @classification ENTERPRISE
+ */
 export interface DeploymentEvent {
   id: string;
   status: DeploymentStatus;
@@ -58,6 +63,11 @@ export interface DeploymentEvent {
   hotfixCompletionTimestampMs?: number;
 }
 
+/**
+ * @interface DoraMetricsResult
+ * @description Corporate Governed interface implementation for DoraMetricsResult
+ * @classification ENTERPRISE
+ */
 export interface DoraMetricsResult {
   changeLeadTimeMs: number;
   deploymentFrequencyPerDay: number;
@@ -75,6 +85,11 @@ export interface DoraMetricsResult {
   };
 }
 
+/**
+ * @class DoraAnalyticsEngine
+ * @description Corporate Governed class implementation for DoraAnalyticsEngine
+ * @classification ENTERPRISE
+ */
 export class DoraAnalyticsEngine {
   private static readonly MS_PER_DAY = 86400000;
   private static readonly HOURS_24_MS = 86400000;

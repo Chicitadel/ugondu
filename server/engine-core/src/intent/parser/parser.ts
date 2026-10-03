@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,6 +32,9 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { DecomposedIntent } from '../model/requirements';
 import { parseApplicationRequirements } from '../rules/application-rules';
 import { parseOperationalRequirements } from '../rules/operational-rules';
@@ -39,7 +42,7 @@ import { parseSecurityRequirements } from '../rules/security-rules';
 
 export function parse(intentText: string): DecomposedIntent {
     if (!intentText || typeof intentText !== 'string' || intentText.trim() === '') {
-        throw new Error('Intent text cannot be null, undefined, or empty');
+        throw new Error(__t('messages.error.intent_text_cannot_be_null_undefined_or_empty'));
     }
 
     const text = intentText.toLowerCase();

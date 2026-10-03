@@ -34,6 +34,11 @@
 
 import { IProviderAdapter } from '../provider-discovery';
 
+/**
+ * @class CPanelAdapter
+ * @description Corporate Governed class implementation for CPanelAdapter
+ * @classification ENTERPRISE
+ */
 export class CPanelAdapter implements IProviderAdapter {
   public id: string = 'cpanel';
 

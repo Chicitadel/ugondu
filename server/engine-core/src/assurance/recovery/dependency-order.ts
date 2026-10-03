@@ -31,7 +31,15 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 
+
+/**
+ * @class DependencyOrderManager
+ * @description Corporate Governed class implementation for DependencyOrderManager
+ * @classification ENTERPRISE
+ */
 export class DependencyOrderManager {
     private readonly dependencies: Map<string, Set<string>> = new Map();
 
@@ -50,7 +58,7 @@ export class DependencyOrderManager {
         const visit = (node: string) => {
             if (visited.has(node)) return;
             if (visiting.has(node)) {
-                throw new Error(`Circular dependency detected involving resource: ${node}`);
+                throw new Error(__t('messages.error.circular_dependency_detected_involving_resour', { 'node': node }));
             }
 
             visiting.add(node);

@@ -34,6 +34,11 @@
 
 import { randomBytes } from 'crypto';
 
+/**
+ * @class SecretManager
+ * @description Corporate Governed class implementation for SecretManager
+ * @classification ENTERPRISE
+ */
 export class SecretManager {
     private secrets: Map<string, string[]> = new Map();
 

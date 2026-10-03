@@ -34,6 +34,11 @@
 import { DiscoveryScope } from './scope';
 import { ObservationEvent } from './observation';
 
+/**
+ * @interface DiscoveryExecution
+ * @description Corporate Governed interface implementation for DiscoveryExecution
+ * @classification ENTERPRISE
+ */
 export interface DiscoveryExecution {
   executionId: string;
   scope: DiscoveryScope;

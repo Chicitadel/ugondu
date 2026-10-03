@@ -31,11 +31,24 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface CompilationTarget
+ * @description Corporate Governed interface implementation for CompilationTarget
+ * @classification ENTERPRISE
+ */
 export interface CompilationTarget {
     provider: string;
     region: string;
 }
 
+/**
+ * @interface UniversalIR
+ * @description Corporate Governed interface implementation for UniversalIR
+ * @classification ENTERPRISE
+ */
 export interface UniversalIR {
     nodes: any[];
     edges: any[];
@@ -45,6 +58,11 @@ export abstract class CompilerProvider {
     abstract compile(ir: UniversalIR, target: CompilationTarget): any;
 }
 
+/**
+ * @class Compiler
+ * @description Corporate Governed class implementation for Compiler
+ * @classification ENTERPRISE
+ */
 export class Compiler {
     private providers: Map<string, CompilerProvider> = new Map();
 
@@ -55,7 +73,7 @@ export class Compiler {
     compile(ir: UniversalIR, target: CompilationTarget): any {
         const provider = this.providers.get(target.provider);
         if (!provider) {
-            throw new Error(`Provider ${target.provider} not registered`);
+            throw new Error(__t('messages.error.provider_not_registered', { 'target_provider': target.provider }));
         }
         return provider.compile(ir, target);
     }

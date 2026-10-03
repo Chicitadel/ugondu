@@ -1,40 +1,39 @@
 /******************************************************************************
  * Project        : Air Roofers Platform
- * Module         : Doctor
+ * Module         : Doctor / Remediation
  * File           : registry.ts
- * Version        : 1.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-03
  * Classification : ENTERPRISE
- *
- * Governance:
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
- *
- * Copyright (c) 2026 Air Roofers
- * All Rights Reserved.
+ * Governance: Corporate Governed / Security Reviewed / Protocol Frozen
+ * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-export class DeterministicOperationRegistry {
-  private operations: Map<string, any> = new Map();
+export interface DeterministicOperation {
+    id: string;
+    type: string;
+    execute: (context: unknown) => Promise<unknown>;
+}
 
-  public register(op: any): void {
-    // Implementation
-  }
+export class DeterministicOperationRegistry {
+    private readonly operations: Map<string, DeterministicOperation> = new Map();
+
+    public register(op: DeterministicOperation): void {
+        this.operations.set(op.id, op);
+    }
+
+    public get(id: string): DeterministicOperation | undefined {
+        return this.operations.get(id);
+    }
+
+    public has(id: string): boolean {
+        return this.operations.has(id);
+    }
+
+    public list(): string[] {
+        return Array.from(this.operations.keys());
+    }
 }

@@ -33,6 +33,11 @@
 
 import { StructuredIntent } from "../model/structured-intent";
 
+/**
+ * @class StructuralValidator
+ * @description Corporate Governed class implementation for StructuralValidator
+ * @classification ENTERPRISE
+ */
 export class StructuralValidator {
     public validate(intent: StructuredIntent): boolean {
         if (!intent.id || !intent.rawIntentId) {

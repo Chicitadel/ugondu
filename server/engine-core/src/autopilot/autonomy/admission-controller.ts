@@ -29,6 +29,11 @@
 
 // The admission controller is the core gatekeeper ensuring policy, freshness, and budget are met.
 
+/**
+ * @class AdmissionController
+ * @description Corporate Governed class implementation for AdmissionController
+ * @classification ENTERPRISE
+ */
 export class AdmissionController {
     public admit(request: any, context: any): boolean {
         // Enforce policy validation

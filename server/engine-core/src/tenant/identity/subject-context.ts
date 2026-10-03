@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -41,6 +41,11 @@ export interface SubjectContext {
   readonly createdAt: Date;
 }
 
+/**
+ * @class SubjectContextFactory
+ * @description Corporate Governed class implementation for SubjectContextFactory
+ * @classification ENTERPRISE
+ */
 export class SubjectContextFactory {
   public static create(
     id: string,

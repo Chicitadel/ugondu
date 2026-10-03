@@ -44,6 +44,11 @@ export interface ResourceDefinition {
     };
 }
 
+/**
+ * @class StagingEnvironment
+ * @description Corporate Governed class implementation for StagingEnvironment
+ * @classification ENTERPRISE
+ */
 export class StagingEnvironment {
     interceptAndMutate(resources: ResourceDefinition[]): ResourceDefinition[] {
         return resources.map(resource => {

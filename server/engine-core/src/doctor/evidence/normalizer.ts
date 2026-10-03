@@ -35,6 +35,11 @@
 // Implementation for normalizer.rs
 import { EvidenceItem } from './collector';
 
+/**
+ * @interface NormalizedEvidence
+ * @description Corporate Governed interface implementation for NormalizedEvidence
+ * @classification ENTERPRISE
+ */
 export interface NormalizedEvidence {
   id: string;
   kind: string;
@@ -43,6 +48,11 @@ export interface NormalizedEvidence {
   summary: string;
 }
 
+/**
+ * @class EvidenceNormalizer
+ * @description Corporate Governed class implementation for EvidenceNormalizer
+ * @classification ENTERPRISE
+ */
 export class EvidenceNormalizer {
   normalize(item: EvidenceItem): NormalizedEvidence {
     return {

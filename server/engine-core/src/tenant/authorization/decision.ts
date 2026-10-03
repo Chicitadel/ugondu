@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -39,6 +39,11 @@ export interface AuthorizationDecision {
   readonly context: Readonly<Record<string, any>>;
 }
 
+/**
+ * @class DecisionBuilder
+ * @description Corporate Governed class implementation for DecisionBuilder
+ * @classification ENTERPRISE
+ */
 export class DecisionBuilder {
   public static allow(reason: string, evaluatedPolicies: string[] = [], context: Record<string, any> = {}): AuthorizationDecision {
     return Object.freeze({

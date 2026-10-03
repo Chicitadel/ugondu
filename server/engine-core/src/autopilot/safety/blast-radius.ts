@@ -33,6 +33,11 @@ export interface BlastRadiusConstraint {
     criticalEntitiesAllowed: boolean;
 }
 
+/**
+ * @class BlastRadiusAnalyzer
+ * @description Corporate Governed class implementation for BlastRadiusAnalyzer
+ * @classification ENTERPRISE
+ */
 export class BlastRadiusAnalyzer {
     public analyze(proposedAction: any): BlastRadiusConstraint {
         return {

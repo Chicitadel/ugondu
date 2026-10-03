@@ -35,12 +35,22 @@
 // Implementation for evidence_graph.rs
 import { EvidenceItem } from '../evidence/collector';
 
+/**
+ * @interface EvidenceEdge
+ * @description Corporate Governed interface implementation for EvidenceEdge
+ * @classification ENTERPRISE
+ */
 export interface EvidenceEdge {
   from: string; // evidence item id
   to: string;   // evidence item id
   relationship: 'CAUSED_BY' | 'CORRELATED_WITH' | 'PRECEDED_BY';
 }
 
+/**
+ * @interface EvidenceGraph
+ * @description Corporate Governed interface implementation for EvidenceGraph
+ * @classification ENTERPRISE
+ */
 export interface EvidenceGraph {
   nodes: EvidenceItem[];
   edges: EvidenceEdge[];

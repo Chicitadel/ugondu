@@ -31,15 +31,23 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { randomBytes } from 'crypto';
 
+/**
+ * @class IdentityManager
+ * @description Corporate Governed class implementation for IdentityManager
+ * @classification ENTERPRISE
+ */
 export class IdentityManager {
     private activeIdentities: Map<string, string> = new Map();
 
     public provisionEphemeralIdentity(sandboxId: string): string {
         if (this.activeIdentities.has(sandboxId)) {
-            throw new Error(`Identity already exists for sandbox ${sandboxId}`);
+            throw new Error(__t('messages.error.identity_already_exists_for_sandbox', { 'sandboxId': sandboxId }));
         }
 
         const ephemeralToken = randomBytes(32).toString('hex');

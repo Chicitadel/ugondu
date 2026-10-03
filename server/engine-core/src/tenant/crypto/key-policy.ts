@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,6 +32,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface KeyPolicy
+ * @description Corporate Governed interface implementation for KeyPolicy
+ * @classification ENTERPRISE
+ */
 export interface KeyPolicy {
     tenantId: string;
     rotationIntervalDays: number;
@@ -39,13 +47,18 @@ export interface KeyPolicy {
     requireMfaForRotation: boolean;
 }
 
+/**
+ * @class KeyPolicyEnforcer
+ * @description Corporate Governed class implementation for KeyPolicyEnforcer
+ * @classification ENTERPRISE
+ */
 export class KeyPolicyEnforcer {
     public validatePolicy(policy: KeyPolicy): void {
         if (policy.allowExport) {
-            throw new Error('Key export is strictly prohibited by security governance.');
+            throw new Error(__t('messages.error.key_export_is_strictly_prohibited_by_security'));
         }
         if (policy.rotationIntervalDays > 90) {
-            throw new Error('Key rotation interval cannot exceed 90 days.');
+            throw new Error(__t('messages.error.key_rotation_interval_cannot_exceed_90_days'));
         }
     }
 }

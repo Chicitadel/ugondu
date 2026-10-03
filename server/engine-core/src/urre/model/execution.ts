@@ -28,6 +28,11 @@ export interface ExecutionIdContext {
   authorizationContext: string;
 }
 
+/**
+ * @interface ExecutionLease
+ * @description Corporate Governed interface implementation for ExecutionLease
+ * @classification ENTERPRISE
+ */
 export interface ExecutionLease {
   executionId: string;
   workerId: string;

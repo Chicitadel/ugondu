@@ -35,6 +35,11 @@ import { IExecutionJournal, IJournalEntry } from './journal';
 import { IntegrityManager } from './integrity';
 import Database from 'better-sqlite3';
 
+/**
+ * @class SqliteStore
+ * @description Corporate Governed class implementation for SqliteStore
+ * @classification ENTERPRISE
+ */
 export class SqliteStore implements IExecutionJournal {
     private db: Database.Database;
 

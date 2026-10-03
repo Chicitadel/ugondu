@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,10 +32,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class TenantDeactivator
+ * @description Corporate Governed class implementation for TenantDeactivator
+ * @classification ENTERPRISE
+ */
 export class TenantDeactivator {
     public deactivate(tenantId: string, graceful: boolean): void {
         if (!tenantId) {
-            throw new Error('Tenant ID required for deactivation.');
+            throw new Error(__t('messages.error.tenant_id_required_for_deactivation'));
         }
         // Process data retention schedules, revoke keys, destroy computing resources
     }

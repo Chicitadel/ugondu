@@ -36,17 +36,32 @@ export enum RollbackStrategy {
     FORWARD_RECOVERY = 'FORWARD_RECOVERY'
 }
 
+/**
+ * @interface RollbackPlan
+ * @description Corporate Governed interface implementation for RollbackPlan
+ * @classification ENTERPRISE
+ */
 export interface RollbackPlan {
     feasible: boolean;
     strategy: RollbackStrategy;
     reasoning: string[];
 }
 
+/**
+ * @interface SystemState
+ * @description Corporate Governed interface implementation for SystemState
+ * @classification ENTERPRISE
+ */
 export interface SystemState {
     targetReceivedWritesCount: number;
     sourceIsStrictlyQuiesced: boolean;
 }
 
+/**
+ * @class RollbackPlanner
+ * @description Corporate Governed class implementation for RollbackPlanner
+ * @classification ENTERPRISE
+ */
 export class RollbackPlanner {
     public calculatePlan(state: SystemState): RollbackPlan {
         const reasoning: string[] = [];

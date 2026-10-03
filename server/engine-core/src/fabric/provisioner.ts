@@ -31,12 +31,20 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../shared/i18n';
+
 import { ExecutionEnvelope } from '../types/passport';
 import { ProvisioningTask, ProvisioningResult } from '../types/fabric';
 import { FabricController } from '../fabric-controller';
 
 import { TenantContextGuard } from '../tenant/integration/twin-isolation-guard';
 
+/**
+ * @class Provisioner
+ * @description Corporate Governed class implementation for Provisioner
+ * @classification ENTERPRISE
+ */
 export class Provisioner {
     constructor(private readonly controller: FabricController) {}
 
@@ -46,16 +54,16 @@ export class Provisioner {
         guard.assertContext(envelope?.securityContext);
 
         if (!envelope || !envelope.signature) {
-            throw new Error('Provisioning blocked: Missing valid ExecutionEnvelope');
+            throw new Error(__t('messages.error.provisioning_blocked_missing_valid_executione'));
         }
 
         // Verify the signature structurally
         if (!envelope.signature.startsWith('SIG:')) {
-            throw new Error('Provisioning blocked: Invalid ExecutionEnvelope signature format');
+            throw new Error(__t('messages.error.provisioning_blocked_invalid_executionenvelop'));
         }
 
         if (envelope.contextId !== task.contextId) {
-            throw new Error('Provisioning blocked: Context ID mismatch in ExecutionEnvelope');
+            throw new Error(__t('messages.error.provisioning_blocked_context_id_mismatch_in_e'));
         }
 
         return await this.controller.allocateResources(task);

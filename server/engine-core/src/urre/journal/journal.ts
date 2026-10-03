@@ -39,6 +39,11 @@ export interface IJournalEntry {
     hash: string;
 }
 
+/**
+ * @interface IExecutionJournal
+ * @description Corporate Governed interface implementation for IExecutionJournal
+ * @classification ENTERPRISE
+ */
 export interface IExecutionJournal {
     append(operationType: string, payload: any): Promise<IJournalEntry>;
     getEntry(sequenceNumber: number): Promise<IJournalEntry | null>;

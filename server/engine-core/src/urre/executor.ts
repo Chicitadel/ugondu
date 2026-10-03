@@ -38,6 +38,11 @@ import { __t } from '@ugondu/shared';
 
 import { TenantContextGuard } from '../tenant/integration/twin-isolation-guard';
 
+/**
+ * @class Executor
+ * @description Corporate Governed class implementation for Executor
+ * @classification ENTERPRISE
+ */
 export class Executor {
     constructor(private readonly engine: EngineInternal) {}
 

@@ -36,4 +36,9 @@ export interface ContainerRegistryCapability {
   createRepository(name: string): Promise<RegistryResult>;
   deleteRepository(name: string): Promise<void>;
 }
+/**
+ * @interface RegistryResult
+ * @description Corporate Governed interface implementation for RegistryResult
+ * @classification ENTERPRISE
+ */
 export interface RegistryResult { repositoryUri: string; }

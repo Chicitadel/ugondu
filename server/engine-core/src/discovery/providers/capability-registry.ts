@@ -40,12 +40,22 @@ export enum ProviderCapability {
   PANEL_MANAGEMENT = 'PANEL_MANAGEMENT',
 }
 
+/**
+ * @interface ICapabilityRegistry
+ * @description Corporate Governed interface implementation for ICapabilityRegistry
+ * @classification ENTERPRISE
+ */
 export interface ICapabilityRegistry {
   registerCapability(providerId: string, capability: ProviderCapability): void;
   hasCapability(providerId: string, capability: ProviderCapability): boolean;
   getCapabilities(providerId: string): ProviderCapability[];
 }
 
+/**
+ * @class CapabilityRegistry
+ * @description Corporate Governed class implementation for CapabilityRegistry
+ * @classification ENTERPRISE
+ */
 export class CapabilityRegistry implements ICapabilityRegistry {
   private registry: Map<string, Set<ProviderCapability>> = new Map();
 

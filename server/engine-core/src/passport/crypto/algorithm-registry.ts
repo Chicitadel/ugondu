@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,18 +32,31 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 export enum SupportedAlgorithm {
     RSA_SHA256 = 'RSA-SHA256',
     RSA_SHA512 = 'RSA-SHA512',
     ED25519 = 'Ed25519'
 }
 
+/**
+ * @interface AlgorithmConfig
+ * @description Corporate Governed interface implementation for AlgorithmConfig
+ * @classification ENTERPRISE
+ */
 export interface AlgorithmConfig {
     name: SupportedAlgorithm;
     nodeCryptoName: string;
     keyType: 'rsa' | 'ed25519';
 }
 
+/**
+ * @class AlgorithmRegistry
+ * @description Corporate Governed class implementation for AlgorithmRegistry
+ * @classification ENTERPRISE
+ */
 export class AlgorithmRegistry {
     private algorithms: Map<SupportedAlgorithm, AlgorithmConfig> = new Map();
 
@@ -72,7 +85,7 @@ export class AlgorithmRegistry {
     public get(name: SupportedAlgorithm): AlgorithmConfig {
         const config = this.algorithms.get(name);
         if (!config) {
-            throw new Error(`Algorithm ${name} not supported`);
+            throw new Error(__t('messages.error.algorithm_not_supported', { 'name': name }));
         }
         return config;
     }

@@ -29,6 +29,11 @@
 
 import { ApdlRule } from './apdl';
 
+/**
+ * @class PrecedenceResolver
+ * @description Corporate Governed class implementation for PrecedenceResolver
+ * @classification ENTERPRISE
+ */
 export class PrecedenceResolver {
     public resolve(rules: ApdlRule[]): ApdlRule[] {
         // Sorts and filters rules based on execution precedence

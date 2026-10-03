@@ -19,6 +19,11 @@ import { DockerTargetAdapter } from './docker';
 
 export type TargetEnvironmentType = 'cpanel' | 'directadmin' | 'ssh' | 'docker' | 'kubernetes' | 'cloud' | 'baremetal';
 
+/**
+ * @interface TargetDescriptor
+ * @description Corporate Governed interface implementation for TargetDescriptor
+ * @classification ENTERPRISE
+ */
 export interface TargetDescriptor {
     targetId: string;
     environmentType: TargetEnvironmentType;
@@ -27,6 +32,11 @@ export interface TargetDescriptor {
     capabilities: string[];
 }
 
+/**
+ * @class TargetFabric
+ * @description Corporate Governed class implementation for TargetFabric
+ * @classification ENTERPRISE
+ */
 export class TargetFabric {
     private registeredTargets: Map<string, TargetDescriptor> = new Map();
 

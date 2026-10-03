@@ -36,6 +36,11 @@ import { SourceDiscovery } from './source-discovery';
 import { TargetDiscovery } from './migration-discovery';
 import { MigrationBlocker } from '../model/migration-blocker';
 
+/**
+ * @class ReadinessAssessor
+ * @description Corporate Governed class implementation for ReadinessAssessor
+ * @classification ENTERPRISE
+ */
 export class ReadinessAssessor {
   private compatibilityAnalyzer = new CompatibilityAnalyzer();
   private sourceDiscovery = new SourceDiscovery();

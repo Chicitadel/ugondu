@@ -32,15 +32,28 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 // Implementation for contradiction_detector.rs
 import { EvidenceItem } from '../evidence/collector';
 
+/**
+ * @interface Contradiction
+ * @description Corporate Governed interface implementation for Contradiction
+ * @classification ENTERPRISE
+ */
 export interface Contradiction {
   item1Id: string;
   item2Id: string;
   reason: string;
 }
 
+/**
+ * @class ContradictionDetector
+ * @description Corporate Governed class implementation for ContradictionDetector
+ * @classification ENTERPRISE
+ */
 export class ContradictionDetector {
   detect(evidence: EvidenceItem[]): Contradiction[] {
     const contradictions: Contradiction[] = [];
@@ -52,7 +65,7 @@ export class ContradictionDetector {
           contradictions.push({
             item1Id: evidence[i].id,
             item2Id: evidence[j].id,
-            reason: `Same kind '${evidence[i].kind}' from different sources with different hashes`,
+            reason: __t('ui.responses.same_kind_from_different_sources_with_differe', { 'evidence_i__kind': evidence[i].kind }),
           });
         }
       }

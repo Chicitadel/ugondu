@@ -39,18 +39,33 @@ export enum ExecutionMode {
     MANUAL = 'MANUAL'
 }
 
+/**
+ * @interface OperationRequirements
+ * @description Corporate Governed interface implementation for OperationRequirements
+ * @classification ENTERPRISE
+ */
 export interface OperationRequirements {
     requiresAtomicRecovery: boolean;
     minimumCpuCores: number;
     minimumMemoryMb: number;
 }
 
+/**
+ * @interface ProviderCapabilities
+ * @description Corporate Governed interface implementation for ProviderCapabilities
+ * @classification ENTERPRISE
+ */
 export interface ProviderCapabilities {
     supportsAtomicRecovery: boolean;
     availableCpuCores: number;
     availableMemoryMb: number;
 }
 
+/**
+ * @class CapabilityCheck
+ * @description Corporate Governed class implementation for CapabilityCheck
+ * @classification ENTERPRISE
+ */
 export class CapabilityCheck {
     private recoveryAdapter?: IProviderRecoveryAdapter;
 

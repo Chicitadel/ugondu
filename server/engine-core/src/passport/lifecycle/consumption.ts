@@ -30,9 +30,17 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { DatabaseClient } from '../../infrastructure/database/client';
 
+/**
+ * @class ConsumptionManager
+ * @description Corporate Governed class implementation for ConsumptionManager
+ * @classification ENTERPRISE
+ */
 export class ConsumptionManager {
     constructor(
         private readonly dbClient: DatabaseClient
@@ -45,7 +53,7 @@ export class ConsumptionManager {
         );
 
         if (record.rows.length === 0) {
-            throw new Error(`Passport ${passportId} not found`);
+            throw new Error(__t('messages.error.passport_not_found', { 'passportId': passportId }));
         }
 
         return record.rows[0].is_consumed;

@@ -31,25 +31,33 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import * as fs from 'fs';
 import * as path from 'path';
 import type { ParsedIntent } from '../compiler/passport-compiler';
 
+/**
+ * @class IntentParser
+ * @description Corporate Governed class implementation for IntentParser
+ * @classification ENTERPRISE
+ */
 export class IntentParser {
   public async parseFile(filePath: string): Promise<ParsedIntent> {
     const resolved = path.resolve(filePath);
     if (!fs.existsSync(resolved)) {
-      throw new Error(`IntentParser: file not found: ${resolved}`);
+      throw new Error(__t('messages.error.intentparser_file_not_found', { 'resolved': resolved }));
     }
     const raw = fs.readFileSync(resolved, 'utf-8');
     let data: Record<string, unknown>;
     try {
       data = JSON.parse(raw) as Record<string, unknown>;
     } catch {
-      throw new Error(`IntentParser: invalid JSON in intent file: ${resolved}`);
+      throw new Error(__t('messages.error.intentparser_invalid_json_in_intent_file', { 'resolved': resolved }));
     }
     if (!data['action'] || typeof data['action'] !== 'string') {
-      throw new Error(`IntentParser: intent file must contain an 'action' string field`);
+      throw new Error(__t('messages.error.intentparser_intent_file_must_contain_an_acti'));
     }
     return {
       action: data['action'] as string,
@@ -64,7 +72,7 @@ export class IntentParser {
     try {
       return JSON.parse(text) as ParsedIntent;
     } catch {
-      throw new Error('IntentParser: invalid JSON intent string');
+      throw new Error(__t('messages.error.intentparser_invalid_json_intent_string'));
     }
   }
 }

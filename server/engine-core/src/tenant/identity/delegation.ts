@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { SubjectContext } from './subject-context';
 
+/**
+ * @interface DelegationRecord
+ * @description Corporate Governed interface implementation for DelegationRecord
+ * @classification ENTERPRISE
+ */
 export interface DelegationRecord {
   readonly delegatorId: string;
   readonly delegateId: string;
@@ -42,6 +47,11 @@ export interface DelegationRecord {
   readonly expiresAt: Date;
 }
 
+/**
+ * @class DelegationManager
+ * @description Corporate Governed class implementation for DelegationManager
+ * @classification ENTERPRISE
+ */
 export class DelegationManager {
   private delegations: DelegationRecord[] = [];
 

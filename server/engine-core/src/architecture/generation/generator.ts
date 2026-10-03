@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,13 +32,16 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { ArchitectureCandidate } from '../model/candidate';
 import { VerticalBVps } from '../verticals/vertical-b-vps';
 import { VerticalCCpanel } from '../verticals/vertical-c-cpanel';
 
 export function generate(input: any): ArchitectureCandidate[] {
     if (!input) {
-        throw new Error('Input cannot be null or undefined');
+        throw new Error(__t('messages.error.input_cannot_be_null_or_undefined'));
     }
     
     // Read input.runtime, input.database, input.requiresTLS, input.targetFamily etc if needed

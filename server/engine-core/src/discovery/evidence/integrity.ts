@@ -33,6 +33,11 @@
 
 import * as crypto from 'crypto';
 
+/**
+ * @class IntegrityEnforcer
+ * @description Corporate Governed class implementation for IntegrityEnforcer
+ * @classification ENTERPRISE
+ */
 export class IntegrityEnforcer {
   private secretKey: string;
 

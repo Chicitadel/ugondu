@@ -23,6 +23,7 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
+
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -59,6 +60,22 @@ export function getLocalesDirectories(): string[] {
 }
 
 /**
+ * Flattens nested locale objects into dotted tokens (e.g. { messages: { error: { x: 'y' } } }
+ * becomes 'messages.error.x'), so tokenized lookups resolve regardless of file nesting.
+ */
+function flattenDictionary(source: Record<string, unknown>, prefix = '', target: Record<string, string> = {}): Record<string, string> {
+    for (const [key, value] of Object.entries(source)) {
+        const token = prefix ? `${prefix}.${key}` : key;
+        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+            flattenDictionary(value as Record<string, unknown>, token, target);
+        } else {
+            target[token] = String(value);
+        }
+    }
+    return target;
+}
+
+/**
  * Dynamically loads or reloads all [lang].json dictionary files from governed locales directories.
  * Dropping a new language file (e.g. ja.json) immediately activates the language without code changes.
  * Deleting a language file immediately removes it and falls back to default locale 'en'.
@@ -84,9 +101,9 @@ export function reloadLocales(): void {
                         if (!dictionaries[langCode]) {
                             dictionaries[langCode] = {};
                         }
-                        Object.assign(dictionaries[langCode], parsed);
+                        Object.assign(dictionaries[langCode], flattenDictionary(parsed));
                     } catch (err: any) {
-                        console.error(`[i18n] Error loading locale file ${filePath}: ${err.message}`);
+                        console.error(__t('messages.system.i18n_error_loading_locale_file', { 'filePath': filePath, 'err_message': err.message }));
                     }
                 }
             }
@@ -121,7 +138,7 @@ export function setLocale(locale: string): void {
     if (dictionaries[normalized]) {
         currentLocale = normalized;
     } else {
-        console.warn(`[i18n] Locale '${locale}' not found in dynamic directory. Remaining on '${currentLocale}'.`);
+        console.warn(__t('messages.system.i18n_locale_not_found_in_dynamic_directory_re', { 'locale': locale, 'currentLocale': currentLocale }));
     }
 }
 

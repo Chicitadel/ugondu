@@ -31,12 +31,20 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../shared/i18n';
+
 import { ProvisioningTask, ProvisioningResult } from './types/fabric';
 
+/**
+ * @class FabricController
+ * @description Corporate Governed class implementation for FabricController
+ * @classification ENTERPRISE
+ */
 export class FabricController {
   public async provision(task: ProvisioningTask): Promise<ProvisioningResult> {
     if (!task.contextId || !task.targetId) {
-      throw new Error(`FabricController: invalid provisioning task — contextId and targetId are required`);
+      throw new Error(__t('messages.error.fabriccontroller_invalid_provisioning_task_co'));
     }
     return {
       contextId: task.contextId,
@@ -49,13 +57,13 @@ export class FabricController {
 
   public async deprovision(targetId: string): Promise<void> {
     if (!targetId) {
-      throw new Error(`FabricController: targetId is required for deprovisioning`);
+      throw new Error(__t('messages.error.fabriccontroller_targetid_is_required_for_dep'));
     }
   }
 
   public async allocateResources(task: ProvisioningTask): Promise<ProvisioningResult> {
     if (!task.contextId || !task.targetId) {
-      throw new Error(`FabricController: allocateResources requires contextId and targetId`);
+      throw new Error(__t('messages.error.fabriccontroller_allocateresources_requires_c'));
     }
     return {
       contextId: task.contextId,

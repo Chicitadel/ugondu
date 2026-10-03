@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { SubjectContext, SubjectContextFactory } from './subject-context';
 
+/**
+ * @class SAMLAdapter
+ * @description Corporate Governed class implementation for SAMLAdapter
+ * @classification ENTERPRISE
+ */
 export class SAMLAdapter {
   public parseAssertion(assertionXml: string): SubjectContext {
     // Simulated XML parsing and validation

@@ -1,99 +1,74 @@
-# Ugondu Edition Comparison — Commercial Feature Guide
+<!--
+/******************************************************************************
+ * Project        : Ugondu — Universal Delivery Operating System
+ * Module         : Commercial Edition Reference (Superseded)
+ * File           : EDITIONS.md
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Last Modified  : 2026-10-02
+ * Classification : PUBLIC
+ *
+ * Governance:
+ * - Architecture Controlled
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+-->
 
-> Air Roofers Ltd | Ujomor Systems Engineering Authority | Classification: PUBLIC
+# Ugondu Edition Reference
 
-This document describes the distinct feature boundaries between Ugondu commercial editions, designed to drive subscription retention and upward tier migration.
+> **Air Roofers Ltd | Ujomor Systems Engineering Authority | Classification: PUBLIC**
 
----
-
-## Edition Overview
-
-### Community Edition — Free Forever
-
-**Who it's for:** Individual developers, open-source projects, hobby deployments.
-
-**What you get:**
-- Full `ugondu deploy` CLI
-- Universal repository provider support (GitHub, GitLab, Bitbucket, Gitea, Gogs, Azure DevOps, etc.)
-- `quota-sync` deployment strategy (cPanel/DirectAdmin disk-safe)
-- 1 active plugin slot
-- `ugondu-plugin-node` and `ugondu-plugin-composer` included
-- Community support via GitHub Issues
-
-**Hard limitations:**
-- No atomic deployments (symlink-based zero-downtime)
-- No release rollbacks — once deployed, no instant recovery
-- No execution telemetry or audit ledger
-- Cannot install 3rd-party commercial plugins beyond slot 1
-- Shown in-terminal upsell notices when locked features are attempted
-
-**Token format:** No prefix (e.g., `community_token_123`)
-
----
-
-### Professional Edition — \$X/month per workspace
-
-**Who it's for:** Freelancers, agencies, small teams managing production workloads.
-
-**Everything in Community, plus:**
-- **Atomic deployment strategy** — zero-downtime symlink swaps (instantly roll to new release)
-- **Release rollbacks** — maintain last 3 releases; one command to revert
-- **5 plugin slots** — install and compose multiple deployment plugins
-- **Plugin Manager Sandbox** — full sandboxed execution environment
-- Priority email support
-
-**Hard limitations:**
-- No execution telemetry streaming to audit ledger
-- No SLA guarantee
-
-**Token format:** `ugp_` prefix (e.g., `ugp_abc123...`)
+> [!IMPORTANT]
+> This document is superseded by the canonical **Capability Entitlement Graph (CEG) Blueprint**:
+> [`ugondu_capability_entitlement_blueprint_v1_2026-10-02.md`](../../00_engineering_guide/blueprints/ugondu/ugondu_capability_entitlement_blueprint_v1_2026-10-02.md)
+>
+> The CEG blueprint is the authoritative source of truth for all edition definitions, capability entitlements, upgrade/downgrade lifecycle, commercial authority boundaries, and the full capability matrix.
+>
+> This file is retained for historical reference only.
 
 ---
 
-### Enterprise Edition — Custom pricing
+## Edition Hierarchy (Summary)
 
-**Who it's for:** Agencies, digital teams, SaaS products with multi-tenant deployment needs.
-
-**Everything in Professional, plus:**
-- **Unlimited plugins** — no slot restrictions
-- **Execution telemetry** — all deployment steps audited and shipped to the Air Roofers Audit Ledger
-- **SLA-backed support** — 4h response SLA
-- **Multi-workspace governance** — centralized policy management
-- **Dedicated identity integration** — custom SSO/SAML binding
-- **White-label option** — rebrand Ugondu as your own product
-
-**Token format:** `uge_` prefix (e.g., `uge_xyz789...`)
-
----
-
-## Feature Gating Architecture
-
-Feature enforcement is **server-side only**. The thin-client is "dumb" — it executes whatever recipe the Governance Server returns. The billing-gateway determines the edition from the token and the engine-core enforces capabilities:
+Ugondu uses the Air Roofers platform-wide canonical edition hierarchy (AR-STD-PKG-005):
 
 ```
-Token → billing-gateway (edition resolution)
-      → engine-core (strategy + plugin + rollback gating)
-      → ExecutionRecipe (signed, delivered to client)
-      → Thin Client (executes steps, cannot bypass)
+COMMUNITY (1) → PROFESSIONAL (2) → BUSINESS (3) → ENTERPRISE (4) → SOVEREIGN (5)
 ```
 
-Trying to use a Community token with Professional features does not crash — it gracefully downgrades the strategy and injects an `UPSELL_NOTICE` step into the recipe.
+- **OEM** and **MSP** are commercial distribution overlays on ENTERPRISE or SOVEREIGN, not ranked editions.
+- Licensing and entitlement is owned exclusively by **Mandatag** (`license.airroofers.eu`).
+- Billing and payment is owned exclusively by **AeroBill** (`billing.airroofers.eu`).
+- Ugondu itself does not implement billing, payment, or entitlement authority.
+
+## Commercial Authority
+
+| Authority | Service | Owns |
+| :--- | :--- | :--- |
+| **Mandatag** | `license.airroofers.eu` | Entitlement issuance, token signing, feature gating |
+| **AeroBill** | `billing.airroofers.eu` | Billing, invoicing, payment, taxation |
+| **Ugondu Control Plane** | `ugondu.airroofers.eu` | Capability resolution, manifest delivery, execution authorization |
+
+## Feature Enforcement
+
+Feature enforcement is **server-side and cryptographically signed**. The thin client presents capabilities based on the server-issued `CapabilityManifest` — it does not decide what it is entitled to.
+
+```
+Mandatag → CapabilityManifest (signed) → Event Bus → Client
+                                              │
+                                      Capability refresh
+                                              │
+                                      Feature enabled/disabled
+```
+
+Upgrading does **not** require reinstalling Ugondu or downloading proprietary code.
 
 ---
 
-## Upgrade Path
-
-```
-Community
-    │  Unlock: atomic deploys, rollbacks, 5 plugins
-    ▼
-Professional
-    │  Unlock: telemetry, unlimited plugins, SLA, multi-workspace
-    ▼
-Enterprise
-```
-
-Upgrade at: **https://identity.airroofers.eu/upgrade**
+*For the full capability matrix, usage limits, upgrade/downgrade lifecycle, and commercial invariants:*
+*→ [`ugondu_capability_entitlement_blueprint_v1_2026-10-02.md`](../../00_engineering_guide/blueprints/ugondu/ugondu_capability_entitlement_blueprint_v1_2026-10-02.md)*
 
 ---
 

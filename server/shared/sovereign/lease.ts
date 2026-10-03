@@ -43,17 +43,17 @@ export class SovereignLeaseValidator {
     ): { valid: boolean; reason?: string } {
         // 1. Time boundary check
         if (currentTime > lease.expiresAt) {
-            return { valid: false, reason: 'LEASE_EXPIRED' };
+            return { valid: false, reason: __t('ui.responses.lease_expired') };
         }
         if (currentTime < lease.issuedAt - 60000) { // 1 min clock skew allowance
-            return { valid: false, reason: 'LEASE_NOT_YET_VALID' };
+            return { valid: false, reason: __t('ui.responses.lease_not_yet_valid') };
         }
 
         // 2. Cryptographic signature check over canonical payload
         const { signature, ...payload } = lease;
         const canonical = canonicalize(payload);
         if (!canonical) {
-            return { valid: false, reason: 'CANONICALIZATION_FAILED' };
+            return { valid: false, reason: __t('ui.responses.canonicalization_failed') };
         }
 
         try {
@@ -66,10 +66,10 @@ export class SovereignLeaseValidator {
             );
 
             if (!verified) {
-                return { valid: false, reason: 'INVALID_CRYPTOGRAPHIC_SIGNATURE' };
+                return { valid: false, reason: __t('ui.responses.invalid_cryptographic_signature') };
             }
         } catch {
-            return { valid: false, reason: 'SIGNATURE_VERIFICATION_EXCEPTION' };
+            return { valid: false, reason: __t('ui.responses.signature_verification_exception') };
         }
 
         return { valid: true };

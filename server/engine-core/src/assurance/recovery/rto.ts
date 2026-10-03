@@ -38,6 +38,11 @@ export interface IncidentHistory {
     recoveryCompletionTimestamp: Date | null;
 }
 
+/**
+ * @class RtoCalculator
+ * @description Corporate Governed class implementation for RtoCalculator
+ * @classification ENTERPRISE
+ */
 export class RtoCalculator {
     public calculateElapsedRto(incident: IncidentHistory): number {
         const end = incident.recoveryCompletionTimestamp ? incident.recoveryCompletionTimestamp.getTime() : new Date().getTime();

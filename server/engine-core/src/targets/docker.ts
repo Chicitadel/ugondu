@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface DockerTargetConfig
+ * @description Corporate Governed interface implementation for DockerTargetConfig
+ * @classification ENTERPRISE
+ */
 export interface DockerTargetConfig {
     targetId: string;
     dockerHost: string;
@@ -27,6 +32,11 @@ export interface DockerTargetConfig {
     readOnlyRoot: boolean;
 }
 
+/**
+ * @interface DockerDeploymentPlan
+ * @description Corporate Governed interface implementation for DockerDeploymentPlan
+ * @classification ENTERPRISE
+ */
 export interface DockerDeploymentPlan {
     strategy: 'container-swap';
     imageTag: string;
@@ -34,6 +44,11 @@ export interface DockerDeploymentPlan {
     healthCheckEndpoint: string;
 }
 
+/**
+ * @class DockerTargetAdapter
+ * @description Corporate Governed class implementation for DockerTargetAdapter
+ * @classification ENTERPRISE
+ */
 export class DockerTargetAdapter {
     private config: DockerTargetConfig;
 

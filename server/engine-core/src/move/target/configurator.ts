@@ -31,10 +31,19 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
 
+
+/**
+ * @class TargetConfigurator
+ * @description Corporate Governed class implementation for TargetConfigurator
+ * @classification ENTERPRISE
+ */
 export class TargetConfigurator {
     async configure(resourceId: string, config: any): Promise<boolean> {
-        console.log(`Configuring resource ${resourceId}...`);
+        Logger.info(__t('messages.system.configuring_resource', { 'resourceId': resourceId }));
         return new Promise((resolve) => setTimeout(() => resolve(true), 100));
     }
 }

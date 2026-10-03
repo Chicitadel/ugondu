@@ -36,5 +36,15 @@ export interface TlsCapability {
   requestCertificate(config: TlsConfig): Promise<TlsResult>;
   revokeCertificate(id: string): Promise<void>;
 }
+/**
+ * @interface TlsConfig
+ * @description Corporate Governed interface implementation for TlsConfig
+ * @classification ENTERPRISE
+ */
 export interface TlsConfig { domainName: string; subjectAlternativeNames?: string[]; }
+/**
+ * @interface TlsResult
+ * @description Corporate Governed interface implementation for TlsResult
+ * @classification ENTERPRISE
+ */
 export interface TlsResult { id: string; certificateChain: string; privateKeyReference: string; }

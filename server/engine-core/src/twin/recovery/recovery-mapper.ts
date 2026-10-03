@@ -38,6 +38,11 @@ export interface RecoveryCapability {
     recoveryStrategies: string[];
 }
 
+/**
+ * @class RecoveryMapper
+ * @description Corporate Governed class implementation for RecoveryMapper
+ * @classification ENTERPRISE
+ */
 export class RecoveryMapper {
     private capabilities: Map<string, RecoveryCapability> = new Map();
 

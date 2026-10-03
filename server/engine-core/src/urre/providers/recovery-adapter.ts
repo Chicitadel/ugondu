@@ -38,6 +38,11 @@ export interface SnapshotMetadata {
     sizeBytes: number;
 }
 
+/**
+ * @interface IProviderRecoveryAdapter
+ * @description Corporate Governed interface implementation for IProviderRecoveryAdapter
+ * @classification ENTERPRISE
+ */
 export interface IProviderRecoveryAdapter {
     /**
      * Creates a recovery snapshot for a given provider context.

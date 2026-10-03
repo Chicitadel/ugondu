@@ -31,10 +31,18 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { RecoveryPoint } from './recovery-point';
 import { RestoreEngine } from './restore';
 
+/**
+ * @class FailoverCoordinator
+ * @description Corporate Governed class implementation for FailoverCoordinator
+ * @classification ENTERPRISE
+ */
 export class FailoverCoordinator {
     constructor(
         private readonly restoreEngine: RestoreEngine
@@ -47,7 +55,7 @@ export class FailoverCoordinator {
             await this.routeTraffic(secondaryNodeId);
         } catch (error) {
             await this.haltFailoverAndAlert(error instanceof Error ? error.message : String(error));
-            throw new Error(`Failover aborted: ${error}`);
+            throw new Error(__t('messages.error.failover_aborted', { 'error': error }));
         }
     }
 

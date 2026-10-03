@@ -34,11 +34,28 @@
 import { PreflightRequest, PreflightDecision, AdmissionState } from '../model';
 import { validateSafetyContract } from './safety-contract';
 import { evaluateDiskPressure } from './disk-pressure';
+import { runAuthorizationReadiness, UppiePreflightContext, AuthorizationReadinessReport } from './authorization-readiness';
 
 /**
  * Executes the full admission controller (auth, drift, capacity, risk).
  */
 export async function runPreflightAdmission(request: PreflightRequest, state: AdmissionState): Promise<PreflightDecision> {
+    // UPPIE Authorization Readiness — runs first when UPPIE context present
+    // INVARIANT: check #12 (recovery authority) FAIL → immediate BLOCK
+    //            check #13 (verification authority) FAIL → immediate BLOCK
+    if (request.uppieContext) {
+      const authReport = runAuthorizationReadiness(request.uppieContext);
+      if (
+        authReport.decision === 'BLOCK' ||
+        authReport.decision === 'BLOCK_RECOVERY_PATH'
+      ) {
+        return 'BLOCK';
+      }
+      if (authReport.decision === 'REQUIRE_APPROVAL') {
+        return 'ALLOW_WITH_APPROVAL';
+      }
+    }
+
     // Auth Check
     if (!request.isAuthenticated || !request.hasRequiredRoles) {
         return 'BLOCK';

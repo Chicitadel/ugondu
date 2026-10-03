@@ -138,7 +138,7 @@ async function runTests() {
     // Test 2: POST with invalid passport id → 403
     try {
         const r = await post(ENGINE_PORT, '/v1/deploy/resolve', validPayload, {
-            'X-Ugondu-Passport-Id': ['   ']
+            'X-Ugondu-Passport-Id': String.fromCharCode(160)
         });
         console.log(r);
         assert.strictEqual(r.status, 403, `Expected 403, got ${r.status}`);

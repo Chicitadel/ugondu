@@ -1,0 +1,13 @@
+{
+  "checkpointId": "cp_100",
+  "payload": {
+    "checkpointId": "cp_100",
+    "state": "RUNNING",
+    "data": {
+      "releaseId": "rel-1"
+    },
+    "timestamp": 1791058402554
+  },
+  "sha256": "6550b35e06529d043791ce000470f2fce425f42d508c7cf30d89d1ee0c8a7cae",
+  "persistedAt": 1791058402555
+}

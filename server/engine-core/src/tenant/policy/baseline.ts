@@ -1,38 +1,31 @@
 /******************************************************************************
  * Project        : Ugondu
- * Module         : tenant/policy
+ * Module         : Tenant / Policy
  * File           : baseline.ts
- * Version        : 1.0.0
- * Author         : Ugondu Engineer
- * Organization   : Ujomor Platform
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-03
  * Classification : ENTERPRISE
- *
- * Governance:
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
- *
- * Copyright (c) 2026 Ujomor Platform
- * All Rights Reserved.
+ * Governance: Corporate Governed / Security Reviewed / Protocol Frozen
+ * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
+export interface TenantPolicyBaseline {
+    defaultEffect: 'DENY';
+    maxRolesPerPrincipal: number;
+    mfaRequiredForProduction: boolean;
+    allowedProviders: string[];
+}
+
 export class BaselinePolicy {
-  public getBaseline(): unknown {
-    return {};
-  }
+    public getBaseline(tenantId?: string): TenantPolicyBaseline {
+        return {
+            defaultEffect: 'DENY',
+            maxRolesPerPrincipal: 10,
+            mfaRequiredForProduction: true,
+            allowedProviders: ['AWS_IAM', 'AZURE_RBAC', 'GCP_IAM', 'KUBERNETES_RBAC', 'LINUX_ACL', 'CPANEL']
+        };
+    }
 }

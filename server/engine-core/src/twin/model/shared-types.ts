@@ -26,6 +26,11 @@ export interface ApplicationDiscovery {
   containerized: boolean;
 }
 
+/**
+ * @interface HostDiscovery
+ * @description Corporate Governed interface implementation for HostDiscovery
+ * @classification ENTERPRISE
+ */
 export interface HostDiscovery {
   os: string;
   cpuCores: number;
@@ -41,6 +46,11 @@ export interface HostDiscovery {
   containers: string[];
 }
 
+/**
+ * @interface CloudDiscovery
+ * @description Corporate Governed interface implementation for CloudDiscovery
+ * @classification ENTERPRISE
+ */
 export interface CloudDiscovery {
   provider: string;
   accountId: string;
@@ -56,6 +66,11 @@ export interface CloudDiscovery {
   certificates: string[];
 }
 
+/**
+ * @interface KubernetesDiscovery
+ * @description Corporate Governed interface implementation for KubernetesDiscovery
+ * @classification ENTERPRISE
+ */
 export interface KubernetesDiscovery {
   clusterName: string;
   namespaces: string[];
@@ -68,6 +83,11 @@ export interface KubernetesDiscovery {
   nodeCount: number;
 }
 
+/**
+ * @interface HostingPanelDiscovery
+ * @description Corporate Governed interface implementation for HostingPanelDiscovery
+ * @classification ENTERPRISE
+ */
 export interface HostingPanelDiscovery {
   panel: 'cpanel' | 'plesk' | 'directadmin' | 'unknown';
   domains: string[];
@@ -87,6 +107,11 @@ export type ResourceLifecycleState =
   | 'DISCOVERED' | 'MODELLED' | 'PLANNED' | 'PROVISIONED'
   | 'DEPLOYED' | 'VERIFIED' | 'HEALTHY' | 'DEGRADED' | 'RECOVERING';
 
+/**
+ * @interface TwinResource
+ * @description Corporate Governed interface implementation for TwinResource
+ * @classification ENTERPRISE
+ */
 export interface TwinResource {
   resourceId: string;
   type: string;
@@ -97,6 +122,11 @@ export interface TwinResource {
   lastVerifiedAt: number | null;
 }
 
+/**
+ * @interface DependencyEdge
+ * @description Corporate Governed interface implementation for DependencyEdge
+ * @classification ENTERPRISE
+ */
 export interface DependencyEdge {
   fromResourceId: string;
   toResourceId: string;
@@ -104,6 +134,11 @@ export interface DependencyEdge {
   verified: boolean;
 }
 
+/**
+ * @interface EnvironmentTwin
+ * @description Corporate Governed interface implementation for EnvironmentTwin
+ * @classification ENTERPRISE
+ */
 export interface EnvironmentTwin {
   environmentId: string;
   tenantId: string;

@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,10 +32,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class PassportContextValidator
+ * @description Corporate Governed class implementation for PassportContextValidator
+ * @classification ENTERPRISE
+ */
 export class PassportContextValidator {
     public validate(context: any): void {
         if (!context || !context.tenantId) {
-            throw new Error('Invalid passport context. Context must contain tenantId.');
+            throw new Error(__t('messages.error.invalid_passport_context_context_must_contain'));
         }
     }
 }

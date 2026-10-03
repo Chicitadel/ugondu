@@ -32,6 +32,11 @@
  ******************************************************************************/
 import { Policy } from './policy';
 
+/**
+ * @class PolicyValidator
+ * @description Corporate Governed class implementation for PolicyValidator
+ * @classification ENTERPRISE
+ */
 export class PolicyValidator {
     public validate(policy: Policy): boolean {
         if (!policy.id || !policy.description) return false;

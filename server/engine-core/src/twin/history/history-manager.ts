@@ -36,6 +36,11 @@ export interface HistoricalTwinState {
     stateSnapshot: any;
 }
 
+/**
+ * @class HistoryManager
+ * @description Corporate Governed class implementation for HistoryManager
+ * @classification ENTERPRISE
+ */
 export class HistoryManager {
     private history: HistoricalTwinState[] = [];
 

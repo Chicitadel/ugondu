@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,12 +34,22 @@
 import { EvidenceChain } from '../evidence/chain';
 import { generateDigest } from '../evidence/digest';
 
+/**
+ * @interface TwinState
+ * @description Corporate Governed interface implementation for TwinState
+ * @classification ENTERPRISE
+ */
 export interface TwinState {
     twinId: string;
     lastSynced: number;
     stateHash: string;
 }
 
+/**
+ * @class TwinBinder
+ * @description Corporate Governed class implementation for TwinBinder
+ * @classification ENTERPRISE
+ */
 export class TwinBinder {
     public bindTwinState(chain: EvidenceChain, state: TwinState): void {
         const serializedState = JSON.stringify(state);

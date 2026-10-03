@@ -36,6 +36,11 @@ export enum Provenance {
     LLM_INFERRED = "LLM_INFERRED"
 }
 
+/**
+ * @interface Requirement
+ * @description Corporate Governed interface implementation for Requirement
+ * @classification ENTERPRISE
+ */
 export interface Requirement {
     id: string;
     description: string;

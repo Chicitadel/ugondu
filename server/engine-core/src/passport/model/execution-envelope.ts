@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { DeliveryPassport } from './passport';
 
+/**
+ * @interface ExecutionEnvelope
+ * @description Corporate Governed interface implementation for ExecutionEnvelope
+ * @classification ENTERPRISE
+ */
 export interface ExecutionEnvelope {
     envelopeId: string;
     passport: DeliveryPassport;

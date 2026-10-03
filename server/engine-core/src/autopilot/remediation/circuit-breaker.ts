@@ -31,14 +31,22 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 
+
+/**
+ * @class CircuitBreaker
+ * @description Corporate Governed class implementation for CircuitBreaker
+ * @classification ENTERPRISE
+ */
 export class CircuitBreaker {
   private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
   private failureCount = 0;
 
   async execute(action: () => Promise<any>): Promise<any> {
     if (this.state === 'OPEN') {
-      throw new Error('Circuit Breaker is OPEN');
+      throw new Error(__t('messages.error.circuit_breaker_is_open'));
     }
     try {
       const result = await action();

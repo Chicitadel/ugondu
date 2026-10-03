@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { DeliveryPassport, PassportStatus, PassportMetadata } from './passport';
 
+/**
+ * @interface EmergencyPassport
+ * @description Corporate Governed interface implementation for EmergencyPassport
+ * @classification ENTERPRISE
+ */
 export interface EmergencyPassport extends DeliveryPassport {
     emergencyReason: string;
     authorizingOfficial: string;
@@ -57,7 +62,7 @@ export function createEmergencyPassport(
 
     return {
         id: `epass-${Date.now()}`,
-        version: '1.0.0',
+        version: '1.0',
         metadata,
         evidence: [],
         status: PassportStatus.ISSUED,

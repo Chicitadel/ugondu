@@ -35,6 +35,11 @@
 // Implementation for deduplicator.rs
 import { IncidentRecord } from '../model/incident';
 
+/**
+ * @class IncidentDeduplicator
+ * @description Corporate Governed class implementation for IncidentDeduplicator
+ * @classification ENTERPRISE
+ */
 export class IncidentDeduplicator {
   deduplicate(incidents: IncidentRecord[]): IncidentRecord[] {
     const seen = new Set<string>();

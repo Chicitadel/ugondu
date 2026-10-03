@@ -1,0 +1,32 @@
+// Locale catalogue for the provisioning engine (fabric.engine.*) and the new registry errors; overwrite-capable and idempotent.
+const fs = require('fs');
+const path = require('path');
+const dir = path.join(__dirname, '..', 'server', 'shared', 'locales');
+const LANGS = ['en', 'fr', 'es', 'de', 'it'];
+const cat = {
+  'fabric.engine.invalid_config': ["Node '{node}': configuration field '{field}' is missing or invalid.", "Nœud « {node} » : le champ de configuration « {field} » est absent ou invalide.", "Nodo '{node}': el campo de configuración '{field}' falta o no es válido.", "Knoten '{node}': Das Konfigurationsfeld '{field}' fehlt oder ist ungültig.", "Nodo '{node}': il campo di configurazione '{field}' è mancante o non valido."],
+  'fabric.engine.no_resource_id': ["The provider returned no resource id for node '{node}'.", "Le fournisseur n'a renvoyé aucun identifiant de ressource pour le nœud « {node} ».", "El proveedor no devolvió ningún identificador de recurso para el nodo '{node}'.", "Der Anbieter hat für den Knoten '{node}' keine Ressourcen-ID zurückgegeben.", "Il provider non ha restituito alcun identificativo di risorsa per il nodo '{node}'."],
+  'fabric.engine.provider_reported_failure': ["The provider reported a failed state for node '{node}'.", "Le fournisseur a signalé un état d'échec pour le nœud « {node} ».", "El proveedor informó de un estado de error para el nodo '{node}'.", "Der Anbieter hat für den Knoten '{node}' einen Fehlerzustand gemeldet.", "Il provider ha segnalato uno stato di errore per il nodo '{node}'."],
+  'fabric.engine.duplicate_node': ["The plan contains a missing or duplicate node id '{node}'.", "Le plan contient un identifiant de nœud absent ou en double « {node} ».", "El plan contiene un identificador de nodo ausente o duplicado '{node}'.", "Der Plan enthält eine fehlende oder doppelte Knoten-ID '{node}'.", "Il piano contiene un id di nodo mancante o duplicato '{node}'."],
+  'fabric.engine.unknown_edge_node': ["The plan has a dependency on unknown node '{node}'.", "Le plan comporte une dépendance vers le nœud inconnu « {node} ».", "El plan tiene una dependencia del nodo desconocido '{node}'.", "Der Plan enthält eine Abhängigkeit zum unbekannten Knoten '{node}'.", "Il piano ha una dipendenza dal nodo sconosciuto '{node}'."],
+  'fabric.engine.unresolved_reference': ["Node '{node}' references '{ref}', which has not been provisioned.", "Le nœud « {node} » référence « {ref} », qui n'a pas été provisionné.", "El nodo '{node}' hace referencia a '{ref}', que no se ha aprovisionado.", "Der Knoten '{node}' verweist auf '{ref}', der nicht bereitgestellt wurde.", "Il nodo '{node}' fa riferimento a '{ref}', che non è stato predisposto."],
+  'fabric.engine.reference_not_declared': ["Node '{node}' references '{ref}' without declaring a dependency on it.", "Le nœud « {node} » référence « {ref} » sans déclarer de dépendance envers lui.", "El nodo '{node}' hace referencia a '{ref}' sin declarar una dependencia de él.", "Der Knoten '{node}' verweist auf '{ref}', ohne eine Abhängigkeit dazu zu deklarieren.", "Il nodo '{node}' fa riferimento a '{ref}' senza dichiarare una dipendenza da esso."],
+  'fabric.engine.unsupported_type': ["Node '{node}' has unsupported resource type '{type}'.", "Le nœud « {node} » a un type de ressource non pris en charge « {type} ».", "El nodo '{node}' tiene un tipo de recurso no admitido '{type}'.", "Der Knoten '{node}' hat den nicht unterstützten Ressourcentyp '{type}'.", "Il nodo '{node}' ha un tipo di risorsa non supportato '{type}'."],
+  'fabric.engine.state_conflict': ["Node '{node}' already exists with a different configuration; it is not modified.", "Le nœud « {node} » existe déjà avec une configuration différente ; il n'est pas modifié.", "El nodo '{node}' ya existe con una configuración distinta; no se modifica.", "Der Knoten '{node}' existiert bereits mit einer anderen Konfiguration; er wird nicht geändert.", "Il nodo '{node}' esiste già con una configurazione diversa; non viene modificato."],
+  'fabric.engine.plan_failed': ['The plan failed and everything it created was rolled back: {error}', "Le plan a échoué et tout ce qu'il avait créé a été annulé : {error}", 'El plan falló y todo lo que había creado se revirtió: {error}', 'Der Plan ist fehlgeschlagen und alles, was er erstellt hatte, wurde zurückgenommen: {error}', 'Il piano è fallito e tutto ciò che aveva creato è stato annullato: {error}'],
+  'fabric.engine.plan_failed_rollback_incomplete': ['The plan failed and {count} resource(s) could not be rolled back: {error}', "Le plan a échoué et {count} ressource(s) n'ont pas pu être annulées : {error}", 'El plan falló y {count} recurso(s) no se pudieron revertir: {error}', 'Der Plan ist fehlgeschlagen und {count} Ressource(n) konnten nicht zurückgenommen werden: {error}', 'Il piano è fallito e {count} risorsa/e non è stato possibile annullarle: {error}'],
+  'messages.error.no_database_adapter_found_for_provider': ["No database adapter is registered for provider '{providerId}'.", "Aucun adaptateur de base de données n'est enregistré pour le fournisseur « {providerId} ».", "No hay ningún adaptador de base de datos registrado para el proveedor '{providerId}'.", "Für den Anbieter '{providerId}' ist kein Datenbank-Adapter registriert.", "Nessun adattatore di database è registrato per il provider '{providerId}'."],
+  'messages.error.no_storage_adapter_found_for_provider': ["No storage adapter is registered for provider '{providerId}'.", "Aucun adaptateur de stockage n'est enregistré pour le fournisseur « {providerId} ».", "No hay ningún adaptador de almacenamiento registrado para el proveedor '{providerId}'.", "Für den Anbieter '{providerId}' ist kein Speicher-Adapter registriert.", "Nessun adattatore di archiviazione è registrato per il provider '{providerId}'."],
+};
+const setNested = (obj, dotted, value) => {
+  const parts = dotted.split('.'); let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) { if (typeof o[parts[i]] !== 'object' || o[parts[i]] === null) o[parts[i]] = {}; o = o[parts[i]]; }
+  o[parts[parts.length - 1]] = value;
+};
+LANGS.forEach((lang, idx) => {
+  const p = path.join(dir, `${lang}.json`);
+  const obj = JSON.parse(fs.readFileSync(p, 'utf8'));
+  for (const [k, v] of Object.entries(cat)) setNested(obj, k, v[idx]);
+  fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+});
+console.log('written', Object.keys(cat).length, 'keys x 5 locales (overwrite-capable)');

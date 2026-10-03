@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -38,6 +38,11 @@ import { IntentBinder, DeploymentIntent } from './intent-binder';
 import { AssuranceBinder, AssuranceReport } from './assurance-binder';
 import { PolicyBinder, PolicyEvaluation } from './policy-binder';
 
+/**
+ * @interface CompilePassportRequest
+ * @description Corporate Governed interface implementation for CompilePassportRequest
+ * @classification ENTERPRISE
+ */
 export interface CompilePassportRequest {
     intent: DeploymentIntent;
     twinState: TwinState;
@@ -46,6 +51,11 @@ export interface CompilePassportRequest {
     aggregationRequest: AggregationRequest;
 }
 
+/**
+ * @interface DeliveryPassport
+ * @description Corporate Governed interface implementation for DeliveryPassport
+ * @classification ENTERPRISE
+ */
 export interface DeliveryPassport {
     id: string;
     intentId: string;
@@ -54,6 +64,11 @@ export interface DeliveryPassport {
     isValid: boolean;
 }
 
+/**
+ * @class PassportCompiler
+ * @description Corporate Governed class implementation for PassportCompiler
+ * @classification ENTERPRISE
+ */
 export class PassportCompiler {
     private twinBinder = new TwinBinder();
     private intentBinder = new IntentBinder();

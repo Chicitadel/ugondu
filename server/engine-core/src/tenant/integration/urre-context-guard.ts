@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,11 +32,19 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class UrreContextGuard
+ * @description Corporate Governed class implementation for UrreContextGuard
+ * @classification ENTERPRISE
+ */
 export class UrreContextGuard {
     public enforce(tenantContextGuard: any): void {
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error('URRE context rejected. Tenant authority must be derived from TenantContextGuard.');
+            throw new Error(__t('messages.error.urre_context_rejected_tenant_authority_must_b'));
         }
     }
 }

@@ -31,6 +31,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class ReadOnlyGate
+ * @description Corporate Governed class implementation for ReadOnlyGate
+ * @classification ENTERPRISE
+ */
 export class ReadOnlyGate {
   private readonly requiredCapability = 'DISCOVERY_READ';
 
@@ -41,14 +49,14 @@ export class ReadOnlyGate {
    */
   public enforce(capabilities: string[]): void {
     if (!capabilities.includes(this.requiredCapability)) {
-      throw new Error(`Security Violation: Missing required capability '${this.requiredCapability}'`);
+      throw new Error(__t('messages.error.security_violation_missing_required_capabilit', { 'this_requiredCapability': this.requiredCapability }));
     }
 
     // Ensure no write capabilities are accidentally present in discovery context
     const forbiddenCapabilities = ['DISCOVERY_WRITE', 'SYSTEM_ADMIN', 'RESOURCE_MUTATE'];
     for (const forbidden of forbiddenCapabilities) {
       if (capabilities.includes(forbidden)) {
-        throw new Error(`Security Violation: Discovery context must not contain write capability '${forbidden}'`);
+        throw new Error(__t('messages.error.security_violation_discovery_context_must_not', { 'forbidden': forbidden }));
       }
     }
   }

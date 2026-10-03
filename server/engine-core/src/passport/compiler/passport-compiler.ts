@@ -31,6 +31,16 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+import type { AuthorityEvidence } from '../model/authority-evidence';
+
+/**
+ * @interface CompiledPassport
+ * @description Corporate Governed interface implementation for CompiledPassport
+ * @classification ENTERPRISE
+ */
 export interface CompiledPassport {
   id: string;
   policyId: string;
@@ -41,6 +51,11 @@ export interface CompiledPassport {
   priority?: string;
 }
 
+/**
+ * @interface ParsedIntent
+ * @description Corporate Governed interface implementation for ParsedIntent
+ * @classification ENTERPRISE
+ */
 export interface ParsedIntent {
   action: string;
   targetId: string;
@@ -49,10 +64,15 @@ export interface ParsedIntent {
   metadata: Record<string, unknown>;
 }
 
+/**
+ * @class PassportCompiler
+ * @description Corporate Governed class implementation for PassportCompiler
+ * @classification ENTERPRISE
+ */
 export class PassportCompiler {
   public async compile(intent: ParsedIntent): Promise<CompiledPassport> {
     if (!intent || !intent.action) {
-      throw new Error('PassportCompiler: intent is required and must specify an action');
+      throw new Error(__t('messages.error.passportcompiler_intent_is_required_and_must_'));
     }
     const now = new Date();
     return {
@@ -68,8 +88,48 @@ export class PassportCompiler {
 
   public async inspect(passportId: string): Promise<CompiledPassport | null> {
     if (!passportId) {
-      throw new Error('PassportCompiler: passportId is required for inspection');
+      throw new Error(__t('messages.error.passportcompiler_passportid_is_required_for_i'));
     }
     return null;
   }
+}
+
+/**
+ * Context for binding UPPIE authority evidence into a Delivery Passport.
+ * Populated by the UPPIE service layer before passport compilation.
+ */
+export interface AuthorityBindingContext {
+  authorityGraphDigest:      string;
+  effectiveAuthorityDigest:  string;
+  minimumAuthoritySet:       string[];
+  grantedAuthority:          import('../model/authority-evidence').GrantedAuthorityRecord[];
+  temporaryGrants:           import('../model/authority-evidence').TemporaryGrantRecord[];
+  revokedGrants:             import('../model/authority-evidence').RevokedGrantRecord[];
+  policySimulationDigest:    string;
+  approvalRecord?:           import('../model/authority-evidence').ApprovalRecord;
+  reuseEvidence?:            import('../model/authority-evidence').ReuseEvidenceRecord;
+}
+
+/**
+ * Bind UPPIE authority evidence into a Delivery Passport.
+ * Called during passport compilation when an UPPIE context is present.
+ *
+ * INVARIANT: The compiler receives pre-computed AuthorityEvidence from the UPPIE
+ * service layer. It does NOT call UPPIE adapters directly (no coupling).
+ * Binding is deterministic: same input → same evidence digest.
+ */
+export function bindAuthorityEvidence(
+  context: AuthorityBindingContext
+): AuthorityEvidence {
+  return {
+    authorityGraphDigest:     context.authorityGraphDigest,
+    effectiveAuthorityDigest: context.effectiveAuthorityDigest,
+    minimumAuthoritySet:      context.minimumAuthoritySet,
+    grantedAuthority:         context.grantedAuthority,
+    temporaryGrants:          context.temporaryGrants,
+    revokedGrants:            context.revokedGrants,
+    policySimulationDigest:   context.policySimulationDigest,
+    approvalRecord:           context.approvalRecord,
+    reuseEvidence:            context.reuseEvidence,
+  };
 }

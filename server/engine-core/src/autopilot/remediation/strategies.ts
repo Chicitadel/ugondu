@@ -1,39 +1,56 @@
 /******************************************************************************
  * Project        : Ugondu Engine Core
- * Module         : Autopilot
+ * Module         : Autopilot / Remediation
  * File           : strategies.ts
- * Version        : 1.0.0
- * Author         : Architecture Team
- * Organization   : Air Roofers
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-03
  * Classification : ENTERPRISE
- *
- * Governance:
- * - Corporate Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
- *
- * Copyright (c) 2026 Air Roofers
- * All Rights Reserved.
+ * Governance: Corporate Governed / Security Reviewed / Protocol Frozen
+ * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
+export interface StrategyDefinition {
+    strategyId: string;
+    name: string;
+    description: string;
+    steps: string[];
+}
+
 export class RemediationStrategies {
-  getStrategy(type: string): any {
-    return null;
-  }
+    private readonly strategies: Map<string, StrategyDefinition> = new Map([
+        ['NETWORK_TIMEOUT', {
+            strategyId: 'strat-net-retry',
+            name: 'Exponential Backoff Network Retry',
+            description: 'Retries transient network communication with backoff ceiling.',
+            steps: ['validate_dns', 'test_ping', 'retry_request']
+        }],
+        ['SERVICE_CRASH', {
+            strategyId: 'strat-svc-restart',
+            name: 'Safe Container Restart',
+            description: 'Drains connections and restarts failing microservice container.',
+            steps: ['drain_traffic', 'restart_container', 'verify_health']
+        }],
+        ['AUTHORIZATION_DRIFT', {
+            strategyId: 'strat-auth-reapply',
+            name: 'Reapply Frozen Authority Matrix',
+            description: 'Reconciles live IAM with UPPIE declared authority state.',
+            steps: ['fetch_live_policies', 'compute_diff', 'apply_least_privilege']
+        }]
+    ]);
+
+    public getStrategy(type: string): StrategyDefinition | null {
+        return this.strategies.get(type) || {
+            strategyId: `strat-generic-${type}`,
+            name: `Generic Remediation for ${type}`,
+            description: 'Standard automated remediation sequence.',
+            steps: ['diagnose', 'isolate', 'recover']
+        };
+    }
+
+    public registerStrategy(type: string, def: StrategyDefinition): void {
+        this.strategies.set(type, def);
+    }
 }

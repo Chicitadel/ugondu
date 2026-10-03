@@ -31,6 +31,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface ITrafficAdapter
+ * @description Corporate Governed interface implementation for ITrafficAdapter
+ * @classification ENTERPRISE
+ */
 export interface ITrafficAdapter {
     id: string;
     drain(timeoutMs: number): Promise<void>;
@@ -45,12 +53,17 @@ export enum TrafficStatus {
     ERROR = 'ERROR'
 }
 
+/**
+ * @class TrafficAuthority
+ * @description Corporate Governed class implementation for TrafficAuthority
+ * @classification ENTERPRISE
+ */
 export class TrafficAuthority {
     private adapters: Map<string, ITrafficAdapter> = new Map();
 
     public registerAdapter(adapter: ITrafficAdapter): void {
         if (this.adapters.has(adapter.id)) {
-            throw new Error(`Adapter with ID ${adapter.id} is already registered.`);
+            throw new Error(__t('messages.error.adapter_with_id_is_already_registered', { 'adapter_id': adapter.id }));
         }
         this.adapters.set(adapter.id, adapter);
     }

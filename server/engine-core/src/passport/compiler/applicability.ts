@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -38,12 +38,22 @@ export enum OperationType {
     Restore = 'Restore'
 }
 
+/**
+ * @interface ApplicabilityContext
+ * @description Corporate Governed interface implementation for ApplicabilityContext
+ * @classification ENTERPRISE
+ */
 export interface ApplicabilityContext {
     targetEnvironment: string;
     operation: OperationType;
     requiredLabels: string[];
 }
 
+/**
+ * @class ApplicabilityAnalyzer
+ * @description Corporate Governed class implementation for ApplicabilityAnalyzer
+ * @classification ENTERPRISE
+ */
 export class ApplicabilityAnalyzer {
     public static isApplicable(evidenceContext: ApplicabilityContext, targetContext: ApplicabilityContext): boolean {
         if (evidenceContext.operation !== targetContext.operation) return false;

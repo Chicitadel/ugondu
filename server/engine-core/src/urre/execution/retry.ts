@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,6 +32,15 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
+
+/**
+ * @interface RetryConfig
+ * @description Corporate Governed interface implementation for RetryConfig
+ * @classification ENTERPRISE
+ */
 export interface RetryConfig {
     maxAttempts: number;
     baseDelayMs: number;
@@ -40,6 +49,11 @@ export interface RetryConfig {
     jitterFactor: number;
 }
 
+/**
+ * @class RetryManager
+ * @description Corporate Governed class implementation for RetryManager
+ * @classification ENTERPRISE
+ */
 export class RetryManager {
     constructor(private config: RetryConfig) {}
 
@@ -59,10 +73,10 @@ export class RetryManager {
                 return result as T;
             } catch (error) {
                 if (attempt >= this.config.maxAttempts) {
-                    throw new Error(`Max retry attempts reached. Last error: ${error}`);
+                    throw new Error(__t('messages.error.max_retry_attempts_reached_last_error', { 'error': error }));
                 }
 
-                console.log(`Attempt ${attempt} failed. Reconciling...`);
+                Logger.info(__t('messages.system.attempt_failed_reconciling', { 'attempt': attempt }));
                 await reconciliationAction(); // MANDATORY reconciliation before retry
 
                 const delay = this.calculateBackoff(attempt);

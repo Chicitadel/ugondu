@@ -34,6 +34,11 @@
 
 import { IProviderAdapter } from '../provider-discovery';
 
+/**
+ * @class LocalAdapter
+ * @description Corporate Governed class implementation for LocalAdapter
+ * @classification ENTERPRISE
+ */
 export class LocalAdapter implements IProviderAdapter {
   public id: string = 'local';
 

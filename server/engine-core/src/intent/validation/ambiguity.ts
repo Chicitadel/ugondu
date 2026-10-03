@@ -33,6 +33,11 @@
 
 import { StructuredIntent } from "../model/structured-intent";
 
+/**
+ * @class AmbiguityDetector
+ * @description Corporate Governed class implementation for AmbiguityDetector
+ * @classification ENTERPRISE
+ */
 export class AmbiguityDetector {
     public detectAmbiguity(intent: StructuredIntent): string[] {
         const ambiguities: string[] = [];

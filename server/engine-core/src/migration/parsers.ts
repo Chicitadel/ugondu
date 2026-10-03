@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface MigrationPlanResult
+ * @description Corporate Governed interface implementation for MigrationPlanResult
+ * @classification ENTERPRISE
+ */
 export interface MigrationPlanResult {
     sourceType: 'jenkins' | 'github-actions' | 'gitlab-ci' | 'docker-compose';
     extractedActions: Array<{ action: string; payload: Record<string, any> }>;
@@ -21,6 +26,11 @@ export interface MigrationPlanResult {
     suggestedStrategy: 'atomic' | 'quota-sync' | 'container-swap';
 }
 
+/**
+ * @class MigrationEngine
+ * @description Corporate Governed class implementation for MigrationEngine
+ * @classification ENTERPRISE
+ */
 export class MigrationEngine {
     public static parseJenkinsfile(content: string): MigrationPlanResult {
         const warnings: string[] = [];

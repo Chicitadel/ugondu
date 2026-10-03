@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,6 +32,23 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+/**
+ * RequirementCategory — classifies decomposed intent requirements by domain.
+ * AUTHORIZATION requirements are passed to UPPIE for authority gap analysis.
+ */
+export enum RequirementCategory {
+  APPLICATION    = 'APPLICATION',
+  OPERATIONAL    = 'OPERATIONAL',
+  SECURITY       = 'SECURITY',
+  AVAILABILITY   = 'AVAILABILITY',
+  AUTHORIZATION  = 'AUTHORIZATION',
+}
+
+/**
+ * @interface ApplicationRequirements
+ * @description Corporate Governed interface implementation for ApplicationRequirements
+ * @classification ENTERPRISE
+ */
 export interface ApplicationRequirements {
   runtime: string | null;       // 'nodejs' | 'php' | 'python' | 'go' | null
   framework: string | null;     // 'express' | 'laravel' | 'django' | null
@@ -40,6 +57,11 @@ export interface ApplicationRequirements {
   buildRequired: boolean;
 }
 
+/**
+ * @interface OperationalRequirements
+ * @description Corporate Governed interface implementation for OperationalRequirements
+ * @classification ENTERPRISE
+ */
 export interface OperationalRequirements {
   backup: boolean;
   rollback: boolean;
@@ -48,6 +70,11 @@ export interface OperationalRequirements {
   scaling: boolean;
 }
 
+/**
+ * @interface SecurityRequirements
+ * @description Corporate Governed interface implementation for SecurityRequirements
+ * @classification ENTERPRISE
+ */
 export interface SecurityRequirements {
   tlsRequired: boolean;
   privateDatabaseNetwork: boolean;
@@ -55,6 +82,11 @@ export interface SecurityRequirements {
   leastPrivilege: boolean;
 }
 
+/**
+ * @interface AvailabilityRequirements
+ * @description Corporate Governed interface implementation for AvailabilityRequirements
+ * @classification ENTERPRISE
+ */
 export interface AvailabilityRequirements {
   healthCheck: boolean;
   restartPolicy: 'always' | 'on-failure' | 'never';
@@ -62,6 +94,11 @@ export interface AvailabilityRequirements {
   uptimeTarget: string | null;
 }
 
+/**
+ * @interface DecomposedIntent
+ * @description Corporate Governed interface implementation for DecomposedIntent
+ * @classification ENTERPRISE
+ */
 export interface DecomposedIntent {
   raw: string;
   application: ApplicationRequirements;

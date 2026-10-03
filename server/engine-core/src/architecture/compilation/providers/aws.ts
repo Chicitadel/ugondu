@@ -33,6 +33,11 @@
 
 import { CompilerProvider, UniversalIR, CompilationTarget } from '../compiler';
 
+/**
+ * @class AWSCompiler
+ * @description Corporate Governed class implementation for AWSCompiler
+ * @classification ENTERPRISE
+ */
 export class AWSCompiler extends CompilerProvider {
     compile(ir: UniversalIR, target: CompilationTarget): any {
         // Implement AWS topology generation

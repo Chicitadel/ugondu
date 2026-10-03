@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -37,6 +37,11 @@ export interface DependencyManifest {
     dependencies: Record<string, string>; // id -> version
 }
 
+/**
+ * @class ConsistencyChecker
+ * @description Corporate Governed class implementation for ConsistencyChecker
+ * @classification ENTERPRISE
+ */
 export class ConsistencyChecker {
     public static checkVersions(manifests: DependencyManifest[]): boolean {
         const resolvedVersions: Record<string, string> = {};

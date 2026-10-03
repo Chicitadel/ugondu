@@ -33,12 +33,22 @@
  ******************************************************************************/
 
 // Implementation for verification_contract.rs
+/**
+ * @interface VerificationCheck
+ * @description Corporate Governed interface implementation for VerificationCheck
+ * @classification ENTERPRISE
+ */
 export interface VerificationCheck {
   name: string;
   description: string;
   critical: boolean;
 }
 
+/**
+ * @interface VerificationContract
+ * @description Corporate Governed interface implementation for VerificationContract
+ * @classification ENTERPRISE
+ */
 export interface VerificationContract {
   remediationId: string;
   checks: VerificationCheck[];

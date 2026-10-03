@@ -31,12 +31,20 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class StabilizationMonitor
+ * @description Corporate Governed class implementation for StabilizationMonitor
+ * @classification ENTERPRISE
+ */
 export class StabilizationMonitor {
     private monitoringWindowMs: number;
 
     constructor(monitoringWindowMs: number) {
         if (monitoringWindowMs <= 0) {
-            throw new Error('Monitoring window must be positive');
+            throw new Error(__t('messages.error.monitoring_window_must_be_positive'));
         }
         this.monitoringWindowMs = monitoringWindowMs;
     }

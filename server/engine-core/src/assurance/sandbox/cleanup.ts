@@ -31,10 +31,18 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { SecretManager } from './secrets';
 import { IdentityManager } from './identity';
 
+/**
+ * @class SandboxCleanup
+ * @description Corporate Governed class implementation for SandboxCleanup
+ * @classification ENTERPRISE
+ */
 export class SandboxCleanup {
     constructor(
         private readonly secretManager: SecretManager,
@@ -43,7 +51,7 @@ export class SandboxCleanup {
 
     public async purge(sandboxId: string): Promise<void> {
         if (!sandboxId) {
-            throw new Error('Cannot purge empty sandbox ID');
+            throw new Error(__t('messages.error.cannot_purge_empty_sandbox_id'));
         }
 
         this.secretManager.purgeSecrets(sandboxId);

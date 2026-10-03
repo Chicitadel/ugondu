@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -33,6 +33,11 @@
  ******************************************************************************/
 import { generateDigest } from './digest';
 
+/**
+ * @interface EvidenceLink
+ * @description Corporate Governed interface implementation for EvidenceLink
+ * @classification ENTERPRISE
+ */
 export interface EvidenceLink {
     evidenceId: string;
     type: string;
@@ -42,6 +47,11 @@ export interface EvidenceLink {
     hash: string;
 }
 
+/**
+ * @class EvidenceChain
+ * @description Corporate Governed class implementation for EvidenceChain
+ * @classification ENTERPRISE
+ */
 export class EvidenceChain {
     private links: EvidenceLink[] = [];
 

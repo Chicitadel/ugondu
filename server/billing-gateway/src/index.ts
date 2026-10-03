@@ -1,3 +1,4 @@
+import { Logger } from '@ugondu/shared/logger';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import axios from 'axios';
@@ -13,7 +14,7 @@ app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS policy violation'), false);
+    return callback(new Error(__t('messages.error.cors_policy_violation')), false);
   }
 }));
 app.use(express.json());
@@ -41,7 +42,7 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
     }
 
     try {
-        console.log(__t('auth_validating'));
+        Logger.info(__t('auth_validating'));
 
         // Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix
         const record = tokenStore.verifyToken(token);
@@ -73,7 +74,7 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
             allowTelemetry: edition === EDITIONS.ENTERPRISE
         };
         
-        console.log(__t('billing_verified', tenantId, edition.toUpperCase()));
+        Logger.info(__t('billing_verified', tenantId, edition.toUpperCase()));
         
         return res.json({
             tenantId,
@@ -82,12 +83,12 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
             message: __t('auth_success', edition.toUpperCase())
         });
     } catch (err: any) {
-        console.error(__t('auth_failed', err.message));
+        Logger.error(__t('auth_failed', err.message));
         return res.status(402).json({ error: __t('payment_required') });
     }
 });
 
 const PORT = process.env.PORT || 4002;
 app.listen(PORT, () => {
-    console.log(__t('listening_port', 'Billing Gateway', PORT));
+    Logger.info(__t('listening_port', 'Billing Gateway', PORT));
 });

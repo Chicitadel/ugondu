@@ -31,8 +31,16 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { ITrafficAdapter, TrafficStatus } from './traffic-authority';
 
+/**
+ * @class QuiescenceManager
+ * @description Corporate Governed class implementation for QuiescenceManager
+ * @classification ENTERPRISE
+ */
 export class QuiescenceManager {
     /**
      * Drains all provided traffic adapters and awaits their quiescence.
@@ -41,7 +49,7 @@ export class QuiescenceManager {
      */
     public async achieveQuiescence(adapters: ITrafficAdapter[], timeoutMs: number): Promise<void> {
         if (!adapters || adapters.length === 0) {
-            throw new Error("No traffic adapters provided for quiescence.");
+            throw new Error(__t('messages.error.no_traffic_adapters_provided_for_quiescence'));
         }
 
         const drainPromises = adapters.map(async (adapter) => {
@@ -51,11 +59,11 @@ export class QuiescenceManager {
                 // Verify the status is actually quiesced
                 const status = await adapter.status();
                 if (status !== TrafficStatus.QUIESCED) {
-                    throw new Error(`Adapter ${adapter.id} failed to reach QUIESCED state. Current state: ${status}`);
+                    throw new Error(__t('messages.error.adapter_failed_to_reach_quiesced_state_curren', { 'adapter_id': adapter.id, 'status': status }));
                 }
             } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                throw new Error(`Failed to drain adapter ${adapter.id}: ${errorMessage}`);
+                const errorMessage = error instanceof Error ? error.message: __t('ui.responses.unknown_error');
+                throw new Error(__t('messages.error.failed_to_drain_adapter', { 'adapter_id': adapter.id, 'errorMessage': errorMessage }));
             }
         });
 

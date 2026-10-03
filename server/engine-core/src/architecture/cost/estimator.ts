@@ -33,12 +33,22 @@
 
 import { CostProvenance } from './pricing';
 
+/**
+ * @interface OperationalCost
+ * @description Corporate Governed interface implementation for OperationalCost
+ * @classification ENTERPRISE
+ */
 export interface OperationalCost {
     amountUsd: number;
     provenance: CostProvenance;
     period: string;
 }
 
+/**
+ * @class CostEstimator
+ * @description Corporate Governed class implementation for CostEstimator
+ * @classification ENTERPRISE
+ */
 export class CostEstimator {
     public estimate(componentId: string): OperationalCost {
         return {

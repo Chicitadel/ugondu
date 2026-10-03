@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -37,18 +37,33 @@ export enum Effect {
   DENY = 'DENY'
 }
 
+/**
+ * @interface PolicyStatement
+ * @description Corporate Governed interface implementation for PolicyStatement
+ * @classification ENTERPRISE
+ */
 export interface PolicyStatement {
   effect: Effect;
   actions: string[];
   resources: string[];
 }
 
+/**
+ * @interface PolicyDocument
+ * @description Corporate Governed interface implementation for PolicyDocument
+ * @classification ENTERPRISE
+ */
 export interface PolicyDocument {
   id: string;
   version: string;
   statements: PolicyStatement[];
 }
 
+/**
+ * @interface PolicyContext
+ * @description Corporate Governed interface implementation for PolicyContext
+ * @classification ENTERPRISE
+ */
 export interface PolicyContext {
   action: string;
   resource: string;
@@ -56,6 +71,11 @@ export interface PolicyContext {
   attributes: Record<string, any>;
 }
 
+/**
+ * @interface EvaluationResult
+ * @description Corporate Governed interface implementation for EvaluationResult
+ * @classification ENTERPRISE
+ */
 export interface EvaluationResult {
   effect: Effect;
   reason: string;

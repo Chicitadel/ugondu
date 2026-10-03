@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,6 +32,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface KeyMetadata
+ * @description Corporate Governed interface implementation for KeyMetadata
+ * @classification ENTERPRISE
+ */
 export interface KeyMetadata {
     keyId: string;
     algorithm: string;
@@ -40,12 +48,22 @@ export interface KeyMetadata {
     rotatedAt?: string;
 }
 
+/**
+ * @interface IKeyRegistry
+ * @description Corporate Governed interface implementation for IKeyRegistry
+ * @classification ENTERPRISE
+ */
 export interface IKeyRegistry {
     registerKey(metadata: KeyMetadata): Promise<void>;
     getKeyMetadata(keyId: string): Promise<KeyMetadata | null>;
     updateStatus(keyId: string, status: 'ACTIVE' | 'ROTATED' | 'COMPROMISED'): Promise<void>;
 }
 
+/**
+ * @class InMemoryKeyRegistry
+ * @description Corporate Governed class implementation for InMemoryKeyRegistry
+ * @classification ENTERPRISE
+ */
 export class InMemoryKeyRegistry implements IKeyRegistry {
     private store = new Map<string, KeyMetadata>();
 
@@ -61,7 +79,7 @@ export class InMemoryKeyRegistry implements IKeyRegistry {
     public async updateStatus(keyId: string, status: 'ACTIVE' | 'ROTATED' | 'COMPROMISED'): Promise<void> {
         const meta = this.store.get(keyId);
         if (!meta) {
-            throw new Error(`Key ${keyId} not found in registry`);
+            throw new Error(__t('messages.error.key_not_found_in_registry', { 'keyId': keyId }));
         }
         meta.status = status;
         if (status === 'ROTATED' || status === 'COMPROMISED') {

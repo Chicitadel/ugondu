@@ -33,6 +33,11 @@
 
 import { ExecutionTask, ExecutionResult } from './types/execution';
 
+/**
+ * @interface EngineInternal
+ * @description Corporate Governed interface implementation for EngineInternal
+ * @classification ENTERPRISE
+ */
 export interface EngineInternal {
     runTask(task: ExecutionTask): Promise<ExecutionResult>;
 }

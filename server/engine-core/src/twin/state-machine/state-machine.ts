@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -36,6 +36,11 @@ import { ResourceState, InvalidTransitionError } from '../model/resource-state';
 import { TwinResource } from '../model/twin-resource';
 import { ALLOWED_TRANSITIONS } from './transition-rules';
 
+/**
+ * @class TwinStateMachine
+ * @description Corporate Governed class implementation for TwinStateMachine
+ * @classification ENTERPRISE
+ */
 export class TwinStateMachine {
   public isValidTransition(from: ResourceState, to: ResourceState): boolean {
     const allowed = ALLOWED_TRANSITIONS[from];

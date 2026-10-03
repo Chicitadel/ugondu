@@ -35,6 +35,11 @@
 // Implementation for causal_evaluator.rs
 import { EvidenceEdge } from '../model/evidence_graph';
 
+/**
+ * @class CausalEvaluator
+ * @description Corporate Governed class implementation for CausalEvaluator
+ * @classification ENTERPRISE
+ */
 export class CausalEvaluator {
   evaluate(edges: EvidenceEdge[]): string[] {
     return edges

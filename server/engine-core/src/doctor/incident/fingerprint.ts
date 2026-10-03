@@ -36,6 +36,11 @@
 import { createHash } from 'crypto';
 import { IncidentRecord } from '../model/incident';
 
+/**
+ * @class IncidentFingerprinter
+ * @description Corporate Governed class implementation for IncidentFingerprinter
+ * @classification ENTERPRISE
+ */
 export class IncidentFingerprinter {
   fingerprint(incident: Partial<IncidentRecord>): string {
     const key = `${incident.targetId}:${incident.category}:${incident.severity}`;

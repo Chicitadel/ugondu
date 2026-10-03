@@ -33,6 +33,11 @@
 
 import { CompilerProvider, UniversalIR, CompilationTarget } from '../compiler';
 
+/**
+ * @class GCPCompiler
+ * @description Corporate Governed class implementation for GCPCompiler
+ * @classification ENTERPRISE
+ */
 export class GCPCompiler extends CompilerProvider {
     compile(ir: UniversalIR, target: CompilationTarget): any {
         // Implement GCP topology generation

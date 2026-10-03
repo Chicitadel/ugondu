@@ -30,10 +30,18 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../shared/i18n';
+
 import { createPrivateKey, createPublicKey, KeyObject, createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * @interface KeyState
+ * @description Corporate Governed interface implementation for KeyState
+ * @classification ENTERPRISE
+ */
 export interface KeyState {
     privateKey: KeyObject;
     publicKey: KeyObject;
@@ -41,6 +49,11 @@ export interface KeyState {
     publicKeyPem: string;
 }
 
+/**
+ * @class KeyLoadError
+ * @description Corporate Governed class implementation for KeyLoadError
+ * @classification ENTERPRISE
+ */
 export class KeyLoadError extends Error {
     constructor(message: string) {
         super(message);
@@ -48,6 +61,11 @@ export class KeyLoadError extends Error {
     }
 }
 
+/**
+ * @class KeyLoader
+ * @description Corporate Governed class implementation for KeyLoader
+ * @classification ENTERPRISE
+ */
 export class KeyLoader {
     public load(): KeyState {
         // Attempt to read from environment variable
@@ -68,7 +86,7 @@ export class KeyLoader {
                 };
             } catch (err) {
                 // Intentionally swallowing error details to prevent key material logging
-                throw new KeyLoadError('Failed to parse UGONDU_RECIPE_PRIVATE_KEY from environment.');
+                throw new KeyLoadError(__t('messages.error.failed_to_parse_ugondu_recipe_private_key_fro'));
             }
         }
 
@@ -91,10 +109,10 @@ export class KeyLoader {
                     publicKeyPem: pubPem
                 };
             } catch (err) {
-                throw new KeyLoadError('Failed to parse private key from file path.');
+                throw new KeyLoadError(__t('messages.error.failed_to_parse_private_key_from_file_path'));
             }
         }
 
-        throw new KeyLoadError('No private key available: UGONDU_RECIPE_PRIVATE_KEY not set and KEYS_DIR/ed25519_private.pem not found.');
+        throw new KeyLoadError(__t('messages.error.no_private_key_available_ugondu_recipe_privat'));
     }
 }

@@ -10,7 +10,7 @@
  * Classification : GOVERNMENT | ENTERPRISE | PUBLIC | INTERNAL
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -39,6 +39,11 @@ import { URL } from 'url';
 import { isPrivateOrLocal } from './ip-blocklist';
 import { __t } from '@ugondu/shared';
 
+/**
+ * @class SSRFBlockedError
+ * @description Corporate Governed class implementation for SSRFBlockedError
+ * @classification ENTERPRISE
+ */
 export class SSRFBlockedError extends Error {
     constructor(message: string) {
         super(message);
@@ -46,6 +51,11 @@ export class SSRFBlockedError extends Error {
     }
 }
 
+/**
+ * @interface RequestInit
+ * @description Corporate Governed interface implementation for RequestInit
+ * @classification ENTERPRISE
+ */
 export interface RequestInit {
     headers?: Record<string, string>;
     timeout?: number;
@@ -53,7 +63,7 @@ export interface RequestInit {
 
 async function request(method: string, urlStr: string, body?: unknown, options?: RequestInit, redirects = 0): Promise<string> {
     if (redirects > 3) {
-        throw new Error('Too many redirects');
+        throw new Error(__t('messages.error.too_many_redirects'));
     }
 
     const parsedUrl = new URL(urlStr);
@@ -69,7 +79,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
         const lookupResult = await dns.lookup(hostname);
         resolvedIp = lookupResult.address;
     } catch (err: any) {
-        throw new Error(`DNS lookup failed for ${hostname}: ${err.message}`);
+        throw new Error(__t('messages.error.dns_lookup_failed_for', { 'hostname': hostname, 'err_message': err.message }));
     }
 
     if (isPrivateOrLocal(resolvedIp)) {

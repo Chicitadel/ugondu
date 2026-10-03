@@ -33,6 +33,11 @@
  ******************************************************************************/
 
 // Implementation for blast_radius.rs
+/**
+ * @interface BlastRadius
+ * @description Corporate Governed interface implementation for BlastRadius
+ * @classification ENTERPRISE
+ */
 export interface BlastRadius {
   targetId: string;
   affectedServices: string[];

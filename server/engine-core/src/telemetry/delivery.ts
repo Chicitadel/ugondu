@@ -15,6 +15,11 @@
 import { __t } from '@ugondu/shared';
 import { randomUUID } from 'crypto';
 
+/**
+ * @interface TimelineEvent
+ * @description Corporate Governed interface implementation for TimelineEvent
+ * @classification ENTERPRISE
+ */
 export interface TimelineEvent {
     eventId: string;
     phase: 'INIT' | 'PREFLIGHT' | 'EXECUTE' | 'VERIFY' | 'COMPLETE' | 'FAILED' | 'ROLLED_BACK';
@@ -24,6 +29,11 @@ export interface TimelineEvent {
     details: string;
 }
 
+/**
+ * @class DeliveryObservabilityEngine
+ * @description Corporate Governed class implementation for DeliveryObservabilityEngine
+ * @classification ENTERPRISE
+ */
 export class DeliveryObservabilityEngine {
     private timeline: TimelineEvent[] = [];
 

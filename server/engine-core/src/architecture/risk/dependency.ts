@@ -37,6 +37,11 @@ export interface DependencyRisk {
     vulnerabilities: string[];
 }
 
+/**
+ * @class DependencyAnalyzer
+ * @description Corporate Governed class implementation for DependencyAnalyzer
+ * @classification ENTERPRISE
+ */
 export class DependencyAnalyzer {
     public assessDependency(dependencyId: string): DependencyRisk {
         return {

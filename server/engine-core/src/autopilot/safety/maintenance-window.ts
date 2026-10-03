@@ -33,6 +33,11 @@ export interface MaintenanceWindow {
     allowCriticalOperations: boolean;
 }
 
+/**
+ * @class MaintenanceManager
+ * @description Corporate Governed class implementation for MaintenanceManager
+ * @classification ENTERPRISE
+ */
 export class MaintenanceManager {
     public isInWindow(window: MaintenanceWindow, date: Date = new Date()): boolean {
         return date >= window.startTime && date <= window.endTime;

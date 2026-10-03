@@ -34,6 +34,11 @@
 import { StructuredIntent } from "../model/structured-intent";
 import { Provenance } from "../model/requirement";
 
+/**
+ * @class ProvenanceValidator
+ * @description Corporate Governed class implementation for ProvenanceValidator
+ * @classification ENTERPRISE
+ */
 export class ProvenanceValidator {
     public validate(intent: StructuredIntent): boolean {
         for (const req of intent.requirements) {

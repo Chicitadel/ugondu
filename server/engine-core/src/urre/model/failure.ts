@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -76,6 +76,11 @@ export type FailureDomain =
   | 'TARGET_PLANE'
   | 'UGONDU_PLANE';
 
+/**
+ * @interface URREFailure
+ * @description Corporate Governed interface implementation for URREFailure
+ * @classification ENTERPRISE
+ */
 export interface URREFailure {
   failureId: string;
   failureClass: FailureClass;
@@ -86,6 +91,11 @@ export interface URREFailure {
   rawError?: string;
 }
 
+/**
+ * @interface FailureMetadata
+ * @description Corporate Governed interface implementation for FailureMetadata
+ * @classification ENTERPRISE
+ */
 export interface FailureMetadata {
   failureClass: FailureClass;
   description: string;

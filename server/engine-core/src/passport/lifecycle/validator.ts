@@ -31,12 +31,19 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { PassportEnvelope } from '../../types/passport';
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { LifecycleState } from '../../types/lifecycle';
 import { ExpiryManager } from './expiry';
 import { RevocationManager } from './revocation';
 import { ConsumptionManager } from './consumption';
 
+/**
+ * @class LifecycleValidator
+ * @description Corporate Governed class implementation for LifecycleValidator
+ * @classification ENTERPRISE
+ */
 export class LifecycleValidator {
     constructor(
         private readonly expiryManager: ExpiryManager,
@@ -48,17 +55,17 @@ export class LifecycleValidator {
         // Core state validation logic
         const isRevoked = await this.revocationManager.isRevoked(passportId);
         if (isRevoked) {
-            throw new Error(`Passport ${passportId} is revoked.`);
+            throw new Error(__t('messages.error.passport_is_revoked', { 'passportId': passportId }));
         }
 
         const isExpired = await this.expiryManager.isExpired(passportId);
         if (isExpired) {
-            throw new Error(`Passport ${passportId} is expired.`);
+            throw new Error(__t('messages.error.passport_is_expired', { 'passportId': passportId }));
         }
 
         const isConsumed = await this.consumptionManager.isConsumed(passportId);
         if (isConsumed && expectedState !== LifecycleState.CONSUMED) {
-            throw new Error(`Passport ${passportId} has already been consumed.`);
+            throw new Error(__t('messages.error.passport_has_already_been_consumed', { 'passportId': passportId }));
         }
 
         return true;

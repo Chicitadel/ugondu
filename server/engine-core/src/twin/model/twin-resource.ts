@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { ResourceState } from './resource-state';
 
+/**
+ * @interface TwinResource
+ * @description Corporate Governed interface implementation for TwinResource
+ * @classification ENTERPRISE
+ */
 export interface TwinResource {
   id: string;
   type: string;

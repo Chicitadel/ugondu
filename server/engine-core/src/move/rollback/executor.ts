@@ -31,15 +31,23 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { RollbackPlan, RollbackStrategy } from './planner';
 
+/**
+ * @class RollbackExecutor
+ * @description Corporate Governed class implementation for RollbackExecutor
+ * @classification ENTERPRISE
+ */
 export class RollbackExecutor {
     public async execute(plan: RollbackPlan): Promise<void> {
         if (!plan.feasible) {
             if (plan.strategy === RollbackStrategy.FORWARD_RECOVERY) {
                 await this.executeForwardRecovery();
             } else {
-                throw new Error("Rollback is not feasible and no recovery strategy is specified.");
+                throw new Error(__t('messages.error.rollback_is_not_feasible_and_no_recovery_stra'));
             }
             return;
         }
@@ -47,7 +55,7 @@ export class RollbackExecutor {
         if (plan.strategy === RollbackStrategy.DNS_FLIP) {
             await this.executeDnsFlip();
         } else {
-            throw new Error(`Unsupported rollback strategy: ${plan.strategy}`);
+            throw new Error(__t('messages.error.unsupported_rollback_strategy', { 'plan_strategy': plan.strategy }));
         }
     }
 

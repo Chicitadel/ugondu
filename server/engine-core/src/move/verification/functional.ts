@@ -37,6 +37,11 @@ export interface FunctionalTestResult {
     errorDetails?: string;
 }
 
+/**
+ * @class FunctionalVerifier
+ * @description Corporate Governed class implementation for FunctionalVerifier
+ * @classification ENTERPRISE
+ */
 export class FunctionalVerifier {
     private tests: Array<() => Promise<FunctionalTestResult>> = [];
 

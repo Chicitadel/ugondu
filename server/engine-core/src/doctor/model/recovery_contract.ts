@@ -35,6 +35,11 @@
 // Implementation for recovery_contract.rs
 export type RecoveryStrategy = 'ROLLBACK' | 'FORWARD_RECOVERY' | 'MANUAL_INTERVENTION' | 'RESTART';
 
+/**
+ * @interface RecoveryContract
+ * @description Corporate Governed interface implementation for RecoveryContract
+ * @classification ENTERPRISE
+ */
 export interface RecoveryContract {
   incidentId: string;
   strategy: RecoveryStrategy;

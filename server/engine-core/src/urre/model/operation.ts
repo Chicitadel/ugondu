@@ -34,6 +34,11 @@ export type MutationClass =
   | 'MIGRATION'
   | 'READONLY';
 
+/**
+ * @interface ActionSafetyContract
+ * @description Corporate Governed interface implementation for ActionSafetyContract
+ * @classification ENTERPRISE
+ */
 export interface ActionSafetyContract {
   mutationClass: MutationClass;
   idempotencyClass: IdempotencyClass;

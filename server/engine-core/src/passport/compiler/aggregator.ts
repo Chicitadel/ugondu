@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,30 +31,43 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 import { EvidenceChain } from '../evidence/chain';
 import { ApplicabilityAnalyzer, ApplicabilityContext } from './applicability';
 import { ConsistencyChecker, DependencyManifest } from './consistency';
 import { FreshnessValidator, FreshnessConfig } from './freshness';
 
+/**
+ * @interface AggregationRequest
+ * @description Corporate Governed interface implementation for AggregationRequest
+ * @classification ENTERPRISE
+ */
 export interface AggregationRequest {
     context: ApplicabilityContext;
     manifests: DependencyManifest[];
     freshnessConfig: FreshnessConfig;
 }
 
+/**
+ * @class EvidenceAggregator
+ * @description Corporate Governed class implementation for EvidenceAggregator
+ * @classification ENTERPRISE
+ */
 export class EvidenceAggregator {
     public aggregate(chain: EvidenceChain, request: AggregationRequest): void {
         if (!chain.verify()) {
-            throw new Error("Evidence chain is invalid");
+            throw new Error(__t('messages.error.evidence_chain_is_invalid'));
         }
         
         if (!ConsistencyChecker.checkVersions(request.manifests)) {
-            throw new Error("Dependency consistency check failed");
+            throw new Error(__t('messages.error.dependency_consistency_check_failed'));
         }
         
         const timestamps = chain.getChain().map(link => link.timestamp);
         if (!FreshnessValidator.validateCollection(timestamps, request.freshnessConfig)) {
-            throw new Error("Evidence is stale according to freshness configuration");
+            throw new Error(__t('messages.error.evidence_is_stale_according_to_freshness_conf'));
         }
         
         chain.append('aggregation', 'AGGREGATION_COMPLETE', {

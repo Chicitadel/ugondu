@@ -31,12 +31,25 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface LimitConfig
+ * @description Corporate Governed interface implementation for LimitConfig
+ * @classification ENTERPRISE
+ */
 export interface LimitConfig {
     globalMax: number;
     providerMax: number;
     targetMax: number;
 }
 
+/**
+ * @class ConcurrencyThrottler
+ * @description Corporate Governed class implementation for ConcurrencyThrottler
+ * @classification ENTERPRISE
+ */
 export class ConcurrencyThrottler {
     private activeGlobal: number = 0;
     private activeProviders: Map<string, number> = new Map();
@@ -58,7 +71,7 @@ export class ConcurrencyThrottler {
 
     public acquire(providerId: string, targetId: string): void {
         if (!this.canAcquire(providerId, targetId)) {
-            throw new Error(`Concurrency limit exceeded for provider ${providerId} or target ${targetId}`);
+            throw new Error(__t('messages.error.concurrency_limit_exceeded_for_provider_or_ta', { 'providerId': providerId, 'targetId': targetId }));
         }
 
         this.activeGlobal++;

@@ -37,6 +37,11 @@ export interface DependencyEdge {
     type: 'DEPENDS_ON' | 'RUNS_ON';
 }
 
+/**
+ * @class DependencyGraph
+ * @description Corporate Governed class implementation for DependencyGraph
+ * @classification ENTERPRISE
+ */
 export class DependencyGraph {
     private edges: DependencyEdge[] = [];
     private reverseIndex: Map<string, DependencyEdge[]> = new Map();

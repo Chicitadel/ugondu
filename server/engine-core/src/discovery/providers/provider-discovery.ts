@@ -32,13 +32,26 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { ICapabilityRegistry } from './capability-registry';
 
+/**
+ * @interface IProviderAdapter
+ * @description Corporate Governed interface implementation for IProviderAdapter
+ * @classification ENTERPRISE
+ */
 export interface IProviderAdapter {
   id: string;
   discover(): Promise<any>;
 }
 
+/**
+ * @class ProviderDiscovery
+ * @description Corporate Governed class implementation for ProviderDiscovery
+ * @classification ENTERPRISE
+ */
 export class ProviderDiscovery {
   private adapters: Map<string, IProviderAdapter> = new Map();
   private capabilityRegistry: ICapabilityRegistry;
@@ -54,7 +67,7 @@ export class ProviderDiscovery {
   public async runDiscovery(providerId: string): Promise<any> {
     const adapter = this.adapters.get(providerId);
     if (!adapter) {
-      throw new Error(`Provider adapter not found: ${providerId}`);
+      throw new Error(__t('messages.error.provider_adapter_not_found', { 'providerId': providerId }));
     }
     return adapter.discover();
   }

@@ -15,6 +15,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface DiscoveryEvidence
+ * @description Corporate Governed interface implementation for DiscoveryEvidence
+ * @classification ENTERPRISE
+ */
 export interface DiscoveryEvidence {
     technology: string;
     category: 'language' | 'framework' | 'package-manager' | 'service' | 'ci' | 'port';
@@ -23,6 +28,11 @@ export interface DiscoveryEvidence {
     confidence: 'DEFINITIVE' | 'EVIDENCE_BACKED' | 'HEURISTIC';
 }
 
+/**
+ * @interface DiscoveredProject
+ * @description Corporate Governed interface implementation for DiscoveredProject
+ * @classification ENTERPRISE
+ */
 export interface DiscoveredProject {
     schemaVersion: '1.0.0';
     repositoryUrl: string;
@@ -38,6 +48,11 @@ export interface DiscoveredProject {
     evidence: DiscoveryEvidence[];
 }
 
+/**
+ * @class DiscoveryEngine
+ * @description Corporate Governed class implementation for DiscoveryEngine
+ * @classification ENTERPRISE
+ */
 export class DiscoveryEngine {
     public static inspectFileMap(
         repositoryUrl: string,

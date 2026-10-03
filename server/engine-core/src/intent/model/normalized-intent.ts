@@ -33,11 +33,23 @@
 
 import { Requirement } from "./requirement";
 import { Assumption } from "./assumption";
+import type { AuthorizationRequirement } from './authorization-requirements';
 
+/**
+ * @interface NormalizedIntent
+ * @description Corporate Governed interface implementation for NormalizedIntent
+ * @classification ENTERPRISE
+ */
 export interface NormalizedIntent {
     id: string;
     structuredIntentId: string;
     normalizedRequirements: Requirement[];
     normalizedAssumptions: Assumption[];
     resolutionTrace: string[];
+    /**
+     * Authorization requirements extracted during intent decomposition.
+     * Present when the operation requires provider-level authority.
+     * Passed to UPPIE for authority gap analysis and grant compilation.
+     */
+    authorizationRequirements?: AuthorizationRequirement[];
 }

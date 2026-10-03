@@ -31,9 +31,17 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { Signer } from './signer';
 import { FreshnessValidator } from './freshness';
 
+/**
+ * @class Packager
+ * @description Corporate Governed class implementation for Packager
+ * @classification ENTERPRISE
+ */
 export class Packager {
     private signer: Signer;
     private validator: FreshnessValidator;
@@ -46,7 +54,7 @@ export class Packager {
     createTwinBinding(artifact: any): any {
         const isValid = this.validator.validate(artifact);
         if (!isValid) {
-            throw new Error("Artifact freshness validation failed.");
+            throw new Error(__t('messages.error.artifact_freshness_validation_failed'));
         }
 
         const signature = this.signer.sign(artifact);

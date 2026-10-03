@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -33,11 +33,21 @@
  ******************************************************************************/
 import { generateDigest, verifyDigest } from './digest';
 
+/**
+ * @interface IntegrityManifest
+ * @description Corporate Governed interface implementation for IntegrityManifest
+ * @classification ENTERPRISE
+ */
 export interface IntegrityManifest {
     files: Record<string, string>; // path -> hash
     rootHash: string;
 }
 
+/**
+ * @class IntegrityValidator
+ * @description Corporate Governed class implementation for IntegrityValidator
+ * @classification ENTERPRISE
+ */
 export class IntegrityValidator {
     public static generateManifest(fileContents: Record<string, string | Buffer>): IntegrityManifest {
         const files: Record<string, string> = {};

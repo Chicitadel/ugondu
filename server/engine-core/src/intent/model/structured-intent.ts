@@ -34,6 +34,11 @@
 import { Requirement } from "./requirement";
 import { Assumption } from "./assumption";
 
+/**
+ * @interface StructuredIntent
+ * @description Corporate Governed interface implementation for StructuredIntent
+ * @classification ENTERPRISE
+ */
 export interface StructuredIntent {
     id: string;
     rawIntentId: string;

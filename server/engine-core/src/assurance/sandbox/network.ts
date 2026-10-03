@@ -31,13 +31,21 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { IsolationHandle } from './isolation';
 
+/**
+ * @class NetworkController
+ * @description Corporate Governed class implementation for NetworkController
+ * @classification ENTERPRISE
+ */
 export class NetworkController {
     public async isolate(handle: IsolationHandle): Promise<void> {
         if (!handle.sandboxId) {
-            throw new Error('Sandbox ID required for network isolation');
+            throw new Error(__t('messages.error.sandbox_id_required_for_network_isolation'));
         }
 
         // Implementation of eBPF or iptables rules to drop egress traffic

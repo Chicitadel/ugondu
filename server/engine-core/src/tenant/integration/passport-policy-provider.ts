@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,15 +32,28 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface PassportPolicy
+ * @description Corporate Governed interface implementation for PassportPolicy
+ * @classification ENTERPRISE
+ */
 export interface PassportPolicy {
     enforceMfa: boolean;
     allowedRegions: string[];
 }
 
+/**
+ * @class PassportPolicyProvider
+ * @description Corporate Governed class implementation for PassportPolicyProvider
+ * @classification ENTERPRISE
+ */
 export class PassportPolicyProvider {
     public getPolicy(tenantId: string): PassportPolicy {
         if (!tenantId) {
-            throw new Error('Tenant ID required to fetch passport policy.');
+            throw new Error(__t('messages.error.tenant_id_required_to_fetch_passport_policy'));
         }
         return {
             enforceMfa: true,

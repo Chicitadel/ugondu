@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -39,12 +39,22 @@ export interface RevocationRecord {
     revokedBy: string;
 }
 
+/**
+ * @interface IRevocationRegistry
+ * @description Corporate Governed interface implementation for IRevocationRegistry
+ * @classification ENTERPRISE
+ */
 export interface IRevocationRegistry {
     revoke(record: RevocationRecord): Promise<void>;
     isRevoked(passportId: string): Promise<boolean>;
     getRecord(passportId: string): Promise<RevocationRecord | null>;
 }
 
+/**
+ * @class InMemoryRevocationRegistry
+ * @description Corporate Governed class implementation for InMemoryRevocationRegistry
+ * @classification ENTERPRISE
+ */
 export class InMemoryRevocationRegistry implements IRevocationRegistry {
     private store = new Map<string, RevocationRecord>();
 

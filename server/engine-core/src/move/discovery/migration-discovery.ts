@@ -33,6 +33,11 @@
 
 import { ArchitectureIR } from './compatibility';
 
+/**
+ * @class TargetDiscovery
+ * @description Corporate Governed class implementation for TargetDiscovery
+ * @classification ENTERPRISE
+ */
 export class TargetDiscovery {
   public discover(): ArchitectureIR {
     // Deterministic IR extraction from target

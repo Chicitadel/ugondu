@@ -35,6 +35,11 @@
 // Implementation for collector.rs
 import { createHash } from 'crypto';
 
+/**
+ * @interface EvidenceItem
+ * @description Corporate Governed interface implementation for EvidenceItem
+ * @classification ENTERPRISE
+ */
 export interface EvidenceItem {
   id: string;
   kind: string;
@@ -44,6 +49,11 @@ export interface EvidenceItem {
   hash: string;
 }
 
+/**
+ * @class EvidenceCollector
+ * @description Corporate Governed class implementation for EvidenceCollector
+ * @classification ENTERPRISE
+ */
 export class EvidenceCollector {
   private items: EvidenceItem[] = [];
 

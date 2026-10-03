@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,6 +35,11 @@ export interface FreshnessConfig {
     ttlMs: number;
 }
 
+/**
+ * @class FreshnessValidator
+ * @description Corporate Governed class implementation for FreshnessValidator
+ * @classification ENTERPRISE
+ */
 export class FreshnessValidator {
     public static isFresh(timestamp: number, config: FreshnessConfig): boolean {
         const now = Date.now();

@@ -33,6 +33,11 @@
 
 import { Resolver } from './resolver';
 
+/**
+ * @class PolicyEngine
+ * @description Corporate Governed class implementation for PolicyEngine
+ * @classification ENTERPRISE
+ */
 export class PolicyEngine {
   private readonly resolver = new Resolver();
 

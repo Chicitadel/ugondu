@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,6 +35,11 @@
 import * as crypto from 'crypto';
 import { ArchitectureCandidate } from '../model/candidate';
 
+/**
+ * @class VerticalCCpanel
+ * @description Corporate Governed class implementation for VerticalCCpanel
+ * @classification ENTERPRISE
+ */
 export class VerticalCCpanel {
     static build(input: any): ArchitectureCandidate {
         return {

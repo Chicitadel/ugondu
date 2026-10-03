@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -39,12 +39,22 @@ export enum AssuranceLevel {
   CRITICAL = 4
 }
 
+/**
+ * @interface AuthenticationAssurance
+ * @description Corporate Governed interface implementation for AuthenticationAssurance
+ * @classification ENTERPRISE
+ */
 export interface AuthenticationAssurance {
   readonly level: AssuranceLevel;
   readonly mechanisms: ReadonlyArray<string>;
   readonly timestamp: Date;
 }
 
+/**
+ * @class AssuranceEvaluator
+ * @description Corporate Governed class implementation for AssuranceEvaluator
+ * @classification ENTERPRISE
+ */
 export class AssuranceEvaluator {
   public evaluate(mechanisms: string[]): AuthenticationAssurance {
     let level = AssuranceLevel.LOW;

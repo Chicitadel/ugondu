@@ -31,9 +31,17 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { GraphBuilder } from './graph-builder';
 
+/**
+ * @class DependencyOrder
+ * @description Corporate Governed class implementation for DependencyOrder
+ * @classification ENTERPRISE
+ */
 export class DependencyOrder {
     static topologicalSort(graphBuilder: GraphBuilder): string[] {
         const graph = graphBuilder.getGraph();
@@ -71,7 +79,7 @@ export class DependencyOrder {
         }
 
         if (result.length !== graph.size) {
-            throw new Error('Cycle detected in dependency graph');
+            throw new Error(__t('messages.error.cycle_detected_in_dependency_graph'));
         }
 
         return result;

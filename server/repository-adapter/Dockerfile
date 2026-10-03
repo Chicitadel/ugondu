@@ -12,6 +12,7 @@ COPY src ./src
 RUN npm run build
 
 FROM node:20-alpine AS runtime
+ENV NODE_ENV=production
 
 RUN addgroup -S ugondu && adduser -S ugondu -G ugondu
 WORKDIR /app

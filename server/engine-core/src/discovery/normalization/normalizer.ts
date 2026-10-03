@@ -33,6 +33,11 @@
 
 import { ConflictDetector } from './conflict';
 
+/**
+ * @interface RawObservation
+ * @description Corporate Governed interface implementation for RawObservation
+ * @classification ENTERPRISE
+ */
 export interface RawObservation {
     provider: string;
     resourceId: string;
@@ -40,6 +45,11 @@ export interface RawObservation {
     timestamp: number;
 }
 
+/**
+ * @interface CanonicalResource
+ * @description Corporate Governed interface implementation for CanonicalResource
+ * @classification ENTERPRISE
+ */
 export interface CanonicalResource {
     id: string;
     type: string;
@@ -49,6 +59,11 @@ export interface CanonicalResource {
     conflictDetails?: any;
 }
 
+/**
+ * @class DataNormalizer
+ * @description Corporate Governed class implementation for DataNormalizer
+ * @classification ENTERPRISE
+ */
 export class DataNormalizer {
     private conflictDetector = new ConflictDetector();
 

@@ -35,6 +35,11 @@
 // Implementation for timeline.rs
 import { EvidenceItem } from '../evidence/collector';
 
+/**
+ * @interface TimelineEntry
+ * @description Corporate Governed interface implementation for TimelineEntry
+ * @classification ENTERPRISE
+ */
 export interface TimelineEntry {
   timestamp: Date;
   kind: string;
@@ -42,6 +47,11 @@ export interface TimelineEntry {
   summary: string;
 }
 
+/**
+ * @class TimelineBuilder
+ * @description Corporate Governed class implementation for TimelineBuilder
+ * @classification ENTERPRISE
+ */
 export class TimelineBuilder {
   build(evidence: EvidenceItem[]): TimelineEntry[] {
     return [...evidence]

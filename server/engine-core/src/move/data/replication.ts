@@ -31,13 +31,22 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
 
+
+/**
+ * @class ReplicationManager
+ * @description Corporate Governed class implementation for ReplicationManager
+ * @classification ENTERPRISE
+ */
 export class ReplicationManager {
     startContinuousReplication(sourceId: string, targetId: string): void {
-        console.log(`Starting continuous replication for ${sourceId} -> ${targetId}`);
+        Logger.info(__t('messages.system.starting_continuous_replication_for', { 'sourceId': sourceId, 'targetId': targetId }));
     }
 
     stopReplication(sourceId: string): void {
-        console.log(`Stopping replication for ${sourceId}`);
+        Logger.info(__t('messages.system.stopping_replication_for', { 'sourceId': sourceId }));
     }
 }

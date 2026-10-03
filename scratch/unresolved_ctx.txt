@@ -1,0 +1,107 @@
+## server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts
+ messages.error.manifest_schema_invalid  <- if (!parseResult.success) { | throw new Error(__t('messages.error.manifest_schema_invalid')); | }
+ messages.error.manifest_expired  <- if (Date.now() > manifest.validUntil) { | throw new Error(__t('messages.error.manifest_expired')); | }
+ messages.error.fips_validation_failed  <- if (!isSignatureValid) { | throw new Error(__t('messages.error.fips_validation_failed')); | }
+## server/engine-core/src/doctor/remediation/generator.ts
+ ui.responses.authorization_insufficient_for_operation_on_t  <- type:   'CANCEL_OPERATION', | reason: __t('ui.responses.authorization_insufficient_for_operation_on_t', { 'ctx_target': ctx.target }), | });
+## server/engine-core/src/move/TranslationMap.ts
+ messages.error.invalid_config  <- if (!parsedConfig) { | throw new Error(__t('messages.error.invalid_config')); | }
+ messages.error.invalid_vhosts_count  <- if (config.apache.vhosts < 0) { | throw new Error(__t('messages.error.invalid_vhosts_count')); | }
+ messages.error.invalid_db_size  <- if (config.mysql.sizeGb < 0) { | throw new Error(__t('messages.error.invalid_db_size')); | }
+## server/engine-core/src/tenant/identity.ts
+ messages.error.invalid_oidc_client_id  <- export const OidcConfigSchema = z.object({ | clientId: z.string().min(1, __t('messages.error.invalid_oidc_client_id')), | clientSecret: z.string().min(1, __t('messages.error.invalid_oidc_client_secret')),
+ messages.error.invalid_oidc_client_secret  <- clientId: z.string().min(1, __t('messages.error.invalid_oidc_client_id')), | clientSecret: z.string().min(1, __t('messages.error.invalid_oidc_client_secret')), | issuer: z.string().url(__t('messages.error.invalid_oidc_issuer_url')),
+ messages.error.invalid_oidc_issuer_url  <- clientSecret: z.string().min(1, __t('messages.error.invalid_oidc_client_secret')), | issuer: z.string().url(__t('messages.error.invalid_oidc_issuer_url')), | redirectUri: z.string().url(__t('messages.error.invalid_oidc_redirect_url')),
+ messages.error.invalid_oidc_redirect_url  <- issuer: z.string().url(__t('messages.error.invalid_oidc_issuer_url')), | redirectUri: z.string().url(__t('messages.error.invalid_oidc_redirect_url')), | });
+ messages.error.invalid_saml_entity_id  <- export const Saml2ConfigSchema = z.object({ | entityId: z.string().min(1, __t('messages.error.invalid_saml_entity_id')), | ssoUrl: z.string().url(__t('messages.error.invalid_saml_sso_url')),
+ messages.error.invalid_saml_sso_url  <- entityId: z.string().min(1, __t('messages.error.invalid_saml_entity_id')), | ssoUrl: z.string().url(__t('messages.error.invalid_saml_sso_url')), | x509Certificate: z.string().min(1, __t('messages.error.invalid_saml_cert')),
+ messages.error.invalid_saml_cert  <- ssoUrl: z.string().url(__t('messages.error.invalid_saml_sso_url')), | x509Certificate: z.string().min(1, __t('messages.error.invalid_saml_cert')), | });
+ messages.error.missing_oidc_token  <- if (!token) { | throw new Error(__t('messages.error.missing_oidc_token')); | }
+ messages.error.missing_saml_assertion  <- if (!assertion) { | throw new Error(__t('messages.error.missing_saml_assertion')); | }
+## server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts
+ entraid.scim.creating_user  <- const parsedUser: IScimUser = ScimUserSchema.parse(user); | console.log(__t("entraid.scim.creating_user", { id: parsedUser.id })); | return Promise.resolve(parsedUser);
+ entraid.scim.updating_user  <- public async updateUser(id: string, user: Partial<IScimUser>): Promise<IScimUser> { | console.log(__t("entraid.scim.updating_user", { id })); | return Promise.resolve({ id, userName: user.userName ?? "unknown", active: user.active ?? true } as IScimUser);
+ entraid.scim.deleting_user  <- public async deleteUser(id: string): Promise<void> { | console.log(__t("entraid.scim.deleting_user", { id })); | return Promise.resolve();
+ entraid.scim.getting_user  <- public async getUser(id: string): Promise<IScimUser | null> { | console.log(__t("entraid.scim.getting_user", { id })); | return Promise.resolve(null);
+ entraid.scim.creating_group  <- const parsedGroup: IScimGroup = ScimGroupSchema.parse(group); | console.log(__t("entraid.scim.creating_group", { id: parsedGroup.id })); | return Promise.resolve(parsedGroup);
+ entraid.scim.updating_group  <- public async updateGroup(id: string, group: Partial<IScimGroup>): Promise<IScimGroup> { | console.log(__t("entraid.scim.updating_group", { id })); | return Promise.resolve({ id, displayName: group.displayName ?? "unknown" } as IScimGroup);
+ entraid.scim.deleting_group  <- public async deleteGroup(id: string): Promise<void> { | console.log(__t("entraid.scim.deleting_group", { id })); | return Promise.resolve();
+ entraid.scim.getting_group  <- public async getGroup(id: string): Promise<IScimGroup | null> { | console.log(__t("entraid.scim.getting_group", { id })); | return Promise.resolve(null);
+## server/engine-core/src/tenant/scim/OktaScimAdapter.ts
+ okta.scim.creating_user  <- const parsedUser: IScimUser = ScimUserSchema.parse(user); | console.log(__t("okta.scim.creating_user", { id: parsedUser.id })); | return Promise.resolve(parsedUser);
+ okta.scim.updating_user  <- public async updateUser(id: string, user: Partial<IScimUser>): Promise<IScimUser> { | console.log(__t("okta.scim.updating_user", { id })); | return Promise.resolve({ id, userName: user.userName ?? "unknown", active: user.active ?? true } as IScimUser);
+ okta.scim.deleting_user  <- public async deleteUser(id: string): Promise<void> { | console.log(__t("okta.scim.deleting_user", { id })); | return Promise.resolve();
+ okta.scim.getting_user  <- public async getUser(id: string): Promise<IScimUser | null> { | console.log(__t("okta.scim.getting_user", { id })); | return Promise.resolve(null);
+ okta.scim.creating_group  <- const parsedGroup: IScimGroup = ScimGroupSchema.parse(group); | console.log(__t("okta.scim.creating_group", { id: parsedGroup.id })); | return Promise.resolve(parsedGroup);
+ okta.scim.updating_group  <- public async updateGroup(id: string, group: Partial<IScimGroup>): Promise<IScimGroup> { | console.log(__t("okta.scim.updating_group", { id })); | return Promise.resolve({ id, displayName: group.displayName ?? "unknown" } as IScimGroup);
+ okta.scim.deleting_group  <- public async deleteGroup(id: string): Promise<void> { | console.log(__t("okta.scim.deleting_group", { id })); | return Promise.resolve();
+ okta.scim.getting_group  <- public async getGroup(id: string): Promise<IScimGroup | null> { | console.log(__t("okta.scim.getting_group", { id })); | return Promise.resolve(null);
+## server/engine-core/src/urre/execution/checkpoint.ts
+ messages.error.checkpoint_save_failed  <- throw new Error( | __t('messages.error.checkpoint_save_failed', { | checkpointId,
+ messages.error.checkpoint_save_failed  <- throw new Error( | __t('messages.error.checkpoint_save_failed', { | checkpointId,
+ messages.error.checkpoint_save_failed  <- throw new Error( | __t('messages.error.checkpoint_save_failed', { | checkpointId,
+ messages.system.checkpoint_saved  <- console.log( | __t('messages.system.checkpoint_saved', { | checkpointId,
+## server/engine-core/src/urre/execution/kernel.ts
+ messages.error.action_execution_failed  <- throw new Error( | __t('messages.error.action_execution_failed', { | actionType: action.type,
+ messages.error.action_execution_failed  <- throw new Error( | __t('messages.error.action_execution_failed', { | actionType: action.type,
+ messages.system.action_executed  <- console.log( | __t('messages.system.action_executed', { | actionType: action.type,
+## server/engine-core/src/urre/tests/rollback.spec.ts
+ messages.error.invalid_deployment_context  <- if (!context || !context.id) { | throw new Error(__t('messages.error.invalid_deployment_context')); | }
+ messages.error.invalid_deployment_context  <- engine.triggerRollback({ id: '', targetEnvironment: 'staging' }); | }).toThrow(__t('messages.error.invalid_deployment_context')); | });
+ messages.error.invalid_rollback_event  <- if (!eventId) { | throw new Error(__t('messages.error.invalid_rollback_event')); | }
+ messages.error.invalid_rollback_event  <- engine.evaluateRollbackSequence(''); | }).toThrow(__t('messages.error.invalid_rollback_event')); | });
+## server/plugin-manager/src/capability-gate.ts
+ ui.responses.plugin_requires_edition_tenant_has  <- tenantId, | reason: __t('ui.responses.plugin_requires_edition_tenant_has', { 'plugin_pluginId': plugin.pluginId, 'plugin_minimumEdition': plugin.minimumEdition, 'tenantEdition': tenantEdition }), | evaluatedAt,
+ ui.responses.plugin_requires_capabilities_not_entitled  <- tenantId, | reason: __t('ui.responses.plugin_requires_capabilities_not_entitled', { 'plugin_pluginId': plugin.pluginId, 'missingCaps_join______': missingCaps.join(', ') }), | evaluatedAt,
+ ui.responses.plugin_depends_on_missing_plugins  <- tenantId, | reason: __t('ui.responses.plugin_depends_on_missing_plugins', { 'plugin_pluginId': plugin.pluginId, 'missingDeps_join______': missingDeps.join(', ') }), | evaluatedAt,
+## server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts
+ azure.rbac.attach_failed  <- } catch (error: any) { | return { success: false, providerRef: '', attachedAt: '', errors: [`${__t('azure.rbac.attach_failed')}: ${error.message}`] }; | }
+ azure.rbac.detach_failed  <- } catch (error: any) { | return { success: false, errors: [`${__t('azure.rbac.detach_failed')}: ${error.message}`] }; | }
+ azure.rbac.update_failed  <- } catch (error: any) { | return { success: false, version: '', errors: [`${__t('azure.rbac.update_failed')}: ${error.message}`] }; | }
+ azure.rbac.clone_failed  <- } catch (error: any) { | return { success: false, clonedId: '', errors: [`${__t('azure.rbac.clone_failed')}: ${error.message}`] }; | }
+ azure.rbac.retire_failed  <- } catch (error: any) { | return { success: false, errors: [`${__t('azure.rbac.retire_failed')}: ${error.message}`] }; | }
+ azure.rbac.restore_failed  <- } catch (error: any) { | return { success: false, restoredId: '', errors: [`${__t('azure.rbac.restore_failed')}: ${error.message}`] }; | }
+## server/uppie/src/adapters/cpanel/CpanelAdapter.ts
+ cpanel.attach.fail  <- const res = await fetch(`${endpoint}/json-api/changepackage?api.version=1&user=${target}&pkg=${nativePolicy.providerId}`, { headers: { 'Authorization': `whm ${(context as any).credentials}` } }); | if (!res.ok) return { success: false, providerRef: '', attache
+ cpanel.attach.err  <- } catch (e: any) { | return { success: false, providerRef: '', attachedAt: '', errors: [__t('cpanel.attach.err', 'Error: {0}', e.message)] }; | }
+ cpanel.detach.fail  <- const res = await fetch(`${endpoint}/json-api/changepackage?api.version=1&user=${target}&pkg=default`, { headers: { 'Authorization': `whm ${(context as any).credentials}` } }); | if (!res.ok) return { success: false, errors: [__t('cpanel.detach.fail', 'Failed 
+ cpanel.detach.err  <- } catch (e: any) { | return { success: false, errors: [__t('cpanel.detach.err', 'Error: {0}', e.message)] }; | }
+ cpanel.update.fail  <- const res = await fetch(`${endpoint}/json-api/savefeaturelist?${params.toString()}`, { headers: { 'Authorization': `whm ${(context as any).credentials}` } }); | if (!res.ok) return { success: false, version: '', errors: [__t('cpanel.update.fail', 'Failed to up
+ cpanel.update.err  <- } catch (e: any) { | return { success: false, version: '', errors: [__t('cpanel.update.err', 'Error: {0}', e.message)] }; | }
+ cpanel.clone.read  <- const getRes = await fetch(`${endpoint}/json-api/getfeaturelist?api.version=1&featurelist=${policyId}`, { headers: { 'Authorization': `whm ${(context as any).credentials}` } }); | if (!getRes.ok) return { success: false, clonedId: '', errors: [__t('cpanel.clon
+ cpanel.clone.write  <- const saveRes = await fetch(`${endpoint}/json-api/savefeaturelist?api.version=1&featurelist=${newName}`, { headers: { 'Authorization': `whm ${(context as any).credentials}` } }); | if (!saveRes.ok) return { success: false, clonedId: '', errors: [__t('cpanel.cl
+ cpanel.clone.err  <- } catch (e: any) { | return { success: false, clonedId: '', errors: [__t('cpanel.clone.err', 'Error: {0}', e.message)] }; | }
+ cpanel.retire.fail  <- const res = await fetch(`${endpoint}/json-api/deletefeaturelist?api.version=1&featurelist=${plan.policyId}`, { method: 'POST', headers: { 'Authorization': `whm ${(context as any).credentials}` } }); | if (!res.ok) return { success: false, errors: [__t('cpanel.
+ cpanel.retire.err  <- } catch (e: any) { | return { success: false, errors: [__t('cpanel.retire.err', 'Error: {0}', e.message)] }; | }
+ cpanel.restore.unsupported  <- async restore(_certificate: PolicyRetirementCertificate, _context: AdapterContext): Promise<RestoreResult> { | return { success: false, restoredId: '', errors: [__t('cpanel.restore.unsupported', 'Restore is not supported by the cPanel provider')] }; | }
+## server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts
+ gcp.iam.attach_error  <- } catch (error: any) { | return { success: false, providerRef: '', attachedAt: '', errors: [__t('gcp.iam.attach_error', { message: error.message })] }; | }
+ gcp.iam.detach_error  <- } catch (error: any) { | return { success: false, errors: [__t('gcp.iam.detach_error', { message: error.message })] }; | }
+ gcp.iam.update_error  <- } catch (error: any) { | return { success: false, version: '', errors: [__t('gcp.iam.update_error', { message: error.message })] }; | }
+ gcp.iam.clone_error  <- } catch (error: any) { | return { success: false, clonedId: '', errors: [__t('gcp.iam.clone_error', { message: error.message })] }; | }
+ gcp.iam.retire_error  <- } catch (error: any) { | return { success: false, errors: [__t('gcp.iam.retire_error', { message: error.message })] }; | }
+ gcp.iam.restore_error  <- } catch (error: any) { | return { success: false, restoredId: '', errors: [__t('gcp.iam.restore_error', { message: error.message })] }; | }
+## server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts
+ uppie.adapter.k8s.attach_error  <- } catch { | return { success: false, providerRef: '', attachedAt: '', errors: [__t('uppie.adapter.k8s.attach_error')] }; | }
+ uppie.adapter.k8s.detach_error  <- } catch { | return { success: false, errors: [__t('uppie.adapter.k8s.detach_error')] }; | }
+ uppie.adapter.k8s.update_error  <- } catch { | return { success: false, version: '', errors: [__t('uppie.adapter.k8s.update_error')] }; | }
+ uppie.adapter.k8s.clone_error  <- } catch { | return { success: false, clonedId: '', errors: [__t('uppie.adapter.k8s.clone_error')] }; | }
+ uppie.adapter.k8s.reconcile_error  <- } catch { | throw new Error(__t('uppie.adapter.k8s.reconcile_error')); | }
+ uppie.adapter.k8s.retire_error  <- } catch { | return { success: false, errors: [__t('uppie.adapter.k8s.retire_error')] }; | }
+ uppie.adapter.k8s.restore_no_reference  <- if (!certificate.rollbackReference) { | return { success: false, restoredId: '', errors: [__t('uppie.adapter.k8s.restore_no_reference')] }; | }
+ uppie.adapter.k8s.restore_error  <- } catch { | return { success: false, restoredId: '', errors: [__t('uppie.adapter.k8s.restore_error')] }; | }
+## server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts
+ linux_acl.attach.no_entries  <- if (!entries || entries.length === 0) { | return { success: false, providerRef: '', attachedAt: '', errors: [__t('linux_acl.attach.no_entries')] }; | }
+ linux_acl.attach.failed  <- } catch (err: any) { | return { success: false, providerRef: '', attachedAt: '', errors: [__t('linux_acl.attach.failed', { error: err.message })] }; | }
+ linux_acl.detach.failed  <- } catch (err: any) { | return { success: false, errors: [__t('linux_acl.detach.failed', { error: err.message })] }; | }
+ linux_acl.update.failed  <- } catch (err: any) { | return { success: false, version: '', errors: [__t('linux_acl.update.failed', { error: err.message })] }; | }
+ linux_acl.clone.failed  <- } catch (err: any) { | return { success: false, clonedId: '', errors: [__t('linux_acl.clone.failed', { error: err.message })] }; | }
+ linux_acl.retire.failed  <- } catch (err: any) { | return { success: false, errors: [__t('linux_acl.retire.failed', { error: err.message })] }; | }
+ linux_acl.restore.failed  <- } catch (err: any) { | return { success: false, restoredId: '', errors: [__t('linux_acl.restore.failed', { error: err.message })] }; | }
+## server/uppie/src/core/analyzer/ExcessivePermissionAnalyzer.ts
+ messages.warning.wildcard_action_and_resource  <- score = this.CRITICAL_RISK_SCORE; | findings.push(__t('messages.warning.wildcard_action_and_resource')); | } else if (hasWildcardAction) {
+ messages.warning.wildcard_action  <- score = this.HIGH_RISK_SCORE; | findings.push(__t('messages.warning.wildcard_action')); | } else if (hasWildcardResource) {
+ messages.warning.wildcard_resource  <- score = this.HIGH_RISK_SCORE; | findings.push(__t('messages.warning.wildcard_resource')); | }
+## server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts
+ ui.responses.wildcard_resource_scope_is_forbidden  <- ruleId: rule.ruleId, | reason: __t('ui.responses.wildcard_resource_scope_is_forbidden', { 'rule_resource_scope': rule.resource.scope }) + | 'LeastPrivilegeCompiler must reduce resource scope before simulation.',
+ ui.responses.deny_rule_submitted_to_adapter_which  <- ruleId: rule.ruleId, | reason: __t('ui.responses.deny_rule_submitted_to_adapter_which', { 'this_adapter_providerType': this.adapter.providerType }) + | 'does not support simulation/DENY. ' +

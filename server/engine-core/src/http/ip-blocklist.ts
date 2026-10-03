@@ -10,7 +10,7 @@
  * Classification : GOVERNMENT | ENTERPRISE | PUBLIC | INTERNAL
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen

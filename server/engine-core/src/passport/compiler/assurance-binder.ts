@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,8 +31,16 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 import { EvidenceChain } from '../evidence/chain';
 
+/**
+ * @interface AssuranceReport
+ * @description Corporate Governed interface implementation for AssuranceReport
+ * @classification ENTERPRISE
+ */
 export interface AssuranceReport {
     reportId: string;
     testSuite: string;
@@ -41,10 +49,15 @@ export interface AssuranceReport {
     timestamp: number;
 }
 
+/**
+ * @class AssuranceBinder
+ * @description Corporate Governed class implementation for AssuranceBinder
+ * @classification ENTERPRISE
+ */
 export class AssuranceBinder {
     public bindAssurance(chain: EvidenceChain, report: AssuranceReport): void {
         if (!report.passed) {
-            throw new Error(`Cannot bind failing assurance report: ${report.reportId}`);
+            throw new Error(__t('messages.error.cannot_bind_failing_assurance_report', { 'report_reportId': report.reportId }));
         }
         chain.append(`assurance-${report.reportId}`, 'ASSURANCE_BINDING', report);
     }

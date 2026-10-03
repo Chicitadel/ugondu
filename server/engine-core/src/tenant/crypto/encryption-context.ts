@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,12 +32,20 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { TenantKeyContext } from './tenant-key-context';
 
+/**
+ * @class EncryptionContext
+ * @description Corporate Governed class implementation for EncryptionContext
+ * @classification ENTERPRISE
+ */
 export class EncryptionContext {
     constructor(private readonly keyContext: TenantKeyContext) {
         if (keyContext.rotationStatus === 'revoked') {
-            throw new Error('Cannot establish encryption context with revoked key.');
+            throw new Error(__t('messages.error.cannot_establish_encryption_context_with_revo'));
         }
     }
 
@@ -49,7 +57,7 @@ export class EncryptionContext {
     public decrypt(cipher: Buffer): Buffer {
         const prefix = Buffer.from('ENCRYPTED:');
         if (!cipher.subarray(0, prefix.length).equals(prefix)) {
-            throw new Error('Invalid cipher payload format.');
+            throw new Error(__t('messages.error.invalid_cipher_payload_format'));
         }
         return cipher.subarray(prefix.length);
     }

@@ -35,6 +35,11 @@
 import { SnapshotConfig } from '../model/snapshot';
 import { RecoveryPoint } from '../model/recovery-point';
 
+/**
+ * @class BackupManager
+ * @description Corporate Governed class implementation for BackupManager
+ * @classification ENTERPRISE
+ */
 export class BackupManager {
   public async createBackup(config: SnapshotConfig): Promise<RecoveryPoint> {
     // Implementation for raw snapshot creation concepts

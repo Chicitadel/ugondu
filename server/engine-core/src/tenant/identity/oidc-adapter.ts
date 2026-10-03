@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { SubjectContext, SubjectContextFactory } from './subject-context';
 
+/**
+ * @class OIDCAdapter
+ * @description Corporate Governed class implementation for OIDCAdapter
+ * @classification ENTERPRISE
+ */
 export class OIDCAdapter {
   public verifyIdToken(token: string): SubjectContext {
     // Simulated token verification

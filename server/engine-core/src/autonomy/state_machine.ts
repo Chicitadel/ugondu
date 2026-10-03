@@ -18,6 +18,11 @@ import { SimulationResult } from '../simulation/simulator';
 
 export type AutonomyLevel = 'L0' | 'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6';
 
+/**
+ * @interface AutonomyContext
+ * @description Corporate Governed interface implementation for AutonomyContext
+ * @classification ENTERPRISE
+ */
 export interface AutonomyContext {
     trustEnvironment?: 'STAGING_VERIFIED' | 'PRODUCTION_HARDENED' | 'DEVELOPMENT_UNCONSTRAINED';
     targetHealth?: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
@@ -26,6 +31,11 @@ export interface AutonomyContext {
     auditTrailReachable?: boolean;
 }
 
+/**
+ * @interface FullAutonomyContext
+ * @description Corporate Governed interface implementation for FullAutonomyContext
+ * @classification ENTERPRISE
+ */
 export interface FullAutonomyContext {
     authenticatedAuthority: string;
     targetAuthorization: boolean;
@@ -38,6 +48,11 @@ export interface FullAutonomyContext {
     policyViolations: string[];
 }
 
+/**
+ * @interface AutonomyGateVerdict
+ * @description Corporate Governed interface implementation for AutonomyGateVerdict
+ * @classification ENTERPRISE
+ */
 export interface AutonomyGateVerdict {
     approved: boolean;
     reason: string;
@@ -57,29 +72,34 @@ export function requireFullAutonomyContext(
     requiredLevel: 5 | 6
 ): AutonomyGateVerdict {
     if (!ctx.authenticatedAuthority || !ALLOWED_AUTONOMY_AUTHORITIES.has(ctx.authenticatedAuthority))
-        return { approved: false, reason: 'INVALID_AUTHENTICATED_AUTHORITY', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.invalid_authenticated_authority'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (!ctx.targetAuthorization)
-        return { approved: false, reason: 'TARGET_NOT_AUTHORIZED', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.target_not_authorized'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (!ctx.capabilityIntersectionVerified)
-        return { approved: false, reason: 'CAPABILITY_INTERSECTION_NOT_VERIFIED', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.capability_intersection_not_verified'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (!ctx.policyVersionHash || ctx.policyVersionHash.length < 32)
-        return { approved: false, reason: 'POLICY_VERSION_HASH_MISSING', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.policy_version_hash_missing'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     const nowSec = Math.floor(Date.now() / 1000);
     if (!ctx.healthEvidence.healthy)
-        return { approved: false, reason: 'HEALTH_EVIDENCE_NOT_HEALTHY', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.health_evidence_not_healthy'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (nowSec - ctx.healthEvidence.verifiedAt > HEALTH_EVIDENCE_MAX_AGE_SECONDS)
-        return { approved: false, reason: 'HEALTH_EVIDENCE_STALE', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.health_evidence_stale'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (!ctx.rollbackReadiness)
-        return { approved: false, reason: 'ROLLBACK_NOT_READY', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.rollback_not_ready'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (ctx.executionTrustScore < MIN_TRUST_SCORE_L5)
-        return { approved: false, reason: 'TRUST_SCORE_INSUFFICIENT', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.trust_score_insufficient'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (ctx.autonomyPolicyLevel < requiredLevel)
-        return { approved: false, reason: 'AUTONOMY_LEVEL_INSUFFICIENT', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.autonomy_level_insufficient'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     if (ctx.policyViolations.length > 0)
-        return { approved: false, reason: 'POLICY_VIOLATIONS_PRESENT', requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
+        return { approved: false, reason: __t('ui.responses.policy_violations_present'), requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
     return { approved: true, reason: `L${requiredLevel}_FULL_CONTEXT_APPROVED`, requiredLevel, providedLevel: ctx.autonomyPolicyLevel };
 }
 
+/**
+ * @interface AutonomyDecision
+ * @description Corporate Governed interface implementation for AutonomyDecision
+ * @classification ENTERPRISE
+ */
 export interface AutonomyDecision {
     level: AutonomyLevel;
     canAutoExecute: boolean;
@@ -87,6 +107,11 @@ export interface AutonomyDecision {
     reason: string;
 }
 
+/**
+ * @class ProgressiveAutonomyEngine
+ * @description Corporate Governed class implementation for ProgressiveAutonomyEngine
+ * @classification ENTERPRISE
+ */
 export class ProgressiveAutonomyEngine {
     public static evaluateExecutionApproval(
         configuredLevel: AutonomyLevel,
@@ -105,7 +130,7 @@ export class ProgressiveAutonomyEngine {
                 level: configuredLevel,
                 canAutoExecute: false,
                 requiresManualApproval: true,
-                reason: 'AUDIT_TRAIL_UNREACHABLE_BLOCKED'
+                reason: __t('ui.responses.audit_trail_unreachable_blocked')
             };
         }
 
@@ -125,7 +150,7 @@ export class ProgressiveAutonomyEngine {
                 level: configuredLevel,
                 canAutoExecute: false,
                 requiresManualApproval: true,
-                reason: 'DUAL_APPROVAL_MANDATED_BY_POLICY'
+                reason: __t('ui.responses.dual_approval_mandated_by_policy')
             };
         }
 
@@ -136,22 +161,22 @@ export class ProgressiveAutonomyEngine {
                     level: 'L0',
                     canAutoExecute: false,
                     requiresManualApproval: true,
-                    reason: 'L0_ASSISTIVE_MANDATORY_HUMAN_APPROVAL'
+                    reason: __t('ui.responses.l0_assistive_mandatory_human_approval')
                 };
 
             case 'L1':
                 // L1: Auto-approves only LOW risk
                 if (simulation.riskCategory === 'LOW') {
-                    return { level: 'L1', canAutoExecute: true, requiresManualApproval: false, reason: 'L1_LOW_RISK_AUTO_APPROVED' };
+                    return { level: 'L1', canAutoExecute: true, requiresManualApproval: false, reason: __t('ui.responses.l1_low_risk_auto_approved') };
                 }
-                return { level: 'L1', canAutoExecute: false, requiresManualApproval: true, reason: 'L1_ELEVATED_RISK_NEEDS_APPROVAL' };
+                return { level: 'L1', canAutoExecute: false, requiresManualApproval: true, reason: __t('ui.responses.l1_elevated_risk_needs_approval') };
 
             case 'L2':
                 // L2: Auto-approves LOW or MEDIUM risk if rollback is verified
                 if (['LOW', 'MEDIUM'].includes(simulation.riskCategory) && rollbackAvailable) {
-                    return { level: 'L2', canAutoExecute: true, requiresManualApproval: false, reason: 'L2_SUPERVISED_ROLLBACK_AVAILABLE' };
+                    return { level: 'L2', canAutoExecute: true, requiresManualApproval: false, reason: __t('ui.responses.l2_supervised_rollback_available') };
                 }
-                return { level: 'L2', canAutoExecute: false, requiresManualApproval: true, reason: 'L2_RISK_OR_ROLLBACK_UNAVAILABLE_NEEDS_APPROVAL' };
+                return { level: 'L2', canAutoExecute: false, requiresManualApproval: true, reason: __t('ui.responses.l2_risk_or_rollback_unavailable_needs_approva') };
 
             case 'L3':
             case 'L4':

@@ -32,11 +32,24 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 // Implementation for freshness.rs
+/**
+ * @interface FreshnessPolicy
+ * @description Corporate Governed interface implementation for FreshnessPolicy
+ * @classification ENTERPRISE
+ */
 export interface FreshnessPolicy {
   maxAgeMs: number;
 }
 
+/**
+ * @class FreshnessValidator
+ * @description Corporate Governed class implementation for FreshnessValidator
+ * @classification ENTERPRISE
+ */
 export class FreshnessValidator {
   constructor(private readonly policy: FreshnessPolicy) {}
 
@@ -46,7 +59,7 @@ export class FreshnessValidator {
 
   assertFresh(collectedAt: Date, label: string): void {
     if (this.isStale(collectedAt)) {
-      throw new Error(`Evidence '${label}' is stale: collected at ${collectedAt.toISOString()}`);
+      throw new Error(__t('messages.error.evidence_is_stale_collected_at', { 'label': label, 'collectedAt_toISOString__': collectedAt.toISOString() }));
     }
   }
 }

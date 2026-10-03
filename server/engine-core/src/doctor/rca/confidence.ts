@@ -35,6 +35,11 @@
 // Implementation for confidence.rs
 import { ConfidenceLevel } from '../model/rca_result';
 
+/**
+ * @class ConfidenceScorer
+ * @description Corporate Governed class implementation for ConfidenceScorer
+ * @classification ENTERPRISE
+ */
 export class ConfidenceScorer {
   score(evidenceCount: number, consistencyRate: number): ConfidenceLevel {
     if (evidenceCount >= 5 && consistencyRate >= 0.9) return 'DEFINITIVE';

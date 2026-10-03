@@ -33,6 +33,11 @@
 
 import { StructuredIntent } from "../model/structured-intent";
 
+/**
+ * @class ConflictDetector
+ * @description Corporate Governed class implementation for ConflictDetector
+ * @classification ENTERPRISE
+ */
 export class ConflictDetector {
     public detectConflicts(intent: StructuredIntent): string[] {
         const conflicts: string[] = [];

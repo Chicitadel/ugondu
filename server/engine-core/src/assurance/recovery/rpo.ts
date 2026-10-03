@@ -34,6 +34,11 @@
 
 import { RecoveryPoint } from './recovery-point';
 
+/**
+ * @class RpoCalculator
+ * @description Corporate Governed class implementation for RpoCalculator
+ * @classification ENTERPRISE
+ */
 export class RpoCalculator {
     public calculateActualRpoMetrics(history: RecoveryPoint[]): { currentRpoMs: number; maxRpoMs: number; averageRpoMs: number } {
         if (history.length < 2) {

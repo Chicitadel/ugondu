@@ -30,8 +30,16 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 export type State = 'IDLE' | 'RUNNING' | 'COMPLETED' | 'FAILED';
 
+/**
+ * @class LifecycleManager
+ * @description Corporate Governed class implementation for LifecycleManager
+ * @classification ENTERPRISE
+ */
 export class LifecycleManager {
     private state: State = 'IDLE';
 
@@ -46,7 +54,7 @@ export class LifecycleManager {
         if (allowedTransitions[this.state].includes(newState)) {
             this.state = newState;
         } else {
-            throw new Error(`Invalid transition from ${this.state} to ${newState}`);
+            throw new Error(__t('messages.error.invalid_transition_from_to', { 'this_state': this.state, 'newState': newState }));
         }
     }
 

@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,16 +32,29 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface ProvisioningContext
+ * @description Corporate Governed interface implementation for ProvisioningContext
+ * @classification ENTERPRISE
+ */
 export interface ProvisioningContext {
     tenantId: string;
     tier: 'standard' | 'enterprise';
     region: string;
 }
 
+/**
+ * @class TenantProvisioner
+ * @description Corporate Governed class implementation for TenantProvisioner
+ * @classification ENTERPRISE
+ */
 export class TenantProvisioner {
     public provision(context: ProvisioningContext): void {
         if (!context.tenantId) {
-            throw new Error('Tenant ID required for provisioning execution.');
+            throw new Error(__t('messages.error.tenant_id_required_for_provisioning_execution'));
         }
         // Allocate resources, setup isolated database schemas, initialize root key
     }

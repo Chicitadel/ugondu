@@ -33,6 +33,11 @@
 
 import { TenantStatus } from './tenant-status';
 
+/**
+ * @interface Tenant
+ * @description Corporate Governed interface implementation for Tenant
+ * @classification ENTERPRISE
+ */
 export interface Tenant {
   readonly id: string;
   readonly organizationId: string;

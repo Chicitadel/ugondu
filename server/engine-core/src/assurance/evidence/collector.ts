@@ -33,6 +33,11 @@
 
 import * as crypto from 'crypto';
 
+/**
+ * @interface Evidence
+ * @description Corporate Governed interface implementation for Evidence
+ * @classification ENTERPRISE
+ */
 export interface Evidence {
     readonly id: string;
     readonly payload: string;
@@ -40,6 +45,11 @@ export interface Evidence {
     readonly hash: string;
 }
 
+/**
+ * @class EvidenceCollector
+ * @description Corporate Governed class implementation for EvidenceCollector
+ * @classification ENTERPRISE
+ */
 export class EvidenceCollector {
     public collectEvidence(payload: string): Evidence {
         const timestamp = Date.now();

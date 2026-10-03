@@ -33,6 +33,11 @@
 
 import { DependencyGraph } from '../dependency/graph';
 
+/**
+ * @class BlastRadiusCalculator
+ * @description Corporate Governed class implementation for BlastRadiusCalculator
+ * @classification ENTERPRISE
+ */
 export class BlastRadiusCalculator {
     constructor(private graph: DependencyGraph) {}
 

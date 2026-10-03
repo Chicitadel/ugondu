@@ -34,6 +34,11 @@
 import { createHash, generateKeyPairSync, sign, verify } from 'crypto';
 import { MigrationPlan } from '../model/migration-plan';
 
+/**
+ * @class IntegrityManager
+ * @description Corporate Governed class implementation for IntegrityManager
+ * @classification ENTERPRISE
+ */
 export class IntegrityManager {
   private privateKey: string;
   public publicKey: string;

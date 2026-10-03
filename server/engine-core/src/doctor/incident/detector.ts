@@ -36,6 +36,11 @@
 import { EvidenceItem } from '../evidence/collector';
 import { IncidentRecord } from '../model/incident';
 
+/**
+ * @class IncidentDetector
+ * @description Corporate Governed class implementation for IncidentDetector
+ * @classification ENTERPRISE
+ */
 export class IncidentDetector {
   detect(evidence: EvidenceItem[]): IncidentRecord[] {
     return evidence
@@ -44,9 +49,10 @@ export class IncidentDetector {
         id: `inc_${e.id}`,
         targetId: (e.payload['targetId'] as string) || 'unknown',
         category: e.kind,
+        incidentClass: 'APPLICATION_FAILURE' as any,
         fingerprint: e.hash,
         detectedAt: e.collectedAt,
-        severity: (e.payload['severity'] as string) || 'MEDIUM',
+        severity: (e.payload['severity'] as any) || ('MEDIUM' as any),
         evidence: [e],
       }));
   }

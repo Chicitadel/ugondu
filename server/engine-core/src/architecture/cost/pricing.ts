@@ -36,6 +36,11 @@ export enum CostProvenance {
     BENCHMARK = 'BENCHMARK'
 }
 
+/**
+ * @interface PricingModel
+ * @description Corporate Governed interface implementation for PricingModel
+ * @classification ENTERPRISE
+ */
 export interface PricingModel {
     modelId: string;
     unitPrice: number;

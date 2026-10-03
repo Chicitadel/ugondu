@@ -31,6 +31,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface TwinEvent
+ * @description Corporate Governed interface implementation for TwinEvent
+ * @classification ENTERPRISE
+ */
 export interface TwinEvent {
     eventId: string;
     resourceId: string;
@@ -39,11 +47,21 @@ export interface TwinEvent {
     timestamp: number;
 }
 
+/**
+ * @interface EnvironmentTwinState
+ * @description Corporate Governed interface implementation for EnvironmentTwinState
+ * @classification ENTERPRISE
+ */
 export interface EnvironmentTwinState {
     resources: Map<string, any>;
     lastEventId?: string;
 }
 
+/**
+ * @class TwinProjector
+ * @description Corporate Governed class implementation for TwinProjector
+ * @classification ENTERPRISE
+ */
 export class TwinProjector {
     public project(events: TwinEvent[], currentState: EnvironmentTwinState): EnvironmentTwinState {
         const nextState: EnvironmentTwinState = {
@@ -69,7 +87,7 @@ export class TwinProjector {
                 state.resources.delete(event.resourceId);
                 break;
             default:
-                throw new Error(`Unknown event type: ${event.eventType}`);
+                throw new Error(__t('messages.error.unknown_event_type', { 'event_eventType': event.eventType }));
         }
     }
 }

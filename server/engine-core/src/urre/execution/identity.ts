@@ -32,9 +32,17 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { ExecutionIdContext } from '../model/execution';
 import { randomUUID } from 'crypto';
 
+/**
+ * @class IdentityUtils
+ * @description Corporate Governed class implementation for IdentityUtils
+ * @classification ENTERPRISE
+ */
 export class IdentityUtils {
   
   public static generateExecutionIdContext(
@@ -78,13 +86,13 @@ export class IdentityUtils {
       
       for (const field of requiredFields) {
         if (!context[field as keyof ExecutionIdContext]) {
-          throw new Error(`Missing required field: ${field}`);
+          throw new Error(__t('messages.error.missing_required_field', { 'field': field }));
         }
       }
       
       return context as ExecutionIdContext;
     } catch (error) {
-      throw new Error(`Failed to parse ExecutionIdContext: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to parse ExecutionIdContext: ${error instanceof Error ? error.message: __t('ui.responses.unknown_error')}`);
     }
   }
 }

@@ -33,6 +33,11 @@
 
 import { ArchitectureIR } from './compatibility';
 
+/**
+ * @class SourceDiscovery
+ * @description Corporate Governed class implementation for SourceDiscovery
+ * @classification ENTERPRISE
+ */
 export class SourceDiscovery {
   public discover(): ArchitectureIR {
     // Deterministic IR extraction from source

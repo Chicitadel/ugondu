@@ -9,6 +9,11 @@ if (!fs.existsSync(dataDir)) {
 const dbPath = path.join(dataDir, 'plugins.json');
 
 // Represents which plugins are installed/active per tenant
+/**
+ * @interface TenantPluginLedger
+ * @description Corporate Governed interface implementation for TenantPluginLedger
+ * @classification ENTERPRISE
+ */
 export interface TenantPluginLedger {
     [tenantId: string]: string[]; // array of active plugin names
 }

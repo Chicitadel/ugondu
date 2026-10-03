@@ -32,8 +32,16 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { ExecutionLease } from '../model/execution';
 
+/**
+ * @class ExecutionLeaseManager
+ * @description Corporate Governed class implementation for ExecutionLeaseManager
+ * @classification ENTERPRISE
+ */
 export class ExecutionLeaseManager {
   private leases: Map<string, ExecutionLease> = new Map();
 
@@ -49,7 +57,7 @@ export class ExecutionLeaseManager {
     const existingLease = this.leases.get(executionId);
     
     if (existingLease && existingLease.expiresAt > now) {
-      throw new Error(`Lease already held for execution ${executionId}`);
+      throw new Error(__t('messages.error.lease_already_held_for_execution', { 'executionId': executionId }));
     }
     
     const leaseId = `${executionId}-${workerId}-${now}`;
@@ -70,14 +78,14 @@ export class ExecutionLeaseManager {
   public renewLease(executionId: string, workerId: string, leaseId: string, ttlMs: number): ExecutionLease {
     const lease = this.leases.get(executionId);
     if (!lease) {
-      throw new Error(`No lease found for execution ${executionId}`);
+      throw new Error(__t('messages.error.no_lease_found_for_execution', { 'executionId': executionId }));
     }
     if (lease.workerId !== workerId || lease.leaseId !== leaseId) {
-      throw new Error(`Lease ownership mismatch for execution ${executionId}`);
+      throw new Error(__t('messages.error.lease_ownership_mismatch_for_execution', { 'executionId': executionId }));
     }
     const now = Date.now();
     if (lease.expiresAt < now) {
-      throw new Error(`Lease for execution ${executionId} has already expired`);
+      throw new Error(__t('messages.error.lease_for_execution_has_already_expired', { 'executionId': executionId }));
     }
     
     lease.lastHeartbeatAt = now;

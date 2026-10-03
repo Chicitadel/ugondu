@@ -8,6 +8,11 @@ if (!fs.existsSync(dataDir)) {
 
 const dbPath = path.join(dataDir, 'billing.json');
 
+/**
+ * @interface TenantInfo
+ * @description Corporate Governed interface implementation for TenantInfo
+ * @classification ENTERPRISE
+ */
 export interface TenantInfo {
     token: string;
     tenant_id: string;

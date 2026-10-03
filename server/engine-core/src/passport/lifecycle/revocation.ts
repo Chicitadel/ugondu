@@ -30,10 +30,18 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { CacheClient } from '../../infrastructure/cache/client';
 import { DatabaseClient } from '../../infrastructure/database/client';
 
+/**
+ * @class RevocationManager
+ * @description Corporate Governed class implementation for RevocationManager
+ * @classification ENTERPRISE
+ */
 export class RevocationManager {
     constructor(
         private readonly cacheClient: CacheClient,
@@ -54,7 +62,7 @@ export class RevocationManager {
         );
 
         if (record.rows.length === 0) {
-            throw new Error(`Passport ${passportId} not found`);
+            throw new Error(__t('messages.error.passport_not_found', { 'passportId': passportId }));
         }
 
         const isRevoked = record.rows[0].is_revoked;

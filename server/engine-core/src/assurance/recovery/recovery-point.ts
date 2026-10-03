@@ -34,12 +34,22 @@
 
 import { createHash, randomUUID } from 'crypto';
 
+/**
+ * @interface RecoveryStateContext
+ * @description Corporate Governed interface implementation for RecoveryStateContext
+ * @classification ENTERPRISE
+ */
 export interface RecoveryStateContext {
     resourceId: string;
     stateData: string;
     checksum: string;
 }
 
+/**
+ * @class RecoveryPoint
+ * @description Corporate Governed class implementation for RecoveryPoint
+ * @classification ENTERPRISE
+ */
 export class RecoveryPoint {
     public readonly id: string;
     public readonly timestamp: Date;

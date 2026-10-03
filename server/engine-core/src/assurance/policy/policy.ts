@@ -36,6 +36,11 @@ export interface Policy {
     evaluate(context: any): boolean;
 }
 
+/**
+ * @class PolicyEngine
+ * @description Corporate Governed class implementation for PolicyEngine
+ * @classification ENTERPRISE
+ */
 export class PolicyEngine {
     private policies: Policy[] = [];
 

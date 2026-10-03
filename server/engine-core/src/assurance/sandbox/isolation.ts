@@ -31,21 +31,34 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 
+
+/**
+ * @interface IsolationHandle
+ * @description Corporate Governed interface implementation for IsolationHandle
+ * @classification ENTERPRISE
+ */
 export interface IsolationHandle {
     sandboxId: string;
     processId: number;
     cgroupPath: string;
 }
 
+/**
+ * @class IsolationManager
+ * @description Corporate Governed class implementation for IsolationManager
+ * @classification ENTERPRISE
+ */
 export class IsolationManager {
     public async enforce(handle: IsolationHandle): Promise<void> {
         if (!handle.cgroupPath.startsWith('/sys/fs/cgroup')) {
-            throw new Error(`Invalid cgroup path: ${handle.cgroupPath}`);
+            throw new Error(__t('messages.error.invalid_cgroup_path', { 'handle_cgroupPath': handle.cgroupPath }));
         }
         
         if (handle.processId <= 0) {
-            throw new Error(`Invalid process ID: ${handle.processId}`);
+            throw new Error(__t('messages.error.invalid_process_id', { 'handle_processId': handle.processId }));
         }
 
         // Enforcement would call out to system APIs here

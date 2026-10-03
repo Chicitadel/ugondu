@@ -36,6 +36,11 @@ import { MigrationCertificate } from '../model/migration-certificate';
 import { IntegrityManager } from './integrity';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * @class EvidencePassport
+ * @description Corporate Governed class implementation for EvidencePassport
+ * @classification ENTERPRISE
+ */
 export class EvidencePassport {
   private integrityManager = new IntegrityManager();
 

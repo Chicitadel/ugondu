@@ -34,6 +34,11 @@
 
 import { IProviderAdapter } from '../provider-discovery';
 
+/**
+ * @class AwsAdapter
+ * @description Corporate Governed class implementation for AwsAdapter
+ * @classification ENTERPRISE
+ */
 export class AwsAdapter implements IProviderAdapter {
   public id: string = 'aws';
 

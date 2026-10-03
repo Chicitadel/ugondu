@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,6 +35,11 @@
 import * as crypto from 'crypto';
 import { Canonicalizer } from './canonicalizer';
 
+/**
+ * @class Signer
+ * @description Corporate Governed class implementation for Signer
+ * @classification ENTERPRISE
+ */
 export class Signer {
     private canonicalizer = new Canonicalizer();
 

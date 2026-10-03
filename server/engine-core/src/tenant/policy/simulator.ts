@@ -33,6 +33,11 @@
 
 import { Resolver } from './resolver';
 
+/**
+ * @class PolicySimulator
+ * @description Corporate Governed class implementation for PolicySimulator
+ * @classification ENTERPRISE
+ */
 export class PolicySimulator {
   private readonly resolver = new Resolver();
   

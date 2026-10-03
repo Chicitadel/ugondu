@@ -44,6 +44,11 @@ import {
   EnvironmentTwin as BaseEnvironmentTwin
 } from './shared-types';
 
+/**
+ * @interface ProviderInfo
+ * @description Corporate Governed interface implementation for ProviderInfo
+ * @classification ENTERPRISE
+ */
 export interface ProviderInfo {
   providerId: string;
   name: string;
@@ -51,12 +56,22 @@ export interface ProviderInfo {
   regions: string[];
 }
 
+/**
+ * @interface ComputeInfo
+ * @description Corporate Governed interface implementation for ComputeInfo
+ * @classification ENTERPRISE
+ */
 export interface ComputeInfo {
   hosts?: HostDiscovery[];
   kubernetes?: KubernetesDiscovery[];
   panels?: HostingPanelDiscovery[];
 }
 
+/**
+ * @interface DatabaseInfo
+ * @description Corporate Governed interface implementation for DatabaseInfo
+ * @classification ENTERPRISE
+ */
 export interface DatabaseInfo {
   id: string;
   engine: string;
@@ -65,6 +80,11 @@ export interface DatabaseInfo {
   endpoints: string[];
 }
 
+/**
+ * @interface TLSInfo
+ * @description Corporate Governed interface implementation for TLSInfo
+ * @classification ENTERPRISE
+ */
 export interface TLSInfo {
   certificates: Array<{
     domain: string;
@@ -74,6 +94,11 @@ export interface TLSInfo {
   }>;
 }
 
+/**
+ * @interface SecretReference
+ * @description Corporate Governed interface implementation for SecretReference
+ * @classification ENTERPRISE
+ */
 export interface SecretReference {
   id: string;
   name: string;
@@ -81,6 +106,11 @@ export interface SecretReference {
   lastRotated: number;
 }
 
+/**
+ * @interface BackupInfo
+ * @description Corporate Governed interface implementation for BackupInfo
+ * @classification ENTERPRISE
+ */
 export interface BackupInfo {
   backupId: string;
   status: 'ACTIVE' | 'FAILED' | 'UNKNOWN';
@@ -88,12 +118,22 @@ export interface BackupInfo {
   retentionDays: number;
 }
 
+/**
+ * @interface RecoveryCapabilities
+ * @description Corporate Governed interface implementation for RecoveryCapabilities
+ * @classification ENTERPRISE
+ */
 export interface RecoveryCapabilities {
   rtoMinutes: number;
   rpoMinutes: number;
   testedAt?: number;
 }
 
+/**
+ * @interface ObservabilityInfo
+ * @description Corporate Governed interface implementation for ObservabilityInfo
+ * @classification ENTERPRISE
+ */
 export interface ObservabilityInfo {
   metrics: boolean;
   tracing: boolean;
@@ -101,30 +141,55 @@ export interface ObservabilityInfo {
   tools: string[];
 }
 
+/**
+ * @interface OwnershipInfo
+ * @description Corporate Governed interface implementation for OwnershipInfo
+ * @classification ENTERPRISE
+ */
 export interface OwnershipInfo {
   teamId: string;
   ownerEmail: string;
   escalationPolicyId?: string;
 }
 
+/**
+ * @interface PolicyInfo
+ * @description Corporate Governed interface implementation for PolicyInfo
+ * @classification ENTERPRISE
+ */
 export interface PolicyInfo {
   policyId: string;
   name: string;
   compliant: boolean;
 }
 
+/**
+ * @interface CostInfo
+ * @description Corporate Governed interface implementation for CostInfo
+ * @classification ENTERPRISE
+ */
 export interface CostInfo {
   currency: string;
   monthlyEstimate: number;
   lastUpdated: number;
 }
 
+/**
+ * @interface HealthInfo
+ * @description Corporate Governed interface implementation for HealthInfo
+ * @classification ENTERPRISE
+ */
 export interface HealthInfo {
   status: 'HEALTHY' | 'DEGRADED' | 'DOWN' | 'UNKNOWN';
   lastChecked: number;
   checkId: string;
 }
 
+/**
+ * @interface IncidentInfo
+ * @description Corporate Governed interface implementation for IncidentInfo
+ * @classification ENTERPRISE
+ */
 export interface IncidentInfo {
   incidentId: string;
   severity: string;
@@ -132,6 +197,11 @@ export interface IncidentInfo {
   createdAt: number;
 }
 
+/**
+ * @interface DeploymentInfo
+ * @description Corporate Governed interface implementation for DeploymentInfo
+ * @classification ENTERPRISE
+ */
 export interface DeploymentInfo {
   deploymentId: string;
   version: string;
@@ -139,6 +209,11 @@ export interface DeploymentInfo {
   status: string;
 }
 
+/**
+ * @interface DriftInfo
+ * @description Corporate Governed interface implementation for DriftInfo
+ * @classification ENTERPRISE
+ */
 export interface DriftInfo {
   driftId: string;
   detectedAt: number;
@@ -146,6 +221,11 @@ export interface DriftInfo {
   details: string;
 }
 
+/**
+ * @interface EvidenceInfo
+ * @description Corporate Governed interface implementation for EvidenceInfo
+ * @classification ENTERPRISE
+ */
 export interface EvidenceInfo {
   evidenceId: string;
   type: string;
@@ -153,6 +233,11 @@ export interface EvidenceInfo {
   locationUrl: string;
 }
 
+/**
+ * @interface ExtendedEnvironmentTwin
+ * @description Corporate Governed interface implementation for ExtendedEnvironmentTwin
+ * @classification ENTERPRISE
+ */
 export interface ExtendedEnvironmentTwin extends BaseEnvironmentTwin {
   identity: {
     environmentName: string;

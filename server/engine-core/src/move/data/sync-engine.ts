@@ -43,6 +43,11 @@ export enum SyncState {
     ERROR = 'ERROR'
 }
 
+/**
+ * @class SyncEngine
+ * @description Corporate Governed class implementation for SyncEngine
+ * @classification ENTERPRISE
+ */
 export class SyncEngine {
     private state: SyncState = SyncState.INITIALIZING;
     private snapshotSync = new SnapshotSync();

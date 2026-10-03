@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,6 +32,9 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 export enum IdempotencyClass {
     DETERMINISTIC = 'DETERMINISTIC',
     CONDITIONAL = 'CONDITIONAL',
@@ -40,6 +43,11 @@ export enum IdempotencyClass {
     QUERY = 'QUERY'
 }
 
+/**
+ * @class IdempotencyResolver
+ * @description Corporate Governed class implementation for IdempotencyResolver
+ * @classification ENTERPRISE
+ */
 export class IdempotencyResolver {
     public resolveIdempotency(actionId: string, idempotencyClass: IdempotencyClass, context: any): boolean {
         switch (idempotencyClass) {
@@ -54,7 +62,7 @@ export class IdempotencyResolver {
             case IdempotencyClass.QUERY:
                 return this.handleQuery(actionId, context);
             default:
-                throw new Error(`Unknown idempotency class: ${idempotencyClass}`);
+                throw new Error(__t('messages.error.unknown_idempotency_class', { 'idempotencyClass': idempotencyClass }));
         }
     }
 

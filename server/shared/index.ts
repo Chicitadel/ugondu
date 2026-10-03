@@ -52,3 +52,4 @@ export * from './discovery';
 export * from './environment-twin';
 export * from './capability-model';
 export * from './outcome-pack';
+export * from './logger';

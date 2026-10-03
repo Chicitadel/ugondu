@@ -35,6 +35,11 @@
 // Implementation for rca_result.rs
 export type ConfidenceLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'DEFINITIVE';
 
+/**
+ * @interface RcaResult
+ * @description Corporate Governed interface implementation for RcaResult
+ * @classification ENTERPRISE
+ */
 export interface RcaResult {
   incidentId: string;
   rootCause: string;

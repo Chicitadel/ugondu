@@ -30,10 +30,18 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { Scheduler } from './scheduler';
 import { AdmissionController } from './admission';
 import { LifecycleManager } from './lifecycle';
 
+/**
+ * @class AssuranceOrchestrator
+ * @description Corporate Governed class implementation for AssuranceOrchestrator
+ * @classification ENTERPRISE
+ */
 export class AssuranceOrchestrator {
     private scheduler: Scheduler;
     private admission: AdmissionController;
@@ -47,7 +55,7 @@ export class AssuranceOrchestrator {
 
     public async executeAssuranceCycle(context: any): Promise<void> {
         if (!this.admission.admit(context)) {
-            throw new Error("Assurance cycle rejected by admission controller.");
+            throw new Error(__t('messages.error.assurance_cycle_rejected_by_admission_control'));
         }
         this.lifecycle.transitionTo('RUNNING');
         try {

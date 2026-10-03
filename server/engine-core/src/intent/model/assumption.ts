@@ -33,6 +33,11 @@
 
 import { Provenance } from "./requirement";
 
+/**
+ * @interface Assumption
+ * @description Corporate Governed interface implementation for Assumption
+ * @classification ENTERPRISE
+ */
 export interface Assumption {
     id: string;
     description: string;

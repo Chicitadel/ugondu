@@ -37,6 +37,11 @@ export enum FreshnessState {
     EXPIRED = 'EXPIRED'
 }
 
+/**
+ * @class FreshnessEvaluator
+ * @description Corporate Governed class implementation for FreshnessEvaluator
+ * @classification ENTERPRISE
+ */
 export class FreshnessEvaluator {
     constructor(
         private staleThresholdMs: number,

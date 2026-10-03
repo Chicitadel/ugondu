@@ -38,6 +38,11 @@ import { NetworkController } from './network';
 import { QuotaEnforcer } from './quotas';
 import { SandboxCleanup } from './cleanup';
 
+/**
+ * @class SandboxEngine
+ * @description Corporate Governed class implementation for SandboxEngine
+ * @classification ENTERPRISE
+ */
 export class SandboxEngine {
     constructor(
         private readonly adapter: SandboxAdapter,

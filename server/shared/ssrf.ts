@@ -178,7 +178,7 @@ export class NetworkDestinationPolicy {
 
 export function validateDestination(targetUrl: string): boolean {
     if (!NetworkDestinationPolicy.isAllowed(targetUrl)) {
-        throw new Error('SSRF_DESTINATION_PROHIBITED');
+        throw new Error(__t('messages.error.ssrf_destination_prohibited'));
     }
     return true;
 }

@@ -42,6 +42,11 @@ export enum ObservationStatus {
   UNKNOWN = 'UNKNOWN',
 }
 
+/**
+ * @interface Fact
+ * @description Corporate Governed interface implementation for Fact
+ * @classification ENTERPRISE
+ */
 export interface Fact {
   id: string;
   key: string;
@@ -52,6 +57,11 @@ export interface Fact {
   metadata?: Record<string, string>;
 }
 
+/**
+ * @interface ObservationEvent
+ * @description Corporate Governed interface implementation for ObservationEvent
+ * @classification ENTERPRISE
+ */
 export interface ObservationEvent {
   eventId: string;
   timestamp: Date;

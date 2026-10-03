@@ -31,35 +31,53 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @interface SshTargetIdentity
+ * @description Corporate Governed interface implementation for SshTargetIdentity
+ * @classification ENTERPRISE
+ */
 export interface SshTargetIdentity {
   host: string;
   expectedFingerprint: string;
 }
 
+/**
+ * @interface CloudTargetIdentity
+ * @description Corporate Governed interface implementation for CloudTargetIdentity
+ * @classification ENTERPRISE
+ */
 export interface CloudTargetIdentity {
   accountId: string;
   expectedProvider: string;
 }
 
+/**
+ * @class TargetIdentityValidator
+ * @description Corporate Governed class implementation for TargetIdentityValidator
+ * @classification ENTERPRISE
+ */
 export class TargetIdentityValidator {
   
   public validateSshIdentity(target: SshTargetIdentity, actualFingerprint: string): void {
     if (!actualFingerprint || actualFingerprint.trim() === '') {
-      throw new Error('Identity Validation Failed: Empty fingerprint returned from target.');
+      throw new Error(__t('messages.error.identity_validation_failed_empty_fingerprint_'));
     }
 
     if (target.expectedFingerprint !== actualFingerprint) {
-      throw new Error(`Identity Validation Failed: Host ${target.host} fingerprint mismatch. Expected ${target.expectedFingerprint}, got ${actualFingerprint}.`);
+      throw new Error(__t('messages.error.identity_validation_failed_host_fingerprint_m', { 'target_host': target.host, 'target_expectedFingerprint': target.expectedFingerprint, 'actualFingerprint': actualFingerprint }));
     }
   }
 
   public validateCloudIdentity(target: CloudTargetIdentity, actualAccountId: string, actualProvider: string): void {
     if (target.accountId !== actualAccountId) {
-      throw new Error(`Identity Validation Failed: Cloud account mismatch. Expected ${target.accountId}, got ${actualAccountId}.`);
+      throw new Error(__t('messages.error.identity_validation_failed_cloud_account_mism', { 'target_accountId': target.accountId, 'actualAccountId': actualAccountId }));
     }
 
     if (target.expectedProvider !== actualProvider) {
-      throw new Error(`Identity Validation Failed: Cloud provider mismatch. Expected ${target.expectedProvider}, got ${actualProvider}.`);
+      throw new Error(__t('messages.error.identity_validation_failed_cloud_provider_mis', { 'target_expectedProvider': target.expectedProvider, 'actualProvider': actualProvider }));
     }
   }
 }

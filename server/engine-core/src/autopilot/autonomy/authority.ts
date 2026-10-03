@@ -2,44 +2,70 @@
  * Project        : Air Roofers Platform
  * Module         : Autopilot / Autonomy
  * File           : authority.ts
- * Version        : 1.0.0
- * Author         : Core Architecture Team
- * Organization   : Air Roofers
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-03
  * Classification : ENTERPRISE
- *
- * Governance:
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- *
- * Copyright (c) 2026 Air Roofers
- * All Rights Reserved.
+ * Governance: Corporate Governed / Security Reviewed / Protocol Frozen
+ * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
 import { AutonomyLevel } from './levels';
 
+export interface DelegationRecord {
+    entityId: string;
+    level: AutonomyLevel;
+    grantedAt: number;
+    expiresAt: number;
+}
+
+/**
+ * @class AuthorityManager
+ * @description Manages autonomous authority delegation, revocation, and validation.
+ * @classification ENTERPRISE
+ */
 export class AuthorityManager {
+    private readonly delegations: Map<string, DelegationRecord> = new Map();
+
     public delegateAuthority(entityId: string, level: AutonomyLevel, durationSecs: number): void {
-        // Delegates operational authority to an agent entity for a specified timeframe
+        const now = Date.now();
+        const expiresAt = now + Math.max(1, durationSecs) * 1000;
+        this.delegations.set(entityId, {
+            entityId,
+            level,
+            grantedAt: now,
+            expiresAt
+        });
     }
 
     public revokeAuthority(entityId: string): void {
-        // Immediately strips operational authority from an entity
+        this.delegations.delete(entityId);
     }
 
     public checkAuthority(entityId: string): AutonomyLevel {
-        // Returns the current active autonomy level for the entity
-        return AutonomyLevel.L0_MANUAL;
+        const record = this.delegations.get(entityId);
+        if (!record) {
+            return AutonomyLevel.L0_MANUAL;
+        }
+        if (Date.now() > record.expiresAt) {
+            this.delegations.delete(entityId);
+            return AutonomyLevel.L0_MANUAL;
+        }
+        return record.level;
+    }
+
+    public listActiveDelegations(): DelegationRecord[] {
+        const now = Date.now();
+        const active: DelegationRecord[] = [];
+        for (const [id, record] of this.delegations.entries()) {
+            if (now <= record.expiresAt) {
+                active.push(record);
+            } else {
+                this.delegations.delete(id);
+            }
+        }
+        return active;
     }
 }

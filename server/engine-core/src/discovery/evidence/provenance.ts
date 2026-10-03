@@ -38,6 +38,11 @@ export interface ProvenanceRecord {
   metadata: Record<string, any>;
 }
 
+/**
+ * @class ProvenanceTracker
+ * @description Corporate Governed class implementation for ProvenanceTracker
+ * @classification ENTERPRISE
+ */
 export class ProvenanceTracker {
   private records: Map<string, ProvenanceRecord> = new Map();
 

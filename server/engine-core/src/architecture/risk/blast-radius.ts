@@ -37,6 +37,11 @@ export interface BlastRadiusContext {
     downtimeEstimateSeconds: number;
 }
 
+/**
+ * @class BlastRadiusCalculator
+ * @description Corporate Governed class implementation for BlastRadiusCalculator
+ * @classification ENTERPRISE
+ */
 export class BlastRadiusCalculator {
     public calculate(componentId: string): BlastRadiusContext {
         return {

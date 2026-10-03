@@ -33,6 +33,11 @@
 
 import { ConflictHandler } from './conflict';
 
+/**
+ * @class Resolver
+ * @description Corporate Governed class implementation for Resolver
+ * @classification ENTERPRISE
+ */
 export class Resolver {
   private readonly conflictHandler = new ConflictHandler();
 
@@ -66,6 +71,9 @@ export class Resolver {
   }
 
   private evaluateRules(context: unknown, resource: unknown): string[] {
-    return [];
+    if (context && typeof context === 'object' && Array.isArray((context as any).rules)) {
+      return (context as any).rules.map((r: any) => r.effect || 'DENY');
+    }
+    return ['ALLOW'];
   }
 }

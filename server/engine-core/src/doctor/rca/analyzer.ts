@@ -36,6 +36,11 @@
 import { IncidentRecord } from '../model/incident';
 import { RcaResult, ConfidenceLevel } from '../model/rca_result';
 
+/**
+ * @class RcaAnalyzer
+ * @description Corporate Governed class implementation for RcaAnalyzer
+ * @classification ENTERPRISE
+ */
 export class RcaAnalyzer {
   analyze(incident: IncidentRecord): RcaResult {
     const evidenceKinds = [...new Set(incident.evidence.map(e => e.kind))];
@@ -53,4 +58,51 @@ export class RcaAnalyzer {
       analysedAt: new Date(),
     };
   }
+}
+
+import { isAuthorizationError } from './auth-error-codes';
+import { IncidentClass, IncidentSeverity } from '../model/incident';
+import type { AuthorizationFailureIncident } from '../model/authorization-failure';
+import { randomUUID } from 'crypto';
+
+/**
+ * Classify an incident based on evidence provider error codes.
+ * AUTHORIZATION_FAILURE is a first-class classification — never falls through
+ * to UNKNOWN when an auth error code is present.
+ */
+export function classifyIncidentFromEvidence(
+  evidence: Array<{ providerErrorCode?: string; provider?: string; message?: string }>,
+  targetId: string,
+  operationId: string,
+  executionId: string,
+  passportId: string
+): { incidentClass: IncidentClass; uppieContext?: AuthorizationFailureIncident } {
+  // Check for authorization failure first (highest specificity)
+  for (const ev of evidence) {
+    const code = ev.providerErrorCode ?? ev.message ?? '';
+    if (isAuthorizationError(code, ev.provider)) {
+      const uppieContext: AuthorizationFailureIncident = {
+        incidentId:            randomUUID(),
+        incidentClass:         IncidentClass.AUTHORIZATION_FAILURE,
+        detectedAt:            new Date().toISOString(),
+        severity:              IncidentSeverity.HIGH,
+        actor:                 '',   // populated by caller from execution context
+        target:                targetId,
+        operation:             '',   // populated by caller
+        provider:              ev.provider ?? 'UNKNOWN',
+        providerErrorCode:     code,
+        requiredCapability:    [],   // populated by UPPIE effective authority calculator
+        presentAuthority:      [],
+        missingAuthority:      [],
+        assignmentPath:        '',
+        recommendedResolution: [],
+        estimatedFixTime:      '< 5 minutes',
+        relatedOperationId:    operationId,
+        relatedExecutionId:    executionId,
+        passportId,
+      };
+      return { incidentClass: IncidentClass.AUTHORIZATION_FAILURE, uppieContext };
+    }
+  }
+  return { incidentClass: IncidentClass.UNKNOWN };
 }

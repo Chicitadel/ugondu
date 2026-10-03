@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 
 import { FailureClass } from './failure';
 
+/**
+ * @interface FailureSignature
+ * @description Corporate Governed interface implementation for FailureSignature
+ * @classification ENTERPRISE
+ */
 export interface FailureSignature {
   failureClass: FailureClass;
   messagePatterns: string[];

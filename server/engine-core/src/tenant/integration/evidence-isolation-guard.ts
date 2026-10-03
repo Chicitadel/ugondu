@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,11 +32,19 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class EvidenceIsolationGuard
+ * @description Corporate Governed class implementation for EvidenceIsolationGuard
+ * @classification ENTERPRISE
+ */
 export class EvidenceIsolationGuard {
     public secureEvidence(tenantContextGuard: any): void {
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error('Evidence isolation breach. Authority must be derived from TenantContextGuard, not caller-supplied.');
+            throw new Error(__t('messages.error.evidence_isolation_breach_authority_must_be_d'));
         }
     }
 }

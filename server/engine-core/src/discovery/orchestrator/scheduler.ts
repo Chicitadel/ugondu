@@ -33,7 +33,13 @@
 
 import { ConcurrencyThrottler } from './limits';
 import { CancellationToken } from './cancellation';
+import { Logger } from '@ugondu/shared';
 
+/**
+ * @interface DiscoveryTask
+ * @description Corporate Governed interface implementation for DiscoveryTask
+ * @classification ENTERPRISE
+ */
 export interface DiscoveryTask {
     executionId: string;
     providerId: string;
@@ -41,6 +47,11 @@ export interface DiscoveryTask {
     execute: (token: CancellationToken) => Promise<void>;
 }
 
+/**
+ * @class DiscoveryScheduler
+ * @description Corporate Governed class implementation for DiscoveryScheduler
+ * @classification ENTERPRISE
+ */
 export class DiscoveryScheduler {
     private queue: DiscoveryTask[] = [];
     private running: boolean = false;
@@ -71,7 +82,7 @@ export class DiscoveryScheduler {
                 this.throttler.acquire(task.providerId, task.targetId);
 
                 // Start execution without awaiting, to process more items
-                this.executeTask(task).catch(console.error);
+                this.executeTask(task).catch(e => Logger.error(e));
             }
         } finally {
             this.running = false;

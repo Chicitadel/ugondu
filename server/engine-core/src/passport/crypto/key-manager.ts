@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,11 +35,21 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
+/**
+ * @interface KeyProvider
+ * @description Corporate Governed interface implementation for KeyProvider
+ * @classification ENTERPRISE
+ */
 export interface KeyProvider {
     getPrivateKey(keyId: string): Promise<crypto.KeyObject | string>;
     getPublicKey(keyId: string): Promise<crypto.KeyObject | string>;
 }
 
+/**
+ * @class LocalKeyProvider
+ * @description Corporate Governed class implementation for LocalKeyProvider
+ * @classification ENTERPRISE
+ */
 export class LocalKeyProvider implements KeyProvider {
     constructor(private keyDir: string) {}
 
@@ -54,6 +64,11 @@ export class LocalKeyProvider implements KeyProvider {
     }
 }
 
+/**
+ * @class KeyManager
+ * @description Corporate Governed class implementation for KeyManager
+ * @classification ENTERPRISE
+ */
 export class KeyManager {
     constructor(private provider: KeyProvider) {}
 

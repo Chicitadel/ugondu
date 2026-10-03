@@ -51,6 +51,12 @@ jobs:
       - name: Build TypeScript — ${{ matrix.service }}
         working-directory: server/${{ matrix.service }}
         run: npm run build
+      - name: Type Check (All Workspaces)
+        run: npm exec --workspaces -- tsc --noEmit --skipLibCheck
+
+      - name: Run Tests (All Workspaces)
+        run: npm run test --workspaces --if-present
+
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4

@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -38,12 +38,22 @@ export interface Role {
   readonly permissions: ReadonlyArray<string>;
 }
 
+/**
+ * @interface RoleBinding
+ * @description Corporate Governed interface implementation for RoleBinding
+ * @classification ENTERPRISE
+ */
 export interface RoleBinding {
   readonly subjectId: string;
   readonly roleId: string;
   readonly tenantId: string;
 }
 
+/**
+ * @class RBACManager
+ * @description Corporate Governed class implementation for RBACManager
+ * @classification ENTERPRISE
+ */
 export class RBACManager {
   private roles: Map<string, Role> = new Map();
   private bindings: Map<string, RoleBinding[]> = new Map();

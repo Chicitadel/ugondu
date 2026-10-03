@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface KubernetesTargetConfig
+ * @description Corporate Governed interface implementation for KubernetesTargetConfig
+ * @classification ENTERPRISE
+ */
 export interface KubernetesTargetConfig {
     targetId: string;
     clusterEndpoint: string;
@@ -26,12 +31,22 @@ export interface KubernetesTargetConfig {
     enableRollingUpdate: boolean;
 }
 
+/**
+ * @interface KubernetesManifestBundle
+ * @description Corporate Governed interface implementation for KubernetesManifestBundle
+ * @classification ENTERPRISE
+ */
 export interface KubernetesManifestBundle {
     deployment: Record<string, any>;
     service: Record<string, any>;
     helmValues: Record<string, any>;
 }
 
+/**
+ * @class KubernetesTargetAdapter
+ * @description Corporate Governed class implementation for KubernetesTargetAdapter
+ * @classification ENTERPRISE
+ */
 export class KubernetesTargetAdapter {
     private config: KubernetesTargetConfig;
 

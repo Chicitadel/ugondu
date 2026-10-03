@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,11 +32,19 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { TwinEvent, EnvironmentTwinState } from '../projection/projector';
 import { TwinResource } from '../model/twin-resource';
 import { ResourceState } from '../model/resource-state';
 import { TwinStateMachine } from '../state-machine/state-machine';
 
+/**
+ * @class TwinBuilder
+ * @description Corporate Governed class implementation for TwinBuilder
+ * @classification ENTERPRISE
+ */
 export class TwinBuilder {
     private stateMachine = new TwinStateMachine();
     private resources: TwinResource[] = [];
@@ -97,7 +105,7 @@ export class TwinBuilder {
                 }
                 break;
             default:
-            throw new Error(`Unknown event type: ${event.eventType}`);
+            throw new Error(__t('messages.error.unknown_event_type', { 'event_eventType': event.eventType }));
         }
     }
 }

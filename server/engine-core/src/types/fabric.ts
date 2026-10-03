@@ -39,6 +39,11 @@ export interface ProvisioningTask {
   config: Record<string, unknown>;
 }
 
+/**
+ * @interface ProvisioningResult
+ * @description Corporate Governed interface implementation for ProvisioningResult
+ * @classification ENTERPRISE
+ */
 export interface ProvisioningResult {
   contextId: string;
   targetId: string;

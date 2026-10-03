@@ -1,3 +1,5 @@
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : engine-core
@@ -10,7 +12,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -44,9 +46,14 @@ export enum ResourceState {
   RECOVERING   = 'RECOVERING',
 }
 
+/**
+ * @class InvalidTransitionError
+ * @description Corporate Governed class implementation for InvalidTransitionError
+ * @classification ENTERPRISE
+ */
 export class InvalidTransitionError extends Error {
   constructor(from: ResourceState, to: ResourceState) {
-    super(`Invalid state transition: ${from} -> ${to}`);
+    super(__t('messages.error.invalid_state_transition', { from, to }));
     this.name = 'InvalidTransitionError';
   }
 }

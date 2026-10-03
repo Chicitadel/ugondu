@@ -34,6 +34,11 @@
 import { MigrationCertificate } from '../model/migration-certificate';
 import { MigrationBlocker } from '../model/migration-blocker';
 
+/**
+ * @class EvidenceCollector
+ * @description Corporate Governed class implementation for EvidenceCollector
+ * @classification ENTERPRISE
+ */
 export class EvidenceCollector {
   private certificates: Map<string, MigrationCertificate> = new Map();
   private blockers: Map<string, MigrationBlocker[]> = new Map();

@@ -31,8 +31,16 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import { DiscoveryScope } from '../model/scope';
 
+/**
+ * @class ScopeEnforcer
+ * @description Corporate Governed class implementation for ScopeEnforcer
+ * @classification ENTERPRISE
+ */
 export class ScopeEnforcer {
   private readonly MAX_CONCURRENCY_HARD_LIMIT = 50;
   private readonly MAX_TIMEOUT_MS_HARD_LIMIT = 300000; // 5 minutes
@@ -42,15 +50,15 @@ export class ScopeEnforcer {
    */
   public enforce(scope: DiscoveryScope): void {
     if (scope.maxConcurrency > this.MAX_CONCURRENCY_HARD_LIMIT) {
-      throw new Error(`Scope Violation: Requested concurrency ${scope.maxConcurrency} exceeds hard limit of ${this.MAX_CONCURRENCY_HARD_LIMIT}`);
+      throw new Error(__t('messages.error.scope_violation_requested_concurrency_exceeds', { 'scope_maxConcurrency': scope.maxConcurrency, 'this_MAX_CONCURRENCY_HARD_LIMIT': this.MAX_CONCURRENCY_HARD_LIMIT }));
     }
 
     if (scope.timeoutMs > this.MAX_TIMEOUT_MS_HARD_LIMIT) {
-      throw new Error(`Scope Violation: Requested timeout ${scope.timeoutMs}ms exceeds hard limit of ${this.MAX_TIMEOUT_MS_HARD_LIMIT}ms`);
+      throw new Error(__t('messages.error.scope_violation_requested_timeout_ms_exceeds_', { 'scope_timeoutMs': scope.timeoutMs, 'this_MAX_TIMEOUT_MS_HARD_LIMIT': this.MAX_TIMEOUT_MS_HARD_LIMIT }));
     }
 
     if (!scope.targets || scope.targets.length === 0) {
-      throw new Error('Scope Violation: Discovery scope must specify at least one target');
+      throw new Error(__t('messages.error.scope_violation_discovery_scope_must_specify_'));
     }
 
     // Additional checks on depth and exclusion patterns can be added here

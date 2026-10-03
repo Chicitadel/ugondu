@@ -38,12 +38,22 @@ export enum RiskLevel {
     CRITICAL = 'CRITICAL'
 }
 
+/**
+ * @interface RiskVector
+ * @description Corporate Governed interface implementation for RiskVector
+ * @classification ENTERPRISE
+ */
 export interface RiskVector {
     level: RiskLevel;
     score: number;
     mitigationStrategy?: string;
 }
 
+/**
+ * @interface MultiDimensionalRisk
+ * @description Corporate Governed interface implementation for MultiDimensionalRisk
+ * @classification ENTERPRISE
+ */
 export interface MultiDimensionalRisk {
     security: RiskVector;
     availability: RiskVector;
@@ -51,6 +61,11 @@ export interface MultiDimensionalRisk {
     overall: RiskLevel;
 }
 
+/**
+ * @class RiskAnalyzer
+ * @description Corporate Governed class implementation for RiskAnalyzer
+ * @classification ENTERPRISE
+ */
 export class RiskAnalyzer {
     public analyze(context: any): MultiDimensionalRisk {
         return {

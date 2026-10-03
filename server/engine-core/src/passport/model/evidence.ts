@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -39,6 +39,11 @@ export enum EvidenceType {
     COMPLIANCE_CHECK = 'COMPLIANCE_CHECK'
 }
 
+/**
+ * @interface Evidence
+ * @description Corporate Governed interface implementation for Evidence
+ * @classification ENTERPRISE
+ */
 export interface Evidence {
     id: string;
     type: EvidenceType;

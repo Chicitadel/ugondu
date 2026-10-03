@@ -36,6 +36,11 @@
 import { EvidenceItem } from '../evidence/collector';
 import { EvidenceGraph, EvidenceEdge } from '../model/evidence_graph';
 
+/**
+ * @class EvidenceGraphBuilder
+ * @description Corporate Governed class implementation for EvidenceGraphBuilder
+ * @classification ENTERPRISE
+ */
 export class EvidenceGraphBuilder {
   build(evidence: EvidenceItem[]): EvidenceGraph {
     const edges: EvidenceEdge[] = [];

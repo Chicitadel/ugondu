@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,13 +32,21 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class TenantSuspender
+ * @description Corporate Governed class implementation for TenantSuspender
+ * @classification ENTERPRISE
+ */
 export class TenantSuspender {
     public suspend(tenantId: string, reason: string): void {
         if (!tenantId) {
-            throw new Error('Tenant ID required for suspension.');
+            throw new Error(__t('messages.error.tenant_id_required_for_suspension'));
         }
         if (!reason) {
-            throw new Error('Suspension reason must be recorded for audit logs.');
+            throw new Error(__t('messages.error.suspension_reason_must_be_recorded_for_audit_'));
         }
         // Disable incoming requests, revoke active sessions
     }

@@ -31,6 +31,9 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 export enum TransitionState {
     PENDING = 'PENDING',
     IN_PROGRESS = 'IN_PROGRESS',
@@ -38,6 +41,11 @@ export enum TransitionState {
     FAILED = 'FAILED'
 }
 
+/**
+ * @class TransitionStateMachine
+ * @description Corporate Governed class implementation for TransitionStateMachine
+ * @classification ENTERPRISE
+ */
 export class TransitionStateMachine {
     private currentState: TransitionState = TransitionState.PENDING;
     private stateHistory: { state: TransitionState; timestamp: Date }[] = [];
@@ -52,7 +60,7 @@ export class TransitionStateMachine {
 
     public async executeTransition(task: () => Promise<void>): Promise<void> {
         if (this.currentState !== TransitionState.PENDING) {
-            throw new Error(`Cannot execute transition from state ${this.currentState}`);
+            throw new Error(__t('messages.error.cannot_execute_transition_from_state', { 'this_currentState': this.currentState }));
         }
 
         this.transitionTo(TransitionState.IN_PROGRESS);

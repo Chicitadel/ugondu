@@ -33,6 +33,11 @@
 
 import { RecoveryContract } from './contract';
 
+/**
+ * @class RecoveryManager
+ * @description Corporate Governed class implementation for RecoveryManager
+ * @classification ENTERPRISE
+ */
 export class RecoveryManager {
     public generateRecoveryContract(context: any): RecoveryContract {
         return {

@@ -32,10 +32,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 // Implementation for integrity.rs
 import { createHash } from 'crypto';
 import { EvidenceItem } from './collector';
 
+/**
+ * @class EvidenceIntegrityChecker
+ * @description Corporate Governed class implementation for EvidenceIntegrityChecker
+ * @classification ENTERPRISE
+ */
 export class EvidenceIntegrityChecker {
   verify(item: EvidenceItem): boolean {
     const payloadStr = JSON.stringify(item.payload, Object.keys(item.payload).sort());
@@ -45,7 +53,7 @@ export class EvidenceIntegrityChecker {
 
   assertIntegrity(item: EvidenceItem): void {
     if (!this.verify(item)) {
-      throw new Error(`Evidence integrity check failed for item '${item.id}'`);
+      throw new Error(__t('messages.error.evidence_integrity_check_failed_for_item', { 'item_id': item.id }));
     }
   }
 }

@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,8 +31,16 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
 import { EvidenceChain } from '../evidence/chain';
 
+/**
+ * @interface PolicyEvaluation
+ * @description Corporate Governed interface implementation for PolicyEvaluation
+ * @classification ENTERPRISE
+ */
 export interface PolicyEvaluation {
     policyId: string;
     decision: 'ALLOW' | 'DENY';
@@ -40,10 +48,15 @@ export interface PolicyEvaluation {
     evaluatedAt: number;
 }
 
+/**
+ * @class PolicyBinder
+ * @description Corporate Governed class implementation for PolicyBinder
+ * @classification ENTERPRISE
+ */
 export class PolicyBinder {
     public bindPolicyEvaluation(chain: EvidenceChain, evaluation: PolicyEvaluation): void {
         if (evaluation.decision !== 'ALLOW') {
-            throw new Error(`Cannot bind denying policy evaluation: ${evaluation.policyId} - ${evaluation.reason}`);
+            throw new Error(__t('messages.error.cannot_bind_denying_policy_evaluation', { 'evaluation_policyId': evaluation.policyId, 'evaluation_reason': evaluation.reason }));
         }
         chain.append(`policy-${evaluation.policyId}`, 'POLICY_BINDING', evaluation);
     }

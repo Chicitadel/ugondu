@@ -31,6 +31,25 @@ jobs:
 
       - name: Build all workspaces
         run: npm run build
+        
+      - name: Run I18N String Audit
+        run: node scripts/i18n_audit.js
+
+      - name: Run Stub / Placeholder Scan
+        run: node scripts/stub_scan.js
+
+      - name: Run Architecture Depth Scan
+        run: node scripts/depth_scan.js
+
+      - name: Run Import Scan
+        run: node scripts/import_scan.js
+
+      - name: Type Check
+        run: npm exec --workspaces -- tsc --noEmit --skipLibCheck
+
+      - name: Run Workspace Tests
+        run: npm run test --workspaces --if-present
+
 
       - name: Verify release integrity
         run: npm run verify:release-integrity

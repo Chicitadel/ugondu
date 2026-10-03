@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -40,17 +40,32 @@ export interface ResourceDefinition {
   config: Record<string, unknown>;
 }
 
+/**
+ * @interface CostModel
+ * @description Corporate Governed interface implementation for CostModel
+ * @classification ENTERPRISE
+ */
 export interface CostModel {
   monthlyEstimate: number;   // USD
   currency: 'USD';
   breakdown: Record<string, number>; // e.g. { compute: 20, database: 15 }
 }
 
+/**
+ * @interface RiskProfile
+ * @description Corporate Governed interface implementation for RiskProfile
+ * @classification ENTERPRISE
+ */
 export interface RiskProfile {
   score: number;            // 0-100, lower is safer
   factors: string[];        // human-readable risk factors
 }
 
+/**
+ * @interface ArchitectureCandidate
+ * @description Corporate Governed interface implementation for ArchitectureCandidate
+ * @classification ENTERPRISE
+ */
 export interface ArchitectureCandidate {
   id: string;
   name: string;

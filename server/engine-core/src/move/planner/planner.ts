@@ -36,6 +36,11 @@ import { GraphBuilder } from './graph-builder';
 import { DependencyOrder } from './dependency-order';
 import { StrategySelector, MigrationStrategy } from './strategy-selector';
 
+/**
+ * @interface MigrationTask
+ * @description Corporate Governed interface implementation for MigrationTask
+ * @classification ENTERPRISE
+ */
 export interface MigrationTask {
     id: string;
     resourceType: string;
@@ -43,6 +48,11 @@ export interface MigrationTask {
     dependencies: string[];
 }
 
+/**
+ * @class MigrationPlanner
+ * @description Corporate Governed class implementation for MigrationPlanner
+ * @classification ENTERPRISE
+ */
 export class MigrationPlanner {
     private graphBuilder = new GraphBuilder();
     private strategySelector = new StrategySelector();

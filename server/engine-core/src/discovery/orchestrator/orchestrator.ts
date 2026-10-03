@@ -31,9 +31,18 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
+
 import { DiscoveryScheduler, DiscoveryTask } from './scheduler';
 import { TimeoutManager, CancellationToken } from './cancellation';
 
+/**
+ * @interface DiscoveryContext
+ * @description Corporate Governed interface implementation for DiscoveryContext
+ * @classification ENTERPRISE
+ */
 export interface DiscoveryContext {
     journalExecutionId: string;
     providerId: string;
@@ -41,12 +50,22 @@ export interface DiscoveryContext {
     timeoutMs?: number;
 }
 
+/**
+ * @interface DiscoveryResult
+ * @description Corporate Governed interface implementation for DiscoveryResult
+ * @classification ENTERPRISE
+ */
 export interface DiscoveryResult {
     executionId: string;
     status: 'SUCCESS' | 'FAILED' | 'CANCELLED';
     error?: Error;
 }
 
+/**
+ * @class DiscoveryOrchestrator
+ * @description Corporate Governed class implementation for DiscoveryOrchestrator
+ * @classification ENTERPRISE
+ */
 export class DiscoveryOrchestrator {
     constructor(private readonly scheduler: DiscoveryScheduler) {}
 
@@ -84,6 +103,6 @@ export class DiscoveryOrchestrator {
     public resumeFromJournal(journalExecutionId: string): void {
         // Logic to resume discovery from URRE journal execution ID
         // This ensures resilient discovery loop execution after a restart
-        console.info(`Resuming discovery for journal execution ID: ${journalExecutionId}`);
+        Logger.info(__t('messages.system.resuming_discovery_for_journal_execution_id', { 'journalExecutionId': journalExecutionId }));
     }
 }

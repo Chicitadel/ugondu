@@ -34,6 +34,11 @@
 
 import { IsolationHandle } from '../sandbox/isolation';
 
+/**
+ * @interface SandboxAdapter
+ * @description Corporate Governed interface implementation for SandboxAdapter
+ * @classification ENTERPRISE
+ */
 export interface SandboxAdapter {
     createSandbox(id: string): Promise<IsolationHandle>;
     destroySandbox(id: string): Promise<void>;

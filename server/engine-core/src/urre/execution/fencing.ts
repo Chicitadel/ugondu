@@ -32,6 +32,14 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class FencingManager
+ * @description Corporate Governed class implementation for FencingManager
+ * @classification ENTERPRISE
+ */
 export class FencingManager {
   private currentTokens: Map<string, number> = new Map();
 
@@ -46,7 +54,7 @@ export class FencingManager {
   public validateToken(resourceId: string, token: number): void {
     const currentToken = this.currentTokens.get(resourceId) || 0;
     if (token < currentToken) {
-      throw new Error(`Stale fencing token ${token} for resource ${resourceId}. Expected at least ${currentToken}`);
+      throw new Error(__t('messages.error.stale_fencing_token_for_resource_expected_at_', { 'token': token, 'resourceId': resourceId, 'currentToken': currentToken }));
     }
   }
 

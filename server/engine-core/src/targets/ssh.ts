@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface SshTargetConfig
+ * @description Corporate Governed interface implementation for SshTargetConfig
+ * @classification ENTERPRISE
+ */
 export interface SshTargetConfig {
     targetId: string;
     host: string;
@@ -23,6 +28,11 @@ export interface SshTargetConfig {
     expectedHostKeyFingerprint: string;
 }
 
+/**
+ * @interface SshDeploymentPlan
+ * @description Corporate Governed interface implementation for SshDeploymentPlan
+ * @classification ENTERPRISE
+ */
 export interface SshDeploymentPlan {
     strategy: 'atomic';
     releasesPath: string;
@@ -30,6 +40,11 @@ export interface SshDeploymentPlan {
     steps: Array<{ action: string; payload: Record<string, any> }>;
 }
 
+/**
+ * @class SshTargetAdapter
+ * @description Corporate Governed class implementation for SshTargetAdapter
+ * @classification ENTERPRISE
+ */
 export class SshTargetAdapter {
     private config: SshTargetConfig;
 

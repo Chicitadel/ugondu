@@ -42,6 +42,11 @@ export enum RecoveryAction {
   FORWARD_RECOVER = 'FORWARD_RECOVER'
 }
 
+/**
+ * @class RecoveryDecisionEngine
+ * @description Corporate Governed class implementation for RecoveryDecisionEngine
+ * @classification ENTERPRISE
+ */
 export class RecoveryDecisionEngine {
   public decideAction(classification: FailureClassification): RecoveryAction {
     switch (classification.severity) {

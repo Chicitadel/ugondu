@@ -34,6 +34,11 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 
+/**
+ * @class IntegrityManager
+ * @description Corporate Governed class implementation for IntegrityManager
+ * @classification ENTERPRISE
+ */
 export class IntegrityManager {
     public static generateHash(sequenceNumber: number, timestamp: number, operationType: string, payload: any, previousHash: string = ''): string {
         const data = `${sequenceNumber}:${timestamp}:${operationType}:${JSON.stringify(payload)}:${previousHash}`;

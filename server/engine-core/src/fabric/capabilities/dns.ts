@@ -36,5 +36,15 @@ export interface DnsCapability {
   createRecord(config: DnsRecordConfig): Promise<DnsResult>;
   deleteRecord(id: string): Promise<void>;
 }
+/**
+ * @interface DnsRecordConfig
+ * @description Corporate Governed interface implementation for DnsRecordConfig
+ * @classification ENTERPRISE
+ */
 export interface DnsRecordConfig { zoneId: string; name: string; type: 'A' | 'CNAME' | 'TXT'; value: string; ttl: number; }
+/**
+ * @interface DnsResult
+ * @description Corporate Governed interface implementation for DnsResult
+ * @classification ENTERPRISE
+ */
 export interface DnsResult { id: string; status: string; }

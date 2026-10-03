@@ -34,6 +34,11 @@
 
 export type MigrationStrategy = 'lift-and-shift' | 'replatform' | 'refactor';
 
+/**
+ * @class StrategySelector
+ * @description Corporate Governed class implementation for StrategySelector
+ * @classification ENTERPRISE
+ */
 export class StrategySelector {
     selectStrategy(resourceType: string, complexityScore: number): MigrationStrategy {
         if (complexityScore > 80) return 'refactor';

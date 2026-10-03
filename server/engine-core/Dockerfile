@@ -1,34 +1,39 @@
-# =============================================================================
-# Ugondu Engine Core — Governance Server Microservice
-# Air Roofers Ltd — Ujomor Systems Engineering Authority
-# Classification: COMMERCIAL | INTERNAL
-# =============================================================================
+# Stage 1: Build
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
+
+# Copy root configurations
 COPY package*.json ./
-RUN npm ci --frozen-lockfile
-COPY tsconfig.json ./
-COPY src ./src
+COPY tsconfig*.json ./
+
+# Copy all workspaces
+COPY server/ ./server/
+
+# Install all dependencies (including dev)
+RUN npm ci
+
+# Build the workspaces
 RUN npm run build
 
-# =============================================================================
-FROM node:20-alpine AS runtime
+# Stage 2: Production
+FROM node:20-alpine AS runner
 
-RUN addgroup -S ugondu && adduser -S ugondu -G ugondu
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN npm ci --only=production --frozen-lockfile && \
-    npm cache clean --force
+# Set production environment
+ENV NODE_ENV=production
 
-COPY --from=builder /app/dist ./dist
+# Switch to non-root user
+USER node
 
-USER ugondu
-ENV PORT=4001
-EXPOSE 4001
+# Copy necessary files from builder stage
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /usr/src/app/server ./server
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:4001/ || exit 1
+# Expose standard port
+EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+# Start engine core
+CMD ["npm", "run", "start:engine"]

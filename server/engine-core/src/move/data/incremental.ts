@@ -31,14 +31,23 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+import { Logger } from '@ugondu/shared';
 
+
+/**
+ * @class IncrementalSync
+ * @description Corporate Governed class implementation for IncrementalSync
+ * @classification ENTERPRISE
+ */
 export class IncrementalSync {
     async catchUp(sourceId: string, targetId: string): Promise<number> {
         const currentTime = Date.now();
         const lastSyncTime = currentTime - 5000;
         const bytesLag = 2048; // Calculate actual byte lag based on delta
         
-        console.log(`Incremental sync: ${bytesLag} bytes behind.`);
+        Logger.info(__t('messages.system.incremental_sync_bytes_behind', { 'bytesLag': bytesLag }));
         return bytesLag;
     }
 }

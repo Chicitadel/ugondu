@@ -11,7 +11,7 @@ import { __t } from '@ugondu/shared';
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -41,6 +41,11 @@ export interface TenantKeyContext {
     rotationStatus: 'active' | 'rotated' | 'revoked';
 }
 
+/**
+ * @class TenantKeyContextResolver
+ * @description Corporate Governed class implementation for TenantKeyContextResolver
+ * @classification ENTERPRISE
+ */
 export class TenantKeyContextResolver {
     public resolveKeyContext(tenantId: string): TenantKeyContext {
         if (!tenantId) {

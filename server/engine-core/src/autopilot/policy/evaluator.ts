@@ -29,6 +29,11 @@
 
 import { ApdlRule } from './apdl';
 
+/**
+ * @class PolicyEvaluator
+ * @description Corporate Governed class implementation for PolicyEvaluator
+ * @classification ENTERPRISE
+ */
 export class PolicyEvaluator {
     public evaluate(context: any, rules: ApdlRule[]): boolean {
         // Evaluate contextual conditions against defined APDL rules

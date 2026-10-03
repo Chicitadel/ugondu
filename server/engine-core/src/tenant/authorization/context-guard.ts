@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -36,6 +36,11 @@ import { SubjectContext } from '../identity/subject-context';
 import { Authority } from './authority';
 import { AuthorizationDecision, DecisionBuilder } from './decision';
 
+/**
+ * @class TenantContextGuard
+ * @description Corporate Governed class implementation for TenantContextGuard
+ * @classification ENTERPRISE
+ */
 export class TenantContextGuard {
   private authority: Authority;
 

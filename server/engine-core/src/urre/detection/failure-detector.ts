@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,12 +35,22 @@
 import { FailureClass } from '../model/failure';
 import { FAILURE_SIGNATURES } from '../model/failure-signature';
 
+/**
+ * @interface FailureContext
+ * @description Corporate Governed interface implementation for FailureContext
+ * @classification ENTERPRISE
+ */
 export interface FailureContext {
   errorMessage: string;
   signals: Record<string, boolean>;
   operation: string;
 }
 
+/**
+ * @class FailureDetector
+ * @description Corporate Governed class implementation for FailureDetector
+ * @classification ENTERPRISE
+ */
 export class FailureDetector {
   public classify(context: FailureContext): FailureClass {
     const errorLower = context.errorMessage.toLowerCase();

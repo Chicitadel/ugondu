@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,11 @@
 import { EvidenceChain } from '../evidence/chain';
 import { OperationType } from './applicability';
 
+/**
+ * @interface DeploymentIntent
+ * @description Corporate Governed interface implementation for DeploymentIntent
+ * @classification ENTERPRISE
+ */
 export interface DeploymentIntent {
     intentId: string;
     operation: OperationType;
@@ -41,6 +46,11 @@ export interface DeploymentIntent {
     targetVersion: string;
 }
 
+/**
+ * @class IntentBinder
+ * @description Corporate Governed class implementation for IntentBinder
+ * @classification ENTERPRISE
+ */
 export class IntentBinder {
     public bindIntent(chain: EvidenceChain, intent: DeploymentIntent): void {
         chain.append(`intent-${intent.intentId}`, 'INTENT_BINDING', intent);

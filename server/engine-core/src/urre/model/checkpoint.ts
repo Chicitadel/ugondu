@@ -15,6 +15,11 @@
 
 import { ActionSafetyContract } from './operation';
 
+/**
+ * @interface VerificationResult
+ * @description Corporate Governed interface implementation for VerificationResult
+ * @classification ENTERPRISE
+ */
 export interface VerificationResult {
   passed: boolean;
   checkName: string;
@@ -22,6 +27,11 @@ export interface VerificationResult {
   timestamp: number;
 }
 
+/**
+ * @interface TypedAction
+ * @description Corporate Governed interface implementation for TypedAction
+ * @classification ENTERPRISE
+ */
 export interface TypedAction {
   actionId: string;
   type: string;
@@ -29,6 +39,11 @@ export interface TypedAction {
   safetyContract: ActionSafetyContract;
 }
 
+/**
+ * @interface Checkpoint
+ * @description Corporate Governed interface implementation for Checkpoint
+ * @classification ENTERPRISE
+ */
 export interface Checkpoint {
   checkpointId: string;
   description: string;

@@ -29,6 +29,11 @@
 
 import { AdmissionController } from '../autonomy/admission-controller';
 
+/**
+ * @class AutonomousModeHandler
+ * @description Corporate Governed class implementation for AutonomousModeHandler
+ * @classification ENTERPRISE
+ */
 export class AutonomousModeHandler {
     private admissionController: AdmissionController;
 

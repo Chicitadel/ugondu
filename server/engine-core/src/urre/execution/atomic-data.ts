@@ -31,16 +31,29 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
 
+/**
+ * @interface MutationRequest
+ * @description Corporate Governed interface implementation for MutationRequest
+ * @classification ENTERPRISE
+ */
 export interface MutationRequest {
     sourcePath: string;
     targetPath: string;
     stagingDir: string;
 }
 
+/**
+ * @class AtomicDataTransaction
+ * @description Corporate Governed class implementation for AtomicDataTransaction
+ * @classification ENTERPRISE
+ */
 export class AtomicDataTransaction {
     /**
      * Generates a SHA-256 hash for the given file.
@@ -77,7 +90,7 @@ export class AtomicDataTransaction {
             const stagingStat = await fs.promises.stat(stagingPath);
             
             if (sourceStat.size !== stagingStat.size) {
-                throw new Error('Size verification failed during transfer.');
+                throw new Error(__t('messages.error.size_verification_failed_during_transfer'));
             }
 
             // 5. HASH VERIFY
@@ -85,7 +98,7 @@ export class AtomicDataTransaction {
             const stagingHash = await this.calculateHash(stagingPath);
 
             if (sourceHash !== stagingHash) {
-                throw new Error('Hash verification failed during transfer.');
+                throw new Error(__t('messages.error.hash_verification_failed_during_transfer'));
             }
 
             // 6. FSYNC
@@ -98,12 +111,12 @@ export class AtomicDataTransaction {
 
             // 8. POST-COMMIT VERIFY
             if (!fs.existsSync(targetPath)) {
-                throw new Error('Post-commit verification failed: Target file not found.');
+                throw new Error(__t('messages.error.post_commit_verification_failed_target_file_n'));
             }
             
             const targetHash = await this.calculateHash(targetPath);
             if (targetHash !== sourceHash) {
-                throw new Error('Post-commit verification failed: Hash mismatch.');
+                throw new Error(__t('messages.error.post_commit_verification_failed_hash_mismatch'));
             }
 
             return true;

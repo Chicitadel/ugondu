@@ -31,32 +31,45 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
 
 import { IsolationHandle } from './isolation';
 
+/**
+ * @interface ResourceUsage
+ * @description Corporate Governed interface implementation for ResourceUsage
+ * @classification ENTERPRISE
+ */
 export interface ResourceUsage {
     memoryBytes: number;
     cpuShares: number;
 }
 
+/**
+ * @class QuotaEnforcer
+ * @description Corporate Governed class implementation for QuotaEnforcer
+ * @classification ENTERPRISE
+ */
 export class QuotaEnforcer {
     private readonly MAX_MEMORY = 1024 * 1024 * 512; // 512MB
     private readonly MAX_CPU = 1000;
 
     public async applyLimits(handle: IsolationHandle): Promise<void> {
         if (!handle.cgroupPath) {
-            throw new Error('Cannot apply quotas without a valid cgroup path');
+            throw new Error(__t('messages.error.cannot_apply_quotas_without_a_valid_cgroup_pa'));
         }
         // System calls to set memory.limit_in_bytes and cpu.shares
     }
 
     public validateUsage(handle: IsolationHandle, currentUsage: ResourceUsage): void {
         if (currentUsage.memoryBytes > this.MAX_MEMORY) {
-            throw new Error(`Sandbox ${handle.sandboxId} exceeded memory quota: ${currentUsage.memoryBytes} bytes leaked`);
+            throw new Error(__t('messages.error.sandbox_exceeded_memory_quota_bytes_leaked', { 'handle_sandboxId': handle.sandboxId, 'currentUsage_memoryBytes': currentUsage.memoryBytes }));
         }
 
         if (currentUsage.cpuShares > this.MAX_CPU) {
-            throw new Error(`Sandbox ${handle.sandboxId} exceeded CPU quota: ${currentUsage.cpuShares} shares leaked`);
+            throw new Error(__t('messages.error.sandbox_exceeded_cpu_quota_shares_leaked', { 'handle_sandboxId': handle.sandboxId, 'currentUsage_cpuShares': currentUsage.cpuShares }));
         }
     }
 }

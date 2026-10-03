@@ -35,12 +35,22 @@
 // Implementation for correlator.rs
 import { IncidentRecord } from '../model/incident';
 
+/**
+ * @interface CorrelationGroup
+ * @description Corporate Governed interface implementation for CorrelationGroup
+ * @classification ENTERPRISE
+ */
 export interface CorrelationGroup {
   groupId: string;
   incidents: IncidentRecord[];
   correlationReason: string;
 }
 
+/**
+ * @class IncidentCorrelator
+ * @description Corporate Governed class implementation for IncidentCorrelator
+ * @classification ENTERPRISE
+ */
 export class IncidentCorrelator {
   correlate(incidents: IncidentRecord[]): CorrelationGroup[] {
     const groups = new Map<string, IncidentRecord[]>();

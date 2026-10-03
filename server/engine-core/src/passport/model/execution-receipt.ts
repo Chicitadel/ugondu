@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -38,6 +38,11 @@ export enum ExecutionOutcome {
     ABORTED = 'ABORTED'
 }
 
+/**
+ * @interface ExecutionReceipt
+ * @description Corporate Governed interface implementation for ExecutionReceipt
+ * @classification ENTERPRISE
+ */
 export interface ExecutionReceipt {
     receiptId: string;
     envelopeId: string;

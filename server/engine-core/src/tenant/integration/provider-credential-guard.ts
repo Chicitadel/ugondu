@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -32,11 +32,19 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from '../../../../shared/i18n';
+
+/**
+ * @class ProviderCredentialGuard
+ * @description Corporate Governed class implementation for ProviderCredentialGuard
+ * @classification ENTERPRISE
+ */
 export class ProviderCredentialGuard {
     public protectCredentials(tenantContextGuard: any): void {
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error('Credential access denied. Caller-supplied tenant authority is forbidden; it must come from TenantContextGuard.');
+            throw new Error(__t('messages.error.credential_access_denied_caller_supplied_tena'));
         }
     }
 }
