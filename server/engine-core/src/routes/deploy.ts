@@ -308,5 +308,75 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
     }
   });
 
+
+
+  router.post('/preview', async (req: Request, res: Response): Promise<void> => {
+    const {
+      repositoryUrl, branch, fileMap, targetEnvironment,
+      token, projectId, workspaceId, targetId, agentId, agentVersion,
+    } = req.body as Record<string, unknown>;
+
+    if (
+      !repositoryUrl || !branch || !targetEnvironment || !token ||
+      !projectId || !workspaceId || !targetId || !agentId || !agentVersion
+    ) {
+      res.status(400).json({ error: __t('invalid_ctx') });
+      return;
+    }
+
+    try {
+      const bgAuth = signServiceIdentity('engine-core', 'billing-gateway');
+      const authResponseStr = await hardenedPost(
+        `${billingGatewayUrl}/authorize`,
+        { token, repositoryUrl },
+        { headers: { Authorization: `Bearer ${bgAuth}` } },
+      ).catch(() => null);
+
+      const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
+      if (!authResponse?.data?.edition) {
+        res.status(402).json({ error: __t('blocked') });
+        return;
+      }
+
+      const { edition, capabilities } = authResponse.data as {
+        edition: string;
+        capabilities: Record<string, unknown>;
+      };
+
+      let strategy =
+        targetEnvironment === 'cpanel' || targetEnvironment === 'directadmin'
+          ? 'quota-sync'
+          : 'atomic';
+
+      if (!capabilities['allowAtomic'] && strategy === 'atomic') {
+        strategy = 'quota-sync';
+      }
+
+      // Simplified DAG prediction for the preview
+      const steps: Record<string, unknown>[] = [
+        { action: 'FETCH_REPOSITORY', payload: { url: repositoryUrl, branch } },
+        { action: 'SYNC_ENVIRONMENT', payload: { strategy } }
+      ];
+
+      if (capabilities['allowRollback']) {
+        steps.push({ action: 'PRUNE_RELEASES', payload: { retention: 3 } });
+      }
+
+      // We explicitly skip the cryptographic signing phase because this is a dry-run preview.
+      res.status(200).json({
+        isPreview: true,
+        transactionId: `dryrun_${randomBytes(12).toString('hex')}`,
+        targetId,
+        strategy,
+        steps,
+        edition,
+        message: "Dry-run execution plan compiled successfully. No mutations have been applied."
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ error: __t('internal_err', msg) });
+    }
+  });
+
   return router;
 }

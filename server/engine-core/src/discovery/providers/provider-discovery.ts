@@ -44,7 +44,7 @@ import { ICapabilityRegistry } from './capability-registry';
  */
 export interface IProviderAdapter {
   id: string;
-  discover(): Promise<any>;
+  discover(targetId: string): Promise<import('../model/observation').ObservationEvent>;
 }
 
 /**
@@ -64,11 +64,11 @@ export class ProviderDiscovery {
     this.adapters.set(adapter.id, adapter);
   }
 
-  public async runDiscovery(providerId: string): Promise<any> {
+  public async runDiscovery(providerId: string, targetId: string): Promise<import('../model/observation').ObservationEvent> {
     const adapter = this.adapters.get(providerId);
     if (!adapter) {
       throw new Error(__t('messages.error.provider_adapter_not_found', { 'providerId': providerId }));
     }
-    return adapter.discover();
+    return adapter.discover(targetId);
   }
 }

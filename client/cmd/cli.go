@@ -261,7 +261,7 @@ func ParseAndRun(args []string) {
 		i18n.SetLocaleWithSource(loc, src)
 	}
 
-	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help"}
+	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help", "auth"}
 
 	if len(cleanedArgs) < 1 {
 		fmt.Println(i18n.T("err_no_command"))
@@ -437,6 +437,20 @@ func ParseAndRun(args []string) {
 		fmt.Println(i18n.T("cli_title"))
 	case "help":
 		PrintHelp()
+	case "auth":
+		if len(cleanedArgs) < 2 {
+			fmt.Println("Usage: ugondu auth <login|status|logout>")
+			os.Exit(1)
+		}
+		subcmd := cleanedArgs[1]
+		if subcmd == "login" {
+			engine.Authenticate()
+		} else if subcmd == "status" {
+			engine.AuthStatus()
+		} else if subcmd == "logout" {
+			engine.Logout()
+		}
+
 	}
 }
 

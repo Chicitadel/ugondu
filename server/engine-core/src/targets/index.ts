@@ -17,3 +17,4 @@ export * from './ssh';
 export * from './docker';
 export * from './fabric';
 export * from './k8s';
+export * from './lifecycle';

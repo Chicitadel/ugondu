@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : UAIGOS
  * Module         : Engine Core - Discovery
- * File           : cpanel-adapter.ts
+ * File           : gcp-adapter.ts
  * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering Authority
  * Organization   : Air Roofers Ltd
@@ -23,7 +23,7 @@ import { ObservationEvent, ObservationStatus, Fact } from '../../model/observati
 import { Logger, __t } from '@ugondu/shared';
 import * as crypto from 'crypto';
 
-export interface CpanelAdapterCredentials {
+export interface GcpAdapterCredentials {
   // Strict typed credentials provided by runtime Twin mapping
   secretRef?: string;
   endpoint?: string;
@@ -31,39 +31,39 @@ export interface CpanelAdapterCredentials {
 }
 
 /**
- * @class CpanelAdapter
- * @description Native capability resolution engine for cpanel using dynamic SDK imports.
+ * @class GcpAdapter
+ * @description Native capability resolution engine for gcp using dynamic SDK imports.
  * @classification ENTERPRISE
  */
-export class CpanelAdapter implements IProviderAdapter {
-  public readonly id: string = 'cpanel';
+export class GcpAdapter implements IProviderAdapter {
+  public readonly id: string = 'gcp';
 
-  constructor(private readonly credentials: CpanelAdapterCredentials) {}
+  constructor(private readonly credentials: GcpAdapterCredentials) {}
 
   public async discover(targetId: string): Promise<ObservationEvent> {
     const startTime = Date.now();
     const facts: Fact[] = [];
     
     try {
-      // Dynamic import to prevent monolithic bloat when cpanel is not targeted
+      // Dynamic import to prevent monolithic bloat when gcp is not targeted
       let sdk: any;
       try {
         // @ts-ignore
-        sdk = await import('axios');
+        sdk = await import('@google-cloud/compute');
       } catch (err: any) {
         Logger.warn(__t('messages.discovery.sdk_missing', { provider: this.id, error: err.message }));
         return this.createEvent(targetId, ObservationStatus.NOT_SUPPORTED, [], startTime, [err.message]);
       }
 
       // Live capability probing
-      const client = new sdk.Axios({ region: this.credentials.region ?? 'us-east-1' });
+      const client = new sdk.InstancesClient({ region: this.credentials.region ?? 'us-east-1' });
       Logger.info(__t('messages.discovery.probing_provider', { provider: this.id, targetId }));
       
-      const response = await client.get(`${this.credentials.endpoint}/json-api/cpanel`, { headers: { Authorization: `whm ${this.credentials.secretRef}` } })();
+      const response = await client.aggregatedListAsync({ project: this.credentials.endpoint })();
       
       facts.push({
         id: crypto.randomUUID(),
-        key: 'cpanel.account.raw',
+        key: 'gcp.compute.instances.raw',
         value: response,
         confidenceScore: 1.0,
         observedAt: new Date(),

@@ -43,6 +43,7 @@ import { InMemoryProvisioningState, PlanRejectedError, ProvisioningError } from 
 import type { ArchitectureIR, EnginePolicy, ExecutionPlan, ExecutionPlanNode, IJournal, PlanRejection, ProvisionedRecord, ProvisioningReport, ProvisioningStateStore, RollbackFailure } from './engine/ProvisioningTypes';
 import type { ComputeConfig } from './capabilities/compute';
 
+import { ExecutionAuthorization, UpmExecutionGate } from '../upm/policy-gate';
 export * from './engine/ProvisioningTypes';
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
@@ -75,7 +76,9 @@ export class ProvisioningEngine {
     return { accepted: checked.rejections.length === 0, nodes, rejections: checked.rejections };
   }
 
-  public async executePlan(ir: ArchitectureIR): Promise<ProvisioningReport> {
+  public async executePlan(ir: ArchitectureIR, auth?: ExecutionAuthorization): Promise<ProvisioningReport> {
+    if (!auth) throw new Error(__t('messages.error.missing_execution_authorization'));
+    UpmExecutionGate.verifyAuthorization(auth, ir);
     const checked = preflight(ir, this.registry, this.policy);
     if (checked.rejections.length > 0) await this.reject(checked.rejections);
     const waves = provisioningWaves(ir);
