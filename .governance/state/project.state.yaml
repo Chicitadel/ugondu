@@ -105,3 +105,5 @@ frozen_decisions:
   - ADR-002: signed-recipe-enforcement
   - ADR-003: microservice-isolation
   - ADR-004: quota-sync-for-cpanel
+  - ADR-005: canonical-release-distribution
+  - ADR-006: intent-driven-execution-and-upm-gating
