@@ -1,14 +1,13 @@
 package engine
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
-    "os/exec"
-    "runtime"
 
 	"ugondu/client/i18n"
 )
@@ -35,52 +34,57 @@ func getAuthFilePath() (string, error) {
 }
 
 func Authenticate() {
-	fmt.Println(" Initializing Air Roofers Federated Authentication Handshake...")
-	
-	// Simulate an OAuth/OIDC browser flow targeting the Air Roofers centralized hosting endpoints.
-	authURL := "https://license.airroofers.eu/oauth/authorize?client_id=ugondu-cli&response_type=token"
-	fmt.Printf(" Please complete authentication in your browser:\n  %s\n\n", authURL)
-	
-	err := openBrowser(authURL)
-	if err != nil {
-		fmt.Printf("Failed to open browser: %v\n", err)
-	}
+	fmt.Println(i18n.T("auth_init"))
 
-	// Wait for callback (simulated here)
-	fmt.Println(" Waiting for cryptographic capability envelope (Mandatag)...")
-	time.Sleep(2 * time.Second)
+	done := make(chan bool)
 
-	// Simulated received capability envelope
-	envelope := CapabilityEnvelope{
-		Edition:        "ENTERPRISE",
-		AllowedActions: []string{"PROVISION_DATABASE", "PROVISION_COMPUTE", "PROVISION_NETWORK"},
-		TenantID:       "tenant_123456",
-		ExpiresAt:      time.Now().Add(24 * time.Hour).Unix(),
-		Signature:      "crypto_seal_9a8b7c6d5e",
-	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		token := r.URL.Query().Get("token")
+		envelopeStr := r.URL.Query().Get("envelope")
 
-	ctx := AuthContext{
-		AccessToken: "mock_jwt_token_42",
-		Envelope:    envelope,
-	}
+		if envelopeStr == "" {
+			http.Error(w, "missing envelope", http.StatusBadRequest)
+			return
+		}
 
-	path, _ := getAuthFilePath()
-	os.MkdirAll(filepath.Dir(path), 0700)
-	
-	data, _ := json.MarshalIndent(ctx, "", "  ")
-	os.WriteFile(path, data, 0600)
+		var envelope CapabilityEnvelope
+		if err := json.Unmarshal([]byte(envelopeStr), &envelope); err != nil {
+			http.Error(w, "invalid envelope format", http.StatusBadRequest)
+			return
+		}
 
-	fmt.Println(" Authentication successful!")
-	fmt.Printf(" Edition: %s\n", envelope.Edition)
-	fmt.Printf(" Tenant: %s\n", envelope.TenantID)
-	fmt.Println(" Entitlement (Mandatag) strictly bound to local context.")
+		ctx := AuthContext{
+			AccessToken: token,
+			Envelope:    envelope,
+		}
+
+		path, _ := getAuthFilePath()
+		os.MkdirAll(filepath.Dir(path), 0700)
+
+		data, _ := json.MarshalIndent(ctx, "", "  ")
+		os.WriteFile(path, data, 0600)
+
+		fmt.Fprintf(w, "Authentication successful. You may close this window.")
+		done <- true
+	})
+
+	server := &http.Server{Addr: "127.0.0.1:8989", Handler: mux}
+	go func() {
+		server.ListenAndServe()
+	}()
+
+	<-done
+	server.Shutdown(context.Background())
+
+	fmt.Println(i18n.T("auth_success"))
 }
 
 func AuthStatus() {
 	path, _ := getAuthFilePath()
 	data, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Println("Not logged in. Run 'ugondu auth login' to authenticate.")
+		fmt.Println(i18n.T("auth_not_logged_in"))
 		return
 	}
 
@@ -88,49 +92,29 @@ func AuthStatus() {
 	json.Unmarshal(data, &ctx)
 
 	if time.Now().Unix() > ctx.Envelope.ExpiresAt {
-		fmt.Println(" Authentication expired. Run 'ugondu auth login' again.")
+		fmt.Println(i18n.T("auth_expired"))
 		return
 	}
 
-	fmt.Printf(" Currently logged in.\n")
-	fmt.Printf("  Edition: %s\n", ctx.Envelope.Edition)
-	fmt.Printf("  Tenant:  %s\n", ctx.Envelope.TenantID)
-	fmt.Printf("  Expires: %s\n", time.Unix(ctx.Envelope.ExpiresAt, 0).Format(time.RFC3339))
+	fmt.Println(i18n.T("auth_currently_logged_in"))
 }
 
 func Logout() {
 	path, _ := getAuthFilePath()
 	os.Remove(path)
-	fmt.Println(" Logged out successfully. Local capability envelope purged.")
+	fmt.Println(i18n.T("auth_logout_success"))
 }
 
 func LoadAuthContext() (*AuthContext, error) {
 	path, _ := getAuthFilePath()
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("not authenticated. please run 'ugondu auth login'")
+		return nil, fmt.Errorf("not authenticated")
 	}
 	var ctx AuthContext
 	json.Unmarshal(data, &ctx)
 	if time.Now().Unix() > ctx.Envelope.ExpiresAt {
-		return nil, fmt.Errorf("authentication expired. please run 'ugondu auth login'")
+		return nil, fmt.Errorf("authentication expired")
 	}
 	return &ctx, nil
-}
-
-func openBrowser(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
 }

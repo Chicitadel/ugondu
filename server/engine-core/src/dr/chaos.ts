@@ -1,3 +1,4 @@
+import { Logger } from '../../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / DR
@@ -138,7 +139,7 @@ export class DisasterRecoveryEngine {
                         "await new Promise(r=>server.listen(port,'127.0.0.1',r));",
                         "await connect(); await new Promise(r=>server.close(r));",
                         "process.stdout.write(JSON.stringify({partitionObserved:rejected,recovered:true}));",
-                        "})().catch(e=>{console.error(e.message);process.exit(1);});"
+                        "})().catch(e=>{Logger.error(e.message);process.exit(1);});"
                     ].join('');
                     execFileSync(process.execPath, ['--input-type=module', '-e', script], { timeout: 5000, encoding: 'utf8' });
                     const recoveredAt = Date.now();
@@ -168,7 +169,7 @@ export class DisasterRecoveryEngine {
                         "await new Promise((resolve,reject)=>{replacement.on('exit',code=>code===0?resolve():reject(new Error('TARGET_RECOVERY_FAILED')));});",
                         "if(out!=='HEALTHY') throw new Error(__t('messages.error.target_healthcheck_failed'));",
                         "process.stdout.write(JSON.stringify({crashed:true,recovered:true}));",
-                        "})().catch(e=>{console.error(e.message);process.exit(1);});"
+                        "})().catch(e=>{Logger.error(e.message);process.exit(1);});"
                     ].join('');
                     execFileSync(process.execPath, ['--input-type=module', '-e', script], { timeout: 5000, encoding: 'utf8' });
                     const recoveredAt = Date.now();

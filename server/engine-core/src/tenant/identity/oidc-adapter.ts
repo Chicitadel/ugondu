@@ -41,23 +41,7 @@ import { SubjectContext, SubjectContextFactory } from './subject-context';
  */
 export class OIDCAdapter {
   public verifyIdToken(token: string): SubjectContext {
-    // Simulated token verification
-    const decoded = this.decodeToken(token);
-
-    return SubjectContextFactory.create(
-      decoded.sub,
-      decoded.tenant_id,
-      [],
-      { email: decoded.email, provider: 'oidc' },
-      true
-    );
-  }
-
-  private decodeToken(token: string): any {
-    return {
-      sub: 'oidc-user-id',
-      tenant_id: 'oidc-tenant',
-      email: 'user@example.com'
-    };
+    // @ts-ignore
+    throw new Error(__t('messages.error.not_implemented', { module: 'OIDC_ADAPTER' }));
   }
 }

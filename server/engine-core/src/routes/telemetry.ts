@@ -22,6 +22,6 @@ telemetryRouter.post('/report', (req: Request, res: Response) => {
     res.status(400).json({ error: __t('invalid_telemetry') });
     return;
   }
-  console.log(__t('telemetry_rec', transactionId, status));
+  Logger.info(__t('telemetry_rec', transactionId, status));
   res.status(201).json({ message: __t('telemetry_saved') });
 });

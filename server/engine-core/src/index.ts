@@ -1,3 +1,4 @@
+import { Logger } from '../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Engine Core — Server Entry Point
@@ -54,5 +55,5 @@ app.use('/v1/deploy',    passportGuardMiddleware, createDeployRouter(keyState, B
 // ─── Server ──────────────────────────────────────────────────────────────────
 const PORT = process.env['PORT'] ?? 4001;
 app.listen(PORT, () => {
-  console.log(__t('listening', 'Ugondu Engine Core', PORT));
+  Logger.info(__t('listening', 'Ugondu Engine Core', PORT));
 });

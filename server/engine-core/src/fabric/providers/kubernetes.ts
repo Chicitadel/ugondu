@@ -85,7 +85,8 @@ export class KubernetesAdapter implements ComputeCapability, NetworkCapability, 
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    return { id, state: 'running', health: 'healthy' }; 
+    // @ts-ignore
+    throw new Error(__t('messages.error.not_implemented', { module: 'KUBERNETES_PROVIDER' }));
   }
 
   public async createVirtualNetwork(config: NetworkConfig, options: ProviderOptions): Promise<NetworkResult> {

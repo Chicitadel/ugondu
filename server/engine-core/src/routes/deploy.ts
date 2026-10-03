@@ -1,3 +1,4 @@
+import { Logger } from '../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Engine Core — Deploy Route
@@ -80,7 +81,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
           : 'atomic';
 
       if (!capabilities['allowAtomic'] && strategy === 'atomic') {
-        console.log(__t('atomic_denied', edition));
+        Logger.info(__t('atomic_denied', edition));
         strategy = 'quota-sync';
       }
 
@@ -111,7 +112,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         }
       } catch (pluginFetchErr: unknown) {
         const msg = pluginFetchErr instanceof Error ? pluginFetchErr.message : String(pluginFetchErr);
-        console.error(__t('plugin_failed'), msg);
+        Logger.error(__t('plugin_failed'), msg);
         const reqBody = req.body as Record<string, unknown>;
         const pluginPolicies = reqBody['pluginPolicies'] as Record<string, unknown> | undefined;
         if (
@@ -171,11 +172,11 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
 
         if (injectedCount >= maxPlugins) {
           if (isRequired) {
-            console.error(__t('engine_plugin_limit_exceeded', pluginName, maxPlugins));
+            Logger.error(__t('engine_plugin_limit_exceeded', pluginName, maxPlugins));
             res.status(500).json({ error: __t('ui.responses.required_plugin_failed'), message: __t('required_plugin_failed', pluginName) });
             return;
           }
-          console.log(__t('max_plugins', maxPlugins, edition, pluginName));
+          Logger.info(__t('max_plugins', maxPlugins, edition, pluginName));
           break;
         }
 
@@ -209,11 +210,11 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
 
         if (execFailed) {
           if (isRequired) {
-            console.error(__t('engine_required_plugin_failed', pluginName));
+            Logger.error(__t('engine_required_plugin_failed', pluginName));
             res.status(500).json({ error: __t('ui.responses.required_plugin_failed'), message: __t('required_plugin_failed', pluginName) });
             return;
           }
-          console.warn(__t('engine_optional_plugin_skipped', pluginName));
+          Logger.warn(__t('engine_optional_plugin_skipped', pluginName));
           continue;
         }
 
@@ -226,7 +227,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
       if (capabilities['allowRollback']) {
         steps.push({ action: 'PRUNE_RELEASES', payload: { retention: 3 } });
       } else {
-        console.log(__t('rollback_denied'));
+        Logger.info(__t('rollback_denied'));
         steps.push({ action: 'UPSELL_NOTICE', payload: { message: __t('upsell_notice') } });
       }
 

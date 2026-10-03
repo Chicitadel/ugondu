@@ -1,3 +1,4 @@
+import { Logger } from '../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Shared / Localization Engine
@@ -103,7 +104,7 @@ export function reloadLocales(): void {
                         }
                         Object.assign(dictionaries[langCode], flattenDictionary(parsed));
                     } catch (err: any) {
-                        console.error(__t('messages.system.i18n_error_loading_locale_file', { 'filePath': filePath, 'err_message': err.message }));
+                        Logger.error(__t('messages.system.i18n_error_loading_locale_file', { 'filePath': filePath, 'err_message': err.message }));
                     }
                 }
             }
@@ -138,7 +139,7 @@ export function setLocale(locale: string): void {
     if (dictionaries[normalized]) {
         currentLocale = normalized;
     } else {
-        console.warn(__t('messages.system.i18n_locale_not_found_in_dynamic_directory_re', { 'locale': locale, 'currentLocale': currentLocale }));
+        Logger.warn(__t('messages.system.i18n_locale_not_found_in_dynamic_directory_re', { 'locale': locale, 'currentLocale': currentLocale }));
     }
 }
 

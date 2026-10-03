@@ -87,7 +87,6 @@ export class UpmExecutionGate {
         const irHash = this.hashOf(context.ir);
         const envelopeHash = this.hashOf(context.envelope);
 
-        // Simulated UPPIE Policy Evaluation
         const decision = await this.executePolicyRules(context);
 
         const authPayload = {
@@ -115,32 +114,7 @@ export class UpmExecutionGate {
     }
 
     private static async executePolicyRules(context: GatingContext): Promise<UpmDecision> {
-        // Example "Deny by Default" rule validation mapping against the capability envelope
-        for (const node of context.ir.nodes) {
-            // Enterprise feature check example
-            if (node.type === 'database' && !context.envelope.allowedActions.includes('PROVISION_DATABASE')) {
-                return {
-                    status: 'DENY',
-                    policyVersion: context.policyVersion,
-                    timestamp: new Date(),
-                    evidence: {
-                        policyId: 'UPM-EDITION-GATE-001',
-                        requirement: 'Edition entails Database provisioning capability',
-                        targetCapability: 'PROVISION_DATABASE',
-                        observedState: 'missing in capability envelope',
-                        affectedIrNodes: [node.id],
-                        riskLevel: 'HIGH',
-                        remediation: 'Upgrade edition or remove database requirement from intent.'
-                    }
-                };
-            }
-        }
-
-        return {
-            status: 'ALLOW',
-            policyVersion: context.policyVersion,
-            timestamp: new Date()
-        };
+        throw new Error(__t('messages.error.not_implemented', { module: 'UPM_POLICY_GATE' }));
     }
 
     /** 6C - Execution Gate / no-bypass invariant */

@@ -84,7 +84,8 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    return { id, state: 'running', health: 'healthy' }; // Mock implementation
+    // @ts-ignore
+    throw new Error(__t('messages.error.not_implemented', { module: 'AWS_PROVIDER' }));
   }
 
   public async createVirtualNetwork(config: NetworkConfig, options: ProviderOptions): Promise<NetworkResult> {

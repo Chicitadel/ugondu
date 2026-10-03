@@ -41,23 +41,7 @@ import { SubjectContext, SubjectContextFactory } from './subject-context';
  */
 export class SAMLAdapter {
   public parseAssertion(assertionXml: string): SubjectContext {
-    // Simulated XML parsing and validation
-    const parsedId = this.extractNameId(assertionXml);
-    const tenantId = this.extractTenant(assertionXml);
-    const attributes = this.extractAttributes(assertionXml);
-
-    return SubjectContextFactory.create(parsedId, tenantId, [], attributes, true);
-  }
-
-  private extractNameId(xml: string): string {
-    return 'saml-user-id';
-  }
-
-  private extractTenant(xml: string): string {
-    return 'saml-tenant';
-  }
-
-  private extractAttributes(xml: string): Record<string, string> {
-    return { provider: 'saml' };
+    // @ts-ignore
+    throw new Error(__t('messages.error.not_implemented', { module: 'SAML_ADAPTER' }));
   }
 }
