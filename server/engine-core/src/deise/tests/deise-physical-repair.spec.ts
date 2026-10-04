@@ -48,7 +48,7 @@ describe('Gate D: DEISE Physical Repair E2E (DirectAdmin)', () => {
         };
 
         // 2. Generate Repair Plan
-        const plan = await engine.diagnoseEnvironment(twin);
+        const plan = await engine.diagnoseEnvironment(twin, 'expected-v2');
 
         // Assert: Topology is broken, but app is intact. We MUST NOT blindly reupload.
         expect(plan.requiresTopologyRepair).toBe(true);
