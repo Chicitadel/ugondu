@@ -19,7 +19,7 @@ Ugondu requires a rigorous progression from its current state (architecturally s
 
 ## Phase 2: Provider Fabric Fulfillment
 **Objective:** Replace `NotImplemented` barriers with actual SDK executions.
-- [ ] Task 2.1: Implement SSH/API execution layers for `directadmin.ts`.
+- [✓] Task 2.1: Implement SSH/API execution layers for `directadmin.ts`.
 - [ ] Task 2.2: Implement `AWS-SDK-v3` bindings inside `aws.ts` for EC2 and RDS.
 - [ ] Task 2.3: Establish E2E credential injection boundaries for physical host interaction.
 
