@@ -1,4 +1,4 @@
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Tenant Identity
@@ -9,37 +9,10 @@ import { __t } from '../../../shared/i18n';
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
- *
- * Governance:
- * - Corporate Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
- *
- * Copyright (c) 2026 Air Roofers
- * All Rights Reserved.
  ******************************************************************************/
 
 import { SubjectContext, SubjectContextFactory } from './subject-context';
 
-/**
- * @class OIDCAdapter
- * @description Corporate Governed class implementation for OIDCAdapter
- * @classification ENTERPRISE
- */
 export class OIDCAdapter {
   public verifyIdToken(token: string): SubjectContext {
     if (!token || typeof token !== 'string') throw new Error(__t('invalid_token'));
@@ -61,6 +34,5 @@ export class OIDCAdapter {
     } catch (error) {
         throw new Error(__t('token_verification_failed') + String(error));
     }
-  }));
   }
 }

@@ -1,4 +1,4 @@
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : URRE Engine Core
  * Module         : URRE Recovery

@@ -1,4 +1,4 @@
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : URRE — Qualification Gates URRE-01..30

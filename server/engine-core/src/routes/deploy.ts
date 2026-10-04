@@ -1,4 +1,4 @@
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import { Logger } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
@@ -33,7 +33,7 @@ import { Logger } from '@ugondu/shared';
 import { Router, Request, Response } from 'express';
 import { randomBytes, sign, createHash } from 'crypto';
 import { hardenedPost, hardenedGet } from '../http/hardened-client';
-import { __t, signServiceIdentity, globalTrustRegistry } from '@ugondu/shared';
+import {  signServiceIdentity, globalTrustRegistry } from '@ugondu/shared';
 import canonicalize from 'canonicalize';
 import { KeyState } from '../crypto/key-loader';
 import { isPluginRequired } from '../utils/plugin-policy';

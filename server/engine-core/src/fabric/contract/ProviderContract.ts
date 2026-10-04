@@ -32,7 +32,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import type { NodeKind } from '../engine/ProvisioningTypes';
 import type { DatabaseEngine } from '../capabilities/database';

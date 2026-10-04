@@ -31,7 +31,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import { createPrivateKey, createPublicKey, KeyObject, createHash } from 'crypto';
 import * as fs from 'fs';

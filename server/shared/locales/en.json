@@ -937,5 +937,7 @@
   "token_expired": "Token Expired",
   "invalid_jwt_structure": "Invalid Jwt Structure",
   "invalid_recovery_point_certificate_for": "Invalid Recovery Point Certificate For",
-  "insufficient_capacity_for_configcpucores_cpu": "Insufficient Capacity For Configcpucores Cpu"
+  "insufficient_capacity_for_configcpucores_cpu": "Insufficient Capacity For Configcpucores Cpu",
+  "messages.error.intent_simulation_rejected": "Intent simulation rejected: {{reason}}",
+  "messages.deise.starting_diagnosis": "Starting Deployment Environment Integrity Diagnosis..."
 }

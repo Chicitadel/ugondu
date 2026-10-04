@@ -59,7 +59,7 @@ export interface IAwsClient {
   createS3Bucket(name: string, isPublic: boolean): Promise<{ id: string; endpoint: string }>;
   deleteS3Bucket(id: string): Promise<void>;
   getInstanceStatus(id: string): Promise<ComputeStatus>;
-  createSubnet(vpcId: string, cidr: string): Promise<{id: string; state: string}>;
+  createSubnet(vpcId: string, cidr: string): Promise<SubnetResult>;
   createSnapshot(id: string): Promise<string>;
 }
 
@@ -101,7 +101,7 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {
     const subnet = await this.client.createSubnet(networkId, cidr);
-    return { id: subnet.id, state: subnet.state, resolved: { cidrBlock: cidr } };
+    return { id: subnet.id, cidr: cidr };
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {

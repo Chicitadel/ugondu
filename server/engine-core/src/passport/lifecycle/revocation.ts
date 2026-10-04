@@ -31,7 +31,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 
 import { CacheClient } from '../../infrastructure/cache/client';

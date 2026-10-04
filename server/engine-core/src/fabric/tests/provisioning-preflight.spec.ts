@@ -27,7 +27,7 @@ const edge = (from: string, to: string) => ({ from, to });
 /** A rejected plan must be a plain error, with nothing created, nothing journalled and nothing recorded. */
 async function refused(ir: any): Promise<string> {
   const fabric = fakeFabric(['aws']);
-  const error = await failure(() => new ProvisioningEngine(fabric.registry, fabric.journal).executePlan(ir));
+  const error = await failure(() => new ProvisioningEngine(fabric.registry, fabric.journal, new InMemoryProvisioningState()).executePlan(ir));
   expect(error).toBeDefined();
   expect(error.name).toBe('Error');
   expect(fabric.calls).toEqual([]);
@@ -73,7 +73,7 @@ describe('Provisioning engine: preflight rejects a bad plan before any change', 
 
   it('accepts a networkRefId that is an unreferenced plain value and requires references to be declared dependencies', async () => {
     const plain = fakeFabric(['aws']);
-    await new ProvisioningEngine(plain.registry, plain.journal).executePlan({ nodes: [compute('web', { networkRefId: 'vpc-123' })], edges: [] });
+    await new ProvisioningEngine(plain.registry, plain.journal, new InMemoryProvisioningState()).executePlan({ nodes: [compute('web', { networkRefId: 'vpc-123' })], edges: [] });
     expect(plain.calls).toEqual(['aws:create:compute:web']);
 
     const undeclared = { nodes: [network('net'), compute('web', { networkRefId: 'ref:net' })], edges: [] };
@@ -87,7 +87,7 @@ describe('Provisioning engine: preflight rejects a bad plan before any change', 
   it('accepts a reference to an indirect requisite', async () => {
     const { registry, journal } = fakeFabric(['aws']);
     const ir = { nodes: [network('net'), bucket('mid'), compute('web', { networkRefId: 'ref:net' })], edges: [edge('net', 'mid'), edge('mid', 'web')] };
-    expect((await new ProvisioningEngine(registry, journal).executePlan(ir)).created).toEqual(['net', 'mid', 'web']);
+    expect((await new ProvisioningEngine(registry, journal, new InMemoryProvisioningState()).executePlan(ir)).created).toEqual(['net', 'mid', 'web']);
   });
 });
 

@@ -31,7 +31,7 @@ import * as crypto from 'crypto';
 import { z } from 'zod';
 
 // @ts-ignore
-import { __t } from 'shared/i18n';
+import { __t } from '@ugondu/shared';
 
 export const CapabilityManifestSchema = z.object({
   licenseId: z.string().uuid(),

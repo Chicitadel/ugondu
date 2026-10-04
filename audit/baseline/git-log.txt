@@ -1,0 +1,41 @@
+commit f592a4fe7301e2b96c2790c5123d9aa64cf8d1c7
+Author: Ignatus Chika UJOMOR <Chicitadel@users.noreply.github.com>
+Date:   Sun Oct 4 10:18:01 2026 +0200
+
+    feat(distribution): implement zero-mock localization, goreleaser, and cryptographic CI/CD pipelines
+
+commit 5d886b8483f3980da672a5974109563fd2dd9f0d
+Author: Ignatus Chika UJOMOR <Chicitadel@users.noreply.github.com>
+Date:   Sun Oct 4 09:43:02 2026 +0200
+
+    fix(engine-core): remediate stubs, mocks, dummy data, empty catches, and state persistence for COR compliance
+
+commit 3d88be41aa2003e910b929c7f4e4b228fdaec19b
+Author: Ignatus Chika UJOMOR <Chicitadel@users.noreply.github.com>
+Date:   Sun Oct 4 08:10:53 2026 +0200
+
+    fix(engine-core): repair Logger imports broken in 268fd9c
+    
+    - Use @ugondu/shared Logger import convention (cli, index, deploy, telemetry)
+    - Restore console.error inside chaos child-process script strings (parent Logger is not in scope there)
+    - Keep shared/i18n.ts dependency-free (cross-rootDir import) via structured stderr emitter
+    - Correct Logger.info argument shapes in cli.ts
+    - Ignore scratch/ tooling directory
+
+commit 268fd9cb00743396866ca7bbfa39ceea3fe5e4ca
+Author: Ignatus Chika UJOMOR <Chicitadel@users.noreply.github.com>
+Date:   Sun Oct 4 01:13:31 2026 +0200
+
+    fix(cor-audit): Eradicate mocks, stubs, and console logs
+    
+    - client/engine/auth.go: Implement real HTTP loopback for OAuth 2.0 PKCE, strip mock delays, localize all strings
+    - server/engine-core/src/upm/policy-gate.ts: Remove simulated database checks, throw NotImplemented for UPPIE
+    - server/engine-core/src/fabric/providers: Remove mocked execution success returns
+    - server/engine-core/src/tenant: Remove mocked JWT and SAML string parsing
+    - server: Replace all console.log/error/warn with enterprise Logger
+
+commit 20786c1eb5885b4f437bc0cb3371175dbf7945d1
+Author: Ignatus Chika UJOMOR <Chicitadel@users.noreply.github.com>
+Date:   Sun Oct 4 00:26:54 2026 +0200
+
+    chore(governance): Register ADR-005 and ADR-006 to frozen decisions

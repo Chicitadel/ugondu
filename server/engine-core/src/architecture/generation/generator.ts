@@ -33,7 +33,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import { ArchitectureCandidate } from '../model/candidate';
 import { VerticalBVps } from '../verticals/vertical-b-vps';

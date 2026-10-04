@@ -33,7 +33,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import { EvidenceChain } from '../evidence/chain';
 import { ApplicabilityAnalyzer, ApplicabilityContext } from './applicability';
 import { ConsistencyChecker, DependencyManifest } from './consistency';

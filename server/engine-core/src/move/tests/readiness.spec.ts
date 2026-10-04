@@ -14,7 +14,7 @@
 import { ReadinessEvaluator } from '../cutover/readiness';
 import type { ReadinessCriteria } from '../cutover/readiness';
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any;
 declare var it: any;

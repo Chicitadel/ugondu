@@ -32,7 +32,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import { Router, Request, Response } from 'express';
 import { PassportCompiler } from '../compiler/passport-compiler';
 import { IntentParser } from '../parser/intent-parser';

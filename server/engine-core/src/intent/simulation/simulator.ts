@@ -2,10 +2,10 @@
  * Project        : Ugondu - Universal Delivery Operating System
  * Module         : Server / Engine Core / Intent / Simulation
  * File           : simulator.ts
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Air Roofers Engineering
  * Organization   : Air Roofers Ltd
- * Created Date   : 2026-10-03
+ * Created Date   : 2026-10-04
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -21,7 +21,7 @@
 
 import { Logger, __t } from '@ugondu/shared';
 import { DecomposedIntent } from '../model/requirements';
-import { ArchitectureIR, ProvisioningNode, ProvisioningEdge, NodeKind } from '../../fabric/engine/ProvisioningTypes';
+import { ArchitectureIR, ProvisioningNode, ProvisioningEdge } from '../../fabric/engine/ProvisioningTypes';
 
 /**
  * @interface SimulationContext
@@ -50,60 +50,114 @@ export class IntentSimulator {
         const nodes: ProvisioningNode[] = [];
         const edges: ProvisioningEdge[] = [];
 
+        // Base deterministic prefix for all nodes in this simulation
+        const envPrefix = `ug-${context.workspaceId.substring(0, 6)}`;
+
         // 1. Evaluate UPM (Unified Policy Model) Boundaries (UPPIE)
-        if (context.enforceStrictIsolation && intent.security) {
-            // "Deny by Default" gating
-            if (intent.security.privateDatabaseNetwork && !context.targetCapabilities.includes('VPC_PEERING')) {
-                throw new Error(__t('messages.error.intent_simulation_rejected_encryption_unavailable'));
-            }
-        }
+        this.evaluateComplianceBoundaries(intent, context);
 
         // 2. Generate Network Boundary Intent
-        const networkNodeId = 'net_boundary_01';
+        const networkNodeId = `${envPrefix}-net`;
         nodes.push({
             id: networkNodeId,
-            type: 'network',
+            type: 'NETWORK',
             provider: context.targetProviderId,
             config: {
                 cidrBlock: '10.0.0.0/16',
                 isolation: intent.security.privateDatabaseNetwork ? 'private' : 'shared'
+            },
+            providerOptions: {
+                enableTlsTraffic: intent.security.tlsRequired,
+                enableIntrusionDetection: intent.security.leastPrivilege
             }
         });
 
         // 3. Generate Compute Resources based on Application requirements
-        const runtimeNodeId = 'compute_runtime_01';
+        const runtimeNodeId = `${envPrefix}-compute`;
+        
+        // Resource scaling heuristic
+        let cpuCores = 1;
+        let memoryMb = 1024;
+        
+        if (intent.operational.scaling) {
+            cpuCores = 4;
+            memoryMb = 8192;
+        }
+
+        if (intent.application.runtime === 'python' || intent.application.runtime === 'php') {
+            memoryMb = Math.max(memoryMb, 2048);
+        }
+
         nodes.push({
             id: runtimeNodeId,
-            type: 'compute',
+            type: 'COMPUTE',
             provider: context.targetProviderId,
             config: {
-                cpuCores: 2,
-                memoryMb: 4096,
-                workloadType: 'stateless',
+                instanceName: `${envPrefix}-app`,
+                osImage: intent.application.runtime || 'containerd',
+                cpuCores,
+                memoryMb,
+                workloadType: intent.application.buildRequired ? 'build-and-run' : 'stateless',
                 networkRefId: `ref:${networkNodeId}`,
-                runtime: intent.application.runtime
+                port: intent.application.port || 8080
+            },
+            providerOptions: {
+                restartPolicy: intent.availability.restartPolicy,
+                healthCheckEnabled: intent.availability.healthCheck,
+                multiZoneRedundancy: intent.availability.redundancy === 'multi-zone',
+                autoRecovery: intent.operational.autoRecovery,
+                monitoringEnabled: intent.operational.monitoring
             }
         });
+        
+        // Compute depends on Network
         edges.push({ from: networkNodeId, to: runtimeNodeId });
 
         // 4. Generate Storage and Database Intention if required
         if (intent.application.database) {
-            const dbNodeId = 'db_persistence_01';
+            const dbNodeId = `${envPrefix}-db`;
             nodes.push({
                 id: dbNodeId,
-                type: 'database',
+                type: 'DATABASE',
                 provider: context.targetProviderId,
                 config: {
+                    name: `${envPrefix}_db`,
                     engine: intent.application.database,
                     networkRefId: `ref:${networkNodeId}`
+                },
+                providerOptions: {
+                    automatedBackups: intent.operational.backup,
+                    backupRetentionDays: intent.operational.backup ? 7 : 0,
+                    privateEndpointOnly: intent.security.privateDatabaseNetwork,
+                    secretsInjected: intent.security.secretsManagement
                 }
             });
+            
+            // Database depends on Network
             edges.push({ from: networkNodeId, to: dbNodeId });
+            
+            // Compute depends on Database (needs DB connection strings injected)
             edges.push({ from: dbNodeId, to: runtimeNodeId });
         }
 
         Logger.info(__t('messages.intent.simulation_complete', { nodes: nodes.length, edges: edges.length }));
 
         return { nodes, edges };
+    }
+
+    private evaluateComplianceBoundaries(intent: DecomposedIntent, context: SimulationContext) {
+        if (!context.enforceStrictIsolation) return;
+
+        if (intent.security.privateDatabaseNetwork && !context.targetCapabilities.includes('VPC_PEERING')) {
+            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: 'VPC_PEERING unavailable for private database boundary' }));
+        }
+
+        if (intent.operational.scaling && !context.targetCapabilities.includes('AUTO_SCALING')) {
+            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: 'AUTO_SCALING unavailable for scaling intent' }));
+        }
+
+        if (intent.availability.redundancy === 'multi-zone' && !context.targetCapabilities.includes('MULTI_ZONE')) {
+            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: 'MULTI_ZONE unavailable for redundancy requirements' }));
+        }
     }
 }

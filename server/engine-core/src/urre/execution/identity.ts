@@ -33,7 +33,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import { ExecutionIdContext } from '../model/execution';
 import { randomUUID } from 'crypto';

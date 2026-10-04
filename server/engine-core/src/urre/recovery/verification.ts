@@ -33,7 +33,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import { createHash } from 'crypto';
 import { RecoveryPoint, RecoveryPointCertificate, DatabaseBackupRef } from '../model/recovery-point';

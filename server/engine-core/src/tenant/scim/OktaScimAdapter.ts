@@ -29,7 +29,7 @@
 
 import { IScimAdapter, IScimUser, IScimGroup, ScimUserSchema, ScimGroupSchema } from "./IScimAdapter";
 // @ts-ignore
-import { __t } from "../../../shared/i18n";
+import { __t } from '@ugondu/shared';
 import { Logger } from '@ugondu/shared';
 
 /**

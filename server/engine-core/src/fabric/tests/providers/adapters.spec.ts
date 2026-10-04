@@ -1,101 +1,74 @@
-/******************************************************************************
- * Project        : Ugondu Platform
- * Module         : Provider Fabric - Provider Adapters Tests
- * File           : adapters.spec.ts
- * Version        : 1.0.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
- * Created Date   : 2026-10-03
- * Classification : ENTERPRISE
- *
- * Governance: Corporate Governed / Security Reviewed / Protocol Frozen
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
- ******************************************************************************/
+import { AwsAdapter, IAwsClient } from '../../../fabric/providers/aws';
+import { KubernetesAdapter, IKubernetesClient } from '../../../fabric/providers/kubernetes';
+import { LinuxAdapter, ILinuxClient } from '../../../fabric/providers/linux';
+import { CpanelAdapter, IWhmClient } from '../../../fabric/providers/cpanel';
 
-import { AwsAdapter, AwsContract } from '../../providers/aws';
-import { KubernetesAdapter, KubernetesContract } from '../../providers/kubernetes';
-import { LinuxAdapter, LinuxContract } from '../../providers/linux';
-import { CpanelAdapter, CpanelContract } from '../../providers/cpanel';
-import { FabricRegistry } from '../../registry';
-
-declare var describe: any, it: any, expect: any;
-
-describe('Provider Adapters Initialization', () => {
-  it('registers all 4 provider adapters with their contracts', () => {
-    const registry = new FabricRegistry();
-
-    // 1. AWS
-    const awsFakeClient = {
+describe('Provider Adapters (FAB-11)', () => {
+  it('AwsAdapter formats results according to the fabric contract', async () => {
+    const mockClient: IAwsClient = {
       resolveInstanceType: async () => 't3.micro',
-      runInstances: async () => ({ id: 'i-123', ip: '1.1.1.1', state: 'running' as const }),
+      runInstances: async () => ({ id: 'i-123', ip: '10.0.0.5', state: 'running' }),
       terminateInstances: async () => {},
-      createVpc: async () => 'vpc-123',
+      createVpc: async () => ({ id: 'vpc-1', cidr: '10.0.0.0/16' }),
       deleteVpc: async () => {},
-      createRds: async () => ({ id: 'rds-123', endpoint: 'db.example.com' }),
-      deleteRds: async () => {},
-      createS3Bucket: async () => ({ id: 'bucket-123', endpoint: 's3.example.com' }),
-      deleteS3Bucket: async () => {}
+      createRdsInstance: async () => ({ id: 'db-1', endpoint: 'db-1.aws.com' }),
+      deleteRdsInstance: async () => {},
+      createS3Bucket: async () => ({ id: 'b-1', url: 's3://b-1' }),
+      deleteS3Bucket: async () => {},
+      getInstanceStatus: async () => ({ id: 'i-123', state: 'running' as any, health: 'healthy' }),
+      createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
+      createSnapshot: async () => ('snap-1'),
     };
-    const awsAdapter = new AwsAdapter(awsFakeClient);
-    registry.registerProvider(AwsContract, {
-      COMPUTE: awsAdapter,
-      NETWORK: awsAdapter,
-      DATABASE: awsAdapter,
-      STORAGE: awsAdapter
-    });
+    const adapter = new AwsAdapter(mockClient);
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'ami-1' }, {});
+    expect(result.id).toBe('i-123');
+    expect(result.state).toBe('running');
+  });
 
-    // 2. Kubernetes
-    const k8sFakeClient = {
-      applyWorkload: async () => ({ id: 'deploy-1', state: 'running' as const }),
+  it('KubernetesAdapter formats results according to the fabric contract', async () => {
+    const mockClient: IKubernetesClient = {
+      applyWorkload: async () => ({ id: 'deploy-1', state: 'running' }),
       deleteWorkload: async () => {},
-      applyNetworkPolicy: async () => ({ id: 'np-1' }),
+      applyNetworkPolicy: async () => ({ id: 'net-1' }),
       deleteNetworkPolicy: async () => {},
-      createPvc: async () => ({ id: 'pvc-1', endpoint: 'pvc' }),
-      deletePvc: async () => {}
+      createPvc: async () => ({ id: 'pvc-1' }),
+      deletePvc: async () => {},
+      getInstanceStatus: async () => ({ id: 'deploy-1', state: 'running' as any, health: 'healthy' }),
+      createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
     };
-    const k8sAdapter = new KubernetesAdapter(k8sFakeClient);
-    registry.registerProvider(KubernetesContract, {
-      COMPUTE: k8sAdapter,
-      NETWORK: k8sAdapter,
-      STORAGE: k8sAdapter
-    });
+    const adapter = new KubernetesAdapter(mockClient);
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx' }, {});
+    expect(result.id).toBe('deploy-1');
+  });
 
-    // 3. Linux
-    const linuxFakeClient = {
+  it('LinuxAdapter formats results according to the fabric contract', async () => {
+    const mockClient: ILinuxClient = {
       checkCapacity: async () => true,
-      runProcess: async () => ({ id: 'proc-1', state: 'running' as const }),
+      runProcess: async () => ({ id: 'pid-1', state: 'running' }),
       stopProcess: async () => {},
-      configureNetwork: async () => ({ id: 'net-1' }),
+      configureNetwork: async () => ({ id: 'if-1' }),
       removeNetwork: async () => {},
-      createDirectory: async () => ({ id: 'dir-1', endpoint: '/dir' }),
-      removeDirectory: async () => {}
+      createDirectory: async () => ({ id: '/opt/data' }),
+      removeDirectory: async () => {},
+      createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
     };
-    const linuxAdapter = new LinuxAdapter(linuxFakeClient);
-    registry.registerProvider(LinuxContract, {
-      COMPUTE: linuxAdapter,
-      NETWORK: linuxAdapter,
-      STORAGE: linuxAdapter
-    });
+    const adapter = new LinuxAdapter(mockClient);
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx' }, {});
+    expect(result.id).toBe('pid-1');
+  });
 
-    // 4. cPanel
-    const cpanelFakeClient = {
-      createHostedApp: async () => ({ id: 'app-1', state: 'running' as const }),
+  it('CpanelAdapter formats results according to the fabric contract', async () => {
+    const mockClient: IWhmClient = {
+      createHostedApp: async () => ({ id: 'app-1', state: 'running' }),
       removeHostedApp: async () => {},
-      createDatabase: async () => ({ id: 'db-1', endpoint: 'db' }),
+      createDatabase: async () => ({ id: 'db-1', endpoint: 'localhost' }),
       removeDatabase: async () => {},
-      createAccountFilesystem: async () => ({ id: 'fs-1', endpoint: 'fs' }),
-      removeAccountFilesystem: async () => {}
+      createAccountFilesystem: async () => ({ id: 'fs-1' }),
+      removeAccountFilesystem: async () => {},
+      createSnapshot: async () => ('snap-1'),
     };
-    const cpanelAdapter = new CpanelAdapter(cpanelFakeClient);
-    registry.registerProvider(CpanelContract, {
-      COMPUTE: cpanelAdapter,
-      DATABASE: cpanelAdapter,
-      STORAGE: cpanelAdapter
-    });
-
-    expect(registry.isRegistered('aws')).toBe(true);
-    expect(registry.isRegistered('kubernetes')).toBe(true);
-    expect(registry.isRegistered('linux')).toBe(true);
-    expect(registry.isRegistered('cpanel')).toBe(true);
+    const adapter = new CpanelAdapter(mockClient);
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'php' }, {});
+    expect(result.id).toBe('app-1');
   });
 });

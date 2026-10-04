@@ -1,4 +1,4 @@
-import { Logger } from '../../../shared/logger';
+import { Logger } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : URRE
@@ -33,7 +33,7 @@ import { Logger } from '../../../shared/logger';
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import * as fs from 'fs';
 import * as crypto from 'crypto';

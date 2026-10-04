@@ -28,7 +28,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import { ExecutionContext } from '../../types/execution';
 import { DatabaseClient } from '../../infrastructure/database/client';

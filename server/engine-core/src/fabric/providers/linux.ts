@@ -1,4 +1,4 @@
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Provider Fabric - Linux Adapter
@@ -59,7 +59,7 @@ export interface ILinuxClient {
   
   configureNetwork(name: string, cidr: string, mode: string): Promise<{ id: string }>;
   removeNetwork(id: string): Promise<void>;
-  createSubnet(networkId: string, cidr: string): Promise<{id: string; state: string}>;
+  createSubnet(vpcId: string, cidr: string): Promise<SubnetResult>;
   
   createDirectory(name: string): Promise<{ id: string; endpoint: string }>;
   removeDirectory(id: string): Promise<void>;
@@ -102,7 +102,7 @@ export class LinuxAdapter implements ComputeCapability, NetworkCapability, Stora
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {
     const subnet = await this.client.createSubnet(networkId, cidr);
-    return { id: subnet.id, state: subnet.state, resolved: { cidrBlock: cidr } };
+    return { id: subnet.id, cidr: cidr };
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

@@ -1,0 +1,50 @@
+
+    Directory: D:\ujomor-platform\products\ugondu
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----           9/29/2026 11:45 PM                .github
+d----           10/1/2026 12:53 PM                .governance
+d----           10/3/2026  8:34 AM                .urre
+d----           9/29/2026 10:41 PM                api
+d----           10/4/2026 12:54 PM                audit
+d----           10/1/2026 12:53 PM                client
+d----           10/1/2026  6:38 PM                config
+d----           10/3/2026 11:07 PM                docs
+d----           10/2/2026  2:26 PM                locales
+d----           10/3/2026  9:54 PM                node_modules
+d----           9/30/2026  7:58 AM                packs
+d----           10/2/2026  2:25 PM                plugins
+d----           10/4/2026 10:16 AM                scratch
+d----           10/3/2026  9:50 PM                scripts
+d----           10/3/2026  1:58 AM                server
+d----           10/1/2026  3:45 PM                src
+d----           10/1/2026  6:57 PM                tests
+-a---           10/1/2026  6:16 PM            366 .env
+-a---           9/29/2026 11:42 PM            681 .env.example
+-a---           10/4/2026  8:10 AM            722 .gitignore
+-a---           10/4/2026 10:16 AM           2259 .goreleaser.yml
+-a---           10/2/2026  2:25 PM            377 .service_replay_ledger.json
+-a---           9/29/2026 11:49 PM           2690 CHANGELOG.md
+-a---           10/1/2026  7:16 AM           2037 commit.ps1
+-a---           10/2/2026  2:26 PM          10242 cor-test-results.json
+-a---           10/2/2026 11:05 PM           3485 DECLARATION.md
+-a---           9/29/2026 11:48 PM           5513 docker-compose.yml
+-a---           10/4/2026 10:17 AM             50 Dockerfile.cli
+-a---           10/1/2026  9:57 AM           8576 generate-assurance.js
+-a---           10/2/2026 11:04 PM           3289 LEGAL.md
+-a---           10/2/2026 11:04 PM           2751 LICENSE.md
+-a---           9/30/2026 12:01 AM            988 Makefile
+-a---           10/2/2026 11:05 PM           1919 NOTICES.md
+-a---           10/3/2026  9:54 PM         258507 package-lock.json
+-a---           10/3/2026  7:57 AM           1370 package.json
+-a---           10/1/2026  5:36 AM           1210 patch_deployment.js
+-a---           9/30/2026  6:04 PM            113 plugin_pub.pem
+-a---           9/30/2026  8:26 AM           6258 README.md
+-a---           9/30/2026  5:28 PM           2479 sign_plugins.js
+-a---           10/1/2026  6:59 PM           1694 update_cli.js
+-a---           10/1/2026  6:57 PM          12437 update_locales.js
+-a---           10/1/2026  7:00 PM           1655 update_rest.js
+-a---           10/1/2026  6:12 AM            329 update_task.js
+-a---           10/1/2026  6:59 PM            523 update_tenant.js
+

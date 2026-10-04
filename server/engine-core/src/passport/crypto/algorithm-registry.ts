@@ -33,7 +33,7 @@
  ******************************************************************************/
 
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 export enum SupportedAlgorithm {
     RSA_SHA256 = 'RSA-SHA256',

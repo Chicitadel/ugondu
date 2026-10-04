@@ -51,6 +51,11 @@ var DeploymentStatus;
     DeploymentStatus["FAILED"] = "FAILED";
     DeploymentStatus["DEGRADED"] = "DEGRADED";
 })(DeploymentStatus || (exports.DeploymentStatus = DeploymentStatus = {}));
+/**
+ * @class DoraAnalyticsEngine
+ * @description Corporate Governed class implementation for DoraAnalyticsEngine
+ * @classification ENTERPRISE
+ */
 var DoraAnalyticsEngine = /** @class */ (function () {
     function DoraAnalyticsEngine() {
     }

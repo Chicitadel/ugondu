@@ -1,4 +1,4 @@
-import { Logger } from '../../../../shared/logger';
+import { Logger } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Provider Fabric — Provisioning Engine
@@ -33,7 +33,7 @@ import { Logger } from '../../../../shared/logger';
  * All Rights Reserved.
  ******************************************************************************/
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import { FabricRegistry } from '../registry';
 import type { ComputeConfig, ProviderOptions, ResolvedValues } from '../capabilities/compute';

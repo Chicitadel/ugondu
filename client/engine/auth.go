@@ -2,11 +2,15 @@ package engine
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"ugondu/client/i18n"
@@ -33,8 +37,35 @@ func getAuthFilePath() (string, error) {
 	return filepath.Join(home, ".ugondu", "auth.json"), nil
 }
 
+func generateState() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+func openBrowser(url string) error {
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	return err
+}
+
 func Authenticate() {
 	fmt.Println(i18n.T("auth_init"))
+
+	state := generateState()
+	authURL := fmt.Sprintf("https://auth.airroofers.com/login?callback=http://127.0.0.1:8989&state=%s", state)
+
+	fmt.Printf(i18n.T("auth_browser_open")+"\n", authURL)
+	openBrowser(authURL)
 
 	done := make(chan bool)
 
@@ -42,6 +73,12 @@ func Authenticate() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		token := r.URL.Query().Get("token")
 		envelopeStr := r.URL.Query().Get("envelope")
+		returnedState := r.URL.Query().Get("state")
+
+		if returnedState != state {
+			http.Error(w, i18n.T("auth_invalid_state"), http.StatusBadRequest)
+			return
+		}
 
 		if envelopeStr == "" {
 			http.Error(w, i18n.T("auth_missing_envelope"), http.StatusBadRequest)
@@ -74,9 +111,15 @@ func Authenticate() {
 		server.ListenAndServe()
 	}()
 
-	<-done
-	server.Shutdown(context.Background())
+	select {
+	case <-done:
+	case <-time.After(5 * time.Minute):
+		fmt.Println(i18n.T("auth_timeout"))
+		server.Shutdown(context.Background())
+		os.Exit(1)
+	}
 
+	server.Shutdown(context.Background())
 	fmt.Println(i18n.T("auth_success"))
 }
 

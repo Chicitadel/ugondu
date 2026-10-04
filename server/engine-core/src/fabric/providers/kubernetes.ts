@@ -66,7 +66,7 @@ export interface IKubernetesClient {
   createPvc(name: string, sizeGb?: number, accessMode?: string): Promise<{ id: string; endpoint: string }>;
   deletePvc(id: string): Promise<void>;
   getInstanceStatus(id: string): Promise<ComputeStatus>;
-  createSubnet(networkId: string, cidr: string): Promise<{id: string; state: string}>;
+  createSubnet(vpcId: string, cidr: string): Promise<SubnetResult>;
 }
 
 export class KubernetesAdapter implements ComputeCapability, NetworkCapability, StorageCapability {
@@ -101,7 +101,7 @@ export class KubernetesAdapter implements ComputeCapability, NetworkCapability, 
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {
     const subnet = await this.client.createSubnet(networkId, cidr);
-    return { id: subnet.id, state: subnet.state, resolved: { cidrBlock: cidr } };
+    return { id: subnet.id, cidr: cidr };
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

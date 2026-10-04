@@ -32,7 +32,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 // @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 export const SECRET_PREFIX = 'secret:';
 

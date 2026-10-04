@@ -1,25 +1,5 @@
-/******************************************************************************
- * Project        : Ugondu - Universal Delivery Operating System
- * Module         : Server / Engine Core / UPM Policy Gate
- * File           : policy-gate.ts
- * Version        : 2.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers Ltd
- * Created Date   : 2026-10-03
- * Classification : ENTERPRISE
- *
- * Governance:
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST
- * Copyright (c) 2026 Air Roofers
- * All Rights Reserved.
- ******************************************************************************/
-
-import { Logger, __t } from '@ugondu/shared';
+import { __t } from '@ugondu/shared';
+import { Logger } from '@ugondu/shared';
 import * as crypto from 'crypto';
 import canonicalize from 'canonicalize';
 import { ArchitectureIR } from '../fabric/engine/ProvisioningTypes';
@@ -144,4 +124,42 @@ export class UpmExecutionGate {
             policyVersion: context.policyVersion
         };
     }
+
+    /** 6C - Validates an execution permit right before the provisioning engine begins. */
+    public static verifyAuthorization(auth: ExecutionAuthorization, executionIr: ArchitectureIR): void {
+        Logger.info(__t('messages.upm.verifying_authorization', { id: auth.authorizationId }));
+
+        // 1. Verify Expiration
+        if (new Date() > auth.expiresAt) {
+            throw new Error(__t('messages.error.execution_authorization_expired'));
+        }
+
+        // 2. Verify Decision
+        if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
+            throw new Error(__t('messages.error.execution_authorization_denied', { status: auth.decision.status }));
+        }
+
+        // 3. Verify IR Identity (Tamper Check)
+        const executionIrHash = this.hashOf(executionIr);
+        if (executionIrHash !== auth.irHash) {
+            throw new Error(__t('messages.error.ir_hash_mismatch'));
+        }
+
+        // 4. Verify Cryptographic Seal
+        const authPayload = {
+            intentHash: auth.intentHash,
+            twinHash: auth.twinHash,
+            irHash: auth.irHash,
+            policyVersion: auth.policyVersion,
+            decisionStatus: auth.decision.status,
+            envelopeHash: auth.envelopeHash
+        };
+        const expectedSeal = this.hashOf(authPayload);
+        
+        if (expectedSeal !== auth.cryptographicSeal) {
+            throw new Error(__t('messages.error.seal_mismatch'));
+        }
+        
+        Logger.info(__t('messages.upm.authorization_verified'));
     }
+}
