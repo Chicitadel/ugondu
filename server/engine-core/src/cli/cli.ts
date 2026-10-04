@@ -1,4 +1,4 @@
-import { Logger } from '../../shared/logger';
+import { Logger } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Universal Autonomous AI Governance Operating System
  * Module         : CLI
@@ -44,33 +44,33 @@ async function runDeploy(intentFile: string): Promise<void> {
   const intent = await parser.parseFile(intentFile);
   const passport = await compiler.compile(intent);
   const receipt = await gatekeeper.execute(passport.id, { action: 'deploy' });
-  Logger.info(__t('cli_deploy_receipt'), JSON.stringify(receipt, null, 2));
+  Logger.info(__t('cli_deploy_receipt'), { receipt });
 }
 
 async function runMove(intentFile: string): Promise<void> {
   const intent = await parser.parseFile(intentFile);
   const passport = await compiler.compile(intent);
   const receipt = await gatekeeper.execute(passport.id, { action: 'move' });
-  Logger.info(__t('cli_move_receipt'), JSON.stringify(receipt, null, 2));
+  Logger.info(__t('cli_move_receipt'), { receipt });
 }
 
 async function runRemediate(intentFile: string): Promise<void> {
   const intent = await parser.parseFile(intentFile);
   const passport = await compiler.compile(intent);
   const receipt = await gatekeeper.execute(passport.id, { action: 'remediate' });
-  Logger.info(__t('cli_remediation_receipt'), JSON.stringify(receipt, null, 2));
+  Logger.info(__t('cli_remediation_receipt'), { receipt });
 }
 
 async function runPassportInspect(passportId: string): Promise<void> {
   const passport = await compiler.inspect(passportId);
-  Logger.info(__t('cli_passport_details'), '\n', JSON.stringify(passport, null, 2));
+  Logger.info(__t('cli_passport_details'), { passport });
 }
 
 async function runEmergencyCreate(intentFile: string): Promise<void> {
   const intent = await parser.parseFile(intentFile);
   intent.priority = 'EMERGENCY';
   const passport = await compiler.compile(intent);
-  Logger.info(__t('cli_emergency_created'), passport.id);
+  Logger.info(__t('cli_emergency_created'), { passportId: passport.id });
 }
 
 export async function bootstrapCli(args: string[]): Promise<void> {

@@ -1,4 +1,4 @@
-import { Logger } from '../../shared/logger';
+import { Logger } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Engine Core — Deploy Route

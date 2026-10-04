@@ -1,4 +1,3 @@
-import { Logger } from '../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Shared / Localization Engine
@@ -23,6 +22,13 @@ import { Logger } from '../../shared/logger';
  *
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
+
+/** Structured stderr emitter (dependency-free; mirrors the Logger envelope). */
+function emitStructured(level: 'WARN' | 'ERROR', message: string): void {
+    if (process.env.NODE_ENV === 'test') return;
+    process.stderr.write(JSON.stringify({ level, timestamp: new Date().toISOString(), message }) + '\n');
+}
+
 
 
 import * as fs from 'fs';
@@ -104,7 +110,7 @@ export function reloadLocales(): void {
                         }
                         Object.assign(dictionaries[langCode], flattenDictionary(parsed));
                     } catch (err: any) {
-                        Logger.error(__t('messages.system.i18n_error_loading_locale_file', { 'filePath': filePath, 'err_message': err.message }));
+                        emitStructured('ERROR', __t('messages.system.i18n_error_loading_locale_file', { 'filePath': filePath, 'err_message': err.message }));
                     }
                 }
             }
@@ -139,7 +145,7 @@ export function setLocale(locale: string): void {
     if (dictionaries[normalized]) {
         currentLocale = normalized;
     } else {
-        Logger.warn(__t('messages.system.i18n_locale_not_found_in_dynamic_directory_re', { 'locale': locale, 'currentLocale': currentLocale }));
+        emitStructured('WARN', __t('messages.system.i18n_locale_not_found_in_dynamic_directory_re', { 'locale': locale, 'currentLocale': currentLocale }));
     }
 }
 

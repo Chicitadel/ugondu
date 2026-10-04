@@ -12,7 +12,7 @@
  ******************************************************************************/
 
 import { Router, Request, Response } from 'express';
-import { __t } from '@ugondu/shared';
+import { __t, Logger } from '@ugondu/shared';
 
 export const telemetryRouter = Router();
 
