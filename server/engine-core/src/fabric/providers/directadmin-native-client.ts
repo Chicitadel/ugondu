@@ -80,6 +80,12 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
     await this.execCmd(`rm -rf /home/${this.username}/ugondu_storage/${id}`);
   }
 
+  public async createSnapshot(id: string): Promise<string> {
+    const snapName = `snap-${id}-${Date.now()}.tar.gz`;
+    await this.execCmd(`mkdir -p /home/${this.username}/admin_backups; tar -czf /home/${this.username}/admin_backups/${snapName} -C /home/${this.username}/domains/${id} public_html`);
+    return snapName;
+  }
+
   public async disconnect(): Promise<void> {
     if (this.connected) {
       this.ssh.dispose();

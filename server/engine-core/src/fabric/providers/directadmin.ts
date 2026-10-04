@@ -32,6 +32,7 @@ export interface IDirectAdminClient {
   createDatabase(name: string, type: string): Promise<{ id: string; state: string }>;
   removeDatabase(id: string): Promise<void>;
   createAccountFILE(name: string): Promise<{ id: string; state: string }>;
+  createSnapshot(id: string): Promise<string>;
   removeAccountFILE(id: string): Promise<void>;
 }
 
@@ -68,7 +69,7 @@ export class DirectAdminAdapter implements ComputeCapability, DatabaseCapability
   }
 
   public async createSnapshot(id: string): Promise<string> {
-    return 'snap-' + id;
+    return await this.client.createSnapshot(id);
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

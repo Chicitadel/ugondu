@@ -47,13 +47,13 @@ export const AwsContract: ProviderCapabilities = {
 export interface IAwsClient {
   /** Deterministic instance selection engine. */
   resolveInstanceType(cpuCores: number, memoryMb: number): Promise<string>;
-  runInstances(type: string, image: string, vpcId?: string): Promise<{ id: string; ip: string; state: 'running' | 'failed' }>;
+  runInstances(type: string, image: string, subnetId?: string): Promise<{ id: string; ip: string; state: 'running' | 'failed' }>;
   terminateInstances(id: string): Promise<void>;
   
   createVpc(cidr: string, name: string): Promise<string>;
   deleteVpc(id: string): Promise<void>;
   
-  createRds(name: string, engine: string, capacity: number, vpcId?: string, credentialsRef?: string): Promise<{ id: string; endpoint: string }>;
+  createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string): Promise<{ id: string; endpoint: string }>;
   deleteRds(id: string): Promise<void>;
   
   createS3Bucket(name: string, isPublic: boolean): Promise<{ id: string; endpoint: string }>;
