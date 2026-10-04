@@ -111,33 +111,33 @@ func ComputeArtifactDigest(tokens map[string]string) string {
 // VerifySignature cryptographically validates the pack using the embedded ED25519 authority key
 func (p *LanguagePack) VerifySignature() error {
 	if p.Signature == "" {
-		return errors.New(i18n.T("unsigned_language_pack"))
+		return errors.New(T("unsigned_language_pack"))
 	}
 
 	block, _ := pem.Decode([]byte(LanguagePackAuthorityPublicKey))
 	if block == nil {
-		return errors.New(i18n.T("failed_to_decode_authority_public"))
+		return errors.New(T("failed_to_decode_authority_public"))
 	}
 
 	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return fmt.Errorf(i18n.T("failed_to_parse_authority_public"), err)
+		return fmt.Errorf(T("failed_to_parse_authority_public"), err)
 	}
 
 	edPub, ok := pub.(ed25519.PublicKey)
 	if !ok {
-		return errors.New(i18n.T("authority_key_is_not_ed25519"))
+		return errors.New(T("authority_key_is_not_ed25519"))
 	}
 
 	sigBytes, err := base64.StdEncoding.DecodeString(p.Signature)
 	if err != nil {
-		return fmt.Errorf(i18n.T("malformed_signature_base64"), err)
+		return fmt.Errorf(T("malformed_signature_base64"), err)
 	}
 
 	// Canonical payload: packId:locale:version:artifactDigest
 	payload := fmt.Sprintf("%s:%s:%s:%s", p.PackId, p.Locale, p.Version, p.ArtifactDigest)
 	if !ed25519.Verify(edPub, []byte(payload), sigBytes) {
-		return errors.New(i18n.T("cryptographic_signature_verification_failed"))
+		return errors.New(T("cryptographic_signature_verification_failed"))
 	}
 
 	return nil
@@ -146,29 +146,29 @@ func (p *LanguagePack) VerifySignature() error {
 // ValidateIntegrity performs digest verification, signature check, schema check, and token completeness
 func (p *LanguagePack) ValidateIntegrity(currentCoreVersion string) error {
 	if p.PackId == "" || p.Locale == "" || p.Version == "" {
-		return errors.New(i18n.T("incomplete_language_pack_manifest"))
+		return errors.New(T("incomplete_language_pack_manifest"))
 	}
 
 	if p.SchemaVersion != "1" {
-		return fmt.Errorf(i18n.T("unsupported_language_pack_schemaversion"), p.SchemaVersion)
+		return fmt.Errorf(T("unsupported_language_pack_schemaversion"), p.SchemaVersion)
 	}
 
 	// 1. Digest Verification
 	computedDigest := ComputeArtifactDigest(p.Tokens)
 	if computedDigest != p.ArtifactDigest {
-		return fmt.Errorf(i18n.T("artifact_digest_mismatch_computed_declared"), computedDigest, p.ArtifactDigest)
+		return fmt.Errorf(T("artifact_digest_mismatch_computed_declared"), computedDigest, p.ArtifactDigest)
 	}
 
 	// 2. Cryptographic Signature Verification
 	if err := p.VerifySignature(); err != nil {
-		return fmt.Errorf(i18n.T("signature_verification_failure"), err)
+		return fmt.Errorf(T("signature_verification_failure"), err)
 	}
 
 	// 3. Completeness Verification on Critical Tokens (LP-13, LP-14)
 	for tokenKey, class := range CriticalTokenRegistry {
 		if class == ClassSecurity || class == ClassDestructive {
 			if _, exists := p.Tokens[tokenKey]; !exists {
-				return fmt.Errorf(i18n.T("critical_token_class_missing_from"), tokenKey, class)
+				return fmt.Errorf(T("critical_token_class_missing_from"), tokenKey, class)
 			}
 		}
 	}
@@ -180,12 +180,12 @@ func (p *LanguagePack) ValidateIntegrity(currentCoreVersion string) error {
 func LoadPackFromFile(filePath string, coreVersion string) (*LanguagePack, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("failed_to_read_language_pack"), err)
+		return nil, fmt.Errorf(T("failed_to_read_language_pack"), err)
 	}
 
 	var pack LanguagePack
 	if err := json.Unmarshal(data, &pack); err != nil {
-		return nil, fmt.Errorf(i18n.T("failed_to_parse_language_pack"), err)
+		return nil, fmt.Errorf(T("failed_to_parse_language_pack"), err)
 	}
 
 	if err := pack.ValidateIntegrity(coreVersion); err != nil {

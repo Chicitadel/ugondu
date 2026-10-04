@@ -41,6 +41,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"ugondu/client/i18n"
 )
 
 type GitAdapter struct {

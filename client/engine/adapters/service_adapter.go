@@ -41,6 +41,8 @@ import (
 	"regexp"
 	"runtime"
 	"time"
+
+	"ugondu/client/i18n"
 )
 
 type ServiceRestartAdapter struct {

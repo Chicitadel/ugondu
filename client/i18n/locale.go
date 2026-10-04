@@ -456,13 +456,13 @@ func InstallPack(source string) (*LanguagePack, error) {
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf(i18n.T("language_pack_not_found"), source)
+			return nil, fmt.Errorf(T("language_pack_not_found"), source)
 		}
 	}
 
 	pack, err := LoadPackFromFile(packPath, "1.2.0")
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("failed_to_verify_pack"), err)
+		return nil, fmt.Errorf(T("failed_to_verify_pack"), err)
 	}
 
 	userDir, err := GetUserPacksDir()
@@ -487,7 +487,7 @@ func InstallPack(source string) (*LanguagePack, error) {
 func RemovePack(locale string) error {
 	norm := NormalizeLocale(locale)
 	if norm == "en-US" {
-		return errors.New(i18n.T("cannot_remove_bootstrap_enus"))
+		return errors.New(T("cannot_remove_bootstrap_enus"))
 	}
 
 	userDir, err := GetUserPacksDir()
@@ -505,7 +505,7 @@ func RemovePack(locale string) error {
 	}
 
 	if !removed {
-		return fmt.Errorf(i18n.T("language_pack_is_not_installed"), locale)
+		return fmt.Errorf(T("language_pack_is_not_installed"), locale)
 	}
 
 	ReloadAllPacks()
