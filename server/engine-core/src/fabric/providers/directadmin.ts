@@ -28,6 +28,7 @@ export const DirectAdminContract: ProviderCapabilities = {
 export interface IDirectAdminClient {
   createHostedApp(name: string, image: string): Promise<{ id: string; state: string }>;
   removeHostedApp(id: string): Promise<void>;
+  getInstanceStatus(id: string): Promise<{ id: string; state: 'running' | 'failed' | 'failed'; health: 'healthy' | 'unhealthy' }>;
   createDatabase(name: string, type: string): Promise<{ id: string; state: string }>;
   removeDatabase(id: string): Promise<void>;
   createAccountFILE(name: string): Promise<{ id: string; state: string }>;
@@ -51,7 +52,7 @@ export class DirectAdminAdapter implements ComputeCapability, DatabaseCapability
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    return { id, state: 'running', health: 'healthy' }; // Mock implementation, MUST be fixed
+    return await this.client.getInstanceStatus(id);
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
