@@ -35,50 +35,15 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-brews:
-  - tap:
-      owner: airroofers
-      name: homebrew-ugondu
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    commit_author:
-      name: ugondu-bot
-      email: bot@airroofers.com
-    folder: Formula
-    homepage: "https://ugondu.io"
-    description: "Ugondu Universal Delivery Operating System"
-    test: |
-      system "#{bin}/ugondu --version"
-nfpms:
-  - vendor: Air Roofers Ltd.
-    homepage: https://ugondu.io
-    maintainer: engineering@airroofers.com
-    description: Ugondu Universal Delivery Operating System
-    license: Commercial
-    formats:
-      - deb
-      - rpm
-    contents:
-      - src: ./docs/ugondu.1
-        dst: /usr/share/man/man1/ugondu.1
-      - src: ./LICENSE
-        dst: /usr/share/doc/ugondu/LICENSE
-dockers:
-  - image_templates:
-      - "ghcr.io/airroofers/ugondu:{{ .Version }}"
-      - "ghcr.io/airroofers/ugondu:latest"
-    dockerfile: Dockerfile.cli
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
 signs:
   - cmd: cosign
-    stdin: '{{ .Env.COSIGN_PASSWORD }}'
+    env:
+      - COSIGN_EXPERIMENTAL=1
+    certificate: '${artifact}.pem'
     args:
-      - "sign-blob"
-      - "--key=env://COSIGN_PRIVATE_KEY"
-      - "--output-signature=${signature}"
-      - "${artifact}"
+      - sign-blob
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+      - '--yes'
     artifacts: checksum
