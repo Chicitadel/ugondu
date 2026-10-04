@@ -58,6 +58,7 @@ export interface ILinuxClient {
   
   configureNetwork(name: string, cidr: string, mode: string): Promise<{ id: string }>;
   removeNetwork(id: string): Promise<void>;
+  createSubnet(networkId: string, cidr: string): Promise<{id: string; state: string}>;
   
   createDirectory(name: string): Promise<{ id: string; endpoint: string }>;
   removeDirectory(id: string): Promise<void>;
@@ -99,7 +100,8 @@ export class LinuxAdapter implements ComputeCapability, NetworkCapability, Stora
   }
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {
-    throw new Error('Not implemented');
+    const subnet = await this.client.createSubnet(networkId, cidr);
+    return { id: subnet.id, state: subnet.state, resolved: { cidrBlock: cidr } };
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

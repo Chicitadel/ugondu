@@ -1,3 +1,4 @@
+import { Logger } from '../../../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Provider Fabric — Provisioning Engine
@@ -106,7 +107,7 @@ export const NODE_HANDLERS: Record<NodeKind, NodeHandler<any>> = {
       const adapter = r.resolveCompute(p);
       const result = await adapter.provisionInstance(cfg, options);
       if (result.state === 'failed') {
-        if (result.id) await adapter.terminateInstance(result.id).catch(() => undefined);
+        if (result.id) await adapter.terminateInstance(result.id).catch((e) => Logger.warn('Suppressed error during termination: ' + String(e)));
         throw new Error(__t('fabric.engine.provider_reported_failure', { node: cfg.instanceName }));
       }
       return created(result, cfg.instanceName);

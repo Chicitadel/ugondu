@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Passport
@@ -57,7 +58,7 @@ export function createExecutionEnvelope(
     context: Record<string, unknown> = {}
 ): ExecutionEnvelope {
     return {
-        envelopeId: `env-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        envelopeId: `env-${Date.now()}-${crypto.randomUUID().split('-')[0]}`,
         passport,
         executionEnvironment: environmentDetails,
         timestamp: new Date().toISOString(),

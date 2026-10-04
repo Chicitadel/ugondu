@@ -1,3 +1,4 @@
+import { Logger } from '../../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Fabric Capabilities Engine
@@ -61,7 +62,7 @@ export class ProvisioningEngine {
   constructor(
     private registry: FabricRegistry,
     private journal: IJournal,
-    private state: ProvisioningStateStore = new InMemoryProvisioningState(),
+    private state: ProvisioningStateStore,
     private policy: EnginePolicy = {},
   ) {}
 
@@ -160,8 +161,8 @@ export class ProvisioningEngine {
       await this.journal.log({ nodeId: node.id, action: 'provision', status: 'success', timestamp: now(), resourceId: outcome.resourceId, evidence });
     } catch (error) {
       // The resource exists but is not recorded: remove it now, or it would be orphaned.
-      await handler.deprovision(this.registry, node.provider, outcome.resourceId).catch(() => undefined);
-      await this.state.remove(node.id).catch(() => undefined);
+      await handler.deprovision(this.registry, node.provider, outcome.resourceId).catch((e) => Logger.warn('Suppressed error during operation: ' + String(e)));
+      await this.state.remove(node.id).catch((e) => Logger.warn('Suppressed error during operation: ' + String(e)));
       throw error;
     }
     return { record, isNew: true };
@@ -180,7 +181,7 @@ export class ProvisioningEngine {
         rolledBack.push(record.nodeId);
       } catch (error) {
         failures.push({ nodeId: record.nodeId, resourceId: record.resourceId, error: messageOf(error) });
-        await this.journal.log({ nodeId: record.nodeId, action: 'deprovision', status: 'failed', timestamp: now(), resourceId: record.resourceId, detail: messageOf(error) }).catch(() => undefined);
+        await this.journal.log({ nodeId: record.nodeId, action: 'deprovision', status: 'failed', timestamp: now(), resourceId: record.resourceId, detail: messageOf(error) }).catch((e) => Logger.warn('Suppressed error during operation: ' + String(e)));
       }
     }
     return { rolledBack, failures };

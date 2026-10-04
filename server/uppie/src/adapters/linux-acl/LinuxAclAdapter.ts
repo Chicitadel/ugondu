@@ -269,7 +269,7 @@ export class LinuxAclAdapter implements IPolicyProviderAdapter {
       if (entries.length > 0) await this.system.exec('setfacl', ['-m', [...new Set(entries)].join(','), '--', path]);
       return { success: true, version: sha256(entries.join(',')).slice(0, 16), errors: [] };
     } catch (err: any) {
-      if (snapshot) await this.system.exec('setfacl', ['--set-file=-', '--', policyId], snapshot).catch(() => undefined);
+      if (snapshot) await this.system.exec('setfacl', ['--set-file=-', '--', policyId], snapshot).catch((e) => console.warn('Failed to restore ACL snapshot: ' + String(e)));
       return { success: false, version: '', errors: [__t('linux_acl.update.failed', { error: err.message })] };
     }
   }

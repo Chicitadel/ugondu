@@ -2,6 +2,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  transformIgnorePatterns: ['node_modules/(?!canonicalize)/'],
   testMatch: ['**/tests/**/*.spec.ts', '**/*.test.ts', '**/*.spec.ts'],
   testTimeout: 10000,
   coverageDirectory: 'coverage',

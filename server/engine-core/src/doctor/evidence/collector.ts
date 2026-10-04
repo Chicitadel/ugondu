@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : doctor::evidence
@@ -61,7 +62,7 @@ export class EvidenceCollector {
     const payloadStr = JSON.stringify(payload, Object.keys(payload).sort());
     const hash = createHash('sha256').update(payloadStr).digest('hex');
     const item: EvidenceItem = {
-      id: `ev_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+      id: `ev_${Date.now()}_${crypto.randomUUID().split('-')[0]}`,
       kind, source, collectedAt: new Date(), payload, hash,
     };
     this.items.push(item);

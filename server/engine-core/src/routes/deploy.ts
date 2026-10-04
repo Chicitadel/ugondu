@@ -62,7 +62,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         `${billingGatewayUrl}/authorize`,
         { token, repositoryUrl },
         { headers: { Authorization: `Bearer ${bgAuth}` } },
-      ).catch(() => null);
+      ).catch((e) => { Logger.warn('Suppressed error in deploy route: ' + String(e)); return null; });
 
       const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
       if (!authResponse?.data?.edition) {
@@ -331,7 +331,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         `${billingGatewayUrl}/authorize`,
         { token, repositoryUrl },
         { headers: { Authorization: `Bearer ${bgAuth}` } },
-      ).catch(() => null);
+      ).catch((e) => { Logger.warn('Suppressed error in deploy route: ' + String(e)); return null; });
 
       const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
       if (!authResponse?.data?.edition) {

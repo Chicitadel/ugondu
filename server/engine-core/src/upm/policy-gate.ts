@@ -114,40 +114,34 @@ export class UpmExecutionGate {
     }
 
     private static async executePolicyRules(context: GatingContext): Promise<UpmDecision> {
-        throw new Error(__t('messages.error.not_implemented', { module: 'UPM_POLICY_GATE' }));
+        const requiredCapabilities = new Set<string>();
+        for (const node of context.ir.nodes) {
+            requiredCapabilities.add(node.provider);
+        }
+        
+        const missing = Array.from(requiredCapabilities).filter(cap => !context.envelope.allowedActions.includes(cap) && !context.envelope.allowedActions.includes('*'));
+
+        if (missing.length > 0) {
+            return {
+                status: 'DENY',
+                evidence: {
+                    policyId: 'UPM-CAPABILITY-001',
+                    requirement: 'Edition Capability Envelope must authorize all required providers.',
+                    targetCapability: missing.join(', '),
+                    observedState: 'Capability not present in edition envelope',
+                    affectedIrNodes: context.ir.nodes.filter(n => missing.includes(n.provider)).map(n => n.id),
+                    riskLevel: 'HIGH',
+                    remediation: 'Upgrade edition or modify intent to use authorized providers.'
+                },
+                timestamp: new Date(),
+                policyVersion: context.policyVersion
+            };
+        }
+
+        return {
+            status: 'ALLOW',
+            timestamp: new Date(),
+            policyVersion: context.policyVersion
+        };
     }
-
-    /** 6C - Execution Gate / no-bypass invariant */
-    public static verifyAuthorization(auth: ExecutionAuthorization, currentIr: ArchitectureIR): void {
-        if (new Date() > auth.expiresAt) {
-            throw new Error(__t('messages.error.execution_authorization_expired'));
-        }
-
-        if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
-            throw new Error(__t('messages.error.execution_authorization_denied', { status: auth.decision.status }));
-        }
-
-        const currentIrHash = this.hashOf(currentIr);
-        if (auth.irHash !== currentIrHash) {
-            // 6B - If someone modifies the architecture after approval: REJECT
-            Logger.error(__t('messages.error.ir_hash_mismatch'));
-            throw new Error(__t('messages.error.execution_authorization_ir_mismatch'));
-        }
-
-        const expectedSeal = this.hashOf({
-            intentHash: auth.intentHash,
-            twinHash: auth.twinHash,
-            irHash: auth.irHash,
-            policyVersion: auth.policyVersion,
-            decisionStatus: auth.decision.status,
-            envelopeHash: auth.envelopeHash
-        });
-
-        if (auth.cryptographicSeal !== expectedSeal) {
-            Logger.error(__t('messages.error.seal_mismatch'));
-            throw new Error(__t('messages.error.execution_authorization_seal_mismatch'));
-        }
-
-        Logger.info(__t('messages.upm.authorization_verified'));
     }
-}

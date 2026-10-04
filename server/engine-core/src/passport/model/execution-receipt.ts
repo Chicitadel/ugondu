@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Passport
@@ -63,7 +64,7 @@ export function generateReceipt(
     error?: string
 ): ExecutionReceipt {
     return {
-        receiptId: `rcpt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        receiptId: `rcpt-${Date.now()}-${crypto.randomUUID().split('-')[0]}`,
         envelopeId,
         outcome,
         startedAt,

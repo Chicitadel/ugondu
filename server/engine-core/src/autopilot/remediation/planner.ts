@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 /******************************************************************************
  * Project        : Ugondu Engine Core
  * Module         : Autopilot / Remediation
@@ -32,7 +33,7 @@ export class RemediationPlanner {
         const severity = diagnosis.severity || 'LOW';
         const requiresApproval = severity === 'CRITICAL' || severity === 'HIGH';
         return {
-            planId: `plan-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            planId: `plan-${Date.now()}-${crypto.randomUUID().split('-')[0]}`,
             incidentId: diagnosis.incidentId,
             steps: [
                 {

@@ -58,6 +58,9 @@ export interface IAwsClient {
   
   createS3Bucket(name: string, isPublic: boolean): Promise<{ id: string; endpoint: string }>;
   deleteS3Bucket(id: string): Promise<void>;
+  getInstanceStatus(id: string): Promise<ComputeStatus>;
+  createSubnet(vpcId: string, cidr: string): Promise<{id: string; state: string}>;
+  createSnapshot(id: string): Promise<string>;
 }
 
 export class AwsAdapter implements ComputeCapability, NetworkCapability, DatabaseCapability, StorageCapability {
@@ -84,8 +87,7 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    // @ts-ignore
-    throw new Error(__t('messages.error.not_implemented', { module: 'AWS_PROVIDER' }));
+    return await this.client.getInstanceStatus(id);
   }
 
   public async createVirtualNetwork(config: NetworkConfig, options: ProviderOptions): Promise<NetworkResult> {
@@ -98,7 +100,8 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
   }
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {
-    throw new Error('Not implemented');
+    const subnet = await this.client.createSubnet(networkId, cidr);
+    return { id: subnet.id, state: subnet.state, resolved: { cidrBlock: cidr } };
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
@@ -111,7 +114,7 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
   }
 
   public async createSnapshot(id: string): Promise<string> {
-    throw new Error('Not implemented');
+    return await this.client.createSnapshot(id);
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

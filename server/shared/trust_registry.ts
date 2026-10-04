@@ -121,7 +121,8 @@ export class TrustRegistry {
         }
 
         if (process.env.UGONDU_SERVICE_TEST_PUBKEY) {
-            const testKeyId = process.env.UGONDU_SERVICE_TEST_KEY_ID || 'key_service_test_v1';
+            const testKeyId = process.env.UGONDU_SERVICE_TEST_KEY_ID;
+if (!testKeyId) throw new Error(__t('error_service_key_missing'));
             this.keys.set(testKeyId, {
                 keyId: testKeyId,
                 algorithm: 'ed25519',

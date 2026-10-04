@@ -1,3 +1,4 @@
+import { Logger } from '../../../shared/logger';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : URRE
@@ -123,7 +124,7 @@ export class AtomicDataTransaction {
         } catch (error) {
             // Cleanup staging if it exists
             if (fs.existsSync(stagingPath)) {
-                await fs.promises.unlink(stagingPath).catch(() => {});
+                await fs.promises.unlink(stagingPath).catch((e) => Logger.warn('Failed to unlink staging path: ' + String(e)));
             }
             throw error;
         }

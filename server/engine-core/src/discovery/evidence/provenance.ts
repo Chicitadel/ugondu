@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Discovery
@@ -47,7 +48,7 @@ export class ProvenanceTracker {
   private records: Map<string, ProvenanceRecord> = new Map();
 
   record(source: string, metadata: Record<string, any>): string {
-    const id = `prov-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const id = `prov-${Date.now()}-${crypto.randomUUID().split('-')[0]}`;
     this.records.set(id, { id, source, timestamp: Date.now(), metadata });
     return id;
   }
