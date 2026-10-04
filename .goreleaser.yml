@@ -8,6 +8,7 @@ builds:
     goarch:
       - amd64
       - arm64
+    dir: ./client
     main: .
     binary: ugondu
     flags:
