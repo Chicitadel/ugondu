@@ -9,18 +9,18 @@ describe('Provider Adapters (FAB-11)', () => {
       resolveInstanceType: async () => 't3.micro',
       runInstances: async () => ({ id: 'i-123', ip: '10.0.0.5', state: 'running' }),
       terminateInstances: async () => {},
-      createVpc: async () => ({ id: 'vpc-1', cidr: '10.0.0.0/16' }),
+      createVpc: async () => 'vpc-1',
       deleteVpc: async () => {},
-      createRdsInstance: async () => ({ id: 'db-1', endpoint: 'db-1.aws.com' }),
-      deleteRdsInstance: async () => {},
-      createS3Bucket: async () => ({ id: 'b-1', url: 's3://b-1' }),
+      createRds: async () => ({ id: 'db-1', endpoint: 'db-1.aws.com' }),
+      deleteRds: async () => {},
+      createS3Bucket: async () => ({ id: 'b-1', endpoint: 's3://b-1' }) as any,
       deleteS3Bucket: async () => {},
       getInstanceStatus: async () => ({ id: 'i-123', state: 'running' as any, health: 'healthy' }),
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
       createSnapshot: async () => ('snap-1'),
     };
     const adapter = new AwsAdapter(mockClient);
-    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'ami-1' }, {});
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'ami-1', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('i-123');
     expect(result.state).toBe('running');
   });
@@ -31,13 +31,13 @@ describe('Provider Adapters (FAB-11)', () => {
       deleteWorkload: async () => {},
       applyNetworkPolicy: async () => ({ id: 'net-1' }),
       deleteNetworkPolicy: async () => {},
-      createPvc: async () => ({ id: 'pvc-1' }),
+      createPvc: async () => ({ id: 'pvc-1', endpoint: 'pvc-1' }),
       deletePvc: async () => {},
       getInstanceStatus: async () => ({ id: 'deploy-1', state: 'running' as any, health: 'healthy' }),
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
     };
     const adapter = new KubernetesAdapter(mockClient);
-    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx' }, {});
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('deploy-1');
   });
 
@@ -48,12 +48,12 @@ describe('Provider Adapters (FAB-11)', () => {
       stopProcess: async () => {},
       configureNetwork: async () => ({ id: 'if-1' }),
       removeNetwork: async () => {},
-      createDirectory: async () => ({ id: '/opt/data' }),
+      createDirectory: async () => ({ id: '/opt/data', endpoint: '/opt/data' }),
       removeDirectory: async () => {},
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
     };
     const adapter = new LinuxAdapter(mockClient);
-    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx' }, {});
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('pid-1');
   });
 
@@ -63,12 +63,12 @@ describe('Provider Adapters (FAB-11)', () => {
       removeHostedApp: async () => {},
       createDatabase: async () => ({ id: 'db-1', endpoint: 'localhost' }),
       removeDatabase: async () => {},
-      createAccountFilesystem: async () => ({ id: 'fs-1' }),
+      createAccountFilesystem: async () => ({ id: 'fs-1', endpoint: 'fs-1' }),
       removeAccountFilesystem: async () => {},
       createSnapshot: async () => ('snap-1'),
     };
     const adapter = new CpanelAdapter(mockClient);
-    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'php' }, {});
+    const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'php', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('app-1');
   });
 });

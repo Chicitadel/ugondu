@@ -108,7 +108,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
     test('Adversarial: Revoked capability (Deny Structure)', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
-            decision: { status: 'DENY', timestamp: new Date(), policyVersion: '1.0.0', evidence: { targetCapability: 'PROVISION_DATABASE', policyId: 'P1', requirement: 'req', observedState: 'obs', affectedIrNodes: [], missing: [], remediation: 'none' } },
+            decision: { status: 'DENY', timestamp: new Date(), policyVersion: '1.0.0', evidence: { targetCapability: 'PROVISION_DATABASE', policyId: 'P1', requirement: 'req', observedState: 'obs', affectedIrNodes: [], remediation: 'none', riskLevel: 'HIGH' } },
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() + 100000),
@@ -132,7 +132,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
     test('Adversarial: Cryptographic Seal Tampering', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
-            decision: { status: 'DENY', timestamp: new Date(), policyVersion: '1.0.0', evidence: { targetCapability: 'PROVISION_DATABASE', policyId: 'P1', requirement: 'req', observedState: 'obs', affectedIrNodes: [], missing: [], remediation: 'none' } },
+            decision: { status: 'DENY', timestamp: new Date(), policyVersion: '1.0.0', evidence: { targetCapability: 'PROVISION_DATABASE', policyId: 'P1', requirement: 'req', observedState: 'obs', affectedIrNodes: [], remediation: 'none', riskLevel: 'HIGH' } },
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() + 100000),

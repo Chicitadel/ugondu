@@ -19,10 +19,10 @@ export const DirectAdminContract: ProviderCapabilities = {
   storageClasses: ['FILE'],
   publicStorageClasses: [],
   supportsDryRun: false,
-  supportsRollback: true,
+  supportsRollback: true, supportsIdempotency: false, supportsImport: false, supportsUpdate: false, supportsDelete: true,
   
-  maxComputeNodes: 10,
-  maxStorageVolumes: 10
+
+
 };
 
 export interface IDirectAdminClient {

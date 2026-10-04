@@ -147,7 +147,7 @@ describe('Preflight rejects what a provider cannot faithfully do (FAB-08)', () =
     const contract: any = nativeContract('lab');
     contract.kinds.NETWORK = { status: 'UNSUPPORTED', modes: [] };
     const fabric = fakeFabric(['lab'], () => contract);
-    const error = await failure(() => new ProvisioningEngine(fabric.registry, fabric.journal).executePlan({ nodes: [network('n', '10.0.0.0/16', 'lab')], edges: [] }));
+    const error = await failure(() => new ProvisioningEngine(fabric.registry, fabric.journal, new InMemoryProvisioningState()).executePlan({ nodes: [network('n', '10.0.0.0/16', 'lab')], edges: [] }));
     expect(error.rejections[0].reason).toBe(C('reason.generic', { provider: 'lab', kind: 'NETWORK' }));
     expect(error.rejections[0].alternatives).toEqual([]);
     expect(fabric.calls).toEqual([]);
