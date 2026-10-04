@@ -156,7 +156,7 @@ func FindLatestTransactionId() (string, error) {
 	}
 	entries, err := os.ReadDir(txBaseDir)
 	if err != nil {
-		return "", fmt.Errorf("unable to read transactions directory: %w", err)
+		return "", fmt.Errorf(i18n.T("unable_to_read_transactions_directory"), err)
 	}
 
 	var latestTxId string
@@ -188,7 +188,7 @@ func FindLatestTransactionId() (string, error) {
 	}
 
 	if latestTxId == "" {
-		return "", fmt.Errorf("no transactions found in %s", txBaseDir)
+		return "", fmt.Errorf(i18n.T("no_transactions_found_in"), txBaseDir)
 	}
 
 	return latestTxId, nil

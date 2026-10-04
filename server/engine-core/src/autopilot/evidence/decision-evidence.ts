@@ -1,3 +1,4 @@
+import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : Air Roofers Platform
  * Module         : Autopilot / Evidence
@@ -32,7 +33,7 @@ export class DecisionEvidenceStore {
 
     public storeEvidence(record: EvidenceRecord): void {
         if (!this.verifyHash(record)) {
-            throw new Error('Evidence record fails cryptographic verification');
+            throw new Error(__t('evidence_record_fails_cryptographic_verification'));
         }
         this.records.set(record.decisionId, record);
     }

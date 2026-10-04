@@ -56,7 +56,7 @@ func NewServiceRestartAdapter() *ServiceRestartAdapter {
 func (a *ServiceRestartAdapter) Restart(serviceName string) error {
 	matched, _ := regexp.MatchString(`^[a-zA-Z0-9_.@-]+$`, serviceName)
 	if !matched {
-		return fmt.Errorf("invalid service name: %s", serviceName)
+		return fmt.Errorf(i18n.T("invalid_service_name"), serviceName)
 	}
 
 	var cmdName string
@@ -78,7 +78,7 @@ func (a *ServiceRestartAdapter) Restart(serviceName string) error {
 
 	cmd := exec.CommandContext(ctx, cmdName, args...)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("service stop/restart failed: %w", err)
+		return fmt.Errorf(i18n.T("service_stoprestart_failed"), err)
 	}
 
 	if runtime.GOOS == "windows" {
@@ -86,7 +86,7 @@ func (a *ServiceRestartAdapter) Restart(serviceName string) error {
 		defer cancelStart()
 		cmdStart := exec.CommandContext(ctxStart, cmdName, "start", serviceName)
 		if err := cmdStart.Run(); err != nil {
-			return fmt.Errorf("service start failed: %w", err)
+			return fmt.Errorf(i18n.T("service_start_failed"), err)
 		}
 	}
 

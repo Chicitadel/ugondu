@@ -68,7 +68,7 @@ func (a *GitAdapter) resolveGitBinary() string {
 
 func (a *GitAdapter) Pull(repoURL, branch, workDir, credentialFile string) error {
 	if !strings.HasPrefix(repoURL, "https://") && !strings.HasPrefix(repoURL, "git@") {
-		return fmt.Errorf("invalid repo URL scheme: %s", repoURL)
+		return fmt.Errorf(i18n.T("invalid_repo_url_scheme"), repoURL)
 	}
 
 	args := []string{"pull", repoURL, branch}
@@ -91,14 +91,14 @@ func (a *GitAdapter) Pull(repoURL, branch, workDir, credentialFile string) error
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("git pull failed: %w", err)
+		return fmt.Errorf(i18n.T("git_pull_failed"), err)
 	}
 	return nil
 }
 
 func (a *GitAdapter) Clone(repoURL, branch, targetDir string) error {
 	if !strings.HasPrefix(repoURL, "https://") && !strings.HasPrefix(repoURL, "git@") {
-		return fmt.Errorf("invalid repo URL scheme: %s", repoURL)
+		return fmt.Errorf(i18n.T("invalid_repo_url_scheme"), repoURL)
 	}
 
 	args := []string{"clone", "-b", branch, repoURL, targetDir}
@@ -113,7 +113,7 @@ func (a *GitAdapter) Clone(repoURL, branch, targetDir string) error {
 	}
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("git clone failed: %w", err)
+		return fmt.Errorf(i18n.T("git_clone_failed"), err)
 	}
 	return nil
 }

@@ -84,7 +84,7 @@ func (a *CopyFileAction) Execute(env *ExecutionEnvelope, payload map[string]inte
 	if err != nil {
 		return nil, fmt.Errorf("ERR_COPY_FAILED: %w", err)
 	}
-	return []string{fmt.Sprintf("Copied %s to %s", p.Source, p.Destination)}, nil
+	return []string{fmt.Sprintf(i18n.T("copied_to"), p.Source, p.Destination)}, nil
 }
 
 // CREATE_DIRECTORY
@@ -117,7 +117,7 @@ func (a *CreateDirectoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 	if err != nil {
 		return nil, fmt.Errorf("ERR_MKDIR_FAILED: %w", err)
 	}
-	return []string{fmt.Sprintf("Created directory %s", p.Path)}, nil
+	return []string{fmt.Sprintf(i18n.T("created_directory"), p.Path)}, nil
 }
 
 // SYMLINK
@@ -152,7 +152,7 @@ func (a *SymlinkAction) Execute(env *ExecutionEnvelope, payload map[string]inter
 	if err != nil {
 		return nil, fmt.Errorf("ERR_SYMLINK_FAILED: %w", err)
 	}
-	return []string{fmt.Sprintf("Created symlink %s -> %s", p.Link, p.Target)}, nil
+	return []string{fmt.Sprintf(i18n.T("created_symlink"), p.Link, p.Target)}, nil
 }
 
 // SERVICE_RESTART
@@ -186,7 +186,7 @@ func (a *ServiceRestartAction) Execute(env *ExecutionEnvelope, payload map[strin
 	if err != nil {
 		return nil, fmt.Errorf("ERR_SERVICE_RESTART_FAILED: %w", err)
 	}
-	return []string{fmt.Sprintf("Restarted service %s", p.ServiceName)}, nil
+	return []string{fmt.Sprintf(i18n.T("restarted_service"), p.ServiceName)}, nil
 }
 
 // COMPOSER_INSTALL
@@ -239,9 +239,9 @@ func (a *ComposerInstallAction) Execute(env *ExecutionEnvelope, payload map[stri
 	}
 
 	if runErr != nil {
-		return logs, fmt.Errorf("composer %s failed: %w\n%s", strings.Join(args, " "), runErr, outputStr)
+		return logs, fmt.Errorf(i18n.T("composer_failed_n"), strings.Join(args, " "), runErr, outputStr)
 	}
 
-	logs = append(logs, fmt.Sprintf("Successfully executed composer %s in %s", strings.Join(args, " "), p.WorkingDirectory))
+	logs = append(logs, fmt.Sprintf(i18n.T("successfully_executed_composer_in"), strings.Join(args, " "), p.WorkingDirectory))
 	return logs, nil
 }

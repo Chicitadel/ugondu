@@ -77,7 +77,7 @@ type FetchRepositoryPayload struct {
 
 func ValidateFetchRepositoryPayload(payload map[string]interface{}) (*FetchRepositoryPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf("payload is required for FETCH_REPOSITORY")
+		return nil, fmt.Errorf(i18n.T("payload_is_required_for_fetchrepository"))
 	}
 	rawURL, ok := payload["url"].(string)
 	if !ok || strings.TrimSpace(rawURL) == "" {
@@ -99,7 +99,7 @@ type SyncEnvironmentPayload struct {
 
 func ValidateSyncEnvironmentPayload(payload map[string]interface{}) (*SyncEnvironmentPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf("payload is required for SYNC_ENVIRONMENT")
+		return nil, fmt.Errorf(i18n.T("payload_is_required_for_syncenvironment"))
 	}
 	strategy, ok := payload["strategy"].(string)
 	if !ok || strings.TrimSpace(strategy) == "" {
@@ -281,9 +281,9 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 	gitAdapter := adapters.NewGitAdapter()
 	if err := gitAdapter.Pull(displayUrl, p.Branch, ".", credFile); err != nil {
-		return logs, fmt.Errorf("git pull failed: %v", err)
+		return logs, fmt.Errorf(i18n.T("git_pull_failed"), err)
 	}
-	logs = append(logs, fmt.Sprintf("Fetched latest from %s @ %s", p.URL, p.Branch))
+	logs = append(logs, fmt.Sprintf(i18n.T("fetched_latest_from"), p.URL, p.Branch))
 
 	return logs, nil
 }
@@ -317,13 +317,13 @@ func (a *SyncEnvironmentAction) Execute(env *ExecutionEnvelope, payload map[stri
 		}
 		releaseDir := filepath.Join(homeDir, "releases", env.TransactionId)
 		if err := CopyDir(".", releaseDir, true); err != nil {
-			return logs, fmt.Errorf("failed to copy to release dir: %v", err)
+			return logs, fmt.Errorf(i18n.T("failed_to_copy_to_release"), err)
 		}
 		if err := AtomicSymlink(releaseDir, filepath.Join(homeDir, "public_html")); err != nil {
-			return logs, fmt.Errorf("failed to create atomic symlink: %v", err)
+			return logs, fmt.Errorf(i18n.T("failed_to_create_atomic_symlink"), err)
 		}
 		fmt.Printf("     -> %s\n", i18n.T("atomic_release", releaseDir))
-		logs = append(logs, fmt.Sprintf("Created atomic release at %s", releaseDir))
+		logs = append(logs, fmt.Sprintf(i18n.T("created_atomic_release_at"), releaseDir))
 	}
 
 	return logs, nil
@@ -350,7 +350,7 @@ func (a *PruneReleasesAction) Execute(env *ExecutionEnvelope, payload map[string
 	if err := PruneReleases(releasesPath, p.Retention); err != nil {
 		fmt.Printf("     -> %s\n", i18n.T("warn_prune_failed", err))
 	}
-	logs = append(logs, fmt.Sprintf("Pruned releases to max %d", p.Retention))
+	logs = append(logs, fmt.Sprintf(i18n.T("pruned_releases_to_max"), p.Retention))
 	return logs, nil
 }
 
@@ -437,10 +437,10 @@ func (a *NodeInstallAction) Execute(env *ExecutionEnvelope, payload map[string]i
 	}
 
 	if runErr != nil {
-		return logs, fmt.Errorf("node install (%s %s) failed: %w\n%s", cmdName, strings.Join(args, " "), runErr, outputStr)
+		return logs, fmt.Errorf(i18n.T("node_install_failed_n"), cmdName, strings.Join(args, " "), runErr, outputStr)
 	}
 
-	logs = append(logs, fmt.Sprintf("Successfully executed %s %s in %s", cmdName, strings.Join(args, " "), p.WorkingDirectory))
+	logs = append(logs, fmt.Sprintf(i18n.T("successfully_executed_in"), cmdName, strings.Join(args, " "), p.WorkingDirectory))
 	return logs, nil
 }
 

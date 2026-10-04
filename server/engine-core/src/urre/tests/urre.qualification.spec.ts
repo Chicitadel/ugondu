@@ -1,3 +1,4 @@
+import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : URRE — Qualification Gates URRE-01..30
@@ -32,7 +33,7 @@ describe('URRE Qualification Gates: URRE-01..30', () => {
     let attempts = 0;
     const res = await retry.executeWithRetry(async () => {
       attempts++;
-      if (attempts < 2) throw new Error('API 503 Service Unavailable');
+      if (attempts < 2) throw new Error(__t('api_503_service_unavailable'));
       return 'SUCCESS';
     }, async () => {});
     expect(res).toBe('SUCCESS');

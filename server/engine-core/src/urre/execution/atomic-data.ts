@@ -124,7 +124,7 @@ export class AtomicDataTransaction {
         } catch (error) {
             // Cleanup staging if it exists
             if (fs.existsSync(stagingPath)) {
-                await fs.promises.unlink(stagingPath).catch((e) => Logger.warn('Failed to unlink staging path: ' + String(e)));
+                await fs.promises.unlink(stagingPath).catch((e) => Logger.warn(__t('failed_to_unlink_staging_path') + String(e)));
             }
             throw error;
         }

@@ -44,7 +44,7 @@ import (
 )
 
 var (
-	ErrTransactionLocked = errors.New("transaction is locked by another active process")
+	ErrTransactionLocked = errors.New(i18n.T("transaction_is_locked_by_another"))
 )
 
 type LockData struct {
@@ -91,7 +91,7 @@ func AcquireTransactionLock(txId string) (*TransactionLock, error) {
 	}
 
 	if err := os.MkdirAll(txDir, 0700); err != nil {
-		return nil, fmt.Errorf("failed to create transaction directory for lock: %w", err)
+		return nil, fmt.Errorf(i18n.T("failed_to_create_transaction_directory"), err)
 	}
 
 	lockPath := filepath.Join(txDir, "lock")
@@ -108,7 +108,7 @@ func AcquireTransactionLock(txId string) (*TransactionLock, error) {
 
 	lockBytes, err := json.MarshalIndent(lockData, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal lock data: %w", err)
+		return nil, fmt.Errorf(i18n.T("failed_to_marshal_lock_data"), err)
 	}
 
 	// Attempt exclusive creation
@@ -117,7 +117,7 @@ func AcquireTransactionLock(txId string) (*TransactionLock, error) {
 		if _, writeErr := file.Write(lockBytes); writeErr != nil {
 			_ = file.Close()
 			_ = os.Remove(lockPath)
-			return nil, fmt.Errorf("failed to write lock file: %w", writeErr)
+			return nil, fmt.Errorf(i18n.T("failed_to_write_lock_file"), writeErr)
 		}
 		_ = file.Sync()
 		_ = file.Close()
@@ -168,7 +168,7 @@ func tryCreateLock(lockPath string, lockBytes []byte, lockData LockData, txId st
 	if _, writeErr := file.Write(lockBytes); writeErr != nil {
 		_ = file.Close()
 		_ = os.Remove(lockPath)
-		return nil, fmt.Errorf("failed to write lock file: %w", writeErr)
+		return nil, fmt.Errorf(i18n.T("failed_to_write_lock_file"), writeErr)
 	}
 	_ = file.Sync()
 	_ = file.Close()

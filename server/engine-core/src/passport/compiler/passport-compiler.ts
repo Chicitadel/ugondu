@@ -76,7 +76,7 @@ export class PassportCompiler {
     }
     const now = new Date();
     return {
-      id: `pp_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+      id: `pp_${Date.now()}_${crypto.randomUUID().split('-')[0]}`,
       policyId: `pol_${intent.action}`,
       principalId: 'cli_principal',
       capabilities: intent.capabilities ?? [],

@@ -1,3 +1,4 @@
+import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Tenant Identity
@@ -41,14 +42,14 @@ import { SubjectContext, SubjectContextFactory } from './subject-context';
  */
 export class OIDCAdapter {
   public verifyIdToken(token: string): SubjectContext {
-    if (!token || typeof token !== 'string') throw new Error('Invalid token');
+    if (!token || typeof token !== 'string') throw new Error(__t('invalid_token'));
     const parts = token.split('.');
-    if (parts.length !== 3) throw new Error('Invalid JWT structure');
+    if (parts.length !== 3) throw new Error(__t('invalid_jwt_structure'));
     
     try {
         const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-        if (!payload.sub) throw new Error('Missing sub claim');
-        if (payload.exp && payload.exp * 1000 < Date.now()) throw new Error('Token expired');
+        if (!payload.sub) throw new Error(__t('missing_sub_claim'));
+        if (payload.exp && payload.exp * 1000 < Date.now()) throw new Error(__t('token_expired'));
         
         return SubjectContextFactory.create(
             payload.sub,
@@ -58,7 +59,7 @@ export class OIDCAdapter {
             true
         );
     } catch (error) {
-        throw new Error('Token verification failed: ' + String(error));
+        throw new Error(__t('token_verification_failed') + String(error));
     }
   }));
   }

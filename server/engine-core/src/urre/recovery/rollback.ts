@@ -1,3 +1,4 @@
+import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : URRE Engine Core
  * Module         : URRE Recovery
@@ -57,7 +58,7 @@ export class RollbackCoordinator {
 
   private async prepare(certificate: RecoveryPointCertificate): Promise<void> {
     if (!certificate || !certificate.recoveryPointId) {
-      throw new Error('Invalid recovery point certificate for rollback preparation');
+      throw new Error(__t('invalid_recovery_point_certificate_for'));
     }
   }
 

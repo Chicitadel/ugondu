@@ -44,13 +44,13 @@ func Authenticate() {
 		envelopeStr := r.URL.Query().Get("envelope")
 
 		if envelopeStr == "" {
-			http.Error(w, "missing envelope", http.StatusBadRequest)
+			http.Error(w, i18n.T("auth_missing_envelope"), http.StatusBadRequest)
 			return
 		}
 
 		var envelope CapabilityEnvelope
 		if err := json.Unmarshal([]byte(envelopeStr), &envelope); err != nil {
-			http.Error(w, "invalid envelope format", http.StatusBadRequest)
+			http.Error(w, i18n.T("auth_invalid_envelope_format"), http.StatusBadRequest)
 			return
 		}
 
@@ -65,7 +65,7 @@ func Authenticate() {
 		data, _ := json.MarshalIndent(ctx, "", "  ")
 		os.WriteFile(path, data, 0600)
 
-		fmt.Fprintf(w, "Authentication successful. You may close this window.")
+		fmt.Fprintf(w, "%s", i18n.T("auth_successful_close_window"))
 		done <- true
 	})
 
@@ -109,12 +109,12 @@ func LoadAuthContext() (*AuthContext, error) {
 	path, _ := getAuthFilePath()
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("not authenticated")
+		return nil, fmt.Errorf(i18n.T("not_authenticated"))
 	}
 	var ctx AuthContext
 	json.Unmarshal(data, &ctx)
 	if time.Now().Unix() > ctx.Envelope.ExpiresAt {
-		return nil, fmt.Errorf("authentication expired")
+		return nil, fmt.Errorf(i18n.T("authentication_expired"))
 	}
 	return &ctx, nil
 }

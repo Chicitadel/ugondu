@@ -57,7 +57,7 @@ function fakeSystem(handlers: Record<string, (args: string[], input?: string) =>
       if (r instanceof Error) throw r;
       return { stdout: r };
     },
-    async readFile(p) { const v = files.get(p); if (v === undefined) throw new Error('ENOENT'); return v; },
+    async readFile(p) { const v = files.get(p); if (v === undefined) throw new Error(__t('enoent')); return v; },
     async writeFile(p, c) { files.set(p, c); },
     async rename(a, b) { files.set(b, files.get(a) as string); files.delete(a); },
     async removeFile(p) { files.delete(p); },

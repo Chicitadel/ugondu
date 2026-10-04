@@ -121,13 +121,13 @@ func AtomicSymlink(target string, symlinkPath string) error {
 	
 	// Create new link at temp path
 	if err := os.Symlink(target, tempPath); err != nil {
-		return fmt.Errorf("failed to create temp symlink: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_create_temp_symlink"), err)
 	}
 	
 	// Atomic rename (POSIX-atomic on Linux/macOS, best-effort on Windows)
 	if err := os.Rename(tempPath, symlinkPath); err != nil {
 		os.Remove(tempPath) // clean up on failure
-		return fmt.Errorf("failed to atomically promote symlink: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_atomically_promote_symlink"), err)
 	}
 	
 	return nil
@@ -167,7 +167,7 @@ func PruneReleases(releasesPath string, retention int) error {
 	for _, oldDir := range dirs[retention:] {
 		fullPath := filepath.Join(releasesPath, oldDir.Name())
 		if err := os.RemoveAll(fullPath); err != nil {
-			return fmt.Errorf("failed to remove old release %s: %v", fullPath, err)
+			return fmt.Errorf(i18n.T("failed_to_remove_old_release"), fullPath, err)
 		}
 	}
 

@@ -1,3 +1,4 @@
+import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Provider Fabric - Linux Adapter
@@ -70,7 +71,7 @@ export class LinuxAdapter implements ComputeCapability, NetworkCapability, Stora
   public async provisionInstance(config: ComputeConfig, options: ProviderOptions): Promise<ComputeResult> {
     const hasCapacity = await this.client.checkCapacity(config.cpuCores, config.memoryMb);
     if (!hasCapacity) {
-      throw new Error(`Insufficient capacity for ${config.cpuCores} CPU and ${config.memoryMb} MB`);
+      throw new Error(__t('insufficient_capacity_for_configcpucores_cpu'));
     }
     const mode = options.mode ?? 'SYSTEMD';
     const instance = await this.client.runProcess(config.instanceName, config.osImage, mode);

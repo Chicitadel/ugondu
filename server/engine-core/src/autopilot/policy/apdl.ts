@@ -1,3 +1,4 @@
+import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : Air Roofers Platform
  * Module         : Autopilot / Policy
@@ -40,16 +41,16 @@ export class ApdlParser {
                     typeof item.priority === 'number'
                 );
                 if (!isValid) {
-                    throw new Error('APDL_PARSE_ERROR');
+                    throw new Error(__t('apdlparseerror'));
                 }
                 return parsed;
             }
             if (parsed && typeof parsed === 'object' && Array.isArray(parsed.rules)) {
                 return parsed.rules;
             }
-            throw new Error('APDL_PARSE_ERROR');
+            throw new Error(__t('apdlparseerror'));
         } catch (error) {
-            throw new Error('APDL_PARSE_ERROR');
+            throw new Error(__t('apdlparseerror'));
         }
     }
 

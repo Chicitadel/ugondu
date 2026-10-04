@@ -145,7 +145,7 @@ describe('WHM failures', () => {
     const down = await failure(() => a.listAccounts());
     expect(down.message).toBe(T('network_error', { command: 'listaccts', error: 'connect ECONNREFUSED' }));
     expect(down.message.includes(TOKEN)).toBe(false);
-    const garbled: any = async () => ({ ok: true, status: 200, json: async () => { throw new Error('Unexpected token'); } });
+    const garbled: any = async () => ({ ok: true, status: 200, json: async () => { throw new Error(__t('unexpected_token')); } });
     const b = createHttpWhmClient({ tenantId: 't', environmentId: 'e', provider: 'CPANEL', credentials }, { fetchImpl: garbled });
     expect((await failure(() => b.listAccounts())).message).toBe(T('network_error', { command: 'listaccts', error: 'Unexpected token' }));
     const silent: any = (_url: string, init: any) => new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(new Error('aborted'))));

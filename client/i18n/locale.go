@@ -46,6 +46,100 @@ var (
 
 // Minimal core bootstrap dictionary (LP-02: only bootstrap/fallback in core)
 var bootstrapDict = map[string]string{
+	"auth_missing_envelope": "missing envelope",
+	"auth_invalid_envelope_format": "invalid envelope format",
+	"auth_successful_close_window": "Authentication successful. You may close this window.",
+
+	"state_file_is_corrupt": "State File Is Corrupt",
+	"auth_success": "Auth Success",
+	"failed_to_serialize_execution_state": "Failed To Serialize Execution State",
+	"failed_to_load_transaction_state": "Failed To Load Transaction State",
+	"created_directory": "Created Directory",
+	"fetched_latest_from": "Fetched Latest From",
+	"failed_to_close_temp_state": "Failed To Close Temp State",
+	"signature_verification_failed": "Signature Verification Failed",
+	"invalid_transactionid_contains_path_separators": "Invalid Transactionid Contains Path Separators",
+	"cannot_save_state_execution_state": "Cannot Save State Execution State",
+	"incomplete_language_pack_manifest": "Incomplete Language Pack Manifest",
+	"execution_recipe_has_expired": "Execution Recipe Has Expired",
+	"failed_to_read_language_pack": "Failed To Read Language Pack",
+	"failed_to_marshal_lock_data": "Failed To Marshal Lock Data",
+	"composer_failed_n": "Composer Failed N",
+	"plan_hash_mismatch_recipe_tampered": "Plan Hash Mismatch Recipe Tampered",
+	"successfully_executed_in": "Successfully Executed In",
+	"failed_to_parse_execution_recipe": "Failed To Parse Execution Recipe",
+	"failed_to_atomically_promote_symlink": "Failed To Atomically Promote Symlink",
+	"payload_is_required_for_syncenvironment": "Payload Is Required For Syncenvironment",
+	"invalid_envelope_format": "Invalid Envelope Format",
+	"skipped_step_due_to_idempotency": "Skipped Step Due To Idempotency",
+	"auth_not_logged_in": "Auth Not Logged In",
+	"public_key_not_found_in": "Public Key Not Found In",
+	"failed_to_create_temp_symlink": "Failed To Create Temp Symlink",
+	"cannot_reach_governance_server_at": "Cannot Reach Governance Server At",
+	"unable_to_read_transactions_directory": "Unable To Read Transactions Directory",
+	"atomic_rename_failed_for_state": "Atomic Rename Failed For State",
+	"invalid_steps_format": "Invalid Steps Format",
+	"service_stoprestart_failed": "Service Stoprestart Failed",
+	"failed_to_remove_old_release": "Failed To Remove Old Release",
+	"failed_to_copy_to_release": "Failed To Copy To Release",
+	"failed_to_parse_pem_block": "Failed To Parse Pem Block",
+	"invalid_service_name": "Invalid Service Name",
+	"err_signature_invalid": "Err Signature Invalid",
+	"authentication_expired": "Authentication Expired",
+	"cryptographic_signature_verification_failed": "Cryptographic Signature Verification Failed",
+	"cannot_remove_bootstrap_enus": "Cannot Remove Bootstrap Enus",
+	"failed_to_fetch_public_keys": "Failed To Fetch Public Keys",
+	"successfully_executed_composer_in": "Successfully Executed Composer In",
+	"failed_to_resolve_user_home": "Failed To Resolve User Home",
+	"auth_expired": "Auth Expired",
+	"created_atomic_release_at": "Created Atomic Release At",
+	"git_clone_failed": "Git Clone Failed",
+	"node_install_failed_n": "Node Install Failed N",
+	"critical_token_class_missing_from": "Critical Token Class Missing From",
+	"copied_to": "Copied To",
+	"not_an_ed25519_key": "Not An Ed25519 Key",
+	"failed_to_create_atomic_symlink": "Failed To Create Atomic Symlink",
+	"failed_to_verify_pack": "Failed To Verify Pack",
+	"failed_to_sync_temp_state": "Failed To Sync Temp State",
+	"failed_to_parse_keys": "Failed To Parse Keys",
+	"restarted_service": "Restarted Service",
+	"signature_verification_failure": "Signature Verification Failure",
+	"auth_currently_logged_in": "Auth Currently Logged In",
+	"failed_to_parse_keys_from": "Failed To Parse Keys From",
+	"artifact_digest_mismatch_computed_declared": "Artifact Digest Mismatch Computed Declared",
+	"failed_to_decode_authority_public": "Failed To Decode Authority Public",
+	"failed_to_serialize_deployment_context": "Failed To Serialize Deployment Context",
+	"no_transactions_found_in": "No Transactions Found In",
+	"payload_is_required_for_fetchrepository": "Payload Is Required For Fetchrepository",
+	"authority_key_is_not_ed25519": "Authority Key Is Not Ed25519",
+	"language_pack_not_found": "Language Pack Not Found",
+	"not_authenticated": "Not Authenticated",
+	"failed_to_open_temp_state": "Failed To Open Temp State",
+	"failed_to_get_user_home": "Failed To Get User Home",
+	"created_symlink": "Created Symlink",
+	"server_rejected_deployment_http": "Server Rejected Deployment Http",
+	"state_file_not_found": "State File Not Found",
+	"service_start_failed": "Service Start Failed",
+	"invalid_repo_url_scheme": "Invalid Repo Url Scheme",
+	"failed_to_write_temp_state": "Failed To Write Temp State",
+	"failed_to_write_lock_file": "Failed To Write Lock File",
+	"failed_to_compute_state_hash": "Failed To Compute State Hash",
+	"git_pull_failed": "Git Pull Failed",
+	"unsupported_language_pack_schemaversion": "Unsupported Language Pack Schemaversion",
+	"language_pack_is_not_installed": "Language Pack Is Not Installed",
+	"err_missing_public_key": "Err Missing Public Key",
+	"auth_init": "Auth Init",
+	"unsigned_language_pack": "Unsigned Language Pack",
+	"failed_to_parse_language_pack": "Failed To Parse Language Pack",
+	"auth_logout_success": "Auth Logout Success",
+	"malformed_signature_base64": "Malformed Signature Base64",
+	"transaction_is_locked_by_another": "Transaction Is Locked By Another",
+	"pruned_releases_to_max": "Pruned Releases To Max",
+	"invalid_signature": "Invalid Signature",
+	"failed_to_parse_authority_public": "Failed To Parse Authority Public",
+	"failed_to_acquire_transaction_lock": "Failed To Acquire Transaction Lock",
+	"failed_to_create_transaction_directory": "Failed To Create Transaction Directory",
+	"unknown_action_in_recipe": "Unknown Action In Recipe",
 	"cli_title":                "Ugondu Universal Delivery Client v1.2.0",
 	"cli_subtitle":             "Air Roofers - Commercial Delivery Platform",
 	"err_not_repo":             "Error: Must be run inside a valid git repository.",
@@ -358,13 +452,13 @@ func InstallPack(source string) (*LanguagePack, error) {
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("language pack '%s' not found", source)
+			return nil, fmt.Errorf(i18n.T("language_pack_not_found"), source)
 		}
 	}
 
 	pack, err := LoadPackFromFile(packPath, "1.2.0")
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify pack: %w", err)
+		return nil, fmt.Errorf(i18n.T("failed_to_verify_pack"), err)
 	}
 
 	userDir, err := GetUserPacksDir()
@@ -389,7 +483,7 @@ func InstallPack(source string) (*LanguagePack, error) {
 func RemovePack(locale string) error {
 	norm := NormalizeLocale(locale)
 	if norm == "en-US" {
-		return errors.New("cannot remove bootstrap en-US")
+		return errors.New(i18n.T("cannot_remove_bootstrap_enus"))
 	}
 
 	userDir, err := GetUserPacksDir()
@@ -407,7 +501,7 @@ func RemovePack(locale string) error {
 	}
 
 	if !removed {
-		return fmt.Errorf("language pack '%s' is not installed", locale)
+		return fmt.Errorf(i18n.T("language_pack_is_not_installed"), locale)
 	}
 
 	ReloadAllPacks()
