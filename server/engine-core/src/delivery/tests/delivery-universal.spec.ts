@@ -44,7 +44,7 @@ describe('Gate E: Source/Destination Universalism', () => {
         
         // Ensure the Native SSH adapter was physically invoked by the destination adapter!
         expect(mockSshClient.execCommand).toHaveBeenCalledWith(
-            expect.stringContaining('if [ -d "/home/admin/domains/ugondu_site/public_html" ]; then echo "OK"; else echo "MISSING"; fi')
+            expect.stringContaining("if [ -d /home/'admin'/domains/'ugondu_site'/public_html ]; then echo \"OK\"; else echo \"MISSING\"; fi")
         );
     });
 });

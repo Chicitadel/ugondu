@@ -50,3 +50,24 @@ export function assertNoSecretValues(nodeId: string, values: Record<string, unkn
     if (!isReference) throw new Error(__t('fabric.engine.secret_in_plan', { node: nodeId, field }));
   }
 }
+
+/**
+ * Resolves a secret reference to its physical value using the Credential Vault.
+ * In a native environment, this delegates to the Ugondu KMS or injected environment variables.
+ */
+export async function resolveSecret(ref: string): Promise<string> {
+  if (!ref.startsWith(SECRET_PREFIX)) {
+    throw new Error('SECURITY_VIOLATION: Attempted to resolve a secret from an invalid reference format.');
+  }
+  const secretKey = ref.slice(SECRET_PREFIX.length).trim();
+  
+  // Map secret reference to physical vault store or KMS injected environment
+  const envName = `UGONDU_SECRET_${secretKey.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
+  const value = process.env[envName];
+  
+  if (!value) {
+    throw new Error(`SECURITY_VIOLATION: Physical secret not found in vault for reference: ${ref}`);
+  }
+  
+  return value;
+}

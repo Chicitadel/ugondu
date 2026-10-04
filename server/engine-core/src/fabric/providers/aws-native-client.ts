@@ -10,6 +10,7 @@
 
 import { Logger, __t } from '@ugondu/shared';
 import { IAwsClient } from './aws';
+import { resolveSecret } from '../engine/SecretGuard';
 import { ComputeStatus } from '../capabilities/compute';
 import { SubnetResult } from '../capabilities/network';
 
@@ -105,8 +106,8 @@ export class AwsNativeClient implements IAwsClient {
             throw new Error('Security Audit: Physical AWS RDS deployment requires a secure credentialsRef mapping.');
         }
         
-        // In a real execution, we would resolve secret:db_password from the credential vault.
-        const password = credentialsRef.replace('secret:', '') + '-secure-injected';
+        // Resolve physically from Vault
+        const password = await resolveSecret(credentialsRef);
         
         const cmd = new CreateDBInstanceCommand({
             DBInstanceIdentifier: name,

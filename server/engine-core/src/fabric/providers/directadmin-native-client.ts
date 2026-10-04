@@ -28,6 +28,11 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
     }
   }
 
+  
+  private escapeShell(val: string): string {
+    return "'" + val.replace(/'/g, "'\\''") + "'";
+  }
+
   private async execCmd(cmd: string): Promise<string> {
     await this.ensureConnection();
     const result = await this.ssh.execCommand(cmd);
@@ -41,7 +46,7 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
   public async getInstanceStatus(id: string): Promise<{ id: string; state: 'running' | 'failed' | 'failed'; health: 'healthy' | 'unhealthy' }> {
     try {
       // Check if the symlink or directory exists
-      const stdout = await this.execCmd(`if [ -d "/home/${this.username}/domains/${id}/public_html" ]; then echo "OK"; else echo "MISSING"; fi`);
+      const stdout = await this.execCmd(`if [ -d /home/${this.escapeShell(this.username)}/domains/${this.escapeShell(id)}/public_html ]; then echo "OK"; else echo "MISSING"; fi`); // username/id handled safely via architecture, but keeping it inside quotes
       if (stdout.trim() === 'OK') {
         return { id, state: 'running', health: 'healthy' };
       }
@@ -52,37 +57,37 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
   }
 
   public async createHostedApp(name: string, image: string): Promise<{ id: string; state: string }> {
-    await this.execCmd(`mkdir -p /home/${this.username}/domains/${name}/public_html`);
+    await this.execCmd(`mkdir -p /home/${this.escapeShell(this.username)}/domains/${this.escapeShell(name)}/public_html`);
     return { id: name, state: 'running' };
   }
 
   public async removeHostedApp(id: string): Promise<void> {
-    await this.execCmd(`rm -rf /home/${this.username}/domains/${id}/public_html`);
+    await this.execCmd(`rm -rf /home/${this.escapeShell(this.username)}/domains/${this.escapeShell(id)}/public_html`);
   }
 
   public async createDatabase(name: string, type: string): Promise<{ id: string; state: string }> {
     // Physical DirectAdmin CLI for creating DBs
     // Example: da api CMD_API_DATABASES ...
-    await this.execCmd(`echo "da api create db ${name}"`); 
+    await this.execCmd(`da api create db ${this.escapeShell(name)}`); 
     return { id: name, state: 'running' };
   }
 
   public async removeDatabase(id: string): Promise<void> {
-    await this.execCmd(`echo "da api drop db ${id}"`);
+    await this.execCmd(`da api drop db ${this.escapeShell(id)}`);
   }
 
   public async createAccountFILE(name: string): Promise<{ id: string; state: string }> {
-    await this.execCmd(`mkdir -p /home/${this.username}/ugondu_storage/${name}`);
+    await this.execCmd(`mkdir -p /home/${this.escapeShell(this.username)}/ugondu_storage/${this.escapeShell(name)}`);
     return { id: name, state: 'running' };
   }
 
   public async removeAccountFILE(id: string): Promise<void> {
-    await this.execCmd(`rm -rf /home/${this.username}/ugondu_storage/${id}`);
+    await this.execCmd(`rm -rf /home/${this.escapeShell(this.username)}/ugondu_storage/${this.escapeShell(id)}`);
   }
 
   public async createSnapshot(id: string): Promise<string> {
     const snapName = `snap-${id}-${Date.now()}.tar.gz`;
-    await this.execCmd(`mkdir -p /home/${this.username}/admin_backups; tar -czf /home/${this.username}/admin_backups/${snapName} -C /home/${this.username}/domains/${id} public_html`);
+    await this.execCmd(`mkdir -p /home/${this.escapeShell(this.username)}/admin_backups; tar -czf /home/${this.escapeShell(this.username)}/admin_backups/${this.escapeShell(snapName)} -C /home/${this.escapeShell(this.username)}/domains/${this.escapeShell(id)} public_html`);
     return snapName;
   }
 

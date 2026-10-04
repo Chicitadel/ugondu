@@ -62,6 +62,6 @@ describe('Gate D: DEISE Physical Repair E2E (DirectAdmin)', () => {
         expect(success).toBe(true);
 
         // 4. Verify the exact SSH command was issued
-        expect(execSpy).toHaveBeenCalledWith('mkdir -p /home/admin/domains/ugondu_site/public_html');
+        expect(execSpy).toHaveBeenCalledWith("mkdir -p /home/'admin'/domains/'ugondu_site'/public_html");
     });
 });

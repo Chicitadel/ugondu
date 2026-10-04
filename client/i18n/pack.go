@@ -38,7 +38,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
+	
 )
 
 // LanguagePackAuthorityPublicKey is the trusted ED25519 public key for verifying signed packs
