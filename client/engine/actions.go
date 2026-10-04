@@ -269,7 +269,7 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 	fmt.Printf("     -> %s\n", i18n.T("sync_git", displayUrl, p.Branch))
 
-	cmd := exec.Command("git", "pull", p.URL, p.Branch)
+	
 	// Ensure token is completely hidden by configuring temp git credential helper
 	var credFile string
 	if err == nil && parsedUrl != nil && parsedUrl.User != nil {

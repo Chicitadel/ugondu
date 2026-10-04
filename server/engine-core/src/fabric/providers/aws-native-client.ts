@@ -61,7 +61,7 @@ export class AwsNativeClient implements IAwsClient {
             InstanceType: type as any,
             MinCount: 1,
             MaxCount: 1,
-            NetworkInterfaces: vpcId ? [{ DeviceIndex: 0, SubnetId: subnetId }] : undefined
+            NetworkInterfaces: subnetId ? [{ DeviceIndex: 0, SubnetId: subnetId }] : undefined
         });
         const res = await this.ec2.send(cmd);
         const instance = res.Instances?.[0];
