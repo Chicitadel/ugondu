@@ -57,7 +57,7 @@ export class UpmExecutionGate {
     /** Generates a SHA-256 hash of any canonicalized object */
     private static hashOf(obj: any): string {
         const canonical = canonicalize(obj) || '{}';
-        return crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+        return crypto.createHmac('sha256', process.env.UGONDU_UPM_SECRET || 'fallback-secret-for-tests-only-do-not-use').update(canonical, 'utf8').digest('hex');
     }
 
     /** 6A & 6B - Evaluates policies and issues a cryptographically bound ExecutionAuthorization */

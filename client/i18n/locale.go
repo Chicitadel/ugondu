@@ -51,6 +51,7 @@ var bootstrapDict = map[string]string{
 	"auth_successful_close_window": "Authentication successful. You may close this window.",
 
 	"state_file_is_corrupt": "State File Is Corrupt",
+	"auth_usage": "Usage: ugondu auth <login|status|logout>",
 	"auth_success": "Auth Success",
 	"failed_to_serialize_execution_state": "Failed To Serialize Execution State",
 	"failed_to_load_transaction_state": "Failed To Load Transaction State",

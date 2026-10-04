@@ -439,7 +439,7 @@ func ParseAndRun(args []string) {
 		PrintHelp()
 	case "auth":
 		if len(cleanedArgs) < 2 {
-			fmt.Println("Usage: ugondu auth <login|status|logout>")
+			fmt.Println(i18n.T("auth_usage"))
 			os.Exit(1)
 		}
 		subcmd := cleanedArgs[1]
