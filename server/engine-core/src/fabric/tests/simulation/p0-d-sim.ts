@@ -7,13 +7,14 @@ import { ComputeStatus } from '../../capabilities/compute';
 import { SubnetResult } from '../../capabilities/network';
 
 class SimulationAwsClient implements IAwsClient {
-    public state: Record<string, { type: string, status: string }> = {};
+    public idCounter = 0;
+    public state: Record<string, any> = {};
 
     async resolveInstanceType(cpuCores: number, memoryMb: number) { return 't3.micro'; }
     async runInstances(type: string, image: string, subnetId?: string) {
         if (type === 'fail') throw new Error('Simulated EC2 Failure');
-        const id = `i-${crypto.randomBytes(4).toString('hex')}`;
-        this.state[id] = { type: 'ec2', status: 'running' };
+        const id = `i-${`${++this.idCounter}`}`;
+        this.state[id] = { type: 'ec2', instanceType: type, status: 'running' };
         Logger.info(`[SIM-AWS] Created EC2 ${id} in ${subnetId}`);
         return { id, ip: '10.0.0.10', state: 'running' as const };
     }
@@ -23,7 +24,7 @@ class SimulationAwsClient implements IAwsClient {
         Logger.info(`[SIM-AWS] Terminated EC2 ${id}`);
     }
     async createVpc(cidr: string, name: string) {
-        const id = `vpc-${crypto.randomBytes(4).toString('hex')}`;
+        const id = `vpc-${`${++this.idCounter}`}`;
         this.state[id] = { type: 'vpc', status: 'available' };
         Logger.info(`[SIM-AWS] Created VPC ${id} with ${cidr}`);
         return id;
@@ -35,7 +36,7 @@ class SimulationAwsClient implements IAwsClient {
     }
     async createRds(name: string, engine: string, capacity: number, sgId?: string, credRef?: string) {
         if (name.includes('fail')) throw new Error('Simulated RDS Failure');
-        const id = `rds-${crypto.randomBytes(4).toString('hex')}`;
+        const id = `rds-${`${++this.idCounter}`}`;
         this.state[id] = { type: 'rds', status: 'available' };
         Logger.info(`[SIM-AWS] Created RDS ${id} (${engine})`);
         return { id, endpoint: `${id}.cluster.amazon.com` };
@@ -47,7 +48,7 @@ class SimulationAwsClient implements IAwsClient {
     }
     async createS3Bucket(name: string, isPublic: boolean) {
         if (name.includes('fail')) throw new Error('Simulated S3 Failure');
-        const id = `s3-${crypto.randomBytes(4).toString('hex')}`;
+        const id = `s3-${`${++this.idCounter}`}`;
         this.state[id] = { type: 's3', status: 'available' };
         Logger.info(`[SIM-AWS] Created S3 Bucket ${id}`);
         return { id, endpoint: `https://${id}.s3.amazonaws.com` };
@@ -63,13 +64,13 @@ class SimulationAwsClient implements IAwsClient {
         return { id, state: r.status as any, health: 'healthy' };
     }
     async createSubnet(vpcId: string, cidr: string): Promise<SubnetResult> {
-        const id = `subnet-${crypto.randomBytes(4).toString('hex')}`;
+        const id = `subnet-${`${++this.idCounter}`}`;
         this.state[id] = { type: 'subnet', status: 'available' };
         Logger.info(`[SIM-AWS] Created Subnet ${id} in ${vpcId}`);
         return { id, cidr };
     }
     async createSnapshot(id: string) {
-        const snap = `snap-${id}-${crypto.randomBytes(4).toString('hex')}`;
+        const snap = `snap-${id}-${`${++this.idCounter}`}`;
         this.state[snap] = { type: 'snapshot', status: 'completed' };
         Logger.info(`[SIM-AWS] Created Snapshot ${snap} for ${id}`);
         return snap;
@@ -82,7 +83,8 @@ class SimulationAwsClient implements IAwsClient {
 }
 
 class SimulationDirectAdminClient implements IDirectAdminClient {
-    public state: Record<string, { type: string, status: string }> = {};
+    public idCounter = 0;
+    public state: Record<string, any> = {};
 
     async createHostedApp(name: string, image: string) {
         this.state[name] = { type: 'app', status: 'running' };
@@ -228,17 +230,17 @@ async function executeSimulations() {
         const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', 'subnet-mock');
         
         Logger.info('[SIM-DEISE] Intentional External Modification (Drift)');
-        awsClient.state[ec2.id].type = 't3.large';
+        awsClient.state[ec2.id].instanceType = 't3.large';
         
         Logger.info('[SIM-DEISE] Discovery & Diagnosis');
-        const observedType = awsClient.state[ec2.id].type;
+        const observedType = awsClient.state[ec2.id].instanceType;
         if (observedType !== 't3.micro') {
             Logger.info(`[SIM-DEISE] Drift Detected: Expected t3.micro, observed ${observedType}`);
             Logger.info('[SIM-DEISE] Executing Repair Plan...');
-            awsClient.state[ec2.id].type = 't3.micro'; // Repair
+            awsClient.state[ec2.id].instanceType = 't3.micro'; // Repair
         }
         
-        const repairedType = awsClient.state[ec2.id].type;
+        const repairedType = awsClient.state[ec2.id].instanceType;
         if (repairedType !== 't3.micro') throw new Error('Repair failed');
         
         evidence.results['P0-D-SIM-04'] = 'PASS';
