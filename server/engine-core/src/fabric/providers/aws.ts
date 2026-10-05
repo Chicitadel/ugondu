@@ -67,6 +67,16 @@ export interface IAwsClient {
   getInstanceStatus(id: string): Promise<ComputeStatus>;
   createSubnet(vpcId: string, cidr: string, az?: string): Promise<SubnetResult>;
   createSnapshot(req: { resourceType: 'EBS_VOLUME' | 'RDS_INSTANCE' | 'EC2_INSTANCE', resourceId: string }): Promise<string>;
+  // Fargate / ECS
+  createEcsCluster(name: string): Promise<string>;
+  registerTaskDefinition(name: string, imageUri: string, cpu: string, memory: string, executionRoleArn: string, taskRoleArn: string, logGroupName: string): Promise<string>;
+  createEcsService(clusterName: string, serviceName: string, taskDefinitionArn: string, desiredCount: number, subnets: string[], securityGroups: string[], targetGroupArn?: string): Promise<string>;
+  
+  // ECR
+  createEcrRepository(name: string): Promise<string>;
+  
+  // CloudWatch Logs
+  createLogGroup(name: string): Promise<string>;
 }
 
 export class AwsAdapter implements ComputeCapability, NetworkCapability, DatabaseCapability, StorageCapability {

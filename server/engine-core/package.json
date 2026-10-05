@@ -17,6 +17,7 @@
     "@aws-sdk/client-s3": "^3.1146.0",
     "@aws-sdk/client-ssm": "^3.1146.0",
     "@aws-sdk/client-sts": "^3.1146.0",
+    "@aws-sdk/credential-providers": "^3.1146.0",
     "@types/keytar": "^4.4.2",
     "@ugondu/shared": "file:../shared",
     "axios": "^1.7.7",

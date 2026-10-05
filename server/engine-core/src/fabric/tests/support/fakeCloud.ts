@@ -80,7 +80,7 @@ export function fakeCloud(provider: string, shared: { calls: string[]; dryRuns: 
   const database: DatabaseCapability = {
     provisionDatabase: async (c: DatabaseConfig, o) => ({ id: create('database', c.name, c, o), connectionString: `db://${c.name}` }),
     deprovisionDatabase: async (id) => remove('database', id),
-    createSnapshot: async (req: any) => `snap-${id}`,
+    createSnapshot: async (req: any) => `snap-${typeof req === 'string' ? req : req.resourceId}`,
   };
   const storage: StorageCapability = {
     provisionStorage: async (c: StorageConfig, o) => ({ id: create('storage', c.name, c, o), endpoint: `https://${c.name}`, resolved: { storageClass: c.storageClass } }),
@@ -121,3 +121,4 @@ export const compute = (id: string, extra: Record<string, unknown> = {}, provide
 export const network = (id: string, cidrBlock = '10.0.0.0/16', provider = 'aws', m?: string) => ({ id, type: 'NETWORK', provider, config: { name: id, cidrBlock }, ...mode(m) });
 export const database = (id: string, extra: Record<string, unknown> = {}, provider = 'aws', m?: string) => ({ id, type: 'DATABASE', provider, config: { name: id, engine: 'postgres', capacity: 20, ...extra }, ...mode(m) });
 export const bucket = (id: string, extra: Record<string, unknown> = {}, provider = 'aws', m?: string) => ({ id, type: 'STORAGE', provider, config: { name: id, storageClass: 'OBJECT', isPublic: false, ...extra }, ...mode(m) });
+

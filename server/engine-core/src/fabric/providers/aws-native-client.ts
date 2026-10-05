@@ -48,12 +48,31 @@ import {
     SSMClient,
     GetParameterCommand
 } from '@aws-sdk/client-ssm';
+import { 
+    ECSClient, 
+    CreateClusterCommand, 
+    RegisterTaskDefinitionCommand, 
+    CreateServiceCommand 
+} from '@aws-sdk/client-ecs';
+
+import { 
+    ECRClient, 
+    CreateRepositoryCommand 
+} from '@aws-sdk/client-ecr';
+
+import { 
+    CloudWatchLogsClient, 
+    CreateLogGroupCommand 
+} from '@aws-sdk/client-cloudwatch-logs';
 
 export class AwsNativeClient implements IAwsClient {
     private ec2: EC2Client;
     private rds: RDSClient;
     private s3: S3Client;
     private ssm: SSMClient;
+    private ecs: ECSClient;
+    private ecr: ECRClient;
+    private cw: CloudWatchLogsClient;
 
     constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }) {
         const config = { region, ...(credentials ? { credentials } : {}) };
@@ -61,6 +80,9 @@ export class AwsNativeClient implements IAwsClient {
         this.rds = new RDSClient(config);
         this.s3 = new S3Client(config);
         this.ssm = new SSMClient(config);
+        this.ecs = new ECSClient(config);
+        this.ecr = new ECRClient(config);
+        this.cw = new CloudWatchLogsClient(config);
         Logger.info(`AwsNativeClient natively instantiated for region: ${region}`);
     }
 
@@ -90,7 +112,7 @@ export class AwsNativeClient implements IAwsClient {
             MaxCount: 1,
             NetworkInterfaces: subnetId ? [{ DeviceIndex: 0, SubnetId: subnetId }] : undefined
         });
-        const res = await this.ec2.send(cmd);
+        const res = await this.ec2.send(cmd) as any;
         const instance = res.Instances?.[0];
         if (!instance || !instance.InstanceId) throw new Error('AWS EC2 creation failed: No instance returned');
         
@@ -126,7 +148,7 @@ export class AwsNativeClient implements IAwsClient {
 
     public async createVpc(cidr: string, name: string): Promise<string> {
         const cmd = new CreateVpcCommand({ CidrBlock: cidr });
-        const res = await this.ec2.send(cmd);
+        const res = await this.ec2.send(cmd) as any;
         if (!res.Vpc || !res.Vpc.VpcId) throw new Error('AWS VPC creation failed');
         // Waiter could be added here if needed, but VPCs are usually available instantly.
         return res.Vpc.VpcId;
@@ -145,14 +167,14 @@ export class AwsNativeClient implements IAwsClient {
 
     public async createSubnet(vpcId: string, cidr: string, az?: string): Promise<SubnetResult> {
         const cmd = new CreateSubnetCommand({ VpcId: vpcId, CidrBlock: cidr, AvailabilityZone: az });
-        const res = await this.ec2.send(cmd);
+        const res = await this.ec2.send(cmd) as any;
         if (!res.Subnet || !res.Subnet.SubnetId) throw new Error('AWS Subnet creation failed');
         return { id: res.Subnet.SubnetId, cidr: cidr };
     }
 
     public async createSecurityGroup(vpcId: string, name: string): Promise<string> {
         const cmd = new CreateSecurityGroupCommand({ VpcId: vpcId, GroupName: name, Description: `Ugondu Managed SG ${name}` });
-        const res = await this.ec2.send(cmd);
+        const res = await this.ec2.send(cmd) as any;
         if (!res.GroupId) throw new Error('AWS Security Group creation failed');
         return res.GroupId;
     }
@@ -263,15 +285,88 @@ export class AwsNativeClient implements IAwsClient {
             return snapId;
         } else if (type === 'EBS_VOLUME') {
             const { CreateSnapshotCommand } = require('@aws-sdk/client-ec2');
-            const cmd = new CreateSnapshotCommand({ VolumeId: id } else if (type === 'EC2_INSTANCE') {
+            const cmd = new CreateSnapshotCommand({ VolumeId: id });
+            const res = await this.ec2.send(cmd) as any;
+            if (!res.SnapshotId) throw new Error('EBS Snapshot creation failed');
+            return res.SnapshotId;
+        } else if (type === 'EC2_INSTANCE') {
             const { CreateImageCommand } = require('@aws-sdk/client-ec2');
             const amiName = `ami-${id}-${Date.now()}`;
             const cmd = new CreateImageCommand({ InstanceId: id, Name: amiName, NoReboot: true });
-            const res = await this.ec2.send(cmd);
+            const res = await this.ec2.send(cmd) as any;
             if (!res.ImageId) throw new Error('EC2 AMI Snapshot creation failed');
             return res.ImageId;
         }
         throw new Error(`Unsupported AWS snapshot resourceType: ${type}`);
+    }
+    public async createEcsCluster(name: string): Promise<string> {
+        const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name }));
+        if (!res.cluster || !res.cluster.clusterName) throw new Error('ECS Cluster creation failed');
+        return res.cluster.clusterName;
+    }
+
+    public async registerTaskDefinition(name: string, imageUri: string, cpu: string, memory: string, executionRoleArn: string, taskRoleArn: string, logGroupName: string): Promise<string> {
+        const cmd = new RegisterTaskDefinitionCommand({
+            family: name,
+            networkMode: 'awsvpc',
+            requiresCompatibilities: ['FARGATE'],
+            cpu,
+            memory,
+            executionRoleArn,
+            taskRoleArn,
+            containerDefinitions: [{
+                name,
+                image: imageUri,
+                essential: true,
+                logConfiguration: {
+                    logDriver: 'awslogs',
+                    options: {
+                        'awslogs-group': logGroupName,
+                        'awslogs-region': await this.ecs.config.region(),
+                        'awslogs-stream-prefix': 'fargate'
+                    }
+                }
+            }]
+        });
+        const res = await this.ecs.send(cmd);
+        if (!res.taskDefinition || !res.taskDefinition.taskDefinitionArn) throw new Error('Task Definition registration failed');
+        return res.taskDefinition.taskDefinitionArn;
+    }
+
+    public async createEcsService(clusterName: string, serviceName: string, taskDefinitionArn: string, desiredCount: number, subnets: string[], securityGroups: string[], targetGroupArn?: string): Promise<string> {
+        const cmd = new CreateServiceCommand({
+            cluster: clusterName,
+            serviceName: serviceName,
+            taskDefinition: taskDefinitionArn,
+            desiredCount,
+            launchType: 'FARGATE',
+            networkConfiguration: {
+                awsvpcConfiguration: {
+                    subnets,
+                    securityGroups,
+                    assignPublicIp: 'ENABLED'
+                }
+            },
+            loadBalancers: targetGroupArn ? [{
+                targetGroupArn,
+                containerName: serviceName,
+                containerPort: 80
+            }] : undefined
+        });
+        const res = await this.ecs.send(cmd);
+        if (!res.service || !res.service.serviceArn) throw new Error('ECS Service creation failed');
+        return res.service.serviceArn;
+    }
+
+    public async createEcrRepository(name: string): Promise<string> {
+        const res = await this.ecr.send(new CreateRepositoryCommand({ repositoryName: name }));
+        if (!res.repository || !res.repository.repositoryUri) throw new Error('ECR Repository creation failed');
+        return res.repository.repositoryUri;
+    }
+
+    public async createLogGroup(name: string): Promise<string> {
+        await this.cw.send(new CreateLogGroupCommand({ logGroupName: name }));
+        return name;
     }
 }
 

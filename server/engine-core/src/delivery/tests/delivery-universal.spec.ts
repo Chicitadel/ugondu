@@ -20,7 +20,7 @@ describe('Gate E: Source/Destination Universalism', () => {
                 supportsDelta: false
             } as SourceCapabilities),
             resolveArtifact: jest.fn().mockResolvedValue('backup-2026-10-04.tar.gz'),
-            streamPayload: jest.fn(),
+            // streamPayload: jest.fn(),
             disconnect: jest.fn()
         };
 
