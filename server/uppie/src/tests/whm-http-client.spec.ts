@@ -39,10 +39,10 @@ function http(replies: Record<string, Reply>, extra: Record<string, string> = {}
   return { client, requests, query };
 }
 
-describe(__t('whm_request_construction'), () => {
-  it(__t('calls_json_api_over_https_with'), async () => {
-    const { client, requests, query } = http({ get_featurelists: ok({ featurelists: ['default', __t('mail_only')] }) });
-    expect(await client.listFeatureLists()).toEqual(['default', __t('mail_only')]);
+describe('WHM request construction', () => {
+  it('calls json-api over HTTPS with the token only in the Authorization header', async () => {
+    const { client, requests, query } = http({ get_featurelists: ok({ featurelists: ['default', 'Mail Only'] }) });
+    expect(await client.listFeatureLists()).toEqual(['default', 'Mail Only']);
     const request = requests[0] as { url: string; init: any };
     expect(request.url.startsWith('https://whm.example.com:2087/json-api/get_featurelists?')).toBe(true);
     expect(query().get('api.version')).toBe('1');
@@ -51,13 +51,13 @@ describe(__t('whm_request_construction'), () => {
     expect(request.url.includes(TOKEN)).toBe(false);
   });
 
-  it(__t('honours_a_configured_port'), async () => {
+  it('honours a configured port', async () => {
     const { client, requests } = http({ listresellers: ok({ reseller: ['bob', 'carol'] }) }, { port: '2086' });
     expect(await client.listResellers()).toEqual(['bob', 'carol']);
     expect(requests[0]?.url.startsWith('https://whm.example.com:2086/json-api/listresellers?')).toBe(true);
   });
 
-  it(__t('writes_complete_feature_maps_w'), async () => {
+  it('writes complete feature maps with create or update and lets control parameters win', async () => {
     const { client, requests, query } = http({ create_featurelist: ok({}), update_featurelist: ok({}) });
     const command = (n: number): string => new URL(requests[n]?.url as string).pathname.split('/').pop() as string;
     await client.saveFeatureList('ugondu_x', { fileman: true, mysql: false, featurelist: true, 'api.version': false }, false);
@@ -71,7 +71,7 @@ describe(__t('whm_request_construction'), () => {
     expect(query(1).get('featurelist')).toBe('ugondu_x');
   });
 
-  it(__t('reads_a_list_only_when_it_exis'), async () => {
+  it('reads a list only when it exists and treats a server-disabled feature as off', async () => {
     const { client, requests, query } = http({
       get_featurelists: ok({ featurelists: ['default'] }),
       get_featurelist_data: ok({ features: [{ id: 'fileman', value: '1', is_disabled: 0 }, { id: 'mysql', value: 1, is_disabled: 1 }, { id: 'cron', value: 0, is_disabled: 0 }] }),
@@ -82,7 +82,7 @@ describe(__t('whm_request_construction'), () => {
     expect(query(2).get('featurelist')).toBe('default');
   });
 
-  it(__t('creates_packages_with_write_si'), async () => {
+  it('creates packages with write-side names and control parameters that attributes cannot override', async () => {
     const { client, query } = http({ addpkg: ok({}), killpkg: ok({}), changepackage: ok({}), delete_featurelist: ok({}) });
     await client.createPackage({ name: 'ugondu_x__Gold', featureList: 'ugondu_x', attributes: { quota: '5000', lang: 'fr', name: 'evil', featurelist: 'evil' } });
     expect(query(0).get('name')).toBe('ugondu_x__Gold');
@@ -98,7 +98,7 @@ describe(__t('whm_request_construction'), () => {
     expect(query(3).get('featurelist')).toBe('ugondu_x');
   });
 
-  it(__t('looks_accounts_up_by_exact_use'), async () => {
+  it('looks accounts up by exact user name', async () => {
     const acct = [{ user: 'alice', plan: 'Gold', domain: 'alice.example.com', owner: 'root', suspended: 0 }, { user: 'alicia', plan: 'default', domain: 'x.example.com', owner: 'root', suspended: 1 }];
     const { client, query } = http({ listaccts: ok({ acct }) });
     expect(await client.getAccount('alice')).toEqual({ user: 'alice', plan: 'Gold', domain: 'alice.example.com', owner: 'root', suspended: false });
@@ -110,8 +110,8 @@ describe(__t('whm_request_construction'), () => {
   });
 });
 
-describe(__t('whm_response_parsing'), () => {
-  it(__t('reads_list_names_features_pack'), () => {
+describe('WHM response parsing', () => {
+  it('reads list names, features, packages and accounts tolerantly', () => {
     expect(parseFeatureListNames({ featurelists: [{ featurelist: 'a' }, { name: 'b' }, 'c', {}] })).toEqual(['a', 'b', 'c']);
     expect(parseFeatureListNames({ features: ['x'] })).toEqual(['x']);
     expect(parseFeatureListNames(undefined)).toEqual([]);
@@ -125,10 +125,10 @@ describe(__t('whm_response_parsing'), () => {
   });
 });
 
-describe(__t('whm_failures'), () => {
-  it(__t('reports_a_refused_call_with_th'), async () => {
-    const refusal = http({ get_featurelists: { metadata: { result: 0, reason: __t('access_denied') } } });
-    expect((await failure(() => refusal.client.listFeatureLists())).message).toBe(T('api_error', { command: 'get_featurelists', reason: __t('access_denied') }));
+describe('WHM failures', () => {
+  it('reports a refused call with the server reason, an HTTP error with its status and a malformed reply', async () => {
+    const refusal = http({ get_featurelists: { metadata: { result: 0, reason: 'Access denied' } } });
+    expect((await failure(() => refusal.client.listFeatureLists())).message).toBe(T('api_error', { command: 'get_featurelists', reason: 'Access denied' }));
     const status: any = async () => ({ ok: false, status: 503, json: async () => ({}) });
     const down = createHttpWhmClient({ tenantId: 't', environmentId: 'e', provider: 'CPANEL', credentials }, { fetchImpl: status });
     const error = await failure(() => down.listPackages());
@@ -139,24 +139,24 @@ describe(__t('whm_failures'), () => {
     expect((await failure(() => bare.client.listPackages())).message).toBe(T('invalid_response', { command: 'listpkgs' }));
   });
 
-  it(__t('reports_network_failures_and_u'), async () => {
-    const unreachable: any = async () => { throw new Error(__t('connect_econnrefused')); };
+  it('reports network failures and unreadable bodies without leaking the token, and bounds every call by a timeout', async () => {
+    const unreachable: any = async () => { throw new Error('connect ECONNREFUSED'); };
     const a = createHttpWhmClient({ tenantId: 't', environmentId: 'e', provider: 'CPANEL', credentials }, { fetchImpl: unreachable });
     const down = await failure(() => a.listAccounts());
-    expect(down.message).toBe(T('network_error', { command: 'listaccts', error: __t('connect_econnrefused') }));
+    expect(down.message).toBe(T('network_error', { command: 'listaccts', error: 'connect ECONNREFUSED' }));
     expect(down.message.includes(TOKEN)).toBe(false);
     const garbled: any = async () => ({ ok: true, status: 200, json: async () => { throw new Error(__t('unexpected_token')); } });
     const b = createHttpWhmClient({ tenantId: 't', environmentId: 'e', provider: 'CPANEL', credentials }, { fetchImpl: garbled });
-    expect((await failure(() => b.listAccounts())).message).toBe(T('network_error', { command: 'listaccts', error: __t('unexpected_token') }));
+    expect((await failure(() => b.listAccounts())).message).toBe(T('network_error', { command: 'listaccts', error: 'Unexpected token' }));
     const silent: any = (_url: string, init: any) => new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(new Error('aborted'))));
     const c = createHttpWhmClient({ tenantId: 't', environmentId: 'e', provider: 'CPANEL', credentials }, { fetchImpl: silent, timeoutMs: 30 });
     expect((await failure(() => c.listPackages())).message).toBe(T('timeout', { command: 'listpkgs', seconds: 0 }));
   });
 
-  it(__t('refuses_hosts_that_are_not_pla'), () => {
+  it('refuses hosts that are not plain host names and incomplete or malformed credentials', () => {
     const build = (over: Record<string, string>) => () => createHttpWhmClient({ tenantId: 't', environmentId: 'e', provider: 'CPANEL', credentials: { ...credentials, ...over } });
     for (const host of ['', 'evil.com/path', 'a b', 'http://x', 'host:80', 'x@y.com', '-bad.example.com']) expect(refused(build({ host }))).toBe(T('invalid_host'));
-    const malformed: Array<Record<string, string>> = [{ username: '' }, { username: 'a b' }, { apiToken: 'short' }, { apiToken: __t('abcdefgh_2345678') }, { apiToken: '' }, { port: '0' }, { port: '70000' }, { port: 'abc' }, { port: '20.5' }];
+    const malformed: Array<Record<string, string>> = [{ username: '' }, { username: 'a b' }, { apiToken: 'short' }, { apiToken: 'ABCDEFGH 2345678' }, { apiToken: '' }, { port: '0' }, { port: '70000' }, { port: 'abc' }, { port: '20.5' }];
     for (const over of malformed) {
       expect(refused(build(over))).toBe(T('invalid_credentials'));
     }

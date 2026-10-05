@@ -35,8 +35,8 @@ async function refused(ir: any): Promise<string> {
   return error.message;
 }
 
-describe(__t('provisioning_engine_preflight_'), () => {
-  it(__t('rejects_duplicate_and_empty_no'), async () => {
+describe('Provisioning engine: preflight rejects a bad plan before any change', () => {
+  it('rejects duplicate and empty node ids, unknown edge ends and cycles', async () => {
     expect(await refused({ nodes: [bucket('a'), bucket('a')], edges: [] })).toBe(T('duplicate_node', { node: 'a' }));
     expect(await refused({ nodes: [{ ...bucket('a'), id: '' }], edges: [] })).toBe(T('duplicate_node', { node: '' }));
     expect(await refused({ nodes: [bucket('a')], edges: [edge('a', 'ghost')] })).toBe(T('unknown_edge_node', { node: 'ghost' }));
@@ -46,7 +46,7 @@ describe(__t('provisioning_engine_preflight_'), () => {
     expect(await refused({ nodes: [bucket('a')], edges: [edge('a', 'a')] })).toBe(cycle);
   });
 
-  it(__t('rejects_an_unsupported_resourc'), async () => {
+  it('rejects an unsupported resource type and a provider that is not registered, for every kind', async () => {
     expect(await refused({ nodes: [{ ...bucket('a'), type: 'LAMBDA' }], edges: [] })).toBe(T('unsupported_type', { node: 'a', type: 'LAMBDA' }));
     expect(await refused({ nodes: [{ ...bucket('a'), type: 'toString' }], edges: [] })).toBe(T('unsupported_type', { node: 'a', type: 'toString' }));
     const missing = __t('fabric.contract.provider_not_registered', { provider: 'gcp' });
@@ -55,7 +55,7 @@ describe(__t('provisioning_engine_preflight_'), () => {
     }
   });
 
-  it(__t('rejects_every_missing_or_malfo'), async () => {
+  it('rejects every missing or malformed configuration field, naming the node and the field', async () => {
     const cases: Array<[any, string]> = [
       [compute('n', { instanceName: '' }), 'instanceName'], [compute('n', { instanceName: 5 }), 'instanceName'],
       [compute('n', { cpuCores: 0 }), 'cpuCores'], [compute('n', { cpuCores: 1.5 }), 'cpuCores'], [compute('n', { cpuCores: '2' }), 'cpuCores'],
@@ -71,7 +71,7 @@ describe(__t('provisioning_engine_preflight_'), () => {
     for (const [node, field] of cases) expect(await refused({ nodes: [node], edges: [] })).toBe(T('invalid_config', { node: 'n', field }));
   });
 
-  it(__t('accepts_a_networkrefid_that_is'), async () => {
+  it('accepts a networkRefId that is an unreferenced plain value and requires references to be declared dependencies', async () => {
     const plain = fakeFabric(['aws']);
     await new ProvisioningEngine(plain.registry, plain.journal, new InMemoryProvisioningState()).executePlan({ nodes: [compute('web', { networkRefId: 'vpc-123' })], edges: [] });
     expect(plain.calls).toEqual(['aws:create:compute:web']);
@@ -84,40 +84,40 @@ describe(__t('provisioning_engine_preflight_'), () => {
     expect(await refused(unknown)).toBe(T('reference_not_declared', { node: 'web', ref: 'missing' }));
   });
 
-  it(__t('accepts_a_reference_to_an_indi'), async () => {
+  it('accepts a reference to an indirect requisite', async () => {
     const { registry, journal } = fakeFabric(['aws']);
     const ir = { nodes: [network('net'), bucket('mid'), compute('web', { networkRefId: 'ref:net' })], edges: [edge('net', 'mid'), edge('mid', 'web')] };
     expect((await new ProvisioningEngine(registry, journal, new InMemoryProvisioningState()).executePlan(ir)).created).toEqual(['net', 'mid', 'web']);
   });
 });
 
-describe(__t('plan_graph_helpers'), () => {
-  it(__t('layers_a_diamond_and_keeps_the'), () => {
+describe('Plan graph helpers', () => {
+  it('layers a diamond and keeps the listed order inside a layer', () => {
     const ir: any = { nodes: [bucket('d'), bucket('c'), bucket('b'), bucket('a')], edges: [edge('a', 'b'), edge('a', 'c'), edge('b', 'd'), edge('c', 'd')] };
     expect(provisioningWaves(ir).map((w) => w.map((n) => n.id))).toEqual([['a'], ['c', 'b'], ['d']]);
     expect(provisioningWaves({ nodes: [], edges: [] })).toEqual([]);
   });
 
-  it(__t('keeps_a_node_back_until_its_de'), () => {
+  it('keeps a node back until its deepest requisite is done, even when it also depends on an earlier one', () => {
     const ir: any = { nodes: [bucket('c'), bucket('b'), bucket('a')], edges: [edge('a', 'b'), edge('b', 'c'), edge('a', 'c')] };
     expect(provisioningWaves(ir).map((w) => w.map((n) => n.id))).toEqual([['a'], ['b'], ['c']]);
   });
 
-  it(__t('collects_direct_and_indirect_a'), () => {
+  it('collects direct and indirect ancestors only', () => {
     const ir: any = { nodes: [], edges: [edge('a', 'b'), edge('b', 'c'), edge('x', 'y')] };
     expect([...ancestorsOf(ir, 'c')].sort()).toEqual(['a', 'b']);
     expect([...ancestorsOf(ir, 'a')]).toEqual([]);
     expect([...ancestorsOf(ir, 'y')]).toEqual(['x']);
   });
 
-  it(__t('finds_and_resolves_references_'), () => {
+  it('finds and resolves references, failing on an unresolved one', () => {
     const node: any = { id: 'web', type: 'COMPUTE', provider: 'aws', config: { a: 'ref:net', b: 'plain', c: 3 } };
     expect(referencesOf(node.config)).toEqual(['net']);
     expect(resolveReferences(node, new Map([['net', 'aws-network-1']]))).toEqual({ a: 'aws-network-1', b: 'plain', c: 3 });
     expect(() => resolveReferences(node, new Map())).toThrow(T('unresolved_reference', { node: 'web', ref: 'net' }));
   });
 
-  it(__t('fingerprints_what_a_node_asks_'), () => {
+  it('fingerprints what a node asks for regardless of key order, and changes with any part of it', () => {
     const base = digestOf('NETWORK', 'aws', { name: 'n', nested: { b: 1, a: [1, { y: 1, x: 2 }] } });
     expect(digestOf('NETWORK', 'aws', { nested: { a: [1, { x: 2, y: 1 }], b: 1 }, name: 'n' })).toBe(base);
     expect(base).toHaveLength(64);
@@ -130,14 +130,14 @@ describe(__t('plan_graph_helpers'), () => {
     expect(digestOf('NETWORK', 'aws', config, { mode: 'VPC', x: 1 })).toBe(digestOf('NETWORK', 'aws', config, { x: 1, mode: 'VPC' }));
   });
 
-  it(__t('validates_ipv4_cidr_blocks_at_'), () => {
+  it('validates IPv4 CIDR blocks at their boundaries', () => {
     for (const ok of ['0.0.0.0/0', '255.255.255.255/32', '10.0.0.0/16']) expect(isIpv4Cidr(ok)).toBe(true);
     for (const no of ['256.0.0.0/8', '1.2.3.4/33', '1.2.3/8', '1.2.3.4', '1.2.3.4/', 'a.b.c.d/8', ' 10.0.0.0/8']) expect(isIpv4Cidr(no)).toBe(false);
   });
 });
 
-describe(__t('in_memory_provisioning_state'), () => {
-  it(__t('stores_copies_so_neither_the_c'), async () => {
+describe('In-memory provisioning state', () => {
+  it('stores copies, so neither the caller nor a reader can alter what is remembered, and forgets on remove', async () => {
     const store = new InMemoryProvisioningState();
     const record: any = { nodeId: 'n', kind: 'NETWORK', provider: 'aws', digest: 'd', resourceId: 'r1', evidence: { requested: { a: 1 }, resolved: { b: 2 } } };
     await store.put(record);

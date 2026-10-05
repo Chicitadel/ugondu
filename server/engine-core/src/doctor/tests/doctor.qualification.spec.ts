@@ -27,7 +27,7 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe(__t('delivery_doctor_qualification_'), () => {
+describe('Delivery Doctor Qualification Gates: DOC-01..36', () => {
   it('DOC-01..12: Diagnostic telemetry ingestion, evidence gathering & passport integration', () => {
     const evidence = new DoctorEvidence();
     const passportInt = new PassportIntegration();

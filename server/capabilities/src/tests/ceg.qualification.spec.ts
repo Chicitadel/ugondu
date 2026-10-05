@@ -71,8 +71,8 @@ function validateOfflineManifest(m: CapabilityManifest) { return verifyManifest(
 describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () => {
 
   // ─── CEG-Q-001 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_001_subscription_authent'), () => {
-    it(__t('should_reject_a_capabilitymani'), () => {
+  describe('CEG-Q-001: Subscription authenticity verification', () => {
+    it('should reject a CapabilityManifest with an invalid Ed25519 signature', () => {
       const manifest = createMockManifest({ signature: 'invalid-sig' });
       const result = verifyManifest(manifest);
       expect(result.valid).toBe(false);
@@ -81,8 +81,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-002 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_002_tenant_binding_corre'), () => {
-    it(__t('should_reject_a_manifest_issue'), () => {
+  describe('CEG-Q-002: Tenant binding correctness', () => {
+    it('should reject a manifest issued for tenant A when presented for tenant B', () => {
       const manifest = createMockManifest({ tenantId: 'tenant-A' });
       const contextTenantId = 'tenant-B';
       
@@ -98,8 +98,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-003 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_003_edition_resolution_a'), () => {
-    it(__t('should_correctly_resolve_busin'), () => {
+  describe('CEG-Q-003: Edition resolution accuracy', () => {
+    it('should correctly resolve BUSINESS edition from a valid manifest', () => {
       const manifest = createMockManifest({ edition: 'BUSINESS' });
       const resolvedEdition = parseEdition(manifest.edition);
       expect(resolvedEdition).toBe('BUSINESS');
@@ -107,8 +107,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-004 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_004_capability_resolutio'), () => {
-    it(__t('should_resolve_rollback_as_ava'), () => {
+  describe('CEG-Q-004: Capability resolution accuracy per edition', () => {
+    it('should resolve ROLLBACK as available for PROFESSIONAL edition', () => {
       const manifest = createMockManifest({
         edition: 'PROFESSIONAL',
         capabilities: ['ROLLBACK'],
@@ -119,7 +119,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
       expect(result.result).toBe('USABLE');
     });
 
-    it(__t('should_resolve_rollback_as_not'), () => {
+    it('should resolve ROLLBACK as NOT available for COMMUNITY edition', () => {
       const manifest = createMockManifest({
         edition: 'COMMUNITY',
         capabilities: [],
@@ -142,14 +142,14 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-005 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_005_manifest_signature_v'), () => {
-    it(__t('should_accept_a_valid_mandatag'), () => {
+  describe('CEG-Q-005: Manifest signature validation', () => {
+    it('should accept a valid Mandatag-signed manifest', () => {
       const manifest = createMockManifest({ signature: 'valid-sig' });
       const result = verifyManifest(manifest);
       expect(result.valid).toBe(true);
     });
 
-    it(__t('should_reject_a_tampered_manif'), () => {
+    it('should reject a tampered manifest (any field modified after signing)', () => {
       const manifest = createMockManifest({ signature: 'valid-sig' });
       // Simulate modifying manifest after signing breaks the signature (mocked by changing signature field)
       manifest.expiresAt = new Date().toISOString();
@@ -162,7 +162,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-006 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_006_manifest_expiry_enfo'), () => {
+  describe('CEG-Q-006: Manifest expiry enforcement', () => {
     it('should return MANIFEST_EXPIRED for a manifest past its expiresAt date', () => {
       const pastDate = new Date(Date.now() - 10000).toISOString();
       const manifest = createMockManifest({ expiresAt: pastDate });
@@ -173,7 +173,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-007 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_007_entitlement_revocati'), () => {
+  describe('CEG-Q-007: Entitlement revocation propagation', () => {
     it('should deactivate capability within one event processing cycle of ENTITLEMENT_REVOKED', () => {
       const graph = new CapabilityDependencyGraph();
       graph.register('TARGET_CAPABILITY', []);
@@ -191,8 +191,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-008 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_008_version_ordering_lat'), () => {
-    it(__t('should_reject_an_older_version'), () => {
+  describe('CEG-Q-008: Version ordering (latest valid state wins)', () => {
+    it('should reject an older-versioned event when a newer one has already been processed', () => {
       let currentVersion = 5;
       let currentState: CapabilityState = 'ACTIVE';
       
@@ -210,8 +210,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-009 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_009_replay_protection'), () => {
-    it(__t('should_drop_a_duplicate_event_'), () => {
+  describe('CEG-Q-009: Replay protection', () => {
+    it('should drop a duplicate event with the same eventId', () => {
       const processedEvents = new Set<string>();
       
       const processIdempotent = (eventId: string) => {
@@ -226,8 +226,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-010 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_010_billing_state_consis'), () => {
-    it(__t('should_not_activate_capability'), () => {
+  describe('CEG-Q-010: Billing-state consistency', () => {
+    it('should NOT activate capability on payment-confirmed webhook alone', () => {
       const stateMachine = new CapabilityStateMachine('PENDING_ACTIVATION');
       const handleWebhook = (event: string) => {
         if (event === 'CAPABILITY_ACTIVATED') {
@@ -253,8 +253,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-011 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_011_event_idempotency'), () => {
-    it(__t('should_process_identical_event'), () => {
+  describe('CEG-Q-011: Event idempotency', () => {
+    it('should process identical eventId twice without side effects on second call', () => {
       let sideEffectCount = 0;
       const seenEvents = new Set<string>();
       
@@ -273,7 +273,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-012 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_012_cache_invalidation_o'), () => {
+  describe('CEG-Q-012: Cache invalidation on entitlement change', () => {
     it('should trigger manifest refresh on SUBSCRIPTION_CHANGED event', () => {
       let cachedManifest: CapabilityManifest | null = createMockManifest({ entitlementVersion: 1 });
       let fetchCallCount = 0;
@@ -317,8 +317,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-014 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_014_unauthorized_capabil'), () => {
-    it(__t('should_return_403_when_client_'), () => {
+  describe('CEG-Q-014: Unauthorized capability server rejection', () => {
+    it('should return 403 when client requests capability not present in server manifest', () => {
       const manifest = createMockManifest({ edition: 'COMMUNITY', capabilities: [] });
       const resolver = new EntitlementResolver(manifest);
       
@@ -338,8 +338,8 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   });
 
   // ─── CEG-Q-015 ────────────────────────────────────────────────────────────
-  describe(__t('ceg_q_015_offline_entitlement_'), () => {
-    it(__t('should_validate_a_signed_offli'), () => {
+  describe('CEG-Q-015: Offline entitlement validation (Sovereign)', () => {
+    it('should validate a signed offline manifest without server connectivity', () => {
       const offlineManifest = createMockManifest({ edition: 'SOVEREIGN', signature: 'valid-sig' });
       // Simulating offline capability with no network access
       const result = validateOfflineManifest(offlineManifest);

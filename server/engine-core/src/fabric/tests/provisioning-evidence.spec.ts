@@ -27,8 +27,8 @@ function setup() {
   return { ...fabric, state, engine: new ProvisioningEngine(fabric.registry, fabric.journal, state) };
 }
 
-describe(__t('every_mutation_yields_evidence'), () => {
-  it(__t('records_what_was_requested_wha'), async () => {
+describe('Every mutation yields evidence (FAB-11)', () => {
+  it('records what was requested, what the provider resolved and the resulting identity', async () => {
     const { engine, state, entries } = setup();
     const report = await engine.executePlan({ nodes: [compute('web', { cpuCores: 4, memoryMb: 8192 })], edges: [] });
     const evidence = { requested: { instanceName: 'web', cpuCores: 4, memoryMb: 8192, osImage: 'ubuntu-24.04' }, resolved: { instanceType: 'fake-4x8192' } };
@@ -40,7 +40,7 @@ describe(__t('every_mutation_yields_evidence'), () => {
     expect(entries.find((e) => e.status === 'pending')?.evidence).toBeUndefined();
   });
 
-  it(__t('records_an_empty_resolution_wh'), async () => {
+  it('records an empty resolution when the provider resolves nothing, and its own values when it does', async () => {
     const { engine } = setup();
     const report = await engine.executePlan({ nodes: [network('net'), bucket('assets')], edges: [] });
     const byId = Object.fromEntries(report.provisioned.map((r) => [r.nodeId, r.evidence]));
@@ -48,13 +48,13 @@ describe(__t('every_mutation_yields_evidence'), () => {
     expect(byId.assets).toEqual({ requested: { name: 'assets', storageClass: 'OBJECT', isPublic: false }, resolved: { storageClass: 'OBJECT' } });
   });
 
-  it(__t('shows_the_resolved_reference_i'), async () => {
+  it('shows the resolved reference in the evidence of a dependent node', async () => {
     const { engine } = setup();
     const report = await engine.executePlan({ nodes: [network('net'), compute('web', { networkRefId: 'ref:net' })], edges: [{ from: 'net', to: 'web' }] });
     expect(report.provisioned[1]!.evidence.requested.networkRefId).toBe('aws-network-1');
   });
 
-  it(__t('returns_the_remembered_evidenc'), async () => {
+  it('returns the remembered evidence, unchanged, for a node that already exists', async () => {
     const { engine, calls, entries } = setup();
     const ir = { nodes: [compute('web', { cpuCores: 4, memoryMb: 8192 })], edges: [] };
     const first = await engine.executePlan(ir);
@@ -64,7 +64,7 @@ describe(__t('every_mutation_yields_evidence'), () => {
     expect(entries.filter((e) => e.status === 'skipped')[0]?.evidence).toEqual(first.provisioned[0]!.evidence);
   });
 
-  it(__t('does_not_let_a_caller_alter_th'), async () => {
+  it('does not let a caller alter the evidence the engine remembers', async () => {
     const { engine, state } = setup();
     const report = await engine.executePlan({ nodes: [compute('web')], edges: [] });
     (report.provisioned[0]!.evidence.resolved as any).instanceType = 'tampered';
@@ -76,8 +76,8 @@ describe(__t('every_mutation_yields_evidence'), () => {
   });
 });
 
-describe(__t('provider_modes_reach_the_adapt'), () => {
-  it(__t('hands_the_declared_mode_and_th'), async () => {
+describe('Provider modes reach the adapter and are part of what a node is (FAB-11)', () => {
+  it('hands the declared mode and the extension block to the adapter', async () => {
     const { engine, live } = setup();
     await engine.executePlan({ nodes: [compute('web', {}, 'kubernetes', 'DEPLOYMENT'), compute('db', { workloadType: 'stateful' }, 'kubernetes', 'STATEFULSET')], edges: [] });
     expect(live.get('kubernetes-compute-1')?.options).toEqual({ mode: 'DEPLOYMENT' });
@@ -85,7 +85,7 @@ describe(__t('provider_modes_reach_the_adapt'), () => {
     expect(live.get('kubernetes-compute-2')?.config.workloadType).toBe('stateful');
   });
 
-  it(__t('treats_the_same_node_with_anot'), async () => {
+  it('treats the same node with another mode as a conflict, never a silent no-op', async () => {
     const { engine, calls } = setup();
     await engine.executePlan({ nodes: [compute('web', {}, 'kubernetes', 'DEPLOYMENT')], edges: [] });
     const error = await failure(() => engine.executePlan({ nodes: [compute('web', {}, 'kubernetes', 'STATEFULSET')], edges: [] }));
@@ -93,7 +93,7 @@ describe(__t('provider_modes_reach_the_adapt'), () => {
     expect(calls).toEqual(['kubernetes:create:compute:web']);
   });
 
-  it(__t('keeps_a_plan_idempotent_when_o'), async () => {
+  it('keeps a plan idempotent when only the key order of the extension block differs', async () => {
     const { engine, calls } = setup();
     const node = (options: any) => ({ ...compute('web', {}, 'aws'), providerOptions: options });
     await engine.executePlan({ nodes: [node({ mode: 'INSTANCE', zone: 'a' })], edges: [] });
@@ -103,8 +103,8 @@ describe(__t('provider_modes_reach_the_adapt'), () => {
   });
 });
 
-describe(__t('preview_shows_the_plan_without'), () => {
-  it(__t('resolves_sizing_through_a_dry_'), async () => {
+describe('Preview shows the plan without changing anything (FAB-11)', () => {
+  it('resolves sizing through a dry run and reports capability and mode, with no mutation and no journal', async () => {
     const { engine, calls, entries, dryRuns, live } = setup();
     const plan = await engine.preview({ nodes: [compute('web', { cpuCores: 4, memoryMb: 8192 }, 'aws', 'INSTANCE'), network('net'), bucket('assets')], edges: [] });
     expect(plan.accepted).toBe(true);
@@ -120,14 +120,14 @@ describe(__t('preview_shows_the_plan_without'), () => {
     expect(live.size).toBe(0);
   });
 
-  it(__t('never_dry_runs_on_a_provider_t'), async () => {
+  it('never dry-runs on a provider that does not declare dry-run support', async () => {
     const { engine, dryRuns } = setup();
     const plan = await engine.preview({ nodes: [compute('site', {}, 'cpanel', 'HOSTED_APP')], edges: [] });
     expect(plan.nodes[0]).toEqual({ nodeId: 'site', kind: 'COMPUTE', provider: 'cpanel', capability: 'CONDITIONAL', mode: 'HOSTED_APP', requested: { instanceName: 'site', cpuCores: 2, memoryMb: 2048, osImage: 'ubuntu-24.04' } });
     expect(dryRuns).toEqual([]);
   });
 
-  it(__t('previews_without_a_resolution_'), async () => {
+  it('previews without a resolution when the adapter has no dry run', async () => {
     const { engine, clouds } = setup();
     delete (clouds.aws!.compute as any).resolveSizing;
     const plan = await engine.preview({ nodes: [compute('web')], edges: [] });
@@ -135,7 +135,7 @@ describe(__t('preview_shows_the_plan_without'), () => {
     expect(plan.nodes[0]!.resolved).toBeUndefined();
   });
 
-  it(__t('reports_why_a_plan_would_be_re'), async () => {
+  it('reports why a plan would be rejected, lists only the nodes that would run, and journals nothing', async () => {
     const { engine, calls, entries } = setup();
     const plan = await engine.preview({ nodes: [bucket('ok'), database('db', {}, 'kubernetes')], edges: [] });
     expect(plan.accepted).toBe(false);
@@ -145,14 +145,14 @@ describe(__t('preview_shows_the_plan_without'), () => {
     expect(entries).toEqual([]);
   });
 
-  it(__t('applies_the_same_structural_ch'), async () => {
+  it('applies the same structural checks as execution', async () => {
     const { engine } = setup();
     const error = await failure(() => engine.preview({ nodes: [bucket('a'), bucket('a')], edges: [] }));
     expect(error.message).toBe(E('duplicate_node', { node: 'a' }));
     expect((await failure(() => engine.preview({ nodes: [{ ...bucket('a'), provider: 'gcp' }], edges: [] }))).message).toBe(__t('fabric.contract.provider_not_registered', { provider: 'gcp' }));
   });
 
-  it(__t('previews_an_empty_plan_as_acce'), async () => {
+  it('previews an empty plan as accepted', async () => {
     expect(await setup().engine.preview({ nodes: [], edges: [] })).toEqual({ accepted: true, nodes: [], rejections: [] });
   });
 });

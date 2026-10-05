@@ -44,8 +44,8 @@ async function rejected(ir: any, policy?: EnginePolicy) {
 
 const codes = (rejections: any[]): string[] => rejections.map((r) => r.code);
 
-describe(__t('preflight_rejects_what_a_provi'), () => {
-  it(__t('rejects_an_unsupported_kind_wi'), async () => {
+describe('Preflight rejects what a provider cannot faithfully do (FAB-08)', () => {
+  it('rejects an unsupported kind with the reason, the alternatives and a journal entry, before any call', async () => {
     const { error, rejections, entries } = await rejected({ nodes: [database('db', {}, 'kubernetes')], edges: [] });
     expect(rejections).toEqual([{
       nodeId: 'db', provider: 'kubernetes', kind: 'DATABASE', code: 'KIND_UNSUPPORTED',
@@ -56,7 +56,7 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     expect(entries[0]).toMatchObject({ nodeId: 'db', action: 'provision', status: 'rejected', detail: `KIND_UNSUPPORTED: ${C('reason.kubernetes_database')}` });
   });
 
-  it(__t('rejects_every_unsupported_cell'), async () => {
+  it('rejects every unsupported cell of the matrix', async () => {
     const cells: Array<[any, string]> = [
       [database('x', {}, 'kubernetes'), 'kubernetes_database'], [database('x', {}, 'linux'), 'linux_database'], [network('x', '10.0.0.0/16', 'cpanel'), 'cpanel_network'],
     ];
@@ -67,12 +67,12 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     }
   });
 
-  it(__t('reports_a_single_rejection_for'), async () => {
+  it('reports a single rejection for an unsupported kind even when a mode or an unsupported engine is also given', async () => {
     const { rejections } = await rejected({ nodes: [{ ...database('x', { engine: 'document' }, 'kubernetes'), providerOptions: { mode: 'OPERATOR' } }], edges: [] });
     expect(codes(rejections)).toEqual(['KIND_UNSUPPORTED']);
   });
 
-  it(__t('collects_the_rejections_of_the'), async () => {
+  it('collects the rejections of the whole plan and rejects it entirely, including its valid nodes', async () => {
     const ir = { nodes: [bucket('ok'), database('db', {}, 'kubernetes'), network('net', '10.0.0.0/16', 'cpanel'), database('db2', {}, 'linux')], edges: [] };
     const { error, rejections, entries } = await rejected(ir);
     expect(rejections.map((r) => r.nodeId)).toEqual(['db', 'net', 'db2']);
@@ -80,13 +80,13 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     expect(entries.map((e) => e.nodeId)).toEqual(['db', 'net', 'db2']);
   });
 
-  it(__t('counts_resources_not_reasons_i'), async () => {
+  it('counts resources, not reasons, in the summary', async () => {
     const { error, rejections } = await rejected({ nodes: [bucket('s', { storageClass: 'FILE', sizeGb: 5, isPublic: true }, 'kubernetes')], edges: [] });
     expect(rejections.length).toBe(2);
     expect(error.message).toBe(E('plan_rejected', { count: 1 }));
   });
 
-  it(__t('requires_a_mode_for_a_conditio'), async () => {
+  it('requires a mode for a conditional kind and offers the way out', async () => {
     const { rejections } = await rejected({ nodes: [network('net', '10.0.0.0/16', 'kubernetes')], edges: [] });
     expect(rejections).toEqual([{
       nodeId: 'net', provider: 'kubernetes', kind: 'NETWORK', code: 'MODE_REQUIRED',
@@ -95,7 +95,7 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     }]);
   });
 
-  it(__t('rejects_a_mode_the_provider_do'), async () => {
+  it('rejects a mode the provider does not offer for the kind, native or conditional', async () => {
     const cases: Array<[any, string]> = [
       [network('n', '10.0.0.0/16', 'kubernetes', 'VPC'), 'NETWORK_POLICY'], [compute('c', {}, 'aws', 'LAMBDA'), 'INSTANCE'], [bucket('b', {}, 'aws', 'FOO'), '-'],
       [compute('c', {}, 'cpanel', 'INSTANCE'), 'HOSTED_APP'], [network('n', '10.0.0.0/16', 'linux', 'VPC'), 'EXISTING, NETWORKMANAGER, SYSTEMD_NETWORKD, NETPLAN'],
@@ -114,10 +114,10 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     expect(calls.length).toBe(5);
   });
 
-  it(__t('rejects_a_storage_class_the_pr'), async () => {
+  it('rejects a storage class the provider does not serve, naming what it does serve', async () => {
     const cases: Array<[any, string]> = [
       [bucket('b', { storageClass: 'FILE', sizeGb: 1 }, 'aws'), 'OBJECT'], [bucket('b', { storageClass: 'BLOCK', sizeGb: 1 }, 'linux', 'DIRECTORY'), 'FILE'],
-      [bucket('b', { storageClass: 'OBJECT' }, 'cpanel', 'ACCOUNT_FILESYSTEM'), 'FILE'], [bucket('b', { storageClass: 'OBJECT' }, 'kubernetes', 'PVC'), __t('file_block')],
+      [bucket('b', { storageClass: 'OBJECT' }, 'cpanel', 'ACCOUNT_FILESYSTEM'), 'FILE'], [bucket('b', { storageClass: 'OBJECT' }, 'kubernetes', 'PVC'), 'FILE, BLOCK'],
     ];
     for (const [node, classes] of cases) {
       const { rejections } = await rejected({ nodes: [node], edges: [] });
@@ -127,8 +127,8 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     }
   });
 
-  it(__t('rejects_a_database_engine_the_'), async () => {
-    const cases: Array<[any, string]> = [[database('d', { engine: 'document' }, 'aws'), __t('postgres_mysql')], [database('d', { engine: 'postgres' }, 'cpanel', 'MYSQL'), 'mysql']];
+  it('rejects a database engine the provider does not serve, naming what it does serve', async () => {
+    const cases: Array<[any, string]> = [[database('d', { engine: 'document' }, 'aws'), 'postgres, mysql'], [database('d', { engine: 'postgres' }, 'cpanel', 'MYSQL'), 'mysql']];
     for (const [node, engines] of cases) {
       const { rejections } = await rejected({ nodes: [node], edges: [] });
       expect(codes(rejections)).toEqual(['DATABASE_ENGINE_UNSUPPORTED']);
@@ -137,13 +137,13 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     }
   });
 
-  it(__t('accepts_what_the_contract_allo'), async () => {
+  it('accepts what the contract allows: RDS engines and MySQL on cPanel', async () => {
     const { engine, calls } = setup();
     await engine.executePlan({ nodes: [database('a', { engine: 'postgres' }), database('b', { engine: 'mysql' }), database('c', { engine: 'mysql' }, 'cpanel', 'MYSQL')], edges: [] });
     expect(calls.length).toBe(3);
   });
 
-  it(__t('falls_back_to_a_generic_reason'), async () => {
+  it('falls back to a generic reason and no alternatives when the declaration gives none', async () => {
     const contract: any = nativeContract('lab');
     contract.kinds.NETWORK = { status: 'UNSUPPORTED', modes: [] };
     const fabric = fakeFabric(['lab'], () => contract);
@@ -153,7 +153,7 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
     expect(fabric.calls).toEqual([]);
   });
 
-  it(__t('rejects_the_plan_the_same_way_'), async () => {
+  it('rejects the plan the same way every time (no state is created by a rejection)', async () => {
     const s = setup();
     const ir = { nodes: [database('db', {}, 'linux')], edges: [] };
     const first = await failure(() => s.engine.executePlan(ir));
@@ -163,10 +163,10 @@ describe(__t('preflight_rejects_what_a_provi'), () => {
   });
 });
 
-describe(__t('public_storage_needs_support_p'), () => {
+describe('Public storage needs support, policy and confirmation (FAB-09)', () => {
   const pub = (extra: Record<string, unknown> = {}, provider = 'aws') => ({ nodes: [bucket('site', { isPublic: true, ...extra }, provider)], edges: [] });
 
-  it(__t('refuses_public_storage_by_defa'), async () => {
+  it('refuses public storage by default policy, with a way out', async () => {
     const { rejections } = await rejected(pub({ publicAccessConfirmed: true }));
     expect(rejections).toEqual([{
       nodeId: 'site', provider: 'aws', kind: 'STORAGE', code: 'PUBLIC_STORAGE_PROHIBITED', reason: C('rejection.public_storage_prohibited', { node: 'site' }),
@@ -174,7 +174,7 @@ describe(__t('public_storage_needs_support_p'), () => {
     }]);
   });
 
-  it(__t('shows_the_security_warning_whe'), async () => {
+  it('shows the security warning when policy allows it but the user has not confirmed', async () => {
     const { rejections } = await rejected(pub(), { allowPublicStorage: true });
     expect(rejections).toEqual([{
       nodeId: 'site', provider: 'aws', kind: 'STORAGE', code: 'PUBLIC_STORAGE_UNCONFIRMED', reason: C('rejection.public_storage_unconfirmed', { node: 'site' }),
@@ -183,20 +183,20 @@ describe(__t('public_storage_needs_support_p'), () => {
     expect((await rejected(pub({ publicAccessConfirmed: false }), { allowPublicStorage: true })).rejections[0].code).toBe('PUBLIC_STORAGE_UNCONFIRMED');
   });
 
-  it(__t('provisions_public_object_stora'), async () => {
+  it('provisions public object storage only when policy allows it and the user confirmed', async () => {
     const { engine, calls, live } = setup({ allowPublicStorage: true });
     await engine.executePlan(pub({ publicAccessConfirmed: true }));
     expect(calls).toEqual(['aws:create:storage:site']);
     expect(live.get('aws-storage-1')?.config).toEqual({ name: 'site', storageClass: 'OBJECT', isPublic: true, publicAccessConfirmed: true });
   });
 
-  it(__t('never_lets_a_confirmation_over'), async () => {
+  it('never lets a confirmation override a policy that prohibits public storage', async () => {
     for (const policy of [{}, { allowPublicStorage: false }]) {
       expect(codes((await rejected(pub({ publicAccessConfirmed: true }), policy)).rejections)).toEqual(['PUBLIC_STORAGE_PROHIBITED']);
     }
   });
 
-  it(__t('rejects_public_access_wherever'), async () => {
+  it('rejects public access wherever it is not meaningful, whatever the policy and confirmation', async () => {
     for (const [provider, extra] of [['linux', { storageClass: 'FILE', sizeGb: 1 }], ['cpanel', { storageClass: 'FILE', sizeGb: 1 }], ['kubernetes', { storageClass: 'BLOCK', sizeGb: 1 }]] as Array<[string, any]>) {
       const modes: Record<string, string> = { linux: 'DIRECTORY', cpanel: 'ACCOUNT_FILESYSTEM', kubernetes: 'PVC' };
       const node = bucket('site', { isPublic: true, publicAccessConfirmed: true, ...extra }, provider, modes[provider]);
@@ -207,19 +207,19 @@ describe(__t('public_storage_needs_support_p'), () => {
     }
   });
 
-  it(__t('keeps_private_storage_unrestri'), async () => {
+  it('keeps private storage unrestricted and ignores a confirmation it does not need', async () => {
     const { engine, calls } = setup();
     await engine.executePlan({ nodes: [bucket('a'), bucket('b', { publicAccessConfirmed: true })], edges: [] });
     expect(calls.length).toBe(2);
   });
 
-  it(__t('reports_an_unsupported_storage'), async () => {
+  it('reports an unsupported storage class on its own, without piling public-access rules on top', async () => {
     const { rejections } = await rejected({ nodes: [bucket('site', { storageClass: 'OBJECT', isPublic: true, publicAccessConfirmed: true }, 'kubernetes', 'PVC')], edges: [] }, { allowPublicStorage: true });
     expect(codes(rejections)).toEqual(['STORAGE_CLASS_UNSUPPORTED']);
   });
 });
 
-describe(__t('plans_carry_credential_referen'), () => {
+describe('Plans carry credential references, never credential values (FAB-10)', () => {
   const refused = async (config: Record<string, unknown>, options?: Record<string, unknown>) => {
     const s = setup();
     const node: any = compute('web', config);
@@ -231,23 +231,23 @@ describe(__t('plans_carry_credential_referen'), () => {
     return error.message as string;
   };
 
-  it(__t('refuses_a_credential_named_fie'), async () => {
+  it('refuses a credential-named field that holds a value, whatever its spelling', async () => {
     for (const field of ['adminPassword', 'db_password', 'DBPASSWORD', 'db_passwd', 'apiKey', 'api_key', 'accessToken', 'clientSecret', 'privateKey', 'private_key', 'credentials', 'credentialsRef']) {
       expect(await refused({ [field]: 'hunter2' })).toBe(E('secret_in_plan', { node: 'web', field }));
     }
   });
 
-  it(__t('refuses_empty_non_string_and_n'), async () => {
-    for (const value of ['', 5, true, null, 'secret:', __t('secret'), 'Secret:x', __t('secret_x')]) {
+  it('refuses empty, non-string and nameless references', async () => {
+    for (const value of ['', 5, true, null, 'secret:', 'secret:   ', 'Secret:x', ' secret:x']) {
       expect(await refused({ adminPassword: value })).toBe(E('secret_in_plan', { node: 'web', field: 'adminPassword' }));
     }
   });
 
-  it(__t('applies_the_same_rule_to_the_p'), async () => {
-    expect(await refused({}, { mode: 'INSTANCE', privateKey: __t('begin_key') })).toBe(E('secret_in_plan', { node: 'web', field: 'privateKey' }));
+  it('applies the same rule to the provider extension block', async () => {
+    expect(await refused({}, { mode: 'INSTANCE', privateKey: '-----BEGIN KEY-----' })).toBe(E('secret_in_plan', { node: 'web', field: 'privateKey' }));
   });
 
-  it(__t('forwards_a_credential_referenc'), async () => {
+  it('forwards a credential reference to the provider unchanged and records only the reference', async () => {
     const s = setup();
     const report = await s.engine.executePlan({ nodes: [database('db', { credentialsRef: 'secret:db-admin' })], edges: [] });
     expect(s.live.get('aws-database-1')?.config.credentialsRef).toBe('secret:db-admin');

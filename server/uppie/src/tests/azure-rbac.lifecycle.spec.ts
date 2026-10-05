@@ -28,7 +28,7 @@ function setup() {
 const op = (...operations: string[]) => ({ action: { capability: 'x', operations } });
 const failure = async (run: () => Promise<any>): Promise<string> => { try { await run(); return ''; } catch (e: any) { return e.message; } };
 
-describe(__t('azure_rbac_compilation'), () => {
+describe('Azure RBAC compilation', () => {
   it('builds one deterministic, order-independent custom role at the rules\' scope', async () => {
     const { adapter } = setup();
     const rules = [rule({ ruleId: 'a' }), rule({ ruleId: 'b', ...op('Microsoft.Storage/storageAccounts/listKeys/action', 'Microsoft.Storage/storageAccounts/read') })];
@@ -46,7 +46,7 @@ describe(__t('azure_rbac_compilation'), () => {
     expect(doc.description).toBe(T('role_description', { digest: doc.roleName.slice('ugondu-'.length) }));
   });
 
-  it(__t('splits_data_plane_operations_a'), async () => {
+  it('splits data-plane operations and encloses resource-level scopes in their resource group', async () => {
     const { adapter } = setup();
     const blob = `${RG}/providers/Microsoft.Storage/storageAccounts/acct`;
     const doc = (await adapter.generate([rule({ resource: { type: 't', scope: blob }, ...op('data:Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read', 'Microsoft.Storage/storageAccounts/read') })], ctx)).nativeDocument as AzureRoleDocument;
@@ -56,14 +56,14 @@ describe(__t('azure_rbac_compilation'), () => {
     expect(doc.assignmentScope).toBe(blob);
   });
 
-  it(__t('defaults_to_the_environment_su'), async () => {
+  it('defaults to the environment subscription when the rule has no scope', async () => {
     const { adapter } = setup();
     const doc = (await adapter.generate([rule({ resource: { type: 't', scope: '*' } })], ctx)).nativeDocument as AzureRoleDocument;
     expect(doc.assignmentScope).toBe(SCOPE);
     expect(doc.assignableScopes).toEqual([SCOPE]);
   });
 
-  it(__t('fails_closed_on_everything_azu'), async () => {
+  it('fails closed on everything Azure role assignments cannot express', async () => {
     const { adapter } = setup();
     const gen = (...rules: any[]) => failure(() => adapter.generate(rules, ctx));
     expect(await gen(rule({ ruleId: 'd', effect: 'DENY' }))).toBe(T('deny_unsupported', { ruleId: 'd' }));
@@ -78,8 +78,8 @@ describe(__t('azure_rbac_compilation'), () => {
   });
 });
 
-describe(__t('azure_rbac_validation'), () => {
-  it(__t('accepts_a_generated_role_and_w'), async () => {
+describe('Azure RBAC validation', () => {
+  it('accepts a generated role and warns on family wildcards', async () => {
     const { adapter } = setup();
     expect((await adapter.validate(await adapter.generate([rule()], ctx), ctx)).valid).toBe(true);
     const wide = await adapter.generate([rule(op('Microsoft.Compute/*'))], ctx);
@@ -88,7 +88,7 @@ describe(__t('azure_rbac_validation'), () => {
     expect(res.warnings).toEqual([T('validate.broad_wildcard', { action: 'Microsoft.Compute/*' })]);
   });
 
-  it(__t('rejects_the_all_operations_wil'), async () => {
+  it('rejects the all-operations wildcard, malformed operations, and inconsistent scopes', async () => {
     const { adapter } = setup();
     const check = async (patch: (d: AzureRoleDocument) => void) => {
       const policy = await adapter.generate([rule()], ctx);
@@ -104,7 +104,7 @@ describe(__t('azure_rbac_validation'), () => {
     expect((await check((d) => { d.assignmentScope = RG2; })).errors).toEqual([T('validate.assignment_outside', { scope: RG2 })]);
   });
 
-  it(__t('detects_a_digest_that_no_longe'), async () => {
+  it('detects a digest that no longer matches the document', async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule()], ctx);
     (policy.nativeDocument as AzureRoleDocument).permissions[0].actions.push('Microsoft.Storage/storageAccounts/delete');
@@ -112,8 +112,8 @@ describe(__t('azure_rbac_validation'), () => {
   });
 });
 
-describe(__t('azure_rbac_attach_and_detach'), () => {
-  it(__t('creates_the_role_and_the_assig'), async () => {
+describe('Azure RBAC attach and detach', () => {
+  it('creates the role and the assignment once, and is idempotent', async () => {
     const { adapter, calls, roles, assignments } = setup();
     const policy = await adapter.generate([rule()], ctx);
     const first = await adapter.attach(policy, `User:${USER_ID}`, ctx);
@@ -126,7 +126,7 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
     expect([...assignments.values()][0]).toMatchObject({ scope: RG, principalId: USER_ID, principalType: 'User', roleDefinitionId: policy.providerId });
   });
 
-  it(__t('accepts_an_identical_assignmen'), async () => {
+  it('accepts an identical assignment that already exists under another name', async () => {
     const { adapter, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, GROUP_ID, ctx);
@@ -136,7 +136,7 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
     expect(res.providerRef.endsWith('/roleAssignments/portal-made')).toBe(true);
   });
 
-  it(__t('assigns_an_existing_built_in_r'), async () => {
+  it('assigns an existing built-in role without redefining it', async () => {
     const { adapter, calls } = setup();
     const doc: AzureRoleDocument = { roleName: 'Reader', description: '', permissions: [{ actions: ['*/read'], notActions: [], dataActions: [], notDataActions: [] }], assignableScopes: [SCOPE], assignmentScope: SCOPE };
     const res = await adapter.attach({ providerId: READER_ID, providerType: 'AZURE_RBAC', nativeDocument: doc, digest: '' }, `ServicePrincipal:${USER_ID}`, ctx);
@@ -144,7 +144,7 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
     expect(calls.filter((c) => c.startsWith('putRole')).length).toBe(0);
   });
 
-  it(__t('refuses_a_role_id_that_already'), async () => {
+  it('refuses a role id that already holds different permissions', async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     roles.set(policy.providerId.toLowerCase(), { id: policy.providerId, name: 'x', roleName: 'someone-elses', description: '', roleType: 'CustomRole', assignableScopes: [RG], permissions: [{ actions: ['Microsoft.Storage/*'], notActions: [], dataActions: [], notDataActions: [] }] });
@@ -153,7 +153,7 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
     expect(res.errors).toEqual([T('attach_error', { error: T('role_exists_different', { id: policy.providerId }) })]);
   });
 
-  it(__t('reports_invalid_principals_and'), async () => {
+  it('reports invalid principals and invalid documents without calling Azure', async () => {
     const { adapter, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     expect((await adapter.attach(policy, 'not-a-guid', ctx)).errors).toEqual([T('attach_error', { error: T('invalid_principal', { principal: 'not-a-guid' }) })]);
@@ -162,7 +162,7 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
     expect(calls.length).toBe(0);
   });
 
-  it(__t('detaches_only_the_named_princi'), async () => {
+  it('detaches only the named principal, and detaching twice is harmless', async () => {
     const { adapter, assignments } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);
@@ -172,7 +172,7 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
     expect([...assignments.values()].map((a) => a.principalId)).toEqual([GROUP_ID]);
   });
 
-  it(__t('treats_a_missing_role_as_alrea'), async () => {
+  it('treats a missing role as already detached and rejects malformed ids', async () => {
     const { adapter } = setup();
     expect((await adapter.detach(`${RG}/providers/Microsoft.Authorization/roleDefinitions/${USER_ID}`, USER_ID, ctx)).success).toBe(true);
     const bad = await adapter.detach('nope', USER_ID, ctx);
@@ -180,8 +180,8 @@ describe(__t('azure_rbac_attach_and_detach'), () => {
   });
 });
 
-describe(__t('azure_rbac_update_and_clone'), () => {
-  it(__t('replaces_the_permissions_of_a_'), async () => {
+describe('Azure RBAC update and clone', () => {
+  it('replaces the permissions of a custom role in place and keeps its name and assignments', async () => {
     const { adapter, roles, assignments } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);
@@ -194,7 +194,7 @@ describe(__t('azure_rbac_update_and_clone'), () => {
     expect(assignments.size).toBe(1);
   });
 
-  it(__t('refuses_to_update_built_in_rol'), async () => {
+  it('refuses to update built-in roles or to move a role outside its assignable scopes', async () => {
     const { adapter } = setup();
     expect((await adapter.update(READER_ID, [rule()], ctx)).errors).toEqual([T('update_error', { error: T('protected_role', { id: READER_ID }) })]);
     const policy = await adapter.generate([rule()], ctx);
@@ -203,43 +203,43 @@ describe(__t('azure_rbac_update_and_clone'), () => {
     expect(moved.errors).toEqual([T('update_error', { error: T('update_scope_change', { id: policy.providerId }) })]);
   });
 
-  it(__t('rejects_updates_that_do_not_va'), async () => {
+  it('rejects updates that do not validate', async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);
     expect((await adapter.update(policy.providerId, [rule(op('*'))], ctx)).errors).toEqual([T('validate.admin_wildcard')]);
   });
 
-  it(__t('clones_custom_and_built_in_rol'), async () => {
+  it('clones custom and built-in roles idempotently under a new name', async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);
-    const one = await adapter.clone(policy.providerId, __t('storage_reader_copy'), ctx);
-    const two = await adapter.clone(policy.providerId, __t('storage_reader_copy'), ctx);
+    const one = await adapter.clone(policy.providerId, 'Storage reader copy', ctx);
+    const two = await adapter.clone(policy.providerId, 'Storage reader copy', ctx);
     expect(one.success).toBe(true);
     expect(two.clonedId).toBe(one.clonedId);
-    expect(roles.get(one.clonedId.toLowerCase())!.roleName).toBe(__t('storage_reader_copy'));
-    const builtin = await adapter.clone(READER_ID, __t('reader_copy'), ctx);
+    expect(roles.get(one.clonedId.toLowerCase())!.roleName).toBe('Storage reader copy');
+    const builtin = await adapter.clone(READER_ID, 'Reader copy', ctx);
     expect(roles.get(builtin.clonedId.toLowerCase())).toMatchObject({ roleType: 'CustomRole', assignableScopes: [SCOPE] });
   });
 
-  it(__t('refuses_a_clone_name_that_belo'), async () => {
+  it('refuses a clone name that belongs to a different role and invalid names', async () => {
     const { adapter } = setup();
     const a = await adapter.generate([rule()], ctx);
     const b = await adapter.generate([rule(op('Microsoft.Storage/storageAccounts/write'))], ctx);
     await adapter.attach(a, USER_ID, ctx);
     await adapter.attach(b, USER_ID, ctx);
-    await adapter.clone(a.providerId, __t('shared_name'), ctx);
-    const clash = await adapter.clone(b.providerId, __t('shared_name'), ctx);
+    await adapter.clone(a.providerId, 'shared name', ctx);
+    const clash = await adapter.clone(b.providerId, 'shared name', ctx);
     expect(clash.success).toBe(false);
     expect((await adapter.clone(a.providerId, '   ', ctx)).errors).toEqual([T('clone_error', { error: T('invalid_name', { limit: 512 }) })]);
   });
 });
 
-describe(__t('azure_rbac_retirement_and_rest'), () => {
+describe('Azure RBAC retirement and restore', () => {
   const plan = (policyId: string): any => ({ policyId, reason: 'test', approvedBy: 'ops', approvedAt: '2026-10-03T00:00:00Z' });
 
-  it(__t('refuses_to_retire_a_role_that_'), async () => {
+  it('refuses to retire a role that is still assigned, then retires it with a rollback snapshot', async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);
@@ -252,12 +252,12 @@ describe(__t('azure_rbac_retirement_and_rest'), () => {
     expect(JSON.parse(res.detachmentEvidence!)).toMatchObject({ policy: policy.providerId, assignments: 0, approvedBy: 'ops' });
   });
 
-  it(__t('never_retires_built_in_roles'), async () => {
+  it('never retires built-in roles', async () => {
     const { adapter } = setup();
     expect((await adapter.retire(plan(READER_ID), ctx)).errors).toEqual([T('retire_error', { error: T('protected_role', { id: READER_ID }) })]);
   });
 
-  it(__t('restores_a_retired_role_under_'), async () => {
+  it('restores a retired role under its original id, idempotently', async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);
@@ -270,7 +270,7 @@ describe(__t('azure_rbac_retirement_and_rest'), () => {
     expect((await adapter.restore(cert, ctx)).restoredId).toBe(policy.providerId);
   });
 
-  it(__t('rejects_missing_mismatched_uns'), async () => {
+  it('rejects missing, mismatched, unsafe and conflicting snapshots', async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER_ID, ctx);

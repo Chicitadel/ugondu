@@ -49,7 +49,7 @@ declare var it: any;
 declare var expect: any;
 declare var jest: any;
 
-describe(__t('uppie_qualification_gate'), () => {
+describe('UPPIE Qualification Gate', () => {
 
   const dummyContext: AdapterContext = {
     tenantId: 't1', environmentId: 'e1', provider: 'AWS_IAM', credentials: {}
@@ -85,13 +85,13 @@ describe(__t('uppie_qualification_gate'), () => {
     } as unknown as IPolicyProviderAdapter;
   }
 
-describe(__t('uppie_qualification_tests_core'), () => {
+describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-001 ──────────────────────────────────────────────────────────
-  describe(__t('uppie_q_001_authority_graph_co'), () => {
-    it(__t('should_build_a_valid_authority'), async () => {
+  describe('UPPIE-Q-001: Authority graph construction accuracy', () => {
+    it('should build a valid AuthorityGraphSnapshot from a mock adapter', async () => {
       const adapter = createMockAdapter({
-        discoverIdentities: jest.fn().mockResolvedValue([{ id: 'actor-1', type: 'USER', displayName: __t('user_1') }]),
-        discoverRoles: jest.fn().mockResolvedValue([{ id: 'role-1', displayName: __t('role_1'), policies: ['pol-1'] }]),
+        discoverIdentities: jest.fn().mockResolvedValue([{ id: 'actor-1', type: 'USER', displayName: 'User 1' }]),
+        discoverRoles: jest.fn().mockResolvedValue([{ id: 'role-1', displayName: 'Role 1', policies: ['pol-1'] }]),
         discoverPolicies: jest.fn().mockResolvedValue([{ providerId: 'pol-1', providerType: 'AWS_IAM', nativeDocument: {}, digest: '123' }]),
         discoverAssignments: jest.fn().mockResolvedValue({ 'actor-1': ['role-1'] }),
       });
@@ -105,7 +105,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
   });
 
   // ─── UPPIE-Q-002 ──────────────────────────────────────────────────────────
-  describe(__t('uppie_q_002_effective_authorit'), () => {
+  describe('UPPIE-Q-002: Effective authority calculation correctness', () => {
     it('should correctly apply all 8 intersection rules (Union ∩ ExplicitDenials ∩ Boundaries...)', async () => {
       const adapter = createMockAdapter({
         discoverEffectiveAuthority: jest.fn().mockResolvedValue({
@@ -123,7 +123,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
 
   // ─── UPPIE-Q-003 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-003: Reuse detection — no duplicate policy created', () => {
-    it(__t('should_return_reuse_when_exist'), async () => {
+    it('should return REUSE when existing authority satisfies the required capability', async () => {
       const adapter = createMockAdapter({
         discoverEffectiveAuthority: jest.fn().mockResolvedValue({
           permissions: [{ state: 'GRANTED', capability: 's3:read' }],
@@ -142,7 +142,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
 
   // ─── UPPIE-Q-004 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-004: Least-privilege compiler — no over-broad permissions', () => {
-    it(__t('should_reject_any_compiled_rul'), () => {
+    it('should reject any compiled rule with wildcard resource scope', () => {
       const compiler = new LeastPrivilegeCompiler();
       const gap = { missing: ['s3:read'], available: [], required: ['s3:read'], actorId: 'a1', resourceId: 'r1', confidence: 'HIGH' as const };
       expect(() => compiler.compile(gap, ['*'], 'Test', 'op-1', false)).toThrow(/prohibited resource scope/i);
@@ -163,7 +163,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
   });
 
   // ─── UPPIE-Q-006 ──────────────────────────────────────────────────────────
-  describe(__t('uppie_q_006_provider_limit_enf'), () => {
+  describe('UPPIE-Q-006: Provider limit enforcement', () => {
     it('should return WARN when role assignment count approaches maxRolesPerIdentity (>85%)', () => {
       const limit = { status: 'SUPPORTED' as const, value: 100 };
       const isApproaching = isApproachingLimit(limit, 86);
@@ -179,8 +179,8 @@ describe(__t('uppie_qualification_tests_core'), () => {
   });
 
   // ─── UPPIE-Q-008 ──────────────────────────────────────────────────────────
-  describe(__t('uppie_q_008_temporaryauthoriza'), () => {
-    it(__t('should_mark_temporaryauthoriza'), () => {
+  describe('UPPIE-Q-008: TemporaryAuthorization auto-revoke after execution', () => {
+    it('should mark TemporaryAuthorization as EXPIRED when expiresAt is in the past', () => {
       const past = new Date(Date.now() - 10000).toISOString();
       const auth = { expiresAt: past, status: 'ISSUED' } as any;
       expect(isExpired(auth)).toBe(true);
@@ -190,7 +190,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
 
   // ─── UPPIE-Q-009 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-009: Policy retirement lifecycle — all 14 steps traceable', () => {
-    it(__t('should_produce_a_policyretirem'), async () => {
+    it('should produce a PolicyRetirementCertificate with all required fields', async () => {
       const adapter = createMockAdapter({
         retire: jest.fn().mockResolvedValue({
           success: true,
@@ -209,8 +209,8 @@ describe(__t('uppie_qualification_tests_core'), () => {
   });
 
   // ─── UPPIE-Q-010 ──────────────────────────────────────────────────────────
-  describe(__t('uppie_q_010_policy_provenance_'), () => {
-    it(__t('should_correctly_identify_iac_'), () => {
+  describe('UPPIE-Q-010: Policy provenance tracking accuracy', () => {
+    it('should correctly identify IaC-managed policies via isIaCManaged()', () => {
       expect(isIaCManaged({ source: 'TERRAFORM' } as any)).toBe(true);
     });
   });
@@ -230,8 +230,8 @@ describe(__t('uppie_qualification_tests_core'), () => {
   });
 
   // ─── UPPIE-Q-012 ──────────────────────────────────────────────────────────
-  describe(__t('uppie_q_012_policy_conflict_de'), () => {
-    it(__t('should_detect_allow_vs_deny_co'), async () => {
+  describe('UPPIE-Q-012: Policy conflict detection', () => {
+    it('should detect ALLOW vs DENY conflict for the same resource', async () => {
       const adapter = createMockAdapter({
         findConflicts: jest.fn().mockResolvedValue({
           conflicts: [{ ruleA: 'r1', ruleB: 'r2', conflictType: 'ALLOW_DENY_OVERLAP', resolution: 'B_WINS', explanation: '' }]
@@ -244,7 +244,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
 
   // ─── UPPIE-Q-013 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-013: Policy drift detection (Declared ≠ Observed ≠ Effective)', () => {
-    it(__t('should_detect_when_observed_st'), async () => {
+    it('should detect when observed state differs from declared state', async () => {
       const adapter = createMockAdapter({
         reconcile: jest.fn().mockResolvedValue({
           toAdd: [{} as AuthorizationRule], toRemove: ['r1'], toUpdate: [], noChange: []
@@ -258,7 +258,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
 
   // ─── UPPIE-Q-014 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-014: AI hypothesis → policy engine → simulation pipeline', () => {
-    it(__t('should_route_from_ai_generated'), async () => {
+    it('should route from AI-generated AuthorizationRule through simulation to decision', async () => {
       const adapter = createMockAdapter({
         simulate: jest.fn().mockResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: {} as any })
       });

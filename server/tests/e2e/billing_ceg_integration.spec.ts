@@ -57,7 +57,7 @@ describe("Billing & Capability Entitlement Graph (CEG) Integration", () => {
     billingGateway = new BillingGateway(eventBus);
   });
 
-  it(__t('should_transition_capability_f'), async () => {
+  it("should transition capability from LOCKED to ACTIVE when SubscriptionUpgraded event is emitted", async () => {
     // 1. Setup: Define a target aggregate ID representing a customer subscription.
     const customerId = "cust_5f8a91b2c3d4";
 
@@ -73,7 +73,7 @@ describe("Billing & Capability Entitlement Graph (CEG) Integration", () => {
     expect(newState).toBe("ACTIVE");
   });
 
-  it(__t('should_not_activate_capability'), async () => {
+  it("should not activate capability if the upgraded tier is BASIC", async () => {
     const customerId = "cust_7e6b5c4d3a2";
 
     ceg.setCapabilityState(customerId, "LOCKED");

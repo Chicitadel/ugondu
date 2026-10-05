@@ -58,7 +58,7 @@ func TestTransactionLock(t *testing.T) {
 		t.Fatalf("AcquireTransactionLock failed: %v", err)
 	}
 	if lock1 == nil {
-		t.Fatalf(i18n.T("expected_valid_lock_got_nil"))
+		t.Fatalf("Expected valid lock, got nil")
 	}
 
 	// Verify lock file exists
@@ -78,7 +78,7 @@ func TestTransactionLock(t *testing.T) {
 		t.Fatalf("ReleaseTransactionLock failed: %v", err)
 	}
 	if _, err := os.Stat(lockPath); !os.IsNotExist(err) {
-		t.Errorf(i18n.T("lock_file_should_have_been_rem"))
+		t.Errorf("Lock file should have been removed after release")
 	}
 
 	// Test 4: Stale lock (older than 30 minutes) should be acquired cleanly
@@ -101,7 +101,7 @@ func TestTransactionLock(t *testing.T) {
 		t.Fatalf("Failed to acquire stale lock: %v", err)
 	}
 	if lock2 == nil {
-		t.Fatalf(i18n.T("expected_valid_lock_after_reco"))
+		t.Fatalf("Expected valid lock after recovering stale lock")
 	}
 	_ = ReleaseTransactionLock(lock2)
 }

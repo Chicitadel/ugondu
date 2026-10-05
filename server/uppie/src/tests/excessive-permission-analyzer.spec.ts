@@ -22,13 +22,13 @@ const rule = (id: string, actions: string[], resources: string[], effect: 'allow
 describe('ExcessivePermissionAnalyzer', () => {
   const analyzer = new ExcessivePermissionAnalyzer();
 
-  it(__t('scores_a_wildcard_action_on_a_'), () => {
+  it('scores a wildcard action on a wildcard resource as critical with a localized finding', () => {
     const [score] = analyzer.analyze([rule('r1', ['*'], ['*'])]);
     expect(score).toEqual({ ruleId: 'r1', score: 100, findings: [__t('messages.warning.wildcard_action_and_resource')] });
     expect(score?.findings[0]).not.toBe('messages.warning.wildcard_action_and_resource');
   });
 
-  it(__t('scores_a_single_wildcard_as_hi'), () => {
+  it('scores a single wildcard as high with its own localized finding', () => {
     const scores = analyzer.analyze([rule('a', ['*'], ['bucket/1']), rule('b', ['read'], ['*'])]);
     expect(scores).toEqual([
       { ruleId: 'a', score: 80, findings: [__t('messages.warning.wildcard_action')] },
@@ -37,7 +37,7 @@ describe('ExcessivePermissionAnalyzer', () => {
     expect(__t('messages.warning.wildcard_action')).not.toBe(__t('messages.warning.wildcard_resource'));
   });
 
-  it(__t('ignores_deny_rules_precise_all'), () => {
+  it('ignores deny rules, precise allow rules and empty input', () => {
     expect(analyzer.analyze([rule('d', ['*'], ['*'], 'deny'), rule('p', ['read'], ['bucket/1'])])).toEqual([]);
     expect(analyzer.analyze([])).toEqual([]);
     expect(analyzer.analyze(undefined as any)).toEqual([]);

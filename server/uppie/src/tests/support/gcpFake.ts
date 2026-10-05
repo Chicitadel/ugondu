@@ -62,8 +62,8 @@ export function fakeGcp(options: { roleLimit?: number } = {}) {
   const chain = (resource: string): string[] => { const out = [resource]; for (let p = parents.get(resource); p; p = parents.get(p)) out.push(p); return out; };
   const policyOf = (resource: string): GcpPolicy => { known(resource); if (!policies.has(resource)) policies.set(resource, { version: 3, etag: '0', bindings: [] }); return policies.get(resource) as GcpPolicy; };
 
-  roles.set(VIEWER, { name: VIEWER, title: 'Viewer', description: __t('read_access'), stage: 'GA', includedPermissions: ['resourcemanager.projects.get', 'storage.objects.get'], deleted: false });
-  roles.set('roles/storage.objectAdmin', { name: 'roles/storage.objectAdmin', title: __t('storage_object_admin'), description: __t('full_object_control'), stage: 'GA', includedPermissions: ['storage.objects.get', 'storage.objects.list', 'storage.objects.delete'], deleted: false });
+  roles.set(VIEWER, { name: VIEWER, title: 'Viewer', description: 'Read access', stage: 'GA', includedPermissions: ['resourcemanager.projects.get', 'storage.objects.get'], deleted: false });
+  roles.set('roles/storage.objectAdmin', { name: 'roles/storage.objectAdmin', title: 'Storage Object Admin', description: 'Full object control', stage: 'GA', includedPermissions: ['storage.objects.get', 'storage.objects.list', 'storage.objects.delete'], deleted: false });
   const live = (name: string): GcpRole | undefined => { const r = roles.get(name); return r && !r.deleted ? r : undefined; };
   const parentOfRole = (name: string): string => name.slice(0, name.indexOf('/roles/'));
   const checkBinding = (resource: string, role: string): void => {
@@ -73,20 +73,20 @@ export function fakeGcp(options: { roleLimit?: number } = {}) {
   const customOf = (name: string): GcpRole => {
     const r = roles.get(name);
     if (!r) throw err(GRPC.NOT_FOUND, `no role ${name}`);
-    if (!/^(projects|organizations)\//.test(name)) throw err(INVALID_ARGUMENT, __t('predefined_roles_are_immutable'));
+    if (!/^(projects|organizations)\//.test(name)) throw err(INVALID_ARGUMENT, 'predefined roles are immutable');
     return r;
   };
-  const checkEtag = (role: GcpRole, etag?: string): void => { if (etag !== undefined && etag !== role.etag) throw err(GRPC.ABORTED, __t('stale_role_etag')); };
+  const checkEtag = (role: GcpRole, etag?: string): void => { if (etag !== undefined && etag !== role.etag) throw err(GRPC.ABORTED, 'stale role etag'); };
 
   const client: GcpIamClient = {
     async getPolicy(resource) { return copy(policyOf(resource)); },
     async setPolicy(resource, policy) {
       const current = policyOf(resource);
       calls.push(`setPolicy:${resource}`);
-      if (abortNext > 0) { abortNext--; current.etag = bump(current.etag); throw err(GRPC.ABORTED, __t('concurrent_edit')); }
-      if (policy.etag !== current.etag) throw err(GRPC.ABORTED, __t('stale_policy_etag'));
-      if (policy.version !== 3 && policy.bindings.some((b) => b.condition)) throw err(GRPC.FAILED_PRECONDITION, __t('conditions_need_policy_version'));
-      if (policy.bindings.reduce((n, b) => n + b.members.length, 0) > 1500) throw err(RESOURCE_EXHAUSTED, __t('too_many_principals'));
+      if (abortNext > 0) { abortNext--; current.etag = bump(current.etag); throw err(GRPC.ABORTED, 'concurrent edit'); }
+      if (policy.etag !== current.etag) throw err(GRPC.ABORTED, 'stale policy etag');
+      if (policy.version !== 3 && policy.bindings.some((b) => b.condition)) throw err(GRPC.FAILED_PRECONDITION, 'conditions need policy version 3');
+      if (policy.bindings.reduce((n, b) => n + b.members.length, 0) > 1500) throw err(RESOURCE_EXHAUSTED, 'too many principals');
       for (const b of policy.bindings) checkBinding(resource, b.role);
       const saved: GcpPolicy = { version: 3, etag: bump(current.etag), bindings: copy(policy.bindings) };
       policies.set(resource, saved);
@@ -97,12 +97,12 @@ export function fakeGcp(options: { roleLimit?: number } = {}) {
     async getRole(name) { const r = roles.get(name); if (!r) throw err(GRPC.NOT_FOUND, `no role ${name}`); return copy(r); },
     async createRole(parent, roleId, spec: GcpRoleSpec) {
       known(parent);
-      if (!/^(projects|organizations)\//.test(parent)) throw err(INVALID_ARGUMENT, __t('roles_live_in_projects_and_org'));
-      if (!/^[a-zA-Z0-9_.]{3,64}$/.test(roleId)) throw err(INVALID_ARGUMENT, __t('bad_role_id'));
-      if (spec.includedPermissions.length > 3000) throw err(INVALID_ARGUMENT, __t('too_many_permissions'));
+      if (!/^(projects|organizations)\//.test(parent)) throw err(INVALID_ARGUMENT, 'roles live in projects and organizations');
+      if (!/^[a-zA-Z0-9_.]{3,64}$/.test(roleId)) throw err(INVALID_ARGUMENT, 'bad role id');
+      if (spec.includedPermissions.length > 3000) throw err(INVALID_ARGUMENT, 'too many permissions');
       const name = `${parent}/roles/${roleId}`;
       if (roles.has(name)) throw err(GRPC.ALREADY_EXISTS, `role ${name} exists`);
-      if ([...roles.values()].filter((r) => !r.deleted && r.name.startsWith(`${parent}/roles/`)).length >= (options.roleLimit ?? 300)) throw err(RESOURCE_EXHAUSTED, __t('role_quota'));
+      if ([...roles.values()].filter((r) => !r.deleted && r.name.startsWith(`${parent}/roles/`)).length >= (options.roleLimit ?? 300)) throw err(RESOURCE_EXHAUSTED, 'role quota');
       const role: GcpRole = { ...copy(spec), name, deleted: false, etag: `r${++counter}` };
       roles.set(name, role);
       calls.push(`createRole:${name}`);
@@ -110,7 +110,7 @@ export function fakeGcp(options: { roleLimit?: number } = {}) {
     },
     async updateRole(name, spec, etag) {
       const role = customOf(name);
-      if (role.deleted) throw err(GRPC.FAILED_PRECONDITION, __t('role_is_deleted'));
+      if (role.deleted) throw err(GRPC.FAILED_PRECONDITION, 'role is deleted');
       checkEtag(role, etag);
       Object.assign(role, copy(spec), { etag: `r${++counter}` });
       calls.push(`updateRole:${name}`);
@@ -126,7 +126,7 @@ export function fakeGcp(options: { roleLimit?: number } = {}) {
     },
     async undeleteRole(name, etag) {
       const role = customOf(name);
-      if (!role.deleted) throw err(GRPC.FAILED_PRECONDITION, __t('role_is_not_deleted'));
+      if (!role.deleted) throw err(GRPC.FAILED_PRECONDITION, 'role is not deleted');
       checkEtag(role, etag);
       role.deleted = false;
       role.etag = `r${++counter}`;
@@ -159,7 +159,7 @@ export function fakeGcp(options: { roleLimit?: number } = {}) {
       policy.etag = bump(policy.etag);
     },
     role(name: string, includedPermissions: string[], over: Partial<GcpRole> = {}): void {
-      roles.set(name, { name, title: 'Seeded', description: __t('seeded_role'), stage: 'GA', includedPermissions, deleted: false, etag: `r${++counter}`, ...over });
+      roles.set(name, { name, title: 'Seeded', description: 'Seeded role', stage: 'GA', includedPermissions, deleted: false, etag: `r${++counter}`, ...over });
     },
     purge(name: string): void { roles.delete(name); },
     abortNext(times: number): void { abortNext = times; },

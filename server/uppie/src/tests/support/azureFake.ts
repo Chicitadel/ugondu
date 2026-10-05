@@ -54,7 +54,7 @@ export function fakeAzure() {
   const denies: AzureDenyAssignment[] = [];
   const calls: string[] = [];
   roles.set(low(READER_ID), {
-    id: READER_ID, name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7', roleName: 'Reader', description: __t('view_everything'), roleType: 'BuiltInRole',
+    id: READER_ID, name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7', roleName: 'Reader', description: 'View everything', roleType: 'BuiltInRole',
     permissions: [{ actions: ['*/read'], notActions: [], dataActions: [], notDataActions: [] }], assignableScopes: ['/'],
   });
   const lookup = (id: string): AzureRoleDefinition | undefined => roles.get(low(id)) ?? [...roles.values()].find((r) => r.roleType === 'BuiltInRole' && low(id).endsWith(`/${low(r.name)}`));

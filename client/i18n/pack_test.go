@@ -45,17 +45,17 @@ func TestLanguagePackVerification(t *testing.T) {
 	for k, v := range pack.Tokens {
 		tampered.Tokens[k] = v
 	}
-	tampered.Tokens["cli_title"] = i18n.T("tampered_title")
+	tampered.Tokens["cli_title"] = "Tampered Title"
 
 	if err := tampered.ValidateIntegrity("1.2.0"); err == nil {
-		t.Error(i18n.T("tampered_pack_should_have_fail"))
+		t.Error("Tampered pack should have failed digest verification")
 	}
 
 	// Adversarial test: Forged signature must fail signature verification
 	forged := *pack
 	forged.Signature = "A" + pack.Signature[1:]
 	if err := forged.VerifySignature(); err == nil {
-		t.Error(i18n.T("forged_signature_should_have_f"))
+		t.Error("Forged signature should have failed verification")
 	}
 }
 
@@ -75,7 +75,7 @@ func TestCriticalTokenCompleteness(t *testing.T) {
 
 	err := pack.ValidateIntegrity("1.2.0")
 	if err == nil {
-		t.Error(i18n.T("pack_with_missing_critical_tok"))
+		t.Error("Pack with missing critical tokens must fail completeness validation")
 	}
 }
 

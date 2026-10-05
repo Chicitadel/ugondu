@@ -95,35 +95,35 @@ func TestVerifyCryptographicBindings(t *testing.T) {
 	stateBadPlan := *state
 	stateBadPlan.PlanHash = "tampered_plan_hash"
 	if err := VerifyCryptographicBindings(&stateBadPlan, env); err == nil {
-		t.Errorf(i18n.T("expected_planhash_mismatch_err"))
+		t.Errorf("Expected PlanHash mismatch error, got nil")
 	}
 
 	// Case 3: TenantId mismatch
 	stateBadTenant := *state
 	stateBadTenant.TenantId = "tenant_attacker"
 	if err := VerifyCryptographicBindings(&stateBadTenant, env); err == nil {
-		t.Errorf(i18n.T("expected_tenantid_mismatch_err"))
+		t.Errorf("Expected TenantId mismatch error, got nil")
 	}
 
 	// Case 4: ProjectId mismatch
 	stateBadProj := *state
 	stateBadProj.ProjectId = "project_tampered"
 	if err := VerifyCryptographicBindings(&stateBadProj, env); err == nil {
-		t.Errorf(i18n.T("expected_projectid_mismatch_er"))
+		t.Errorf("Expected ProjectId mismatch error, got nil")
 	}
 
 	// Case 5: EnvironmentId mismatch
 	stateBadEnv := *state
 	stateBadEnv.EnvironmentId = "kubernetes"
 	if err := VerifyCryptographicBindings(&stateBadEnv, env); err == nil {
-		t.Errorf(i18n.T("expected_environmentid_mismatc"))
+		t.Errorf("Expected EnvironmentId mismatch error, got nil")
 	}
 
 	// Case 6: PolicyHash mismatch
 	stateBadPolicy := *state
 	stateBadPolicy.PolicyHash = "policy_bypass"
 	if err := VerifyCryptographicBindings(&stateBadPolicy, env); err == nil {
-		t.Errorf(i18n.T("expected_policyhash_mismatch_e"))
+		t.Errorf("Expected PolicyHash mismatch error, got nil")
 	}
 }
 func TestSignatureEnforcedDirectCall(t *testing.T) {
@@ -135,7 +135,7 @@ func TestSignatureEnforcedDirectCall(t *testing.T) {
 
 	pubKeyBytes, _ := x509.MarshalPKIXPublicKey(pub)
 	pubKeyPem := pem.EncodeToMemory(&pem.Block{
-		Type:  i18n.T("public_key"),
+		Type:  "PUBLIC KEY",
 		Bytes: pubKeyBytes,
 	})
 
@@ -153,7 +153,7 @@ func TestSignatureEnforcedDirectCall(t *testing.T) {
 	os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
 	logs, err := ExecuteRecipe(validEnv, steps)
 	if err == nil {
-		t.Errorf(i18n.T("expected_error_due_to_missing_"))
+		t.Errorf("Expected error due to missing public key env var")
 	}
 	if len(logs) > 0 {
 		t.Errorf("Expected logs to be empty, got %v", logs)
@@ -172,7 +172,7 @@ func TestSignatureEnforcedDirectCall(t *testing.T) {
 
 	logs, err = ExecuteRecipe(tamperedEnv, steps)
 	if err == nil {
-		t.Errorf(i18n.T("expected_error_due_to_invalid_"))
+		t.Errorf("Expected error due to invalid signature")
 	}
 	if len(logs) > 0 {
 		t.Errorf("Expected logs to be empty, got %v", logs)

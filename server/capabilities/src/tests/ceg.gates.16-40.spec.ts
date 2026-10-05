@@ -19,7 +19,7 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe(__t('ceg_qualification_gates_ceg_16'), () => {
+describe('CEG Qualification Gates: CEG-16..40', () => {
   const baseManifest: CapabilityManifest = {
     tenantId: 'tenant-enterprise',
     subjectId: 'sub-1',
@@ -45,14 +45,14 @@ describe(__t('ceg_qualification_gates_ceg_16'), () => {
     expect(elapsed).toBeLessThan(10);
   });
 
-  it(__t('ceg_19_23_tier_boundary_enforc'), () => {
+  it('CEG-19..23: Tier boundary enforcement across Community, Pro, Business, Enterprise, Sovereign', () => {
     const communityManifest: CapabilityManifest = { ...baseManifest, edition: 'COMMUNITY', capabilities: [] };
     const communityResolver = new EntitlementResolver(communityManifest);
     const res = communityResolver.resolve('MOVE_CROSS_CLOUD', true, true, true);
     expect(res.result).toBe('NOT_ENTITLED');
   });
 
-  it(__t('ceg_24_25_edition_downgrade_do'), () => {
+  it('CEG-24..25: Edition downgrade does NOT destroy active workloads (INV-CEG-6)', () => {
     const sm = new CapabilityStateMachine('ACTIVE');
     expect(sm.currentState).toBe('ACTIVE');
     sm.transition('DEACTIVATING');
@@ -61,7 +61,7 @@ describe(__t('ceg_qualification_gates_ceg_16'), () => {
     expect(sm.currentState).toBe('DEACTIVATED');
   });
 
-  it(__t('ceg_26_28_feature_state_gating'), () => {
+  it('CEG-26..28: Feature state gating (LOCKED vs AVAILABLE vs DEGRADED)', () => {
     const lockedManifest: CapabilityManifest = {
       ...baseManifest,
       capabilities: []
@@ -75,7 +75,7 @@ describe(__t('ceg_qualification_gates_ceg_16'), () => {
     expect(maxNodes).toBe(100);
   });
 
-  it(__t('ceg_37_40_grace_period_non_des'), () => {
+  it('CEG-37..40: Grace period non-destructive execution', () => {
     const expiredManifest: CapabilityManifest = {
       ...baseManifest,
       expiresAt: new Date(Date.now() - 1000).toISOString()

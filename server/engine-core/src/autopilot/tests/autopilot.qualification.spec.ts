@@ -26,8 +26,8 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe(__t('infrastructure_autopilot_quali'), () => {
-  it(__t('auto_01_06_autonomy_levels_l0_'), () => {
+describe('Infrastructure Autopilot Qualification Gates: AUTO-01..26', () => {
+  it('AUTO-01..06: Autonomy levels L0 to L6 delegation and checking', () => {
     const am = new AuthorityManager();
     expect(am.checkAuthority('bot-1')).toBe(AutonomyLevel.L0_MANUAL);
     am.delegateAuthority('bot-1', AutonomyLevel.L4_HIGH_AUTONOMY, 3600);
@@ -36,7 +36,7 @@ describe(__t('infrastructure_autopilot_quali'), () => {
     expect(am.checkAuthority('bot-1')).toBe(AutonomyLevel.L0_MANUAL);
   });
 
-  it(__t('auto_07_10_drift_detection_and'), () => {
+  it('AUTO-07..10: Drift detection and corrective mutation plan generation', () => {
     const reconciler = new DriftReconciler();
     const planner = new RemediationPlanner();
     const driftRes = reconciler.reconcile({ resourceId: 'res-web-1' });
@@ -45,7 +45,7 @@ describe(__t('infrastructure_autopilot_quali'), () => {
     expect(plan.steps.length).toBeGreaterThan(0);
   });
 
-  it(__t('auto_11_15_safety_budget_rate_'), () => {
+  it('AUTO-11..15: Safety budget, rate limiting and circuit breakers', () => {
     const budget = new BudgetManager();
     const limiter = new RateLimiter();
     const b = { maxCostPerExecution: 10, dailyLimit: 100, currency: 'EUR' };
@@ -62,7 +62,7 @@ describe(__t('infrastructure_autopilot_quali'), () => {
     expect(versioning.getActiveVersion('pol-1')).toBe('v1.0.1');
   });
 
-  it(__t('auto_21_26_apdl_policy_executi'), () => {
+  it('AUTO-21..26: APDL policy execution and decision evidence storage', () => {
     const parser = new ApdlParser();
     const store = new DecisionEvidenceStore();
     const rules = parser.parse('[{"ruleId":"r1","condition":"true","action":"restart","priority":1}]');

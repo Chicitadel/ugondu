@@ -38,14 +38,14 @@ declare var it: any;
 declare var expect: any;
 declare var beforeEach: any;
 
-describe(__t('urre_rollback_sequences'), (): void => {
+describe('URRE Rollback Sequences', (): void => {
   let engine: URREngine;
 
   beforeEach((): void => {
     engine = new URREngine();
   });
 
-  it(__t('should_trigger_a_rollback_with'), async (): Promise<void> => {
+  it('should trigger a rollback with PENDING status upon deployment failure', async (): Promise<void> => {
     const ctx: DeploymentContext = { id: 'deploy-123', targetEnvironment: 'production' };
     const rollbackEvent: RollbackEvent = await engine.triggerRollback({...ctx, tx: { id: ctx.id, status: 'FAILED', nodes: [], edges: [], createdAt: Date.now(), updatedAt: Date.now() }});
 
@@ -54,21 +54,21 @@ describe(__t('urre_rollback_sequences'), (): void => {
     expect(rollbackEvent.timestamp).toBeLessThanOrEqual(Date.now());
   });
 
-  it(__t('should_throw_an_error_when_dep'), async (): Promise<void> => {
+  it('should throw an error when deployment context is invalid during rollback trigger', async (): Promise<void> => {
     await expect(engine.triggerRollback({ id: '', targetEnvironment: 'staging' })).rejects.toThrow(__t('messages.error.invalid_deployment_context'));
   });
 
-  it(__t('should_successfully_evaluate_a'), (): void => {
+  it('should successfully evaluate a valid rollback sequence', (): void => {
     const isSuccess: boolean = engine.evaluateRollbackSequence('rb-deploy-123');
     expect(isSuccess).toBe(true);
   });
 
-  it(__t('should_return_false_when_evalu'), (): void => {
+  it('should return false when evaluating a failed rollback sequence', (): void => {
     const isSuccess: boolean = engine.evaluateRollbackSequence('rb-fail-id');
     expect(isSuccess).toBe(false);
   });
 
-  it(__t('should_throw_an_error_when_eve'), (): void => {
+  it('should throw an error when event ID is empty during evaluation', (): void => {
     expect((): void => {
       engine.evaluateRollbackSequence('');
     }).toThrow(__t('messages.error.invalid_rollback_event'));

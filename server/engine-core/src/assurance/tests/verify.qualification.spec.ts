@@ -33,7 +33,7 @@ describe('Verification & Assurance Qualification Gates: VERIFY-01..41', () => {
     expect(result).toBe(true);
   });
 
-  it(__t('verify_41_verifyrecoveryauthor'), async () => {
+  it('VERIFY-41: verifyRecoveryAuthority confirms rollback capability before deployment', async () => {
     const verifier = new RecoveryVerifier();
     const result = await verifier.testRecoveryPaths();
     expect(result).toBe(true);

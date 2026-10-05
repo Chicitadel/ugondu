@@ -3,8 +3,8 @@ import { KubernetesAdapter, IKubernetesClient } from '../../../fabric/providers/
 import { LinuxAdapter, ILinuxClient } from '../../../fabric/providers/linux';
 import { CpanelAdapter, IWhmClient } from '../../../fabric/providers/cpanel';
 
-describe(__t('provider_adapters_fab_11'), () => {
-  it(__t('awsadapter_formats_results_acc'), async () => {
+describe('Provider Adapters (FAB-11)', () => {
+  it('AwsAdapter formats results according to the fabric contract', async () => {
     const mockClient: IAwsClient = {
       resolveInstanceType: async () => 't3.micro',
       runInstances: async () => ({ id: 'i-123', ip: '10.0.0.5', state: 'running' }),
@@ -25,7 +25,7 @@ describe(__t('provider_adapters_fab_11'), () => {
     expect(result.state).toBe('running');
   });
 
-  it(__t('kubernetesadapter_formats_resu'), async () => {
+  it('KubernetesAdapter formats results according to the fabric contract', async () => {
     const mockClient: IKubernetesClient = {
       applyWorkload: async () => ({ id: 'deploy-1', state: 'running' }),
       deleteWorkload: async () => {},
@@ -41,7 +41,7 @@ describe(__t('provider_adapters_fab_11'), () => {
     expect(result.id).toBe('deploy-1');
   });
 
-  it(__t('linuxadapter_formats_results_a'), async () => {
+  it('LinuxAdapter formats results according to the fabric contract', async () => {
     const mockClient: ILinuxClient = {
       checkCapacity: async () => true,
       runProcess: async () => ({ id: 'pid-1', state: 'running' }),
@@ -57,7 +57,7 @@ describe(__t('provider_adapters_fab_11'), () => {
     expect(result.id).toBe('pid-1');
   });
 
-  it(__t('cpaneladapter_formats_results_'), async () => {
+  it('CpanelAdapter formats results according to the fabric contract', async () => {
     const mockClient: IWhmClient = {
       createHostedApp: async () => ({ id: 'app-1', state: 'running' }),
       removeHostedApp: async () => {},

@@ -34,8 +34,8 @@ async function seeded() {
   return { ...iam, adapter, policyArn: providerRef };
 }
 
-describe(__t('aws_iam_discovery'), () => {
-  it(__t('discovers_policies_assignments'), async () => {
+describe('AWS IAM discovery', () => {
+  it('discovers policies, assignments, identities, groups and roles from live objects', async () => {
     const { adapter, policyArn } = await seeded();
     const policies = await adapter.discoverPolicies(ctx);
     expect(policies.map((p) => p.providerId)).toEqual([policyArn]);
@@ -57,8 +57,8 @@ describe(__t('aws_iam_discovery'), () => {
   });
 });
 
-describe(__t('aws_iam_evaluation_and_effecti'), () => {
-  it(__t('evaluates_through_the_policy_s'), async () => {
+describe('AWS IAM evaluation and effective authority', () => {
+  it('evaluates through the policy simulator, honouring explicit Deny', async () => {
     const { adapter } = await seeded();
     expect(await adapter.evaluate(rule({ action: op('s3:GetObject') }), ctx)).toBe('GRANTED');
     expect(await adapter.evaluate(rule({ action: op('s3:DeleteObject') }), ctx)).toBe('DENIED');
@@ -67,12 +67,12 @@ describe(__t('aws_iam_evaluation_and_effecti'), () => {
     expect(await adapter.evaluate(rule({ subject: { type: 'USER', id: 'bob' } }), ctx)).toBe('UNKNOWN');
   });
 
-  it(__t('returns_unknown_when_aws_canno'), async () => {
+  it('returns UNKNOWN when AWS cannot be reached', async () => {
     const adapter = new AwsIamPolicyAdapter(async () => { throw new Error('offline'); });
     expect(await adapter.evaluate(rule(), ctx)).toBe('UNKNOWN');
   });
 
-  it(__t('reports_per_action_state_with_'), async () => {
+  it('reports per-action state with contributing and denying policies', async () => {
     const { adapter, policyArn } = await seeded();
     const res = await adapter.discoverEffectiveAuthority(ARN.role('app'), 'arn:aws:s3:::bkt/file', ctx);
     const by = (a: string) => res.permissions.find((p) => p.capability === a);
@@ -94,8 +94,8 @@ describe(__t('aws_iam_evaluation_and_effecti'), () => {
   });
 });
 
-describe(__t('aws_iam_simulation_conflicts_a'), () => {
-  it(__t('classifies_proposed_rules_as_n'), async () => {
+describe('AWS IAM simulation, conflicts and reconciliation', () => {
+  it('classifies proposed rules as new grants, unchanged access and effective denies', async () => {
     const { adapter } = await seeded();
     const subject = (id: string) => ({ type: 'USER', id });
     const sim = await adapter.simulate([
@@ -113,7 +113,7 @@ describe(__t('aws_iam_simulation_conflicts_a'), () => {
     expect(deny.denied).toEqual([`${ARN.role('app')}:${OBJECTS}:s3:GetObject`]);
   });
 
-  it(__t('lowers_confidence_when_rules_c'), async () => {
+  it('lowers confidence when rules cannot be simulated and reports LOW for nothing simulated', async () => {
     const { adapter } = await seeded();
     const mixed = await adapter.simulate([rule({ action: op('s3:GetObject') }), rule({ action: op('s3:Put*') })], ctx);
     expect(mixed.confidence).toBe('MEDIUM');
@@ -133,7 +133,7 @@ describe(__t('aws_iam_simulation_conflicts_a'), () => {
     expect((await adapter.findConflicts([allow, { ...deny, resource: { type: 't', scope: 'arn:aws:s3:::other/*' } }], ctx)).conflicts).toEqual([]);
   });
 
-  it(__t('plans_add_update_remove_and_no'), async () => {
+  it('plans add, update, remove and no-change against observed policies', async () => {
     const { adapter } = await seeded();
     const at = (scope: string, effect: string, ...ops: string[]) => rule({ effect, action: op(...ops), resource: { type: 't', scope } });
     const observed = [
@@ -152,7 +152,7 @@ describe(__t('aws_iam_simulation_conflicts_a'), () => {
     expect(plan.toRemove).toEqual(['Deny|arn:aws:s3:::three/*']);
   });
 
-  it(__t('wraps_reconciliation_failures_'), async () => {
+  it('wraps reconciliation failures with the localized error', async () => {
     const { adapter } = await seeded();
     let message = '';
     try { await adapter.reconcile([rule()], [{ providerId: 'x', providerType: 'AWS_IAM', digest: '', nativeDocument: undefined }], ctx); } catch (e: any) { message = e.message; }
@@ -160,11 +160,11 @@ describe(__t('aws_iam_simulation_conflicts_a'), () => {
   });
 });
 
-describe(__t('aws_iam_usage_observation'), () => {
+describe('AWS IAM usage observation', () => {
   const day = 86_400_000;
   const window = (days: number) => ({ startAt: new Date(Date.now() - days * day).toISOString(), endAt: new Date().toISOString() });
 
-  it(__t('classifies_a_policy_from_servi'), async () => {
+  it('classifies a policy from service last-accessed data within the window', async () => {
     const { adapter, usage, policyArn } = await seeded();
     const recent = new Date(Date.now() - 2 * day);
     const old = new Date(Date.now() - 200 * day);
@@ -176,7 +176,7 @@ describe(__t('aws_iam_usage_observation'), () => {
     expect(await adapter.observeUsage(policyArn, window(30), ctx)).toMatchObject({ observedUsages: 0, classification: 'UNUSED' });
   });
 
-  it(__t('reports_unattached_policies_an'), async () => {
+  it('reports unattached policies and attached policies without recent activity as unused', async () => {
     const { adapter, usage, policyArn, policies } = await seeded();
     const spare = await adapter.generate([rule({ ruleId: 's', action: op('s3:PutObject') })], ctx);
     const spareArn = (await adapter.attach(spare, ARN.role('app'), ctx)).providerRef;

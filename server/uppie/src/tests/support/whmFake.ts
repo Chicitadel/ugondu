@@ -37,10 +37,10 @@ const map = (enabled: string[]): Record<string, boolean> => Object.fromEntries(F
  * In-memory WHM enforcing the server rules the adapter must respect: a list name must be unused to be created and must
  * exist to be updated, only features the server offers are accepted, a package needs an existing feature list, a package
  * in use by an account cannot be deleted, and an account can only move to an existing package.
- * Built-ins: lists default (all features), disabled (none) and __t('mail_only'); packages default, Gold, Mailer.
+ * Built-ins: lists default (all features), disabled (none) and "Mail Only"; packages default, Gold, Mailer.
  */
 export function fakeWhm() {
-  const lists = new Map<string, Record<string, boolean>>([['default', map(FEATURES)], ['disabled', map([])], [__t('mail_only'), map(['webmail'])]]);
+  const lists = new Map<string, Record<string, boolean>>([['default', map(FEATURES)], ['disabled', map([])], ['Mail Only', map(['webmail'])]]);
   const packages = new Map<string, WhmPackage>();
   const accounts = new Map<string, WhmAccount>();
   const resellers = new Set<string>();
@@ -61,7 +61,7 @@ export function fakeWhm() {
   };
   seed.pkg('default', 'default', { quota: '0', maxftp: 'unlimited', maxsql: 'unlimited', hasshell: 'n', lang: 'en' });
   seed.pkg('Gold', 'default', { quota: '5000', maxftp: '10', maxsql: '5', hasshell: 'y', lang: 'fr' });
-  seed.pkg('Mailer', __t('mail_only'), { quota: '500', maxftp: '0', maxsql: '0', hasshell: 'n', lang: 'en' });
+  seed.pkg('Mailer', 'Mail Only', { quota: '500', maxftp: '0', maxsql: '0', hasshell: 'n', lang: 'en' });
   seed.account('alice', 'Gold');
   seed.account('bob', 'Mailer');
   seed.account('carol', 'default');
