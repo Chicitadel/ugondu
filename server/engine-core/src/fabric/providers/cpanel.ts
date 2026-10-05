@@ -89,7 +89,7 @@ export class CpanelAdapter implements ComputeCapability, DatabaseCapability, Sto
   }
 
   public async createSnapshot(req: any): Promise<string> {
-    return await this.client.createSnapshot(id);
+    return await this.client.createSnapshot(typeof req === 'string' ? req : req.resourceId);
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

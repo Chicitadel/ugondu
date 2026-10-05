@@ -15,6 +15,7 @@
     "@aws-sdk/client-iam": "^3.1146.0",
     "@aws-sdk/client-rds": "^3.1146.0",
     "@aws-sdk/client-s3": "^3.1146.0",
+    "@aws-sdk/client-ssm": "^3.1146.0",
     "@aws-sdk/client-sts": "^3.1146.0",
     "@types/keytar": "^4.4.2",
     "@ugondu/shared": "file:../shared",

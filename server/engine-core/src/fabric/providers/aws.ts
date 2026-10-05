@@ -58,6 +58,7 @@ export interface IAwsClient {
   createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string>;
   deleteDBSubnetGroup(name: string): Promise<void>;
   
+  
   createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string, dbSubnetGroupName?: string): Promise<{ id: string; endpoint: string }>;
   deleteRds(id: string): Promise<void>;
   
@@ -102,11 +103,7 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
 
   public async deleteVirtualNetwork(id: string): Promise<void> {
     await this.client.deleteVpc(id);
-  discoverAvailabilityZones(): Promise<string[]>;
-  createSecurityGroup(vpcId: string, name: string): Promise<string>;
-  deleteSecurityGroup(id: string): Promise<void>;
-  createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string>;
-  deleteDBSubnetGroup(name: string): Promise<void>;
+  
   }
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {

@@ -7,6 +7,12 @@ import { ComputeStatus } from '../../capabilities/compute';
 import { SubnetResult } from '../../capabilities/network';
 
 class SimulationAwsClient implements IAwsClient {
+    async discoverAvailabilityZones() { return ['eu-west-3a', 'eu-west-3b']; }
+    async createSecurityGroup() { return 'sg-sim'; }
+    async deleteSecurityGroup() {}
+    async createDBSubnetGroup() { return 'dbsg-sim'; }
+    async deleteDBSubnetGroup() {}
+
     public idCounter = 0;
     public state: Record<string, any> = {};
 
@@ -70,7 +76,7 @@ class SimulationAwsClient implements IAwsClient {
         return { id, cidr };
     }
     async createSnapshot(req: any) {
-        const snap = `snap-${id}-${`${++this.idCounter}`}`;
+        const snap = `snap-${req.resourceId || req}-${`${++this.idCounter}`}`;
         this.state[snap] = { type: 'snapshot', status: 'completed' };
         Logger.info(`[SIM-AWS] Created Snapshot ${snap} for ${id}`);
         return snap;
