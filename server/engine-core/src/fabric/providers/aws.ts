@@ -123,7 +123,8 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
-    const rds = await this.client.createRds(config.name, config.engine, config.capacity, (options.networkRefId as string), config.credentialsRef);
+    const dbSubnetGroupName = (options as any).dbSubnetGroupName;
+    const rds = await this.client.createRds(config.name, config.engine, config.capacity, (options.networkRefId as string), config.credentialsRef, dbSubnetGroupName);
     return { id: rds.id, connectionString: rds.endpoint, resolved: { engine: config.engine } };
   }
 

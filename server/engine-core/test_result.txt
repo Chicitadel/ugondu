@@ -1,0 +1,919 @@
+
+> @airroofers/ugondu-engine-core@1.0.0 test
+> jest --passWithNoTests
+
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in D:/ujomor-platform/products/ugondu/server/engine-core/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+FAIL src/identity/credential-intake/tests/aws-credential-normalization.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/move/tests/move_passport.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/upm/tests/policy-gate.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/urre/tests/urre.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/urre/tests/rollback.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/move/tests/readiness.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/urre/tests/verification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-preflight.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/providers/adapters.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/intent/tests/intent.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-rollback.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-engine.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provider-rejection.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-evidence.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provider-contract.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/doctor/tests/doctor.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/delivery/tests/delivery-universal.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/governance/engine/policy-deduplication.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/deise/tests/deise-repair.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/deise/tests/deise-physical-repair.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/autopilot/tests/autopilot.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/assurance/tests/verify.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+Summary of all failing tests
+FAIL src/identity/credential-intake/tests/aws-credential-normalization.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/move/tests/move_passport.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/upm/tests/policy-gate.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/urre/tests/urre.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/urre/tests/rollback.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/move/tests/readiness.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/urre/tests/verification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-preflight.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/providers/adapters.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/intent/tests/intent.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-rollback.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-engine.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provider-rejection.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provisioning-evidence.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/fabric/tests/provider-contract.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/doctor/tests/doctor.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/delivery/tests/delivery-universal.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/governance/engine/policy-deduplication.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/deise/tests/deise-repair.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/deise/tests/deise-physical-repair.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/autopilot/tests/autopilot.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+FAIL src/assurance/tests/verify.qualification.spec.ts
+  ● Test suite failed to run
+
+    ReferenceError: Cannot access 'dictionaries' before initialization
+
+      191 |  */
+      192 | function __t(key, ...args) {
+    > 193 |     const dict = dictionaries[currentLocale] || {};
+          |                  ^
+      194 |     const fallbackDict = dictionaries['en'] || {};
+      195 |     let template = dict[key];
+      196 |     if (template === undefined) {
+
+      at __t (../shared/dist/i18n.js:193:18)
+      at Object.<anonymous> (../shared/dist/i18n.js:1:1)
+      at Object.<anonymous> (../shared/dist/index.js:48:14)
+      at jest.setup.ts:5:23
+      at Object.<anonymous> (src/upm/policy-gate.ts:1:1)
+      at Object.<anonymous> (jest.setup.ts:2:1)
+
+
+Test Suites: 22 failed, 22 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        11.004 s
+Ran all test suites.
+npm ERR! Lifecycle script `test` failed with error: 
+npm ERR! Error: command failed 
+npm ERR!   in workspace: @airroofers/ugondu-engine-core@1.0.0 
+npm ERR!   at location: D:\ujomor-platform\products\ugondu\server\engine-core 

@@ -1,0 +1,13 @@
+npm ERR! Lifecycle script `lint` failed with error: 
+npm ERR! Error: Missing script: "lint"
+
+Did you mean this?
+    npm link # Symlink a package folder
+
+To see a list of scripts, run:
+  npm run 
+npm ERR!   in workspace: @airroofers/ugondu-engine-core@1.0.0 
+npm ERR!   at location: D:\ujomor-platform\products\ugondu\server\engine-core 
+npm ERR! Missing script: lint
+
+npm ERR! A complete log of this run can be found in: D:\npm-cache\_logs\2026-10-05T11_13_42_610Z-debug-0.log

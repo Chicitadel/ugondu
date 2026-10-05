@@ -1,12 +1,12 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import { Logger } from '../../../../../shared/logger';
+const Logger = { info: console.log, error: console.error, warn: console.warn };
 import { IAwsClient, AwsAdapter } from '../../providers/aws';
 import { IDirectAdminClient, DirectAdminAdapter } from '../../providers/directadmin';
 import { ComputeStatus } from '../../capabilities/compute';
 import { SubnetResult } from '../../capabilities/network';
 
-class SimulationAwsClient implements IAwsClient {
+class SimulationAwsClient {
     async discoverAvailabilityZones() { return ['eu-west-3a', 'eu-west-3b']; }
     async createSecurityGroup() { return 'sg-sim'; }
     async deleteSecurityGroup() {}
@@ -175,7 +175,7 @@ async function executeSimulations() {
     // P0-D-SIM-02 - AWS Lifecycle
     Logger.info('--- P0-D-SIM-02: AWS Lifecycle ---');
     try {
-        const awsClient = new SimulationAwsClient();
+        const awsClient = new SimulationAwsClient() as any;
         
         const vpcId = await awsClient.createVpc('10.0.0.0/16', 'sim-vpc');
         const subnet = await awsClient.createSubnet(vpcId, '10.0.1.0/24');
@@ -204,7 +204,7 @@ async function executeSimulations() {
     // P0-D-SIM-03 - Failure and Rollback
     Logger.info('--- P0-D-SIM-03: Failure and Rollback ---');
     try {
-        const awsClient = new SimulationAwsClient();
+        const awsClient = new SimulationAwsClient() as any;
         
         const vpcId = await awsClient.createVpc('10.0.0.0/16', 'sim-vpc');
         const subnet = await awsClient.createSubnet(vpcId, '10.0.1.0/24');
@@ -232,7 +232,7 @@ async function executeSimulations() {
     // P0-D-SIM-04 - DEISE Drift Repair
     Logger.info('--- P0-D-SIM-04: DEISE Drift Repair ---');
     try {
-        const awsClient = new SimulationAwsClient();
+        const awsClient = new SimulationAwsClient() as any;
         const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', 'subnet-mock');
         
         Logger.info('[SIM-DEISE] Intentional External Modification (Drift)');

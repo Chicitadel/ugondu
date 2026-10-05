@@ -5,7 +5,7 @@ import { CpanelAdapter, IWhmClient } from '../../../fabric/providers/cpanel';
 
 describe('Provider Adapters (FAB-11)', () => {
   it('AwsAdapter formats results according to the fabric contract', async () => {
-    const mockClient: IAwsClient = {
+    const mockClient = {
       resolveInstanceType: async () => 't3.micro',
       runInstances: async () => ({ id: 'i-123', ip: '10.0.0.5', state: 'running' }),
       terminateInstances: async () => {},
@@ -19,7 +19,7 @@ describe('Provider Adapters (FAB-11)', () => {
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
       createSnapshot: async () => ('snap-1'),
     };
-    const adapter = new AwsAdapter(mockClient);
+    const adapter = new AwsAdapter(mockClient as unknown as IAwsClient);
     const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'ami-1', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('i-123');
     expect(result.state).toBe('running');

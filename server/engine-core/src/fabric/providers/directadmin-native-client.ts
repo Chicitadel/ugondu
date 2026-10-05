@@ -86,6 +86,7 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
   }
 
   public async createSnapshot(req: any): Promise<string> {
+    const id = req.resourceId;
     const snapName = `snap-${id}-${Date.now()}.tar.gz`;
     await this.execCmd(`mkdir -p /home/${this.escapeShell(this.username)}/admin_backups; tar -czf /home/${this.escapeShell(this.username)}/admin_backups/${this.escapeShell(snapName)} -C /home/${this.escapeShell(this.username)}/domains/${this.escapeShell(id)} public_html`);
     return snapName;
