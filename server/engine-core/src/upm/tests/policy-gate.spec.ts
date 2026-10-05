@@ -32,7 +32,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
         };
     });
 
-    test(__t('authorized_ir_should_pass_stri'), async () => {
+    test('Authorized IR should pass strict verification', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
             decision: { status: 'ALLOW', timestamp: new Date(), policyVersion: '1.0.0' },
@@ -56,7 +56,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
         expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).not.toThrow();
     });
 
-    test(__t('adversarial_modified_ir_after_'), async () => {
+    test('Adversarial: Modified IR after approval (Bypass attempt)', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
             decision: { status: 'ALLOW', timestamp: new Date(), policyVersion: '1.0.0' },
@@ -82,7 +82,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
         expect(() => UpmExecutionGate.verifyAuthorization(auth, maliciousIr)).toThrow(/hash_mismatch/i);
     });
 
-    test(__t('adversarial_expired_authorizat'), async () => {
+    test('Adversarial: Expired authorization replay', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
             decision: { status: 'ALLOW', timestamp: new Date(), policyVersion: '1.0.0' },
@@ -106,7 +106,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
         expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).toThrow(/execution_authorization_expired/i);
     });
 
-    test(__t('adversarial_revoked_capability'), async () => {
+    test('Adversarial: Revoked capability (Deny Structure)', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
             decision: { status: 'DENY', timestamp: new Date(), policyVersion: '1.0.0', evidence: { targetCapability: 'PROVISION_DATABASE', policyId: 'P1', requirement: 'req', observedState: 'obs', affectedIrNodes: [], remediation: 'none', riskLevel: 'HIGH' } },
@@ -130,7 +130,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
         expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).toThrow(/execution_authorization_denied/i);
     });
 
-    test(__t('adversarial_cryptographic_seal'), async () => {
+    test('Adversarial: Cryptographic Seal Tampering', async () => {
         const auth: ExecutionAuthorization = {
             authorizationId: 'auth-1',
             decision: { status: 'DENY', timestamp: new Date(), policyVersion: '1.0.0', evidence: { targetCapability: 'PROVISION_DATABASE', policyId: 'P1', requirement: 'req', observedState: 'obs', affectedIrNodes: [], remediation: 'none', riskLevel: 'HIGH' } },

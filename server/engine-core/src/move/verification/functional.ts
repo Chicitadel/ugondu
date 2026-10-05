@@ -60,7 +60,7 @@ export class FunctionalVerifier {
                 const errorDetails = err instanceof Error ? err.message : String(err);
                 results.push({
                     passed: false,
-                    testName: test.name || __t('anonymous_test'),
+                    testName: test.name || 'Anonymous Test',
                     errorDetails
                 });
             }

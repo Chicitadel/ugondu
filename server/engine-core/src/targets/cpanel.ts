@@ -50,7 +50,7 @@ export class CPanelTargetAdapter {
 
     constructor(config: CPanelTargetConfig) {
         if (!config.targetId || !config.serverHostname || !config.username) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error('Invalid DeploymentContext. Missing required fields or token.');
         }
         this.config = {
             ...config,

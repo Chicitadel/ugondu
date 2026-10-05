@@ -131,7 +131,7 @@ export function evaluatePluginCapability(
     decision:    'ACTIVATE',
     pluginId:    plugin.pluginId,
     tenantId,
-    reason: __t('ui.responses.all_capability_and_edition_requirements_satis'),
+    reason: 'All capability and edition requirements satisfied.',
     evaluatedAt,
   };
 }

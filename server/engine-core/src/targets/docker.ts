@@ -54,7 +54,7 @@ export class DockerTargetAdapter {
 
     constructor(config: DockerTargetConfig) {
         if (!config.targetId || !config.imageName || !config.containerName) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error('Invalid DeploymentContext. Missing required fields or token.');
         }
         this.config = {
             ...config,

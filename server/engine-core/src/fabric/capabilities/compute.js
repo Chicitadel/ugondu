@@ -1,0 +1,35 @@
+'use strict';
+/******************************************************************************
+ * Project        : Ugondu Platform
+ * Module         : Fabric Capabilities Engine
+ * File           : compute.ts
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-03
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Corporate Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers
+ * All Rights Reserved.
+ ******************************************************************************/
+Object.defineProperty(exports, "__esModule", { value: true });

@@ -112,7 +112,7 @@ export class AtomicDataTransaction {
 
             // 8. POST-COMMIT VERIFY
             if (!fs.existsSync(targetPath)) {
-                throw new Error(__t('messages.error.post_commit_verification_failed_target_file_n'));
+                throw new Error('Post-commit verification failed: Target file not found.');
             }
             
             const targetHash = await this.calculateHash(targetPath);

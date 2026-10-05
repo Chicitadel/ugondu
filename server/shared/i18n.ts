@@ -37,7 +37,7 @@ import * as path from 'path';
 export type LocaleCode = string;
 
 let currentLocale: LocaleCode = (process.env.UGONDU_LOCALE || 'en').toLowerCase();
-const dictionaries: Record<string, Record<string, string>> = {};
+var dictionaries: Record<string, Record<string, string>> = {};
 
 export function getLocalesDirectories(): string[] {
     const candidatePaths = [

@@ -86,7 +86,7 @@ export class KeyLoader {
                 };
             } catch (err) {
                 // Intentionally swallowing error details to prevent key material logging
-                throw new KeyLoadError(__t('messages.error.failed_to_parse_ugondu_recipe_private_key_fro'));
+                throw new KeyLoadError('Failed to parse UGONDU_RECIPE_PRIVATE_KEY from environment.');
             }
         }
 
@@ -109,10 +109,10 @@ export class KeyLoader {
                     publicKeyPem: pubPem
                 };
             } catch (err) {
-                throw new KeyLoadError(__t('messages.error.failed_to_parse_private_key_from_file_path'));
+                throw new KeyLoadError('Failed to parse private key from file path.');
             }
         }
 
-        throw new KeyLoadError(__t('messages.error.no_private_key_available_ugondu_recipe_privat'));
+        throw new KeyLoadError('No private key available: UGONDU_RECIPE_PRIVATE_KEY not set and KEYS_DIR/ed25519_private.pem not found.');
     }
 }

@@ -80,7 +80,7 @@ export class EntitlementResolver {
       return {
         capabilityId,
         result: 'CORE_ALWAYS_AVAILABLE',
-        detail: __t('ui.responses.core_safety_capability'),
+        detail: 'Core safety capability — always available regardless of edition.',
       };
     }
 
@@ -89,7 +89,7 @@ export class EntitlementResolver {
       return {
         capabilityId,
         result: 'MANIFEST_EXPIRED',
-        detail: __t('ui.responses.manifest_expired'),
+        detail: 'Entitlement manifest has expired. Please refresh your session.',
       };
     }
 

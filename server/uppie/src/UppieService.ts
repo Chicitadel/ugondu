@@ -132,7 +132,7 @@ export class UppieService {
       gap,
       [context.environmentId],
       __t('uppie.service.minimum_authority_rule'),
-      context.operationId ?? __t('uppie.service.unspecified_operation'),
+      context.operationId ?? 'unspecified',
       false,
     );
   }

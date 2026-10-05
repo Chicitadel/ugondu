@@ -46,7 +46,7 @@ export interface FailureSignature {
 }
 
 export const FAILURE_SIGNATURES: FailureSignature[] = [
-  { failureClass: FailureClass.PROCESS_CRASH, messagePatterns: ['sigsegv', __t('segmentation_fault'), __t('core_dumped')], contextSignals: ['processDead'] },
+  { failureClass: FailureClass.PROCESS_CRASH, messagePatterns: ['sigsegv', 'segmentation fault', __t('core_dumped')], contextSignals: ['processDead'] },
   { failureClass: FailureClass.POWER_LOSS, messagePatterns: [__t('power_failure'), __t('unexpected_shutdown'), 'acpi'], contextSignals: ['powerLost'] },
   { failureClass: FailureClass.DISK_FULL, messagePatterns: [__t('no_space_left'), 'enospc', __t('disk_full'), __t('storage_limit')], contextSignals: ['diskFull'] },
   { failureClass: FailureClass.NETWORK_LOSS, messagePatterns: [__t('network_unreachable'), 'enotfound', __t('connection_reset'), 'econnrefused'], contextSignals: ['networkOffline'] },

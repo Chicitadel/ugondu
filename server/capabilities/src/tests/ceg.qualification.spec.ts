@@ -63,7 +63,7 @@ function createMockManifest(overrides: Partial<CapabilityManifest> = {}): Capabi
 // Mock of manifest verifier and offline validation
 function verifyManifest(manifest: CapabilityManifest): { valid: boolean; reason?: string } {
   if (manifest.signature === 'invalid-sig') return { valid: false, reason: __t('ui.responses.invalid_signature') };
-  if (manifest.signature !== 'valid-sig') return { valid: false, reason: __t('ui.responses.signature_mismatch') };
+  if (manifest.signature !== 'valid-sig') return { valid: false, reason: 'SIGNATURE_MISMATCH' };
   return { valid: true };
 }
 function validateOfflineManifest(m: CapabilityManifest) { return verifyManifest(m); }
@@ -87,13 +87,13 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
       const contextTenantId = 'tenant-B';
       
       const verifyContext = (m: CapabilityManifest, tId: string) => {
-        if (m.tenantId !== tId) return { valid: false, reason: __t('ui.responses.tenant_mismatch') };
+        if (m.tenantId !== tId) return { valid: false, reason: 'TENANT_MISMATCH' };
         return { valid: true };
       };
       
       const result = verifyContext(manifest, contextTenantId);
       expect(result.valid).toBe(false);
-      expect(result.reason).toBe(__t('ui.responses.tenant_mismatch'));
+      expect(result.reason).toBe('TENANT_MISMATCH');
     });
   });
 
@@ -157,7 +157,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
       
       const result = verifyManifest(manifest);
       expect(result.valid).toBe(false);
-      expect(result.reason).toBe(__t('ui.responses.signature_mismatch'));
+      expect(result.reason).toBe('SIGNATURE_MISMATCH');
     });
   });
 
@@ -325,7 +325,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
       const mockApiRequest = (capabilityId: string) => {
         const resolution = resolver.resolve(capabilityId, true, true, true);
         if (resolution.result === 'NOT_ENTITLED') {
-          return { status: 403, body: { reason: __t('ui.responses.not_entitled') } };
+          return { status: 403, body: { reason: 'NOT_ENTITLED' } };
         }
         return { status: 200, body: { success: true } };
       };
@@ -333,7 +333,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
       const response = mockApiRequest('ENTERPRISE_FEATURE');
       
       expect(response.status).toBe(403);
-      expect(response.body.reason).toBe(__t('ui.responses.not_entitled'));
+      expect(response.body.reason).toBe('NOT_ENTITLED');
     });
   });
 

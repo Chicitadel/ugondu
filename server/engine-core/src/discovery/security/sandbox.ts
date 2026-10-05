@@ -41,13 +41,13 @@ import { __t } from '@ugondu/shared';
  */
 export class CommandSandbox {
   private allowedCommands: Set<string> = new Set([
-    __t('uname_a'),
+    'uname -a',
     'cat /etc/os-release',
     'uptime',
-    __t('df_h'),
-    __t('free_m'),
-    __t('ps_ef'),
-    __t('netstat_tuln')
+    'df -h',
+    'free -m',
+    'ps -ef',
+    'netstat -tuln'
   ]);
 
   /**

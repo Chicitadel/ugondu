@@ -67,8 +67,8 @@ export class RollbackPlanner {
         const reasoning: string[] = [];
 
         if (state.targetReceivedWritesCount > 0 && state.sourceIsStrictlyQuiesced) {
-            reasoning.push(__t('target_has_received_writes_and'));
-            reasoning.push(__t('rollback_via_dns_flip_would_re'));
+            reasoning.push('Target has received writes and source is strictly quiesced.');
+            reasoning.push('Rollback via DNS flip would result in data loss.');
             
             return {
                 feasible: false,
@@ -77,7 +77,7 @@ export class RollbackPlanner {
             };
         }
 
-        reasoning.push(__t('safe_to_perform_dns_flip_rollb'));
+        reasoning.push('Safe to perform DNS flip rollback.');
         return {
             feasible: true,
             strategy: RollbackStrategy.DNS_FLIP,

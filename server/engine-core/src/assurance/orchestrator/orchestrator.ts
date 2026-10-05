@@ -55,7 +55,7 @@ export class AssuranceOrchestrator {
 
     public async executeAssuranceCycle(context: any): Promise<void> {
         if (!this.admission.admit(context)) {
-            throw new Error(__t('messages.error.assurance_cycle_rejected_by_admission_control'));
+            throw new Error('Assurance cycle rejected by admission controller.');
         }
         this.lifecycle.transitionTo('RUNNING');
         try {

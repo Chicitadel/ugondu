@@ -45,10 +45,10 @@ export class TwinIsolationGuard {
         // Enforce that authority is derived from TenantContextGuard and not caller-supplied
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error(__t('messages.error.tenant_authority_mismatch_no_subsystem_can_ac'));
+            throw new Error('Tenant authority mismatch. No subsystem can accept caller-supplied tenant authority; it must be derived from the TenantContextGuard.');
         }
         if (resourceContext.tenantId !== derivedTenantId) {
-            throw new Error(__t('messages.error.isolation_breach_resource_belongs_to_a_differ'));
+            throw new Error('Isolation breach: resource belongs to a different tenant.');
         }
     }
 }

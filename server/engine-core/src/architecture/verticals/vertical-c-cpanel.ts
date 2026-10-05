@@ -46,7 +46,7 @@ export class VerticalCCpanel {
             id: crypto.randomUUID(),
             name: __t('cpanel_shared_hosting_candidat'),
             provider: 'cpanel',
-            description: __t('a_shared_hosting_environment_m'),
+            description: 'A shared hosting environment managed via cPanel.',
             resources: [
                 { id: crypto.randomUUID(), type: 'compute', name: 'cpanel-quota-sync', provider: 'cpanel', config: {} },
                 { id: crypto.randomUUID(), type: 'database', name: 'cpanel-mysql', provider: 'cpanel', config: {} },

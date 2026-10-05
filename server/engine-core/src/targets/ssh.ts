@@ -50,7 +50,7 @@ export class SshTargetAdapter {
 
     constructor(config: SshTargetConfig) {
         if (!config.targetId || !config.host || !config.username || !config.expectedHostKeyFingerprint) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error('Invalid DeploymentContext. Missing required fields or token.');
         }
         this.config = {
             ...config,

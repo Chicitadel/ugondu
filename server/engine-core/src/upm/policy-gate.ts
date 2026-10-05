@@ -109,12 +109,12 @@ export class UpmExecutionGate {
                 status: 'DENY',
                 evidence: {
                     policyId: 'UPM-CAPABILITY-001',
-                    requirement: __t('edition_capability_envelope_mu'),
+                    requirement: 'Edition Capability Envelope must authorize all required providers.',
                     targetCapability: missing.join(', '),
                     observedState: __t('capability_not_present_in_edit'),
                     affectedIrNodes: context.ir.nodes.filter(n => missing.includes(n.provider)).map(n => n.id),
                     riskLevel: 'HIGH',
-                    remediation: __t('upgrade_edition_or_modify_inte')
+                    remediation: 'Upgrade edition or modify intent to use authorized providers.'
                 },
                 timestamp: new Date(),
                 policyVersion: context.policyVersion

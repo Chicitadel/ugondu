@@ -61,7 +61,7 @@ export class DiscoveryEngine {
         fileContents?: Record<string, string>
     ): DiscoveredProject {
         if (!repositoryUrl || !branch) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error('Invalid DeploymentContext. Missing required fields or token.');
         }
 
         const languages = new Set<string>();

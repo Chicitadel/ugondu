@@ -46,7 +46,7 @@ export class TenantSuspender {
             throw new Error(__t('messages.error.tenant_id_required_for_suspension'));
         }
         if (!reason) {
-            throw new Error(__t('messages.error.suspension_reason_must_be_recorded_for_audit_'));
+            throw new Error('Suspension reason must be recorded for audit logs.');
         }
         // Disable incoming requests, revoke active sessions
     }

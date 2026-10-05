@@ -43,7 +43,7 @@ import { __t } from '@ugondu/shared';
 export class TenantQuarantiner {
     public quarantine(tenantId: string, threatLevel: 'moderate' | 'critical'): void {
         if (!tenantId) {
-            throw new Error(__t('messages.error.tenant_id_required_for_quarantine_execution'));
+            throw new Error('Tenant ID required for quarantine execution.');
         }
         // Zero-trust enforcement: isolate completely, block all outbound and inbound
     }

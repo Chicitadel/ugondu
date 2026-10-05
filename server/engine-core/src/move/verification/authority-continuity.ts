@@ -109,7 +109,7 @@ export function verifyAuthorityContinuity(
       sourceAuthorityIntact:   false,
       targetAuthorityVerified: ctx.targetAuthorityVerified,
       evaluatedAt,
-      detail: __t('source_authority_was_revoked_b'),
+      detail: 'Source authority was revoked before cutover commitment. Rollback required.',
     };
   }
 
@@ -167,6 +167,6 @@ export function verifyAuthorityContinuity(
     sourceAuthorityIntact:   true,
     targetAuthorityVerified: ctx.targetAuthorityVerified,
     evaluatedAt,
-    detail: __t('authority_translation_verified'),
+    detail: 'Authority translation verified. Full coverage. No blocking items.',
   };
 }

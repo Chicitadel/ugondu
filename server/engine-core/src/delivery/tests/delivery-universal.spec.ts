@@ -10,7 +10,7 @@ describe('Gate E: Source/Destination Universalism', () => {
         engine = new UniversalDeliveryEngine();
     });
 
-    it(__t('can_dynamically_bridge_a_backu'), async () => {
+    it('can dynamically bridge a Backup source to a DirectAdmin destination', async () => {
         // 1. Physical mock of a Backup Source Adapter
         const backupSource: ISourceAdapter = {
             

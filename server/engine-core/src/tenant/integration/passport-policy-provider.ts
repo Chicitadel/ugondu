@@ -53,7 +53,7 @@ export interface PassportPolicy {
 export class PassportPolicyProvider {
     public getPolicy(tenantId: string): PassportPolicy {
         if (!tenantId) {
-            throw new Error(__t('messages.error.tenant_id_required_to_fetch_passport_policy'));
+            throw new Error('Tenant ID required to fetch passport policy.');
         }
         return {
             enforceMfa: true,

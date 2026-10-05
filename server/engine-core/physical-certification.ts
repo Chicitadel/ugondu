@@ -7,6 +7,7 @@ import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
 import * as fs from 'fs';
 import { UgonduCredentialStore } from './src/identity/credential-intake/store';
 import * as path from 'path';
+import * as crypto from 'crypto';
 
 // URRE and DEISE engines
 import { URREngine } from './src/urre/execution/urre-engine';
@@ -64,11 +65,46 @@ class GateEvaluator {
     }
 }
 
+interface SignedGateResult extends ImmutableGateResult {
+    hash: string;
+}
+
+const ledger: SignedGateResult[] = [];
 const evaluator = new GateEvaluator();
+
 function recordObservation(obs: ExecutionObservation) {
     const result = evaluator.evaluate(obs);
-    mdReport += `| ${result.gateId} | **${result.status}** | ${result.action} | ${result.targetId} | ${result.api} | ${result.details} |\n`;
-    console.log(`[${result.status}] ${result.gateId}: ${result.action} on ${result.targetId} via ${result.api}`);
+    
+    const dataString = JSON.stringify({
+        gateId: result.gateId,
+        status: result.status,
+        action: result.action,
+        targetId: result.targetId,
+        api: result.api,
+        details: result.details
+    });
+    const hash = crypto.createHash('sha256').update(dataString).digest('hex');
+    
+    const signedResult = { ...result, hash };
+    ledger.push(signedResult);
+    
+    console.log(`[${result.status}] ${result.gateId}: ${result.action} on ${result.targetId} via ${result.api} (Hash: ${hash})`);
+}
+
+function generateReport() {
+    let report = `# UGONDU PHYSICAL CERTIFICATION REPORT (COR-4 / COR-5)
+**Date:** ${new Date().toISOString()}
+**Provider:** AWS
+**Region:** ${REGION}
+**Profile:** ${PROFILE}
+
+| Gate | Status | Operation | Resource ID | AWS API | Evidence | Ledger Hash |
+|------|--------|-----------|-------------|---------|----------|-------------|
+\`;
+    for (const record of ledger) {
+        report += `| ${record.gateId} | **${record.status}** | ${record.action} | ${record.targetId} | ${record.api} | ${record.details} | ${record.hash} |\n`;
+    }
+    return report;
 }
 
 
@@ -259,12 +295,12 @@ async function runCertification() {
                 
         const credStore = new UgonduCredentialStore();
         const awsCred = await credStore.get('aws');
-        const rdsPassword = awsCred?.credentials?.MasterUserPassword || process.env.RDS_TEST_PASSWORD;
+        const rdsPassword = awsCred?.credentials?.MasterUserPassword;
         if (!rdsPassword) {
             recordObservation({ gateId: 'COR-4.CRED', success: false, wasSimulated: false, action: 'CredentialResolve', targetId: 'RDS', api: 'UgonduCredentialStore', details: 'No secure RDS password found' });
             throw new Error('NO_RDS_PASSWORD');
         }
-        recordObservation({ gateId: 'COR-4.CRED', success: true, wasSimulated: false, action: 'CredentialResolve', targetId: 'RDS', api: 'UgonduCredentialStore', details: 'secure runtime injection (REDACTED)' });
+        recordObservation({ gateId: 'COR-4.CRED', success: true, wasSimulated: false, action: 'CredentialResolve', targetId: 'RDS', api: 'UgonduCredentialStore', details: 'secret reference: rds-certification-secret' });
 
                 MasterUserPassword: rdsPassword,
                 AllocatedStorage: 5,

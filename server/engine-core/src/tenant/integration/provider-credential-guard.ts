@@ -44,7 +44,7 @@ export class ProviderCredentialGuard {
     public protectCredentials(tenantContextGuard: any): void {
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error(__t('messages.error.credential_access_denied_caller_supplied_tena'));
+            throw new Error('Credential access denied. Caller-supplied tenant authority is forbidden; it must come from TenantContextGuard.');
         }
     }
 }

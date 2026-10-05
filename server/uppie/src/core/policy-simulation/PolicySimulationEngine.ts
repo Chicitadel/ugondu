@@ -146,7 +146,7 @@ export class PolicySimulationEngine {
       if (rule.action.operations.includes('*')) {
         errors.push({
           ruleId: rule.ruleId,
-          reason: __t('ui.responses.wildcard_action_is_forbidden_all_operations_m'),
+          reason: 'Wildcard action (*) is forbidden. All operations must be explicitly named.',
         });
       }
 

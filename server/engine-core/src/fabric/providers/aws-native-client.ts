@@ -112,7 +112,7 @@ export class AwsNativeClient implements IAwsClient {
         // Dynamic SSM AMI Resolution if image is 'latest-al2023'
         let actualImage = image;
         if (image === 'latest-al2023') {
-            Logger.info(__t('resolving_latest_amazon_linux_'));
+            Logger.info('Resolving latest Amazon Linux 2023 AMI via SSM');
             const ssmRes = await this.ssm.send(new GetParameterCommand({ Name: '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64' }));
             actualImage = ssmRes.Parameter?.Value || image;
         }
@@ -214,7 +214,7 @@ export class AwsNativeClient implements IAwsClient {
         const dbInstanceClass = capacity > 100 ? 'db.m5.large' : 'db.t3.micro';
         
         if (!credentialsRef || !credentialsRef.startsWith('secret:')) {
-            throw new Error(__t('security_audit_physical_aws_rd'));
+            throw new Error('Security Audit: Physical AWS RDS deployment requires a secure credentialsRef mapping.');
         }
         
         const password = await resolveSecret(credentialsRef);

@@ -36,9 +36,9 @@ export const AWS_IAM_CONSTRAINTS: AuthorizationConstraints = {
   maxStatements:          { status: 'NOT_OBSERVABLE',                       note: __t('limited_indirectly_by_maxpolic') },
   maxGroups:              { status: 'SUPPORTED_WITH_LIMITS', value: 300,   note: __t('iam_groups_per_account') },
   maxGroupMemberships:    { status: 'SUPPORTED_WITH_LIMITS', value: 10,    note: __t('groups_per_iam_user') },
-  maxInheritanceDepth:    { status: 'UNSUPPORTED',                          note: __t('aws_iam_has_no_role_inheritanc') },
+  maxInheritanceDepth:    { status: 'UNSUPPORTED',                          note: 'AWS IAM has no role inheritance depth' },
   maxBindings:            { status: 'NOT_OBSERVABLE',                       note: 'N/A for AWS IAM (see maxAssignments)' },
   maxServiceAccounts:     { status: 'SUPPORTED_WITH_LIMITS', value: 1000,  note: __t('iam_roles_usable_as_service_ac') },
   maxRules:               { status: 'NOT_OBSERVABLE',                       note: 'N/A for AWS IAM (sudoers concept)' },
-  maxACLEntries:          { status: 'NOT_OBSERVABLE',                       note: __t('resource_specific_s3_kms_etc') },
+  maxACLEntries:          { status: 'NOT_OBSERVABLE',                       note: 'Resource-specific (S3, KMS, etc.)' },
 };

@@ -32,7 +32,7 @@ export class UniversalDeliveryEngine {
 
         // 4. Connect Destination
         if (typeof destinationAdapter.getInstanceStatus !== 'function') {
-            throw new Error(__t('destination_adapter_is_invalid'));
+            throw new Error('Destination Adapter is invalid or mocked.');
         }
 
         // 5. Transfer & Deploy (Simulating physical adapter capability)

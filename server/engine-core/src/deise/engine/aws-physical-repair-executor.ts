@@ -8,12 +8,12 @@ export class AwsPhysicalRepairExecutor {
 
     public async executeRepair(plan: RepairPlan): Promise<boolean> {
         if (!plan.safeToProceed) {
-            Logger.error(__t('repair_plan_is_marked_unsafe_t'));
+            Logger.error('Repair Plan is marked unsafe to proceed. Aborting physical repair.');
             return false;
         }
 
         if (!plan.requiresInfrastructureRepair) {
-            Logger.info(__t('no_infrastructure_repair_requi'));
+            Logger.info('No infrastructure repair required. Environment is structurally sound.');
             return true;
         }
 

@@ -43,7 +43,7 @@ import { __t } from '@ugondu/shared';
 export class PassportContextValidator {
     public validate(context: any): void {
         if (!context || !context.tenantId) {
-            throw new Error(__t('messages.error.invalid_passport_context_context_must_contain'));
+            throw new Error('Invalid passport context. Context must contain tenantId.');
         }
     }
 }

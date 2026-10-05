@@ -47,7 +47,7 @@ export class RollbackExecutor {
             if (plan.strategy === RollbackStrategy.FORWARD_RECOVERY) {
                 await this.executeForwardRecovery();
             } else {
-                throw new Error(__t('messages.error.rollback_is_not_feasible_and_no_recovery_stra'));
+                throw new Error('Rollback is not feasible and no recovery strategy is specified.');
             }
             return;
         }

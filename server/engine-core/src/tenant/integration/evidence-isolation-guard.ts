@@ -44,7 +44,7 @@ export class EvidenceIsolationGuard {
     public secureEvidence(tenantContextGuard: any): void {
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error(__t('messages.error.evidence_isolation_breach_authority_must_be_d'));
+            throw new Error('Evidence isolation breach. Authority must be derived from TenantContextGuard, not caller-supplied.');
         }
     }
 }

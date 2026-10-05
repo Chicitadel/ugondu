@@ -27,7 +27,7 @@ export class AwsAuthenticationVerifier implements AuthenticationVerifier {
             };
         } catch (error: any) {
             Logger.error(__t('aws_sts_authentication_verific'));
-            throw new Error(__t('aws_authentication_failed_chec'));
+            throw new Error('AWS Authentication failed: Check credentials or network.');
         }
     }
 }
@@ -63,7 +63,7 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
         });
 
         if (accessKeyIdx === -1 || secretKeyIdx === -1) {
-            throw new Error(__t('aws_csv_missing_essential_acce'));
+            throw new Error('AWS CSV missing essential access key columns.');
         }
 
         const values = parseCsvLine(lines[1]);
@@ -72,7 +72,7 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
         let userName = userNameIdx !== -1 ? values[userNameIdx] : undefined;
 
         if (!userName) {
-            Logger.info(__t('aws_csv_missing_user_name_atte'));
+            Logger.info('AWS CSV missing User Name. Attempting safe recovery via STS...');
             
             // Temporary credential object to authenticate and discover identity
             const tempCred = {
@@ -85,15 +85,15 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
             try {
                 identity = await this.verifier.verify(tempCred);
             } catch (e: any) {
-                Logger.error(__t('cannot_safely_reconstruct_aws_'));
-                throw new Error(__t('normalization_blocked_missing_'));
+                Logger.error('Cannot safely reconstruct AWS CSV: Identity authentication failed.');
+                throw new Error('Normalization blocked: Missing User Name and credentials failed STS authentication.');
             }
 
             if (identity.principal.includes(':user/')) {
                 userName = identity.principal.split(':user/')[1].split('/')[0];
                 Logger.info(`Safely reconstructed User Name: ${userName}`);
             } else {
-                throw new Error(__t('normalization_blocked_identity'));
+                throw new Error('Normalization blocked: Identity authenticated but is not a standard IAM User (e.g. Assumed Role). Cannot inject User Name.');
             }
         }
 

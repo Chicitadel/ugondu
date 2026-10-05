@@ -46,7 +46,7 @@ export class VerticalBVps {
             id: crypto.randomUUID(),
             name: __t('linux_vps_candidate'),
             provider: 'linux-vps',
-            description: __t('a_standard_linux_virtual_priva'),
+            description: 'A standard Linux Virtual Private Server architecture.',
             resources: [
                 { id: crypto.randomUUID(), type: 'compute', name: 'nginx-proxy', provider: 'linux', config: {} },
                 { id: crypto.randomUUID(), type: 'compute', name: 'systemd-service', provider: 'linux', config: {} },
