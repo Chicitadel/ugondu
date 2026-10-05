@@ -10,7 +10,8 @@
 ------------------------------------------------
 Repository: https://github.com/chicitadel/ugondu
 Branch: phase4/production-hardening
-Commit: 2672a8bc
+Audited Source Commit: 2672a8bc
+Evidence Artifact Commit: [Assigned by Git]
 Version: v1.0.0-beta.9
 
 ------------------------------------------------
