@@ -42,10 +42,10 @@ export class AwsNativeClient implements IAwsClient {
     private rds: RDSClient;
     private s3: S3Client;
 
-    constructor(region: string, credentials: { accessKeyId: string, secretAccessKey: string }) {
-        this.ec2 = new EC2Client({ region, credentials });
-        this.rds = new RDSClient({ region, credentials });
-        this.s3 = new S3Client({ region, credentials });
+    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }) {
+        this.ec2 = new EC2Client({ region, ...(credentials ? {credentials} : {}) });
+        this.rds = new RDSClient({ region, ...(credentials ? {credentials} : {}) });
+        this.s3 = new S3Client({ region, ...(credentials ? {credentials} : {}) });
         Logger.info(`AwsNativeClient natively instantiated for region: ${region}`);
     }
 
