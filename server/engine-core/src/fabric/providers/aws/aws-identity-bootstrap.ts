@@ -1,8 +1,11 @@
 import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+import * as keytar from 'keytar';
 import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
-import { Logger, __t } from '@ugondu/shared';
+import { IAMClient, SimulatePrincipalPolicyCommand } from '@aws-sdk/client-iam';
+import { Logger } from '@ugondu/shared';
+
+const UGONDU_KEYTAR_SERVICE = 'UgonduAWSProvider';
+const UGONDU_KEYTAR_ACCOUNT = 'physical-certification-credentials';
 
 export interface AwsIdentity {
     accountId: string;
@@ -19,19 +22,9 @@ export interface AwsPermissionPreflightResult {
 
 export class AwsIdentityBootstrap {
 
-    private readonly configDir: string;
-    private readonly credentialsPath: string;
-
-    constructor() {
-        this.configDir = path.join(os.homedir(), '.ugondu', 'aws');
-        this.credentialsPath = path.join(this.configDir, 'credentials.json');
-        if (!fs.existsSync(this.configDir)) {
-            fs.mkdirSync(this.configDir, { recursive: true });
-        }
-    }
-
     /**
-     * Parses an AWS IAM CSV file. It recognizes the headers regardless of column order.
+     * Parses an AWS IAM CSV file locally.
+     * Guaranteed to process strictly in memory and detect headers case-insensitively.
      */
     public parseCredentialsCsv(csvContent: string): { accessKeyId: string; secretAccessKey: string } {
         const lines = csvContent.split(/\r?\n/).filter(line => line.trim() !== '');
@@ -74,45 +67,95 @@ export class AwsIdentityBootstrap {
                 region
             };
         } catch (error: any) {
-            throw new Error(`AWS STS Verification failed: ${error.message}`);
+            // Explicitly prevent secret leaks from STS error payloads
+            Logger.error('AWS STS Verification failed. Check your access key or network connectivity.');
+            throw new Error('AWS STS Verification failed. Identity could not be verified.');
         }
     }
 
     /**
-     * Secures the credentials locally in Ugondu's isolated keystore.
+     * Secures the credentials natively in the OS Keystore (Windows Credential Manager / macOS Keychain / Linux Secret Service)
      */
-    public storeCredentialsLocally(credentials: { accessKeyId: string; secretAccessKey: string }): void {
-        // In a real OS keystore scenario, this would interface with Keychain/Credential Manager.
-        // For local bootstrap, we use isolated 0600 file permissions.
-        fs.writeFileSync(this.credentialsPath, JSON.stringify(credentials, null, 2), { mode: 0o600 });
-        Logger.info('Credentials secured locally.');
+    public async storeCredentialsLocally(credentials: { accessKeyId: string; secretAccessKey: string }): Promise<void> {
+        const payload = JSON.stringify(credentials);
+        await keytar.setPassword(UGONDU_KEYTAR_SERVICE, UGONDU_KEYTAR_ACCOUNT, payload);
+        Logger.info('Credentials secured in OS Keychain/DPAPI.');
     }
 
-    public getStoredCredentials(): { accessKeyId: string; secretAccessKey: string } | null {
-        if (!fs.existsSync(this.credentialsPath)) return null;
+    /**
+     * securely retrieves credentials from the OS Keystore
+     */
+    public async getStoredCredentials(): Promise<{ accessKeyId: string; secretAccessKey: string } | null> {
+        const payload = await keytar.getPassword(UGONDU_KEYTAR_SERVICE, UGONDU_KEYTAR_ACCOUNT);
+        if (!payload) return null;
         try {
-            const data = fs.readFileSync(this.credentialsPath, 'utf8');
-            return JSON.parse(data);
+            return JSON.parse(payload);
         } catch {
             return null;
         }
     }
 
     /**
-     * Preflight capability checker (currently simulates dry-run capabilities)
+     * securely deletes credentials from the OS Keystore (rotation/revocation support)
+     */
+    public async deleteStoredCredentials(): Promise<void> {
+        await keytar.deletePassword(UGONDU_KEYTAR_SERVICE, UGONDU_KEYTAR_ACCOUNT);
+        Logger.info('Credentials deleted from OS Keychain/DPAPI.');
+    }
+
+    /**
+     * Real preflight capability checker using IAM SimulatePrincipalPolicy
      */
     public async preflightPermissions(credentials: { accessKeyId: string; secretAccessKey: string }, region: string): Promise<AwsPermissionPreflightResult> {
         const identity = await this.verifyIdentity(credentials, region);
-        // Note: Real preflight would use IAM SimulatePrincipalPolicy or dry-run AWS API calls.
+        
+        const iam = new IAMClient({ region, credentials });
+        
+        // Define exact IAM actions required for P0-PHYS AWS
+        const actionNames = [
+            'ec2:RunInstances',
+            'ec2:CreateVpc',
+            'rds:CreateDBSubnetGroup',
+            's3:CreateBucket'
+        ];
+
+        let ready = true;
+        const capabilities: Record<string, boolean> = {
+            'ec2': false,
+            'vpc': false,
+            'rds': false,
+            's3': false
+        };
+
+        try {
+            const simRes = await iam.send(new SimulatePrincipalPolicyCommand({
+                PolicySourceArn: identity.principalArn,
+                ActionNames: actionNames
+            }));
+
+            const evalResults = simRes.EvaluationResults || [];
+            
+            for (const res of evalResults) {
+                const action = res.EvalActionName || '';
+                const allowed = res.EvalDecision === 'allowed';
+                if (!allowed) ready = false;
+
+                if (action.startsWith('ec2:Run')) capabilities['ec2'] = allowed;
+                if (action.startsWith('ec2:CreateVpc')) capabilities['vpc'] = allowed;
+                if (action.startsWith('rds:Create')) capabilities['rds'] = allowed;
+                if (action.startsWith('s3:Create')) capabilities['s3'] = allowed;
+            }
+
+        } catch (error: any) {
+            // Mask any internal AWS signature exceptions to prevent logging secrets
+            Logger.error('Permission preflight via IAM simulation failed.');
+            throw new Error('Permission preflight failed. User may lack iam:SimulatePrincipalPolicy permission.');
+        }
+
         return {
             identity,
-            capabilities: {
-                'vpc': true,
-                'ec2': true,
-                'rds': true,
-                's3': true
-            },
-            ready: true
+            capabilities,
+            ready
         };
     }
 
@@ -121,6 +164,14 @@ export class AwsIdentityBootstrap {
      */
     public generatePolicy(capabilities: string[], region: string, accountId: string = '*'): object {
         const statements: any[] = [];
+
+        // Required for preflight
+        statements.push({
+            Sid: 'UgonduPreflight',
+            Effect: 'Allow',
+            Action: ['iam:SimulatePrincipalPolicy'],
+            Resource: '*'
+        });
 
         if (capabilities.includes('ec2')) {
             statements.push({

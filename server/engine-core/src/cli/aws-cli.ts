@@ -62,7 +62,7 @@ Run \`ugondu provider aws credentials import <CSV>\`
             console.log(`Principal:   ${identity.principalArn}`);
             console.log(`Region:      ${identity.region}`);
 
-            bootstrap.storeCredentialsLocally(creds);
+            await bootstrap.storeCredentialsLocally(creds);
             console.log('AWS provider is READY.');
         } catch (e: any) {
             console.error(`Import failed: ${e.message}`);
