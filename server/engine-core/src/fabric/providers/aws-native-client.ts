@@ -48,7 +48,8 @@ import {
     SSMClient,
     GetParameterCommand
 } from '@aws-sdk/client-ssm';
-import { 
+
+import { 
     ECSClient, 
     CreateClusterCommand, 
     RegisterTaskDefinitionCommand, 
@@ -65,6 +66,15 @@ import {
     CreateLogGroupCommand 
 } from '@aws-sdk/client-cloudwatch-logs';
 
+import {
+    IAMClient,
+    CreateRoleCommand,
+    PutRolePolicyCommand
+} from '@aws-sdk/client-iam';
+
+import { PolicyGovernanceEngine, ProviderAuthorizationAdapter } from '../../governance/engine/policy-engine';
+import { UniversalPermission } from '../../governance/model/authorization';
+
 export class AwsNativeClient implements IAwsClient {
     private ec2: EC2Client;
     private rds: RDSClient;
@@ -73,6 +83,7 @@ export class AwsNativeClient implements IAwsClient {
     private ecs: ECSClient;
     private ecr: ECRClient;
     private cw: CloudWatchLogsClient;
+    private iam: IAMClient;
 
     constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }) {
         const config = { region, ...(credentials ? { credentials } : {}) };
@@ -83,6 +94,7 @@ export class AwsNativeClient implements IAwsClient {
         this.ecs = new ECSClient(config);
         this.ecr = new ECRClient(config);
         this.cw = new CloudWatchLogsClient(config);
+        this.iam = new IAMClient(config);
         Logger.info(`AwsNativeClient natively instantiated for region: ${region}`);
     }
 
@@ -100,7 +112,7 @@ export class AwsNativeClient implements IAwsClient {
         // Dynamic SSM AMI Resolution if image is 'latest-al2023'
         let actualImage = image;
         if (image === 'latest-al2023') {
-            Logger.info('Resolving latest Amazon Linux 2023 AMI via SSM');
+            Logger.info(__t('resolving_latest_amazon_linux_'));
             const ssmRes = await this.ssm.send(new GetParameterCommand({ Name: '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64' }));
             actualImage = ssmRes.Parameter?.Value || image;
         }
@@ -114,7 +126,7 @@ export class AwsNativeClient implements IAwsClient {
         });
         const res = await this.ec2.send(cmd) as any;
         const instance = res.Instances?.[0];
-        if (!instance || !instance.InstanceId) throw new Error('AWS EC2 creation failed: No instance returned');
+        if (!instance || !instance.InstanceId) throw new Error(__t('aws_ec2_creation_failed_no_ins'));
         
         const id = instance.InstanceId;
         
@@ -149,7 +161,7 @@ export class AwsNativeClient implements IAwsClient {
     public async createVpc(cidr: string, name: string): Promise<string> {
         const cmd = new CreateVpcCommand({ CidrBlock: cidr });
         const res = await this.ec2.send(cmd) as any;
-        if (!res.Vpc || !res.Vpc.VpcId) throw new Error('AWS VPC creation failed');
+        if (!res.Vpc || !res.Vpc.VpcId) throw new Error(__t('aws_vpc_creation_failed'));
         // Waiter could be added here if needed, but VPCs are usually available instantly.
         return res.Vpc.VpcId;
     }
@@ -168,14 +180,14 @@ export class AwsNativeClient implements IAwsClient {
     public async createSubnet(vpcId: string, cidr: string, az?: string): Promise<SubnetResult> {
         const cmd = new CreateSubnetCommand({ VpcId: vpcId, CidrBlock: cidr, AvailabilityZone: az });
         const res = await this.ec2.send(cmd) as any;
-        if (!res.Subnet || !res.Subnet.SubnetId) throw new Error('AWS Subnet creation failed');
+        if (!res.Subnet || !res.Subnet.SubnetId) throw new Error(__t('aws_subnet_creation_failed'));
         return { id: res.Subnet.SubnetId, cidr: cidr };
     }
 
     public async createSecurityGroup(vpcId: string, name: string): Promise<string> {
         const cmd = new CreateSecurityGroupCommand({ VpcId: vpcId, GroupName: name, Description: `Ugondu Managed SG ${name}` });
         const res = await this.ec2.send(cmd) as any;
-        if (!res.GroupId) throw new Error('AWS Security Group creation failed');
+        if (!res.GroupId) throw new Error(__t('aws_security_group_creation_fa'));
         return res.GroupId;
     }
 
@@ -186,11 +198,11 @@ export class AwsNativeClient implements IAwsClient {
     public async createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string> {
         const cmd = new CreateDBSubnetGroupCommand({
             DBSubnetGroupName: name,
-            DBSubnetGroupDescription: 'Ugondu managed DB subnet group',
+            DBSubnetGroupDescription: __t('ugondu_managed_db_subnet_group'),
             SubnetIds: subnetIds
         });
         const res = await this.rds.send(cmd);
-        if (!res.DBSubnetGroup || !res.DBSubnetGroup.DBSubnetGroupName) throw new Error('AWS DB Subnet Group creation failed');
+        if (!res.DBSubnetGroup || !res.DBSubnetGroup.DBSubnetGroupName) throw new Error(__t('aws_db_subnet_group_creation_f'));
         return res.DBSubnetGroup.DBSubnetGroupName;
     }
 
@@ -202,7 +214,7 @@ export class AwsNativeClient implements IAwsClient {
         const dbInstanceClass = capacity > 100 ? 'db.m5.large' : 'db.t3.micro';
         
         if (!credentialsRef || !credentialsRef.startsWith('secret:')) {
-            throw new Error('Security Audit: Physical AWS RDS deployment requires a secure credentialsRef mapping.');
+            throw new Error(__t('security_audit_physical_aws_rd'));
         }
         
         const password = await resolveSecret(credentialsRef);
@@ -219,7 +231,7 @@ export class AwsNativeClient implements IAwsClient {
         });
         
         const res = await this.rds.send(cmd);
-        if (!res.DBInstance || !res.DBInstance.DBInstanceIdentifier) throw new Error('AWS RDS creation failed');
+        if (!res.DBInstance || !res.DBInstance.DBInstanceIdentifier) throw new Error(__t('aws_rds_creation_failed'));
         
         const id = res.DBInstance.DBInstanceIdentifier;
 
@@ -287,21 +299,21 @@ export class AwsNativeClient implements IAwsClient {
             const { CreateSnapshotCommand } = require('@aws-sdk/client-ec2');
             const cmd = new CreateSnapshotCommand({ VolumeId: id });
             const res = await this.ec2.send(cmd) as any;
-            if (!res.SnapshotId) throw new Error('EBS Snapshot creation failed');
+            if (!res.SnapshotId) throw new Error(__t('ebs_snapshot_creation_failed'));
             return res.SnapshotId;
         } else if (type === 'EC2_INSTANCE') {
             const { CreateImageCommand } = require('@aws-sdk/client-ec2');
             const amiName = `ami-${id}-${Date.now()}`;
             const cmd = new CreateImageCommand({ InstanceId: id, Name: amiName, NoReboot: true });
             const res = await this.ec2.send(cmd) as any;
-            if (!res.ImageId) throw new Error('EC2 AMI Snapshot creation failed');
+            if (!res.ImageId) throw new Error(__t('ec2_ami_snapshot_creation_fail'));
             return res.ImageId;
         }
         throw new Error(`Unsupported AWS snapshot resourceType: ${type}`);
     }
     public async createEcsCluster(name: string): Promise<string> {
         const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name }));
-        if (!res.cluster || !res.cluster.clusterName) throw new Error('ECS Cluster creation failed');
+        if (!res.cluster || !res.cluster.clusterName) throw new Error(__t('ecs_cluster_creation_failed'));
         return res.cluster.clusterName;
     }
 
@@ -329,7 +341,7 @@ export class AwsNativeClient implements IAwsClient {
             }]
         });
         const res = await this.ecs.send(cmd);
-        if (!res.taskDefinition || !res.taskDefinition.taskDefinitionArn) throw new Error('Task Definition registration failed');
+        if (!res.taskDefinition || !res.taskDefinition.taskDefinitionArn) throw new Error(__t('task_definition_registration_f'));
         return res.taskDefinition.taskDefinitionArn;
     }
 
@@ -354,19 +366,89 @@ export class AwsNativeClient implements IAwsClient {
             }] : undefined
         });
         const res = await this.ecs.send(cmd);
-        if (!res.service || !res.service.serviceArn) throw new Error('ECS Service creation failed');
+        if (!res.service || !res.service.serviceArn) throw new Error(__t('ecs_service_creation_failed'));
         return res.service.serviceArn;
     }
 
     public async createEcrRepository(name: string): Promise<string> {
         const res = await this.ecr.send(new CreateRepositoryCommand({ repositoryName: name }));
-        if (!res.repository || !res.repository.repositoryUri) throw new Error('ECR Repository creation failed');
+        if (!res.repository || !res.repository.repositoryUri) throw new Error(__t('ecr_repository_creation_failed'));
         return res.repository.repositoryUri;
     }
 
     public async createLogGroup(name: string): Promise<string> {
         await this.cw.send(new CreateLogGroupCommand({ logGroupName: name }));
         return name;
+    }
+
+    public async createFargateRoles(taskName: string): Promise<{ executionRoleArn: string, taskRoleArn: string }> {
+        const engine = new PolicyGovernanceEngine();
+        // Mock adapter implementation for AWS IAM
+        const awsAdapter: ProviderAuthorizationAdapter = {
+            providerIdentifier: 'aws',
+            translateIntent: () => { throw new Error('NotImplemented'); },
+            synthesizePolicy: () => { throw new Error('NotImplemented'); },
+            verifyCapability: (intent) => { throw new Error('NotImplemented'); }
+        };
+        engine.registerAdapter(awsAdapter);
+
+        // Define intent
+        const execIntent: UniversalPermission[] = [
+            { action: 'ecr:GetAuthorizationToken', resource: 'arn:aws:ecr:*:*:repository/*' },
+            { action: 'ecr:BatchCheckLayerAvailability', resource: 'arn:aws:ecr:*:*:repository/*' },
+            { action: 'ecr:GetDownloadUrlForLayer', resource: 'arn:aws:ecr:*:*:repository/*' },
+            { action: 'ecr:BatchGetImage', resource: 'arn:aws:ecr:*:*:repository/*' },
+            { action: 'logs:CreateLogStream', resource: 'arn:aws:logs:*:*:log-group:*' },
+            { action: 'logs:PutLogEvents', resource: 'arn:aws:logs:*:*:log-group:*' }
+        ];
+
+        // Evaluate intent through Governance Engine
+        const decision = engine.evaluateIntent('aws', execIntent, `fargate-${taskName}`);
+        
+        if (decision.decision !== 'ALLOW') {
+            throw new Error(`Governance Policy Denied: ${decision.reason}`);
+        }
+
+        const execRoleName = `${taskName}-ExecRole-${Date.now()}`;
+        const taskRoleName = `${taskName}-TaskRole-${Date.now()}`;
+        
+        const assumeRolePolicyDocument = JSON.stringify({
+            Version: '2012-10-17',
+            Statement: [{ Effect: 'Allow', Principal: { Service: 'ecs-tasks.amazonaws.com' }, Action: 'sts:AssumeRole' }]
+        });
+
+        // Create Execution Role
+        const execRoleRes = await this.iam.send(new CreateRoleCommand({
+            RoleName: execRoleName,
+            AssumeRolePolicyDocument: assumeRolePolicyDocument
+        }));
+
+        // Attach minimal inline policy based on intent
+        const inlinePolicyDoc = JSON.stringify({
+            Version: '2012-10-17',
+            Statement: execIntent.map(i => ({
+                Effect: 'Allow',
+                Action: i.action,
+                Resource: i.resource
+            }))
+        });
+
+        await this.iam.send(new PutRolePolicyCommand({
+            RoleName: execRoleName,
+            PolicyName: 'UgonduMinimalExecutionPolicy',
+            PolicyDocument: inlinePolicyDoc
+        }));
+
+        // Create Task Role
+        const taskRoleRes = await this.iam.send(new CreateRoleCommand({
+            RoleName: taskRoleName,
+            AssumeRolePolicyDocument: assumeRolePolicyDocument
+        }));
+
+        return {
+            executionRoleArn: execRoleRes.Role!.Arn!,
+            taskRoleArn: taskRoleRes.Role!.Arn!
+        };
     }
 }
 

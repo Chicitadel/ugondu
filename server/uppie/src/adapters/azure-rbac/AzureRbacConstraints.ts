@@ -40,16 +40,16 @@ import type { AuthorizationConstraints } from '../../types/index';
  * - No DENY-only assignments: deny assignments are system-generated only
  */
 export const AZURE_RBAC_CONSTRAINTS: AuthorizationConstraints = {
-  maxPoliciesPerRole:  { status: 'SUPPORTED',            value: 5000, note: 'Max custom role definitions per tenant' },
+  maxPoliciesPerRole:  { status: 'SUPPORTED',            value: 5000, note: __t('max_custom_role_definitions_pe') },
   maxRolesPerIdentity: { status: 'SUPPORTED',            value: 200,  note: 'Max role assignments per user/SP' },
-  maxAssignments:      { status: 'SUPPORTED',            value: 5000, note: 'Max role assignments per subscription (500 per management group)' },
-  maxPolicySize:       { status: 'SUPPORTED',            value: 8192, note: 'Max custom role definition JSON size in bytes' },
-  maxStatements:       { status: 'SUPPORTED',            value: 128,  note: 'Max actions per custom role' },
-  maxGroups:           { status: 'SUPPORTED',            value: 5000, note: 'Max groups per Azure AD tenant' },
-  maxGroupMemberships: { status: 'SUPPORTED',            value: 500,  note: 'Max group memberships per user' },
+  maxAssignments:      { status: 'SUPPORTED',            value: 5000, note: __t('max_role_assignments_per_subsc') },
+  maxPolicySize:       { status: 'SUPPORTED',            value: 8192, note: __t('max_custom_role_definition_jso') },
+  maxStatements:       { status: 'SUPPORTED',            value: 128,  note: __t('max_actions_per_custom_role') },
+  maxGroups:           { status: 'SUPPORTED',            value: 5000, note: __t('max_groups_per_azure_ad_tenant') },
+  maxGroupMemberships: { status: 'SUPPORTED',            value: 500,  note: __t('max_group_memberships_per_user') },
   maxInheritanceDepth: { status: 'SUPPORTED',            value: 3,    note: 'Management group → subscription → resource group' },
-  maxBindings:         { status: 'UNSUPPORTED',                       note: 'Azure uses Role Assignments, not Bindings' },
-  maxServiceAccounts:  { status: 'SUPPORTED',            value: 2000, note: 'Max service principals per tenant (soft limit)' },
-  maxRules:            { status: 'UNSUPPORTED',                       note: 'Azure RBAC does not use rule-based access' },
-  maxACLEntries:       { status: 'UNSUPPORTED',                       note: 'Azure RBAC does not use ACLs' },
+  maxBindings:         { status: 'UNSUPPORTED',                       note: __t('azure_uses_role_assignments_no') },
+  maxServiceAccounts:  { status: 'SUPPORTED',            value: 2000, note: __t('max_service_principals_per_ten') },
+  maxRules:            { status: 'UNSUPPORTED',                       note: __t('azure_rbac_does_not_use_rule_b') },
+  maxACLEntries:       { status: 'UNSUPPORTED',                       note: __t('azure_rbac_does_not_use_acls') },
 };

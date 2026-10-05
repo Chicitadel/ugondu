@@ -55,5 +55,5 @@ app.use('/v1/deploy',    passportGuardMiddleware, createDeployRouter(keyState, B
 // ─── Server ──────────────────────────────────────────────────────────────────
 const PORT = process.env['PORT'] ?? 4001;
 app.listen(PORT, () => {
-  Logger.info(__t('listening', 'Ugondu Engine Core', PORT));
+  Logger.info(__t('listening', __t('ugondu_engine_core'), PORT));
 });

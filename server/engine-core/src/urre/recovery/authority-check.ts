@@ -88,7 +88,7 @@ export function verifyRecoveryAuthority(
       return {
         result:              'AUTHORIZED',
         missingCapabilities: [],
-        detail:              'Recovery authority verified. All required capabilities present.',
+        detail:              __t('recovery_authority_verified_al'),
         evaluatedAt,
         operationId,
         executionId,
@@ -110,7 +110,7 @@ export function verifyRecoveryAuthority(
     return {
       result:              'BLOCKED',
       missingCapabilities: uppieContext.missingCapabilities,
-      detail:              'Recovery authority missing AND provider limit exhausted. Human escalation required.',
+      detail:              __t('recovery_authority_missing_and'),
       evaluatedAt,
       operationId,
       executionId,

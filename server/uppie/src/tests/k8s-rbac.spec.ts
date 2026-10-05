@@ -27,8 +27,8 @@ function setup() {
   return { ...cluster, adapter: new KubernetesRbacAdapter(async () => cluster.client) };
 }
 
-describe('Kubernetes RBAC compilation', () => {
-  it('compiles an ALLOW rule to a least-privilege ClusterRole in the core group', async () => {
+describe(__t('kubernetes_rbac_compilation'), () => {
+  it(__t('compiles_an_allow_rule_to_a_le'), async () => {
     const { adapter } = setup();
     const native = await adapter.generate([rule()], ctx);
     const doc = native.nativeDocument as K8sClusterRole;
@@ -39,13 +39,13 @@ describe('Kubernetes RBAC compilation', () => {
     expect(/^ugondu-[a-f0-9]{12}$/.test(native.providerId)).toBe(true);
   });
 
-  it('derives apiGroup and subresource from kubectl-style scope', () => {
+  it(__t('derives_apigroup_and_subresour'), () => {
     expect(parseScope('deployments.apps')).toEqual({ apiGroup: 'apps', resource: 'deployments' });
     expect(parseScope('pods/log')).toEqual({ apiGroup: '', resource: 'pods/log' });
     expect(parseScope('deployments.apps/scale')).toEqual({ apiGroup: 'apps', resource: 'deployments/scale' });
   });
 
-  it('merges resources sharing a group and verb set, and is deterministic', async () => {
+  it(__t('merges_resources_sharing_a_gro'), async () => {
     const { adapter } = setup();
     const rules = [rule({ resource: { type: 'k8s::resource', scope: 'services' } }), rule(), rule({ action: { capability: 'x', operations: ['get', 'list'] } })];
     const a = await adapter.generate(rules, ctx);
@@ -55,18 +55,18 @@ describe('Kubernetes RBAC compilation', () => {
     expect(a.digest).toBe(b.digest);
   });
 
-  it('never compiles DENY rules because RBAC has no deny primitive', () => {
+  it(__t('never_compiles_deny_rules_beca'), () => {
     expect(compileK8sPolicyRules([rule({ effect: 'DENY' })])).toEqual([]);
   });
 
-  it('rejects wildcards, unknown verbs and malformed scopes with localized errors', () => {
+  it(__t('rejects_wildcards_unknown_verb'), () => {
     expect(() => compileK8sPolicyRules([rule({ action: { capability: 'x', operations: ['*'] } })])).toThrow(__t('uppie.adapter.k8s.wildcard_forbidden', { value: '*' }));
     expect(() => compileK8sPolicyRules([rule({ resource: { type: 't', scope: '*' } })])).toThrow(__t('uppie.adapter.k8s.wildcard_forbidden', { value: '*' }));
     expect(() => compileK8sPolicyRules([rule({ action: { capability: 'x', operations: ['exec'] } })])).toThrow(__t('uppie.adapter.k8s.invalid_verb', { verb: 'exec' }));
     expect(() => compileK8sPolicyRules([rule({ resource: { type: 't', scope: 'Pods!' } })])).toThrow(__t('uppie.adapter.k8s.invalid_scope', { scope: 'Pods!' }));
   });
 
-  it('parses subjects and rejects malformed or ROLE-typed subjects', () => {
+  it(__t('parses_subjects_and_rejects_ma'), () => {
     expect(parseSubject('alice')).toEqual({ kind: 'User', name: 'alice', apiGroup: 'rbac.authorization.k8s.io' });
     expect(parseSubject('ServiceAccount:team-a:builder')).toEqual({ kind: 'ServiceAccount', name: 'builder', namespace: 'team-a' });
     expect(() => parseSubject('ServiceAccount:only-name')).toThrow(__t('uppie.adapter.k8s.invalid_subject', { subject: 'ServiceAccount:only-name' }));
@@ -74,15 +74,15 @@ describe('Kubernetes RBAC compilation', () => {
   });
 });
 
-describe('Kubernetes RBAC validation', () => {
-  it('accepts a generated policy', async () => {
+describe(__t('kubernetes_rbac_validation'), () => {
+  it(__t('accepts_a_generated_policy'), async () => {
     const { adapter } = setup();
     const res = await adapter.validate(await adapter.generate([rule()], ctx), ctx);
     expect(res.valid).toBe(true);
     expect(res.errors).toEqual([]);
   });
 
-  it('reports an empty role, a tampered digest and wildcard rules', async () => {
+  it(__t('reports_an_empty_role_a_tamper'), async () => {
     const { adapter } = setup();
     const empty = await adapter.generate([], ctx);
     expect((await adapter.validate(empty, ctx)).errors).toContain(__t('uppie.adapter.k8s.validate.no_rules'));
@@ -98,8 +98,8 @@ describe('Kubernetes RBAC validation', () => {
   });
 });
 
-describe('Kubernetes RBAC lifecycle', () => {
-  it('attaches idempotently: one role, one binding, repeatable', async () => {
+describe(__t('kubernetes_rbac_lifecycle'), () => {
+  it(__t('attaches_idempotently_one_role'), async () => {
     const { adapter, roles, bindings } = setup();
     const native = await adapter.generate([rule()], ctx);
     const first = await adapter.attach(native, 'User:alice', ctx);
@@ -112,7 +112,7 @@ describe('Kubernetes RBAC lifecycle', () => {
     expect(bindings.get(first.providerRef)?.subjects?.[0]).toEqual({ kind: 'User', name: 'alice', apiGroup: 'rbac.authorization.k8s.io' });
   });
 
-  it('refuses to attach over a same-named role holding different rules', async () => {
+  it(__t('refuses_to_attach_over_a_same_'), async () => {
     const { adapter, roles } = setup();
     const native = await adapter.generate([rule()], ctx);
     roles.set(native.providerId, { kind: 'ClusterRole', metadata: { name: native.providerId }, rules: [{ apiGroups: [''], resources: ['secrets'], verbs: ['get'] }] });
@@ -121,21 +121,21 @@ describe('Kubernetes RBAC lifecycle', () => {
     expect(res.errors[0]).toBe(__t('uppie.adapter.k8s.attach_error', { error: __t('uppie.adapter.k8s.role_exists_different', { name: native.providerId }) }));
   });
 
-  it('fails attach on an invalid document without touching the cluster', async () => {
+  it(__t('fails_attach_on_an_invalid_doc'), async () => {
     const { adapter, roles } = setup();
     const res = await adapter.attach(await adapter.generate([], ctx), 'User:alice', ctx);
     expect(res.success).toBe(false);
     expect(roles.size).toBe(0);
   });
 
-  it('includes the underlying error when the cluster call fails', async () => {
+  it(__t('includes_the_underlying_error_'), async () => {
     const { client } = fakeCluster();
-    const adapter = new KubernetesRbacAdapter(async () => ({ ...client, createClusterRole: async () => { throw new K8sApiError('forbidden by admission', 403); } }));
+    const adapter = new KubernetesRbacAdapter(async () => ({ ...client, createClusterRole: async () => { throw new K8sApiError(__t('forbidden_by_admission'), 403); } }));
     const res = await adapter.attach(await adapter.generate([rule()], ctx), 'User:alice', ctx);
-    expect(res.errors[0]).toBe(__t('uppie.adapter.k8s.attach_error', { error: 'forbidden by admission' }));
+    expect(res.errors[0]).toBe(__t('uppie.adapter.k8s.attach_error', { error: __t('forbidden_by_admission') }));
   });
 
-  it('detaches a binding and treats an already-removed binding as success', async () => {
+  it(__t('detaches_a_binding_and_treats_'), async () => {
     const { adapter, bindings } = setup();
     const native = await adapter.generate([rule()], ctx);
     await adapter.attach(native, 'ServiceAccount:team-a:builder', ctx);
@@ -146,7 +146,7 @@ describe('Kubernetes RBAC lifecycle', () => {
     expect(buildBindingName('r', 'alice')).toBe(buildBindingName('r', 'User:alice'));
   });
 
-  it('updates rules in place, preserving resourceVersion semantics, and refuses system roles', async () => {
+  it(__t('updates_rules_in_place_preserv'), async () => {
     const { adapter, roles } = setup();
     const native = await adapter.generate([rule()], ctx);
     await adapter.attach(native, 'User:alice', ctx);
@@ -159,18 +159,18 @@ describe('Kubernetes RBAC lifecycle', () => {
     expect((await adapter.update(native.providerId, [], ctx)).errors).toEqual([__t('uppie.adapter.k8s.validate.no_rules')]);
   });
 
-  it('clones a role under a new valid name and refuses duplicates and bad names', async () => {
+  it(__t('clones_a_role_under_a_new_vali'), async () => {
     const { adapter, roles } = setup();
     const native = await adapter.generate([rule()], ctx);
     await adapter.attach(native, 'User:alice', ctx);
     expect((await adapter.clone(native.providerId, 'copy-of-pods', ctx)).clonedId).toBe('copy-of-pods');
     expect(roles.get('copy-of-pods')?.rules).toEqual(roles.get(native.providerId)?.rules);
     expect((await adapter.clone(native.providerId, 'copy-of-pods', ctx)).success).toBe(false);
-    expect((await adapter.clone(native.providerId, 'Bad Name', ctx)).success).toBe(false);
+    expect((await adapter.clone(native.providerId, __t('bad_name'), ctx)).success).toBe(false);
   });
 });
 
-describe('Kubernetes RBAC discovery and analysis', () => {
+describe(__t('kubernetes_rbac_discovery_and_'), () => {
   async function seeded() {
     const env = setup();
     const native = await env.adapter.generate([rule()], ctx);
@@ -180,7 +180,7 @@ describe('Kubernetes RBAC discovery and analysis', () => {
     return { ...env, native };
   }
 
-  it('discovers policies, roles, assignments, identities and groups from live objects', async () => {
+  it(__t('discovers_policies_roles_assig'), async () => {
     const { adapter, native } = await seeded();
     expect((await adapter.discoverPolicies(ctx)).map((p) => p.providerId)).toEqual([native.providerId]);
     expect((await adapter.discoverRoles(ctx))[0].policies).toEqual([native.providerId]);
@@ -203,7 +203,7 @@ describe('Kubernetes RBAC discovery and analysis', () => {
     expect((await lone.adapter.findDependencies(n2.providerId, ctx)).blastRadius).toBe('LIMITED');
   });
 
-  it('evaluates access through SubjectAccessReview semantics', async () => {
+  it(__t('evaluates_access_through_subje'), async () => {
     const { adapter } = await seeded();
     expect(await adapter.evaluate(rule(), ctx)).toBe('GRANTED');
     expect(await adapter.evaluate(rule({ action: { capability: 'x', operations: ['delete'] } }), ctx)).toBe('DENIED');
@@ -212,12 +212,12 @@ describe('Kubernetes RBAC discovery and analysis', () => {
     expect(await adapter.evaluate(rule({ effect: 'DENY' }), ctx)).toBe('UNKNOWN');
   });
 
-  it('returns UNKNOWN when the cluster cannot be reached', async () => {
+  it(__t('returns_unknown_when_the_clust'), async () => {
     const adapter = new KubernetesRbacAdapter(async () => { throw new Error('offline'); });
     expect(await adapter.evaluate(rule(), ctx)).toBe('UNKNOWN');
   });
 
-  it('reports effective authority per verb with the contributing roles', async () => {
+  it(__t('reports_effective_authority_pe'), async () => {
     const { adapter, native } = await seeded();
     const res = await adapter.discoverEffectiveAuthority('User:alice', 'pods', ctx);
     const state = (verb: string) => res.permissions.find((p) => p.capability === verb);
@@ -228,7 +228,7 @@ describe('Kubernetes RBAC discovery and analysis', () => {
     expect(state('delete')?.sourcePolicies).toEqual([]);
   });
 
-  it('simulates by probing current access: new grants, unchanged grants, unenforceable denies', async () => {
+  it(__t('simulates_by_probing_current_a'), async () => {
     const { adapter } = await seeded();
     const sim = await adapter.simulate([
       rule(),
@@ -244,8 +244,8 @@ describe('Kubernetes RBAC discovery and analysis', () => {
   });
 });
 
-describe('Kubernetes RBAC reconciliation', () => {
-  it('plans add, update, remove and no-change against observed roles', async () => {
+describe(__t('kubernetes_rbac_reconciliation'), () => {
+  it(__t('plans_add_update_remove_and_no'), async () => {
     const { adapter } = setup();
     const observed = [
       await adapter.generate([rule(), rule({ resource: { type: 't', scope: 'secrets' } })], ctx),
@@ -264,7 +264,7 @@ describe('Kubernetes RBAC reconciliation', () => {
     expect(plan.toRemove).toEqual(['|secrets']);
   });
 
-  it('wraps failures with the localized reconcile error', async () => {
+  it(__t('wraps_failures_with_the_locali'), async () => {
     const { adapter } = setup();
     let message = '';
     try { await adapter.reconcile([rule({ resource: { type: 't', scope: '*' } })], [], ctx); } catch (e: any) { message = e.message; }
@@ -272,10 +272,10 @@ describe('Kubernetes RBAC reconciliation', () => {
   });
 });
 
-describe('Kubernetes RBAC retirement and restore', () => {
+describe(__t('kubernetes_rbac_retirement_and'), () => {
   const plan = (policyId: string): any => ({ policyId, shadowPeriodDays: 7, approvedBy: 'change-board', retentionDays: 90 });
 
-  it('refuses to retire a role that is still bound, and system roles', async () => {
+  it(__t('refuses_to_retire_a_role_that_'), async () => {
     const { adapter } = setup();
     const native = await adapter.generate([rule()], ctx);
     await adapter.attach(native, 'User:alice', ctx);
@@ -285,7 +285,7 @@ describe('Kubernetes RBAC retirement and restore', () => {
     expect((await adapter.retire(plan('cluster-admin'), ctx)).success).toBe(false);
   });
 
-  it('retires an unbound role with a server-field-free snapshot, and restores it exactly', async () => {
+  it(__t('retires_an_unbound_role_with_a'), async () => {
     const { adapter, roles } = setup();
     const native = await adapter.generate([rule()], ctx);
     await adapter.attach(native, 'User:alice', ctx);
@@ -306,7 +306,7 @@ describe('Kubernetes RBAC retirement and restore', () => {
     expect((await adapter.restore({ policyId: native.providerId, rollbackReference: retired.rollbackReference } as any, ctx)).success).toBe(false);
   });
 
-  it('refuses restore without a reference, for a mismatched name, a protected name or malformed JSON', async () => {
+  it(__t('refuses_restore_without_a_refe'), async () => {
     const { adapter } = setup();
     const native = await adapter.generate([rule()], ctx);
     const ref = JSON.stringify(native.nativeDocument);
@@ -317,21 +317,21 @@ describe('Kubernetes RBAC retirement and restore', () => {
   });
 });
 
-describe('Kubernetes RBAC client lifecycle', () => {
-  it('creates the client lazily, caches it, and retries after a factory failure', async () => {
+describe(__t('kubernetes_rbac_client_lifecyc'), () => {
+  it(__t('creates_the_client_lazily_cach'), async () => {
     let calls = 0;
     const { client } = fakeCluster();
-    const adapter = new KubernetesRbacAdapter(async () => { calls++; if (calls === 1) throw new Error('kubeconfig missing'); return client; });
+    const adapter = new KubernetesRbacAdapter(async () => { calls++; if (calls === 1) throw new Error(__t('kubeconfig_missing')); return client; });
     expect(calls).toBe(0);
     let failure = '';
     try { await adapter.discoverPolicies(ctx); } catch (e: any) { failure = e.message; }
-    expect(failure).toBe('kubeconfig missing');
+    expect(failure).toBe(__t('kubeconfig_missing'));
     await adapter.discoverPolicies(ctx);
     await adapter.discoverRoles(ctx);
     expect(calls).toBe(2);
   });
 
-  it('declares every non-observable capability honestly', () => {
+  it(__t('declares_every_non_observable_'), () => {
     const { adapter } = setup();
     expect(adapter.capabilities.observeUsage).toBe('NOT_OBSERVABLE');
     expect(adapter.capabilities.findConflicts).toBe('NOT_OBSERVABLE');

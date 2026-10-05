@@ -25,8 +25,8 @@ function setup() {
   return { ...iam, adapter: new AwsIamPolicyAdapter(async () => iam.client) };
 }
 
-describe('AWS IAM compilation', () => {
-  it('emits IAM-cased effects, merges identical statements and is order independent', async () => {
+describe(__t('aws_iam_compilation'), () => {
+  it(__t('emits_iam_cased_effects_merges'), async () => {
     const { adapter } = setup();
     const rules = [rule({ ruleId: 'a' }), rule({ ruleId: 'b', action: { capability: 'x', operations: ['s3:ListBucket', 's3:GetObject'] } }), rule({ ruleId: 'c', effect: 'DENY', action: { capability: 'x', operations: ['s3:DeleteObject'] } })];
     const a = await adapter.generate(rules, ctx);
@@ -40,7 +40,7 @@ describe('AWS IAM compilation', () => {
     expect(doc.Statement[0].Sid).toBe('a');
   });
 
-  it('compiles every limiter into the Condition block', () => {
+  it(__t('compiles_every_limiter_into_th'), () => {
     const condition = compileConditions(rule({
       resource: { type: 't', scope: '*', conditions: { 'aws:PrincipalOrgID': 'o-123' } },
       constraints: { requireMfa: true, ipRange: '10.0.0.0/8' },
@@ -62,16 +62,16 @@ describe('AWS IAM compilation', () => {
     expect(compileConditions(rule())).toBeUndefined();
   });
 
-  it('fails closed on conditions it cannot express', () => {
+  it(__t('fails_closed_on_conditions_it_'), () => {
     const bad = (conditions: any[], constraints: any = {}) => () => compileConditions(rule({ conditions, constraints }));
     expect(bad([{ type: 'GEO_FENCE', value: {} }])).toThrow(__t('uppie.adapter.aws.invalid_condition', { type: 'GEO_FENCE' }));
     expect(bad([{ type: 'IP_BOUND', value: {} }])).toThrow(__t('uppie.adapter.aws.invalid_condition', { type: 'IP_BOUND' }));
     expect(bad([{ type: 'TIME_BOUND', value: { notAfter: 'tomorrow-ish' } }])).toThrow(__t('uppie.adapter.aws.invalid_condition', { type: 'TIME_BOUND' }));
     expect(bad([{ type: 'IP_BOUND', value: { cidr: '10.1.0.0/16' } }], { ipRange: '10.0.0.0/8' })).toThrow(__t('uppie.adapter.aws.invalid_condition', { type: 'IP_BOUND' }));
-    expect(bad([{ type: 'CUSTOM', value: { operator: 'String Equals', key: 'k', values: 'v' } }])).toThrow(__t('uppie.adapter.aws.invalid_condition', { type: 'CUSTOM' }));
+    expect(bad([{ type: 'CUSTOM', value: { operator: __t('string_equals'), key: 'k', values: 'v' } }])).toThrow(__t('uppie.adapter.aws.invalid_condition', { type: 'CUSTOM' }));
   });
 
-  it('rejects a rule with no operations', async () => {
+  it(__t('rejects_a_rule_with_no_operati'), async () => {
     const { adapter } = setup();
     let message = '';
     try { await adapter.generate([rule({ action: { capability: 'x', operations: [] } })], ctx); } catch (e: any) { message = e.message; }
@@ -79,8 +79,8 @@ describe('AWS IAM compilation', () => {
   });
 });
 
-describe('AWS IAM validation', () => {
-  it('accepts a generated policy and warns on service-wide wildcards', async () => {
+describe(__t('aws_iam_validation'), () => {
+  it(__t('accepts_a_generated_policy_and'), async () => {
     const { adapter } = setup();
     expect((await adapter.validate(await adapter.generate([rule()], ctx), ctx)).valid).toBe(true);
     const wide = await adapter.generate([rule({ action: { capability: 'x', operations: ['s3:*'] } })], ctx);
@@ -89,7 +89,7 @@ describe('AWS IAM validation', () => {
     expect(res.warnings).toEqual([__t('uppie.adapter.aws.validate.service_wildcard', { action: 's3:*' })]);
   });
 
-  it('rejects admin wildcards, malformed content, oversize documents and tampered digests', async () => {
+  it(__t('rejects_admin_wildcards_malfor'), async () => {
     const { adapter } = setup();
     const admin = await adapter.generate([rule({ action: { capability: 'x', operations: ['*'] }, resource: { type: 't', scope: '*' } })], ctx);
     expect((await adapter.validate(admin, ctx)).errors).toContain(__t('uppie.adapter.aws.validate.admin_wildcard'));
@@ -114,8 +114,8 @@ describe('AWS IAM validation', () => {
   });
 });
 
-describe('AWS IAM attach and detach', () => {
-  it('creates the policy in the principal account and attaches it, idempotently', async () => {
+describe(__t('aws_iam_attach_and_detach'), () => {
+  it(__t('creates_the_policy_in_the_prin'), async () => {
     const { adapter, policies, attachments } = setup();
     const native = await adapter.generate([rule()], ctx);
     const first = await adapter.attach(native, ARN.role('app'), ctx);
@@ -126,7 +126,7 @@ describe('AWS IAM attach and detach', () => {
     expect([...attachments.get(first.providerRef) as Set<string>]).toEqual(['role/app']);
   });
 
-  it('refuses a same-named policy that holds different permissions', async () => {
+  it(__t('refuses_a_same_named_policy_th'), async () => {
     const { adapter } = setup();
     const native = await adapter.generate([rule()], ctx);
     await adapter.attach(native, ARN.role('app'), ctx);
@@ -137,7 +137,7 @@ describe('AWS IAM attach and detach', () => {
     expect(res.errors[0]).toBe(__t('uppie.adapter.aws.attach_error', { error: __t('uppie.adapter.aws.policy_exists_different', { arn: ARN.policy(native.providerId) }) }));
   });
 
-  it('attaches an existing policy ARN without creating anything, and rejects malformed targets', async () => {
+  it(__t('attaches_an_existing_policy_ar'), async () => {
     const { adapter, seedManaged, policies, calls } = setup();
     const arn = seedManaged('ReadOnlyAccess', { Version: '2012-10-17', Statement: [{ Effect: 'Allow', Action: ['s3:Get*'], Resource: ['*'] }] });
     const native = { ...(await adapter.generate([rule()], ctx)), providerId: arn };
@@ -149,7 +149,7 @@ describe('AWS IAM attach and detach', () => {
     expect((await adapter.attach(await adapter.generate([], ctx), ARN.role('app'), ctx)).success).toBe(false);
   });
 
-  it('detaches, treats an already-detached policy as success, and rejects bad ARNs', async () => {
+  it(__t('detaches_treats_an_already_det'), async () => {
     const { adapter, attachments } = setup();
     const native = await adapter.generate([rule()], ctx);
     const { providerRef } = await adapter.attach(native, ARN.user('bob'), ctx);
@@ -160,8 +160,8 @@ describe('AWS IAM attach and detach', () => {
   });
 });
 
-describe('AWS IAM update, clone, retire and restore', () => {
-  it('creates a new default version and rotates the oldest non-default one at the five-version limit', async () => {
+describe(__t('aws_iam_update_clone_retire_an'), () => {
+  it(__t('creates_a_new_default_version_'), async () => {
     const { adapter, policies } = setup();
     const { providerRef } = await adapter.attach(await adapter.generate([rule()], ctx), ARN.role('app'), ctx);
     const operations = (i: number) => rule({ action: { capability: 'x', operations: [`s3:Operation${i}`] } });
@@ -173,7 +173,7 @@ describe('AWS IAM update, clone, retire and restore', () => {
     expect(versions[4].document.Statement[0].Action).toEqual(['s3:Operation5']);
   });
 
-  it('refuses to update AWS-managed policies or to publish an invalid document', async () => {
+  it(__t('refuses_to_update_aws_managed_'), async () => {
     const { adapter, seedManaged } = setup();
     const arn = seedManaged('ReadOnlyAccess', { Version: '2012-10-17', Statement: [{ Effect: 'Allow', Action: ['s3:Get*'], Resource: ['*'] }] });
     expect((await adapter.update(arn, [rule()], ctx)).errors[0]).toBe(__t('uppie.adapter.aws.update_error', { error: __t('uppie.adapter.aws.protected_policy', { arn }) }));
@@ -181,7 +181,7 @@ describe('AWS IAM update, clone, retire and restore', () => {
     expect((await adapter.update(providerRef, [rule({ action: { capability: 'x', operations: ['*'] }, resource: { type: 't', scope: '*' } })], ctx)).errors).toEqual([__t('uppie.adapter.aws.validate.admin_wildcard')]);
   });
 
-  it('clones customer and AWS-managed policies and validates the new name', async () => {
+  it(__t('clones_customer_and_aws_manage'), async () => {
     const { adapter, seedManaged, policies } = setup();
     const document: AwsPolicyDocument = { Version: '2012-10-17', Statement: [{ Effect: 'Allow', Action: ['s3:Get*'], Resource: ['*'] }] };
     const managed = seedManaged('ReadOnlyAccess', document);
@@ -189,10 +189,10 @@ describe('AWS IAM update, clone, retire and restore', () => {
     expect(res).toEqual({ success: true, clonedId: ARN.policy('my-readonly'), errors: [] });
     expect((policies.get(ARN.policy('my-readonly')) as any).versions[0].document).toEqual(document);
     expect((await adapter.clone(managed, 'my-readonly', ctx)).success).toBe(false);
-    expect((await adapter.clone(managed, 'bad name!', ctx)).errors[0]).toBe(__t('uppie.adapter.aws.clone_error', { error: __t('uppie.adapter.aws.invalid_name', { name: 'bad name!' }) }));
+    expect((await adapter.clone(managed, __t('bad_name'), ctx)).errors[0]).toBe(__t('uppie.adapter.aws.clone_error', { error: __t('uppie.adapter.aws.invalid_name', { name: __t('bad_name') }) }));
   });
 
-  it('refuses to retire an attached or AWS-managed policy', async () => {
+  it(__t('refuses_to_retire_an_attached_'), async () => {
     const { adapter, seedManaged } = setup();
     const { providerRef } = await adapter.attach(await adapter.generate([rule()], ctx), ARN.role('app'), ctx);
     const plan: any = { policyId: providerRef, shadowPeriodDays: 7, approvedBy: 'change-board', retentionDays: 90 };
@@ -201,7 +201,7 @@ describe('AWS IAM update, clone, retire and restore', () => {
     expect((await adapter.retire({ ...plan, policyId: managed }, ctx)).success).toBe(false);
   });
 
-  it('retires an unattached policy with all versions and restores it to the same ARN', async () => {
+  it(__t('retires_an_unattached_policy_w'), async () => {
     const { adapter, policies } = setup();
     const { providerRef } = await adapter.attach(await adapter.generate([rule()], ctx), ARN.role('app'), ctx);
     await adapter.update(providerRef, [rule({ action: { capability: 'x', operations: ['s3:PutObject'] } })], ctx);
@@ -219,7 +219,7 @@ describe('AWS IAM update, clone, retire and restore', () => {
     expect((await adapter.restore(cert, ctx)).success).toBe(false);
   });
 
-  it('refuses restore without a reference, for a mismatched policy, an AWS-managed ARN, or an invalid snapshot', async () => {
+  it(__t('refuses_restore_without_a_refe'), async () => {
     const { adapter } = setup();
     const snapshot = JSON.stringify({ name: 'ugondu-abc', path: '/', document: { Version: '2012-10-17', Statement: [{ Effect: 'Allow', Action: ['s3:GetObject'], Resource: ['*'] }] } });
     expect((await adapter.restore({ policyId: ARN.policy('ugondu-abc') } as any, ctx)).errors).toEqual([__t('uppie.adapter.aws.restore_no_reference')]);
@@ -230,14 +230,14 @@ describe('AWS IAM update, clone, retire and restore', () => {
   });
 });
 
-describe('AWS IAM client lifecycle', () => {
+describe(__t('aws_iam_client_lifecycle'), () => {
   it('caches one client per tenant/environment/credential identity and retries after a factory failure', async () => {
     const iam = fakeIam();
     let calls = 0;
-    const adapter = new AwsIamPolicyAdapter(async () => { calls++; if (calls === 1) throw new Error('no credentials'); return iam.client; });
+    const adapter = new AwsIamPolicyAdapter(async () => { calls++; if (calls === 1) throw new Error(__t('no_credentials')); return iam.client; });
     let failure = '';
     try { await adapter.discoverPolicies(ctx); } catch (e: any) { failure = e.message; }
-    expect(failure).toBe('no credentials');
+    expect(failure).toBe(__t('no_credentials'));
     await adapter.discoverPolicies(ctx);
     await adapter.discoverRoles(ctx);
     expect(calls).toBe(2);

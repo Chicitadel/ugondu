@@ -48,7 +48,7 @@ export const nodeAclSystem: AclSystem = {
       let size = 0;
       child.stdout.on('data', (d: Buffer) => {
         size += d.length;
-        if (size > MAX_OUTPUT_BYTES) { child.kill(); reject(new Error('output limit exceeded')); return; }
+        if (size > MAX_OUTPUT_BYTES) { child.kill(); reject(new Error(__t('output_limit_exceeded'))); return; }
         stdout += d.toString('utf8');
       });
       child.stderr.on('data', (d: Buffer) => { stderr += d.toString('utf8'); });

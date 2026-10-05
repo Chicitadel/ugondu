@@ -17,19 +17,19 @@ export class PolicyGovernanceEngine {
     public evaluateIntent(provider: string, intent: UniversalPermission[], principal: string): PolicyDecisionRecord {
         const adapter = this.adapters.get(provider);
         if (!adapter) {
-            return this.createFailRecord(provider, principal, intent, 'Provider adapter not found. Failing closed.');
+            return this.createFailRecord(provider, principal, intent, __t('provider_adapter_not_found_fai'));
         }
 
         // POL-014: Security Boundary Preservation
         const canEnforce = adapter.verifyCapability(intent);
         if (!canEnforce) {
-            return this.createFailRecord(provider, principal, intent, 'SECURITY BOUNDARY LOSS: Provider cannot enforce exact intent natively.');
+            return this.createFailRecord(provider, principal, intent, __t('security_boundary_loss_provide'));
         }
 
         // POL-002: Wildcard Check
         for (const p of intent) {
             if (p.action === '*' || p.resource === '*') {
-                return this.createFailRecord(provider, principal, intent, 'POL-002 VIOLATION: Wildcard privilege requested without justification.');
+                return this.createFailRecord(provider, principal, intent, __t('pol_002_violation_wildcard_pri'));
             }
         }
 
@@ -44,7 +44,7 @@ export class PolicyGovernanceEngine {
             granted: intent.map(i => i.action),
             denied: [],
             decision: 'ALLOW',
-            reason: 'Minimal permission set satisfied and strictly bounded.'
+            reason: __t('minimal_permission_set_satisfi')
         };
     }
 

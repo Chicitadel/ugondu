@@ -41,8 +41,8 @@ const denyEverywhere = (id: string, scope: string) => ({
   permissions: [{ actions: [STORAGE_READ], notActions: [], dataActions: [], notDataActions: [] }],
 });
 
-describe('Azure RBAC discovery', () => {
-  it('reports roles, assignments, identities and groups from role assignments', async () => {
+describe(__t('azure_rbac_discovery'), () => {
+  it(__t('reports_roles_assignments_iden'), async () => {
     const { adapter } = setup();
     const policy = await deploy(adapter, USER, `Group:${GROUP_ID}`, `ServicePrincipal:${SP_ID}`);
     const found = await adapter.discoverPolicies(ctx);
@@ -56,7 +56,7 @@ describe('Azure RBAC discovery', () => {
     expect(roles.find((r) => r.displayName === 'Reader')!.policies).toEqual([READER_ID]);
   });
 
-  it('skips assignments whose role no longer exists and propagates other failures', async () => {
+  it(__t('skips_assignments_whose_role_n'), async () => {
     const { adapter, seed, client } = setup();
     seed.assign(RG, USER_ID, 'User', `${RG}/providers/Microsoft.Authorization/roleDefinitions/${GROUP_ID}`);
     expect(await adapter.discoverPolicies(ctx)).toEqual([]);
@@ -65,8 +65,8 @@ describe('Azure RBAC discovery', () => {
   });
 });
 
-describe('Azure RBAC effective authority and evaluation', () => {
-  it('combines inherited and local assignments, applying them only where they reach', async () => {
+describe(__t('azure_rbac_effective_authority'), () => {
+  it(__t('combines_inherited_and_local_a'), async () => {
     const { adapter, seed } = setup();
     seed.assign(SCOPE, USER_ID, 'User', READER_ID);
     const policy = await deploy(adapter, USER);
@@ -79,7 +79,7 @@ describe('Azure RBAC effective authority and evaluation', () => {
     expect(atRg2.permissions.map((p) => p.capability)).toEqual(['*/read']);
   });
 
-  it('marks operations removed by a deny assignment, and wildcards it only partly covers', async () => {
+  it(__t('marks_operations_removed_by_a_'), async () => {
     const { adapter, seed } = setup();
     seed.assign(SCOPE, USER_ID, 'User', READER_ID);
     await deploy(adapter, USER);
@@ -89,7 +89,7 @@ describe('Azure RBAC effective authority and evaluation', () => {
     expect(result.permissions.find((p) => p.capability === '*/read')).toMatchObject({ state: 'CONDITIONALLY_GRANTED', confidence: 'LOW', denyPolicies: ['deny-1'] });
   });
 
-  it('ignores deny assignments that exclude the principal', async () => {
+  it(__t('ignores_deny_assignments_that_'), async () => {
     const { adapter, seed } = setup();
     await deploy(adapter, USER);
     seed.deny({ ...denyEverywhere('deny-x', SCOPE), excludePrincipalIds: [USER_ID.toUpperCase()] });
@@ -97,7 +97,7 @@ describe('Azure RBAC effective authority and evaluation', () => {
     expect(result.permissions.map((p) => p.state)).toEqual(['GRANTED']);
   });
 
-  it('evaluates a rule as GRANTED when held, DENIED under a deny assignment, otherwise UNKNOWN', async () => {
+  it(__t('evaluates_a_rule_as_granted_wh'), async () => {
     const { adapter, seed } = setup();
     expect(await adapter.evaluate(rule(), ctx)).toBe('UNKNOWN');
     await deploy(adapter, USER);
@@ -109,7 +109,7 @@ describe('Azure RBAC effective authority and evaluation', () => {
     expect(await adapter.evaluate(rule(), ctx)).toBe('DENIED');
   });
 
-  it('honors role exclusions: notActions remove operations that a wildcard would grant', async () => {
+  it(__t('honors_role_exclusions_notacti'), async () => {
     const { adapter, client, seed } = setup();
     const role = await client.createOrUpdateRoleDefinition(RG, SP_ID, {
       roleName: 'storage-no-delete', description: '', assignableScopes: [RG],
@@ -120,7 +120,7 @@ describe('Azure RBAC effective authority and evaluation', () => {
     expect(await adapter.evaluate(rule(op('Microsoft.Storage/storageAccounts/delete')), ctx)).toBe('UNKNOWN');
   });
 
-  it('does not count access inherited through group membership, which Azure does not expose here', async () => {
+  it(__t('does_not_count_access_inherite'), async () => {
     const { adapter } = setup();
     await deploy(adapter, `Group:${GROUP_ID}`);
     expect(await adapter.evaluate(rule(), ctx)).toBe('UNKNOWN');
@@ -128,8 +128,8 @@ describe('Azure RBAC effective authority and evaluation', () => {
   });
 });
 
-describe('Azure RBAC simulation, conflicts and reconciliation', () => {
-  it('separates access that would be added from access already held, never above MEDIUM confidence', async () => {
+describe(__t('azure_rbac_simulation_conflict'), () => {
+  it(__t('separates_access_that_would_be'), async () => {
     const { adapter } = setup();
     await deploy(adapter, USER);
     const res = await adapter.simulate([rule({ ruleId: 'held' }), rule({ ruleId: 'new', ...op('Microsoft.Storage/storageAccounts/write') })], ctx);
@@ -140,7 +140,7 @@ describe('Azure RBAC simulation, conflicts and reconciliation', () => {
     expect(res.blastRadius).toMatchObject({ dependentActors: [USER], blastRadius: 'LIMITED' });
   });
 
-  it('treats a group subject as a broad change and unrealisable rules as unchanged with LOW confidence', async () => {
+  it(__t('treats_a_group_subject_as_a_br'), async () => {
     const { adapter } = setup();
     const group = await adapter.simulate([rule({ subject: { type: 'GROUP', id: `Group:${GROUP_ID}` } })], ctx);
     expect(group.blastRadius.blastRadius).toBe('BROAD');
@@ -150,7 +150,7 @@ describe('Azure RBAC simulation, conflicts and reconciliation', () => {
     expect(deny.confidence).toBe('LOW');
   });
 
-  it('reports a Deny rule that overlaps an Allow of the same subject as ambiguous', async () => {
+  it(__t('reports_a_deny_rule_that_overl'), async () => {
     const { adapter } = setup();
     const allow = rule({ ruleId: 'allow' });
     const deny = rule({ ruleId: 'deny', effect: 'DENY' });
@@ -161,7 +161,7 @@ describe('Azure RBAC simulation, conflicts and reconciliation', () => {
     expect((await adapter.findConflicts([allow, rule({ ruleId: 'd4', effect: 'DENY', ...op('Microsoft.Compute/virtualMachines/read') })], ctx)).conflicts).toEqual([]);
   });
 
-  it('diffs desired rules against deployed roles', async () => {
+  it(__t('diffs_desired_rules_against_de'), async () => {
     const { adapter } = setup();
     await deploy(adapter, USER);
     const observed = await adapter.discoverPolicies(ctx);
@@ -176,8 +176,8 @@ describe('Azure RBAC simulation, conflicts and reconciliation', () => {
   });
 });
 
-describe('Azure RBAC dependencies and usage', () => {
-  it('lists the principals that depend on a role and sizes the blast radius', async () => {
+describe(__t('azure_rbac_dependencies_and_us'), () => {
+  it(__t('lists_the_principals_that_depe'), async () => {
     const { adapter } = setup();
     const policy = await deploy(adapter, USER, `ServicePrincipal:${SP_ID}`);
     expect(await adapter.findDependencies(policy.providerId, ctx)).toEqual({
@@ -187,7 +187,7 @@ describe('Azure RBAC dependencies and usage', () => {
     expect((await adapter.findDependencies(policy.providerId, ctx)).blastRadius).toBe('BROAD');
   });
 
-  it('counts only the assignments of the role in question', async () => {
+  it(__t('counts_only_the_assignments_of'), async () => {
     const { adapter } = setup();
     await deploy(adapter, USER);
     const other = await adapter.generate([rule(op('Microsoft.Storage/storageAccounts/write'))], ctx);
@@ -198,7 +198,7 @@ describe('Azure RBAC dependencies and usage', () => {
     expect((await adapter.retire({ policyId: other.providerId, approvedBy: 'ops' } as any, ctx)).success).toBe(true);
   });
 
-  it('reports unused roles honestly: unassigned is UNUSED, assigned is UNKNOWN', async () => {
+  it(__t('reports_unused_roles_honestly_'), async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule({ resource: { type: 't', scope: SCOPE } })], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -210,7 +210,7 @@ describe('Azure RBAC dependencies and usage', () => {
     expect((await adapter.detectUnused(ctx, 90)).map((u) => u.policyId)).toEqual([policy.providerId]);
   });
 
-  it('cannot see an unassigned role that is defined for a single resource group (documented limit)', async () => {
+  it(__t('cannot_see_an_unassigned_role_'), async () => {
     const { adapter } = setup();
     const policy = await deploy(adapter, USER);
     await adapter.detach(policy.providerId, USER, ctx);
@@ -219,7 +219,7 @@ describe('Azure RBAC dependencies and usage', () => {
     expect((await adapter.observeUsage(policy.providerId, { startAt: '2026-01-01T00:00:00Z', endAt: '2026-10-01T00:00:00Z' }, ctx)).classification).toBe('UNUSED');
   });
 
-  it('declares limits and constraints, with usage and effective authority marked as limited', async () => {
+  it(__t('declares_limits_and_constraint'), async () => {
     const { adapter } = setup();
     expect(await adapter.getConstraints(ctx)).toBe(AZURE_RBAC_CONSTRAINTS);
     expect(AZURE_RBAC_CONSTRAINTS.maxPoliciesPerRole).toMatchObject({ value: 5000 });
@@ -229,14 +229,14 @@ describe('Azure RBAC dependencies and usage', () => {
   });
 });
 
-describe('Azure RBAC client lifecycle', () => {
-  it('creates the client lazily, caches it per credential identity, and retries after a factory failure', async () => {
+describe(__t('azure_rbac_client_lifecycle'), () => {
+  it(__t('creates_the_client_lazily_cach'), async () => {
     const az = fakeAzure();
     let calls = 0;
     let failNext = true;
-    const adapter = new AzureRbacAdapter(async () => { calls++; if (failNext) { failNext = false; throw new Error('no sdk'); } return az.client; });
+    const adapter = new AzureRbacAdapter(async () => { calls++; if (failNext) { failNext = false; throw new Error(__t('no_sdk')); } return az.client; });
     expect(calls).toBe(0);
-    expect(await failure(() => adapter.discoverRoles(ctx))).toBe('no sdk');
+    expect(await failure(() => adapter.discoverRoles(ctx))).toBe(__t('no_sdk'));
     await adapter.discoverRoles(ctx);
     await adapter.discoverRoles(ctx);
     expect(calls).toBe(2);

@@ -29,8 +29,8 @@ const at = (scope: string) => ({ resource: { type: 't', scope } });
 const window = { from: '2026-01-01T00:00:00Z', to: '2026-02-01T00:00:00Z' } as any;
 const certificate = (policyId: string, rollbackReference?: string): any => ({ policyId, ...(rollbackReference !== undefined ? { rollbackReference } : {}) });
 
-describe('GCP IAM update', () => {
-  it('replaces the permissions of a custom role in place and keeps its bindings', async () => {
+describe(__t('gcp_iam_update'), () => {
+  it(__t('replaces_the_permissions_of_a_'), async () => {
     const { adapter, roles, policyOf } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -43,7 +43,7 @@ describe('GCP IAM update', () => {
     expect(policyOf(PROJECT).bindings).toEqual([{ role: policy.providerId, members: [USER] }]);
   });
 
-  it('refuses predefined roles, conditions, other role locations and invalid permissions', async () => {
+  it(__t('refuses_predefined_roles_condi'), async () => {
     const { adapter, roles, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -52,14 +52,14 @@ describe('GCP IAM update', () => {
     expect(await update(VIEWER, rule())).toEqual([T('update_error', { error: T('protected_role', { name: VIEWER }) })]);
     expect(await update(policy.providerId, rule({ conditions: [{ type: 'TIME_BOUND', value: { notAfter: '2030-01-01T00:00:00Z' } }] }))).toEqual([T('update_error', { error: T('update_condition_change', { name: policy.providerId }) })]);
     expect(await update(policy.providerId, rule(at(ORG)))).toEqual([T('update_error', { error: T('update_scope_change', { name: policy.providerId }) })]);
-    expect(await update(policy.providerId, rule(op('not a permission')))).toEqual([T('validate.invalid_permission', { permission: 'not a permission' })]);
+    expect(await update(policy.providerId, rule(op(__t('not_a_permission'))))).toEqual([T('validate.invalid_permission', { permission: __t('not_a_permission') })]);
     expect(await update(policy.providerId, rule({ effect: 'DENY', ruleId: 'd' }))).toEqual([T('update_error', { error: T('deny_unsupported', { ruleId: 'd' }) })]);
     seed.role(`${OTHER}/roles/foreign`, ['storage.objects.get']);
     expect(await update(`${OTHER}/roles/foreign`, rule())).toEqual([T('update_error', { error: T('scope_outside_environment', { resource: OTHER }) })]);
     expect(JSON.stringify(roles.get(policy.providerId))).toBe(before);
   });
 
-  it('refuses to change an organization role, which other projects below the organization share', async () => {
+  it(__t('refuses_to_change_an_organizat'), async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule(at(FOLDER))], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -69,8 +69,8 @@ describe('GCP IAM update', () => {
   });
 });
 
-describe('GCP IAM clone', () => {
-  it('copies a predefined role into the environment project and a custom role next to its source', async () => {
+describe(__t('gcp_iam_clone'), () => {
+  it(__t('copies_a_predefined_role_into_'), async () => {
     const { adapter, roles } = setup();
     const predefined = await adapter.clone(VIEWER, 'viewer_copy', ctx);
     expect(predefined).toEqual({ success: true, clonedId: `${PROJECT}/roles/viewer_copy`, errors: [] });
@@ -81,7 +81,7 @@ describe('GCP IAM clone', () => {
     expect(roles.get(`${ORG}/roles/org_copy`)?.includedPermissions).toEqual(['storage.objects.get', 'storage.objects.list']);
   });
 
-  it('is idempotent for identical copies and refuses a different role of that id', async () => {
+  it(__t('is_idempotent_for_identical_co'), async () => {
     const { adapter, seed, calls, roles } = setup();
     await adapter.clone(VIEWER, 'viewer_copy', ctx);
     expect((await adapter.clone(VIEWER, 'viewer_copy', ctx)).success).toBe(true);
@@ -94,9 +94,9 @@ describe('GCP IAM clone', () => {
     expect(roles.get(`${PROJECT}/roles/old_copy`)?.deleted).toBe(false);
   });
 
-  it('validates the new id and keeps sources inside the environment', async () => {
+  it(__t('validates_the_new_id_and_keeps'), async () => {
     const { adapter, seed } = setup();
-    for (const bad of ['', 'ab', 'has space', 'x'.repeat(65), 'a/b']) {
+    for (const bad of ['', 'ab', __t('has_space'), 'x'.repeat(65), 'a/b']) {
       expect((await adapter.clone(VIEWER, bad, ctx)).errors).toEqual([T('clone_error', { error: T('invalid_name', { name: bad.trim() }) })]);
     }
     seed.role(`${OTHER}/roles/foreign`, ['storage.objects.get']);
@@ -105,8 +105,8 @@ describe('GCP IAM clone', () => {
   });
 });
 
-describe('GCP IAM usage', () => {
-  it('reports UNUSED for an unbound project role and UNKNOWN once any binding in the hierarchy references it', async () => {
+describe(__t('gcp_iam_usage'), () => {
+  it(__t('reports_unused_for_an_unbound_'), async () => {
     const { adapter, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -118,7 +118,7 @@ describe('GCP IAM usage', () => {
     expect((await adapter.observeUsage(policy.providerId, window, ctx)).classification).toBe('UNKNOWN');
   });
 
-  it('never proves an organization role unused, since other projects may bind it', async () => {
+  it(__t('never_proves_an_organization_r'), async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule(at(ORG))], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -142,8 +142,8 @@ describe('GCP IAM usage', () => {
   });
 });
 
-describe('GCP IAM retire and restore', () => {
-  it('refuses to retire a role that is still bound, a predefined role, or one outside the environment', async () => {
+describe(__t('gcp_iam_retire_and_restore'), () => {
+  it(__t('refuses_to_retire_a_role_that_'), async () => {
     const { adapter, seed, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -158,7 +158,7 @@ describe('GCP IAM retire and restore', () => {
     expect(roles.get(policy.providerId)?.deleted).toBe(false);
   });
 
-  it('soft-deletes an unbound role with a snapshot and evidence, then refuses to retire it again', async () => {
+  it(__t('soft_deletes_an_unbound_role_w'), async () => {
     const { adapter, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -172,7 +172,7 @@ describe('GCP IAM retire and restore', () => {
     expect(again.errors).toEqual([T('retire_error', { error: T('already_retired', { name: policy.providerId }) })]);
   });
 
-  it('restores by undeleting, recreating once purged, and is idempotent', async () => {
+  it(__t('restores_by_undeleting_recreat'), async () => {
     const { adapter, roles, seed, policyOf } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -191,7 +191,7 @@ describe('GCP IAM retire and restore', () => {
     expect(roles.get(policy.providerId)).toMatchObject({ deleted: false, includedPermissions: ['storage.objects.get', 'storage.objects.list'] });
   });
 
-  it('refuses a missing, mismatched or unsafe snapshot and never overwrites a different role', async () => {
+  it(__t('refuses_a_missing_mismatched_o'), async () => {
     const { adapter, seed, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -201,7 +201,7 @@ describe('GCP IAM retire and restore', () => {
     expect(await restore(policy.providerId)).toEqual([T('restore_no_reference')]);
     expect(await restore(`${PROJECT}/roles/other`, snapshot)).toEqual([T('restore_error', { error: T('restore_invalid_snapshot', { name: `${PROJECT}/roles/other` }) })]);
     expect(await restore(policy.providerId, { ...snapshot, includedPermissions: undefined })).toEqual([T('restore_error', { error: T('restore_invalid_snapshot', { name: policy.providerId }) })]);
-    expect((await restore(policy.providerId, 'not json'))[0].startsWith(T('restore_error', { error: '' }))).toBe(true);
+    expect((await restore(policy.providerId, __t('not_json')))[0].startsWith(T('restore_error', { error: '' }))).toBe(true);
     expect(await restore(VIEWER, { ...snapshot, name: VIEWER })).toEqual([T('restore_error', { error: T('protected_role', { name: VIEWER }) })]);
     expect(await restore(`${OTHER}/roles/x`, { ...snapshot, name: `${OTHER}/roles/x` })).toEqual([T('restore_error', { error: T('scope_outside_environment', { resource: OTHER }) })]);
     expect(await restore(`${ORG}/roles/x`, { ...snapshot, name: `${ORG}/roles/x` })).toEqual([T('restore_error', { error: T('shared_role', { name: `${ORG}/roles/x` }) })]);

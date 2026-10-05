@@ -97,66 +97,66 @@ export function runAuthorizationReadiness(
 ): AuthorizationReadinessReport {
   const checks: AuthReadinessCheck[] = [
     {
-      checkId: 1, description: 'Actor authenticated',
+      checkId: 1, description: __t('actor_authenticated'),
       result:  ctx.actorId.length > 0 ? 'PASS' : 'FAIL',
     },
     {
-      checkId: 2, description: 'Actor authorized (minimum required authority)',
+      checkId: 2, description: __t('actor_authorized_minimum_requi'),
       result:  ctx.missingCapabilities.length === 0
         ? 'PASS'
         : ctx.existingGrantedCapabilities.length > 0 ? 'PARTIAL' : 'FAIL',
     },
     {
-      checkId: 3, description: 'Target identified and accessible',
+      checkId: 3, description: __t('target_identified_and_accessib'),
       result:  ctx.targetId.length > 0 ? 'PASS' : 'FAIL',
     },
     {
-      checkId: 4, description: 'Required capabilities known',
+      checkId: 4, description: __t('required_capabilities_known'),
       result:  ctx.requiredCapabilities.length > 0 ? 'PASS' : 'FAIL',
     },
     {
-      checkId: 5, description: 'Existing authority sufficient',
+      checkId: 5, description: __t('existing_authority_sufficient'),
       result:  ctx.missingCapabilities.length === 0 ? 'PASS' : 'PARTIAL',
     },
     {
-      checkId: 6, description: 'Missing capabilities count',
+      checkId: 6, description: __t('missing_capabilities_count'),
       result:  ctx.missingCapabilities.length === 0 ? 'PASS' : 'WARN',
       detail:  ctx.missingCapabilities.length > 0
         ? `${ctx.missingCapabilities.length} missing: ${ctx.missingCapabilities.join(', ')}`
         : undefined,
     },
     {
-      checkId: 7, description: 'Provider assignment limit headroom',
+      checkId: 7, description: __t('provider_assignment_limit_head'),
       result:  ctx.providerLimitHeadroom === 'OK'
         ? 'PASS'
         : ctx.providerLimitHeadroom === 'WARN' ? 'WARN' : 'FAIL',
     },
     {
-      checkId: 8, description: 'Policy conflict detected',
+      checkId: 8, description: __t('policy_conflict_detected'),
       result:  ctx.policyConflictDetected ? 'WARN' : 'PASS',
       detail:  ctx.policyConflictDetected ? 'Policy conflict detected — manual review required' : undefined,
     },
     {
-      checkId: 9, description: 'Existing assignment reusable',
+      checkId: 9, description: __t('existing_assignment_reusable'),
       result:  ctx.existingAssignmentReusable ? 'PASS' : 'WARN',
     },
     {
-      checkId: 10, description: 'New assignment required',
+      checkId: 10, description: __t('new_assignment_required'),
       result:  ctx.missingCapabilities.length > 0 ? 'WARN' : 'PASS',
     },
     {
-      checkId: 11, description: 'Approval required for new grant',
+      checkId: 11, description: __t('approval_required_for_new_gran'),
       result:  (ctx.missingCapabilities.length > 0 && !ctx.newGrantApproved) ? 'WARN' : 'PASS',
     },
     {
-      checkId: 12, description: 'Recovery authority available',
+      checkId: 12, description: __t('recovery_authority_available'),
       result:  ctx.recoveryAuthorityVerified ? 'PASS' : 'FAIL',
       detail:  !ctx.recoveryAuthorityVerified
         ? 'HARD BLOCK: recovery authority unavailable — operation cannot be safely recovered'
         : undefined,
     },
     {
-      checkId: 13, description: 'Verification authority available',
+      checkId: 13, description: __t('verification_authority_availab'),
       result:  ctx.verificationAuthorityVerified ? 'PASS' : 'FAIL',
       detail:  !ctx.verificationAuthorityVerified
         ? 'HARD BLOCK: verification authority unavailable — operation outcome cannot be confirmed'

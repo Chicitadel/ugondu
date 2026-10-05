@@ -34,13 +34,13 @@ import (
 
 // Resolution sources per LP-03
 const (
-	SourceCliFlag           = "CLI --locale flag"
+	SourceCliFlag           = i18n.T("cli_locale_flag")
 	SourceEnvVar            = "UGONDU_LOCALE environment variable"
-	SourceUserPreference     = "Persistent user preference"
-	SourceTenantPolicy      = "Tenant organization policy"
-	SourceProjectPolicy     = "Project policy"
+	SourceUserPreference     = i18n.T("persistent_user_preference")
+	SourceTenantPolicy      = i18n.T("tenant_organization_policy")
+	SourceProjectPolicy     = i18n.T("project_policy")
 	SourceOSDetection       = "OS / environment detection"
-	SourceBootstrapFallback = "Core bootstrap fallback"
+	SourceBootstrapFallback = i18n.T("core_bootstrap_fallback")
 )
 
 // UserLocaleConfig represents persistent configuration stored in ~/.ugondu/config.json

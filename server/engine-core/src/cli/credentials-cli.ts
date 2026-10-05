@@ -47,7 +47,7 @@ async function run() {
             process.exit(1);
         }
     } else {
-        console.error('Unknown credentials command. Try: import');
+        console.error(__t('unknown_credentials_command_tr'));
         process.exit(1);
     }
 }

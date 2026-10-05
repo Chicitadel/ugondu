@@ -134,7 +134,7 @@ export class LeastPrivilegeCompiler {
         throw new Error(
           `LeastPrivilegeCompiler: Rule for capability '${rule.action.capability}' ` +
           `has prohibited resource scope '${scope}'. ` +
-          'Scope must be narrowed to specific resource targets.'
+          __t('scope_must_be_narrowed_to_spec')
         );
       }
     }

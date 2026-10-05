@@ -12,7 +12,7 @@ describe('AwsCredentialNormalizer', () => {
         jest.clearAllMocks();
     });
 
-    it('should normalize a standard 3-column AWS CSV without network calls', async () => {
+    it(__t('should_normalize_a_standard_3_'), async () => {
         const csv = 'User Name,Access key ID,Secret access key\nugondu-user,AKIA123,SECRET456';
         const result = await normalizer.normalize(csv);
         
@@ -21,7 +21,7 @@ describe('AwsCredentialNormalizer', () => {
         expect(result.payload.secretAccessKey).toBe('SECRET456');
     });
 
-    it('should securely recover missing User Name via STS authentication', async () => {
+    it(__t('should_securely_recover_missin'), async () => {
         const csv = 'Access key ID,Secret access key\nAKIA123,SECRET456';
         
         // Mock successful STS GetCallerIdentity for an IAM user
@@ -38,7 +38,7 @@ describe('AwsCredentialNormalizer', () => {
         expect(result.payload.secretAccessKey).toBe('SECRET456');
     });
 
-    it('should fail normalization if STS authentication fails for 2-column CSV', async () => {
+    it(__t('should_fail_normalization_if_s'), async () => {
         const csv = 'Access key ID,Secret access key\nAKIA123,BADSECRET';
         
         // Mock failed STS GetCallerIdentity
@@ -47,7 +47,7 @@ describe('AwsCredentialNormalizer', () => {
         await expect(normalizer.normalize(csv)).rejects.toThrow(/Normalization blocked: Missing User Name and credentials failed STS authentication/);
     });
 
-    it('should fail normalization if authenticated principal is not an IAM User', async () => {
+    it(__t('should_fail_normalization_if_a'), async () => {
         const csv = 'Access key ID,Secret access key\nAKIA123,SECRET456';
         
         // Mock assumed role STS GetCallerIdentity

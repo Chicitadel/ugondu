@@ -37,17 +37,17 @@ import type { AuthorizationConstraints } from '../../types/index';
  */
 export function cpanelConstraints(featureCount: number): AuthorizationConstraints {
   return {
-    maxPoliciesPerRole:  { status: 'SUPPORTED',   value: 1,            note: 'A package references exactly one feature list' },
-    maxRolesPerIdentity: { status: 'SUPPORTED',   value: 1,            note: 'An account belongs to exactly one package' },
-    maxAssignments:      { status: 'NOT_OBSERVABLE',                   note: 'WHM documents no cap on accounts per package' },
-    maxPolicySize:       { status: 'UNSUPPORTED',                      note: 'A feature list is bounded by the features of the server, not by size' },
-    maxStatements:       { status: 'SUPPORTED',   value: featureCount, note: 'Features offered by this server' },
-    maxGroups:           { status: 'UNSUPPORTED',                      note: 'WHM has no groups' },
-    maxGroupMemberships: { status: 'UNSUPPORTED',                      note: 'WHM has no groups' },
+    maxPoliciesPerRole:  { status: 'SUPPORTED',   value: 1,            note: __t('a_package_references_exactly_o') },
+    maxRolesPerIdentity: { status: 'SUPPORTED',   value: 1,            note: __t('an_account_belongs_to_exactly_') },
+    maxAssignments:      { status: 'NOT_OBSERVABLE',                   note: __t('whm_documents_no_cap_on_accoun') },
+    maxPolicySize:       { status: 'UNSUPPORTED',                      note: __t('a_feature_list_is_bounded_by_t') },
+    maxStatements:       { status: 'SUPPORTED',   value: featureCount, note: __t('features_offered_by_this_serve') },
+    maxGroups:           { status: 'UNSUPPORTED',                      note: __t('whm_has_no_groups') },
+    maxGroupMemberships: { status: 'UNSUPPORTED',                      note: __t('whm_has_no_groups') },
     maxInheritanceDepth: { status: 'SUPPORTED',   value: 2,            note: 'WHM (root or reseller) > cPanel account' },
-    maxBindings:         { status: 'SUPPORTED',   value: 1,            note: 'An account has one package, so one feature list' },
+    maxBindings:         { status: 'SUPPORTED',   value: 1,            note: __t('an_account_has_one_package_so_') },
     maxServiceAccounts:  { status: 'UNSUPPORTED',                      note: 'WHM has no service accounts; API tokens belong to WHM users' },
-    maxRules:            { status: 'UNSUPPORTED',                      note: 'WHM does not use rule-based access control' },
-    maxACLEntries:       { status: 'UNSUPPORTED',                      note: 'WHM does not use ACLs' },
+    maxRules:            { status: 'UNSUPPORTED',                      note: __t('whm_does_not_use_rule_based_ac') },
+    maxACLEntries:       { status: 'UNSUPPORTED',                      note: __t('whm_does_not_use_acls') },
   };
 }

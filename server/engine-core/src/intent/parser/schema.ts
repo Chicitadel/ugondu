@@ -34,10 +34,10 @@
 export const IntentSchema = {
     name: "StructuredIntentSchema",
     version: "1.0.0",
-    description: "Schema for validating parsed intents against core engine constraints",
+    description: __t('schema_for_validating_parsed_i'),
     rules: [
-        "Must contain at least one requirement",
+        __t('must_contain_at_least_one_requ'),
         "Provenance must be explicitly tagged as USER_EXPLICIT or LLM_INFERRED",
-        "Conflict detection routines must clear the capability map"
+        __t('conflict_detection_routines_mu')
     ]
 };

@@ -29,15 +29,15 @@ function setup(state = new InMemoryProvisioningState(), journal?: any) {
   return { ...fabric, state, engine: new ProvisioningEngine(fabric.registry, journal ?? fabric.journal, state) };
 }
 
-describe('Provisioning engine: error containment (FAB-04)', () => {
-  it('rolls back what the run created, newest first, so a network is never deleted under its instance', async () => {
+describe(__t('provisioning_engine_error_cont'), () => {
+  it(__t('rolls_back_what_the_run_create'), async () => {
     const { engine, clouds, calls, live, state, entries } = setup();
     clouds.aws!.failCreate('database', 'db');
     const error = await failure(() => engine.executePlan(stack()));
 
     expect(error.name).toBe('ProvisioningError');
-    expect(error.message).toBe(T('plan_failed', { error: 'injected failure: database:db' }));
-    expect(error.cause.message).toBe('injected failure: database:db');
+    expect(error.message).toBe(T('plan_failed', { error: __t('injected_failure_database_db') }));
+    expect(error.cause.message).toBe(__t('injected_failure_database_db'));
     expect(error.rolledBack).toEqual(['web', 'net']);
     expect(error.rollbackFailures).toEqual([]);
     expect(live.size).toBe(0);
@@ -46,10 +46,10 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
     expect(await state.get('web')).toBeUndefined();
     const last = entries.filter((e) => e.action === 'deprovision').map((e) => `${e.nodeId}:${e.status}`);
     expect(last).toEqual(['web:pending', 'web:success', 'net:pending', 'net:success']);
-    expect(entries.find((e) => e.nodeId === 'db' && e.status === 'failed')?.detail).toBe('injected failure: database:db');
+    expect(entries.find((e) => e.nodeId === 'db' && e.status === 'failed')?.detail).toBe(__t('injected_failure_database_db'));
   });
 
-  it('keeps a resource of an earlier run that failed plans never created', async () => {
+  it(__t('keeps_a_resource_of_an_earlier'), async () => {
     const { engine, clouds, live } = setup();
     await engine.executePlan({ nodes: [network('net')], edges: [] });
     clouds.aws!.failCreate('database', 'db');
@@ -57,7 +57,7 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
     expect([...live.keys()]).toEqual(['aws-network-1']);
   });
 
-  it('treats a failed state reported by the provider as a failure, removes what it left behind and records nothing for that node', async () => {
+  it(__t('treats_a_failed_state_reported'), async () => {
     const { engine, state, live, calls } = setup();
     const error = await failure(() => engine.executePlan({ nodes: [network('net'), compute('web', { networkRefId: 'ref:net', osImage: 'broken' })], edges: [edge('net', 'web')] }));
     expect(error.cause.message).toBe(T('provider_reported_failure', { node: 'web' }));
@@ -67,7 +67,7 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
     expect(calls).toEqual(['aws:create:network:net', 'aws:create:compute:web', 'aws:delete:compute:aws-compute-2', 'aws:delete:network:aws-network-1']);
   });
 
-  it('reports every resource it could not remove instead of hiding it, and keeps those recorded', async () => {
+  it(__t('reports_every_resource_it_coul'), async () => {
     const { engine, clouds, state, entries } = setup();
     clouds.aws!.failDelete('aws-compute-2');
     clouds.aws!.failCreate('database', 'db');
@@ -75,16 +75,16 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
 
     expect(error.rolledBack).toEqual([]);
     expect(error.rollbackFailures).toEqual([
-      { nodeId: 'web', resourceId: 'aws-compute-2', error: 'injected delete failure: aws-compute-2' },
-      { nodeId: 'net', resourceId: 'aws-network-1', error: 'network aws-network-1 still hosts an instance' },
+      { nodeId: 'web', resourceId: 'aws-compute-2', error: __t('injected_delete_failure_aws_co') },
+      { nodeId: 'net', resourceId: 'aws-network-1', error: __t('network_aws_network_1_still_ho') },
     ]);
-    expect(error.message).toBe(T('plan_failed_rollback_incomplete', { error: 'injected failure: database:db', count: 2 }));
+    expect(error.message).toBe(T('plan_failed_rollback_incomplete', { error: __t('injected_failure_database_db'), count: 2 }));
     expect((await state.get('web'))?.resourceId).toBe('aws-compute-2');
     expect((await state.get('net'))?.resourceId).toBe('aws-network-1');
     expect(entries.filter((e) => e.action === 'deprovision' && e.status === 'failed').map((e) => e.nodeId)).toEqual(['web', 'net']);
   });
 
-  it('continues rolling back the remaining resources when one removal fails', async () => {
+  it(__t('continues_rolling_back_the_rem'), async () => {
     const { engine, clouds, live, state } = setup();
     clouds.aws!.failDelete('aws-storage-2');
     clouds.aws!.failCreate('compute', 'web');
@@ -96,17 +96,17 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
     expect((await state.get('assets'))?.resourceId).toBeDefined();
   });
 
-  it('removes a resource that was created but could not be recorded, so nothing is orphaned', async () => {
+  it(__t('removes_a_resource_that_was_cr'), async () => {
     const memory = new InMemoryProvisioningState();
-    const failing: any = { get: memory.get.bind(memory), remove: memory.remove.bind(memory), put: async (r: ProvisionedRecord) => { if (r.nodeId === 'net') throw new Error('state store down'); await memory.put(r); } };
+    const failing: any = { get: memory.get.bind(memory), remove: memory.remove.bind(memory), put: async (r: ProvisionedRecord) => { if (r.nodeId === 'net') throw new Error(__t('state_store_down')); await memory.put(r); } };
     const { engine, calls, live } = setup(failing);
     const error = await failure(() => engine.executePlan({ nodes: [network('net')], edges: [] }));
-    expect(error.cause.message).toBe('state store down');
+    expect(error.cause.message).toBe(__t('state_store_down'));
     expect(calls).toEqual(['aws:create:network:net', 'aws:delete:network:aws-network-1']);
     expect(live.size).toBe(0);
   });
 
-  it('rolls back databases and buckets as well, newest first', async () => {
+  it(__t('rolls_back_databases_and_bucke'), async () => {
     const { engine, clouds, calls, live } = setup();
     clouds.aws!.failCreate('compute', 'web');
     const ir = { nodes: [network('net'), database('db'), bucket('assets'), compute('web', { networkRefId: 'ref:net' })], edges: [edge('net', 'web')] };
@@ -116,15 +116,15 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
     expect(live.size).toBe(0);
   });
 
-  it('reports the error of the first failing node when several nodes of one layer fail', async () => {
+  it(__t('reports_the_error_of_the_first'), async () => {
     const { engine, clouds } = setup();
     clouds.aws!.failCreate('storage', 'a');
     clouds.aws!.failCreate('storage', 'b');
     const error = await failure(() => engine.executePlan({ nodes: [bucket('a'), bucket('b')], edges: [] }));
-    expect(error.cause.message).toBe('injected failure: storage:a');
+    expect(error.cause.message).toBe(__t('injected_failure_storage_a'));
   });
 
-  it('refuses a provider answer that carries no resource id', async () => {
+  it(__t('refuses_a_provider_answer_that'), async () => {
     const { engine, clouds, state } = setup();
     clouds.aws!.storage.provisionStorage = async () => ({ id: '', endpoint: '' });
     const error = await failure(() => engine.executePlan({ nodes: [bucket('assets')], edges: [] }));
@@ -132,11 +132,11 @@ describe('Provisioning engine: error containment (FAB-04)', () => {
     expect(await state.get('assets')).toBeUndefined();
   });
 
-  it('fails closed when the journal cannot record the intention, before any provider call', async () => {
-    const journal = { log: async () => { throw new Error('journal unavailable'); } };
+  it(__t('fails_closed_when_the_journal_'), async () => {
+    const journal = { log: async () => { throw new Error(__t('journal_unavailable')); } };
     const { engine, calls } = setup(undefined, journal);
     const error = await failure(() => engine.executePlan({ nodes: [network('net')], edges: [] }));
-    expect(error.cause.message).toBe('journal unavailable');
+    expect(error.cause.message).toBe(__t('journal_unavailable'));
     expect(error.rolledBack).toEqual([]);
     expect(calls).toEqual([]);
   });

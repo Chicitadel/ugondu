@@ -115,7 +115,7 @@ export function evaluateAuthorizationReadiness(
       checkId:     4,
       description: __t('ui.preflight.capabilities_known'),
       result:      ctx.requiredCapabilities.length > 0 ? 'PASS' : 'FAIL',
-      detail:      ctx.requiredCapabilities.length === 0 ? 'No capabilities declared for this operation' : undefined,
+      detail:      ctx.requiredCapabilities.length === 0 ? __t('no_capabilities_declared_for_t') : undefined,
     },
     {
       checkId:     5,
@@ -141,7 +141,7 @@ export function evaluateAuthorizationReadiness(
       checkId:     8,
       description: __t('ui.preflight.policy_conflict_detected'),
       result:      ctx.policyConflictDetected ? 'WARN' : 'PASS',
-      detail:      ctx.policyConflictDetected ? 'Policy conflict requires manual review' : undefined,
+      detail:      ctx.policyConflictDetected ? __t('policy_conflict_requires_manua') : undefined,
     },
     {
       checkId:     9,

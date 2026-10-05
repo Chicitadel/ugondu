@@ -32,8 +32,8 @@ const MATRIX: Record<string, { kinds: Record<string, [string, string[]]>; engine
   cpanel: { kinds: { COMPUTE: ['CONDITIONAL', ['HOSTED_APP']], NETWORK: ['UNSUPPORTED', []], DATABASE: ['CONDITIONAL', ['MYSQL']], STORAGE: ['CONDITIONAL', ['ACCOUNT_FILESYSTEM']] }, engines: ['mysql'], classes: ['FILE'], publicClasses: [] },
 };
 
-describe('Provider capability contract: the frozen matrix (FAB-07)', () => {
-  it('declares exactly the four providers of the blueprint', () => {
+describe(__t('provider_capability_contract_t'), () => {
+  it(__t('declares_exactly_the_four_prov'), () => {
     expect(Object.keys(CANONICAL_CONTRACTS).sort()).toEqual(['aws', 'cpanel', 'kubernetes', 'linux']);
   });
 
@@ -51,7 +51,7 @@ describe('Provider capability contract: the frozen matrix (FAB-07)', () => {
     });
   }
 
-  it('explains every unsupported or conditional kind and offers alternatives, with real localized text', () => {
+  it(__t('explains_every_unsupported_or_'), () => {
     for (const contract of Object.values(CANONICAL_CONTRACTS)) {
       for (const kind of NODE_KINDS) {
         const declared = contract.kinds[kind];
@@ -64,7 +64,7 @@ describe('Provider capability contract: the frozen matrix (FAB-07)', () => {
     }
   });
 
-  it('only AWS serves public storage, and only object storage', () => {
+  it(__t('only_aws_serves_public_storage'), () => {
     const publicCapable = Object.values(CANONICAL_CONTRACTS).filter((c) => c.publicStorageClasses.length > 0);
     expect(publicCapable.map((c) => c.provider)).toEqual(['aws']);
     expect(publicCapable[0]!.publicStorageClasses).toEqual(['OBJECT']);
@@ -76,13 +76,13 @@ describe('Provider capability contract: the frozen matrix (FAB-07)', () => {
     }
   });
 
-  it('only a provider that can dry-run sizing declares so', () => {
+  it(__t('only_a_provider_that_can_dry_r'), () => {
     expect(Object.values(CANONICAL_CONTRACTS).map((c) => [c.provider, c.supportsDryRun])).toEqual([['aws', true], ['kubernetes', true], ['linux', true], ['cpanel', false]]);
   });
 });
 
-describe('Provider capability contract: registration is explicit (FAB-07)', () => {
-  it('accepts a consistent declaration and exposes it', () => {
+describe(__t('provider_capability_contract_r'), () => {
+  it(__t('accepts_a_consistent_declarati'), () => {
     const registry = new FabricRegistry();
     registry.registerProvider(nativeContract('aws'), all);
     expect(registry.isRegistered('aws')).toBe(true);
@@ -90,7 +90,7 @@ describe('Provider capability contract: registration is explicit (FAB-07)', () =
     expect(registry.contractOf('aws').provider).toBe('aws');
   });
 
-  it('registers each real provider with adapters only for the kinds it does not declare unsupported', () => {
+  it(__t('registers_each_real_provider_w'), () => {
     const { registry } = canonicalFabric();
     expect(() => registry.resolveDatabase('aws')).not.toThrow();
     expect(() => registry.resolveDatabase('cpanel')).not.toThrow();
@@ -101,19 +101,19 @@ describe('Provider capability contract: registration is explicit (FAB-07)', () =
     }
   });
 
-  it('tells apart an unregistered provider from an unsupported kind', () => {
+  it(__t('tells_apart_an_unregistered_pr'), () => {
     const { registry } = canonicalFabric();
     expect(() => registry.contractOf('gcp')).toThrow(C('provider_not_registered', { provider: 'gcp' }));
     expect(() => registry.resolveCompute('gcp')).toThrow(C('provider_not_registered', { provider: 'gcp' }));
   });
 
-  it('refuses to register the same provider twice', () => {
+  it(__t('refuses_to_register_the_same_p'), () => {
     const registry = new FabricRegistry();
     registry.registerProvider(nativeContract('aws'), all);
     expect(() => registry.registerProvider(nativeContract('aws'), all)).toThrow(C('provider_already_registered', { provider: 'aws' }));
   });
 
-  it('refuses a declaration that omits a kind, so silence is never read as unsupported', () => {
+  it(__t('refuses_a_declaration_that_omi'), () => {
     const contract: any = nativeContract('aws');
     delete contract.kinds.NETWORK;
     expect(() => assertContractConsistent(contract, all)).toThrow(C('kind_undeclared', { provider: 'aws', kind: 'NETWORK' }));
@@ -122,7 +122,7 @@ describe('Provider capability contract: registration is explicit (FAB-07)', () =
     expect((error as Error).name).toBe('ProviderRegistrationError');
   });
 
-  it('refuses an adapter for a kind declared unsupported and a missing adapter for a supported kind', () => {
+  it(__t('refuses_an_adapter_for_a_kind_'), () => {
     const unsupported: any = nativeContract('x');
     unsupported.kinds.DATABASE = { status: 'UNSUPPORTED', modes: [] };
     expect(() => assertContractConsistent(unsupported, all)).toThrow(C('adapter_for_unsupported', { provider: 'x', kind: 'DATABASE' }));
@@ -133,14 +133,14 @@ describe('Provider capability contract: registration is explicit (FAB-07)', () =
     expect(() => assertContractConsistent(conditional, { COMPUTE: stub, NETWORK: stub, DATABASE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'STORAGE' }));
   });
 
-  it('refuses a conditional kind that names no mode, and a declaration without a provider name', () => {
+  it(__t('refuses_a_conditional_kind_tha'), () => {
     const conditional: any = nativeContract('x');
     conditional.kinds.NETWORK = { status: 'CONDITIONAL', modes: [] };
     expect(() => assertContractConsistent(conditional, all)).toThrow(C('conditional_without_modes', { provider: 'x', kind: 'NETWORK' }));
     expect(() => assertContractConsistent({ ...nativeContract('x'), provider: '' }, all)).toThrow(C('provider_name_missing'));
   });
 
-  it('checks the kinds in a fixed order, so the first reported problem is stable', () => {
+  it(__t('checks_the_kinds_in_a_fixed_or'), () => {
     const contract: any = nativeContract('x');
     contract.kinds.COMPUTE = { status: 'UNSUPPORTED', modes: [] };
     contract.kinds.STORAGE = { status: 'UNSUPPORTED', modes: [] };

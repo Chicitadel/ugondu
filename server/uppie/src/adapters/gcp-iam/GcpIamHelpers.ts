@@ -74,7 +74,7 @@ export async function chainOf(client: GcpIamClient, resource: string): Promise<s
   return chain;
 }
 
-/** A rule's resource, which must be the environment's project or one of its ancestors (the credential's own hierarchy). */
+/** A rule__t('s_resource_which_must_be_the_e')s project or one of its ancestors (the credential's own hierarchy). */
 export function resolveResource(raw: string | undefined, project: string, chain: string[]): string {
   if (!raw || raw === '*') return project;
   const resource = parseResource(raw);
@@ -90,7 +90,7 @@ export function roleParentOf(resource: string, chain: string[]): string {
   return org;
 }
 
-/** Resources where this adapter may have granted the role: from the environment's project up to the role's parent. */
+/** Resources where this adapter may have granted the role: from the environment__t('s_project_up_to_the_role')s parent. */
 export function grantScopes(roleName: string, project: string, chain: string[]): string[] {
   if (!isCustomRole(roleName)) return [project];
   const end = chain.indexOf(roleParentOfName(roleName));

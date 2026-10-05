@@ -372,7 +372,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         strategy,
         steps,
         edition,
-        message: "Dry-run execution plan compiled successfully. No mutations have been applied."
+        message: __t('dry_run_execution_plan_compile')
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

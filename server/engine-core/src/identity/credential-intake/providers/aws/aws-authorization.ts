@@ -41,7 +41,7 @@ export class AwsAuthorizationPreflight implements AuthorizationPreflight {
             return results;
         } catch (error: any) {
             // Graceful degradation instead of hard failure
-            Logger.warn('AUTHORIZATION SIMULATION UNAVAILABLE: Caller lacks iam:SimulatePrincipalPolicy');
+            Logger.warn(__t('authorization_simulation_unava'));
             return { _simulation_unavailable: true };
         }
     }

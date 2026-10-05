@@ -129,6 +129,6 @@ app.get('/v1/repository/providers', (req: Request, res: Response): any => {
 
 const PORT = process.env.PORT || 4005;
 app.listen(PORT, () => {
-    Logger.info(__t('listening_port', 'Repository Adapter', PORT));
+    Logger.info(__t('listening_port', __t('repository_adapter'), PORT));
     Logger.info(__t('repo_supported'));
 });

@@ -58,7 +58,7 @@ const specOf = (r: GcpRoleSpec): GcpRoleSpec => ({ title: r.title, description: 
  * GcpIamAdapter — UPPIE provider adapter for Google Cloud IAM.
  *
  * - A policy is one custom role (`ugondu_<digest12>`) plus the binding that grants it on the rules' resource; the
- *   resource must be the environment's project or one of its ancestors. Folder-level grants use the organization's role.
+ *   resource must be the environment__t('s_project_or_one_of_its_ancest')s role.
  * - Operations are IAM permissions. Deny effects (a separate policy type in GCP), rules that differ in resource or
  *   condition, and conditions other than time bounds are refused (fail closed).
  * - Allow policies are edited get → mutate → set with the etag; a concurrent edit (ABORTED) is retried, never overwritten.

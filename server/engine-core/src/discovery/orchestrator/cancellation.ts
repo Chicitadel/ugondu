@@ -107,7 +107,7 @@ export class TimeoutManager {
 
             token.register(() => {
                 clearTimeout(timer);
-                reject(new CancellationError('Operation was cancelled'));
+                reject(new CancellationError(__t('operation_was_cancelled')));
             });
 
             operation(token)

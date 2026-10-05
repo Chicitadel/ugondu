@@ -46,7 +46,7 @@ export class RcaAnalyzer {
     const evidenceKinds = [...new Set(incident.evidence.map(e => e.kind))];
     const rootCause = evidenceKinds.length > 0
       ? `Primary evidence type: ${evidenceKinds[0]}`
-      : 'Root cause undetermined from available evidence';
+      : __t('root_cause_undetermined_from_a');
     const confidence: ConfidenceLevel = incident.evidence.length >= 3 ? 'HIGH'
       : incident.evidence.length >= 1 ? 'MEDIUM' : 'LOW';
     return {
@@ -54,7 +54,7 @@ export class RcaAnalyzer {
       rootCause,
       contributingFactors: evidenceKinds.slice(1),
       confidence,
-      recommendedActions: ['Investigate logs', 'Review recent deployments'],
+      recommendedActions: [__t('investigate_logs'), __t('review_recent_deployments')],
       analysedAt: new Date(),
     };
   }

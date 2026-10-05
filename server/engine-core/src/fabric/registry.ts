@@ -58,7 +58,7 @@ interface Registration {
 /**
  * @class FabricRegistry
  * @description Providers register a capability contract together with their adapters. The contract is checked for
- * completeness at registration, so "unsupported", "not installed" and "incomplete" are three different, explicit
+ * completeness at registration, so "unsupported", __t('not_installed') and "incomplete" are three different, explicit
  * conditions rather than one missing map entry.
  * @classification ENTERPRISE
  */

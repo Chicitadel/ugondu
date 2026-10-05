@@ -47,7 +47,7 @@ export class AdapterRegistry {
     if (this.adapters.has(adapter.providerType)) {
       throw new Error(
         `Adapter for provider '${adapter.providerType}' is already registered. ` +
-        'Unregister the existing adapter before registering a replacement.'
+        __t('unregister_the_existing_adapte')
       );
     }
     this.adapters.set(adapter.providerType, adapter);
@@ -64,7 +64,7 @@ export class AdapterRegistry {
     if (!this.adapters.has(providerType)) {
       throw new Error(
         `Cannot activate adapter for '${providerType}': not registered. ` +
-        'Register the adapter before activating it.'
+        __t('register_the_adapter_before_ac')
       );
     }
     this.activeAdapters.add(providerType);
@@ -92,7 +92,7 @@ export class AdapterRegistry {
     if (!adapter) {
       throw new Error(
         `No active adapter available for provider '${providerType}'. ` +
-        'Ensure the adapter is registered and activated for this tenant edition.'
+        __t('ensure_the_adapter_is_register')
       );
     }
     return adapter;

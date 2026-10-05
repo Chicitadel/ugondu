@@ -33,7 +33,7 @@
 export class SyntheticProbe {
     public async execute(target: string, timeoutMs: number = 5000): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('Probe timeout')), timeoutMs);
+            const timeout = setTimeout(() => reject(new Error(__t('probe_timeout'))), timeoutMs);
             setTimeout(() => {
                 clearTimeout(timeout);
                 resolve(true);

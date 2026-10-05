@@ -235,7 +235,7 @@ func handleLocaleVerify(target string) {
 	}
 
 	if pack == nil {
-		fmt.Println(i18n.T("locale_verify_fail", norm, "pack not installed"))
+		fmt.Println(i18n.T("locale_verify_fail", norm, i18n.T("pack_not_installed")))
 		os.Exit(1)
 	}
 

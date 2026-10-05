@@ -22,7 +22,7 @@ export function fakeCluster() {
   const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
   const client: K8sRbacClient = {
     async listClusterRoles() { return [...roles.values()].map(clone); },
-    async readClusterRole(name) { const r = roles.get(name); if (!r) throw new K8sApiError('not found', 404); return clone(r); },
+    async readClusterRole(name) { const r = roles.get(name); if (!r) throw new K8sApiError(__t('not_found'), 404); return clone(r); },
     async createClusterRole(role) {
       const name = role.metadata?.name as string;
       if (roles.has(name)) throw new K8sApiError('exists', 409);
@@ -30,18 +30,18 @@ export function fakeCluster() {
     },
     async replaceClusterRole(name, role) {
       const current = roles.get(name);
-      if (!current) throw new K8sApiError('not found', 404);
+      if (!current) throw new K8sApiError(__t('not_found'), 404);
       if (role.metadata?.resourceVersion !== current.metadata?.resourceVersion) throw new K8sApiError('conflict', 409);
       roles.set(name, { ...clone(role), metadata: { ...role.metadata, resourceVersion: String(revision++) } });
     },
-    async deleteClusterRole(name) { if (!roles.delete(name)) throw new K8sApiError('not found', 404); },
+    async deleteClusterRole(name) { if (!roles.delete(name)) throw new K8sApiError(__t('not_found'), 404); },
     async listClusterRoleBindings() { return [...bindings.values()].map(clone); },
     async createClusterRoleBinding(b) {
       const name = b.metadata?.name as string;
       if (bindings.has(name)) throw new K8sApiError('exists', 409);
       bindings.set(name, clone(b));
     },
-    async deleteClusterRoleBinding(name) { if (!bindings.delete(name)) throw new K8sApiError('not found', 404); },
+    async deleteClusterRoleBinding(name) { if (!bindings.delete(name)) throw new K8sApiError(__t('not_found'), 404); },
     async reviewAccess(spec) {
       for (const b of bindings.values()) {
         const bound = (b.subjects ?? []).some((s) =>

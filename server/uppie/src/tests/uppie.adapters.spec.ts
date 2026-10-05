@@ -49,7 +49,7 @@ declare var it: any;
 declare var expect: any;
 declare var jest: any;
 
-describe('UPPIE Qualification Gate', () => {
+describe(__t('uppie_qualification_gate'), () => {
 
   const dummyContext: AdapterContext = {
     tenantId: 't1', environmentId: 'e1', provider: 'AWS_IAM', credentials: {}
@@ -85,11 +85,11 @@ describe('UPPIE Qualification Gate', () => {
     } as unknown as IPolicyProviderAdapter;
   }
 
-describe('UPPIE Qualification Tests - Adapters', () => {
+describe(__t('uppie_qualification_tests_adap'), () => {
   // ─── UPPIE-Q-015 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-015: AWS IAM AIR compilation correctness', () => {
-    it('should compile an AIR rule to valid AWS IAM JSON policy document', async () => {
-      const adapter = new AwsIamPolicyAdapter(async () => { throw new Error('generate must not contact AWS'); });
+  describe(__t('uppie_q_015_aws_iam_air_compil'), () => {
+    it(__t('should_compile_an_air_rule_to_'), async () => {
+      const adapter = new AwsIamPolicyAdapter(async () => { throw new Error(__t('generate_must_not_contact_aws')); });
       const rule = { ruleId: 'q15', effect: 'ALLOW', action: { operations: ['s3:GetObject'] }, resource: { scope: 'arn:aws:s3:::bkt' } } as any;
       const res = await adapter.generate([rule], dummyContext);
       const doc = res.nativeDocument as any;
@@ -100,9 +100,9 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-016 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-016: Kubernetes RBAC AIR compilation correctness', () => {
-    it('should compile an AIR rule to valid Kubernetes RBAC ClusterRole structure', async () => {
-      const adapter = new KubernetesRbacAdapter(async () => { throw new Error('generate must not contact a cluster'); });
+  describe(__t('uppie_q_016_kubernetes_rbac_ai'), () => {
+    it(__t('should_compile_an_air_rule_to_'), async () => {
+      const adapter = new KubernetesRbacAdapter(async () => { throw new Error(__t('generate_must_not_contact_a_cl')); });
       const rule = { subject: { type: 'USER', id: 'user1' }, effect: 'ALLOW', action: { operations: ['get', 'list'] }, resource: { type: 'k8s::resource', scope: 'pods' } } as any;
       const res = await adapter.generate([rule], dummyContext);
       const doc = res.nativeDocument as any;
@@ -115,8 +115,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-017 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-017: Linux ACL AIR compilation correctness', () => {
-    it('should compile an AIR rule to a POSIX ACL entry for the subject on the target path', async () => {
+  describe(__t('uppie_q_017_linux_acl_air_comp'), () => {
+    it(__t('should_compile_an_air_rule_to_'), async () => {
       const adapter = new LinuxAclAdapter();
       const rule = { subject: { type: 'USER', id: 'user1' }, effect: 'ALLOW', action: { operations: ['r', 'x'] }, resource: { type: 'linux::file', scope: '/srv/app' } } as any;
       const res = await adapter.generate([rule], dummyContext);
@@ -125,7 +125,7 @@ describe('UPPIE Qualification Tests - Adapters', () => {
       expect(doc.acls[0].entries).toEqual(['u:user1:r-x']);
     });
 
-    it('should compile an AIR sudo rule to a sudoers line restricted to the root run-as user', async () => {
+    it(__t('should_compile_an_air_sudo_rul'), async () => {
       const adapter = new LinuxAclAdapter();
       const rule = { subject: { type: 'USER', id: 'user1' }, effect: 'ALLOW', action: { operations: ['/bin/ls'] }, resource: { type: 'linux::sudo::Command', scope: 'host' } } as any;
       const res = await adapter.generate([rule], dummyContext);
@@ -135,7 +135,7 @@ describe('UPPIE Qualification Tests - Adapters', () => {
 
   // ─── UPPIE-Q-018 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-018: Authorization readiness preflight — all 13 checks', () => {
-    it('should evaluate all 13 checks and return correct decision', () => {
+    it(__t('should_evaluate_all_13_checks_'), () => {
       const ctx = {
         actorId: 'a1', targetId: 't1', requiredCapabilities: ['cap1'], existingGrantedCapabilities: ['cap1'],
         missingCapabilities: [], newGrantApproved: true, recoveryAuthorityVerified: true, verificationAuthorityVerified: true,
@@ -168,8 +168,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-019 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-019: Retirement certificate generation and completeness', () => {
-    it('should generate a certificate with all required fields including shadowPeriodDays and signature', async () => {
+  describe(__t('uppie_q_019_retirement_certifi'), () => {
+    it(__t('should_generate_a_certificate_'), async () => {
       const adapter = createMockAdapter({
         retire: jest.fn().mockResolvedValue({
           success: true,
@@ -184,7 +184,7 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-020 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-020: Usage classification accuracy', () => {
+  describe(__t('uppie_q_020_usage_classificati'), () => {
     it('should classify a policy not used in 90+ days as RARELY_USED (not OBSOLETE)', async () => {
       const adapter = createMockAdapter({
         observeUsage: jest.fn().mockResolvedValue({ classification: 'RARELY_USED' })
@@ -202,8 +202,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-021 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-021: Blast radius calculation for policy removal', () => {
-    it('should identify all actors that would lose access if a role is removed', async () => {
+  describe(__t('uppie_q_021_blast_radius_calcu'), () => {
+    it(__t('should_identify_all_actors_tha'), async () => {
       const adapter = createMockAdapter({
         findDependencies: jest.fn().mockResolvedValue({ dependentActors: ['a1', 'a2'] })
       });
@@ -213,8 +213,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-022 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-022: Rollback reference integrity in retirement certificate', () => {
-    it('should include a valid rollbackReference pointing to pre-retirement snapshot', async () => {
+  describe(__t('uppie_q_022_rollback_reference'), () => {
+    it(__t('should_include_a_valid_rollbac'), async () => {
       const adapter = createMockAdapter({
         retire: jest.fn().mockResolvedValue({ certificate: { rollbackReference: 'ref1' } }),
         restore: jest.fn().mockResolvedValue({ success: true, restoredId: 'pol1' })
@@ -228,7 +228,7 @@ describe('UPPIE Qualification Tests - Adapters', () => {
 
   // ─── UPPIE-Q-023 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-023: Ugondu own-permission minimal — scoped identity + auto-revoke', () => {
-    it('should issue a TemporaryAuthorization scoped to the operation and auto-revoke after completion', () => {
+    it(__t('should_issue_a_temporaryauthor'), () => {
       const manager = new TemporaryAuthorizationManager();
       const auth = manager.issue({ expiresAt: new Date(Date.now() + 10000).toISOString(), operationId: 'op1', executionId: 'ex1', targetId: 't1', capabilityScope: [], resourceScope: [], purpose: 'test', actor: 'a1', approval: {} as any });
       expect(requiresRevocation(auth)).toBe(true);
@@ -249,7 +249,7 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   });
 
   // ─── UPPIE-Q-025 ──────────────────────────────────────────────────────────
-  describe('UPPIE-Q-025: Three upgrade prompt type accuracy', () => {
+  describe(__t('uppie_q_025_three_upgrade_prom'), () => {
     it('should return NOT_ENTITLED for a capability not in the edition', () => {
       const resolveCap = (cap: string, edition: string) => edition === 'COMMUNITY' && cap === 'ENTERPRISE_CAP' ? 'NOT_ENTITLED' : 'OK';
       expect(resolveCap('ENTERPRISE_CAP', 'COMMUNITY')).toBe('NOT_ENTITLED');
@@ -260,7 +260,7 @@ describe('UPPIE Qualification Tests - Adapters', () => {
       expect(resolveCap(false)).toBe('NOT_CONFIGURED');
     });
 
-    it('should return UNAUTHORIZED for a configured but permission-less capability', () => {
+    it(__t('should_return_unauthorized_for'), () => {
       const resolveCap = (perms: boolean) => !perms ? 'UNAUTHORIZED' : 'OK';
       expect(resolveCap(false)).toBe('UNAUTHORIZED');
     });

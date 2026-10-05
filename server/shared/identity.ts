@@ -292,7 +292,7 @@ export function verifyServiceIdentityToken(
 export function requireServiceIdentity(expectedAudience: string, requiredScope?: string) {
     return (req: any, res: any, next: any) => {
         const auth = req.headers.authorization;
-        if (!auth || !auth.startsWith('Bearer ')) {
+        if (!auth || !auth.startsWith(__t('bearer'))) {
             return res.status(401).json({ error: __t('ui.responses.missing_service_token'), message: __t('auth_service_token_missing') });
         }
         

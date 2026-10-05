@@ -45,7 +45,7 @@ export class RecoveryManager {
             rtoSeconds: 3600,
             rpoSeconds: 300,
             automated: true,
-            procedures: ['Restore from Backup', 'Failover']
+            procedures: [__t('restore_from_backup'), 'Failover']
         };
     }
 }

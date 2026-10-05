@@ -158,7 +158,7 @@ export async function createSdkAzureRbacClient(context: AdapterContext): Promise
 
   return {
     listRoleDefinitions: (scope, customOnly) => wrap(() => collect(
-      sdk.roleDefinitions.list(scope, customOnly ? { filter: "type eq 'CustomRole'" } : undefined), toRole)),
+      sdk.roleDefinitions.list(scope, customOnly ? { filter: __t('type_eq_customrole') } : undefined), toRole)),
     getRoleDefinition: (id) => wrap(async () => toRole(await sdk.roleDefinitions.getById(id))),
     createOrUpdateRoleDefinition: (scope, guid, payload) => wrap(async () => toRole(await sdk.roleDefinitions.createOrUpdate(scope, guid, { ...payload, roleType: 'CustomRole' }))),
     deleteRoleDefinition: (scope, guid) => wrap(async () => { await sdk.roleDefinitions.delete(scope, guid); }),

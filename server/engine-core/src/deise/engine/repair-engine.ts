@@ -45,7 +45,7 @@ export class DeploymentRepairEngine {
         if (twin.topology.webrootSymlinkTarget !== 'current/public_html') {
             diagnoses.push({
                 category: DriftCategory.ENVIRONMENT_DRIFT,
-                description: 'Webroot pointer does not match expected platform topology. Possible hosting migration detected.',
+                description: __t('webroot_pointer_does_not_match'),
                 affectedPaths: [twin.topology.webrootPath],
                 isDestructiveRecovery: false,
                 remediationAction: 'RECONFIGURE_WEBROOT'
@@ -94,11 +94,11 @@ export class DeploymentRepairEngine {
         const safeToProceed = true; 
 
         if (destructiveDeleteBlocked) {
-            Logger.warn('Destructive delete (--delete) is blocked due to detected topology anomalies.');
+            Logger.warn(__t('destructive_delete_delete_is_b'));
         }
         
         if (requiresInfrastructureRepair) {
-            Logger.info('[SIM-DEISE] Executing Repair Plan...');
+            Logger.info(__t('sim_deise_executing_repair_pla'));
         }
 
         return {

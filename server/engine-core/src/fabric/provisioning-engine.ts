@@ -79,11 +79,7 @@ export class ProvisioningEngine {
 
   public async executePlan(ir: ArchitectureIR, auth?: ExecutionAuthorization): Promise<ProvisioningReport> {
     if (!auth) {
-      if (process.env.JEST_WORKER_ID) {
-        auth = {} as any;
-      } else {
-        throw new Error(__t('messages.error.missing_execution_authorization'));
-      }
+      throw new Error(__t('messages.error.missing_execution_authorization'));
     }
     UpmExecutionGate.verifyAuthorization(auth!, ir);
     const checked = preflight(ir, this.registry, this.policy);

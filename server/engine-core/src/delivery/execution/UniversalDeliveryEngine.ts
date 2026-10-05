@@ -26,13 +26,13 @@ export class UniversalDeliveryEngine {
         // For physical validation, we verify the source adapter can resolve.
         const artifactRef = await source.resolveArtifact({ type: 'GIT', uri: 'HEAD' } as any);
         if (!artifactRef) {
-            throw new Error('Failed to resolve artifact from Source');
+            throw new Error(__t('failed_to_resolve_artifact_fro'));
         }
         Logger.info(`Artifact resolved at location/hash: ${artifactRef}`);
 
         // 4. Connect Destination
         if (typeof destinationAdapter.getInstanceStatus !== 'function') {
-            throw new Error('Destination Adapter is invalid or mocked.');
+            throw new Error(__t('destination_adapter_is_invalid'));
         }
 
         // 5. Transfer & Deploy (Simulating physical adapter capability)

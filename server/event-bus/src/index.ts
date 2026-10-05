@@ -56,7 +56,7 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
 
 const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {
-    Logger.info(__t('listening', 'Ugondu Event Bus', PORT));
+    Logger.info(__t('listening', __t('ugondu_event_bus'), PORT));
 });
 
 export * from './events/entitlement-events';

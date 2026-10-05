@@ -59,7 +59,7 @@ export class CompatibilityAnalyzer {
         blockerId: uuidv4(),
         severity: 'CRITICAL',
         description: `Version mismatch: source (${source.version}) vs target (${target.version})`,
-        component: 'Core Architecture',
+        component: __t('core_architecture'),
       });
     }
 

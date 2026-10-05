@@ -28,16 +28,16 @@ import type { AuthorizationConstraints } from '../../types/index';
  * Source: Linux kernel ACL implementation (POSIX.1e draft + ext4/xfs limits).
  */
 export const LINUX_ACL_CONSTRAINTS: AuthorizationConstraints = {
-  maxPoliciesPerRole:     { status: 'UNSUPPORTED',                          note: 'Linux ACL has no role concept' },
-  maxRolesPerIdentity:    { status: 'UNSUPPORTED',                          note: 'Linux ACL has no role concept' },
-  maxAssignments:         { status: 'NOT_OBSERVABLE',                       note: 'ACL entries per filesystem object vary by fs' },
+  maxPoliciesPerRole:     { status: 'UNSUPPORTED',                          note: __t('linux_acl_has_no_role_concept') },
+  maxRolesPerIdentity:    { status: 'UNSUPPORTED',                          note: __t('linux_acl_has_no_role_concept') },
+  maxAssignments:         { status: 'NOT_OBSERVABLE',                       note: __t('acl_entries_per_filesystem_obj') },
   maxPolicySize:          { status: 'UNSUPPORTED',                          note: 'N/A for Linux ACL' },
   maxStatements:          { status: 'UNSUPPORTED',                          note: 'N/A for Linux ACL' },
-  maxGroups:              { status: 'SUPPORTED_WITH_LIMITS', value: 65536,  note: 'Linux GID namespace limit (16-bit)' },
+  maxGroups:              { status: 'SUPPORTED_WITH_LIMITS', value: 65536,  note: __t('linux_gid_namespace_limit_16_b') },
   maxGroupMemberships:    { status: 'NOT_OBSERVABLE',                       note: 'Managed by /etc/group; no kernel hard limit' },
   maxInheritanceDepth:    { status: 'UNSUPPORTED',                          note: 'Linux ACL has no inheritance; default ACLs only' },
   maxBindings:            { status: 'UNSUPPORTED',                          note: 'N/A for Linux ACL' },
   maxServiceAccounts:     { status: 'UNSUPPORTED',                          note: 'N/A for Linux ACL' },
-  maxRules:               { status: 'SUPPORTED_WITH_LIMITS', value: 32,     note: 'Max ACL entries per object (ext4 default)' },
-  maxACLEntries:          { status: 'SUPPORTED_WITH_LIMITS', value: 32,     note: 'POSIX ACL entry limit per filesystem object' },
+  maxRules:               { status: 'SUPPORTED_WITH_LIMITS', value: 32,     note: __t('max_acl_entries_per_object_ext') },
+  maxACLEntries:          { status: 'SUPPORTED_WITH_LIMITS', value: 32,     note: __t('posix_acl_entry_limit_per_file') },
 };

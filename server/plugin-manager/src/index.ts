@@ -279,5 +279,5 @@ app.post('/v1/plugins/:pluginName/execute', requireServiceIdentity('plugin-manag
 
 const PORT = process.env.PORT || 4003;
 app.listen(PORT, () => {
-    Logger.info(__t('listening_port', 'Plugin Manager Sandbox', PORT));
+    Logger.info(__t('listening_port', __t('plugin_manager_sandbox'), PORT));
 });

@@ -111,7 +111,7 @@ export async function effectiveAuthority(client: AzureRbacClient, actor: string,
 }
 
 /**
- * GRANTED when the rule's operations are all permitted by the subject's own assignments; DENIED only through a matching
+ * GRANTED when the rule__t('s_operations_are_all_permitted')s own assignments; DENIED only through a matching
  * deny assignment. Absence of a grant is UNKNOWN, since group-inherited access cannot be observed without the directory.
  */
 export async function evaluateRule(client: AzureRbacClient, rule: AuthorizationRule, context: AdapterContext): Promise<'GRANTED' | 'DENIED' | 'UNKNOWN'> {

@@ -29,8 +29,8 @@ function setup(providers: string[] = ['aws']) {
   return { ...fabric, state, engine: new ProvisioningEngine(fabric.registry, fabric.journal, state) };
 }
 
-describe('Provisioning engine: execution order (FAB-03)', () => {
-  it('creates requisites first, resolves references to real resource ids and reports every node', async () => {
+describe(__t('provisioning_engine_execution_'), () => {
+  it(__t('creates_requisites_first_resol'), async () => {
     const { engine, calls, entries, live } = setup();
     const ir = { nodes: [compute('web', { networkRefId: 'ref:net' }), network('net')], edges: [edge('net', 'web')] };
     const report = await engine.executePlan(ir);
@@ -44,7 +44,7 @@ describe('Provisioning engine: execution order (FAB-03)', () => {
     expect(entries[1]?.resourceId).toBe('aws-network-1');
   });
 
-  it('never creates a dependent before everything it depends on, whatever order the nodes are listed in', async () => {
+  it(__t('never_creates_a_dependent_befo'), async () => {
     const { engine, calls } = setup();
     const ir = {
       nodes: [bucket('assets'), database('db'), compute('web'), network('net')],
@@ -58,26 +58,26 @@ describe('Provisioning engine: execution order (FAB-03)', () => {
     expect(at('db')).toBeLessThan(at('assets'));
   });
 
-  it('starts independent nodes together instead of one after the other', async () => {
+  it(__t('starts_independent_nodes_toget'), async () => {
     const { engine, entries } = setup();
     await engine.executePlan({ nodes: [bucket('a'), bucket('b')], edges: [] });
     expect(entries.map((e) => `${e.nodeId}:${e.status}`)).toEqual(['a:pending', 'b:pending', 'a:success', 'b:success']);
   });
 
-  it('hands the provider only the validated fields of a node, never stray configuration or a credential reference', async () => {
+  it(__t('hands_the_provider_only_the_va'), async () => {
     const { engine, live } = setup();
     await engine.executePlan({ nodes: [compute('web', { junk: 'x', adminPassword: 'secret:db-admin' })], edges: [] });
     expect(live.get('aws-compute-1')?.config).toEqual({ instanceName: 'web', cpuCores: 2, memoryMb: 2048, osImage: 'ubuntu-24.04' });
     expect(live.get('aws-compute-1')?.options).toEqual({});
   });
 
-  it('provisions an empty plan without touching anything', async () => {
+  it(__t('provisions_an_empty_plan_witho'), async () => {
     const { engine, calls } = setup();
     expect(await engine.executePlan({ nodes: [], edges: [] })).toEqual({ provisioned: [], created: [], unchanged: [] });
     expect(calls).toEqual([]);
   });
 
-  it('hands provider options to all kinds of resources', async () => {
+  it(__t('hands_provider_options_to_all_'), async () => {
     const { engine, live } = setup();
     const myOptions = { custom: 'yes' };
     const ir = {
@@ -97,11 +97,11 @@ describe('Provisioning engine: execution order (FAB-03)', () => {
   });
 });
 
-describe('Provisioning engine: multi-target (FAB-02)', () => {
+describe(__t('provisioning_engine_multi_targ'), () => {
   const nodes = [network('net'), compute('web', { networkRefId: 'ref:net' }), database('db'), bucket('assets')];
   const edges = [edge('net', 'web')];
 
-  it('provisions the same plan on different providers, each call reaching only its own adapter', async () => {
+  it(__t('provisions_the_same_plan_on_di'), async () => {
     const shapes: string[][] = [];
     for (const provider of ['aws', 'linux']) {
       const { engine, calls } = setup(['aws', 'linux']);
@@ -113,17 +113,17 @@ describe('Provisioning engine: multi-target (FAB-02)', () => {
     expect(shapes[1]).toEqual(shapes[0]);
   });
 
-  it('mixes providers inside one plan', async () => {
+  it(__t('mixes_providers_inside_one_pla'), async () => {
     const { engine, calls } = setup(['aws', 'linux']);
     await engine.executePlan({ nodes: [{ ...network('net'), provider: 'aws' }, { ...bucket('assets'), provider: 'linux' }], edges: [] });
     expect([...calls].sort()).toEqual(['aws:create:network:net', 'linux:create:storage:assets']);
   });
 });
 
-describe('Provisioning engine: idempotency (FAB-05)', () => {
+describe(__t('provisioning_engine_idempotenc'), () => {
   const ir = () => ({ nodes: [compute('web', { networkRefId: 'ref:net' }), network('net'), database('db')], edges: [edge('net', 'web')] });
 
-  it('makes no provider call at all on the second pass and returns the same resources', async () => {
+  it(__t('makes_no_provider_call_at_all_'), async () => {
     const { engine, calls, entries } = setup();
     const first = await engine.executePlan(ir());
     const callsAfterFirst = calls.length;
@@ -138,7 +138,7 @@ describe('Provisioning engine: idempotency (FAB-05)', () => {
     expect(entries.slice(mark).every((e) => e.resourceId !== undefined)).toBe(true);
   });
 
-  it('treats a reordered configuration as identical', async () => {
+  it(__t('treats_a_reordered_configurati'), async () => {
     const { engine, calls } = setup();
     await engine.executePlan({ nodes: [database('db')], edges: [] });
     const reordered = { id: 'db', type: 'DATABASE', provider: 'aws', config: { capacity: 20, engine: 'postgres', name: 'db' } };
@@ -147,7 +147,7 @@ describe('Provisioning engine: idempotency (FAB-05)', () => {
     expect(calls).toHaveLength(1);
   });
 
-  it('only creates what is missing when the plan grows', async () => {
+  it(__t('only_creates_what_is_missing_w'), async () => {
     const { engine, calls } = setup();
     await engine.executePlan({ nodes: [network('net')], edges: [] });
     const report = await engine.executePlan({ nodes: [network('net'), bucket('assets')], edges: [] });
@@ -156,7 +156,7 @@ describe('Provisioning engine: idempotency (FAB-05)', () => {
     expect(calls).toEqual(['aws:create:network:net', 'aws:create:storage:assets']);
   });
 
-  it('refuses to silently change an existing node and leaves it, and everything else it created, untouched', async () => {
+  it(__t('refuses_to_silently_change_an_'), async () => {
     const { engine, calls, live, state } = setup();
     await engine.executePlan({ nodes: [network('net')], edges: [] });
     const error = await failure(() => engine.executePlan({ nodes: [network('net', '10.1.0.0/16'), bucket('assets')], edges: [] }));

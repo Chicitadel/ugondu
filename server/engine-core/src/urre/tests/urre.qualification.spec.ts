@@ -21,7 +21,7 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('URRE Qualification Gates: URRE-01..30', () => {
+describe(__t('urre_qualification_gates_urre_'), () => {
   it('URRE-01..05: Network & Communication Fault Resilience', async () => {
     const retry = new RetryManager({
       maxAttempts: 3,

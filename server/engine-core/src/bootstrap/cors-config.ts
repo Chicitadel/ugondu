@@ -33,7 +33,7 @@ export const corsMiddleware = cors({
   origin(origin, callback) {
     if (!origin) return callback(null, true);
     if (!ALLOWED_ORIGINS.includes(origin)) {
-      return callback(new Error('CORS policy violation'), false);
+      return callback(new Error(__t('cors_policy_violation')), false);
     }
     return callback(null, true);
   },

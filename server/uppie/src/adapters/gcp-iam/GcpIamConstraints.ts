@@ -41,16 +41,16 @@ import type { AuthorizationConstraints } from '../../types/index';
  * - DENY policies are a separate policy type and are not produced by this adapter
  */
 export const GCP_IAM_CONSTRAINTS: AuthorizationConstraints = {
-  maxPoliciesPerRole:  { status: 'SUPPORTED',   value: 300,   note: 'Max custom roles per project and per organization' },
+  maxPoliciesPerRole:  { status: 'SUPPORTED',   value: 300,   note: __t('max_custom_roles_per_project_a') },
   maxRolesPerIdentity: { status: 'NOT_OBSERVABLE',             note: 'GCP does not cap the number of roles a principal holds; the cap is per policy' },
-  maxAssignments:      { status: 'SUPPORTED',   value: 1500,  note: 'Max principals per allow policy (at most 250 groups or domains)' },
-  maxPolicySize:       { status: 'SUPPORTED',   value: 65536, note: 'Max IAM policy size in bytes (64 KB)' },
-  maxStatements:       { status: 'SUPPORTED',   value: 3000,  note: 'Max permissions per custom role' },
-  maxGroups:           { status: 'SUPPORTED',   value: 250,   note: 'Max groups and domains per allow policy' },
-  maxGroupMemberships: { status: 'NOT_OBSERVABLE',             note: 'Group membership is held by Cloud Identity and is not visible to IAM' },
+  maxAssignments:      { status: 'SUPPORTED',   value: 1500,  note: __t('max_principals_per_allow_polic') },
+  maxPolicySize:       { status: 'SUPPORTED',   value: 65536, note: __t('max_iam_policy_size_in_bytes_6') },
+  maxStatements:       { status: 'SUPPORTED',   value: 3000,  note: __t('max_permissions_per_custom_rol') },
+  maxGroups:           { status: 'SUPPORTED',   value: 250,   note: __t('max_groups_and_domains_per_all') },
+  maxGroupMemberships: { status: 'NOT_OBSERVABLE',             note: __t('group_membership_is_held_by_cl') },
   maxInheritanceDepth: { status: 'SUPPORTED',   value: 10,    note: 'Organization > folders (up to 10 levels) > project' },
-  maxBindings:         { status: 'SUPPORTED',   value: 1500,  note: 'Bindings are bounded by the principal limit of the allow policy' },
-  maxServiceAccounts:  { status: 'SUPPORTED',   value: 100,   note: 'Max service accounts per project (default quota)' },
-  maxRules:            { status: 'UNSUPPORTED',                note: 'GCP IAM does not use rule-based access control' },
-  maxACLEntries:       { status: 'UNSUPPORTED',                note: 'GCP IAM does not use ACLs (Cloud Storage ACLs are separate)' },
+  maxBindings:         { status: 'SUPPORTED',   value: 1500,  note: __t('bindings_are_bounded_by_the_pr') },
+  maxServiceAccounts:  { status: 'SUPPORTED',   value: 100,   note: __t('max_service_accounts_per_proje') },
+  maxRules:            { status: 'UNSUPPORTED',                note: __t('gcp_iam_does_not_use_rule_base') },
+  maxACLEntries:       { status: 'UNSUPPORTED',                note: __t('gcp_iam_does_not_use_acls_clou') },
 };

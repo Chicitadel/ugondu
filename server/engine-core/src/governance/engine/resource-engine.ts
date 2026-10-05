@@ -38,6 +38,6 @@ export class ResourceGovernanceEngine {
         }
 
         // Unmanaged but observed? We cannot safely touch it.
-        throw new Error('POL-010 VIOLATION: Reconciliation Safety. Resource exists but lacks management provenance.');
+        throw new Error(__t('pol_010_violation_reconciliati'));
     }
 }

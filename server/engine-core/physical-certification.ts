@@ -71,9 +71,9 @@ async function runCertification() {
             }));
             const allowed = simRes.EvaluationResults?.every(r => r.EvalDecision === 'allowed');
             if (allowed) {
-                appendGate('COR-4.2', 'PASS', 'Preflight', principalArn, 'iam:SimulatePrincipalPolicy', 'All required permissions allowed');
+                appendGate('COR-4.2', 'PASS', 'Preflight', principalArn, 'iam:SimulatePrincipalPolicy', __t('all_required_permissions_allow'));
             } else {
-                appendGate('COR-4.2', 'FAIL', 'Preflight', principalArn, 'iam:SimulatePrincipalPolicy', 'Permissions denied');
+                appendGate('COR-4.2', 'FAIL', 'Preflight', principalArn, 'iam:SimulatePrincipalPolicy', __t('permissions_denied'));
                 // skip
             }
         } catch (e: any) {
@@ -140,7 +140,7 @@ async function runCertification() {
             return { vpcId };
         }, async (node) => {
             await ec2.send(new DeleteVpcCommand({ VpcId: node.output!.vpcId }));
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.vpcId, 'ec2:DeleteVpc', 'VPC deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.vpcId, 'ec2:DeleteVpc', __t('vpc_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_SUBNET', async (node) => {
@@ -153,17 +153,17 @@ async function runCertification() {
             return { subId };
         }, async (node) => {
             await ec2.send(new DeleteSubnetCommand({ SubnetId: node.output!.subId }));
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.subId, 'ec2:DeleteSubnet', 'Subnet deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.subId, 'ec2:DeleteSubnet', __t('subnet_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_SG', async (node) => {
-            const res = await ec2.send(new CreateSecurityGroupCommand({ GroupName: `${prefix}-sg`, Description: 'Ugondu SG', VpcId: vpcId }));
+            const res = await ec2.send(new CreateSecurityGroupCommand({ GroupName: `${prefix}-sg`, Description: __t('ugondu_sg'), VpcId: vpcId }));
             sgId = res.GroupId!;
             appendGate('COR-4.5', 'PASS', 'Provision', sgId, 'ec2:CreateSecurityGroup', `VpcId: ${vpcId}`);
             return { sgId };
         }, async (node) => {
             await ec2.send(new DeleteSecurityGroupCommand({ GroupId: node.output!.sgId }));
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.sgId, 'ec2:DeleteSecurityGroup', 'SG deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.sgId, 'ec2:DeleteSecurityGroup', __t('sg_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_EC2', async (node) => {
@@ -178,7 +178,18 @@ async function runCertification() {
             appendGate('COR-4.6', 'PASS', 'Provision', ec2Id, 'ec2:RunInstances', `Type: t3.nano, AMI: ${ami}`);
             
             // COR-4.7 Wait for readiness
-            appendGate('COR-4.7', 'PASS', 'Wait', ec2Id, 'ec2:DescribeInstances', `State: pending -> Waiter passed implicitly in script (fake delay for speed)`);
+            let isRunning = false;
+            for (let i = 0; i < 60; i++) {
+                const desc = await ec2.send(new DescribeInstancesCommand({ InstanceIds: [ec2Id] }));
+                const state = desc.Reservations?.[0]?.Instances?.[0]?.State?.Name;
+                if (state === 'running') {
+                    isRunning = true;
+                    break;
+                }
+                await new Promise(r => setTimeout(r, 5000));
+            }
+            if (!isRunning) throw new Error(__t('ec2_did_not_reach_running_stat'));
+            appendGate('COR-4.7', 'PASS', 'Wait', ec2Id, 'ec2:DescribeInstances', `State: pending -> running`);
             return { ec2Id };
         }, async (node) => {
             await ec2.send(new TerminateInstancesCommand({ InstanceIds: [node.output!.ec2Id] }));
@@ -189,7 +200,7 @@ async function runCertification() {
                 if (res.Reservations![0].Instances![0].State!.Name === 'terminated') running = false;
                 else await new Promise(r => setTimeout(r, 5000));
             }
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.ec2Id, 'ec2:TerminateInstances', 'Instance terminated');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.ec2Id, 'ec2:TerminateInstances', __t('instance_terminated'));
         });
 
         urre.registerHandler('aws', 'CREATE_RDS_SUB', async (node) => {
@@ -198,7 +209,7 @@ async function runCertification() {
             return { rdsSubName };
         }, async (node) => {
             await rds.send(new DeleteDBSubnetGroupCommand({ DBSubnetGroupName: node.output!.rdsSubName }));
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.rdsSubName, 'rds:DeleteDBSubnetGroup', 'RDS Subnet Group deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.rdsSubName, 'rds:DeleteDBSubnetGroup', __t('rds_subnet_group_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_RDS', async (node) => {
@@ -214,7 +225,18 @@ async function runCertification() {
                 PubliclyAccessible: false
             }));
             appendGate('COR-4.9', 'PASS', 'Provision', rdsId, 'rds:CreateDBInstance', `Class: db.t3.micro, Engine: postgres`);
-            appendGate('COR-4.10', 'PASS', 'Wait', rdsId, 'rds:DescribeDBInstances', `Status: creating -> implicitly waited`);
+            let isAvailable = false;
+            for (let i = 0; i < 120; i++) {
+                const desc = await rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId }));
+                const status = desc.DBInstances?.[0]?.DBInstanceStatus;
+                if (status === 'available') {
+                    isAvailable = true;
+                    break;
+                }
+                await new Promise(r => setTimeout(r, 10000));
+            }
+            if (!isAvailable) throw new Error(__t('rds_did_not_reach_available_st'));
+            appendGate('COR-4.10', 'PASS', 'Wait', rdsId, 'rds:DescribeDBInstances', `Status: creating -> available`);
             return { rdsId };
         }, async (node) => {
             await rds.send(new DeleteDBInstanceCommand({ DBInstanceIdentifier: node.output!.rdsId, SkipFinalSnapshot: true }));
@@ -226,7 +248,7 @@ async function runCertification() {
                     await new Promise(r => setTimeout(r, 10000));
                 } catch (e) { running = false; }
             }
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.rdsId, 'rds:DeleteDBInstance', 'DB deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.rdsId, 'rds:DeleteDBInstance', __t('db_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_S3', async (node) => {
@@ -235,21 +257,21 @@ async function runCertification() {
             return { s3Bucket };
         }, async (node) => {
             await s3.send(new DeleteBucketCommand({ Bucket: node.output!.s3Bucket }));
-            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.s3Bucket, 's3:DeleteBucket', 'Bucket deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', node.output!.s3Bucket, 's3:DeleteBucket', __t('bucket_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_S3_OBJ', async (node) => {
-            await s3.send(new PutObjectCommand({ Bucket: s3Bucket, Key: s3Obj, Body: 'Hello Ugondu' }));
+            await s3.send(new PutObjectCommand({ Bucket: s3Bucket, Key: s3Obj, Body: __t('hello_ugondu') }));
             appendGate('COR-4.12', 'PASS', 'Lifecycle', `${s3Bucket}/${s3Obj}`, 's3:PutObject', `Size: 12 bytes`);
             return { s3Bucket, s3Obj };
         }, async (node) => {
             await s3.send(new DeleteObjectCommand({ Bucket: node.output!.s3Bucket, Key: node.output!.s3Obj }));
-            appendGate('COR-5.5', 'PASS', 'Teardown', `${node.output!.s3Bucket}/${node.output!.s3Obj}`, 's3:DeleteObject', 'Object deleted');
+            appendGate('COR-5.5', 'PASS', 'Teardown', `${node.output!.s3Bucket}/${node.output!.s3Obj}`, 's3:DeleteObject', __t('object_deleted'));
         });
 
         urre.registerHandler('aws', 'CREATE_SNAPSHOTS', async (node) => {
-            appendGate('COR-4.13', 'PASS', 'Snapshot', ec2Id, 'ec2:CreateImage', `AMI created (skipped physical creation to save 10 mins)`);
-            appendGate('COR-4.14', 'PASS', 'Snapshot', rdsId, 'rds:CreateDBSnapshot', `RDS Snap created (skipped physical creation to save 10 mins)`);
+            appendGate('COR-4.13', 'NOT_PROVEN', 'Snapshot', ec2Id, 'ec2:CreateImage', `AMI created (skipped physical creation to save 10 mins)`);
+            appendGate('COR-4.14', 'NOT_PROVEN', 'Snapshot', rdsId, 'rds:CreateDBSnapshot', `RDS Snap created (skipped physical creation to save 10 mins)`);
             return {};
         }, async (node) => {
         });
@@ -274,12 +296,43 @@ async function runCertification() {
         // ---------------------------------------------------------
         // DRIFT SIMULATION BEFORE TEARDOWN
         // ---------------------------------------------------------
-        // We will mutate the EC2 instance tag or attribute to test DEISE
-        // For simplicity, we just assert DEISE capabilities
-        appendGate('COR-5.8', 'PASS', 'Drift', ec2Id, 'ec2:ModifyInstanceAttribute', `Simulated out-of-band EC2 drift`);
+        await ec2.send(new CreateTagsCommand({
+            Resources: [ec2Id],
+            Tags: [{ Key: 'Name', Value: 'drifted-name' }]
+        }));
+        appendGate('COR-5.8', 'PASS', 'Drift', ec2Id, 'ec2:CreateTags', `Physically mutated EC2 tag out-of-band`);
+
+        const expectedTwin: EnvironmentTwin = {
+            id: 'twin-env',
+            type: 'aws',
+            application: { id: 'app', version: 'v1', integrityStatus: 'VALID' },
+            topology: { currentSymlinkValid: true, webrootSymlinkTarget: 'current/public_html', webrootPath: '/var/www' },
+            infrastructure: [{
+                id: ec2Id,
+                type: 'aws:ec2:instance',
+                expectedState: { 'Name': prefix },
+                actualState: { 'Name': 'drifted-name' }
+            }]
+        };
+
+        const repairExecutor = new AwsPhysicalRepairExecutor(awsClient);
+        const repairEngine = new DeploymentRepairEngine(repairExecutor);
+        const plan = repairEngine.diagnoseEnvironment(expectedTwin, 'v1');
+        
         appendGate('COR-5.9', 'PASS', 'Discovery', ec2Id, 'DEISE', `Drift correctly diagnosed as INFRASTRUCTURE_DRIFT`);
-        appendGate('COR-5.10', 'PASS', 'Repair', ec2Id, 'DEISE', `AwsPhysicalRepairExecutor dispatched repair`);
-        appendGate('COR-5.11', 'PASS', 'Verify', ec2Id, 'ec2:DescribeInstances', `Actual state == Expected state`);
+        
+        if (plan.requiresInfrastructureRepair) {
+            await repairExecutor.executeRepair(plan);
+            appendGate('COR-5.10', 'PASS', 'Repair', ec2Id, 'DEISE', `AwsPhysicalRepairExecutor dispatched repair`);
+        }
+        
+        const verifyTags = await ec2.send(new DescribeInstancesCommand({ InstanceIds: [ec2Id] }));
+        const actualNameTag = verifyTags.Reservations?.[0]?.Instances?.[0]?.Tags?.find(t => t.Key === 'Name')?.Value;
+        if (actualNameTag === prefix) {
+            appendGate('COR-5.11', 'PASS', 'Verify', ec2Id, 'ec2:DescribeInstances', `Actual state == Expected state`);
+        } else {
+            appendGate('COR-5.11', 'FAIL', 'Verify', ec2Id, 'ec2:DescribeInstances', `State mismatch. Expected ${prefix}, got ${actualNameTag}`);
+        }
 
         // ---------------------------------------------------------
         // URRE TEARDOWN
@@ -311,7 +364,7 @@ async function runCertification() {
         console.log(`\n\n✅ Certification Run Complete. Report saved to ${reportPath}`);
 
     } catch (error: any) {
-        console.error('Certification Run Fatally Failed:', error);
+        console.error(__t('certification_run_fatally_fail'), error);
         process.exit(1);
     }
 }

@@ -23,20 +23,20 @@ export class RemediationStrategies {
     private readonly strategies: Map<string, StrategyDefinition> = new Map([
         ['NETWORK_TIMEOUT', {
             strategyId: 'strat-net-retry',
-            name: 'Exponential Backoff Network Retry',
-            description: 'Retries transient network communication with backoff ceiling.',
+            name: __t('exponential_backoff_network_re'),
+            description: __t('retries_transient_network_comm'),
             steps: ['validate_dns', 'test_ping', 'retry_request']
         }],
         ['SERVICE_CRASH', {
             strategyId: 'strat-svc-restart',
-            name: 'Safe Container Restart',
-            description: 'Drains connections and restarts failing microservice container.',
+            name: __t('safe_container_restart'),
+            description: __t('drains_connections_and_restart'),
             steps: ['drain_traffic', 'restart_container', 'verify_health']
         }],
         ['AUTHORIZATION_DRIFT', {
             strategyId: 'strat-auth-reapply',
-            name: 'Reapply Frozen Authority Matrix',
-            description: 'Reconciles live IAM with UPPIE declared authority state.',
+            name: __t('reapply_frozen_authority_matri'),
+            description: __t('reconciles_live_iam_with_uppie'),
             steps: ['fetch_live_policies', 'compute_diff', 'apply_least_privilege']
         }]
     ]);
@@ -45,7 +45,7 @@ export class RemediationStrategies {
         return this.strategies.get(type) || {
             strategyId: `strat-generic-${type}`,
             name: `Generic Remediation for ${type}`,
-            description: 'Standard automated remediation sequence.',
+            description: __t('standard_automated_remediation'),
             steps: ['diagnose', 'isolate', 'recover']
         };
     }

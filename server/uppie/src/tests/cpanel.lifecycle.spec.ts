@@ -31,8 +31,8 @@ function setup() {
   return { ...whm, adapter: new CpanelAdapter(async () => whm.client) };
 }
 
-describe('cPanel compilation', () => {
-  it('builds one deterministic, order-independent feature list', async () => {
+describe(__t('cpanel_compilation'), () => {
+  it(__t('builds_one_deterministic_order'), async () => {
     const { adapter } = setup();
     const rules = [rule({ ruleId: 'a' }), rule({ ruleId: 'b', ...ops('mysql', 'fileman') })];
     const a = await adapter.generate(rules, ctx);
@@ -48,18 +48,18 @@ describe('cPanel compilation', () => {
     expect((await adapter.generate([rule(ops('mysql'))], ctx)).digest === a.digest).toBe(false);
   });
 
-  it('trims and de-duplicates operations', async () => {
+  it(__t('trims_and_de_duplicates_operat'), async () => {
     const { adapter } = setup();
-    expect(((await adapter.generate([rule(ops(' fileman ', 'fileman'))], ctx)).nativeDocument as CpanelDocument).features).toEqual(['fileman']);
+    expect(((await adapter.generate([rule(ops(__t('fileman'), 'fileman'))], ctx)).nativeDocument as CpanelDocument).features).toEqual(['fileman']);
   });
 
-  it('stores the features in sorted order whatever order the rules list them in', async () => {
+  it(__t('stores_the_features_in_sorted_'), async () => {
     const { adapter } = setup();
     const doc = (await adapter.generate([rule(ops('webmail', 'cron', 'backup'))], ctx)).nativeDocument as CpanelDocument;
     expect(doc.features).toEqual(['backup', 'cron', 'webmail']);
   });
 
-  it('fails closed on everything a feature list cannot express and never drops a rule silently', async () => {
+  it(__t('fails_closed_on_everything_a_f'), async () => {
     const { adapter } = setup();
     const gen = (...rules: any[]) => failure(() => adapter.generate(rules, ctx));
     expect(await gen(rule({ ruleId: 'd', effect: 'DENY' }))).toBe(T('deny_unsupported', { ruleId: 'd' }));
@@ -72,19 +72,19 @@ describe('cPanel compilation', () => {
     expect(await gen(rule({ ruleId: 'e', ...ops() }))).toBe(T('invalid_rule', { ruleId: 'e' }));
     expect(await gen()).toBe(T('no_rules'));
     expect(await gen(rule(ops('nope')))).toBe(T('unknown_feature', { feature: 'nope' }));
-    expect(await gen(rule(ops('Bad Feature')))).toBe(T('unknown_feature', { feature: 'Bad Feature' }));
+    expect(await gen(rule(ops(__t('bad_feature'))))).toBe(T('unknown_feature', { feature: __t('bad_feature') }));
     expect(await gen(rule({ constraints: { requireMfa: false } }))).toBe('');
   });
 });
 
-describe('cPanel validation', () => {
-  it('accepts a generated policy and warns when it enables every feature', async () => {
+describe(__t('cpanel_validation'), () => {
+  it(__t('accepts_a_generated_policy_and'), async () => {
     const { adapter } = setup();
     expect(await adapter.validate(await adapter.generate([rule()], ctx), ctx)).toEqual({ valid: true, errors: [], warnings: [] });
     expect(await adapter.validate(await adapter.generate([rule(ops(...FEATURES))], ctx), ctx)).toEqual({ valid: true, errors: [], warnings: [T('validate.all_features')] });
   });
 
-  it('rejects tampered, foreign, unknown, empty and missing documents', async () => {
+  it(__t('rejects_tampered_foreign_unkno'), async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule()], ctx);
     const doc = policy.nativeDocument as CpanelDocument;
@@ -99,8 +99,8 @@ describe('cPanel validation', () => {
   });
 });
 
-describe('cPanel attach', () => {
-  it('moves the account to a clone of its package that carries the list and keeps every package setting', async () => {
+describe(__t('cpanel_attach'), () => {
+  it(__t('moves_the_account_to_a_clone_o'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     const name = policy.providerId;
@@ -117,7 +117,7 @@ describe('cPanel attach', () => {
     expect(writes(calls)).toEqual([`saveFeatureList:${name}:create`, `createPackage:${name}__Gold`, `changePackage:alice:${name}__Gold`]);
   });
 
-  it('is idempotent and reuses an identical existing list', async () => {
+  it(__t('is_idempotent_and_reuses_an_id'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     expect((await adapter.attach(policy, 'alice', ctx)).success).toBe(true);
@@ -131,7 +131,7 @@ describe('cPanel attach', () => {
     expect(writes(other.calls)).toEqual([`createPackage:${policy.providerId}__Mailer`, `changePackage:bob:${policy.providerId}__Mailer`]);
   });
 
-  it('refuses a different list of the same name, an unknown account and a bad account name without writing', async () => {
+  it(__t('refuses_a_different_list_of_th'), async () => {
     const { adapter, state, calls, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     const err = (e: string) => [T('attach_error', { error: e })];
@@ -149,12 +149,12 @@ describe('cPanel attach', () => {
     expect(state.plan('alice')).toBe('Gold');
   });
 
-  it('checks everything before it writes: a missing original package or a clashing package leaves the server untouched', async () => {
+  it(__t('checks_everything_before_it_wr'), async () => {
     const { adapter, state, calls, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     const err = (e: string) => [T('attach_error', { error: e })];
     expect((await adapter.attach(policy, 'erin', ctx)).errors).toEqual(err(T('origin_package_missing', { package: 'Ghost' })));
-    seed.pkg(`${policy.providerId}__Gold`, 'Mail Only');
+    seed.pkg(`${policy.providerId}__Gold`, __t('mail_only'));
     expect((await adapter.attach(policy, 'alice', ctx)).errors).toEqual(err(T('package_conflict', { name: `${policy.providerId}__Gold` })));
     seed.pkg('P'.repeat(50), 'default');
     seed.account('zed', 'P'.repeat(50));
@@ -165,7 +165,7 @@ describe('cPanel attach', () => {
     expect(state.plan('alice')).toBe('Gold');
   });
 
-  it('refuses invalid and unmanaged policies before any call that writes', async () => {
+  it(__t('refuses_invalid_and_unmanaged_'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     expect((await adapter.attach({ ...policy, digest: 'f'.repeat(64) }, 'alice', ctx)).errors).toEqual([T('validate.digest_mismatch')]);
@@ -175,7 +175,7 @@ describe('cPanel attach', () => {
     expect(state.list('default')).toEqual(FEATURES);
   });
 
-  it('switches an account between policies without losing its original package and removes the abandoned clone', async () => {
+  it(__t('switches_an_account_between_po'), async () => {
     const { adapter, state } = setup();
     const a = await adapter.generate([rule()], ctx);
     const b = await adapter.generate([rule(ops('mysql'))], ctx);
@@ -186,11 +186,11 @@ describe('cPanel attach', () => {
     expect(state.list(a.providerId)).toEqual(['fileman', 'ftpaccts']);
   });
 
-  it('can be retried after the move itself failed, finding the list and package already in place', async () => {
+  it(__t('can_be_retried_after_the_move_'), async () => {
     const { adapter, state, calls, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     seed.failOnce('changePackage');
-    expect((await adapter.attach(policy, 'alice', ctx)).errors).toEqual([T('attach_error', { error: 'injected failure: changePackage' })]);
+    expect((await adapter.attach(policy, 'alice', ctx)).errors).toEqual([T('attach_error', { error: __t('injected_failure_changepackage') })]);
     expect(state.plan('alice')).toBe('Gold');
     const mark = calls.length;
     expect((await adapter.attach(policy, 'alice', ctx)).success).toBe(true);
@@ -199,8 +199,8 @@ describe('cPanel attach', () => {
   });
 });
 
-describe('cPanel detach', () => {
-  it('moves the account back, keeps a clone that another account still uses and removes it with the last one', async () => {
+describe(__t('cpanel_detach'), () => {
+  it(__t('moves_the_account_back_keeps_a'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     const clone = `${policy.providerId}__Gold`;
@@ -219,7 +219,7 @@ describe('cPanel detach', () => {
     expect(state.packageNames()).toEqual(['Gold', 'Mailer', 'default']);
   });
 
-  it('does nothing for an account that is not attached to the policy', async () => {
+  it(__t('does_nothing_for_an_account_th'), async () => {
     const { adapter, state, calls } = setup();
     const a = await adapter.generate([rule()], ctx);
     const b = await adapter.generate([rule(ops('mysql'))], ctx);
@@ -231,11 +231,11 @@ describe('cPanel detach', () => {
     expect(state.plan('alice')).toBe(`${a.providerId}__Gold`);
   });
 
-  it('reports an unknown account, a bad account name and a vanished original package', async () => {
+  it(__t('reports_an_unknown_account_a_b'), async () => {
     const { adapter, state, client, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     expect((await adapter.detach(policy.providerId, 'nobody', ctx)).errors).toEqual([T('detach_error', { error: T('account_not_found', { account: 'nobody' }) })]);
-    expect((await adapter.detach(policy.providerId, 'Bad Name', ctx)).errors).toEqual([T('detach_error', { error: T('invalid_account', { account: 'Bad Name' }) })]);
+    expect((await adapter.detach(policy.providerId, __t('bad_name'), ctx)).errors).toEqual([T('detach_error', { error: T('invalid_account', { account: __t('bad_name') }) })]);
     seed.pkg('Temp', 'default');
     seed.account('zed', 'Temp');
     await adapter.attach(policy, 'zed', ctx);
@@ -246,29 +246,29 @@ describe('cPanel detach', () => {
     expect(state.plan('zed')).toBe(`${policy.providerId}__Temp`);
   });
 
-  it('removes a leftover clone on retry when its deletion failed after the account moved back', async () => {
+  it(__t('removes_a_leftover_clone_on_re'), async () => {
     const { adapter, state, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);
     seed.failOnce('deletePackage');
-    expect((await adapter.detach(policy.providerId, 'alice', ctx)).errors).toEqual([T('detach_error', { error: 'injected failure: deletePackage' })]);
+    expect((await adapter.detach(policy.providerId, 'alice', ctx)).errors).toEqual([T('detach_error', { error: __t('injected_failure_deletepackage') })]);
     expect(state.plan('alice')).toBe('Gold');
     expect(state.packageNames()).toContain(`${policy.providerId}__Gold`);
     expect((await adapter.detach(policy.providerId, 'alice', ctx)).success).toBe(true);
     expect(state.packageNames()).toEqual(['Gold', 'Mailer', 'default']);
   });
 
-  it('only ever removes the clones it created for the list, never other unused packages', async () => {
+  it(__t('only_ever_removes_the_clones_i'), async () => {
     const { adapter, state, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     seed.pkg('Idle', 'default');
-    seed.pkg(`${policy.providerId}__Stray`, 'Mail Only');
+    seed.pkg(`${policy.providerId}__Stray`, __t('mail_only'));
     await adapter.attach(policy, 'alice', ctx);
     expect((await adapter.detach(policy.providerId, 'alice', ctx)).success).toBe(true);
     expect(state.packageNames()).toEqual(['Gold', 'Idle', 'Mailer', 'default', `${policy.providerId}__Stray`]);
   });
 
-  it('never removes an unused package of the operator that merely references the list', async () => {
+  it(__t('never_removes_an_unused_packag'), async () => {
     const { adapter, state, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);

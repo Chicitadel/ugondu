@@ -310,10 +310,10 @@ func (a *SyncEnvironmentAction) Execute(env *ExecutionEnvelope, payload map[stri
 		if err := CopyDir(".", dest, true); err != nil {
 			return logs, fmt.Errorf("quota-sync copy failed: %v", err)
 		}
-		logs = append(logs, "Copied files using quota-sync (Native Go)")
+		logs = append(logs, i18n.T("copied_files_using_quota_sync_"))
 	} else if p.Strategy == "atomic" {
 		if strings.Contains(env.TransactionId, "/") || strings.Contains(env.TransactionId, "\\") || strings.Contains(env.TransactionId, "..") {
-			return logs, fmt.Errorf("FATAL: transactionId contains invalid path characters")
+			return logs, fmt.Errorf(i18n.T("fatal_transactionid_contains_i"))
 		}
 		releaseDir := filepath.Join(homeDir, "releases", env.TransactionId)
 		if err := CopyDir(".", releaseDir, true); err != nil {

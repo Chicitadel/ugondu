@@ -22,7 +22,7 @@ declare var expect: any;
 
 describe('Intent & Architecture Qualification Gates: INT-01..08, ARCH-01..07, PACK-01..06, QUAL-01..06', () => {
   it('INT-01..08: Natural Language Intent normalization & constraint parsing', () => {
-    const rawIntent = 'Deploy containerized web app to AWS with RDS postgres';
+    const rawIntent = __t('deploy_containerized_web_app_t');
     const parsed = parse(rawIntent);
     expect(parsed.raw).toBe(rawIntent);
     expect(parsed.application).toBeDefined();
@@ -57,7 +57,7 @@ describe('Intent & Architecture Qualification Gates: INT-01..08, ARCH-01..07, PA
     const outcomePack = {
       packId: 'pack-web-rds-v1',
       version: '1.0.0',
-      intent: 'Deploy containerized web app to AWS with RDS postgres',
+      intent: __t('deploy_containerized_web_app_t'),
       verificationSuite: { requiredTests: [], successCriteria: [] }
     };
     expect(outcomePack.packId).toBe('pack-web-rds-v1');

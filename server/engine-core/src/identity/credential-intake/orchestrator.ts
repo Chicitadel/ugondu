@@ -35,7 +35,7 @@ export class CredentialIntakeOrchestrator {
         }
 
         if (!matchedNormalizer) {
-            throw new Error('Credential format not recognized by any supported provider (e.g. AWS CSV, Azure JSON).');
+            throw new Error(__t('credential_format_not_recogniz'));
         }
 
         // 1. Normalize

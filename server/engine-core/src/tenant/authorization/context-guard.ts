@@ -53,12 +53,12 @@ export class TenantContextGuard {
    */
   public guard(subject: SubjectContext, action: string, resource: any): AuthorizationDecision {
     if (!subject) {
-      return DecisionBuilder.deny('Unauthenticated subject');
+      return DecisionBuilder.deny(__t('unauthenticated_subject'));
     }
     
     // Cross-tenant protection
     if (resource && resource.tenantId && resource.tenantId !== subject.tenantId) {
-      return DecisionBuilder.deny('Cross-tenant access violation detected');
+      return DecisionBuilder.deny(__t('cross_tenant_access_violation_'));
     }
 
     return this.authority.authorize(subject, action, resource);

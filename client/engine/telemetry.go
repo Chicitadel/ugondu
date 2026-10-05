@@ -50,7 +50,7 @@ func ReportTelemetry(apiURL, transactionId, status string, logs []string) {
 
 	resp, err := http.Post(apiURL+"/telemetry/report", "application/json", bytes.NewBuffer(body))
 	if err != nil || resp.StatusCode != 201 {
-		errStr := "unknown error"
+		errStr := i18n.T("unknown_error")
 		if err != nil {
 			errStr = err.Error()
 		}

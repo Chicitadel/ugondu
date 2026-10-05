@@ -31,8 +31,8 @@ function setup() {
   return { ...whm, adapter: new CpanelAdapter(async () => whm.client) };
 }
 
-describe('cPanel update', () => {
-  it('replaces the features of a managed list in place and reports the new version', async () => {
+describe(__t('cpanel_update'), () => {
+  it(__t('replaces_the_features_of_a_man'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);
@@ -46,14 +46,14 @@ describe('cPanel update', () => {
     expect(state.plan('alice')).toBe(`${policy.providerId}__Gold`);
   });
 
-  it('refuses unmanaged, missing, Deny and unknown-feature updates without changing anything', async () => {
+  it(__t('refuses_unmanaged_missing_deny'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);
     const mark = calls.length;
     const err = (e: string) => [T('update_error', { error: e })];
     expect((await adapter.update('default', [rule()], ctx)).errors).toEqual(err(T('unmanaged_list', { name: 'default' })));
-    expect((await adapter.update('Mail Only', [rule()], ctx)).errors).toEqual(err(T('unmanaged_list', { name: 'Mail Only' })));
+    expect((await adapter.update(__t('mail_only'), [rule()], ctx)).errors).toEqual(err(T('unmanaged_list', { name: __t('mail_only') })));
     expect((await adapter.update('ugondu_a_b', [rule()], ctx)).errors).toEqual(err(T('unmanaged_list', { name: 'ugondu_a_b' })));
     expect((await adapter.update('ugondu_missing', [rule()], ctx)).errors).toEqual(err(T('list_missing', { name: 'ugondu_missing' })));
     expect((await adapter.update(policy.providerId, [rule({ ruleId: 'd', effect: 'DENY' })], ctx)).errors).toEqual(err(T('deny_unsupported', { ruleId: 'd' })));
@@ -65,36 +65,36 @@ describe('cPanel update', () => {
   });
 });
 
-describe('cPanel clone', () => {
-  it('copies any readable list into a managed list, adding the prefix and trimming the name', async () => {
+describe(__t('cpanel_clone'), () => {
+  it(__t('copies_any_readable_list_into_'), async () => {
     const { adapter, state, calls } = setup();
-    const a = await adapter.clone('Mail Only', 'copy', ctx);
+    const a = await adapter.clone(__t('mail_only'), 'copy', ctx);
     expect(a).toEqual({ success: true, clonedId: 'ugondu_copy', errors: [] });
     expect(state.list('ugondu_copy')).toEqual(['webmail']);
     expect(await adapter.clone('default', '  ugondu_everything ', ctx)).toEqual({ success: true, clonedId: 'ugondu_everything', errors: [] });
     expect(state.list('ugondu_everything')).toEqual(FEATURES);
     const mark = calls.length;
-    expect((await adapter.clone('Mail Only', 'copy', ctx)).success).toBe(true);
+    expect((await adapter.clone(__t('mail_only'), 'copy', ctx)).success).toBe(true);
     expect(writes(calls, mark)).toEqual([]);
   });
 
-  it('refuses a clash with a different list, a missing source and invalid names', async () => {
+  it(__t('refuses_a_clash_with_a_differe'), async () => {
     const { adapter, state, seed } = setup();
     seed.list('ugondu_taken', ['mysql']);
     const err = (e: string) => [T('clone_error', { error: e })];
-    expect((await adapter.clone('Mail Only', 'taken', ctx)).errors).toEqual(err(T('list_exists_different', { name: 'ugondu_taken' })));
+    expect((await adapter.clone(__t('mail_only'), 'taken', ctx)).errors).toEqual(err(T('list_exists_different', { name: 'ugondu_taken' })));
     expect((await adapter.clone('nothing', 'fresh', ctx)).errors).toEqual(err(T('list_missing', { name: 'nothing' })));
-    for (const bad of ['bad name', '', 'x_y', 'a'.repeat(49), 'ugondu_']) {
-      const result = await adapter.clone('Mail Only', bad, ctx);
+    for (const bad of [__t('bad_name'), '', 'x_y', 'a'.repeat(49), 'ugondu_']) {
+      const result = await adapter.clone(__t('mail_only'), bad, ctx);
       expect(result).toEqual({ success: false, clonedId: '', errors: err(T('invalid_name', { name: bad })) });
     }
     expect(state.list('ugondu_taken')).toEqual(['mysql']);
-    expect(state.listNames()).toEqual(['Mail Only', 'default', 'disabled', 'ugondu_taken']);
+    expect(state.listNames()).toEqual([__t('mail_only'), 'default', 'disabled', 'ugondu_taken']);
   });
 });
 
-describe('cPanel usage', () => {
-  it('classifies a list no package references as UNUSED and any referenced list as UNKNOWN', async () => {
+describe(__t('cpanel_usage'), () => {
+  it(__t('classifies_a_list_no_package_r'), async () => {
     const { adapter, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     seed.list('ugondu_idle', ['mysql']);
@@ -109,7 +109,7 @@ describe('cPanel usage', () => {
     expect(await adapter.observeUsage(policy.providerId, window, ctx)).toMatchObject({ observedUsages: 0, classification: 'UNUSED' });
   });
 
-  it('lists only managed lists that no package references', async () => {
+  it(__t('lists_only_managed_lists_that_'), async () => {
     const { adapter, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);
@@ -124,10 +124,10 @@ describe('cPanel usage', () => {
   });
 });
 
-describe('cPanel retire and restore', () => {
-  it('retires an unreferenced managed list and returns a snapshot and evidence', async () => {
+describe(__t('cpanel_retire_and_restore'), () => {
+  it(__t('retires_an_unreferenced_manage'), async () => {
     const { adapter, state } = setup();
-    const cloned = await adapter.clone('Mail Only', 'idle', ctx);
+    const cloned = await adapter.clone(__t('mail_only'), 'idle', ctx);
     const result = await adapter.retire(plan(cloned.clonedId), ctx);
     expect(result.success).toBe(true);
     expect(result.errors).toEqual([]);
@@ -137,7 +137,7 @@ describe('cPanel retire and restore', () => {
     expect(state.list('ugondu_idle')).toBeUndefined();
   });
 
-  it('refuses to retire a list a package references, even one no account uses, and never an unmanaged or missing list', async () => {
+  it(__t('refuses_to_retire_a_list_a_pac'), async () => {
     const { adapter, state, calls, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);
@@ -154,7 +154,7 @@ describe('cPanel retire and restore', () => {
     expect((await adapter.retire(plan(policy.providerId), ctx)).success).toBe(true);
   });
 
-  it('restores a retired list from its snapshot, idempotently', async () => {
+  it(__t('restores_a_retired_list_from_i'), async () => {
     const { adapter, state, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, 'alice', ctx);
@@ -169,7 +169,7 @@ describe('cPanel retire and restore', () => {
     expect(writes(calls, mark)).toEqual([]);
   });
 
-  it('refuses a restore that would overwrite a different list or that the snapshot does not justify', async () => {
+  it(__t('refuses_a_restore_that_would_o'), async () => {
     const { adapter, state, calls, seed } = setup();
     const err = (e: string) => [T('restore_error', { error: e })];
     const snap = (name: string, features: unknown) => JSON.stringify({ name, features });
@@ -180,7 +180,7 @@ describe('cPanel retire and restore', () => {
     expect((await adapter.restore(certificate('ugondu_live', snap('ugondu_live', 'mysql')), ctx)).errors).toEqual(err(T('restore_invalid_snapshot', { name: 'ugondu_live' })));
     expect((await adapter.restore(certificate('default', snap('default', ['mysql'])), ctx)).errors).toEqual(err(T('unmanaged_list', { name: 'default' })));
     expect((await adapter.restore(certificate('ugondu_new', snap('ugondu_new', ['zzz'])), ctx)).errors).toEqual(err(T('validate.unknown_feature', { feature: 'zzz' })));
-    const broken = await adapter.restore(certificate('ugondu_live', 'not json'), ctx);
+    const broken = await adapter.restore(certificate('ugondu_live', __t('not_json')), ctx);
     expect(broken.success).toBe(false);
     expect(broken.errors[0]?.startsWith(T('restore_error', { error: '' }))).toBe(true);
     expect(writes(calls)).toEqual([]);

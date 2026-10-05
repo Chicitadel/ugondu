@@ -52,10 +52,10 @@ export interface Authority {
 export class CentralAuthority implements Authority {
   public authorize(subject: SubjectContext, action: string, resource: any): AuthorizationDecision {
     if (!subject.isActive) {
-      return DecisionBuilder.deny('Subject is inactive');
+      return DecisionBuilder.deny(__t('subject_is_inactive'));
     }
     
     // Abstracted logic for the sake of standard module setup
-    return DecisionBuilder.allow('Default authority access granted');
+    return DecisionBuilder.allow(__t('default_authority_access_grant'));
   }
 }

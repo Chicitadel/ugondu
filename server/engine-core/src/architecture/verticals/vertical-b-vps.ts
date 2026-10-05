@@ -44,9 +44,9 @@ export class VerticalBVps {
     static build(input: any): ArchitectureCandidate {
         return {
             id: crypto.randomUUID(),
-            name: 'Linux VPS Candidate',
+            name: __t('linux_vps_candidate'),
             provider: 'linux-vps',
-            description: 'A standard Linux Virtual Private Server architecture.',
+            description: __t('a_standard_linux_virtual_priva'),
             resources: [
                 { id: crypto.randomUUID(), type: 'compute', name: 'nginx-proxy', provider: 'linux', config: {} },
                 { id: crypto.randomUUID(), type: 'compute', name: 'systemd-service', provider: 'linux', config: {} },
@@ -62,10 +62,10 @@ export class VerticalBVps {
             },
             riskProfile: {
                 score: 35,
-                factors: ['single-server SPOF', 'manual TLS renewal fallback', 'local DB no replication']
+                factors: [__t('single_server_spof'), __t('manual_tls_renewal_fallback'), __t('local_db_no_replication')]
             },
-            rollbackStrategy: 'symlink swap to previous release directory',
-            availabilityCharacteristics: 'Single node, standard availability'
+            rollbackStrategy: __t('symlink_swap_to_previous_relea'),
+            availabilityCharacteristics: __t('single_node_standard_availabil')
         };
     }
 }

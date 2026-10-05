@@ -68,7 +68,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
 
     const parsedUrl = new URL(urlStr);
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-        throw new Error(__t('err_invalid_protocol') || 'Invalid protocol');
+        throw new Error(__t('err_invalid_protocol') || __t('invalid_protocol'));
     }
 
     const hostname = parsedUrl.hostname;
@@ -83,7 +83,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
     }
 
     if (isPrivateOrLocal(resolvedIp)) {
-        throw new SSRFBlockedError(__t('err_ssrf_blocked') || 'SSRF blocked');
+        throw new SSRFBlockedError(__t('err_ssrf_blocked') || __t('ssrf_blocked'));
     }
 
     const requestOptions: http.RequestOptions = {
@@ -125,7 +125,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
         req.on('error', reject);
         req.on('timeout', () => {
             req.destroy();
-            reject(new Error('Request timeout'));
+            reject(new Error(__t('request_timeout')));
         });
 
         if (body) {

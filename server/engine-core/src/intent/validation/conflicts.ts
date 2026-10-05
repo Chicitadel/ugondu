@@ -46,7 +46,7 @@ export class ConflictDetector {
 
         // Simple conflict resolution constraint checking
         if (budgetReqs.length > 0 && archReqs.length > 0) {
-            conflicts.push("Constraint Conflict Detected: Validating Architecture scaling against predefined Budget metrics.");
+            conflicts.push(__t('constraint_conflict_detected_v'));
         }
 
         return conflicts;

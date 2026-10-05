@@ -90,5 +90,5 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
 
 const PORT = process.env.PORT || 4002;
 app.listen(PORT, () => {
-    Logger.info(__t('listening_port', 'Billing Gateway', PORT));
+    Logger.info(__t('listening_port', __t('billing_gateway'), PORT));
 });

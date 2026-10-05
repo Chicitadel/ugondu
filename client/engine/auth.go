@@ -53,7 +53,7 @@ func openBrowser(url string) error {
 	case "darwin":
 		err = exec.Command("open", url).Start()
 	default:
-		err = fmt.Errorf("unsupported platform")
+		err = fmt.Errorf(i18n.T("unsupported_platform"))
 	}
 	return err
 }

@@ -11,12 +11,12 @@ export class PhysicalRepairExecutor {
 
     public async executeRepair(plan: RepairPlan, instanceId: string, username: string): Promise<boolean> {
         if (!plan.safeToProceed) {
-            Logger.error('Repair Plan is marked unsafe to proceed. Aborting physical repair.');
+            Logger.error(__t('repair_plan_is_marked_unsafe_t'));
             return false;
         }
 
         if (!plan.requiresTopologyRepair) {
-            Logger.info('No topology repair required. Environment is structurally sound.');
+            Logger.info(__t('no_topology_repair_required_en'));
             return true; // Nothing to repair physically
         }
 

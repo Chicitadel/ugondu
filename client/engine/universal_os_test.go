@@ -60,7 +60,7 @@ func TestCopyDirExcludesGitOnly(t *testing.T) {
 	//   my.git.repo.txt
 	//   normal.txt
 	_ = os.MkdirAll(filepath.Join(srcDir, ".git"), 0755)
-	_ = os.WriteFile(filepath.Join(srcDir, ".git", "config"), []byte("git config"), 0644)
+	_ = os.WriteFile(filepath.Join(srcDir, ".git", "config"), []byte(i18n.T("git_config")), 0644)
 	_ = os.WriteFile(filepath.Join(srcDir, ".gitignore"), []byte("node_modules"), 0644)
 	_ = os.MkdirAll(filepath.Join(srcDir, "git-service"), 0755)
 	_ = os.WriteFile(filepath.Join(srcDir, "git-service", "index.js"), []byte("console.log()"), 0644)
@@ -73,7 +73,7 @@ func TestCopyDirExcludesGitOnly(t *testing.T) {
 
 	// .git should be excluded
 	if _, err := os.Stat(filepath.Join(dstDir, ".git")); !os.IsNotExist(err) {
-		t.Errorf(".git directory should have been excluded")
+		t.Errorf(i18n.T("git_directory_should_have_been"))
 	}
 
 	// .gitignore should NOT be excluded!
@@ -115,7 +115,7 @@ func TestAtomicSymlinkNoGap(t *testing.T) {
 	done := make(chan struct{})
 	errCh := make(chan error, 1)
 
-	// Goroutine to constantly read the symlink, expecting no "not found" errors
+	// Goroutine to constantly read the symlink, expecting no i18n.T("not_found") errors
 	go func() {
 		for {
 			select {

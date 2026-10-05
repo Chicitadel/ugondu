@@ -24,7 +24,7 @@ export class SecurityImpact {
         return {
             severity: isEscalated ? 'CRITICAL' : 'LOW',
             requiresEscalation: isEscalated,
-            findings: isEscalated ? ['Potential privilege escalation detected'] : ['Least-privilege posture maintained']
+            findings: isEscalated ? [__t('potential_privilege_escalation')] : [__t('least_privilege_posture_mainta')]
         };
     }
 }

@@ -44,9 +44,9 @@ export class VerticalCCpanel {
     static build(input: any): ArchitectureCandidate {
         return {
             id: crypto.randomUUID(),
-            name: 'cPanel Shared Hosting Candidate',
+            name: __t('cpanel_shared_hosting_candidat'),
             provider: 'cpanel',
-            description: 'A shared hosting environment managed via cPanel.',
+            description: __t('a_shared_hosting_environment_m'),
             resources: [
                 { id: crypto.randomUUID(), type: 'compute', name: 'cpanel-quota-sync', provider: 'cpanel', config: {} },
                 { id: crypto.randomUUID(), type: 'database', name: 'cpanel-mysql', provider: 'cpanel', config: {} },
@@ -61,10 +61,10 @@ export class VerticalCCpanel {
             },
             riskProfile: {
                 score: 50,
-                factors: ['shared resource contention', 'limited OS access', 'cPanel API rate limits']
+                factors: [__t('shared_resource_contention'), __t('limited_os_access'), __t('cpanel_api_rate_limits')]
             },
-            rollbackStrategy: 'restore from cPanel backup or file manager snapshot',
-            availabilityCharacteristics: 'Shared hosting availability SLA'
+            rollbackStrategy: __t('restore_from_cpanel_backup_or_'),
+            availabilityCharacteristics: __t('shared_hosting_availability_sl')
         };
     }
 }

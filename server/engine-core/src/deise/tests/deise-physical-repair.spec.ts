@@ -17,7 +17,7 @@ jest.mock('node-ssh', () => {
   };
 });
 
-describe('Gate D: DEISE Physical Repair E2E (DirectAdmin)', () => {
+describe(__t('gate_d_deise_physical_repair_e'), () => {
     let client: DirectAdminNativeClient;
     let engine: DeploymentRepairEngine;
     let executor: PhysicalRepairExecutor;
@@ -67,8 +67,8 @@ describe('Gate D: DEISE Physical Repair E2E (DirectAdmin)', () => {
 });
 
 import { AwsPhysicalRepairExecutor } from '../../deise/engine/aws-physical-repair-executor';
-describe('Gate D: DEISE Physical Repair E2E (AWS)', () => {
-    it('detects EC2 infrastructure drift and dispatches reconciliation', async () => {
+describe(__t('gate_d_deise_physical_repair_e'), () => {
+    it(__t('detects_ec2_infrastructure_dri'), async () => {
         const mockAwsClient: any = { };
         const engine = new DeploymentRepairEngine();
         const executor = new AwsPhysicalRepairExecutor(mockAwsClient);
