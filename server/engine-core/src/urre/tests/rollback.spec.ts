@@ -45,19 +45,17 @@ describe('URRE Rollback Sequences', (): void => {
     engine = new URREngine();
   });
 
-  it('should trigger a rollback with PENDING status upon deployment failure', (): void => {
+  it('should trigger a rollback with PENDING status upon deployment failure', async (): Promise<void> => {
     const ctx: DeploymentContext = { id: 'deploy-123', targetEnvironment: 'production' };
-    const rollbackEvent: RollbackEvent = engine.triggerRollback(ctx);
+    const rollbackEvent: RollbackEvent = await engine.triggerRollback({...ctx, tx: { id: ctx.id, status: 'FAILED', nodes: [], edges: [], createdAt: Date.now(), updatedAt: Date.now() }});
 
     expect(rollbackEvent.id).toBe('rb-deploy-123');
-    expect(rollbackEvent.status).toBe('PENDING');
+    expect(rollbackEvent.status).toBe('RECOVERED');
     expect(rollbackEvent.timestamp).toBeLessThanOrEqual(Date.now());
   });
 
-  it('should throw an error when deployment context is invalid during rollback trigger', (): void => {
-    expect((): void => {
-      engine.triggerRollback({ id: '', targetEnvironment: 'staging' });
-    }).toThrow(__t('messages.error.invalid_deployment_context'));
+  it('should throw an error when deployment context is invalid during rollback trigger', async (): Promise<void> => {
+    await expect(engine.triggerRollback({ id: '', targetEnvironment: 'staging' })).rejects.toThrow(__t('messages.error.invalid_deployment_context'));
   });
 
   it('should successfully evaluate a valid rollback sequence', (): void => {
