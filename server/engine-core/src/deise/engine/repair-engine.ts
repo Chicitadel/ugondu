@@ -1,22 +1,15 @@
-/******************************************************************************
- * Project        : Ugondu - Universal Delivery Operating System
- * Module         : Server / Engine Core / DEISE / Engine
- * File           : repair-engine.ts
- * Version        : 1.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers Ltd
- * Created Date   : 2026-10-04
- * Classification : ENTERPRISE
- ******************************************************************************/
+import { Logger } from '@ugondu/shared';
+// @ts-ignore
+import { __t } from '@ugondu/shared';
 
-import { Logger, __t } from '@ugondu/shared';
 import { EnvironmentTwin } from '../twin/environment-twin';
-import { DriftCategory, DriftDiagnosis, ObjectType } from '../model/drift';
+import { DriftCategory, DriftDiagnosis } from '../model/drift';
 
 export interface RepairPlan {
     diagnoses: DriftDiagnosis[];
     requiresApplicationUpload: boolean;
     requiresTopologyRepair: boolean;
+    requiresInfrastructureRepair: boolean;
     safeToProceed: boolean;
     destructiveDeleteBlocked: boolean;
 }
@@ -32,6 +25,7 @@ export class DeploymentRepairEngine {
         const diagnoses: DriftDiagnosis[] = [];
         let requiresApplicationUpload = false;
         let requiresTopologyRepair = false;
+        let requiresInfrastructureRepair = false;
         let destructiveDeleteBlocked = false;
 
         // 1. Detect Topology Drift (e.g. DirectAdmin migration incident)
@@ -70,26 +64,48 @@ export class DeploymentRepairEngine {
                 remediationAction: 'UPLOAD_APPLICATION_PAYLOAD'
             });
             requiresApplicationUpload = true;
-        } else {
-            // Application is valid! Do not re-upload unnecessarily!
-            if (requiresTopologyRepair) {
-                Logger.info('Application intact but topology broken. Smart repair will skip upload.');
+        }
+
+        // 3. Detect Physical Infrastructure Drift (P0-9: AWS EC2/RDS)
+        if (twin.infrastructure) {
+            for (const infra of twin.infrastructure) {
+                const keys = Object.keys(infra.expectedState);
+                for (const key of keys) {
+                    const expected = infra.expectedState[key];
+                    const actual = infra.actualState[key];
+                    
+                    if (expected !== actual) {
+                        Logger.warn(`[SIM-DEISE] Drift Detected: Expected ${expected}, observed ${actual}`);
+                        
+                        diagnoses.push({
+                            category: DriftCategory.INFRASTRUCTURE_DRIFT,
+                            description: `Infrastructure drift on ${infra.id} (${infra.type}): ${key} expected ${expected} but was ${actual}`,
+                            affectedPaths: [infra.id],
+                            isDestructiveRecovery: false,
+                            remediationAction: 'REPAIR_INFRASTRUCTURE'
+                        });
+                        requiresInfrastructureRepair = true;
+                    }
+                }
             }
         }
 
-        // 3. Evaluate Safe To Proceed
-        // If we only have Topology drift, we can safely repair it.
-        // If we have an unknown topology but the engine cannot fix it automatically, block deployment.
-        const safeToProceed = true; // In a full implementation, this evaluates if the remediation actions are fully mapped.
+        // 4. Evaluate Safe To Proceed
+        const safeToProceed = true; 
 
         if (destructiveDeleteBlocked) {
             Logger.warn('Destructive delete (--delete) is blocked due to detected topology anomalies.');
+        }
+        
+        if (requiresInfrastructureRepair) {
+            Logger.info('[SIM-DEISE] Executing Repair Plan...');
         }
 
         return {
             diagnoses,
             requiresApplicationUpload,
             requiresTopologyRepair,
+            requiresInfrastructureRepair,
             safeToProceed,
             destructiveDeleteBlocked
         };

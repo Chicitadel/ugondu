@@ -65,3 +65,23 @@ describe('Gate D: DEISE Physical Repair E2E (DirectAdmin)', () => {
         expect(execSpy).toHaveBeenCalledWith("mkdir -p /home/'admin'/domains/'ugondu_site'/public_html");
     });
 });
+
+import { AwsPhysicalRepairExecutor } from '../../deise/engine/aws-physical-repair-executor';
+describe('Gate D: DEISE Physical Repair E2E (AWS)', () => {
+    it('detects EC2 infrastructure drift and dispatches reconciliation', async () => {
+        const mockAwsClient: any = { };
+        const engine = new DeploymentRepairEngine();
+        const executor = new AwsPhysicalRepairExecutor(mockAwsClient);
+
+        const twin: any = { provider: {}, topology: {}, application: {}, runtime: {}, infrastructure: [
+            { id: 'i-12345', type: 'EC2', expectedState: { instanceType: 't3.micro' }, actualState: { instanceType: 't3.large' } }
+        ] };
+
+        const plan = await engine.diagnoseEnvironment(twin, 'expected-v2');
+
+        expect(plan.requiresInfrastructureRepair).toBe(true);
+        const success = await executor.executeRepair(plan);
+        expect(success).toBe(true);
+    });
+});
+

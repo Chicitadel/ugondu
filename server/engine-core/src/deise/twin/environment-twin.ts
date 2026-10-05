@@ -42,5 +42,14 @@ export interface EnvironmentTwin {
     provider: ProviderTwin;
     topology: TopologyTwin;
     application: ApplicationTwin;
+    infrastructure?: InfrastructureTwin[];
     runtime: RuntimeTwin;
 }
+
+export interface InfrastructureTwin {
+    id: string;
+    type: 'EC2' | 'RDS' | 'VPC' | 'S3';
+    expectedState: Record<string, any>;
+    actualState: Record<string, any>;
+}
+

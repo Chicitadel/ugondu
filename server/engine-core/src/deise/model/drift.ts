@@ -30,7 +30,8 @@ export enum DriftCategory {
     ENVIRONMENT_DRIFT = 'ENVIRONMENT_DRIFT',
 
     /** Execution environment broken (missing extensions, no DB conn). */
-    RUNTIME_DRIFT = 'RUNTIME_DRIFT'
+    RUNTIME_DRIFT = 'RUNTIME_DRIFT',
+    INFRASTRUCTURE_DRIFT = 'INFRASTRUCTURE_DRIFT'
 }
 
 export enum ObjectType {
