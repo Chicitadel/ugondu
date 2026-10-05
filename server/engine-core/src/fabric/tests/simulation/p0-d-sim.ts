@@ -78,7 +78,7 @@ class SimulationAwsClient implements IAwsClient {
     async createSnapshot(req: any) {
         const snap = `snap-${req.resourceId || req}-${`${++this.idCounter}`}`;
         this.state[snap] = { type: 'snapshot', status: 'completed' };
-        Logger.info(`[SIM-AWS] Created Snapshot ${snap} for ${id}`);
+        Logger.info(`[SIM-AWS] Created Snapshot ${snap} for ${typeof req === 'string' ? req : req.resourceId}`);
         return snap;
     }
     async deleteSnapshot(id: string) {
@@ -125,9 +125,9 @@ class SimulationDirectAdminClient implements IDirectAdminClient {
         Logger.info(`[SIM-DA] Removed Account FILE ${id}`);
     }
     async createSnapshot(req: any) {
-        const snap = `backup-${id}.tar.gz`;
+        const snap = `backup-${typeof req === 'string' ? req : req.resourceId}.tar.gz`;
         this.state[snap] = { type: 'snapshot', status: 'completed' };
-        Logger.info(`[SIM-DA] Created Snapshot ${snap} for ${id}`);
+        Logger.info(`[SIM-DA] Created Snapshot ${snap} for ${typeof req === 'string' ? req : req.resourceId}`);
         return snap;
     }
     async deleteSnapshot(id: string) {
@@ -290,3 +290,4 @@ async function executeSimulations() {
 }
 
 executeSimulations().catch(console.error);
+

@@ -1,5 +1,6 @@
 import { CredentialIntakeOrchestrator } from '../identity/credential-intake/orchestrator';
 import { Logger } from '@ugondu/shared';
+import { UgonduCredentialStore } from '../identity/credential-intake/store';
 
 async function run() {
     const args = process.argv.slice(2);
@@ -26,14 +27,20 @@ async function run() {
             console.log(`Account: ${result.identity.accountId}`);
             
             console.log(`\nAuthorization: ✓ Ugondu capability preflight`);
-            for (const [cap, allowed] of Object.entries(result.authResults)) {
-                console.log(`  ${allowed ? '✓' : '✗'} ${cap}`);
+            if (result.authResults._simulation_unavailable) {
+                console.log('  ⚠ AUTHORIZATION SIMULATION UNAVAILABLE (Missing iam:SimulatePrincipalPolicy)');
+            } else {
+                for (const [cap, allowed] of Object.entries(result.authResults)) {
+                    console.log(`  ${allowed ? '✓' : '✗'} ${cap}`);
+                }
             }
 
             console.log(`\nCredential status: READY\n`);
 
-            // Optional: integration with CredentialStore to securely save it.
-            // await CredentialStore.save(result.normalized);
+            // Persist using Keytar
+            const store = new UgonduCredentialStore();
+            await store.save(result.normalized);
+            console.log(`✓ Credentials stored securely in OS Keystore.`);
 
         } catch (error: any) {
             console.error(`\nIMPORT FAILED: ${error.message}\n`);

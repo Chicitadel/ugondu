@@ -1,3 +1,4 @@
+process.env.UGONDU_UPM_SECRET = 'test-secret';
 import { UpmExecutionGate, GatingContext, ExecutionAuthorization } from '../policy-gate';
 import { ArchitectureIR } from '../../fabric/engine/ProvisioningTypes';
 

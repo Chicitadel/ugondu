@@ -30,5 +30,5 @@ export interface AuthenticationVerifier {
 }
 
 export interface AuthorizationPreflight {
-    preflight(credential: NormalizedCredential, identity: AuthenticatedIdentity, capabilities: string[]): Promise<Record<string, boolean>>;
+    preflight(credential: NormalizedCredential, identity: AuthenticatedIdentity, capabilities: string[]): Promise<any>;
 }

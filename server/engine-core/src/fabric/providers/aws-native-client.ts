@@ -263,11 +263,7 @@ export class AwsNativeClient implements IAwsClient {
             return snapId;
         } else if (type === 'EBS_VOLUME') {
             const { CreateSnapshotCommand } = require('@aws-sdk/client-ec2');
-            const cmd = new CreateSnapshotCommand({ VolumeId: id });
-            const res = await this.ec2.send(cmd);
-            if (!res.SnapshotId) throw new Error('EBS Snapshot creation failed');
-            return res.SnapshotId;
-        } else if (type === 'EC2_INSTANCE') {
+            const cmd = new CreateSnapshotCommand({ VolumeId: id } else if (type === 'EC2_INSTANCE') {
             const { CreateImageCommand } = require('@aws-sdk/client-ec2');
             const amiName = `ami-${id}-${Date.now()}`;
             const cmd = new CreateImageCommand({ InstanceId: id, Name: amiName, NoReboot: true });
@@ -276,9 +272,6 @@ export class AwsNativeClient implements IAwsClient {
             return res.ImageId;
         }
         throw new Error(`Unsupported AWS snapshot resourceType: ${type}`);
-    });
-        const res = await this.ec2.send(cmd);
-        if (!res.SnapshotId) throw new Error('EBS Snapshot creation failed');
-        return res.SnapshotId;
     }
 }
+

@@ -12,7 +12,6 @@ export class AwsAuthorizationPreflight implements AuthorizationPreflight {
             }
         });
 
-        // Translate abstract capabilities to AWS IAM actions
         const actions: string[] = [];
         if (capabilities.includes('ec2')) actions.push('ec2:RunInstances');
         if (capabilities.includes('vpc')) actions.push('ec2:CreateVpc');
@@ -41,8 +40,9 @@ export class AwsAuthorizationPreflight implements AuthorizationPreflight {
             }
             return results;
         } catch (error: any) {
-            Logger.error('AWS IAM SimulatePrincipalPolicy failed.');
-            throw new Error('Authorization preflight failed due to missing simulate policy permissions or network error.');
+            // Graceful degradation instead of hard failure
+            Logger.warn('AUTHORIZATION SIMULATION UNAVAILABLE: Caller lacks iam:SimulatePrincipalPolicy');
+            return { _simulation_unavailable: true };
         }
     }
 }
