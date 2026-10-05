@@ -52,15 +52,20 @@ export interface IAwsClient {
   
   createVpc(cidr: string, name: string): Promise<string>;
   deleteVpc(id: string): Promise<void>;
+  discoverAvailabilityZones(): Promise<string[]>;
+  createSecurityGroup(vpcId: string, name: string): Promise<string>;
+  deleteSecurityGroup(id: string): Promise<void>;
+  createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string>;
+  deleteDBSubnetGroup(name: string): Promise<void>;
   
-  createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string): Promise<{ id: string; endpoint: string }>;
+  createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string, dbSubnetGroupName?: string): Promise<{ id: string; endpoint: string }>;
   deleteRds(id: string): Promise<void>;
   
   createS3Bucket(name: string, isPublic: boolean): Promise<{ id: string; endpoint: string }>;
   deleteS3Bucket(id: string): Promise<void>;
   getInstanceStatus(id: string): Promise<ComputeStatus>;
-  createSubnet(vpcId: string, cidr: string): Promise<SubnetResult>;
-  createSnapshot(id: string): Promise<string>;
+  createSubnet(vpcId: string, cidr: string, az?: string): Promise<SubnetResult>;
+  createSnapshot(req: { resourceType: 'EBS_VOLUME' | 'RDS_INSTANCE' | 'EC2_INSTANCE', resourceId: string }): Promise<string>;
 }
 
 export class AwsAdapter implements ComputeCapability, NetworkCapability, DatabaseCapability, StorageCapability {
@@ -97,6 +102,11 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
 
   public async deleteVirtualNetwork(id: string): Promise<void> {
     await this.client.deleteVpc(id);
+  discoverAvailabilityZones(): Promise<string[]>;
+  createSecurityGroup(vpcId: string, name: string): Promise<string>;
+  deleteSecurityGroup(id: string): Promise<void>;
+  createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string>;
+  deleteDBSubnetGroup(name: string): Promise<void>;
   }
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {
@@ -113,8 +123,8 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
     await this.client.deleteRds(id);
   }
 
-  public async createSnapshot(id: string): Promise<string> {
-    return await this.client.createSnapshot(id);
+  public async createSnapshot(req: { resourceType: 'EBS_VOLUME' | 'RDS_INSTANCE' | 'EC2_INSTANCE', resourceId: string }): Promise<string> {
+    return await this.client.createSnapshot(req);
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {

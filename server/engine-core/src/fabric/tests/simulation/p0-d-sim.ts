@@ -69,7 +69,7 @@ class SimulationAwsClient implements IAwsClient {
         Logger.info(`[SIM-AWS] Created Subnet ${id} in ${vpcId}`);
         return { id, cidr };
     }
-    async createSnapshot(id: string) {
+    async createSnapshot(req: any) {
         const snap = `snap-${id}-${`${++this.idCounter}`}`;
         this.state[snap] = { type: 'snapshot', status: 'completed' };
         Logger.info(`[SIM-AWS] Created Snapshot ${snap} for ${id}`);
@@ -118,7 +118,7 @@ class SimulationDirectAdminClient implements IDirectAdminClient {
         delete this.state[id];
         Logger.info(`[SIM-DA] Removed Account FILE ${id}`);
     }
-    async createSnapshot(id: string) {
+    async createSnapshot(req: any) {
         const snap = `backup-${id}.tar.gz`;
         this.state[snap] = { type: 'snapshot', status: 'completed' };
         Logger.info(`[SIM-DA] Created Snapshot ${snap} for ${id}`);

@@ -80,7 +80,7 @@ export function fakeCloud(provider: string, shared: { calls: string[]; dryRuns: 
   const database: DatabaseCapability = {
     provisionDatabase: async (c: DatabaseConfig, o) => ({ id: create('database', c.name, c, o), connectionString: `db://${c.name}` }),
     deprovisionDatabase: async (id) => remove('database', id),
-    createSnapshot: async (id) => `snap-${id}`,
+    createSnapshot: async (req: any) => `snap-${id}`,
   };
   const storage: StorageCapability = {
     provisionStorage: async (c: StorageConfig, o) => ({ id: create('storage', c.name, c, o), endpoint: `https://${c.name}`, resolved: { storageClass: c.storageClass } }),

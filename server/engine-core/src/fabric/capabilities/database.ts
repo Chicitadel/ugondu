@@ -40,7 +40,7 @@ export const DATABASE_ENGINES: ReadonlyArray<DatabaseEngine> = ['postgres', 'mys
 export interface DatabaseCapability {
   provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult>;
   deprovisionDatabase(id: string): Promise<void>;
-  createSnapshot(id: string): Promise<string>;
+  createSnapshot(req: import('./snapshot').SnapshotRequest | { resourceType: string, resourceId: string }): Promise<string>;
 }
 
 /**

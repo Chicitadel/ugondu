@@ -53,7 +53,7 @@ export interface IWhmClient {
   
   createDatabase(name: string, engine: string, capacity: number, credentialsRef?: string): Promise<{ id: string; endpoint: string }>;
   removeDatabase(id: string): Promise<void>;
-  createSnapshot(id: string): Promise<string>;
+  createSnapshot(req: any): Promise<string>;
   
   createAccountFilesystem(name: string): Promise<{ id: string; endpoint: string }>;
   removeAccountFilesystem(id: string): Promise<void>;
@@ -88,7 +88,7 @@ export class CpanelAdapter implements ComputeCapability, DatabaseCapability, Sto
     await this.client.removeDatabase(id);
   }
 
-  public async createSnapshot(id: string): Promise<string> {
+  public async createSnapshot(req: any): Promise<string> {
     return await this.client.createSnapshot(id);
   }
 
