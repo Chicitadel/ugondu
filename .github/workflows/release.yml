@@ -66,6 +66,19 @@ jobs:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
 
+      
+      - name: Download Simulation Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: simulation-evidence
+          path: evidence/
+
+      - name: Upload Evidence to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} evidence/COR_SIMULATION_EVIDENCE.json evidence/COR_SIMULATION_LOG.txt evidence/COR_SIMULATION_SHA256.txt
+
       - name: Generate subject for provenance
         id: hash
         env:
