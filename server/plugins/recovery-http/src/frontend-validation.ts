@@ -61,9 +61,39 @@ export class FrontendValidation implements RecoveryCapability {
         if (!plan.requiresConfigurationRepair) {
             return true;
         }
-        // Actually execute validation or fail
-        // COR-013: Do not return true if incomplete
-        throw new Error('FrontendValidation execution is not fully implemented yet.');
+        
+        // Execute configuration repairs
+        for (const repair of plan.configurationRepairs || []) {
+            try {
+                await adapter.applyConfigurationRepair(repair.type, repair.target);
+            } catch (error) {
+                console.error(`[FrontendValidation] Repair failed for ${repair.type}:`, error);
+                return false;
+            }
+        }
+
+        // HTTP health check execution loop logic via abstract fetch patterns
+        const domain = scope.resourceIdentifiers[0] || 'localhost';
+        const targetUrl = `https://${domain}`;
+        const maxRetries = 3;
+        const retryDelayMs = 3000;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const response = await fetch(targetUrl);
+                if (response.ok) {
+                    return true;
+                }
+            } catch (error) {
+                // Fetch failed, loop will retry
+                console.warn(`[FrontendValidation] Health check attempt ${attempt} failed.`);
+            }
+            if (attempt < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+            }
+        }
+
+        return false;
     }
 }
 

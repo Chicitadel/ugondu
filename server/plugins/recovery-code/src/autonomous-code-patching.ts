@@ -21,8 +21,20 @@ export class AutonomousCodePatching implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         if (!plan.requiresCodePatching) return true;
-        // COR-013: Do not return true if incomplete
-        throw new Error('AutonomousCodePatching is not yet implemented.');
+        
+        let allPatchesSuccessful = true;
+        
+        for (const patch of plan.patches || []) {
+            try {
+                // Abstract execution of the code patch logic
+                await adapter.executePatchStrategy(patch.target, patch.strategy);
+            } catch (error) {
+                console.error(`[AutonomousCodePatching] Failed to apply patch strategy '${patch.strategy}' on '${patch.target}':`, error);
+                allPatchesSuccessful = false;
+            }
+        }
+        
+        return allPatchesSuccessful;
     }
 }
 
