@@ -2,16 +2,14 @@ $ErrorActionPreference = 'Stop'
 
 function Assert-No-Match {
     param([string]$Pattern, [string]$Path, [string]$Message)
-    # Using git ls-files ensures we only search tracked files, cleanly avoiding node_modules/dist
-    $files = git -C $Path ls-files | ForEach-Object { "$Path\$_" }
+    
+    $files = git ls-files $Path
     
     $matches = @()
     foreach ($file in $files) {
-        if (Test-Path $file -PathType Leaf) {
-            if ($file -match '\.md$' -or $file -match '\.json$' -or $file -match '\.js$') { continue }
-            $res = Select-String -Path $file -Pattern $Pattern | Where-Object { $_.Line -notmatch 'VERIFIED' -and $_.Line -notmatch '<placeholder>' -and $_.Line -notmatch '// placeholder:' }
-            if ($res) { $matches += $res }
-        }
+        if ($file -match '\.md$' -or $file -match '\.json$' -or $file -match '\.js$' -or $file -match 'verify-cor-candidate\.ps1$') { continue }
+        $res = Select-String -Path $file -Pattern $Pattern | Where-Object { $_.Line -notmatch 'VERIFIED' -and $_.Line -notmatch '<placeholder>' -and $_.Line -notmatch '// placeholder:' }
+        if ($res) { $matches += $res }
     }
 
     if ($matches.Count -gt 0) {
@@ -47,13 +45,13 @@ git diff --check
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 echo "7. No secrets check"
-Assert-No-Match -Pattern "rds-test-password-123|hardcoded_secret" -Path "server/engine-core/src" -Message "Secrets found"
+Assert-No-Match -Pattern "rds-test-password-123|hardcoded_secret" -Path "server/engine-core" -Message "Secrets found"
 
 echo "8. No placeholder evidence"
 Assert-No-Match -Pattern "hash123|'verified'|`"verified`"|canonical-123|placeholder" -Path "server/engine-core" -Message "Placeholder evidence found"
 
 echo "9. No NotImplemented"
-Assert-No-Match -Pattern "NotImplemented" -Path "server/engine-core/src" -Message "NotImplemented found"
+Assert-No-Match -Pattern "NotImplemented" -Path "server/engine-core" -Message "NotImplemented found"
 
 echo "12. No hardcoded AMIs"
 Assert-No-Match -Pattern "ami-[0-9a-f]{8,}" -Path "server/engine-core" -Message "Hardcoded AMI found"
