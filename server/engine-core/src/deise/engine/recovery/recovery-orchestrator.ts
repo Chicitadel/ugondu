@@ -1,7 +1,7 @@
 import { RecoveryContract, BlastRadiusAnalysis, RecoveryCertificate } from './recovery-contract';
 import { LiveEnvironmentAdapterContract, RecoveryScope } from './live-environment-adapter-contract';
 import { EnvironmentTwin } from '../../twin/environment-twin';
-import { DiagnosisPlan } from '../repair-engine';
+import { RepairPlan } from '../repair-engine';
 import * as crypto from 'crypto';
 
 export class RecoveryOrchestrator implements RecoveryContract {
@@ -20,16 +20,16 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return adapter.fingerprintRepository(scope);
     }
 
-    async diagnose(twin: EnvironmentTwin): Promise<DiagnosisPlan> {
+    async diagnose(twin: EnvironmentTwin): Promise<RepairPlan> {
         // ... invoke actual repair engine diagnosis ...
         throw new Error('Not implemented');
     }
 
-    async generateRecoveryPlan(diagnosis: DiagnosisPlan): Promise<DiagnosisPlan> {
+    async generateRecoveryPlan(diagnosis: RepairPlan): Promise<RepairPlan> {
         return diagnosis;
     }
 
-    async analyzeBlastRadius(plan: DiagnosisPlan, scope: RecoveryScope): Promise<BlastRadiusAnalysis> {
+    async analyzeBlastRadius(plan: RepairPlan, scope: RecoveryScope): Promise<BlastRadiusAnalysis> {
         const analysis: BlastRadiusAnalysis = {
             isSafe: true,
             authorizedScope: scope.resourceIdentifiers,
@@ -53,7 +53,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return analysis;
     }
 
-    async dryRun(plan: DiagnosisPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
+    async dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
         const dryResult = await adapter.dryRun(plan, scope);
         if (!dryResult.safe) {
             throw new Error('Dry run indicates unsafe mutations.');
@@ -61,12 +61,12 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return true;
     }
 
-    async requestApproval(plan: DiagnosisPlan, analysis: BlastRadiusAnalysis): Promise<boolean> {
+    async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis): Promise<boolean> {
         if (!analysis.isSafe) throw new Error('Cannot approve an unsafe plan.');
         return true; // Explicit approval gate
     }
 
-    async executeAtomically(plan: DiagnosisPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }> {
+    async executeAtomically(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }> {
         // Pre-execution drift check
         if (!scope.baselineFingerprint) throw new Error('Baseline fingerprint missing for drift check');
         const driftSafe = await adapter.checkDrift(scope, scope.baselineFingerprint);

@@ -15,3 +15,19 @@ invariants:
       applications, repositories, tenants, databases, domains, DNS records, credentials, files,
       or hosting configuration unless those resources are explicitly declared as dependencies
       of the approved recovery transaction.
+
+  - id: REFERENCE_ENVIRONMENT_NON_ENTANGLEMENT
+    name: Reference Environment Non-Entanglement Invariant
+    description: >
+      A real environment used to validate Ugondu MUST be represented as an external environment instance
+      and MUST NOT become an architectural dependency, hardcoded fixture, provider-specific assumption,
+      product-specific recovery rule, or contractual prerequisite of Ugondu. Conformance behavior MUST
+      be expressed through universal contracts, capabilities, resource types, adapters, policies, and evidence schemas.
+
+  - id: REAL_WORLD_CASE_GENERALIZATION
+    name: Real-World Case Generalization Invariant
+    description: >
+      When a real production environment exposes a previously unknown failure mode, Ugondu MUST generalize
+      the observed failure into a provider-neutral resource, relationship, capability, diagnosis, or recovery pattern
+      before incorporating it into the universal platform. The original environment may be retained as a conformance case
+      but MUST NOT define the universal abstraction.

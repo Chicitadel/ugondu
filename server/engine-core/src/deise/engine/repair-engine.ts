@@ -10,6 +10,7 @@ export interface RepairPlan {
     requiresApplicationUpload: boolean;
     requiresTopologyRepair: boolean;
     requiresInfrastructureRepair: boolean;
+    infrastructureRepairs?: any[];
     safeToProceed: boolean;
     destructiveDeleteBlocked: boolean;
 }

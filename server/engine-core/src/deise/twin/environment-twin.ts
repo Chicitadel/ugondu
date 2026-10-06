@@ -55,6 +55,10 @@ export interface EnvironmentTwin {
     certificateInventory?: Record<string, any>;
     cronInventory?: Record<string, any>;
     backupInventory?: Record<string, any>;
+    
+    // Resource Graph mapping actual relationships
+    resourceGraphEdges?: Array<{ source: string; target: string; relation: string }>;
+    
     immutableEvidenceSnapshotId?: string;
 }
 

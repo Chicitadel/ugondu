@@ -1,5 +1,5 @@
 import { EnvironmentTwin } from '../../twin/environment-twin';
-import { DiagnosisPlan } from '../repair-engine';
+import { RepairPlan } from '../repair-engine';
 
 export interface RecoveryScope {
     targetUri: string;
@@ -34,12 +34,12 @@ export interface LiveEnvironmentAdapterContract {
     /**
      * Dry run without mutation: calculate exact filesystem/database/configuration/DNS changes.
      */
-    dryRun(plan: DiagnosisPlan, scope: RecoveryScope): Promise<{ plannedMutations: any[], safe: boolean }>;
+    dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ plannedMutations: any[], safe: boolean }>;
 
     /**
      * Execute mutations with compensating transactions and checkpoints.
      */
-    executeAtomicRecovery(plan: DiagnosisPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }>;
+    executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }>;
 
     /**
      * Trigger compensating transactions if atomic execution fails.

@@ -1,6 +1,6 @@
 import { LiveEnvironmentAdapterContract, RecoveryScope } from './live-environment-adapter-contract';
 import { EnvironmentTwin } from '../../twin/environment-twin';
-import { DiagnosisPlan } from '../repair-engine';
+import { RepairPlan } from '../repair-engine';
 
 export interface BlastRadiusAnalysis {
     isSafe: boolean;
@@ -30,17 +30,17 @@ export interface RecoveryContract {
     
     fingerprint(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<string>;
     
-    diagnose(twin: EnvironmentTwin): Promise<DiagnosisPlan>;
+    diagnose(twin: EnvironmentTwin): Promise<RepairPlan>;
     
-    generateRecoveryPlan(diagnosis: DiagnosisPlan): Promise<DiagnosisPlan>;
+    generateRecoveryPlan(diagnosis: RepairPlan): Promise<RepairPlan>;
     
-    analyzeBlastRadius(plan: DiagnosisPlan, scope: RecoveryScope): Promise<BlastRadiusAnalysis>;
+    analyzeBlastRadius(plan: RepairPlan, scope: RecoveryScope): Promise<BlastRadiusAnalysis>;
     
-    dryRun(plan: DiagnosisPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean>;
+    dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean>;
     
-    requestApproval(plan: DiagnosisPlan, analysis: BlastRadiusAnalysis): Promise<boolean>;
+    requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis): Promise<boolean>;
     
-    executeAtomically(plan: DiagnosisPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }>;
+    executeAtomically(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }>;
     
     verify(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, verificationEvidence: any }>;
     
