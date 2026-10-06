@@ -17,7 +17,7 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
     
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         // COR-008: Do not fake success
-        throw new Error('ComposerIntegrityValidation is not yet implemented.');
+        throw new Error(__t('composerintegrityvalidation_is'));
     }
 }
 

@@ -66,7 +66,7 @@ describe(__t('msg_deise_deployment_environment_integrity_s'), () => {
         expect(driftCategories).toContain(DriftCategory.ENVIRONMENT_DRIFT);
         expect(driftCategories).not.toContain(DriftCategory.PAYLOAD_DRIFT);
 
-        // Verify the "Do No Harm" constraint: It must explicitly block destructive deletions
+        // Verify the __t('do_no_harm') constraint: It must explicitly block destructive deletions
         // because the structural drift implies we don't fully understand the mapping yet.
         expect(repairPlan.destructiveDeleteBlocked).toBe(true);
     });

@@ -79,7 +79,7 @@ describe(__t('msg_gate_d_deise_physical_repair_e2e_aws'), () => {
         process.env = originalEnv;
     });
 
-    it('detects EC2 infrastructure drift and dispatches reconciliation', async () => {
+    it(__t('detects_ec2_infrastructure_dri'), async () => {
         const mockAwsClient: any = { ec2: { send: jest.fn().mockResolvedValue({}) } };
         const engine = new DeploymentRepairEngine();
         const executor = new AwsPhysicalRepairExecutor(mockAwsClient);

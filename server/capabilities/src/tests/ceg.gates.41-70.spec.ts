@@ -18,7 +18,7 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('CEG Qualification Gates: CEG-41..70', () => {
+describe(__t('ceg_qualification_gates_ceg_41'), () => {
   it('CEG-45..52: Offline & Cache Resiliency with OfflineLicenseEvaluator', () => {
     const evaluator = new OfflineLicenseEvaluator();
     expect(evaluator).toBeDefined();
@@ -35,7 +35,7 @@ describe('CEG Qualification Gates: CEG-41..70', () => {
     expect(() => evaluator.evaluateManifest(tampered)).toThrow();
   });
 
-  it('CEG-65..68: Downgrade Compatibility Engine validation', () => {
+  it(__t('ceg_65_68_downgrade_compatibil'), () => {
     const graph = new CapabilityDependencyGraph();
     graph.register('ADVANCED_MONITORING', ['CORE_METRICS']);
     const report = graph.validateDeactivation('CORE_METRICS', ['ADVANCED_MONITORING']);

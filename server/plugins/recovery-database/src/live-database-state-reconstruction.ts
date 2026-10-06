@@ -17,7 +17,7 @@ export class LiveDatabaseStateReconstruction implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         // COR-009: Do not fake success
-        throw new Error('LiveDatabaseStateReconstruction is not yet implemented.');
+        throw new Error(__t('livedatabasestatereconstructio'));
     }
 }
 

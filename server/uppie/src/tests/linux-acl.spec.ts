@@ -77,8 +77,8 @@ function rule(over: Record<string, any> = {}): any {
   };
 }
 
-describe('POSIX ACL parser', () => {
-  it('parses getfacl blocks including default entries', () => {
+describe(__t('posix_acl_parser'), () => {
+  it(__t('parses_getfacl_blocks_includin'), () => {
     const acls = parseGetfacl(GETFACL);
     expect(acls.length).toBe(2);
     expect(acls[0].path).toBe('/srv/data');
@@ -86,7 +86,7 @@ describe('POSIX ACL parser', () => {
     expect(acls[0].entries.some((e: any) => e.isDefault && e.qualifier === 'alice')).toBe(true);
   });
 
-  it('applies owner, named-user, masked group and other rules in POSIX order', () => {
+  it(__t('applies_owner_named_user_maske'), () => {
     const acl = parseGetfacl(GETFACL)[0];
     expect(effectivePerms(acl, 'root', [])).toBe('rwx');
     expect(effectivePerms(acl, 'alice', [])).toBe('rw-');
@@ -95,12 +95,12 @@ describe('POSIX ACL parser', () => {
     expect(effectivePerms(acl, 'mallory', [])).toBe('---');
   });
 
-  it('clamps named entries to the mask', () => {
+  it(__t('clamps_named_entries_to_the_ma'), () => {
     const acl = parseGetfacl('# file: /x\n# owner: root\n# group: root\nuser::rwx\nuser:alice:rwx\ngroup::r--\nmask::r--\nother::---\n')[0];
     expect(effectivePerms(acl, 'alice', [])).toBe('r--');
   });
 
-  it('rejects unsafe paths', () => {
+  it(__t('rejects_unsafe_paths'), () => {
     expect(isSafePath('/srv/data')).toBe(true);
     for (const bad of ['relative/path', '/srv/../etc', '/srv/data\n/etc', '', '-rf', '/a\u0000b']) {
       expect(isSafePath(bad)).toBe(false);
@@ -108,8 +108,8 @@ describe('POSIX ACL parser', () => {
   });
 });
 
-describe('LinuxAclAdapter compilation', () => {
-  it('compiles an ALLOW rule into a setfacl entry for the subject principal', async () => {
+describe(__t('linuxacladapter_compilation'), () => {
+  it(__t('compiles_an_allow_rule_into_a_'), async () => {
     const policy = await new LinuxAclAdapter(fakeSystem().system).generate([rule()], ctx);
     const doc = policy.nativeDocument as any;
     expect(doc.acls[0].path).toBe('/srv/data');
@@ -118,7 +118,7 @@ describe('LinuxAclAdapter compilation', () => {
     expect(/^[a-f0-9]{64}$/.test(policy.digest)).toBe(true);
   });
 
-  it('uses the g: tag for group subjects and never emits DENY rules', async () => {
+  it(__t('uses_the_g_tag_for_group_subje'), async () => {
     const policy = await new LinuxAclAdapter(fakeSystem().system).generate([
       rule({ subject: { type: 'GROUP', id: 'dev' }, action: { capability: 'x', operations: ['read'] } }),
       rule({ effect: 'DENY', subject: { type: 'USER', id: 'eve' } }),
@@ -126,14 +126,14 @@ describe('LinuxAclAdapter compilation', () => {
     expect((policy.nativeDocument as any).acls[0].entries).toEqual(['g:dev:r--']);
   });
 
-  it('compiles sudo rules with a root run-as user and absolute commands', async () => {
+  it(__t('compiles_sudo_rules_with_a_roo'), async () => {
     const policy = await new LinuxAclAdapter(fakeSystem().system).generate([
       rule({ resource: { type: 'linux::sudo::Command', scope: 'host' }, action: { capability: 'sudo', operations: ['/bin/ls', '/usr/bin/id'] } }),
     ], ctx);
     expect((policy.nativeDocument as any).sudoers).toEqual(['alice ALL=(root) /bin/ls, /usr/bin/id']);
   });
 
-  it('rejects injection attempts in principals, operations, commands and paths', async () => {
+  it(__t('rejects_injection_attempts_in_'), async () => {
     const adapter = new LinuxAclAdapter(fakeSystem().system);
     for (const bad of [
       rule({ subject: { type: 'USER', id: 'alice;rm -rf /' } }),
@@ -147,7 +147,7 @@ describe('LinuxAclAdapter compilation', () => {
     }
   });
 
-  it('refuses to mix ACL and sudo rules in one policy', async () => {
+  it(__t('refuses_to_mix_acl_and_sudo_ru'), async () => {
     let message = '';
     try {
       await new LinuxAclAdapter(fakeSystem().system).generate([
@@ -157,18 +157,18 @@ describe('LinuxAclAdapter compilation', () => {
     expect(message).toBe(__t('linux_acl.validate.mixed_document'));
   });
 
-  it('validates entry syntax and the 32-entry limit', async () => {
+  it(__t('validates_entry_syntax_and_the'), async () => {
     const adapter = new LinuxAclAdapter(fakeSystem().system);
     const many = Array.from({ length: 33 }, (_, i) => `u:user${i}:r--`);
-    const res = await adapter.validate({ providerId: 'x', providerType: 'LINUX_ACL', digest: '', nativeDocument: { acls: [{ path: '/srv', entries: [...many, 'u:bad name:rw-'] }], sudoers: [] } }, ctx);
+    const res = await adapter.validate({ providerId: 'x', providerType: 'LINUX_ACL', digest: '', nativeDocument: { acls: [{ path: '/srv', entries: [...many, __t('u_bad_name_rw')] }], sudoers: [] } }, ctx);
     expect(res.valid).toBe(false);
     expect(res.errors).toContain(__t('linux_acl.validate.too_many_entries', { count: 34, limit: 32 }));
-    expect(res.errors).toContain(__t('linux_acl.validate.invalid_entry', { entry: 'u:bad name:rw-' }));
+    expect(res.errors).toContain(__t('linux_acl.validate.invalid_entry', { entry: __t('u_bad_name_rw') }));
   });
 });
 
-describe('LinuxAclAdapter operations', () => {
-  it('discovers extended ACL policies and assignments from getfacl output', async () => {
+describe(__t('linuxacladapter_operations'), () => {
+  it(__t('discovers_extended_acl_policie'), async () => {
     const { system, calls } = fakeSystem({ getfacl: () => GETFACL });
     const adapter = new LinuxAclAdapter(system);
     const policies = await adapter.discoverPolicies(ctx);
@@ -179,7 +179,7 @@ describe('LinuxAclAdapter operations', () => {
     expect(calls[0].args).toContain('--recursive');
   });
 
-  it('refuses to discover with an unsafe root', async () => {
+  it(__t('refuses_to_discover_with_an_un'), async () => {
     let threw = false;
     try { await new LinuxAclAdapter(fakeSystem().system).discoverPolicies({ ...ctx, environmentId: '../etc' }); } catch { threw = true; }
     expect(threw).toBe(true);
@@ -194,8 +194,8 @@ describe('LinuxAclAdapter operations', () => {
     expect((await adapter.discoverGroups(ctx))[0].members).toEqual(['alice', 'bob']);
   });
 
-  it('evaluates effective authority from the real ACL and the actor group list', async () => {
-    const { system } = fakeSystem({ getfacl: () => GETFACL, id: () => 'carol dev' });
+  it(__t('evaluates_effective_authority_'), async () => {
+    const { system } = fakeSystem({ getfacl: () => GETFACL, id: () => __t('carol_dev') });
     const adapter = new LinuxAclAdapter(system);
     const result = await adapter.discoverEffectiveAuthority('carol', '/srv/data', ctx);
     const states = Object.fromEntries(result.permissions.map((p: any) => [p.capability, p.state]));
@@ -204,7 +204,7 @@ describe('LinuxAclAdapter operations', () => {
     expect(await adapter.evaluate(rule({ subject: { type: 'USER', id: 'carol' }, action: { capability: 'x', operations: ['w'] } }), ctx)).toBe('DENIED');
   });
 
-  it('attaches with an argument vector (no shell) and rejects traversal targets', async () => {
+  it(__t('attaches_with_an_argument_vect'), async () => {
     const { system, calls } = fakeSystem();
     const adapter = new LinuxAclAdapter(system);
     const policy = await adapter.generate([rule()], ctx);
@@ -217,7 +217,7 @@ describe('LinuxAclAdapter operations', () => {
     expect(none.errors).toContain(__t('linux_acl.attach.no_entries'));
   });
 
-  it('detaches by specifier and rejects malformed specifiers', async () => {
+  it(__t('detaches_by_specifier_and_reje'), async () => {
     const { system, calls } = fakeSystem();
     const adapter = new LinuxAclAdapter(system);
     expect((await adapter.detach('u:alice,g:dev', '/srv/data', ctx)).success).toBe(true);
@@ -225,7 +225,7 @@ describe('LinuxAclAdapter operations', () => {
     expect((await adapter.detach('u:alice; reboot', '/srv/data', ctx)).success).toBe(false);
   });
 
-  it('installs sudoers only after visudo validation and removes the temp file on failure', async () => {
+  it(__t('installs_sudoers_only_after_vi'), async () => {
     const good = fakeSystem();
     const adapter = new LinuxAclAdapter(good.system);
     const policy = await adapter.generate([rule({ resource: { type: 'linux::sudo::Command', scope: 'h' }, action: { capability: 'x', operations: ['/bin/ls'] } })], ctx);
@@ -233,7 +233,7 @@ describe('LinuxAclAdapter operations', () => {
     expect(good.files.get(`${SUDOERS_TARGET}/${policy.providerId}`)).toBe('alice ALL=(root) /bin/ls\n');
     expect(good.calls[0].file).toBe('visudo');
 
-    const bad = fakeSystem({ visudo: () => new Error('syntax error') });
+    const bad = fakeSystem({ visudo: () => new Error(__t('syntax_error')) });
     const res = await new LinuxAclAdapter(bad.system).attach(policy, SUDOERS_TARGET, ctx);
     expect(res.success).toBe(false);
     expect(bad.files.size).toBe(0);
@@ -243,7 +243,7 @@ describe('LinuxAclAdapter operations', () => {
     let setCalls = 0;
     const { system, calls } = fakeSystem({
       getfacl: () => GETFACL,
-      setfacl: (args) => { setCalls++; return args[0] === '-m' ? new Error('Operation not supported') : ''; },
+      setfacl: (args) => { setCalls++; return args[0] === '-m' ? new Error(__t('operation_not_supported')) : ''; },
     });
     const res = await new LinuxAclAdapter(system).update('/srv/data', [rule()], ctx);
     expect(res.success).toBe(false);
@@ -252,7 +252,7 @@ describe('LinuxAclAdapter operations', () => {
     expect(setCalls).toBe(3);
   });
 
-  it('retire captures a snapshot and restore replays it only for the same path', async () => {
+  it(__t('retire_captures_a_snapshot_and'), async () => {
     let stripped = false;
     const { system, calls } = fakeSystem({
       getfacl: () => (stripped ? '# file: /srv/data\n# owner: root\n# group: ops\nuser::rwx\ngroup::r-x\nother::---\n' : GETFACL),
@@ -270,7 +270,7 @@ describe('LinuxAclAdapter operations', () => {
     expect((await adapter.restore({ ...cert, rollbackReference: '' }, ctx)).errors).toContain(__t('linux_acl.restore.no_snapshot'));
   });
 
-  it('reconciles desired rules against observed entries', async () => {
+  it(__t('reconciles_desired_rules_again'), async () => {
     const adapter = new LinuxAclAdapter(fakeSystem().system);
     const observed = [{ providerId: 'x', providerType: 'LINUX_ACL', digest: '', nativeDocument: { acls: [{ path: '/srv/data', entries: ['u:alice:r--', 'u:bob:rw-'] }], sudoers: [] } }] as any;
     const plan = await adapter.reconcile([

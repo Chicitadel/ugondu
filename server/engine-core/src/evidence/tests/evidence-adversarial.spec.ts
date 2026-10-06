@@ -1,7 +1,7 @@
 import { EvidenceCollector, EvidenceValidator, ObservationRecord } from '../evidence-engine';
 import * as crypto from 'crypto';
 
-describe('Evidence Engine Adversarial Tests', () => {
+describe(__t('evidence_engine_adversarial_te'), () => {
   const collector = new EvidenceCollector();
 
   it('fake hash -> NOT_PROVEN', () => {

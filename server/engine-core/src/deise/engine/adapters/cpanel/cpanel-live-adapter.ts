@@ -6,7 +6,7 @@ export class CPanelLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async identify(scope: RecoveryScope, scopedCredentials: any): Promise<string> {
         if (!scopedCredentials || !scopedCredentials.cpanelToken) {
-            throw new Error('CPanel adapter requires specific scoped credentials (cpanelToken).');
+            throw new Error(__t('cpanel_adapter_requires_specif'));
         }
         return 'cpanel-protected-host';
     }

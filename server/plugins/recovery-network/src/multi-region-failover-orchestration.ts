@@ -17,7 +17,7 @@ export class MultiRegionFailoverOrchestration implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         // COR-010: Do not fake success
-        throw new Error('MultiRegionFailoverOrchestration is not yet implemented.');
+        throw new Error(__t('multiregionfailoverorchestrati'));
     }
 }
 

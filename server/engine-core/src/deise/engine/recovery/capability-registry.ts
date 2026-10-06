@@ -8,7 +8,7 @@ export class CapabilityRegistry {
 
     registerCapability(capability: any): void {
         if (!capability || typeof capability.capabilityId !== 'string') {
-            throw new Error('Invalid capability contract');
+            throw new Error(__t('invalid_capability_contract'));
         }
         this.plugins.set(capability.capabilityId, capability);
     }

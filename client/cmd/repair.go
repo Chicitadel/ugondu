@@ -75,7 +75,7 @@ func HandleRepairCommand(args []string) {
 		req.Header.Set("Content-Type", "application/json")
 		token := os.Getenv("UGONDU_TOKEN")
 		if token != "" {
-			req.Header.Set("Authorization", "Bearer "+token)
+			req.Header.Set("Authorization", i18n.T("bearer")+token)
 		}
 		
 		// Execute the actual HTTP request
@@ -114,6 +114,6 @@ func HandleRepairCommand(args []string) {
 		}
 		
 	} else {
-		fmt.Println("Unknown repair subcommand:", subcmd)
+		fmt.Println(i18n.T("unknown_repair_subcommand"), subcmd)
 	}
 }

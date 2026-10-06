@@ -29,20 +29,20 @@ function setup() {
   return { ...whm, adapter: new CpanelAdapter(async () => whm.client) };
 }
 
-describe('cPanel discovery', () => {
-  it('reports every feature list as a native policy whose digest depends only on its features', async () => {
+describe(__t('cpanel_discovery'), () => {
+  it(__t('reports_every_feature_list_as_'), async () => {
     const { adapter } = setup();
     const policies = await adapter.discoverPolicies(ctx);
-    expect(policies.map((p) => p.providerId)).toEqual(['Mail Only', 'default', 'disabled']);
+    expect(policies.map((p) => p.providerId)).toEqual([__t('mail_only'), 'default', 'disabled']);
     expect(policies.every((p) => p.providerType === 'CPANEL')).toBe(true);
-    expect(policies[0]?.nativeDocument).toEqual({ name: 'Mail Only', features: ['webmail'] });
+    expect(policies[0]?.nativeDocument).toEqual({ name: __t('mail_only'), features: ['webmail'] });
     expect(policies[1]?.nativeDocument).toEqual({ name: 'default', features: FEATURES });
     expect(policies[0]?.digest).toBe((await adapter.generate([rule({ action: { capability: 'x', operations: ['webmail'] } })], ctx)).digest);
   });
 
-  it('maps accounts to the feature list of their package and leaves out accounts whose package is missing', async () => {
+  it(__t('maps_accounts_to_the_feature_l'), async () => {
     const { adapter } = setup();
-    expect(await adapter.discoverAssignments(ctx)).toEqual({ alice: ['default'], bob: ['Mail Only'], carol: ['default'], dave: ['default'] });
+    expect(await adapter.discoverAssignments(ctx)).toEqual({ alice: ['default'], bob: [__t('mail_only')], carol: ['default'], dave: ['default'] });
   });
 
   it('reports accounts and resellers as identities, and packages as roles; there are no groups', async () => {
@@ -61,7 +61,7 @@ describe('cPanel discovery', () => {
       { id: 'Alpha', displayName: 'Alpha', policies: ['disabled'] },
       { id: 'default', displayName: 'default', policies: ['default'] },
       { id: 'Gold', displayName: 'Gold', policies: ['default'] },
-      { id: 'Mailer', displayName: 'Mailer', policies: ['Mail Only'] },
+      { id: 'Mailer', displayName: 'Mailer', policies: [__t('mail_only')] },
     ]);
     expect(await adapter.discoverGroups(ctx)).toEqual([]);
     expect(adapter.capabilities.discoverGroups).toBe('UNSUPPORTED');
@@ -69,8 +69,8 @@ describe('cPanel discovery', () => {
   });
 });
 
-describe('cPanel effective authority and evaluation', () => {
-  it('lists the features an account holds through its package and nothing for a suspended account', async () => {
+describe(__t('cpanel_effective_authority_and'), () => {
+  it(__t('lists_the_features_an_account_'), async () => {
     const { adapter } = setup();
     const alice = await adapter.discoverEffectiveAuthority('alice', 'alice.example.com', ctx);
     expect(alice.actorId).toBe('alice');
@@ -78,11 +78,11 @@ describe('cPanel effective authority and evaluation', () => {
     expect(alice.evaluationMethod).toBe('POLICY_MODEL');
     expect(alice.permissions.map((p) => p.capability)).toEqual(FEATURES);
     expect(alice.permissions[0]).toMatchObject({ state: 'GRANTED', confidence: 'MEDIUM', sourcePolicies: ['default'], denyPolicies: [], resource: 'alice.example.com' });
-    expect((await adapter.discoverEffectiveAuthority('bob', '*', ctx)).permissions.map((p) => [p.capability, p.sourcePolicies])).toEqual([['webmail', ['Mail Only']]]);
+    expect((await adapter.discoverEffectiveAuthority('bob', '*', ctx)).permissions.map((p) => [p.capability, p.sourcePolicies])).toEqual([['webmail', [__t('mail_only')]]]);
     expect((await adapter.discoverEffectiveAuthority('dave', '*', ctx)).permissions).toEqual([]);
   });
 
-  it('follows an attached policy and refuses accounts it cannot resolve', async () => {
+  it(__t('follows_an_attached_policy_and'), async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([forUser('alice', 'fileman')], ctx);
     await adapter.attach(policy, 'alice', ctx);
@@ -92,7 +92,7 @@ describe('cPanel effective authority and evaluation', () => {
     expect(await failure(() => adapter.discoverEffectiveAuthority('Bad!', '*', ctx))).toBe(T('invalid_account', { account: 'Bad!' }));
   });
 
-  it('evaluates the access an account actually holds, whatever the effect of the rule', async () => {
+  it(__t('evaluates_the_access_an_accoun'), async () => {
     const { adapter, seed } = setup();
     const ev = (r: any) => adapter.evaluate(r, ctx);
     expect(await ev(forUser('alice', 'fileman'))).toBe('GRANTED');
@@ -111,8 +111,8 @@ describe('cPanel effective authority and evaluation', () => {
   });
 });
 
-describe('cPanel simulation', () => {
-  it('reports what attaching would grant, keep and take away, because a feature list replaces the whole feature set', async () => {
+describe(__t('cpanel_simulation'), () => {
+  it(__t('reports_what_attaching_would_g'), async () => {
     const { adapter, calls } = setup();
     const kept = await adapter.simulate([forUser('alice', 'fileman', 'ftpaccts')], ctx);
     expect(kept.allowed).toEqual([]);
@@ -125,7 +125,7 @@ describe('cPanel simulation', () => {
     expect(calls.some((c) => c.startsWith('saveFeatureList') || c.startsWith('changePackage'))).toBe(false);
   });
 
-  it('merges the rules of one subject and lowers the confidence for subjects it cannot resolve or compile', async () => {
+  it(__t('merges_the_rules_of_one_subjec'), async () => {
     const { adapter } = setup();
     const merged = await adapter.simulate([forUser('bob', 'webmail'), forUser('bob', 'fileman')], ctx);
     expect(merged).toMatchObject({ allowed: [id('bob', 'fileman')], unchanged: [id('bob', 'webmail')], denied: [] });
@@ -138,15 +138,15 @@ describe('cPanel simulation', () => {
     expect(none.blastRadius.dependentActors).toEqual([]);
   });
 
-  it('classifies the blast radius from the number of accounts', async () => {
+  it(__t('classifies_the_blast_radius_fr'), async () => {
     const { adapter } = setup();
     const result = await adapter.simulate(['alice', 'bob', 'carol', 'dave'].map((u) => forUser(u, 'fileman')), ctx);
     expect(result.blastRadius).toMatchObject({ dependentActors: ['alice', 'bob', 'carol', 'dave'], blastRadius: 'SIGNIFICANT' });
   });
 });
 
-describe('cPanel dependencies and conflicts', () => {
-  it('reports the packages that carry a list and the accounts on them', async () => {
+describe(__t('cpanel_dependencies_and_confli'), () => {
+  it(__t('reports_the_packages_that_carr'), async () => {
     const { adapter, seed } = setup();
     expect(await adapter.findDependencies('default', ctx)).toEqual({ policyId: 'default', dependentRoles: ['Gold', 'default'], dependentActors: ['alice', 'carol', 'dave'], dependentServices: [], blastRadius: 'LIMITED' });
     seed.account('abby', 'Gold');
@@ -157,13 +157,13 @@ describe('cPanel dependencies and conflicts', () => {
     expect(await adapter.findDependencies('ugondu_idle', ctx)).toEqual({ policyId: 'ugondu_idle', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' });
   });
 
-  it('reports a Deny that overlaps an Allow of the same subject as ambiguous, and nothing else', async () => {
+  it(__t('reports_a_deny_that_overlaps_a'), async () => {
     const { adapter } = setup();
     const allow = { ...forUser('alice', 'mysql', 'fileman', 'ftpaccts'), ruleId: 'a' };
     const deny = { ...forUser('alice', 'mysql', 'ftpaccts', 'cron'), ruleId: 'd', effect: 'DENY' };
     const found = await adapter.findConflicts([allow, deny], ctx);
     expect(found.conflicts).toEqual([{
-      ruleA: 'a', ruleB: 'd', conflictType: 'ALLOW_DENY_OVERLAP', resolution: 'AMBIGUOUS', explanation: T('conflict_explanation', { subject: 'alice', operations: 'ftpaccts, mysql' }),
+      ruleA: 'a', ruleB: 'd', conflictType: 'ALLOW_DENY_OVERLAP', resolution: 'AMBIGUOUS', explanation: T('conflict_explanation', { subject: 'alice', operations: __t('ftpaccts_mysql') }),
     }]);
     expect((await adapter.findConflicts([allow, { ...deny, subject: { type: 'USER', id: 'bob' } }], ctx)).conflicts).toEqual([]);
     expect((await adapter.findConflicts([allow, { ...deny, action: { capability: 'x', operations: ['cron'] } }], ctx)).conflicts).toEqual([]);
@@ -171,8 +171,8 @@ describe('cPanel dependencies and conflicts', () => {
   });
 });
 
-describe('cPanel reconciliation and constraints', () => {
-  it('diffs the desired features per account with what managed lists give the accounts that use them', async () => {
+describe(__t('cpanel_reconciliation_and_cons'), () => {
+  it(__t('diffs_the_desired_features_per'), async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([forUser('alice', 'fileman', 'ftpaccts')], ctx);
     await adapter.attach(policy, 'alice', ctx);
@@ -191,7 +191,7 @@ describe('cPanel reconciliation and constraints', () => {
     expect(union.noChange).toEqual(['Allow|alice']);
   });
 
-  it('refuses Deny rules, conditions and bad subjects instead of reconciling around them', async () => {
+  it(__t('refuses_deny_rules_conditions_'), async () => {
     const { adapter } = setup();
     const err = (e: string) => T('reconcile_error', { error: e });
     expect(await failure(() => adapter.reconcile([{ ...forUser('alice', 'fileman'), ruleId: 'd', effect: 'DENY' }], [], ctx))).toBe(err(T('deny_unsupported', { ruleId: 'd' })));
@@ -199,7 +199,7 @@ describe('cPanel reconciliation and constraints', () => {
     expect(await failure(() => adapter.reconcile([forUser('Bad!', 'fileman')], [], ctx))).toBe(err(T('invalid_account', { account: 'Bad!' })));
   });
 
-  it('declares its limits and reads the number of features from the server', async () => {
+  it(__t('declares_its_limits_and_reads_'), async () => {
     const { adapter } = setup();
     const c = await adapter.getConstraints(ctx);
     expect(c.maxStatements).toMatchObject({ status: 'SUPPORTED', value: FEATURES.length });
@@ -212,8 +212,8 @@ describe('cPanel reconciliation and constraints', () => {
   });
 });
 
-describe('cPanel client handling', () => {
-  it('builds one client per tenant, environment and server identity and does not cache a failed build', async () => {
+describe(__t('cpanel_client_handling'), () => {
+  it(__t('builds_one_client_per_tenant_e'), async () => {
     const { client } = fakeWhm();
     let built = 0;
     const adapter = new CpanelAdapter(async () => { built++; return client; });
@@ -229,11 +229,11 @@ describe('cPanel client handling', () => {
     expect((await retrying.discoverRoles(ctx)).length).toBe(3);
   });
 
-  it('uses the HTTPS client by default and refuses to start without server credentials', async () => {
+  it(__t('uses_the_https_client_by_defau'), async () => {
     expect(await failure(() => new CpanelAdapter().discoverRoles(ctx))).toBe(T('invalid_host'));
   });
 
-  it('refuses to compile or report limits when the list that defines the server features is missing', async () => {
+  it(__t('refuses_to_compile_or_report_l'), async () => {
     const { client } = fakeWhm();
     const blind = { ...client, getFeatureList: async (name: string) => (name === 'default' ? undefined : client.getFeatureList(name)) };
     const adapter = new CpanelAdapter(async () => blind);

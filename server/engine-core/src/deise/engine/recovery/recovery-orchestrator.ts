@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 
 export class RecoveryOrchestrator implements RecoveryContract {
     async discover(scope: RecoveryScope): Promise<LiveEnvironmentAdapterContract> {
-        throw new Error('Adapter resolution delegated to Factory');
+        throw new Error(__t('adapter_resolution_delegated_t'));
     }
 
     async capture(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<EnvironmentTwin> {
@@ -22,7 +22,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
 
     async diagnose(twin: EnvironmentTwin): Promise<RepairPlan> {
         // ... invoke actual repair engine diagnosis ...
-        throw new Error('Not implemented');
+        throw new Error(__t('not_implemented'));
     }
 
     async generateRecoveryPlan(diagnosis: RepairPlan): Promise<RepairPlan> {
@@ -56,35 +56,35 @@ export class RecoveryOrchestrator implements RecoveryContract {
     async dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
         const dryResult = await adapter.dryRun(plan, scope);
         if (!dryResult.safe) {
-            throw new Error('Dry run indicates unsafe mutations.');
+            throw new Error(__t('dry_run_indicates_unsafe_mutat'));
         }
         return true;
     }
 
     async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis): Promise<boolean> {
-        if (!analysis.isSafe) throw new Error('Cannot approve an unsafe plan.');
+        if (!analysis.isSafe) throw new Error(__t('cannot_approve_an_unsafe_plan'));
         return true; // Explicit approval gate
     }
 
     async executeAtomically(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }> {
         // Pre-execution drift check
-        if (!scope.baselineFingerprint) throw new Error('Baseline fingerprint missing for drift check');
+        if (!scope.baselineFingerprint) throw new Error(__t('baseline_fingerprint_missing_f'));
         const driftSafe = await adapter.checkDrift(scope, scope.baselineFingerprint);
         if (!driftSafe) {
-            throw new Error('Environment drift detected since baseline fingerprint. Aborting execution.');
+            throw new Error(__t('environment_drift_detected_sin'));
         }
         
         const result = await adapter.executeAtomicRecovery(plan, scope);
         if (!result.success) {
             await adapter.rollback(result.checkpointId);
-            throw new Error('Atomic execution failed and was rolled back.');
+            throw new Error(__t('atomic_execution_failed_and_wa'));
         }
         return { success: true, executionEvidence: result.evidence };
     }
 
     async verify(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, verificationEvidence: any }> {
         const result = await adapter.verifyState(scope, expectedState);
-        if (!result.verified) throw new Error('Verification failed. Expected state not reached.');
+        if (!result.verified) throw new Error(__t('verification_failed_expected_s'));
         return result;
     }
 
@@ -105,7 +105,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
     }
 
     async issuePassport(certificate: RecoveryCertificate): Promise<any> {
-        if (!certificate.verificationEvidence) throw new Error('Cannot issue passport without independent verification evidence.');
+        if (!certificate.verificationEvidence) throw new Error(__t('cannot_issue_passport_without_'));
         return { passportId: crypto.randomUUID(), certificateId: certificate.certificateId, status: 'RECOVERY_VALIDATED' };
     }
 }

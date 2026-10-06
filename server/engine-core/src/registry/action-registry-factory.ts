@@ -70,7 +70,7 @@ export function createProductionActionRegistry(region: string): UniversalActionR
     urre.registerHandler('aws', 'CREATE_EBS_SNAPSHOT', async (node: DagNode) => {
         const volumes = await aws.describeInstanceVolumes(node.output!.instanceId);
         const volId = volumes?.[0];
-        if (!volId) throw new Error("No volume found for EC2");
+        if (!volId) throw new Error(__t('no_volume_found_for_ec2'));
         const snapId = await aws.createSnapshot({ resourceType: 'EBS_VOLUME', resourceId: volId });
         return { snapshotId: snapId };
     }, async (node: DagNode) => {
@@ -120,7 +120,7 @@ export function createProductionActionRegistry(region: string): UniversalActionR
 
     // S3 Object
     urre.registerHandler('aws', 'PUT_S3', async (node: DagNode) => {
-        await aws.putS3Object({ Bucket: node.output!.bucketName, Key: node.output!.key, Body: 'test data' });
+        await aws.putS3Object({ Bucket: node.output!.bucketName, Key: node.output!.key, Body: __t('test_data') });
         return { success: true };
     }, async (node: DagNode) => {
         if (node.output?.bucketName && node.output?.key) {

@@ -203,7 +203,7 @@ app.post('/v1/plugins/:pluginName/activate', (req: Request, res: Response): any 
     const resolvedPath = path.resolve(PLUGINS_DIR, pluginName);
     const canonicalBase = path.resolve(PLUGINS_DIR);
     if (!resolvedPath.startsWith(canonicalBase + path.sep)) {
-        return res.status(403).json({ error: __t('ui.responses.path_traversal_detected'), message: 'Path traversal detected in plugin resolution.' });
+        return res.status(403).json({ error: __t('ui.responses.path_traversal_detected'), message: __t('path_traversal_detected_in_plu') });
     }
 
     pluginStore.activatePlugin(tenantId, pluginName);
@@ -218,7 +218,7 @@ app.post('/v1/plugins/:pluginName/execute', requireServiceIdentity('plugin-manag
     const resolvedPath = path.resolve(PLUGINS_DIR, pluginName);
     const canonicalBase = path.resolve(PLUGINS_DIR);
     if (!resolvedPath.startsWith(canonicalBase + path.sep)) {
-        return res.status(403).json({ error: __t('ui.responses.path_traversal_detected'), message: 'Path traversal detected in plugin resolution.' });
+        return res.status(403).json({ error: __t('ui.responses.path_traversal_detected'), message: __t('path_traversal_detected_in_plu') });
     }
 
     // Tenant plugin authorization check
