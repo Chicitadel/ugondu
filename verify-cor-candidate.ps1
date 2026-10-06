@@ -118,7 +118,7 @@ echo "15. Semantic placeholder blacklist"
 Assert-No-Match -Pattern "(secret:dummy|dummy-arn|sha256:dummy|ami-placeholder|subnet-placeholder|mock-tx|mocking|mocked|simulation|simulate|simulated|fake|dummy|synthetic|stub|placeholder|skip physical|skip physical describe|public\.ecr\.aws|latest|fake-ami|test-ami|mock-ami)" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts server/engine-core/src/fabric server/engine-core/src/deise server/engine-core/src/urre server/engine-core/src/evidence" -Message "Semantic placeholders found in production/certification paths"
 
 echo "16. Enforce strict residual scan logic"
-$physicalCert = Get-Content "server/engine-core/src/assurance/provider/aws-certification-provider-adapter.ts" -Raw
+$physicalCert = Get-Content "server/engine-core/src/assurance/fault/aws-residual-scanner.ts" -Raw
 $requiredChecks = @("describeVpcs", "describeSubnets", "describeInstances", "describeDBInstances")
 foreach ($check in $requiredChecks) {
     if (-not ($physicalCert -match $check)) {
@@ -176,5 +176,6 @@ Assert-No-Match -Pattern "mocked|simulation|simulated|TODO|stub|placeholder" -Pa
 
 echo "25. No Platform Leakage"
 Assert-No-Match -Pattern "(bash |sh |cp |mv |systemctl |powershell |aws |gcloud |kubectl |docker )" -Path "server/engine-core/src/deise/engine/recovery/capabilities/*.ts server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts" -Message "Platform leakage detected in universal orchestrator/capabilities"
+
 
 
