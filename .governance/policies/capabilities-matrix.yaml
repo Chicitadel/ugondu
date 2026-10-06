@@ -173,3 +173,22 @@ capabilities:
       verified: false
       commercially_released: false
 
+
+  - id: ComposerIntegrityValidation
+    lifecycle:
+      declared: true
+      implemented: false
+      integrated: false
+      verified: false
+      commercially_released: false
+    surfaces:
+      cli: true
+      api: true
+      ui: true
+      sdk: true
+      agent: true
+      manual_operator: true
+    platforms:
+      cpanel: planned
+      directadmin: planned
+      linux: planned

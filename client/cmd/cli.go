@@ -261,7 +261,7 @@ func ParseAndRun(args []string) {
 		i18n.SetLocaleWithSource(loc, src)
 	}
 
-	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help", "auth"}
+	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help", "auth", "repair"}
 
 	if len(cleanedArgs) < 1 {
 		fmt.Println(i18n.T("err_no_command"))
@@ -437,6 +437,8 @@ func ParseAndRun(args []string) {
 		fmt.Println(i18n.T("cli_title"))
 	case "help":
 		PrintHelp()
+	case "repair":
+		HandleRepairCommand(cleanedArgs[1:])
 	case "auth":
 		if len(cleanedArgs) < 2 {
 			fmt.Println(i18n.T("auth_usage"))

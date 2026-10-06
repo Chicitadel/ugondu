@@ -37,6 +37,7 @@
   "aborting": "Operation aborted by user.",
   "resuming_deployment": "Resuming deployment for transaction %s...",
   "no_prev_deployment": "No previous deployment found to resume.",
+  "universal_recovery_pipeline_init": "Universal Recovery Pipeline Initialized",
   "resume_parse_fail": "Failed to parse previous recipe: %v",
   "step_skipped_idempotent": "Skipping already completed step %d (%s) due to idempotency",
   "unknown_action_error": "Unknown action in recipe: %s",
