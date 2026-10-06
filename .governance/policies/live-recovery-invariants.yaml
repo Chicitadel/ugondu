@@ -31,3 +31,18 @@ invariants:
       the observed failure into a provider-neutral resource, relationship, capability, diagnosis, or recovery pattern
       before incorporating it into the universal platform. The original environment may be retained as a conformance case
       but MUST NOT define the universal abstraction.
+
+  - id: UNIVERSAL_RECOVERY_INVARIANT
+    name: Universal Recovery Invariant
+    description: >
+      Every supported Ugondu environment MUST expose recovery through the universal Recovery Contract.
+      Recovery capabilities MUST be provider-, hosting-model-, control-plane-, runtime-, and operating-system-neutral.
+      Platform-specific behavior MUST be isolated behind adapters implementing the universal contracts.
+      No supported environment may require a separate recovery architecture.
+
+  - id: ENVIRONMENT_AGNOSTIC_CONFORMANCE
+    name: Environment-Agnostic Conformance Invariant
+    description: >
+      A production or customer environment used to validate Ugondu MUST be treated as an environment instance
+      and conformance case. Its identity, ownership, domain names, repositories, topology, credentials,
+      and historical incidents MUST NOT become hardcoded dependencies of the Ugondu product.

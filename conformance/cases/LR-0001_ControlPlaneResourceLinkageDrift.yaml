@@ -1,0 +1,29 @@
+name: ControlPlaneResourceLinkageDrift
+id: LR-0001
+classification: PROTECTED_PRODUCTION_RECOVERY
+
+environment:
+  platform: DirectAdmin
+  operating_system: Linux
+  hosting_model: Shared Hosting
+
+observed_problem:
+  description: Control-plane and application resource linkage divergence.
+  symptoms:
+    - Control-plane mapping asserts document root X for subdomain Y
+    - DNS resolves to IP A
+    - Actual HTTP server on IP A returns 404 for subdomain Y
+    - Application physical files intact under declared document root X
+    - Repository structure intact
+    
+context:
+  migration_history: cPanel to DirectAdmin
+  known_changes: IP change occurred
+  
+actual_cause:
+  description: To be established strictly from evidence gathered by Universal Recovery Engine.
+  
+recovery_objective:
+  - Establish true resource relationship graph
+  - Identify exactly which edges (DNS -> IP, Server -> Document Root) are broken
+  - Re-establish correct resource relationships without modifying unrelated production resources
