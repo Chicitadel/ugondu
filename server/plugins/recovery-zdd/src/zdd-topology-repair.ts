@@ -31,7 +31,8 @@ export class ZddTopologyRepair implements RecoveryCapability {
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         if (!plan.requiresInfrastructureRepair) return true;
         // Automatically executes the ZDD cleanup, rename, and symlink restoration sequence
-        // COR-013: Do not return true if stubbed
+        // COR-013: Do not return true if incomplete
         throw new Error('ZddTopologyRepair is not yet fully implemented.');
     }
 }
+

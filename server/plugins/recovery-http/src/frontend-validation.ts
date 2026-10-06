@@ -62,7 +62,8 @@ export class FrontendValidation implements RecoveryCapability {
             return true;
         }
         // Actually execute validation or fail
-        // COR-013: Do not return true if stubbed
+        // COR-013: Do not return true if incomplete
         throw new Error('FrontendValidation execution is not fully implemented yet.');
     }
 }
+

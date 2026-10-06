@@ -21,7 +21,8 @@ export class AutonomousCodePatching implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         if (!plan.requiresCodePatching) return true;
-        // COR-013: Do not return true if stubbed
+        // COR-013: Do not return true if incomplete
         throw new Error('AutonomousCodePatching is not yet implemented.');
     }
 }
+

@@ -8,7 +8,7 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
     }
     
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        return { isReady: false, reason: 'StubImplementation' };
+        return { isReady: false, reason: 'PendingImplementation' };
     }
     
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
@@ -20,3 +20,4 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
         throw new Error('ComposerIntegrityValidation is not yet implemented.');
     }
 }
+
