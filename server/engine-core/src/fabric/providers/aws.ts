@@ -68,7 +68,9 @@ export interface IAwsClient {
   createSubnet(vpcId: string, cidr: string, az?: string): Promise<SubnetResult>;
   createSnapshot(req: { resourceType: 'EBS_VOLUME' | 'RDS_INSTANCE' | 'EC2_INSTANCE', resourceId: string }): Promise<string>;
   setEc2Tags(instanceId: string, tags: Record<string, string>): Promise<void>;
+  getEc2Tags(instanceId: string): Promise<Record<string, string>>;
   modifyRdsInstance(instanceId: string, attributes: Record<string, any>): Promise<void>;
+  getRdsAttribute(instanceId: string, attribute: string): Promise<any>;
   // Fargate / ECS
   createFargateRoles(taskName: string): Promise<{ executionRoleArn: string, taskRoleArn: string }>;
   createEcsCluster(name: string): Promise<string>;

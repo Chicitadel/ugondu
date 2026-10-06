@@ -85,9 +85,9 @@ export class UniversalActionRegistry {
         }
     }
 
-    private async dispatchToURRE(operationType: string, params: Record<string, any>): Promise<Record<string, any>> {
+    public async dispatchToURRE(operationType: string, params: Record<string, any>): Promise<Record<string, any>> {
         // Enforce ActionResolver -> Governance -> URRE -> Provider path
-        const txId = `tx-canonical-${Date.now()}`;
+        const txId = params.transactionId || `tx-canonical-${Date.now()}`;
         const dag = new TransactionDag(txId);
         dag.addNode('OP', 'aws', operationType as any); (dag.getNode('OP') as any).output = params;
 
@@ -117,9 +117,65 @@ export class UniversalActionRegistry {
         return this.actions.get(id) || null;
     }
 
+    public registerAction(action: ActionContract): void {
+        this.actions.set(action.id, action);
+    }
+
     public listActions(domain?: string): ActionContract[] {
         const all = Array.from(this.actions.values());
         if (domain) return all.filter(a => a.domain === domain);
         return all;
     }
 }
+
+export function createProductionActionRegistry(region?: string): UniversalActionRegistry {
+    const urre = new URREngine();
+    const aws = new AwsNativeClient(region || process.env.UGONDU_CERT_REGION || 'us-east-1');
+
+    urre.registerHandler('aws', 'CREATE_EC2',
+        async (node) => {
+            const res = await aws.runInstances('t3.micro', node.output.ami, node.output.vpcId);
+            return { instanceId: res.id, ip: res.ip };
+        },
+        async (node) => {
+            if (node.output?.instanceId) {
+                await aws.terminateInstances(node.output.instanceId);
+            }
+        }
+    );
+
+    urre.registerHandler('aws', 'TERMINATE_EC2',
+        async (node) => {
+            if (node.output?.instanceId) {
+                await aws.terminateInstances(node.output.instanceId);
+            }
+            return {};
+        },
+        async () => {}
+    );
+
+    urre.registerHandler('aws', 'CREATE_VPC',
+        async (node) => {
+            const vpcId = await aws.createVpc(node.output.cidrBlock || '10.0.0.0/16', 'ugondu-vpc');
+            return { vpcId };
+        },
+        async (node) => {
+            if (node.output?.vpcId) {
+                await aws.deleteVpc(node.output.vpcId);
+            }
+        }
+    );
+
+    urre.registerHandler('aws', 'TERMINATE_VPC',
+        async (node) => {
+            if (node.output?.vpcId) {
+                await aws.deleteVpc(node.output.vpcId);
+            }
+            return {};
+        },
+        async () => {}
+    );
+
+    return new UniversalActionRegistry(urre);
+}
+

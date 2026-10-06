@@ -486,6 +486,19 @@ export class AwsNativeClient implements IAwsClient {
         await this.ec2.send(new CreateTagsCommand({ Resources: [instanceId], Tags: awsTags }));
     }
 
+    public async getEc2Tags(instanceId: string): Promise<Record<string, string>> {
+        const cmd = new DescribeInstancesCommand({ InstanceIds: [instanceId] });
+        const res = await this.ec2.send(cmd);
+        const tags = res.Reservations?.[0]?.Instances?.[0]?.Tags || [];
+        const result: Record<string, string> = {};
+        for (const tag of tags) {
+            if (tag.Key && tag.Value) {
+                result[tag.Key] = tag.Value;
+            }
+        }
+        return result;
+    }
+
     public async modifyRdsInstance(instanceId: string, attributes: Record<string, any>): Promise<void> {
         const cmd = new ModifyDBInstanceCommand({
             DBInstanceIdentifier: instanceId,
@@ -493,6 +506,14 @@ export class AwsNativeClient implements IAwsClient {
             ApplyImmediately: true
         });
         await this.rds.send(cmd);
+    }
+
+    public async getRdsAttribute(instanceId: string, attribute: string): Promise<any> {
+        const cmd = new DescribeDBInstancesCommand({ DBInstanceIdentifier: instanceId });
+        const res = await this.rds.send(cmd);
+        const inst = res.DBInstances?.[0];
+        if (!inst) throw new Error(`RDS instance ${instanceId} not found`);
+        return (inst as any)[attribute];
     }
 }
 

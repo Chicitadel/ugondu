@@ -6,8 +6,10 @@ import { TransactionStore } from './src/urre/transaction/transaction-store';
 import { EC2Client, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
 import { __t } from '@ugondu/shared';
 
-// We write a specific integration test for P0-4 using real AWS client
-const REGION = 'us-east-1'; // use default test region or from process.env
+const REGION = process.env.UGONDU_CERT_REGION;
+if (!REGION) {
+    throw new Error('UGONDU_CERT_REGION environment variable is required and must not be empty.');
+}
 
 async function registerRealHandlers(engine: URREngine) {
     const ec2 = new EC2Client({ region: REGION });

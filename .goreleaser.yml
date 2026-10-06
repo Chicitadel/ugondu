@@ -29,7 +29,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
@@ -40,11 +40,11 @@ signs:
   - cmd: cosign
     env:
       - COSIGN_EXPERIMENTAL=1
-    certificate: '${artifact}.pem'
+    output: true
     args:
       - sign-blob
-      - '--output-certificate=${certificate}'
-      - '--output-signature=${signature}'
+      - '--output-certificate=${artifact}.pem'
+      - '--output-signature=${artifact}.sig'
       - '${artifact}'
       - '--yes'
     artifacts: checksum

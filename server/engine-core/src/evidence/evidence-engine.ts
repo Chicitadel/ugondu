@@ -49,13 +49,18 @@ export class ObservedStateDeriver {
   }
 }
 
-export interface ProviderObservation {
+export interface PhysicalProviderObservation {
   provider: string;
+  accountId: string;
+  region: string;
   operation: string;
   request: any;
-  response?: any;
-  verification?: any;
+  mutationResponse?: any;
+  verificationRequest?: any;
+  verificationResponse?: any;
   resourceIdentity: string;
+  expectedState: any;
+  observedState: any;
   executionContext: string;
 }
 
@@ -74,37 +79,43 @@ export interface ObservationRecord {
 }
 
 export class EvidenceCollector {
-  recordProviderObservation(params: ProviderObservation): ObservationRecord {
-    if (!params.response || !params.verification) {
+  recordProviderObservation(params: PhysicalProviderObservation): ObservationRecord {
+    const isProven = !!(
+      params.mutationResponse &&
+      params.verificationResponse &&
+      params.observedState &&
+      JSON.stringify(params.expectedState) === JSON.stringify(params.observedState)
+    );
+
+    if (!isProven) {
       return {
         provider: params.provider,
         operation: params.operation,
         request: params.request,
-        response: params.response || null,
-        verification: params.verification || null,
+        response: params.mutationResponse || null,
+        verification: params.verificationResponse || null,
         resourceIdentity: params.resourceIdentity,
         executionContext: params.executionContext,
         providerResponseHash: '',
-        observedState: null,
+        observedState: params.observedState || null,
         timestamp: new Date().toISOString(),
         status: 'NOT_PROVEN'
       };
     }
 
-    const canonicalBytes = ProviderResponseCanonicalizer.canonicalize(params.response);
+    const canonicalBytes = ProviderResponseCanonicalizer.canonicalize(params.mutationResponse);
     const hash = ProviderResponseHasher.hash(canonicalBytes);
-    const state = ObservedStateDeriver.derive(params.response);
 
     return {
       provider: params.provider,
       operation: params.operation,
       request: params.request,
-      response: params.response,
-      verification: params.verification,
+      response: params.mutationResponse,
+      verification: params.verificationResponse,
       resourceIdentity: params.resourceIdentity,
       executionContext: params.executionContext,
       providerResponseHash: hash,
-      observedState: state,
+      observedState: params.observedState,
       timestamp: new Date().toISOString(),
       status: 'PROVEN'
     };
