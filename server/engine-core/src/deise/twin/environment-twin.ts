@@ -44,6 +44,18 @@ export interface EnvironmentTwin {
     application: ApplicationTwin;
     infrastructure?: InfrastructureTwin[];
     runtime: RuntimeTwin;
+    
+    // Live Environment Assessment Inventories
+    fileInventory?: Record<string, any>;
+    permissionInventory?: Record<string, any>;
+    configurationInventory?: Record<string, any>;
+    databaseInventory?: Record<string, any>;
+    dnsInventory?: Record<string, any>;
+    runtimeInventory?: Record<string, any>;
+    certificateInventory?: Record<string, any>;
+    cronInventory?: Record<string, any>;
+    backupInventory?: Record<string, any>;
+    immutableEvidenceSnapshotId?: string;
 }
 
 export interface InfrastructureTwin {

@@ -1,0 +1,17 @@
+invariants:
+  - id: PROTECTED_PRODUCTION_RECOVERY
+    name: Protected Production Recovery Invariant
+    description: >
+      Ugondu MUST NOT modify a protected production environment until the target environment,
+      resource ownership, intended state, dependency graph, affected scope, recovery plan,
+      rollback mechanism, and verification criteria have been independently established.
+      A recovery operation MUST be constrained to its declared resource scope and MUST
+      preserve unrelated resources.
+
+  - id: LIVE_RECOVERY_NON_INTERFERENCE
+    name: Live Recovery Non-Interference Invariant
+    description: >
+      Recovery of one application, repository, tenant, or capability MUST NOT mutate unrelated
+      applications, repositories, tenants, databases, domains, DNS records, credentials, files,
+      or hosting configuration unless those resources are explicitly declared as dependencies
+      of the approved recovery transaction.
