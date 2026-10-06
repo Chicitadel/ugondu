@@ -69,7 +69,7 @@ export class DeploymentRepairEngine {
             requiresApplicationUpload = true;
         }
 
-        // 3. Detect Physical Infrastructure Drift (P0-9: AWS EC2/RDS)
+        // 3. Detect Physical Infrastructure Drift
         if (twin.infrastructure) {
             for (const infra of twin.infrastructure) {
                 const keys = Object.keys(infra.expectedState);
@@ -80,12 +80,8 @@ export class DeploymentRepairEngine {
                     if (expected !== actual) {
                         Logger.warn(`Drift Detected: Expected ${expected}, observed ${actual}`);
 
-                        let repairOperation = 'UNKNOWN';
-                        if (infra.type === 'EC2' && key === 'Name') {
-                            repairOperation = 'ec2:CreateTags';
-                        } else if (infra.type === 'RDS') {
-                            repairOperation = 'rds:ModifyDBInstance';
-                        }
+                        // Delegate remediation verb to Provider Adapter via universal contract
+                        let repairOperation = 'adapter:ReconcileResourceState';
 
                         diagnoses.push({
                             category: DriftCategory.INFRASTRUCTURE_DRIFT,
@@ -93,7 +89,7 @@ export class DeploymentRepairEngine {
                             affectedPaths: [infra.id],
                             isDestructiveRecovery: false,
                             remediationAction: 'REPAIR_INFRASTRUCTURE',
-                            provider: 'aws',
+                            provider: infra.provider || 'universal',
                             resourceType: infra.type,
                             resourceId: infra.id,
                             attribute: key,

@@ -300,7 +300,7 @@ func ParseAndRun(args []string) {
 	}
 	targetEnv := os.Getenv("UGONDU_TARGET_ENV")
 	if targetEnv == "" {
-		targetEnv = "cpanel"
+		targetEnv = "auto"
 	}
 
 	force := false

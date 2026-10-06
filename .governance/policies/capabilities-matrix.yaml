@@ -1,33 +1,175 @@
 editions:
   - id: COMMUNITY
-    description: "Basic recovery and diagnostic tools for standard applications."
+    description: "Core safety + manual basic recovery. No AI required."
     capabilities:
-      - ResourceLinkageRepair
-      - BasicHealthCheck
+      - EnvironmentDiscovery
+      - EnvironmentTwin
+      - ResourceGraphReconstruction
+      - ResourceOwnershipAnalysis
+      - ScopeBinding
+      - BlastRadiusAnalysis
+      - RepairDiagnosis
+      - RepairPlanning
+      - RepairDiff
+      - RepairDryRun
+      - PreRepairFingerprint
+      - DriftGuard
+      - RepairApproval
+      - ExecutionIntegrity
+      - IndependentVerification
+      - EvidenceCapture
+      - RecoveryCertificate
+      - RecoveryPassport
+      - EmergencyRollback
+      - TransactionResume
+      - RecoveryAbort
+      - AuditTrail
+      - BasicFileIntegrityRepair
+      - FileRestore
+      - DirectoryReconstruction
+      - SymlinkRepair
+      - DocumentRootRepair
+      - BasicConfigurationRepair
+      - BasicRepositoryRepair
+      - BasicRuntimeServiceRepair
+      - BasicHTTPValidation
+      - Verification
+
+  - id: PROFESSIONAL
+    description: "Everything in Community, plus advanced dependencies, shared libraries, environments, databases, and Docker."
+    capabilities:
+      - ComposerIntegrityValidation
+      - NpmDependencyIntegrity
+      - PipDependencyIntegrity
+      - PathRepositoryReconstruction
+      - SharedDirectoryReconstruction
+      - EnvConfigurationInjection
+      - ApplicationBootstrapRepair
+      - RuntimeVersionRepair
+      - WebServerConfigurationRepair
+      - TLSRepair
+      - DNSRecordRepair
+      - DatabaseConnectivityRepair
+      - CronRepair
+      - DockerRepair
+      - VPSRepair
+      - LinuxPackageRepair
+      - WindowsServiceRepair
+      - MacOSServiceRepair
+      - MigrationAssessment
+      - MigrationTopologyReconstruction
+
+  - id: BUSINESS
+    description: "Everything in Professional, plus advanced DB, backup/restore, cloud linkage, IaC, ZDD, control-planes, fleet targeting."
+    capabilities:
+      - LiveDatabaseStateReconstruction
+      - DatabaseBackupRestore
+      - StorageMountRepair
+      - NetworkFirewallRepair
+      - CloudResourceLinkageRepair
+      - CloudIAMRepair
+      - IaCDriftRepair
+      - ZddTopologyRepair
+      - ControlPlaneRepair
+      - LoadBalancerRepair
+      - CDNOriginRepair
+      - ContainerFleetRepair
+      - ScheduledRemediation
+      - OrganizationGovernance
 
   - id: ENTERPRISE
-    description: "Advanced topological repair, zero-downtime framework support, and fleet management."
+    description: "Everything in Business, plus Kubernetes, VMware, HA, automated remediation, enterprise policy, tenant fleet recovery."
     capabilities:
-      - ResourceLinkageRepair
-      - BasicHealthCheck
-      - ZddTopologyRepair
-      - FrontendValidation
-      - EnvConfigurationInjection
+      - KubernetesNodeRepair
+      - KubernetesPodRepair
+      - KubernetesDeploymentRepair
+      - VMwareRepair
+      - ProxmoxRepair
+      - MultiNodeRepair
+      - AutomatedRemediation
+      - FailoverOrchestration
+      - AdvancedDatabaseReconstruction
+      - AdvancedForensicRecovery
+      - EnterprisePolicyOrchestration
+      - DelegatedOperators
+      - ControlledAutonomousExecution
 
   - id: SOVEREIGN
-    description: "Full autonomous resilience, AI-driven root cause patching, and isolated fault domain reconstruction."
+    description: "Everything in Enterprise, plus autonomous patching, isolated fault domains, air-gapped recovery, sovereign vaults."
     capabilities:
-      - ResourceLinkageRepair
-      - BasicHealthCheck
-      - ZddTopologyRepair
-      - FrontendValidation
-      - EnvConfigurationInjection
       - AutonomousCodePatching
-      - LiveDatabaseStateReconstruction
+      - IsolatedFaultDomainReconstruction
+      - OfflineRecovery
+      - AirGappedRecovery
+      - ImmutableRecoveryEvidence
+      - CryptographicEnvironmentReconstruction
+      - SovereignRecoveryVaults
       - MultiRegionFailoverOrchestration
+      - CryptographicPassportChains
+      - SovereignPolicyEnforcement
 
 architecture_invariants:
   - rule: "Plugin Independency"
     description: "Capabilities MUST NEVER be hardcoded into engine-core. They must be registered via the CapabilityRegistry as independent plugins/microservices."
   - rule: "Universal Platform Abstraction"
-    description: "Capabilities MUST NEVER rely on specific OS commands (e.g. bash, systemd) directly in the orchestrator. All execution must pass through LiveEnvironmentAdapterContract."
+    description: "Capabilities MUST NEVER rely on specific OS commands (e.g. bash, systemd) directly in the orchestrator. All execution must pass through Universal Resource Contract and Provider Adapter."
+  - rule: "Agentless Capability Parity Invariant"
+    description: "Every commercially released executable capability MUST be invocable by a human operator through the canonical CLI and/or supported UI without requiring an AI model, autonomous agent, LLM, or agentic planner. Agentic interfaces may improve automation, but MUST NOT be the sole access path."
+  - rule: "Execution Path Equivalence Invariant"
+    description: "Manual CLI/UI execution and agent-initiated execution MUST converge on the same Intent, Plan, Policy Decision, Authorization, Execution, Verification, Evidence, and Passport pipeline. No surface may bypass the universal execution governance path."
+
+capabilities:
+  - id: PathRepositoryReconstruction
+    lifecycle:
+      declared: true
+      implemented: false
+      integrated: false
+      verified: false
+      commercially_released: false
+    surfaces:
+      cli: true
+      api: true
+      ui: true
+      sdk: true
+      agent: true
+      manual_operator: true
+    platforms:
+      cpanel: planned
+      directadmin: planned
+      linux: planned
+
+  - id: ZddTopologyRepair
+    lifecycle:
+      declared: true
+      implemented: false
+      integrated: false
+      verified: false
+      commercially_released: false
+    surfaces:
+      cli: true
+      api: true
+      ui: true
+      sdk: true
+      agent: true
+      manual_operator: true
+    platforms:
+      cpanel: verified
+      directadmin: verified
+      linux: planned
+
+  - id: LiveDatabaseStateReconstruction
+    lifecycle:
+      declared: true
+      implemented: false
+      integrated: false
+      verified: false
+      commercially_released: false
+
+  - id: MultiRegionFailoverOrchestration
+    lifecycle:
+      declared: true
+      implemented: false
+      integrated: false
+      verified: false
+      commercially_released: false
+
