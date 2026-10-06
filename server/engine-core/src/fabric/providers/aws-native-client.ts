@@ -26,7 +26,8 @@ import {
     DescribeAvailabilityZonesCommand,
     CreateSecurityGroupCommand,
     AuthorizeSecurityGroupIngressCommand,
-    DeleteSecurityGroupCommand
+    DeleteSecurityGroupCommand,
+    CreateTagsCommand
 } from '@aws-sdk/client-ec2';
 
 import {
@@ -35,7 +36,8 @@ import {
     DeleteDBInstanceCommand,
     CreateDBSubnetGroupCommand,
     DeleteDBSubnetGroupCommand,
-    DescribeDBInstancesCommand
+    DescribeDBInstancesCommand,
+    ModifyDBInstanceCommand
 } from '@aws-sdk/client-rds';
 
 import {
@@ -157,19 +159,51 @@ export class AwsNativeClient implements IAwsClient {
     public async terminateInstances(id: string): Promise<void> {
         const cmd = new TerminateInstancesCommand({ InstanceIds: [id] });
         await this.ec2.send(cmd);
+        
+        Logger.info(`Waiting for EC2 instance ${id} to reach 'terminated' state...`);
+        let retries = 0;
+        while (retries < 30) {
+            await this.sleep(10000);
+            const desc = await this.ec2.send(new DescribeInstancesCommand({ InstanceIds: [id] }));
+            const inst = desc.Reservations?.[0]?.Instances?.[0];
+            if (!inst || inst.State?.Name === 'terminated') {
+                return;
+            }
+            retries++;
+        }
+        throw new Error(`Timeout waiting for instance ${id} to terminate.`);
     }
 
     public async createVpc(cidr: string, name: string): Promise<string> {
         const cmd = new CreateVpcCommand({ CidrBlock: cidr });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Vpc || !res.Vpc.VpcId) throw new Error(__t('aws_vpc_creation_failed'));
+        
+        const vpcId = res.Vpc.VpcId;
         // Waiter could be added here if needed, but VPCs are usually available instantly.
-        return res.Vpc.VpcId;
+        return vpcId;
     }
 
     public async deleteVpc(id: string): Promise<void> {
         const cmd = new DeleteVpcCommand({ VpcId: id });
-        await this.ec2.send(cmd);
+        
+        Logger.info(`Deleting VPC ${id}...`);
+        let retries = 0;
+        while (retries < 10) {
+            try {
+                await this.ec2.send(cmd);
+                return;
+            } catch (err: any) {
+                if (err.name === 'DependencyViolation') {
+                    Logger.info(`VPC ${id} has dependencies, retrying...`);
+                    await this.sleep(10000);
+                    retries++;
+                } else {
+                    throw err;
+                }
+            }
+        }
+        throw new Error(`Timeout waiting for VPC ${id} dependencies to clear.`);
     }
 
     public async discoverAvailabilityZones(): Promise<string[]> {
@@ -445,6 +479,20 @@ export class AwsNativeClient implements IAwsClient {
             executionRoleArn: execRoleRes.Role!.Arn!,
             taskRoleArn: taskRoleRes.Role!.Arn!
         };
+    }
+
+    public async setEc2Tags(instanceId: string, tags: Record<string, string>): Promise<void> {
+        const awsTags = Object.entries(tags).map(([Key, Value]) => ({ Key, Value }));
+        await this.ec2.send(new CreateTagsCommand({ Resources: [instanceId], Tags: awsTags }));
+    }
+
+    public async modifyRdsInstance(instanceId: string, attributes: Record<string, any>): Promise<void> {
+        const cmd = new ModifyDBInstanceCommand({
+            DBInstanceIdentifier: instanceId,
+            ...attributes,
+            ApplyImmediately: true
+        });
+        await this.rds.send(cmd);
     }
 }
 

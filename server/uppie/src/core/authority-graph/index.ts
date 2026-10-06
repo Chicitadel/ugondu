@@ -1,1 +1,1 @@
-export { AuthorityGraphBuilder, createEmptyAuthorityGraph } from './AuthorityGraphBuilder';
+export { AuthorityGraphBuilder } from './AuthorityGraphBuilder';

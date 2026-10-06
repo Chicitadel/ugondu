@@ -61,7 +61,7 @@ export type {
 } from './core/preflight/AuthorizationReadinessPreflight';
 
 // Authority Graph Builder (Stream D)
-export { AuthorityGraphBuilder, createEmptyAuthorityGraph } from './core/authority-graph/AuthorityGraphBuilder';
+export { AuthorityGraphBuilder } from './core/authority-graph/AuthorityGraphBuilder';
 
 // Policy Simulation Engine (Stream E)
 export { PolicySimulationEngine } from './core/policy-simulation/PolicySimulationEngine';

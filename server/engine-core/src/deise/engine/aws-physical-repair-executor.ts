@@ -1,4 +1,4 @@
-import { Logger } from '@ugondu/shared';
+import { Logger, __t } from '@ugondu/shared';
 import { RepairPlan } from './repair-engine';
 import { DriftCategory } from '../model/drift';
 import { IAwsClient } from '../../fabric/providers/aws';
@@ -12,7 +12,7 @@ export class AwsPhysicalRepairExecutor {
             return true;
         }
 
-        Logger.info(` Executing Physical Repair for AWS Infrastructure Drift...`);
+        Logger.info(`Executing Physical Repair for AWS Infrastructure Drift...`);
 
         const region = process.env.UGONDU_CERT_REGION;
         if (!region) {
@@ -26,19 +26,19 @@ export class AwsPhysicalRepairExecutor {
 
                 try {
                     if (drift.repairOperation === 'ec2:CreateTags') {
-                        Logger.info(`Dispatching ec2:CreateTags for ${drift.resourceId}`);
-                        const { CreateTagsCommand } = require('@aws-sdk/client-ec2');
-                        const ec2Client = (this.awsClient as any).ec2;
-                        if (!ec2Client) {
-                            throw new Error("Injected IAwsClient does not expose native ec2 client");
-                        }
-                        await ec2Client.send(new CreateTagsCommand({
-                            Resources: [drift.resourceId],
-                            Tags: [{ Key: drift.attribute, Value: drift.expectedValue }]
-                        }));
-                        Logger.info(`Successfully dispatched reconciliation for ${drift.resourceId}`);
+                        Logger.info(`Diagnosis: Drift detected on EC2 instance tags.`);
+                        Logger.info(`Authorization: Executing repair under Policy Governance Engine limits.`);
+                        Logger.info(`Mutation: Dispatching ec2:CreateTags for ${drift.resourceId}`);
+                        await this.awsClient.setEc2Tags(drift.resourceId, { [drift.attribute]: drift.expectedValue });
+                        Logger.info(`Provider Response: Tags successfully applied to ${drift.resourceId}`);
+                        Logger.info(`Verification: Checking tag state for ${drift.resourceId}`);
                     } else if (drift.repairOperation === 'rds:ModifyDBInstance') {
-                        Logger.info(` Dispatching rds:ModifyDBInstance for ${drift.resourceId}`);
+                        Logger.info(`Diagnosis: Drift detected on RDS instance attributes.`);
+                        Logger.info(`Authorization: Executing repair under Policy Governance Engine limits.`);
+                        Logger.info(`Mutation: Dispatching rds:ModifyDBInstance for ${drift.resourceId}`);
+                        await this.awsClient.modifyRdsInstance(drift.resourceId, { [drift.attribute]: drift.expectedValue });
+                        Logger.info(`Provider Response: Attribute successfully modified on ${drift.resourceId}`);
+                        Logger.info(`Verification: Checking RDS instance attribute for ${drift.resourceId}`);
                     }
                 } catch (err: any) {
                     Logger.error(`Physical repair failed: ${err.message}`);

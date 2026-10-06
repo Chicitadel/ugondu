@@ -186,24 +186,4 @@ export class AuthorityGraphBuilder {
   }
 }
 
-/**
- * Create a minimal empty AuthorityGraph for test or stub purposes.
- * MUST NOT be used in production — only for scaffolding.
- */
-export function createEmptyAuthorityGraph(
-  environmentId: string,
-  tenantId:      string
-): AuthorityGraph {
-  return {
-    graphId:            randomUUID(),
-    environmentId,
-    tenantId,
-    capturedAt:         new Date().toISOString(),
-    actors:             [],
-    roles:              [],
-    policies:           [],
-    boundaries:         [],
-    edges:              [],
-    effectiveAuthority: {},
-  };
-}
+

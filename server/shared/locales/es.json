@@ -424,5 +424,18 @@
   "msg_err_symlink_evaluation_w": "[ES] ERR_SYMLINK_EVALUATION: %w",
   "msg_err_safe_path_w": "[ES] ERR_SAFE_PATH: %w",
   "msg_err_target_not_found_w": "[ES] ERR_TARGET_NOT_FOUND: %w",
-  "msg_quota_sync_copy_failed_v": "[ES] Quota-sync copy failed: %v"
+  "msg_quota_sync_copy_failed_v": "[ES] Quota-sync copy failed: %v",
+  "engine.fargate.err_stable_timeout": "[ES] Service did not reach runningCount == 1",
+  "engine.fargate.err_replacement_spinup": "[ES] Replacement task did not spin up",
+  "engine.fargate.err_replacement_running": "[ES] Replacement task did not reach RUNNING state",
+  "engine.fargate.err_revert_timeout": "[ES] Service did not revert to original task definition",
+  "engine.urre.err_process_a_no_crash": "[ES] Process A did not crash as expected!",
+  "engine.urre.err_tx_not_found": "[ES] Transaction tx-p0-4-real not found on disk!",
+  "engine.urre.err_vpc_not_success": "[ES] VPC node state was not SUCCESS before crash!",
+  "engine.urre.err_subnet_no_success": "[ES] SUBNET node did not execute successfully in Process B!",
+  "engine.urre.err_tx_not_immediate_success": "[ES] Transaction should be SUCCESS immediately!",
+  "uppie.adapter_registry.err_already_registered": "[ES] Adapter for provider '%{providerType}' is already registered. Unregister the existing adapter before registering a replacement.",
+  "uppie.adapter_registry.err_not_registered": "[ES] Cannot activate adapter for '%{providerType}': not registered. Register the adapter before activating it.",
+  "uppie.adapter_registry.err_no_active": "[ES] No active adapter available for provider '%{providerType}'. Ensure the adapter is registered and activated for this tenant edition.",
+  "uppie.least_privilege.err_prohibited_scope": "[ES] LeastPrivilegeCompiler: Rule for capability '%{capability}' has prohibited resource scope '%{scope}'."
 }

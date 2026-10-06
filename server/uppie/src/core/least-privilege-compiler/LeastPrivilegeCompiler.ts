@@ -27,6 +27,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '../../../../shared/i18n';
 import type { AuthorizationRule, AuthorizationAction, AuthorizationResource } from '../../types/index';
 import type { CapabilityGapResult } from '../policy-evaluation-engine/EffectiveAuthorityCalculator';
 import { randomUUID } from 'crypto';
@@ -131,11 +132,7 @@ export class LeastPrivilegeCompiler {
     for (const rule of rules) {
       const scope = rule.resource.scope;
       if (PROHIBITED_PATTERNS.some((p) => scope === p || scope.endsWith(':*:*'))) {
-        throw new Error(
-          `LeastPrivilegeCompiler: Rule for capability '${rule.action.capability}' ` +
-          `has prohibited resource scope '${scope}'. ` +
-          'Scope must be narrowed to specific resource targets.'
-        );
+        throw new Error(__t('uppie.least_privilege.err_prohibited_scope', { capability: rule.action.capability, scope }));
       }
     }
   }

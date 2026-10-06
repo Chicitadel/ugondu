@@ -49,13 +49,24 @@ export class ObservedStateDeriver {
   }
 }
 
-export interface ObservationParams {
-  providerId: string;
-  response: any;
+export interface ProviderObservation {
+  provider: string;
+  operation: string;
+  request: any;
+  response?: any;
+  verification?: any;
+  resourceIdentity: string;
+  executionContext: string;
 }
 
 export interface ObservationRecord {
-  providerId: string;
+  provider: string;
+  operation: string;
+  request: any;
+  response: any;
+  verification: any;
+  resourceIdentity: string;
+  executionContext: string;
   providerResponseHash: string;
   observedState: any;
   timestamp: string;
@@ -63,10 +74,16 @@ export interface ObservationRecord {
 }
 
 export class EvidenceCollector {
-  recordProviderObservation(params: ObservationParams): ObservationRecord {
-    if (!params.response) {
+  recordProviderObservation(params: ProviderObservation): ObservationRecord {
+    if (!params.response || !params.verification) {
       return {
-        providerId: params.providerId,
+        provider: params.provider,
+        operation: params.operation,
+        request: params.request,
+        response: params.response || null,
+        verification: params.verification || null,
+        resourceIdentity: params.resourceIdentity,
+        executionContext: params.executionContext,
         providerResponseHash: '',
         observedState: null,
         timestamp: new Date().toISOString(),
@@ -79,7 +96,13 @@ export class EvidenceCollector {
     const state = ObservedStateDeriver.derive(params.response);
 
     return {
-      providerId: params.providerId,
+      provider: params.provider,
+      operation: params.operation,
+      request: params.request,
+      response: params.response,
+      verification: params.verification,
+      resourceIdentity: params.resourceIdentity,
+      executionContext: params.executionContext,
       providerResponseHash: hash,
       observedState: state,
       timestamp: new Date().toISOString(),

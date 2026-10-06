@@ -4,6 +4,7 @@ import { URREngine } from './src/urre/execution/urre-engine';
 import { TransactionDag, DagNode } from './src/urre/transaction/transaction-dag';
 import { TransactionStore } from './src/urre/transaction/transaction-store';
 import { EC2Client, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
+import { __t } from '@ugondu/shared';
 
 // We write a specific integration test for P0-4 using real AWS client
 const REGION = 'us-east-1'; // use default test region or from process.env
@@ -52,7 +53,7 @@ async function phase1() {
     await engine.executeTransaction(tx);
     
     // We should not reach here if it crashes cleanly
-    throw new Error('Process A did not crash as expected!');
+    throw new Error(__t('engine.urre.err_process_a_no_crash'));
 }
 
 async function phase2() {
@@ -63,12 +64,12 @@ async function phase2() {
     const store = new TransactionStore();
     const existingTx = await store.load('tx-p0-4-real');
     if (!existingTx) {
-        throw new Error('Transaction tx-p0-4-real not found on disk!');
+        throw new Error(__t('engine.urre.err_tx_not_found'));
     }
 
     const vpcNode = existingTx.getNode('VPC')!;
     if (vpcNode.status !== 'SUCCESS') {
-        throw new Error('VPC node state was not SUCCESS before crash!');
+        throw new Error(__t('engine.urre.err_vpc_not_success'));
     }
     const vpcId = vpcNode.output.vpcId;
     console.log(`PROCESS B: Loaded VPC ID ${vpcId} from state. Will skip recreation.`);
@@ -78,7 +79,7 @@ async function phase2() {
 
     const subNode = existingTx.getNode('SUBNET')!;
     if (subNode.status !== 'SUCCESS') {
-        throw new Error('SUBNET node did not execute successfully in Process B!');
+        throw new Error(__t('engine.urre.err_subnet_no_success'));
     }
 
     console.log('PROCESS B: Success! Cleaning up AWS VPC...');
@@ -97,14 +98,14 @@ async function phase3() {
     const store = new TransactionStore();
     const existingTx = await store.load('tx-p0-4-real');
     if (!existingTx) {
-        throw new Error('Transaction tx-p0-4-real not found on disk!');
+        throw new Error(__t('engine.urre.err_tx_not_found'));
     }
 
     console.log('PROCESS C: Executing transaction again...');
     await engine.executeTransaction(existingTx);
 
     if (existingTx.status !== 'SUCCESS') {
-        throw new Error('Transaction should be SUCCESS immediately!');
+        throw new Error(__t('engine.urre.err_tx_not_immediate_success'));
     }
 
     console.log('PROCESS C: Idempotency proven.');

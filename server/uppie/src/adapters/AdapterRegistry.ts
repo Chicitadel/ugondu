@@ -27,6 +27,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '../../../shared/i18n';
 import type { IPolicyProviderAdapter, ProviderType } from './IPolicyProviderAdapter';
 
 /**
@@ -45,10 +46,7 @@ export class AdapterRegistry {
    */
   register(adapter: IPolicyProviderAdapter): void {
     if (this.adapters.has(adapter.providerType)) {
-      throw new Error(
-        `Adapter for provider '${adapter.providerType}' is already registered. ` +
-        'Unregister the existing adapter before registering a replacement.'
-      );
+      throw new Error(__t('uppie.adapter_registry.err_already_registered', { providerType: adapter.providerType }));
     }
     this.adapters.set(adapter.providerType, adapter);
   }
@@ -62,10 +60,7 @@ export class AdapterRegistry {
   /** Activate an adapter (makes it available for use). Requires prior registration. */
   activate(providerType: ProviderType): void {
     if (!this.adapters.has(providerType)) {
-      throw new Error(
-        `Cannot activate adapter for '${providerType}': not registered. ` +
-        'Register the adapter before activating it.'
-      );
+      throw new Error(__t('uppie.adapter_registry.err_not_registered', { providerType }));
     }
     this.activeAdapters.add(providerType);
   }
@@ -90,10 +85,7 @@ export class AdapterRegistry {
   requireForProvider(providerType: ProviderType): IPolicyProviderAdapter {
     const adapter = this.getForProvider(providerType);
     if (!adapter) {
-      throw new Error(
-        `No active adapter available for provider '${providerType}'. ` +
-        'Ensure the adapter is registered and activated for this tenant edition.'
-      );
+      throw new Error(__t('uppie.adapter_registry.err_no_active', { providerType }));
     }
     return adapter;
   }

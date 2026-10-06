@@ -6,7 +6,15 @@ describe('Evidence Engine Adversarial Tests', () => {
 
   it('fake hash -> NOT_PROVEN', () => {
     const response = { data: 'important', timestamp: 123456789 };
-    const validRecord = collector.recordProviderObservation({ providerId: 'p1', response });
+    const validRecord = collector.recordProviderObservation({ 
+      provider: 'p1', 
+      operation: 'TEST_OP',
+      request: {},
+      response, 
+      verification: { ok: true },
+      resourceIdentity: 'urn:test:res',
+      executionContext: 'ctx1'
+    });
     
     // Adversary tampers with the hash
     const fakeRecord: ObservationRecord = {
@@ -20,7 +28,15 @@ describe('Evidence Engine Adversarial Tests', () => {
 
   it('timestamp hash -> NOT_PROVEN', () => {
     const response = { data: 'important', timestamp: 123456789 };
-    const validRecord = collector.recordProviderObservation({ providerId: 'p1', response });
+    const validRecord = collector.recordProviderObservation({ 
+      provider: 'p1', 
+      operation: 'TEST_OP',
+      request: {},
+      response, 
+      verification: { ok: true },
+      resourceIdentity: 'urn:test:res',
+      executionContext: 'ctx1'
+    });
 
     // Adversary creates a hash that includes the volatile timestamp field
     // (Bypassing canonicalization)
@@ -41,7 +57,13 @@ describe('Evidence Engine Adversarial Tests', () => {
     
     // Adversary claims PROVEN but provides no hash evidence
     const fakeRecord: ObservationRecord = {
-      providerId: 'p1',
+      provider: 'p1',
+      operation: 'TEST_OP',
+      request: {},
+      response: { data: 'important' },
+      verification: { ok: true },
+      resourceIdentity: 'urn:test:res',
+      executionContext: 'ctx1',
       providerResponseHash: '',
       observedState: { data: 'important' },
       timestamp: new Date().toISOString(),
@@ -54,14 +76,28 @@ describe('Evidence Engine Adversarial Tests', () => {
 
   it('missing response -> NOT_PROVEN', () => {
     // If there is no response from the provider
-    const record = collector.recordProviderObservation({ providerId: 'p1', response: null });
+    const record = collector.recordProviderObservation({ 
+      provider: 'p1', 
+      operation: 'TEST_OP',
+      request: {},
+      response: null,
+      verification: { ok: true },
+      resourceIdentity: 'urn:test:res',
+      executionContext: 'ctx1' 
+    });
     
     expect(record.status).toBe('NOT_PROVEN');
     expect(record.providerResponseHash).toBe('');
     
     // And if an adversary tries to claim PROVEN for a missing response:
     const fakeRecord: ObservationRecord = {
-      providerId: 'p1',
+      provider: 'p1',
+      operation: 'TEST_OP',
+      request: {},
+      response: null,
+      verification: { ok: true },
+      resourceIdentity: 'urn:test:res',
+      executionContext: 'ctx1',
       providerResponseHash: 'somehash',
       observedState: null,
       timestamp: new Date().toISOString(),

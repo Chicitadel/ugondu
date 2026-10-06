@@ -77,11 +77,31 @@ Assert-No-Match -Pattern "123456789012" -Path "server/engine-core" -Message "Har
 echo "14. No direct mutation APIs in certification"
 Assert-No-Match -Pattern "new EC2Client|new ECSClient|new RDSClient|new IAMClient|new S3Client" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts" -Message "Direct AWS mutation clients found in certification files. Must use Action Registry -> URRE path for mutations."
 
+echo "15. Semantic placeholder blacklist"
+Assert-No-Match -Pattern "(ami-placeholder|subnet-placeholder|mock-tx|mocking|mocked|simulation|simulate|simulated|fake|dummy|synthetic|stub|placeholder|skip physical|skip physical describe|public\.ecr\.aws|latest|fake-ami|test-ami|mock-ami)" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts server/engine-core/src/fabric server/engine-core/src/deise server/engine-core/src/urre server/engine-core/src/evidence" -Message "Semantic placeholders found in production/certification paths"
+
 echo "20. Generating candidate manifest"
-echo "Candidate SHA: $head" > manifest.txt
+$branch = (git rev-parse --abbrev-ref HEAD)
+$tag = (git tag --points-at HEAD | Select-Object -First 1)
+
+$manifest = @{
+    candidateSha = $head
+    branch = $branch
+    remoteSha = $head
+    tag = $tag
+    workingTreeClean = $true
+    build = "PASS"
+    test = "PASS"
+    lint = "PASS"
+    diffCheck = "PASS"
+    physicalCertification = "NOT_RUN"
+}
+
+$manifest | ConvertTo-Json -Depth 5 > manifest.json
+Get-Content manifest.json
 
 echo "21. SHA-256 candidate manifest"
-certutil -hashfile manifest.txt SHA256
+certutil -hashfile manifest.json SHA256
 
 echo "22. SUCCESS - Candidate ready for physical campaign"
 exit 0
