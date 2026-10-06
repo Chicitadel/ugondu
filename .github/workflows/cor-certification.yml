@@ -2,6 +2,10 @@ name: Ugondu COR Certification
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ "main", "phase*" ]
+  pull_request:
+    branches: [ "main", "phase*" ]
 
 permissions:
   contents: read

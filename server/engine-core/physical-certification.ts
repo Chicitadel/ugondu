@@ -71,14 +71,13 @@ async function runCertification() {
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
 
         // DEISE Drift Injection and Test
-        console.log("10. Injecting Faults / Drift Out-of-band");
-        // Test script drift injection bypasses registry ONLY for testing the executor's ability to repair
-        const ec2ClientModule = require('@aws-sdk/client-ec2');
-        const ec2Injector = new ec2ClientModule.EC2({ region });
-        await ec2Injector.createTags({ Resources: [ec2Id], Tags: [{ Key: 'Name', Value: 'DriftedName' }] });
+        console.log(__t('cert.phase.injecting_faults', { default: '10. Injecting Faults / Drift Out-of-band' }));
+        // Governed Fault Injection
+        const { AwsCertificationFaultInjector } = require('./src/assurance/fault/aws-fault-injector');
+        const faultInjector = new AwsCertificationFaultInjector(region);
+        await faultInjector.injectTagDrift(ec2Id, 'Name', 'DriftedName');
         
-        console.log("11. DEISE Diagnosis and Native Repair");
-        // Actually invoke the AwsPhysicalRepairExecutor through DEISE
+        console.log(__t('cert.phase.diagnosis_repair', { default: '11. DEISE Diagnosis and Native Repair' }));
         const { AwsPhysicalRepairExecutor } = require('./src/deise/engine/aws-physical-repair-executor');
         const executor = new AwsPhysicalRepairExecutor(region);
         
@@ -94,17 +93,17 @@ async function runCertification() {
         const repairEngine = new DeploymentRepairEngine();
         const plan = repairEngine.diagnoseEnvironment(twin, 'v1');
         
-        console.log(`Diagnoses found: ${plan.diagnoses.length}`);
+        console.log(__t('cert.diagnoses.found', { count: plan.diagnoses.length, default: `Diagnoses found: ${plan.diagnoses.length}` }));
         if (plan.requiresInfrastructureRepair) {
-            console.log("12. DEISE Repair (Fixing Drift natively)");
+            console.log(__t('cert.phase.repairing_drift', { default: '12. DEISE Repair (Fixing Drift natively)' }));
             await executor.executeRepair(plan.infrastructureRepairs[0]);
         }
 
-        console.log("13. URRE Fault Injection & Rollback (Same transaction DAG)");
+        console.log(__t('cert.phase.urre_fault_injection', { default: '13. URRE Fault Injection & Rollback (Same transaction DAG)' }));
         urre.faultInjector = {
             afterNodePersisted: async (node) => {
                 if (node.action === 'CREATE_EC2' && node.status === 'RUNNING') {
-                    throw new Error("Simulated Fault during execution");
+                    throw new Error(__t('error.cert.simulated_fault', { default: 'Simulated Fault during execution' }));
                 }
             }
         };
@@ -112,14 +111,14 @@ async function runCertification() {
         try {
             await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
         } catch (e: any) {
-            console.log("Fault caught, testing rollback on the same TX. Error: " + e.message);
+            console.log(__t('cert.phase.testing_rollback', { error: e.message, default: 'Fault caught, testing rollback on the same TX. Error: ' + e.message }));
             await urre.triggerRollback({ id: txId });
         }
         
         // Remove fault injector for cleanup
         urre.faultInjector = undefined;
 
-        console.log("14. Cleanup (Canonical Actions Only)");
+        console.log(__t('cert.phase.cleanup', { default: '14. Cleanup (Canonical Actions Only)' }));
         await registry.getAction('storage:object:delete')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
         await registry.getAction('storage:s3:terminate')!.execute({ transactionId: txId, bucketName });
         
@@ -135,16 +134,20 @@ async function runCertification() {
         await registry.getAction('network:subnet:terminate')!.execute({ transactionId: txId, subnetId: sub2Id });
         await registry.getAction('network:vpc:terminate')!.execute({ transactionId: txId, vpcId: vpcId });
 
-        console.log("15. Residual Scan Verification");
-        const vpcDesc = await ec2Injector.describeVpcs({ VpcIds: [vpcId] }).catch(() => null);
-        const subDesc = await ec2Injector.describeSubnets({ SubnetIds: [sub1Id] }).catch(() => null);
-        const instDesc = await ec2Injector.describeInstances({ InstanceIds: [instanceId] }).catch(() => null);
-        const rdsDesc = await (ec2Injector as any).describeDBInstances({ DBInstanceIdentifier: 'test' }).catch(() => null);
-        const s3Desc = await (ec2Injector as any).headBucket({ Bucket: 'test' }).catch(() => null);
-        if ((vpcDesc ? 1 : 0) + (subDesc ? 1 : 0) + (instDesc ? 1 : 0) + (rdsDesc ? 1 : 0) + (s3Desc ? 1 : 0) !== 0) throw new Error("Residual Scan FAILED! Resources leaked.");
-        else console.log("Residual Scan: Clean!");
+        console.log(__t('cert.phase.residual_scan', { default: '15. Residual Scan Verification' }));
+        const { AwsResidualScanner } = require('./src/assurance/fault/aws-residual-scanner');
+        const residualScanner = new AwsResidualScanner(region);
+        
+        const leaked = await residualScanner.scanForLeakedResources({
+            vpcId, sub1Id, ec2Id, rdsId, bucketName
+        });
+        
+        if (leaked) {
+            throw new Error(__t('error.cert.residual_scan_failed', { default: 'Residual Scan FAILED! Resources leaked.' }));
+        }
+        else console.log(__t('cert.residual_scan.clean', { default: 'Residual Scan: Clean!' }));
 
-        console.log("? Certification Run Complete.");
+        console.log(__t('cert.run.complete', { default: '? Certification Run Complete.' }));
 
     } catch (e) {
         console.error(e);

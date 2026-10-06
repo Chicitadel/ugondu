@@ -31,6 +31,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import { Evidence } from './collector';
 import { EvidenceIntegrity } from './integrity';
 
@@ -40,7 +41,7 @@ export class EvidencePassport {
 
     public addEvidence(evidence: Evidence): void {
         if (!this.integrityChecker.verifyEvidence(evidence)) {
-            throw new Error('Evidence integrity check failed.');
+            throw new Error(__t('error.evidence.integrity_check_failed'));
         }
         this.evidences.push(evidence);
     }

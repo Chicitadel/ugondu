@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const root = 'D:\\ujomor-platform\\products\\ugondu';
+const root = process.env.UGONDU_ROOT || path.resolve(__dirname, '..');
 const localeDir = path.join(root, 'server', 'shared', 'locales');
 
 const flat = (o, p = '', out = {}) => {

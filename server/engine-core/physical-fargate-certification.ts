@@ -29,10 +29,10 @@ async function runFargateCertification() {
         await registry.getAction('container:registry:create')!.execute({ transactionId: txId, repositoryName: campaignId });
 
         console.log("Triggering canonical action: container:image:build");
-        await registry.getAction('container:image:build')!.execute({ transactionId: txId, dockerfile: 'Dockerfile.fargate', tag: `${campaignId}:latest` });
+        await registry.getAction('container:image:build')!.execute({ transactionId: txId, dockerfile: 'Dockerfile.fargate', tag: `${campaignId}:cert-build` });
 
         console.log("Triggering canonical action: container:image:push");
-        const pushRes = await registry.getAction('container:image:push')!.execute({ transactionId: txId, repositoryName: campaignId, tag: `${campaignId}:latest` });
+        const pushRes = await registry.getAction('container:image:push')!.execute({ transactionId: txId, repositoryName: campaignId, tag: `${campaignId}:cert-build` });
         const validDigest = pushRes?.outputs?.digest || pushRes?.digest;
         if (!validDigest) throw new Error("Missing physical image digest");
 
