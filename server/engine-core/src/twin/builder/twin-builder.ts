@@ -71,7 +71,7 @@ export class TwinBuilder {
 
     private applyEvent(event: TwinEvent): void {
         const existingIndex = this.resources.findIndex(r => r.id === event.resourceId);
-        
+
         switch (event.eventType) {
             case 'CREATED':
                 if (existingIndex === -1) {

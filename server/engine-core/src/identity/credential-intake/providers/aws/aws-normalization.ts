@@ -49,9 +49,9 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
 
         // Handle quoted CSV fields safely
         const parseCsvLine = (line: string) => line.split(',').map(v => v.replace(/^"|"$/g, '').trim());
-        
+
         const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
-        
+
         let accessKeyIdx = -1;
         let secretKeyIdx = -1;
         let userNameIdx = -1;
@@ -73,7 +73,7 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
 
         if (!userName) {
             Logger.info('AWS CSV missing User Name. Attempting safe recovery via STS...');
-            
+
             // Temporary credential object to authenticate and discover identity
             const tempCred = {
                 provider: 'aws',

@@ -41,11 +41,11 @@ export async function isolateTarget(context: TargetContext, reason: string): Pro
     try {
         context.systemState = 'ISOLATED';
         context.reason = reason;
-        
+
         // Execute network and process isolation
         await context.networkManager.cutOff();
         await context.processManager.isolate();
-        
+
         return {
             success: true,
             message: `Target successfully isolated. Reason: ${reason}`,

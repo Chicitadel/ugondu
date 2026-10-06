@@ -16,16 +16,16 @@ async function run() {
         console.log(`\nUGONDU CREDENTIAL IMPORT`);
         console.log(`────────────────────────────────────────`);
         console.log(`Input: ${filePath}`);
-        
+
         try {
             const orchestrator = new CredentialIntakeOrchestrator();
             const result = await orchestrator.processImport(filePath, ['ec2', 'vpc', 'rds', 's3']);
-            
+
             console.log(`Provider detected: ${result.normalized.provider.toUpperCase()}`);
             console.log(`\nAuthentication: ✓ SUCCESS`);
             console.log(`Caller: ${result.identity.principal}`);
             console.log(`Account: ${result.identity.accountId}`);
-            
+
             console.log(`\nAuthorization: ✓ Ugondu capability preflight`);
             if (result.authResults._simulation_unavailable) {
                 console.log('  ⚠ AUTHORIZATION SIMULATION UNAVAILABLE (Missing iam:SimulatePrincipalPolicy)');

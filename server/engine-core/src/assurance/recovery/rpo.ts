@@ -46,7 +46,7 @@ export class RpoCalculator {
         }
 
         const sorted = [...history].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-        
+
         let maxRpoMs = 0;
         let totalRpoMs = 0;
 

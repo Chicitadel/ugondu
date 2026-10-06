@@ -19,14 +19,14 @@ export interface Operation {
     status: string;
 }
 
-export type IdempotencyClass = 
-  | 'DETERMINISTIC' 
-  | 'CONDITIONAL' 
-  | 'ONCE' 
-  | 'DESTRUCTIVE' 
+export type IdempotencyClass =
+  | 'DETERMINISTIC'
+  | 'CONDITIONAL'
+  | 'ONCE'
+  | 'DESTRUCTIVE'
   | 'QUERY';
 
-export type MutationClass = 
+export type MutationClass =
   | 'DATA_TRANSFER'
   | 'CONFIGURATION'
   | 'INFRASTRUCTURE'

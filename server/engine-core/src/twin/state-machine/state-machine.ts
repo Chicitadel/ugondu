@@ -53,7 +53,7 @@ export class TwinStateMachine {
     }
 
     const now = new Date();
-    
+
     resource.stateHistory.push({
       from: resource.state,
       to: newState,

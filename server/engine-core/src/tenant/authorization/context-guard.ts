@@ -55,7 +55,7 @@ export class TenantContextGuard {
     if (!subject) {
       return DecisionBuilder.deny(__t('unauthenticated_subject'));
     }
-    
+
     // Cross-tenant protection
     if (resource && resource.tenantId && resource.tenantId !== subject.tenantId) {
       return DecisionBuilder.deny(__t('cross_tenant_access_violation_'));

@@ -43,7 +43,7 @@ export class KubernetesAdapter implements IProviderAdapter {
   public async discover(targetId: string): Promise<ObservationEvent> {
     const startTime = Date.now();
     const facts: Fact[] = [];
-    
+
     try {
       // Dynamic import to prevent monolithic bloat when kubernetes is not targeted
       let sdk: any;
@@ -58,9 +58,9 @@ export class KubernetesAdapter implements IProviderAdapter {
       // Live capability probing
       const client = new sdk.KubeConfig({ region: this.credentials.region ?? 'us-east-1' });
       Logger.info(__t('messages.discovery.probing_provider', { provider: this.id, targetId }));
-      
+
       const response = await client.makeApiClient(sdk.CoreV1Api).listNode()();
-      
+
       facts.push({
         id: crypto.randomUUID(),
         key: 'kubernetes.nodes.raw',

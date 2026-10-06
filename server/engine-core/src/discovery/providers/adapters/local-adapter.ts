@@ -43,7 +43,7 @@ export class LocalAdapter implements IProviderAdapter {
   public async discover(targetId: string): Promise<ObservationEvent> {
     const startTime = Date.now();
     const facts: Fact[] = [];
-    
+
     try {
       // Dynamic import to prevent monolithic bloat when local is not targeted
       let sdk: any;
@@ -58,9 +58,9 @@ export class LocalAdapter implements IProviderAdapter {
       // Live capability probing
       const client = new sdk.Object({ region: this.credentials.region ?? 'us-east-1' });
       Logger.info(__t('messages.discovery.probing_provider', { provider: this.id, targetId }));
-      
+
       const response = await client.Promise.resolve({ cpus: sdk.cpus(), mem: sdk.totalmem(), platform: sdk.platform() })();
-      
+
       facts.push({
         id: crypto.randomUUID(),
         key: 'linux.os.capabilities',

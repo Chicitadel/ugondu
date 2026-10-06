@@ -43,7 +43,7 @@ export class AwsAdapter implements IProviderAdapter {
   public async discover(targetId: string): Promise<ObservationEvent> {
     const startTime = Date.now();
     const facts: Fact[] = [];
-    
+
     try {
       // Dynamic import to prevent monolithic bloat when aws is not targeted
       let sdk: any;
@@ -58,9 +58,9 @@ export class AwsAdapter implements IProviderAdapter {
       // Live capability probing
       const client = new sdk.EC2Client({ region: this.credentials.region ?? 'us-east-1' });
       Logger.info(__t('messages.discovery.probing_provider', { provider: this.id, targetId }));
-      
+
       const response = await client.send(new sdk.DescribeInstancesCommand({}))();
-      
+
       facts.push({
         id: crypto.randomUUID(),
         key: 'aws.ec2.instances.raw',

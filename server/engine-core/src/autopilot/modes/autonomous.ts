@@ -49,7 +49,7 @@ export class AutonomousModeHandler {
                 result: true
             };
         }
-        
+
         return {
             status: 'REJECTED_BY_ADMISSION',
             result: false

@@ -60,14 +60,14 @@ export async function resolveSecret(ref: string): Promise<string> {
     throw new Error('SECURITY_VIOLATION: Attempted to resolve a secret from an invalid reference format.');
   }
   const secretKey = ref.slice(SECRET_PREFIX.length).trim();
-  
+
   // Map secret reference to physical vault store or KMS injected environment
   const envName = `UGONDU_SECRET_${secretKey.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
   const value = process.env[envName];
-  
+
   if (!value) {
     throw new Error(`SECURITY_VIOLATION: Physical secret not found in vault for reference: ${ref}`);
   }
-  
+
   return value;
 }

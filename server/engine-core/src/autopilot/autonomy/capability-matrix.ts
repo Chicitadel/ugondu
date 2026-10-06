@@ -55,7 +55,7 @@ export class CapabilityMatrix {
     public isCapable(actionId: string, activeLevel: AutonomyLevel): boolean {
         const capability = this.capabilities.get(actionId);
         if (!capability) return false;
-        
+
         // Ensure active level is equal or higher than required level
         // Simplified check, real implementation needs numeric comparison
         return true;

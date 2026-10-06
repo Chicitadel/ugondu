@@ -71,18 +71,18 @@ export class IdempotencyResolver {
     }
 
     private handleConditional(actionId: string, context: any): boolean {
-        return true; 
+        return true;
     }
 
     private handleOnce(actionId: string, context: any): boolean {
-        return true; 
+        return true;
     }
 
     private handleDestructive(actionId: string, context: any): boolean {
-        return true; 
+        return true;
     }
 
     private handleQuery(actionId: string, context: any): boolean {
-        return true; 
+        return true;
     }
 }

@@ -52,7 +52,7 @@ export class IdentityManager {
 
         const ephemeralToken = randomBytes(32).toString('hex');
         this.activeIdentities.set(sandboxId, ephemeralToken);
-        
+
         return ephemeralToken;
     }
 

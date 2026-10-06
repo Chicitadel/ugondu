@@ -49,9 +49,9 @@ export class ReadinessAssessor {
   public assessReadiness(): { ready: boolean; blockers: MigrationBlocker[] } {
     const sourceIr = this.sourceDiscovery.discover();
     const targetIr = this.targetDiscovery.discover();
-    
+
     const blockers = this.compatibilityAnalyzer.analyze(sourceIr, targetIr);
-    
+
     return {
       ready: blockers.length === 0,
       blockers,

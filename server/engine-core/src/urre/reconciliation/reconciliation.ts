@@ -39,7 +39,7 @@ import { detectDrift } from './drift';
 /**
  * Consolidates planned, recorded, observed, provider, and target states.
  * Outputs the definitive state of the system.
- * 
+ *
  * @param context The comprehensive state context across all dimensions
  * @returns The consolidated state: CONFIRMED_COMPLETE, INCOMPLETE, DRIFTED, UNKNOWN, CORRUPTED, or UNRECOVERABLE
  */

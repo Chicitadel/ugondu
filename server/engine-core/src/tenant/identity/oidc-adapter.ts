@@ -18,12 +18,12 @@ export class OIDCAdapter {
     if (!token || typeof token !== 'string') throw new Error(__t('invalid_token'));
     const parts = token.split('.');
     if (parts.length !== 3) throw new Error(__t('invalid_jwt_structure'));
-    
+
     try {
         const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
         if (!payload.sub) throw new Error(__t('missing_sub_claim'));
         if (payload.exp && payload.exp * 1000 < Date.now()) throw new Error(__t('token_expired'));
-        
+
         return SubjectContextFactory.create(
             payload.sub,
             payload.tenant_id || payload.tid || 'default-tenant',

@@ -60,7 +60,7 @@ export class EvidenceChain {
         const timestamp = Date.now();
         const dataToHash = JSON.stringify({ evidenceId, type, payload, timestamp, previousHash });
         const hash = generateDigest(dataToHash);
-        
+
         const link: EvidenceLink = { evidenceId, type, payload, timestamp, previousHash, hash };
         this.links.push(link);
         return link;
@@ -71,7 +71,7 @@ export class EvidenceChain {
             const link = this.links[i];
             const expectedPreviousHash = i > 0 ? this.links[i - 1].hash : null;
             if (link.previousHash !== expectedPreviousHash) return false;
-            
+
             const dataToHash = JSON.stringify({
                 evidenceId: link.evidenceId,
                 type: link.type,

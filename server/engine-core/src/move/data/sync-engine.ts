@@ -57,10 +57,10 @@ export class SyncEngine {
         try {
             this.state = SyncState.SNAPSHOT;
             await this.snapshotSync.performSnapshot(sourceId, targetId);
-            
+
             this.state = SyncState.INCREMENTAL;
             const lag = await this.incrementalSync.catchUp(sourceId, targetId);
-            
+
             if (lag < 100) {
                 this.state = SyncState.IN_SYNC;
             }

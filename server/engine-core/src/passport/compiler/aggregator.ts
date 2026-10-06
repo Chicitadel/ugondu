@@ -60,16 +60,16 @@ export class EvidenceAggregator {
         if (!chain.verify()) {
             throw new Error(__t('messages.error.evidence_chain_is_invalid'));
         }
-        
+
         if (!ConsistencyChecker.checkVersions(request.manifests)) {
             throw new Error(__t('messages.error.dependency_consistency_check_failed'));
         }
-        
+
         const timestamps = chain.getChain().map(link => link.timestamp);
         if (!FreshnessValidator.validateCollection(timestamps, request.freshnessConfig)) {
             throw new Error(__t('messages.error.evidence_is_stale_according_to_freshness_conf'));
         }
-        
+
         chain.append('aggregation', 'AGGREGATION_COMPLETE', {
             operation: request.context.operation,
             environment: request.context.targetEnvironment

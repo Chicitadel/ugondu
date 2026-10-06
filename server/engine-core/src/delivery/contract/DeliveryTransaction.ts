@@ -8,25 +8,25 @@
  * Classification : ENTERPRISE
  *
  * Description:
- * Canonical definition of a Universal Delivery Transaction. Defines Actor, 
- * Source, Destination, and Action as strictly isolated, authenticated, and 
+ * Canonical definition of a Universal Delivery Transaction. Defines Actor,
+ * Source, Destination, and Action as strictly isolated, authenticated, and
  * independently verifiable entities.
  ******************************************************************************/
 
-export type DeliveryActionType = 
-    | 'DEPLOY' 
-    | 'PROMOTE' 
-    | 'MIGRATE' 
-    | 'SYNC' 
-    | 'RESTORE' 
-    | 'REPAIR' 
-    | 'ROLLBACK' 
-    | 'CLONE' 
-    | 'MIRROR' 
-    | 'BACKUP' 
-    | 'VERIFY' 
-    | 'DRY_RUN' 
-    | 'EXPORT' 
+export type DeliveryActionType =
+    | 'DEPLOY'
+    | 'PROMOTE'
+    | 'MIGRATE'
+    | 'SYNC'
+    | 'RESTORE'
+    | 'REPAIR'
+    | 'ROLLBACK'
+    | 'CLONE'
+    | 'MIRROR'
+    | 'BACKUP'
+    | 'VERIFY'
+    | 'DRY_RUN'
+    | 'EXPORT'
     | 'IMPORT';
 
 export interface DeliveryActor {

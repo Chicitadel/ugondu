@@ -8,16 +8,16 @@ export class UgonduCredentialStore {
         // We partition by provider so multiple providers can be stored
         const accountId = `ugondu-${credential.provider}-credentials`;
         const payload = JSON.stringify(credential);
-        
+
         await keytar.setPassword(UGONDU_KEYTAR_SERVICE, accountId, payload);
     }
 
     public async get(provider: string): Promise<NormalizedCredential | null> {
         const accountId = `ugondu-${provider}-credentials`;
         const payload = await keytar.getPassword(UGONDU_KEYTAR_SERVICE, accountId);
-        
+
         if (!payload) return null;
-        
+
         try {
             return JSON.parse(payload) as NormalizedCredential;
         } catch {

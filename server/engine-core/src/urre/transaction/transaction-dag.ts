@@ -18,11 +18,44 @@ export interface DagEdge {
     to: string;
 }
 
-export interface TransactionDag {
-    id: string;
-    status: TransactionState;
-    nodes: DagNode[];
-    edges: DagEdge[];
-    createdAt: number;
-    updatedAt: number;
+export class TransactionDag {
+    public id: string;
+    public status: TransactionState = 'PENDING';
+    public nodes: DagNode[] = [];
+    public edges: DagEdge[] = [];
+    public createdAt: number = Date.now();
+    public updatedAt: number = Date.now();
+
+    constructor(id: string) {
+        this.id = id;
+    }
+
+    public addNode(id: string, provider: string, action: string, type: 'PROVISION'|'CONFIGURE'|'MIGRATE'|'CLEANUP' = 'PROVISION'): void {
+        this.nodes.push({ id, provider, action, type, params: {}, status: 'PENDING' });
+    }
+
+    public getNode(id: string): DagNode | undefined {
+        return this.nodes.find(n => n.id === id);
+    }
+
+    public serialize(): Record<string, any> {
+        return {
+            id: this.id,
+            status: this.status,
+            nodes: this.nodes,
+            edges: this.edges,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt
+        };
+    }
+
+    public static deserialize(data: Record<string, any>): TransactionDag {
+        const tx = new TransactionDag(data.id);
+        tx.status = data.status;
+        tx.edges = data.edges || [];
+        tx.createdAt = data.createdAt;
+        tx.updatedAt = data.updatedAt;
+        tx.nodes = data.nodes || [];
+        return tx;
+    }
 }

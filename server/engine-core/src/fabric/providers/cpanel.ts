@@ -28,8 +28,8 @@ export const CpanelContract: ProviderCapabilities = {
   provider: 'cpanel',
   kinds: {
     COMPUTE: { status: 'CONDITIONAL', modes: ['HOSTED_APP'] },
-    NETWORK: { 
-      status: 'UNSUPPORTED', 
+    NETWORK: {
+      status: 'UNSUPPORTED',
       modes: [],
       reasonKey: 'fabric.contract.reason.cpanel_network'
     },
@@ -50,11 +50,11 @@ export const CpanelContract: ProviderCapabilities = {
 export interface IWhmClient {
   createHostedApp(name: string, image: string): Promise<{ id: string; state: 'running' | 'failed' }>;
   removeHostedApp(id: string): Promise<void>;
-  
+
   createDatabase(name: string, engine: string, capacity: number, credentialsRef?: string): Promise<{ id: string; endpoint: string }>;
   removeDatabase(id: string): Promise<void>;
   createSnapshot(req: any): Promise<string>;
-  
+
   createAccountFilesystem(name: string): Promise<{ id: string; endpoint: string }>;
   removeAccountFilesystem(id: string): Promise<void>;
 }

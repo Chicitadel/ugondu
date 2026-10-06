@@ -46,7 +46,7 @@ export function setupPassportEndpoints(router: Router): void {
       const intentPayload = req.body;
       const parsedIntent = await parser.parse(intentPayload);
       const passport = await compiler.compile(parsedIntent);
-      
+
       res.status(200).json({
         success: true,
         data: passport
@@ -63,7 +63,7 @@ export function setupPassportEndpoints(router: Router): void {
     try {
       const { id } = req.params;
       const passport = await compiler.inspect(id);
-      
+
       if (!passport) {
         return res.status(404).json({
           success: false,

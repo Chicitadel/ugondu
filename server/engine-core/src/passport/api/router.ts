@@ -36,9 +36,9 @@ import { setupExecutionEndpoints } from './execution-endpoints';
 
 export function createPassportApiRouter(): Router {
   const router = Router();
-  
+
   setupPassportEndpoints(router);
   setupExecutionEndpoints(router);
-  
+
   return router;
 }

@@ -41,7 +41,7 @@ export class RetentionManager {
   isExpired(timestamp: number): boolean {
     return (Date.now() - timestamp) > this.retentionPeriodMs;
   }
-  
+
   enforceRetention<T extends { timestamp: number }>(items: T[]): T[] {
     return items.filter(item => !this.isExpired(item.timestamp));
   }

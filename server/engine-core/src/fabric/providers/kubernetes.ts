@@ -28,18 +28,18 @@ export const KubernetesContract: ProviderCapabilities = {
   provider: 'kubernetes',
   kinds: {
     COMPUTE: { status: 'NATIVE', modes: ['DEPLOYMENT', 'STATEFULSET'] },
-    NETWORK: { 
-      status: 'CONDITIONAL', 
+    NETWORK: {
+      status: 'CONDITIONAL',
       modes: ['NETWORK_POLICY'],
       reasonKey: 'fabric.contract.reason.kubernetes_network'
     },
-    DATABASE: { 
-      status: 'UNSUPPORTED', 
+    DATABASE: {
+      status: 'UNSUPPORTED',
       modes: [],
       reasonKey: 'fabric.contract.reason.kubernetes_database',
       alternativeKeys: [
-        'fabric.contract.alt.install_plugin', 
-        'fabric.contract.alt.target_managed_provider', 
+        'fabric.contract.alt.install_plugin',
+        'fabric.contract.alt.target_managed_provider',
         'fabric.contract.alt.remove_resource'
       ]
     },
@@ -59,10 +59,10 @@ export const KubernetesContract: ProviderCapabilities = {
 export interface IKubernetesClient {
   applyWorkload(name: string, type: 'Deployment' | 'StatefulSet', cpuReq: number, memReqMi: number, image: string): Promise<{ id: string; state: 'running' | 'failed' }>;
   deleteWorkload(id: string): Promise<void>;
-  
+
   applyNetworkPolicy(name: string, cidr: string): Promise<{ id: string }>;
   deleteNetworkPolicy(id: string): Promise<void>;
-  
+
   createPvc(name: string, sizeGb?: number, accessMode?: string): Promise<{ id: string; endpoint: string }>;
   deletePvc(id: string): Promise<void>;
   getInstanceStatus(id: string): Promise<ComputeStatus>;

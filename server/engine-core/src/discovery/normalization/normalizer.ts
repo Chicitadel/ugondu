@@ -69,11 +69,11 @@ export class DataNormalizer {
 
     public normalize(raw: RawObservation[]): CanonicalResource[] {
         const canonicalMap = new Map<string, CanonicalResource>();
-        
+
         for (const obs of raw) {
             const existing = canonicalMap.get(obs.resourceId);
             const normalized = this.mapToCanonical(obs);
-            
+
             if (existing) {
                 const conflict = this.conflictDetector.detect(existing, normalized);
                 if (conflict.hasConflict) {
@@ -87,7 +87,7 @@ export class DataNormalizer {
                 canonicalMap.set(obs.resourceId, normalized);
             }
         }
-        
+
         return Array.from(canonicalMap.values());
     }
 

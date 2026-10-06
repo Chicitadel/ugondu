@@ -1,0 +1,12 @@
+[
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\governance\\engine\\policy-deduplication.spec.ts",
+    "LineNumber": 72,
+    "Line": "        const mockAdapter: ProviderAuthorizationAdapter = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\governance\\engine\\policy-deduplication.spec.ts",
+    "LineNumber": 84,
+    "Line": "        engine.registerAdapter(mockAdapter);"
+  }
+]

@@ -151,21 +151,21 @@ async function executeSimulations() {
     try {
         const daClient = new SimulationDirectAdminClient();
         const da = new DirectAdminAdapter(daClient);
-        
+
         await daClient.createHostedApp('app1', 'nodejs');
         await daClient.createDatabase('db1', 'mysql');
-        
+
         const stat = await daClient.getInstanceStatus('app1');
         if (stat.state !== 'running') throw new Error('App not running');
-        
+
         const snap = await daClient.createSnapshot('app1');
         const snapStat = daClient.state[snap];
         if (!snapStat) throw new Error('Snapshot not recorded in state');
-        
+
         await daClient.removeDatabase('db1');
         await daClient.removeHostedApp('app1');
         await daClient.deleteSnapshot(snap);
-        
+
         if (Object.keys(daClient.state).length !== 0) throw new Error('Residual state found');
         evidence.results['P0-D-SIM-01'] = 'PASS';
     } catch (e: any) {
@@ -176,25 +176,25 @@ async function executeSimulations() {
     Logger.info('--- P0-D-SIM-02: AWS Lifecycle ---');
     try {
         const awsClient = new SimulationAwsClient() as any;
-        
+
         const vpcId = await awsClient.createVpc('10.0.0.0/16', 'sim-vpc');
         const subnet = await awsClient.createSubnet(vpcId, '10.0.1.0/24');
         const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', subnet.id);
         const rds = await awsClient.createRds('sim-db', 'postgres', 10);
         const s3 = await awsClient.createS3Bucket('sim-bucket', false);
-        
+
         const ec2Stat = await awsClient.getInstanceStatus(ec2.id);
         if (ec2Stat.state !== 'running') throw new Error('EC2 not running');
-        
+
         const snap = await awsClient.createSnapshot(rds.id);
-        
+
         await awsClient.terminateInstances(ec2.id);
         await awsClient.deleteRds(rds.id);
         await awsClient.deleteS3Bucket(s3.id);
         awsClient.state[subnet.id] = undefined as any; delete awsClient.state[subnet.id];
         await awsClient.deleteVpc(vpcId);
         await awsClient.deleteSnapshot(snap);
-        
+
         if (Object.keys(awsClient.state).length !== 0) throw new Error('Residual resources found in AWS simulated account');
         evidence.results['P0-D-SIM-02'] = 'PASS';
     } catch (e: any) {
@@ -205,11 +205,11 @@ async function executeSimulations() {
     Logger.info('--- P0-D-SIM-03: Failure and Rollback ---');
     try {
         const awsClient = new SimulationAwsClient() as any;
-        
+
         const vpcId = await awsClient.createVpc('10.0.0.0/16', 'sim-vpc');
         const subnet = await awsClient.createSubnet(vpcId, '10.0.1.0/24');
         const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', subnet.id);
-        
+
         let failed = false;
         try {
             await awsClient.createRds('fail-db', 'postgres', 10);
@@ -220,10 +220,10 @@ async function executeSimulations() {
             awsClient.state[subnet.id] = undefined as any; delete awsClient.state[subnet.id];
             await awsClient.deleteVpc(vpcId);
         }
-        
+
         if (!failed) throw new Error('Expected failure did not occur');
         if (Object.keys(awsClient.state).length !== 0) throw new Error('Rollback failed to clear residual resources');
-        
+
         evidence.results['P0-D-SIM-03'] = 'PASS';
     } catch (e: any) {
         evidence.results['P0-D-SIM-03'] = 'FAIL: ' + e.message;
@@ -234,10 +234,10 @@ async function executeSimulations() {
     try {
         const awsClient = new SimulationAwsClient() as any;
         const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', 'subnet-mock');
-        
+
         Logger.info('[SIM-DEISE] Intentional External Modification (Drift)');
         awsClient.state[ec2.id].instanceType = 't3.large';
-        
+
         Logger.info('[SIM-DEISE] Discovery & Diagnosis');
         const observedType = awsClient.state[ec2.id].instanceType;
         if (observedType !== 't3.micro') {
@@ -245,15 +245,15 @@ async function executeSimulations() {
             Logger.info('[SIM-DEISE] Executing Repair Plan...');
             awsClient.state[ec2.id].instanceType = 't3.micro'; // Repair
         }
-        
+
         const repairedType = awsClient.state[ec2.id].instanceType;
         if (repairedType !== 't3.micro') throw new Error('Repair failed');
-        
+
         evidence.results['P0-D-SIM-04'] = 'PASS';
     } catch (e: any) {
         evidence.results['P0-D-SIM-04'] = 'FAIL: ' + e.message;
     }
-    
+
     // P0-D-SIM-05 - Universal Delivery Transaction
     Logger.info('--- P0-D-SIM-05: Universal Delivery Transaction ---');
     try {
@@ -262,20 +262,20 @@ async function executeSimulations() {
             txLog.push(state);
             Logger.info(`[SIM-TX] Transistioning: -> ${state}`);
         };
-        
+
         stateMachine('PENDING');
         stateMachine('RUNNING');
         stateMachine('SUCCESS');
-        
+
         stateMachine('PENDING');
         stateMachine('RUNNING');
         Logger.info('[SIM-TX] Simulated Interruption');
         stateMachine('FAILED');
         stateMachine('ROLLBACK');
         stateMachine('RECOVERED');
-        
+
         if (txLog.length !== 8) throw new Error('Transaction state machine invalid');
-        
+
         evidence.results['P0-D-SIM-05'] = 'PASS';
     } catch (e: any) {
         evidence.results['P0-D-SIM-05'] = 'FAIL: ' + e.message;
@@ -284,7 +284,7 @@ async function executeSimulations() {
     // Cryptographic Seal
     const hash = crypto.createHash('sha256').update(JSON.stringify(evidence)).digest('hex');
     const finalEvidence = { ...evidence, seal: hash };
-    
+
     fs.writeFileSync('COR_SIMULATION_EVIDENCE.json', JSON.stringify(finalEvidence, null, 2));
     Logger.info('Provider Fabric Deterministic Simulation concluded. Evidence recorded to COR_SIMULATION_EVIDENCE.json');
 }

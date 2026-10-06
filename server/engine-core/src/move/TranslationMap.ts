@@ -125,7 +125,7 @@ export class TranslationMap {
     if (config.mysql.sizeGb < 0) {
         throw new Error(__t('messages.error.invalid_db_size'));
     }
-    
+
     let instanceClass: string = 'db.t3.micro';
     if (config.mysql.sizeGb > 100) {
       instanceClass = 'db.r5.large';

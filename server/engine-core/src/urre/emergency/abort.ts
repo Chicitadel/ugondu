@@ -41,10 +41,10 @@ export async function abortExecution(context: TargetContext, reason: string): Pr
     try {
         context.systemState = 'ABORTED';
         context.reason = reason;
-        
+
         // Execute underlying system abort commands
         await context.processManager.terminateAll();
-        
+
         return {
             success: true,
             message: `Execution successfully aborted. Reason: ${reason}`,

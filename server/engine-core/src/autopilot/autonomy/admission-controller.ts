@@ -39,8 +39,8 @@ export class AdmissionController {
         // Enforce policy validation
         // Enforce data freshness requirements
         // Enforce budget limits
-        return this.verifyPolicy(request) && 
-               this.verifyFreshness(context) && 
+        return this.verifyPolicy(request) &&
+               this.verifyFreshness(context) &&
                this.verifyBudget(context);
     }
 

@@ -56,11 +56,11 @@ export class EvidencePassport {
       signature,
     };
   }
-  
+
   public verifyCertificate(certificate: MigrationCertificate, plan: MigrationPlan): boolean {
     const hash = this.integrityManager.hashPlan(plan);
     if (hash !== certificate.hash) return false;
-    
+
     return this.integrityManager.verifySignature(hash, certificate.signature);
   }
 }

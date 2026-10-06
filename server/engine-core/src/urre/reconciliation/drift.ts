@@ -37,7 +37,7 @@ import { StateDigest, TaskContext } from '../model';
 /**
  * Detects external drift between the expected base digest and the actual target digest.
  * If drift is detected, it signals the orchestration engine to trigger a REPLAN.
- * 
+ *
  * @param expectedBase The expected state digest
  * @param actualTarget The actual state digest observed in the target environment
  * @param context The execution context for signaling
@@ -49,7 +49,7 @@ export function detectDrift(expectedBase: StateDigest, actualTarget: StateDigest
         context.signal('REPLAN');
         return true;
     }
-    
+
     // Perform deep comparison if required by context policy
     if (context.policy.strictDriftDetection && expectedBase.version !== actualTarget.version) {
         context.logger.info(`Version drift detected. Expected version ${expectedBase.version}, got ${actualTarget.version}`);

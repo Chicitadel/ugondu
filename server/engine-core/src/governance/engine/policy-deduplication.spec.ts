@@ -21,7 +21,7 @@ describe('POL-003 Deduplication & Testing', () => {
                 conditions: { a: 1, b: 2 }
             }
         ];
-        
+
         const intent2: UniversalPermission[] = [
             {
                 action: 'read',
@@ -41,7 +41,7 @@ describe('POL-003 Deduplication & Testing', () => {
             { action: 'read', resource: 'res:2' },
             { action: 'write', resource: 'res:1' }
         ];
-        
+
         const intent2: UniversalPermission[] = [
             { action: 'write', resource: 'res:1' },
             { action: 'read', resource: 'res:2' } // differing order
@@ -57,7 +57,7 @@ describe('POL-003 Deduplication & Testing', () => {
         const intent1: UniversalPermission[] = [
             { action: 'read', resource: 'res:1' }
         ];
-        
+
         const intent2: UniversalPermission[] = [
             { action: 'read', resource: 'res:2' }
         ];
@@ -97,7 +97,7 @@ describe('POL-003 Deduplication & Testing', () => {
         expect(record2.operation).toBe('REUSE');
         expect(record2.resource).toBe(record1.resource); // Same policy ID reused
         expect(engine.registry.getRegistryCount()).toBe(1); // Still 1
-        
+
         // Third evaluation with equivalent intent (different order) should REUSE
         const intentDiffOrder: UniversalPermission[] = [
             { action: 'read', resource: 'res:shared', conditions: {} }

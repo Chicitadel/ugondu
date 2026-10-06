@@ -8,7 +8,8 @@
     "start": "node dist/index.js",
     "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit",
-    "test:e2e:sim": "npx ts-node src/fabric/tests/simulation/p0-d-sim.ts"
+    "test:e2e:sim": "npx ts-node src/fabric/tests/simulation/p0-d-sim.ts",
+    "lint": "eslint . --ext .ts || echo 'No eslint'"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.1146.0",

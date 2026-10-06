@@ -50,7 +50,7 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
             if (permission.conditions && Object.keys(permission.conditions).length > 0) {
                 statement.Condition = permission.conditions;
             }
-            
+
             return statement;
         });
 
@@ -77,7 +77,7 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
             if (permission.action === '*' || permission.resource === '*') {
                 return false;
             }
-            
+
             if (permission.conditions) {
                 // Return false if intent cannot be mapped exactly without over-privileging
                 if ('unsupported_boundary' in permission.conditions) {
@@ -85,7 +85,7 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
                 }
             }
         }
-        
+
         return true;
     }
 }

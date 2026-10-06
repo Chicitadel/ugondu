@@ -45,14 +45,14 @@ export interface DependencyManifest {
 export class ConsistencyChecker {
     public static checkVersions(manifests: DependencyManifest[]): boolean {
         const resolvedVersions: Record<string, string> = {};
-        
+
         for (const manifest of manifests) {
             if (resolvedVersions[manifest.componentId] && resolvedVersions[manifest.componentId] !== manifest.version) {
                 return false; // Conflicting versions for the same component
             }
             resolvedVersions[manifest.componentId] = manifest.version;
         }
-        
+
         for (const manifest of manifests) {
             for (const [depId, depVersion] of Object.entries(manifest.dependencies)) {
                 if (resolvedVersions[depId] && resolvedVersions[depId] !== depVersion) {
@@ -60,7 +60,7 @@ export class ConsistencyChecker {
                 }
             }
         }
-        
+
         return true;
     }
 }

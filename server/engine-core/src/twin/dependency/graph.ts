@@ -49,11 +49,11 @@ export class DependencyGraph {
 
     public addEdge(edge: DependencyEdge): void {
         this.edges.push(edge);
-        
+
         const fwd = this.forwardIndex.get(edge.sourceId) || [];
         fwd.push(edge);
         this.forwardIndex.set(edge.sourceId, fwd);
-        
+
         const rev = this.reverseIndex.get(edge.targetId) || [];
         rev.push(edge);
         this.reverseIndex.set(edge.targetId, rev);

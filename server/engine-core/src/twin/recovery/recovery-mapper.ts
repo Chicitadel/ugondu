@@ -61,8 +61,8 @@ export class RecoveryMapper {
         }
 
         // URRE evaluation logic (Unified Recovery Readiness Evaluation)
-        return capability.recoveryStrategies.length > 0 && 
-               capability.rtoTargetMs !== undefined && 
+        return capability.recoveryStrategies.length > 0 &&
+               capability.rtoTargetMs !== undefined &&
                capability.rpoTargetMs !== undefined;
     }
 }

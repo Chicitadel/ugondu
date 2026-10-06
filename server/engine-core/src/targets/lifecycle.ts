@@ -33,7 +33,7 @@ export class TargetLifecycleManager {
 
     public async acquireLease(targetId: string, tenantId: string): Promise<TargetLease> {
         Logger.info(__t('messages.target.requesting_lease', { targetId, tenantId }));
-        
+
         const target = globalTargetFabric.getTarget(targetId);
         if (!target) {
             throw new Error(__t('messages.error.target_not_found', { targetId }));
@@ -62,7 +62,7 @@ export class TargetLifecycleManager {
 
         this.activeLeases.set(lease.leaseId, lease);
         Logger.info(__t('messages.target.lease_acquired', { targetId, leaseId: lease.leaseId }));
-        
+
         return lease;
     }
 
@@ -104,7 +104,7 @@ export class TargetLifecycleManager {
     public checkHealth(targetId: string): 'HEALTHY' | 'DEGRADED' | 'OFFLINE' {
         const target = globalTargetFabric.getTarget(targetId);
         if (!target) return 'OFFLINE';
-        
+
         // Mock health check evaluation based on TargetDescriptor status
         if (target.status === 'ONLINE') return 'HEALTHY';
         if (target.status === 'DEGRADED') return 'DEGRADED';

@@ -34,7 +34,7 @@ export class URREngine {
     private getIndegree(tx: TransactionDag, reversed = false): Record<string, number> {
         const inDegree: Record<string, number> = {};
         tx.nodes.forEach(n => inDegree[n.id] = 0);
-        
+
         tx.edges.forEach(edge => {
             const to = reversed ? edge.from : edge.to;
             if (inDegree[to] !== undefined) {
@@ -47,7 +47,7 @@ export class URREngine {
     private getAdjacency(tx: TransactionDag, reversed = false): Record<string, string[]> {
         const adj: Record<string, string[]> = {};
         tx.nodes.forEach(n => adj[n.id] = []);
-        
+
         tx.edges.forEach(edge => {
             const from = reversed ? edge.to : edge.from;
             const to = reversed ? edge.from : edge.to;
@@ -93,7 +93,7 @@ export class URREngine {
             try {
                 const key = `${node.provider}:${node.action}`;
                 if (!this.handlers[key]) throw new Error(`No handler registered for ${key}`);
-                
+
                 node.output = await this.handlers[key](node);
                 node.status = 'SUCCESS';
                 await this.store.save(tx);
@@ -108,9 +108,9 @@ export class URREngine {
                 node.error = error.message;
                 tx.status = 'FAILED';
                 await this.store.save(tx);
-                
+
                 Logger.error(`Transaction ${tx.id} failed at node ${node.id}: ${error.message}`);
-                
+
                 // Immediately invoke URRE Rollback Engine
                 await this.triggerRollback({ id: tx.id, targetEnvironment: '', tx });
                 return;
@@ -124,7 +124,7 @@ export class URREngine {
     public async triggerRollback(context: DeploymentContext): Promise<RollbackEvent> {
         let tx = context.tx;
         if (!tx) tx = await this.store.load(context.id) || undefined;
-        
+
         if (!tx) {
             throw new Error(__t('messages.error.invalid_deployment_context'));
         }
@@ -136,12 +136,12 @@ export class URREngine {
         // Reverse the DAG for Rollback Traverser
         const inDegree = this.getIndegree(tx, true);
         const adj = this.getAdjacency(tx, true);
-        
+
         // Only rollback nodes that were SUCCESS or RUNNING
         const rollbackEligible = tx.nodes.filter(n => n.status === 'SUCCESS' || n.status === 'RUNNING').map(n => n.id);
 
         const queue: string[] = Object.keys(inDegree).filter(id => inDegree[id] === 0);
-        
+
         while (queue.length > 0) {
             const nodeId = queue.shift()!;
             const node = tx.nodes.find(n => n.id === nodeId)!;

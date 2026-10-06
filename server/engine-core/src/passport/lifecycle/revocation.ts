@@ -51,7 +51,7 @@ export class RevocationManager {
     public async isRevoked(passportId: string): Promise<boolean> {
         const cacheKey = `passport:revocation:${passportId}`;
         const cachedRevocation = await this.cacheClient.get(cacheKey);
-        
+
         if (cachedRevocation !== null) {
             return cachedRevocation === 'true';
         }

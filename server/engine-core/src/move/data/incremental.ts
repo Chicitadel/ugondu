@@ -46,7 +46,7 @@ export class IncrementalSync {
         const currentTime = Date.now();
         const lastSyncTime = currentTime - 5000;
         const bytesLag = 2048; // Calculate actual byte lag based on delta
-        
+
         Logger.info(__t('messages.system.incremental_sync_bytes_behind', { 'bytesLag': bytesLag }));
         return bytesLag;
     }

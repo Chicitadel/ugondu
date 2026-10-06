@@ -63,24 +63,24 @@ export interface RecoveryPoint {
   label: string;
   state: RecoveryPointState;
   pointClass: RecoveryPointClass;
-  
+
   applicationVersion: string;
   artifactDigests: Record<string, string>;
   configDigests: Record<string, string>;
   secretVersionRefs: Record<string, string>;
-  
+
   infrastructureGraph: InfrastructureSnapshot;
   dnsState: DnsSnapshot;
   tlsCertDigests: Record<string, string>;
   dependencyVersions: Record<string, string>;
-  
+
   databaseBackupRef: DatabaseBackupRef | null;
   backupVerified: boolean;
   backupRestoreTestedAt: number | null;
-  
+
   containerImageDigests: Record<string, string>;
   kubernetesManifestDigests: Record<string, string>;
-  
+
   verificationResults: VerificationResult[];
   verifiedAt: number | null;
   policyVersionHash: string;

@@ -56,7 +56,7 @@ export class IsolationManager {
         if (!handle.cgroupPath.startsWith('/sys/fs/cgroup')) {
             throw new Error(__t('messages.error.invalid_cgroup_path', { 'handle_cgroupPath': handle.cgroupPath }));
         }
-        
+
         if (handle.processId <= 0) {
             throw new Error(__t('messages.error.invalid_process_id', { 'handle_processId': handle.processId }));
         }

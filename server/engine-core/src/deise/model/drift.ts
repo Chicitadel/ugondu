@@ -70,4 +70,6 @@ export interface DriftDiagnosis {
     affectedPaths: string[];
     isDestructiveRecovery: boolean;
     remediationAction: string;
+    expectedState?: any;
+    actualState?: any;
 }

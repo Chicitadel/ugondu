@@ -49,7 +49,7 @@ export interface IAwsClient {
   resolveInstanceType(cpuCores: number, memoryMb: number): Promise<string>;
   runInstances(type: string, image: string, subnetId?: string): Promise<{ id: string; ip: string; state: 'running' | 'failed' }>;
   terminateInstances(id: string): Promise<void>;
-  
+
   createVpc(cidr: string, name: string): Promise<string>;
   deleteVpc(id: string): Promise<void>;
   discoverAvailabilityZones(): Promise<string[]>;
@@ -57,11 +57,11 @@ export interface IAwsClient {
   deleteSecurityGroup(id: string): Promise<void>;
   createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string>;
   deleteDBSubnetGroup(name: string): Promise<void>;
-  
-  
+
+
   createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string, dbSubnetGroupName?: string): Promise<{ id: string; endpoint: string }>;
   deleteRds(id: string): Promise<void>;
-  
+
   createS3Bucket(name: string, isPublic: boolean): Promise<{ id: string; endpoint: string }>;
   deleteS3Bucket(id: string): Promise<void>;
   getInstanceStatus(id: string): Promise<ComputeStatus>;
@@ -72,10 +72,10 @@ export interface IAwsClient {
   createEcsCluster(name: string): Promise<string>;
   registerTaskDefinition(name: string, imageUri: string, cpu: string, memory: string, executionRoleArn: string, taskRoleArn: string, logGroupName: string): Promise<string>;
   createEcsService(clusterName: string, serviceName: string, taskDefinitionArn: string, desiredCount: number, subnets: string[], securityGroups: string[], targetGroupArn?: string): Promise<string>;
-  
+
   // ECR
   createEcrRepository(name: string): Promise<string>;
-  
+
   // CloudWatch Logs
   createLogGroup(name: string): Promise<string>;
 }
@@ -114,7 +114,7 @@ export class AwsAdapter implements ComputeCapability, NetworkCapability, Databas
 
   public async deleteVirtualNetwork(id: string): Promise<void> {
     await this.client.deleteVpc(id);
-  
+
   }
 
   public async createSubnet(networkId: string, cidr: string): Promise<SubnetResult> {

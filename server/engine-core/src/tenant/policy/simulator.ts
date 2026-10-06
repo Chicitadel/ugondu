@@ -40,7 +40,7 @@ import { Resolver } from './resolver';
  */
 export class PolicySimulator {
   private readonly resolver = new Resolver();
-  
+
   public simulate(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
     return this.resolver.resolve(context, resource);
   }

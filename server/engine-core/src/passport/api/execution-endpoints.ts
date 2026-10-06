@@ -43,9 +43,9 @@ export function setupExecutionEndpoints(router: Router): void {
     try {
       const { passportId } = req.params;
       const executionContext = req.body.context || {};
-      
+
       const receipt = await gatekeeper.execute(passportId, executionContext);
-      
+
       res.status(200).json({
         success: true,
         data: receipt

@@ -7,7 +7,7 @@ import { AwsAuthorizationPreflight } from './providers/aws/aws-authorization';
 
 export class CredentialIntakeOrchestrator {
     private normalizers: CredentialNormalizer[] = [new AwsCredentialNormalizer()];
-    
+
     private getVerifier(provider: string): AuthenticationVerifier {
         if (provider === 'aws') return new AwsAuthenticationVerifier();
         throw new Error(`No AuthenticationVerifier registered for provider: ${provider}`);
@@ -41,12 +41,12 @@ export class CredentialIntakeOrchestrator {
         // 1. Normalize
         Logger.info(`Normalizing credential...`);
         const normalized = await matchedNormalizer.normalize(rawContent);
-        
+
         // 2. Authenticate
         Logger.info(`Authenticating ${normalized.provider} credential...`);
         const verifier = this.getVerifier(normalized.provider);
         const identity = await verifier.verify(normalized);
-        
+
         // 3. Authorize
         Logger.info(`Running capability authorization preflight...`);
         const preflight = this.getPreflight(normalized.provider);

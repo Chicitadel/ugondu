@@ -23,7 +23,7 @@ export interface SourceCapabilities {
 }
 
 export interface ISourceAdapter {
-    /** 
+    /**
      * Identify and authenticate the physical source entity independent of the actor.
      */
     authenticate(credentialRef: string): Promise<SourceIdentity>;

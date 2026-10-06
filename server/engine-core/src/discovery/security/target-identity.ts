@@ -60,7 +60,7 @@ export interface CloudTargetIdentity {
  * @classification ENTERPRISE
  */
 export class TargetIdentityValidator {
-  
+
   public validateSshIdentity(target: SshTargetIdentity, actualFingerprint: string): void {
     if (!actualFingerprint || actualFingerprint.trim() === '') {
       throw new Error('Identity Validation Failed: Empty fingerprint returned from target.');

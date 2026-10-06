@@ -38,7 +38,7 @@ export function isPrivateOrLocal(ip: string): boolean {
     if (net.isIPv4(ip)) {
         const parts = ip.split('.').map(Number);
         if (parts.length !== 4) return false;
-        
+
         // 127.0.0.0/8 (loopback)
         if (parts[0] === 127) return true;
         // 10.0.0.0/8 (RFC 1918)
@@ -56,27 +56,27 @@ export function isPrivateOrLocal(ip: string): boolean {
             (parts[0] === 255 && parts[1] === 255 && parts[2] === 255 && parts[3] === 255)) {
             return true;
         }
-        
+
         return false;
     } else if (net.isIPv6(ip)) {
         const lowerIp = ip.toLowerCase();
-        
+
         if (lowerIp.startsWith('::ffff:')) {
             const ipv4Part = lowerIp.substring(7);
             if (ipv4Part.includes('.')) {
                 return isPrivateOrLocal(ipv4Part);
             }
         }
-        
+
         if (lowerIp === '::1' || lowerIp === '::') return true;
 
         const expanded = expandIPv6(lowerIp);
         if (expanded.startsWith('fc') || expanded.startsWith('fd')) return true;
         if (expanded.startsWith('fe8') || expanded.startsWith('fe9') || expanded.startsWith('fea') || expanded.startsWith('feb')) return true;
-        
+
         return false;
     }
-    
+
     return false;
 }
 

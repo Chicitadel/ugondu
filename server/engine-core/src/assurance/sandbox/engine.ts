@@ -54,7 +54,7 @@ export class SandboxEngine {
 
     public async initializeSandbox(id: string): Promise<void> {
         const handle = await this.adapter.createSandbox(id);
-        
+
         await this.isolation.enforce(handle);
         await this.network.isolate(handle);
         await this.quota.applyLimits(handle);

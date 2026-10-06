@@ -58,7 +58,7 @@ export class Packager {
         }
 
         const signature = this.signer.sign(artifact);
-        
+
         return {
             artifact,
             binding: {

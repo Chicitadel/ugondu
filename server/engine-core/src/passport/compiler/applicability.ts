@@ -58,8 +58,8 @@ export class ApplicabilityAnalyzer {
     public static isApplicable(evidenceContext: ApplicabilityContext, targetContext: ApplicabilityContext): boolean {
         if (evidenceContext.operation !== targetContext.operation) return false;
         if (evidenceContext.targetEnvironment !== targetContext.targetEnvironment) return false;
-        
-        const hasAllLabels = targetContext.requiredLabels.every(label => 
+
+        const hasAllLabels = targetContext.requiredLabels.every(label =>
             evidenceContext.requiredLabels.includes(label)
         );
         return hasAllLabels;

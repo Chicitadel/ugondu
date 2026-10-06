@@ -76,16 +76,16 @@ export class TenantContextGuard {
             throw new TenantIsolationError(__t('messages.error.security_context_is_null_or_undefined'));
         }
         const tenantId = securityContext.tenantId;
-        
+
         if (!tenantId || typeof tenantId !== 'string' || tenantId.trim() === '') {
             throw new TenantIsolationError(__t('messages.error.tenantid_must_be_a_non_empty_string'));
         }
-        
+
         if (!securityContext.tenant || tenantId !== securityContext.tenant.id) {
             throw new TenantIsolationError(__t('messages.error.tenantid_does_not_match_securitycontext_tenan'));
         }
-        
-        if (securityContext.organizationId && securityContext.tenant.organizationId && 
+
+        if (securityContext.organizationId && securityContext.tenant.organizationId &&
             securityContext.organizationId !== securityContext.tenant.organizationId) {
             throw new TenantIsolationError(__t('messages.error.organizationid_is_inconsistent_with_tenantid'));
         }

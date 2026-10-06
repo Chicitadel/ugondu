@@ -60,13 +60,13 @@ export class CertificationAuthority {
         // In a complete implementation, this would read files from move/evidence
         // and compute their hashes. We abstract it here.
         const evidenceHashes = await this.compileEvidence(evidenceDirectory);
-        
+
         const timestamp = new Date().toISOString();
         const id = crypto.randomUUID();
-        
+
         const payload = JSON.stringify({ id, timestamp, evidenceHashes });
         const signature = this.signPayload(payload);
-        
+
         return {
             id,
             timestamp,
@@ -74,7 +74,7 @@ export class CertificationAuthority {
             signature
         };
     }
-    
+
     private async compileEvidence(directory: string): Promise<Record<string, string>> {
         // Mocking evidence collection for abstraction
         return {
@@ -82,7 +82,7 @@ export class CertificationAuthority {
             'evidence_2.json': crypto.createHash('sha256').update('evidence2').digest('hex')
         };
     }
-    
+
     private signPayload(payload: string): string {
         const sign = crypto.createSign('SHA256');
         sign.update(payload);

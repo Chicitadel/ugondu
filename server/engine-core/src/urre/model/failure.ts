@@ -70,7 +70,7 @@ export enum FailureClass {
   UNKNOWN_FAILURE         = 'UNKNOWN_FAILURE',
 }
 
-export type FailureDomain = 
+export type FailureDomain =
   | 'CONTROL_PLANE'
   | 'DATA_PLANE'
   | 'TARGET_PLANE'

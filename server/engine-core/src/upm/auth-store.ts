@@ -54,16 +54,16 @@ export class FileAuthorizationStore implements IAuthorizationStore {
 
     public async save(auth: ExecutionAuthorization): Promise<void> {
         const filePath = this.getFilePath(auth.authorizationId);
-        
+
         const payload = JSON.stringify(auth, null, 2);
         await fs.promises.writeFile(filePath, payload, 'utf8');
-        
+
         Logger.info(__t('messages.upm.authorization_saved', { id: auth.authorizationId }));
     }
 
     public async load(authorizationId: string): Promise<ExecutionAuthorization | undefined> {
         const filePath = this.getFilePath(authorizationId);
-        
+
         if (!fs.existsSync(filePath)) {
             return undefined;
         }
@@ -71,11 +71,11 @@ export class FileAuthorizationStore implements IAuthorizationStore {
         try {
             const data = await fs.promises.readFile(filePath, 'utf8');
             const auth: ExecutionAuthorization = JSON.parse(data);
-            
+
             // Rehydrate Date objects
             auth.expiresAt = new Date(auth.expiresAt);
             auth.decision.timestamp = new Date(auth.decision.timestamp);
-            
+
             return auth;
         } catch (error) {
             Logger.error(__t('messages.error.authorization_load_failed', { id: authorizationId, error: String(error) }));

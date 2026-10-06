@@ -72,7 +72,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
     }
 
     const hostname = parsedUrl.hostname;
-    
+
     // DNS Lookup
     let resolvedIp: string;
     try {
@@ -136,7 +136,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
             }
             req.write(bodyStr);
         }
-        
+
         req.end();
     });
 }

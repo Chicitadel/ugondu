@@ -14,12 +14,12 @@ import { resolveSecret } from '../engine/SecretGuard';
 import { ComputeStatus } from '../capabilities/compute';
 import { SubnetResult } from '../capabilities/network';
 
-import { 
-    EC2Client, 
-    RunInstancesCommand, 
-    TerminateInstancesCommand, 
-    CreateVpcCommand, 
-    DeleteVpcCommand, 
+import {
+    EC2Client,
+    RunInstancesCommand,
+    TerminateInstancesCommand,
+    CreateVpcCommand,
+    DeleteVpcCommand,
     DescribeInstancesCommand,
     CreateSubnetCommand,
     CreateSnapshotCommand,
@@ -29,19 +29,19 @@ import {
     DeleteSecurityGroupCommand
 } from '@aws-sdk/client-ec2';
 
-import { 
-    RDSClient, 
-    CreateDBInstanceCommand, 
+import {
+    RDSClient,
+    CreateDBInstanceCommand,
     DeleteDBInstanceCommand,
     CreateDBSubnetGroupCommand,
     DeleteDBSubnetGroupCommand,
     DescribeDBInstancesCommand
 } from '@aws-sdk/client-rds';
 
-import { 
-    S3Client, 
-    CreateBucketCommand, 
-    DeleteBucketCommand 
+import {
+    S3Client,
+    CreateBucketCommand,
+    DeleteBucketCommand
 } from '@aws-sdk/client-s3';
 
 import {
@@ -49,21 +49,21 @@ import {
     GetParameterCommand
 } from '@aws-sdk/client-ssm';
 
-import { 
-    ECSClient, 
-    CreateClusterCommand, 
-    RegisterTaskDefinitionCommand, 
-    CreateServiceCommand 
+import {
+    ECSClient,
+    CreateClusterCommand,
+    RegisterTaskDefinitionCommand,
+    CreateServiceCommand
 } from '@aws-sdk/client-ecs';
 
-import { 
-    ECRClient, 
-    CreateRepositoryCommand 
+import {
+    ECRClient,
+    CreateRepositoryCommand
 } from '@aws-sdk/client-ecr';
 
-import { 
-    CloudWatchLogsClient, 
-    CreateLogGroupCommand 
+import {
+    CloudWatchLogsClient,
+    CreateLogGroupCommand
 } from '@aws-sdk/client-cloudwatch-logs';
 
 import {
@@ -73,6 +73,7 @@ import {
 } from '@aws-sdk/client-iam';
 
 import { PolicyGovernanceEngine, ProviderAuthorizationAdapter } from '../../governance/engine/policy-engine';
+import { AwsGovernanceAdapter } from '../../governance/providers/aws/adapter';
 import { UniversalPermission } from '../../governance/model/authorization';
 
 export class AwsNativeClient implements IAwsClient {
@@ -127,9 +128,9 @@ export class AwsNativeClient implements IAwsClient {
         const res = await this.ec2.send(cmd) as any;
         const instance = res.Instances?.[0];
         if (!instance || !instance.InstanceId) throw new Error(__t('aws_ec2_creation_failed_no_ins'));
-        
+
         const id = instance.InstanceId;
-        
+
         // P0-4 Waiter Implementation
         Logger.info(`Waiting for EC2 instance ${id} to reach 'running' state...`);
         let ip = 'pending';
@@ -212,13 +213,13 @@ export class AwsNativeClient implements IAwsClient {
 
     public async createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string, dbSubnetGroupName?: string): Promise<{ id: string; endpoint: string }> {
         const dbInstanceClass = capacity > 100 ? 'db.m5.large' : 'db.t3.micro';
-        
+
         if (!credentialsRef || !credentialsRef.startsWith('secret:')) {
             throw new Error('Security Audit: Physical AWS RDS deployment requires a secure credentialsRef mapping.');
         }
-        
+
         const password = await resolveSecret(credentialsRef);
-        
+
         const cmd = new CreateDBInstanceCommand({
             DBInstanceIdentifier: name,
             AllocatedStorage: capacity,
@@ -229,10 +230,10 @@ export class AwsNativeClient implements IAwsClient {
             VpcSecurityGroupIds: securityGroupId ? [securityGroupId] : undefined,
             DBSubnetGroupName: dbSubnetGroupName
         });
-        
+
         const res = await this.rds.send(cmd);
         if (!res.DBInstance || !res.DBInstance.DBInstanceIdentifier) throw new Error(__t('aws_rds_creation_failed'));
-        
+
         const id = res.DBInstance.DBInstanceIdentifier;
 
         // P0-4 Waiter Implementation
@@ -244,8 +245,8 @@ export class AwsNativeClient implements IAwsClient {
             const inst = desc.DBInstances?.[0];
             if (inst) {
                 if (inst.DBInstanceStatus === 'available') {
-                    return { 
-                        id, 
+                    return {
+                        id,
                         endpoint: inst.Endpoint?.Address || 'unknown'
                     };
                 }
@@ -255,7 +256,7 @@ export class AwsNativeClient implements IAwsClient {
             }
             retries++;
         }
-        
+
         throw new Error(`Timeout waiting for RDS ${id} to become available.`);
     }
 
@@ -278,10 +279,10 @@ export class AwsNativeClient implements IAwsClient {
     public async getInstanceStatus(id: string): Promise<ComputeStatus> {
         const res = await this.ec2.send(new DescribeInstancesCommand({ InstanceIds: [id] }));
         const state = res.Reservations?.[0]?.Instances?.[0]?.State?.Name;
-        return { 
-            id, 
+        return {
+            id,
             state: state === 'running' ? 'running' : 'failed',
-            health: 'healthy' 
+            health: 'healthy'
         };
     }
 
@@ -384,12 +385,7 @@ export class AwsNativeClient implements IAwsClient {
     public async createFargateRoles(taskName: string): Promise<{ executionRoleArn: string, taskRoleArn: string }> {
         const engine = new PolicyGovernanceEngine();
         // Mock adapter implementation for AWS IAM
-        const awsAdapter: ProviderAuthorizationAdapter = {
-            providerIdentifier: 'aws',
-            translateIntent: () => { throw new Error('NotImplemented'); },
-            synthesizePolicy: () => { throw new Error('NotImplemented'); },
-            verifyCapability: (intent) => { throw new Error('NotImplemented'); }
-        };
+        const awsAdapter = new AwsGovernanceAdapter();
         engine.registerAdapter(awsAdapter);
 
         // Define intent
@@ -404,14 +400,14 @@ export class AwsNativeClient implements IAwsClient {
 
         // Evaluate intent through Governance Engine
         const decision = engine.evaluateIntent('aws', execIntent, `fargate-${taskName}`);
-        
+
         if (decision.decision !== 'ALLOW') {
             throw new Error(`Governance Policy Denied: ${decision.reason}`);
         }
 
         const execRoleName = `${taskName}-ExecRole-${Date.now()}`;
         const taskRoleName = `${taskName}-TaskRole-${Date.now()}`;
-        
+
         const assumeRolePolicyDocument = JSON.stringify({
             Version: '2012-10-17',
             Statement: [{ Effect: 'Allow', Principal: { Service: 'ecs-tasks.amazonaws.com' }, Action: 'sts:AssumeRole' }]

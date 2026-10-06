@@ -51,7 +51,7 @@ export class FunctionalVerifier {
 
     public async runVerificationSuite(): Promise<FunctionalTestResult[]> {
         const results: FunctionalTestResult[] = [];
-        
+
         for (const test of this.tests) {
             try {
                 const result = await test();
@@ -65,7 +65,7 @@ export class FunctionalVerifier {
                 });
             }
         }
-        
+
         return results;
     }
 }

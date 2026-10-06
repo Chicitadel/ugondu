@@ -78,7 +78,7 @@ export class FileSystemStore implements IExecutionJournal {
         this.sequenceCounter++;
         const timestamp = Date.now();
         const hash = IntegrityManager.generateHash(this.sequenceCounter, timestamp, operationType, payload, this.lastHash);
-        
+
         const entry: IJournalEntry = {
             sequenceNumber: this.sequenceCounter,
             timestamp,

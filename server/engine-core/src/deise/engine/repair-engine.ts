@@ -73,10 +73,10 @@ export class DeploymentRepairEngine {
                 for (const key of keys) {
                     const expected = infra.expectedState[key];
                     const actual = infra.actualState[key];
-                    
+
                     if (expected !== actual) {
-                        Logger.warn(`[SIM-DEISE] Drift Detected: Expected ${expected}, observed ${actual}`);
-                        
+                        Logger.warn(`Drift Detected: Expected ${expected}, observed ${actual}`);
+
                         diagnoses.push({
                             category: DriftCategory.INFRASTRUCTURE_DRIFT,
                             description: `Infrastructure drift on ${infra.id} (${infra.type}): ${key} expected ${expected} but was ${actual}`,
@@ -91,14 +91,14 @@ export class DeploymentRepairEngine {
         }
 
         // 4. Evaluate Safe To Proceed
-        const safeToProceed = true; 
+        const safeToProceed = !destructiveDeleteBlocked;
 
         if (destructiveDeleteBlocked) {
             Logger.warn('Destructive delete (--delete) is blocked due to detected topology anomalies.');
         }
-        
+
         if (requiresInfrastructureRepair) {
-            Logger.info('[SIM-DEISE] Executing Repair Plan...');
+            Logger.info('Executing Repair Plan...');
         }
 
         return {

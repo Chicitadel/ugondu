@@ -60,7 +60,7 @@ export function parseApplicationRequirements(text: string): ApplicationRequireme
     else if (/django/i.test(text)) framework = 'django';
     else if (/flask/i.test(text)) framework = 'flask';
     else if (/fastapi/i.test(text)) framework = 'fastapi';
-    
+
     return {
         runtime,
         framework,

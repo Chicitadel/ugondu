@@ -43,7 +43,7 @@ export class GcpAdapter implements IProviderAdapter {
   public async discover(targetId: string): Promise<ObservationEvent> {
     const startTime = Date.now();
     const facts: Fact[] = [];
-    
+
     try {
       // Dynamic import to prevent monolithic bloat when gcp is not targeted
       let sdk: any;
@@ -58,9 +58,9 @@ export class GcpAdapter implements IProviderAdapter {
       // Live capability probing
       const client = new sdk.InstancesClient({ region: this.credentials.region ?? 'us-east-1' });
       Logger.info(__t('messages.discovery.probing_provider', { provider: this.id, targetId }));
-      
+
       const response = await client.aggregatedListAsync({ project: this.credentials.endpoint })();
-      
+
       facts.push({
         id: crypto.randomUUID(),
         key: 'gcp.compute.instances.raw',

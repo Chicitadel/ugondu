@@ -74,10 +74,10 @@ export class SqliteStore implements IExecutionJournal {
         const lastEntry = this.getLastEntry();
         const previousHash = lastEntry ? lastEntry.hash : '';
         const timestamp = Date.now();
-        
+
         const stmt = this.db.prepare('INSERT INTO journal_entries (timestamp, operationType, payload, hash) VALUES (?, ?, ?, ?) RETURNING sequenceNumber');
         const payloadStr = JSON.stringify(payload);
-        
+
         let newSequenceNumber = 0;
         let newHash = '';
 
@@ -85,12 +85,12 @@ export class SqliteStore implements IExecutionJournal {
             const nextSeqStmt = this.db.prepare('SELECT COALESCE(MAX(sequenceNumber), 0) + 1 AS nextSeq FROM journal_entries');
             const { nextSeq } = nextSeqStmt.get() as { nextSeq: number };
             newSequenceNumber = nextSeq;
-            
+
             newHash = IntegrityManager.generateHash(newSequenceNumber, timestamp, operationType, payload, previousHash);
-            
+
             stmt.run(timestamp, operationType, payloadStr, newHash);
         });
-        
+
         transaction();
 
         return {

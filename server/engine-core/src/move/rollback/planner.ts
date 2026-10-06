@@ -69,7 +69,7 @@ export class RollbackPlanner {
         if (state.targetReceivedWritesCount > 0 && state.sourceIsStrictlyQuiesced) {
             reasoning.push('Target has received writes and source is strictly quiesced.');
             reasoning.push('Rollback via DNS flip would result in data loss.');
-            
+
             return {
                 feasible: false,
                 strategy: RollbackStrategy.FORWARD_RECOVERY,

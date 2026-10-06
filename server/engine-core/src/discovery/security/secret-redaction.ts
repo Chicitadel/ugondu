@@ -66,7 +66,7 @@ export class SecretRedactionEngine {
       // We must reset lastIndex if we reuse regexes, but these are newly created via the getter?
       // Wait, in JS the 'g' flag makes it stateful, let's clone the regex to avoid state issues
       const regex = new RegExp(pattern.regex.source, pattern.regex.flags);
-      
+
       while ((match = regex.exec(content)) !== null) {
         findings.push({
           type: pattern.type,
@@ -76,7 +76,7 @@ export class SecretRedactionEngine {
           redactedLength: match[0].length
         });
       }
-      
+
       // Replace in clean content
       cleanContent = cleanContent.replace(regex, '[REDACTED_SECRET]');
     }

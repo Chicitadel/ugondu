@@ -54,7 +54,7 @@ export class PolicyRegistry {
     public register(policy: StoredPolicy): void {
         this.policies.set(policy.id, policy);
     }
-    
+
     public getRegistryCount(): number {
         return this.policies.size;
     }

@@ -37,14 +37,14 @@ import { ReconciliationState, TaskContext } from '../model';
 /**
  * Handles the UNKNOWN state triggering during reconciliation.
  * Prevents blind retries when the actual state of the system cannot be determined.
- * 
+ *
  * @param taskId The ID of the task
  * @param context The current execution context
  * @returns The resolved state, typically UNKNOWN, to halt execution and request manual intervention
  */
 export function handleUnknownState(taskId: string, context: TaskContext): ReconciliationState {
     context.logger.warn(`Task ${taskId} entered UNKNOWN state. Suspending auto-retry to prevent undefined behavior.`);
-    
+
     // Set flag to prevent blind retries
     context.state.retryPolicy.halted = true;
     context.state.requiresManualIntervention = true;

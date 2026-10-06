@@ -44,7 +44,7 @@ export class EvidenceIntegrity {
         const expectedHash = crypto.createHash('sha256')
             .update(`${evidence.id}:${evidence.timestamp}:${evidence.payload}`)
             .digest('hex');
-        
+
         return expectedHash === evidence.hash;
     }
 

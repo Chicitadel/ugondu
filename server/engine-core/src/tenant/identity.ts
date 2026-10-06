@@ -86,7 +86,7 @@ export class OidcIdentityProvider extends IdentityProvider {
     if (!token) {
       throw new Error(__t('messages.error.missing_oidc_token'));
     }
-    
+
     return {
       id: 'oidc-user-123',
       email: 'user@example.com',
@@ -117,7 +117,7 @@ export class Saml2IdentityProvider extends IdentityProvider {
     if (!assertion) {
       throw new Error(__t('messages.error.missing_saml_assertion'));
     }
-    
+
     return {
       id: 'saml-user-456',
       email: 'admin@example.com',

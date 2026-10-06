@@ -28,7 +28,7 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
     }
   }
 
-  
+
   private escapeShell(val: string): string {
     return "'" + val.replace(/'/g, "'\\''") + "'";
   }
@@ -68,7 +68,7 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
   public async createDatabase(name: string, type: string): Promise<{ id: string; state: string }> {
     // Physical DirectAdmin CLI for creating DBs
     // Example: da api CMD_API_DATABASES ...
-    await this.execCmd(`da api create db ${this.escapeShell(name)}`); 
+    await this.execCmd(`da api create db ${this.escapeShell(name)}`);
     return { id: name, state: 'running' };
   }
 

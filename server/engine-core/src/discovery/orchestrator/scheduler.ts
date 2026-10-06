@@ -69,7 +69,7 @@ export class DiscoveryScheduler {
 
         try {
             while (this.queue.length > 0) {
-                const index = this.queue.findIndex(t => 
+                const index = this.queue.findIndex(t =>
                     this.throttler.canAcquire(t.providerId, t.targetId)
                 );
 

@@ -41,10 +41,10 @@ export async function pauseExecution(context: TargetContext, reason: string): Pr
     try {
         context.systemState = 'PAUSED';
         context.reason = reason;
-        
+
         // Execute underlying system pause commands
         await context.scheduler.pauseAll();
-        
+
         return {
             success: true,
             message: `Execution successfully paused. Reason: ${reason}`,

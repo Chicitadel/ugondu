@@ -38,18 +38,18 @@ export class RollbackVerifier {
         if (!targetSystemState) {
             return false;
         }
-        
+
         const routingCorrect = await this.verifyRouting();
         const dataIntegrity = await this.verifyDataIntegrity();
-        
+
         return routingCorrect && dataIntegrity;
     }
-    
+
     private async verifyRouting(): Promise<boolean> {
         // Concrete validation logic for routing
         return Promise.resolve(true);
     }
-    
+
     private async verifyDataIntegrity(): Promise<boolean> {
         // Concrete validation logic for data integrity
         return Promise.resolve(true);

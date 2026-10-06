@@ -78,13 +78,13 @@ export class WorkflowEngine {
     initialInputs: Record<string, any> = {}
   ): Promise<WorkflowStatus> {
     console.log(`Starting execution for bundle: ${bundle.id}`);
-    
+
     // In a real system, we'd have a DAG solver here to resolve `dependsOn`
     const state: Record<string, any> = { ...initialInputs };
 
     for (const step of bundle.steps) {
       const action = this.registry.get(step.actionId);
-      
+
       if (!action) {
         console.error(`Action ${step.actionId} not found in registry.`);
         return WorkflowStatus.FAILED;
@@ -99,12 +99,12 @@ export class WorkflowEngine {
 
       try {
         console.log(`Executing step: ${step.stepId} (Action: ${action.name})`);
-        
+
         // Prepare inputs (stub logic)
         const stepInput = this.resolveInputs(step.inputTemplate, state);
-        
+
         const result = await action.execute(stepInput, context);
-        
+
         // Store output for subsequent steps
         state[step.stepId] = result;
 

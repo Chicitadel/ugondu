@@ -59,7 +59,7 @@ export class MigrationPlanner {
 
     plan(tasks: MigrationTask[]): { order: string[], strategies: Record<string, MigrationStrategy> } {
         const strategies: Record<string, MigrationStrategy> = {};
-        
+
         for (const task of tasks) {
             this.graphBuilder.addNode(task.id);
             strategies[task.id] = this.strategySelector.selectStrategy(task.resourceType, task.complexityScore);

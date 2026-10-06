@@ -29,12 +29,12 @@ export const LinuxContract: ProviderCapabilities = {
   provider: 'linux',
   kinds: {
     COMPUTE: { status: 'NATIVE', modes: ['SYSTEMD', 'CONTAINER'] },
-    NETWORK: { 
-      status: 'CONDITIONAL', 
-      modes: ['EXISTING', 'NETWORKMANAGER', 'SYSTEMD_NETWORKD', 'NETPLAN'] 
+    NETWORK: {
+      status: 'CONDITIONAL',
+      modes: ['EXISTING', 'NETWORKMANAGER', 'SYSTEMD_NETWORKD', 'NETPLAN']
     },
-    DATABASE: { 
-      status: 'UNSUPPORTED', 
+    DATABASE: {
+      status: 'UNSUPPORTED',
       modes: [],
       reasonKey: 'fabric.contract.reason.linux_database'
     },
@@ -56,11 +56,11 @@ export interface ILinuxClient {
   checkCapacity(cpuCores: number, memoryMb: number): Promise<boolean>;
   runProcess(name: string, image: string, mode: string): Promise<{ id: string; state: 'running' | 'failed' }>;
   stopProcess(id: string): Promise<void>;
-  
+
   configureNetwork(name: string, cidr: string, mode: string): Promise<{ id: string }>;
   removeNetwork(id: string): Promise<void>;
   createSubnet(vpcId: string, cidr: string): Promise<SubnetResult>;
-  
+
   createDirectory(name: string): Promise<{ id: string; endpoint: string }>;
   removeDirectory(id: string): Promise<void>;
 }

@@ -47,7 +47,7 @@ export class DisasterRecoveryEngine {
     public static runChaosExperiment(fault: ChaosFaultType, customSandboxDir?: string): ChaosExperimentResult {
         const injectedAt = Date.now();
         const sandboxDir = customSandboxDir || path.resolve(process.cwd(), `.chaos_dr_${crypto.randomBytes(6).toString('hex')}`);
-        
+
         try {
             if (!fs.existsSync(sandboxDir)) {
                 fs.mkdirSync(sandboxDir, { recursive: true, mode: 0o700 });

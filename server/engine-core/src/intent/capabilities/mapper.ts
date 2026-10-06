@@ -53,7 +53,7 @@ export interface CapabilityNode {
 export class CapabilityMapper {
     public mapToGraph(intent: NormalizedIntent): CapabilityNode[] {
         const graph: CapabilityNode[] = [];
-        
+
         for (const req of intent.normalizedRequirements) {
             graph.push({
                 id: `cap-${req.id}`,
@@ -61,7 +61,7 @@ export class CapabilityMapper {
                 dependencies: []
             });
         }
-        
+
         return graph;
     }
 }

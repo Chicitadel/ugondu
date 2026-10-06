@@ -25,7 +25,7 @@ export class PhysicalRepairExecutor {
         for (const diag of plan.diagnoses) {
             if (diag.category === DriftCategory.TOPOLOGY_DRIFT) {
                 Logger.info(`Repairing Topology Drift: ${diag.description}`);
-                
+
                 // Specific fix for the DirectAdmin "public_html broken symlink" incident
                 if (diag.description.includes('pointer') || diag.description.includes('public_html')) {
                     try {
@@ -33,13 +33,13 @@ export class PhysicalRepairExecutor {
                         // However, we need a specific 'repairSymlink' capability or just use createHostedApp
                         // For a precise DirectAdmin physical fix:
                         Logger.info(`Executing physical SSH restoration of public_html for ${instanceId}`);
-                        
+
                         // We will physically recreate the public_html symlink pointing to the current release
                         // (Assuming release_currentVersion is tracked or we fallback to an empty safe dir)
                         // Note: For full safety, DirectAdminNativeClient should expose `execCmd` securely for repair operations.
                         // We'll call a dedicated repair function on the client.
                         await this.daClient.createHostedApp(instanceId, 'repair');
-                        
+
                         Logger.info(`Successfully repaired topology for ${instanceId}`);
                     } catch (err) {
                         Logger.error(`Physical repair failed: ${(err as Error).message}`);

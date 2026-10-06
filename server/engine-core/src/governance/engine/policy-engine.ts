@@ -37,7 +37,7 @@ export class PolicyGovernanceEngine {
         // POL-003 Deduplication logic: REUSE before CREATE
         const fingerprint = this.fingerprintGen.generate(intent);
         const existingPolicy = this.registry.lookup(fingerprint);
-        
+
         if (existingPolicy) {
             return {
                 id: `pdr-${Date.now()}`,

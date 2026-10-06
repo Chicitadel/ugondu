@@ -7,7 +7,7 @@ export interface ResourceLifecycleIntent {
 }
 
 export class ResourceGovernanceEngine {
-    
+
     /**
      * POL-005 & POL-006: Ensure we only mutate/retire owned resources
      */

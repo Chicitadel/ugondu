@@ -42,7 +42,7 @@ export class AmbiguityDetector {
     public detectAmbiguity(intent: StructuredIntent): string[] {
         const ambiguities: string[] = [];
         const ambiguousTerms = ["fast", "scale", "responsive", "optimal"];
-        
+
         for (const req of intent.requirements) {
             for (const term of ambiguousTerms) {
                 if (req.description.toLowerCase().includes(term)) {

@@ -44,10 +44,10 @@ export class ConsistencyChecker {
         if (!sourceDataHash || !targetDataHash) {
             throw new Error(__t('messages.error.data_hashes_cannot_be_empty'));
         }
-        
+
         return sourceDataHash === targetDataHash;
     }
-    
+
     public async verifySchemaConsistency(sourceSchema: any, targetSchema: any): Promise<boolean> {
         // Structural comparison of schemas
         return JSON.stringify(sourceSchema) === JSON.stringify(targetSchema);

@@ -54,7 +54,7 @@ export class CentralAuthority implements Authority {
     if (!subject.isActive) {
       return DecisionBuilder.deny(__t('subject_is_inactive'));
     }
-    
+
     // Abstracted logic for the sake of standard module setup
     return DecisionBuilder.allow(__t('default_authority_access_grant'));
   }

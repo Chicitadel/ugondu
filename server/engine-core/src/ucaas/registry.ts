@@ -50,20 +50,20 @@ export interface Action<TInput = any, TOutput = any> {
   id: string;
   name: string;
   description: string;
-  
+
   // Execution triggers
   cliCommand?: string;
   keyboardShortcut?: string;
   guiPath?: string; // e.g., 'Settings > Advanced > Clear Cache'
-  
+
   // AI and System capabilities
   isAIAccessible: boolean;
   systemTags: string[];
-  
+
   // Governance and Risk
   riskLevel: RiskLevel;
   requiresHumanApproval: boolean;
-  
+
   // Execution
   execute: (input: TInput, context?: ExecutionContext) => Promise<TOutput>;
 }

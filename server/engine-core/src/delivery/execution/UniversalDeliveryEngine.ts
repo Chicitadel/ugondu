@@ -7,8 +7,8 @@ export class UniversalDeliveryEngine {
      * Physically bridges any valid Source (Local, Git, Backup) to any valid Destination (DirectAdmin, AWS).
      */
     public async executeTransaction(
-        source: ISourceAdapter, 
-        destinationAdapter: any, 
+        source: ISourceAdapter,
+        destinationAdapter: any,
         action: 'DEPLOY' | 'RESTORE'
     ): Promise<boolean> {
         Logger.info(`[UniversalDeliveryEngine] Beginning ${action} transaction...`);
@@ -22,7 +22,7 @@ export class UniversalDeliveryEngine {
         Logger.info(`Discovered Source Payload format: ${srcCaps.supportsHistory}`);
 
         // 3. Resolve Artifact (e.g. stream a backup or git checkout)
-        // In a real flow, this would extract the byte stream. 
+        // In a real flow, this would extract the byte stream.
         // For physical validation, we verify the source adapter can resolve.
         const artifactRef = await source.resolveArtifact({ type: 'GIT', uri: 'HEAD' } as any);
         if (!artifactRef) {
@@ -40,7 +40,7 @@ export class UniversalDeliveryEngine {
         // For example, if it's DirectAdmin, we would use the SSH client to copy over the artifact bytes.
         // We will just verify the destination is responding.
         const targetStatus = await destinationAdapter.getInstanceStatus('ugondu_site');
-        
+
         Logger.info(`Transaction successful. Target status: ${targetStatus.state}`);
         return true;
     }

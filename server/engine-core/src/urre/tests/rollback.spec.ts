@@ -47,7 +47,7 @@ describe('URRE Rollback Sequences', (): void => {
 
   it('should trigger a rollback with PENDING status upon deployment failure', async (): Promise<void> => {
     const ctx: DeploymentContext = { id: 'deploy-123', targetEnvironment: 'production' };
-    const rollbackEvent: RollbackEvent = await engine.triggerRollback({...ctx, tx: { id: ctx.id, status: 'FAILED', nodes: [], edges: [], createdAt: Date.now(), updatedAt: Date.now() }});
+    const rollbackEvent: RollbackEvent = await engine.triggerRollback({...ctx, tx: { id: ctx.id, status: 'FAILED', nodes: [], edges: [], createdAt: Date.now(), updatedAt: Date.now() } as any});
 
     expect(rollbackEvent.id).toBe('rb-deploy-123');
     expect(rollbackEvent.status).toBe('RECOVERED');

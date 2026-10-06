@@ -89,7 +89,7 @@ export class AtomicDataTransaction {
             // 4. SIZE VERIFY
             const sourceStat = await fs.promises.stat(sourcePath);
             const stagingStat = await fs.promises.stat(stagingPath);
-            
+
             if (sourceStat.size !== stagingStat.size) {
                 throw new Error(__t('messages.error.size_verification_failed_during_transfer'));
             }
@@ -114,7 +114,7 @@ export class AtomicDataTransaction {
             if (!fs.existsSync(targetPath)) {
                 throw new Error('Post-commit verification failed: Target file not found.');
             }
-            
+
             const targetHash = await this.calculateHash(targetPath);
             if (targetHash !== sourceHash) {
                 throw new Error(__t('messages.error.post_commit_verification_failed_hash_mismatch'));

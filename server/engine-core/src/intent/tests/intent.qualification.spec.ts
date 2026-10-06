@@ -38,7 +38,7 @@ describe('Intent & Architecture Qualification Gates: INT-01..08, ARCH-01..07, PA
       ],
       edges: [{ from: 'node-web', to: 'node-db' }]
     };
-    
+
     // Circular dependency prevention uses provisioningWaves
     expect(() => provisioningWaves(architectureIR as any)).not.toThrow();
 

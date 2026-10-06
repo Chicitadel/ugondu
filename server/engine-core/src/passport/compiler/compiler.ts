@@ -78,20 +78,20 @@ export class PassportCompiler {
 
     public compile(request: CompilePassportRequest): DeliveryPassport {
         const chain = new EvidenceChain();
-        
+
         this.intentBinder.bindIntent(chain, request.intent);
         this.twinBinder.bindTwinState(chain, request.twinState);
-        
+
         for (const report of request.assuranceReports) {
             this.assuranceBinder.bindAssurance(chain, report);
         }
-        
+
         for (const evaluation of request.policyEvaluations) {
             this.policyBinder.bindPolicyEvaluation(chain, evaluation);
         }
-        
+
         this.aggregator.aggregate(chain, request.aggregationRequest);
-        
+
         return {
             id: `passport-${Date.now()}`,
             intentId: request.intent.intentId,

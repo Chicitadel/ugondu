@@ -59,7 +59,7 @@ export class ConcurrencyThrottler {
 
     public canAcquire(providerId: string, targetId: string): boolean {
         if (this.activeGlobal >= this.config.globalMax) return false;
-        
+
         const providerActive = this.activeProviders.get(providerId) || 0;
         if (providerActive >= this.config.providerMax) return false;
 
@@ -81,7 +81,7 @@ export class ConcurrencyThrottler {
 
     public release(providerId: string, targetId: string): void {
         if (this.activeGlobal > 0) this.activeGlobal--;
-        
+
         const providerActive = this.activeProviders.get(providerId) || 0;
         if (providerActive > 0) {
             this.activeProviders.set(providerId, providerActive - 1);

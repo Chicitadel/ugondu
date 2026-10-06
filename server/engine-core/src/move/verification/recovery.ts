@@ -35,17 +35,17 @@ export class RecoveryVerifier {
     public async verifyDisasterRecoveryProtocols(): Promise<boolean> {
         // Assert that backup artifacts are present
         const backupsExist = await this.checkBackups();
-        
+
         // Assert that failover mechanisms are ready
         const failoverReady = await this.checkFailoverReady();
-        
+
         return backupsExist && failoverReady;
     }
-    
+
     private async checkBackups(): Promise<boolean> {
         return Promise.resolve(true);
     }
-    
+
     private async checkFailoverReady(): Promise<boolean> {
         return Promise.resolve(true);
     }

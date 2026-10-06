@@ -43,10 +43,10 @@ export function generate(input: any): ArchitectureCandidate[] {
     if (!input) {
         throw new Error(__t('messages.error.input_cannot_be_null_or_undefined'));
     }
-    
+
     // Read input.runtime, input.database, input.requiresTLS, input.targetFamily etc if needed
     // In this basic version, we generate the viable verticals unconditionally and return them
-    
+
     return [
         VerticalBVps.build(input),
         VerticalCCpanel.build(input)

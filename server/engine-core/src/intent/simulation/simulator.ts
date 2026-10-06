@@ -46,7 +46,7 @@ export class IntentSimulator {
 
     public async simulate(intent: DecomposedIntent, context: SimulationContext): Promise<ArchitectureIR> {
         Logger.info(__t('messages.intent.starting_simulation', { tenantId: context.tenantId }));
-        
+
         const nodes: ProvisioningNode[] = [];
         const edges: ProvisioningEdge[] = [];
 
@@ -74,11 +74,11 @@ export class IntentSimulator {
 
         // 3. Generate Compute Resources based on Application requirements
         const runtimeNodeId = `${envPrefix}-compute`;
-        
+
         // Resource scaling heuristic
         let cpuCores = 1;
         let memoryMb = 1024;
-        
+
         if (intent.operational.scaling) {
             cpuCores = 4;
             memoryMb = 8192;
@@ -109,7 +109,7 @@ export class IntentSimulator {
                 monitoringEnabled: intent.operational.monitoring
             }
         });
-        
+
         // Compute depends on Network
         edges.push({ from: networkNodeId, to: runtimeNodeId });
 
@@ -132,10 +132,10 @@ export class IntentSimulator {
                     secretsInjected: intent.security.secretsManagement
                 }
             });
-            
+
             // Database depends on Network
             edges.push({ from: networkNodeId, to: dbNodeId });
-            
+
             // Compute depends on Database (needs DB connection strings injected)
             edges.push({ from: dbNodeId, to: runtimeNodeId });
         }

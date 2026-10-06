@@ -72,7 +72,7 @@ export class CapabilityEntitlementGraph {
   private async handleSubscriptionUpgraded(event: EventPayload): Promise<void> {
     const { aggregateId, payload } = event;
     const tier = payload["tier"] as string;
-    
+
     if (tier === "PREMIUM" || tier === "ENTERPRISE") {
       this.setCapabilityState(aggregateId, "ACTIVE");
     }

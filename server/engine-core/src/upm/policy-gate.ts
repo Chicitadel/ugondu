@@ -101,7 +101,7 @@ export class UpmExecutionGate {
         for (const node of context.ir.nodes) {
             requiredCapabilities.add(node.provider);
         }
-        
+
         const missing = Array.from(requiredCapabilities).filter(cap => !context.envelope.allowedActions.includes(cap) && !context.envelope.allowedActions.includes('*'));
 
         if (missing.length > 0) {
@@ -158,11 +158,11 @@ export class UpmExecutionGate {
             envelopeHash: auth.envelopeHash
         };
         const expectedSeal = this.hashOf(authPayload);
-        
+
         if (expectedSeal !== auth.cryptographicSeal) {
             throw new Error(__t('messages.error.seal_mismatch'));
         }
-        
+
         Logger.info(__t('messages.upm.authorization_verified'));
     }
 }

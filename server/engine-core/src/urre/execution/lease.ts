@@ -55,11 +55,11 @@ export class ExecutionLeaseManager {
   ): ExecutionLease {
     const now = Date.now();
     const existingLease = this.leases.get(executionId);
-    
+
     if (existingLease && existingLease.expiresAt > now) {
       throw new Error(__t('messages.error.lease_already_held_for_execution', { 'executionId': executionId }));
     }
-    
+
     const leaseId = `${executionId}-${workerId}-${now}`;
     const newLease: ExecutionLease = {
       executionId,
@@ -70,7 +70,7 @@ export class ExecutionLeaseManager {
       lastHeartbeatAt: now,
       fencingToken
     };
-    
+
     this.leases.set(executionId, newLease);
     return newLease;
   }
@@ -87,18 +87,18 @@ export class ExecutionLeaseManager {
     if (lease.expiresAt < now) {
       throw new Error(__t('messages.error.lease_for_execution_has_already_expired', { 'executionId': executionId }));
     }
-    
+
     lease.lastHeartbeatAt = now;
     lease.expiresAt = now + ttlMs;
     return lease;
   }
-  
+
   public isLeaseValid(executionId: string): boolean {
     const lease = this.leases.get(executionId);
     if (!lease) return false;
     return lease.expiresAt > Date.now();
   }
-  
+
   public releaseLease(executionId: string, workerId: string, leaseId: string): void {
     const lease = this.leases.get(executionId);
     if (lease && lease.workerId === workerId && lease.leaseId === leaseId) {

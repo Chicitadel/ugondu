@@ -62,7 +62,7 @@ export class FencingManager {
     const currentToken = this.currentTokens.get(resourceId) || 0;
     return token >= currentToken;
   }
-  
+
   public revokeToken(resourceId: string): void {
     const nextToken = (this.currentTokens.get(resourceId) || 0) + 1;
     this.currentTokens.set(resourceId, nextToken);

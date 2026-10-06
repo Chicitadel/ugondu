@@ -77,7 +77,7 @@ export class KeyLoader {
                 const publicKey = createPublicKey(privateKey);
                 const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
                 const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
-                
+
                 return {
                     privateKey,
                     publicKey,

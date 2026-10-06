@@ -44,10 +44,10 @@ export class Resolver {
   public resolve(context: unknown, resource: unknown): 'ALLOW' | 'DENY' {
     // Policy resolution must be deterministic (DENY > ALLOW)
     const evaluatedRules = this.evaluateRules(context, resource);
-    
+
     let allowFound = false;
     let denyFound = false;
-    
+
     for (const result of evaluatedRules) {
       if (result === 'DENY') {
         denyFound = true;
@@ -56,7 +56,7 @@ export class Resolver {
         allowFound = true;
       }
     }
-    
+
     if (denyFound && allowFound) {
        this.conflictHandler.handle(evaluatedRules);
     }

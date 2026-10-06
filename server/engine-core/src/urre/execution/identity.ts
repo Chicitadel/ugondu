@@ -44,7 +44,7 @@ import { randomUUID } from 'crypto';
  * @classification ENTERPRISE
  */
 export class IdentityUtils {
-  
+
   public static generateExecutionIdContext(
     tenantId: string,
     targetId: string,
@@ -77,19 +77,19 @@ export class IdentityUtils {
     try {
       const decoded = Buffer.from(serialized, 'base64').toString('utf-8');
       const context = JSON.parse(decoded) as Partial<ExecutionIdContext>;
-      
+
       const requiredFields = [
-        'executionId', 'stepId', 'operationId', 'attemptId', 
-        'idempotencyKey', 'targetId', 'tenantId', 'planDigest', 
+        'executionId', 'stepId', 'operationId', 'attemptId',
+        'idempotencyKey', 'targetId', 'tenantId', 'planDigest',
         'policyDigest', 'actorIdentity', 'authorizationContext'
       ];
-      
+
       for (const field of requiredFields) {
         if (!context[field as keyof ExecutionIdContext]) {
           throw new Error(__t('messages.error.missing_required_field', { 'field': field }));
         }
       }
-      
+
       return context as ExecutionIdContext;
     } catch (error) {
       throw new Error(`Failed to parse ExecutionIdContext: ${error instanceof Error ? error.message: __t('ui.responses.unknown_error')}`);

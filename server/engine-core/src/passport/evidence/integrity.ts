@@ -53,14 +53,14 @@ export class IntegrityValidator {
         const files: Record<string, string> = {};
         const hashes: string[] = [];
         const sortedPaths = Object.keys(fileContents).sort();
-        
+
         for (const path of sortedPaths) {
             const content = fileContents[path];
             const hash = generateDigest(content);
             files[path] = hash;
             hashes.push(`${path}:${hash}`);
         }
-        
+
         const rootHash = generateDigest(hashes.join('\n'));
         return { files, rootHash };
     }
@@ -68,7 +68,7 @@ export class IntegrityValidator {
     public static verifyManifest(manifest: IntegrityManifest, fileContents: Record<string, string | Buffer>): boolean {
         const sortedPaths = Object.keys(manifest.files).sort();
         const hashes: string[] = [];
-        
+
         for (const path of sortedPaths) {
             if (!(path in fileContents)) return false;
             const content = fileContents[path];
@@ -76,7 +76,7 @@ export class IntegrityValidator {
             if (hash !== manifest.files[path]) return false;
             hashes.push(`${path}:${hash}`);
         }
-        
+
         const expectedRootHash = generateDigest(hashes.join('\n'));
         return expectedRootHash === manifest.rootHash;
     }

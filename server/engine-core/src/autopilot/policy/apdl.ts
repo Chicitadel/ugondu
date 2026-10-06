@@ -33,10 +33,10 @@ export class ApdlParser {
         try {
             const parsed = JSON.parse(policyDocument);
             if (Array.isArray(parsed)) {
-                const isValid = parsed.every(item => 
-                    item && 
-                    typeof item.ruleId === 'string' && 
-                    typeof item.condition === 'string' && 
+                const isValid = parsed.every(item =>
+                    item &&
+                    typeof item.ruleId === 'string' &&
+                    typeof item.condition === 'string' &&
                     typeof item.action === 'string' &&
                     typeof item.priority === 'number'
                 );

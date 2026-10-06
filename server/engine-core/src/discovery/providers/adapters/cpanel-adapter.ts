@@ -43,7 +43,7 @@ export class CpanelAdapter implements IProviderAdapter {
   public async discover(targetId: string): Promise<ObservationEvent> {
     const startTime = Date.now();
     const facts: Fact[] = [];
-    
+
     try {
       // Dynamic import to prevent monolithic bloat when cpanel is not targeted
       let sdk: any;
@@ -58,9 +58,9 @@ export class CpanelAdapter implements IProviderAdapter {
       // Live capability probing
       const client = new sdk.Axios({ region: this.credentials.region ?? 'us-east-1' });
       Logger.info(__t('messages.discovery.probing_provider', { provider: this.id, targetId }));
-      
+
       const response = await client.get(`${this.credentials.endpoint}/json-api/cpanel`, { headers: { Authorization: `whm ${this.credentials.secretRef}` } })();
-      
+
       facts.push({
         id: crypto.randomUUID(),
         key: 'cpanel.account.raw',

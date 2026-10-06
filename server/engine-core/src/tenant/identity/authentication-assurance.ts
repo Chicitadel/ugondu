@@ -63,7 +63,7 @@ export class AssuranceEvaluator {
     } else if (mechanisms.includes('password')) {
       level = AssuranceLevel.MEDIUM;
     }
-    
+
     return {
       level,
       mechanisms: Object.freeze([...mechanisms]),

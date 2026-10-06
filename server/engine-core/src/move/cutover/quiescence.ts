@@ -55,7 +55,7 @@ export class QuiescenceManager {
         const drainPromises = adapters.map(async (adapter) => {
             try {
                 await adapter.drain(timeoutMs);
-                
+
                 // Verify the status is actually quiesced
                 const status = await adapter.status();
                 if (status !== TrafficStatus.QUIESCED) {

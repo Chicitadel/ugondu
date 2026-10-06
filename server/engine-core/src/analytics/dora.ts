@@ -184,16 +184,16 @@ export class DoraAnalyticsEngine {
     mttrMs: number,
     cfrPercentage: number
   ): DoraTier {
-    const isEliteFreq = freqPerDay >= 1; 
-    const isEliteLeadTime = leadTimeMs <= this.MS_PER_DAY; 
-    const isEliteMttr = mttrMs <= 3600000; 
-    const isEliteCfr = cfrPercentage <= 15; 
+    const isEliteFreq = freqPerDay >= 1;
+    const isEliteLeadTime = leadTimeMs <= this.MS_PER_DAY;
+    const isEliteMttr = mttrMs <= 3600000;
+    const isEliteCfr = cfrPercentage <= 15;
 
     if (isEliteFreq && isEliteLeadTime && isEliteMttr && isEliteCfr) {
       return DoraTier.ELITE;
     }
 
-    const isHighFreq = freqPerDay >= (1 / 7); 
+    const isHighFreq = freqPerDay >= (1 / 7);
     const isHighLeadTime = leadTimeMs <= (7 * this.MS_PER_DAY);
     const isHighMttr = mttrMs <= (24 * 3600000);
     const isHighCfr = cfrPercentage <= 30;

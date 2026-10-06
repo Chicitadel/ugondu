@@ -52,9 +52,9 @@ export interface ResourceDefinition {
 export class StagingEnvironment {
     interceptAndMutate(resources: ResourceDefinition[]): ResourceDefinition[] {
         return resources.map(resource => {
-            const needsSuspension = 
-                resource.kind === 'CronJob' || 
-                resource.kind === 'Webhook' || 
+            const needsSuspension =
+                resource.kind === 'CronJob' ||
+                resource.kind === 'Webhook' ||
                 resource.kind === 'EventSubscription';
 
             if (needsSuspension) {

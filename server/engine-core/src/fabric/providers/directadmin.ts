@@ -7,8 +7,8 @@ export const DirectAdminContract: ProviderCapabilities = {
   provider: 'directadmin',
   kinds: {
     COMPUTE: { status: 'CONDITIONAL', modes: ['HOSTED_APP'] },
-    NETWORK: { 
-      status: 'UNSUPPORTED', 
+    NETWORK: {
+      status: 'UNSUPPORTED',
       modes: [],
       reasonKey: 'fabric.contract.reason.directadmin_network'
     },
@@ -20,7 +20,7 @@ export const DirectAdminContract: ProviderCapabilities = {
   publicStorageClasses: [],
   supportsDryRun: false,
   supportsRollback: true, supportsIdempotency: false, supportsImport: false, supportsUpdate: false, supportsDelete: true,
-  
+
 
 
 };

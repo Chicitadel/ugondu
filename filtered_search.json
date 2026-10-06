@@ -1,0 +1,2012 @@
+[
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\ci\\ingestion-pipeline.js",
+    "LineNumber": 33,
+    "Line": "        token: 'ingestion-token', // Matches MOCK_VALID_TOKENS in auth.js"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\ci\\fixtures\\node\\jest-results.json",
+    "LineNumber": 9,
+    "Line": "  \"numTodoTests\": 0,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\cor\\scope_guard.js",
+    "LineNumber": 68,
+    "Line": "  'engine/ai/FederatedAIEngineeringEngine.js',               // CI fix: stub for Enterprise_Expansion_Y_to_AE tests"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\cor\\scope_guard.js",
+    "LineNumber": 69,
+    "Line": "  'engine/licensing/ScanEntitlementService.js',              // CI fix: stub for federation_truthfulness tests"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\cor\\scope_guard.js",
+    "LineNumber": 70,
+    "Line": "  'engine/release/ProjectionTransaction.js',                 // CI fix: stub for cor_lifecycle_integration_staleness tests"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\cor\\scope_guard.js",
+    "LineNumber": 71,
+    "Line": "  'engine/federation/EntitlementFederationAdapter.js',       // CI fix: stub for federation/security tests"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\evidence\\plugin-extraction-baseline.json",
+    "LineNumber": 356,
+    "Line": "      \"domain\": \"adapters_stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\evidence\\plugin-extraction-baseline.json",
+    "LineNumber": 357,
+    "Line": "      \"path\": \"engine/adapters/StubEngineAdapter.js\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\evidence\\plugin-extraction-baseline.json",
+    "LineNumber": 359,
+    "Line": "      \"capability_id\": \"eaorcs.adapter.stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\localization\\hardcoded-string-classification.yaml",
+    "LineNumber": 76,
+    "Line": "    description: \"Test assertion literals, mock payloads, and test fixture names within test directories\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\auth.js",
+    "LineNumber": 4,
+    "Line": "// Secret Resolver (Mocked for now, would load from AWS Secrets Manager / HashiCorp Vault)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\auth.js",
+    "LineNumber": 5,
+    "Line": "const MOCK_VALID_TOKENS = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\auth.js",
+    "LineNumber": 26,
+    "Line": "    const identity = MOCK_VALID_TOKENS[token];"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\auth.js",
+    "LineNumber": 32,
+    "Line": "    // Expiry Check (Mocked: Assume valid)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\auth.js",
+    "LineNumber": 33,
+    "Line": "    // Issuer Check (Mocked: Assume valid)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\policy-api.js",
+    "LineNumber": 17,
+    "Line": "            // For MVP, we need to adapt the Postgres/Mysql stores to support searching, but we'll mock it "
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\store.js",
+    "LineNumber": 51,
+    "Line": " * Mock Memory Implementation for tests/upgrades"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\contracts\\ai.js",
+    "LineNumber": 2,
+    "Line": " * Program D (Universal AI): AI Contract Stub"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\contracts\\cms.js",
+    "LineNumber": 2,
+    "Line": " * Program C (Universal CMS): CMS Contract Stub"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\contracts\\ecosystem.js",
+    "LineNumber": 2,
+    "Line": " * Program G (Ecosystem): Ecosystem Contract Stub"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\foundation\\storage-abstraction.js",
+    "LineNumber": 13,
+    "Line": "            return { id, data: `Mock MySQL Data from ${collection}` };"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\kernel\\kernel-api.js",
+    "LineNumber": 57,
+    "Line": "    // We mock this slightly for the example"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\kernel\\domain\\certification.js",
+    "LineNumber": 25,
+    "Line": "        // For the domain mock, we assume the resolution engine already blocked non-explicit experimentals,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\platform\\kernel\\domain\\resolution.js",
+    "LineNumber": 74,
+    "Line": "        // 2. Deployment Profile (Mocked skip for now, but would check env vars)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2429,
+    "Line": "    \".governance/platform/node_modules/undici-types/mock-agent.d.ts\": \"GOVERNANCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2430,
+    "Line": "    \".governance/platform/node_modules/undici-types/mock-call-history.d.ts\": \"GOVERNANCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2431,
+    "Line": "    \".governance/platform/node_modules/undici-types/mock-client.d.ts\": \"GOVERNANCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2432,
+    "Line": "    \".governance/platform/node_modules/undici-types/mock-errors.d.ts\": \"GOVERNANCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2433,
+    "Line": "    \".governance/platform/node_modules/undici-types/mock-interceptor.d.ts\": \"GOVERNANCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2434,
+    "Line": "    \".governance/platform/node_modules/undici-types/mock-pool.d.ts\": \"GOVERNANCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 2957,
+    "Line": "    \"EAORCS_AUDIT_PACKAGE_v5.1/engine/adapters/StubEngineAdapter.js\": \"GENERATED_EVIDENCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 3072,
+    "Line": "    \"EAORCS_AUDIT_PACKAGE_v5.1/engine/audit/passport_v4/checks/04/stub_analysis.json\": \"GENERATED_EVIDENCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 3138,
+    "Line": "    \"EAORCS_AUDIT_PACKAGE_v5.1/engine/audit/passport_v8/checks/04/stub_audit.json\": \"GENERATED_EVIDENCE\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 5356,
+    "Line": "    \"engine/adapters/StubEngineAdapter.js\": \"ADAPTER\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 5490,
+    "Line": "    \"engine/audit/passport_v4/checks/04/stub_analysis.json\": \"CONFIGURATION\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 5556,
+    "Line": "    \"engine/audit/passport_v8/checks/04/stub_audit.json\": \"CONFIGURATION\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\release\\project_inventory.json",
+    "LineNumber": 7866,
+    "Line": "    \"tests/helpers/MockFederationGrantIssuer.js\": \"TEST\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 6,
+    "Line": "    \"subjectId\": \"subj_mock-clean-target_96a77954409c\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 8,
+    "Line": "    \"workspaceRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 23,
+    "Line": "    \"workspaceRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 24,
+    "Line": "    \"subjectId\": \"subj_mock-clean-target_96a77954409c\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 29,
+    "Line": "    \"repositoryRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 63,
+    "Line": "      \"subjectId\": \"subj_mock-clean-target_96a77954409c\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 65,
+    "Line": "      \"workspaceRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 89,
+    "Line": "          \"workspaceRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 90,
+    "Line": "          \"subjectId\": \"subj_mock-clean-target_96a77954409c\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 95,
+    "Line": "          \"repositoryRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 149,
+    "Line": "          \"subjectId\": \"subj_mock-clean-target_96a77954409c\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\.governance\\state\\sessions\\f124ffc4-f4c3-408c-99fa-da0de2a39f2b.json",
+    "LineNumber": 150,
+    "Line": "          \"workspaceRoot\": \"D:\\\\ujomor-platform\\\\products\\\\eaorcs\\\\tmp\\\\mock-clean-target\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 2,
+    "Line": "  \"mocks\": ["
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 3,
+    "Line": "    \"server\\\\billing-gateway\\\\src\\\\db.ts:23 -> // Flat-file persistence engine (Zero-stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 4,
+    "Line": "    \"server\\\\billing-gateway\\\\src\\\\index.ts:47 -> // Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 12,
+    "Line": "    \"server\\\\engine-core\\\\src\\\\move\\\\TranslationMap.ts:32 -> // Mocking translation function for UI/Error strings\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 13,
+    "Line": "    \"server\\\\engine-core\\\\src\\\\move\\\\verification\\\\certification.ts:79 -> // Mocking evidence collection for abstraction\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 15,
+    "Line": "    \"server\\\\engine-core\\\\src\\\\targets\\\\lifecycle.ts:108 -> // Mock health check evaluation based on TargetDescriptor status\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 41,
+    "Line": "    \"server\\\\uppie\\\\src\\\\adapters\\\\aws-iam\\\\AwsIamClient.ts:85 -> const toDocument = (raw: unknown): AwsPolicyDocument => {\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 42,
+    "Line": "    \"server\\\\uppie\\\\src\\\\adapters\\\\aws-iam\\\\AwsIamClient.ts:146 -> return { ...summary(Policy), description: Policy.Description, document: toDocument(PolicyVersion.Document) };\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\forensic_report.json",
+    "LineNumber": 69,
+    "Line": "    \"server\\\\uppie\\\\src\\\\core\\\\authority-graph\\\\AuthorityGraphBuilder.ts:190 -> * Create a minimal empty AuthorityGraph for test or stub purposes.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\git_branch.txt",
+    "LineNumber": 3,
+    "Line": "* phase4/production-hardening     f592a4f [origin/phase4/production-hardening: ahead 10] feat(distribution): implement zero-mock localization, goreleaser, and cryptographic CI/CD pipelines"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\git_log.txt",
+    "LineNumber": 5,
+    "Line": "    feat(distribution): implement zero-mock localization, goreleaser, and cryptographic CI/CD pipelines"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\git-ls-files.txt",
+    "LineNumber": 3249,
+    "Line": "scratch/stub_scan.js"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\git-ls-files.txt",
+    "LineNumber": 3261,
+    "Line": "scripts/stub_scan.js"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 149,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 339,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 535,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 599,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 663,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 750,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 815,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 879,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 943,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1007,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1071,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1146,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1163,
+    "Line": "      24 | const stub: any = {};"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1231,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1320,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1384,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1451,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1536,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1580,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1658,
+    "Line": "      86 |     const engine = new PolicySimulationEngine(mockAdapter);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1785,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1885,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 1964,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2020,
+    "Line": "    > 17 |     const generateMockIr = function(): ArchitectureIR { return {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2143,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2230,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2349,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2519,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2620,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2722,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 2786,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 3107,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 3171,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 3257,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 3321,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 3810,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4037,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4227,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4423,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4487,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4551,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4637,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4701,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4765,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4829,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4893,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 4957,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5032,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5049,
+    "Line": "      24 | const stub: any = {};"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5107,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5196,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5260,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5327,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5382,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5426,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5504,
+    "Line": "      86 |     const engine = new PolicySimulationEngine(mockAdapter);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5606,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5668,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5732,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5787,
+    "Line": "    > 17 |     const generateMockIr = function(): ArchitectureIR { return {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5895,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 5982,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6101,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6270,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6355,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6430,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6494,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6707,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6771,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6857,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 6921,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\audit\\baseline\\jest_initial.txt",
+    "LineNumber": 7349,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\locales\\es.json",
+    "LineNumber": 86,
+    "Line": "  \"repo_all_providers\": \"Todos los proveedores de repositorios admitidos.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\locales\\es.json",
+    "LineNumber": 190,
+    "Line": "  \"locale_doctor_ok\": \"✔ Todos los subsistemas de localización en buen estado y verificados criptográficamente.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\packs\\ugondu-lang-es-ES.upl.json",
+    "LineNumber": 103,
+    "Line": "    \"locale_doctor_ok\": \"✔ Todos los subsistemas de localización en buen estado y verificados criptográficamente.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\packs\\ugondu-lang-es-ES.upl.json",
+    "LineNumber": 165,
+    "Line": "    \"repo_all_providers\": \"Todos los proveedores de repositorios admitidos.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\add_aws_keys.js",
+    "LineNumber": 33,
+    "Line": "  'validate.admin_wildcard': ['An Allow statement grants every action on every resource (*:*), which violates least privilege.', 'Une instruction Allow accorde toutes les actions sur toutes les ressources (*:*), ce qui viole le principe du moindre privilège.', 'Una instrucción Allow concede todas las acciones sobre todos los recursos (*:*), lo que infringe el mínimo privilegio.', 'Eine Allow-Anweisung gewährt alle Aktionen auf allen Ressourcen (*:*) und verstößt damit gegen das Prinzip der minimalen Rechte.', \"Un'istruzione Allow concede tutte le azioni su tutte le risorse (*:*), violando il principio del privilegio minimo.\"],"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\add_fabric_keys.js",
+    "LineNumber": 16,
+    "Line": "  'fabric.engine.plan_failed': ['The plan failed and everything it created was rolled back: {error}', \"Le plan a échoué et tout ce qu'il avait créé a été annulé : {error}\", 'El plan falló y todo lo que había creado se revirtió: {error}', 'Der Plan ist fehlgeschlagen und alles, was er erstellt hatte, wurde zurückgenommen: {error}', 'Il piano è fallito e tutto ciò che aveva creato è stato annullato: {error}'],"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\add_k8s_keys.js",
+    "LineNumber": 24,
+    "Line": "  'validate.invalid_name': [\"Invalid ClusterRole name '{name}': it must be a DNS subdomain (lowercase alphanumerics, '-' and '.').\", \"Nom de ClusterRole invalide « {name} » : il doit être un sous-domaine DNS (minuscules, chiffres, « - » et « . »).\", \"Nombre de ClusterRole no válido '{name}': debe ser un subdominio DNS (minúsculas, dígitos, '-' y '.').\", \"Ungültiger ClusterRole-Name '{name}': Er muss eine DNS-Subdomain sein (Kleinbuchstaben, Ziffern, '-' und '.').\", \"Nome ClusterRole non valido '{name}': deve essere un sottodominio DNS (minuscole, cifre, '-' e '.').\"],"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\add_missing_keys.js",
+    "LineNumber": 103,
+    "Line": "add('messages.warning.wildcard_resource', 'Wildcard resource applies the action to every resource.', \"Une ressource générique applique l'action à toutes les ressources.\", 'El recurso comodín aplica la acción a todos los recursos.', 'Eine Platzhalter-Ressource wendet die Aktion auf alle Ressourcen an.', \"Una risorsa jolly applica l'azione a tutte le risorse.\");"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_forensics.py",
+    "LineNumber": 9,
+    "Line": "report = {\"mocks\": [], \"strings\": [], \"ip_leak\": [], \"tests\": \"\", \"build\": \"\", \"distribution\": []}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_forensics.py",
+    "LineNumber": 11,
+    "Line": "# 1. Audit Stubs/Mocks"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_forensics.py",
+    "LineNumber": 20,
+    "Line": "                    if re.search(r'(?i)(mock|stub|simulate|todo|dummy|not_implemented|placeholder)', line):"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_forensics.py",
+    "LineNumber": 21,
+    "Line": "                        report[\"mocks\"].append(f\"{path}:{i+1} -> {line.strip()}\")"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 5,
+    "Line": "    \"text\": \"// Flat-file persistence engine (Zero-stub)\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 10,
+    "Line": "    \"text\": \"// Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 95,
+    "Line": "    \"text\": \"return { id, state: 'running', health: 'healthy' }; // Mock implementation\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 110,
+    "Line": "    \"text\": \"// Mocking translation function for UI/Error strings\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 115,
+    "Line": "    \"text\": \"// Mocking evidence collection for abstraction\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 165,
+    "Line": "    \"text\": \"// Mock health check evaluation based on TargetDescriptor status\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 305,
+    "Line": "    \"text\": \"const toDocument = (raw: unknown): AwsPolicyDocument => {\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 310,
+    "Line": "    \"text\": \"return { ...summary(Policy), description: Policy.Description, document: toDocument(PolicyVersion.Document) };\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 450,
+    "Line": "    \"text\": \"* Create a minimal empty AuthorityGraph for test or stub purposes.\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\audit_results.json",
+    "LineNumber": 585,
+    "Line": "    \"text\": \"AccessToken: \\\"mock_jwt_token_42\\\",\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.js",
+    "LineNumber": 3,
+    "Line": " * Categories: STUB, MOCK, HARDCODED_STRING, MISSING_I18N_KEY, CONSOLE, EMPTY_CATCH, SECRET_FALLBACK,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.js",
+    "LineNumber": 50,
+    "Line": "  { cat: 'STUB', re: /not_implemented|NotImplemented|throw new Error\\(['\"`]Not implemented/i },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.js",
+    "LineNumber": 51,
+    "Line": "  { cat: 'MOCK', re: /\\b(mock(ed|ing)?|simulat(ed|e an?|ion only)|dummy|placeholder|scaffold|fake|stub(bed)?)\\b/i, comment: true },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.js",
+    "LineNumber": 52,
+    "Line": "  { cat: 'TODO', re: /\\b(TODO|FIXME|XXX|HACK)\\b|for now|in production this|would normally/i },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.js",
+    "LineNumber": 84,
+    "Line": "        if (r.cat === 'MOCK' && /simulate\\w*\\s*\\(|Simulat(or|ion)(Engine|Result|Context)|IntentSimulator|simulator\\.ts|import /.test(line) && !/\\/\\//.test(line)) continue;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 5,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 6,
+    "Line": "    \"text\": \"// Flat-file persistence engine (Zero-stub)\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 11,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 12,
+    "Line": "    \"text\": \"// Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 23,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 41,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 47,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 53,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 77,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 78,
+    "Line": "    \"text\": \"// Mocking translation function for UI/Error strings\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 83,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 84,
+    "Line": "    \"text\": \"// Mocking evidence collection for abstraction\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 89,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 90,
+    "Line": "    \"text\": \"// Mock health check evaluation based on TargetDescriptor status\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 95,
+    "Line": "    \"cat\": \"STUB\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 113,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 119,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 125,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 131,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 137,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\cor_scan.json",
+    "LineNumber": 143,
+    "Line": "    \"cat\": \"MOCK\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\create_policy_tests.py",
+    "LineNumber": 22,
+    "Line": "    const generateMockIr = (): ArchitectureIR => ({"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\create_policy_tests.py",
+    "LineNumber": 27,
+    "Line": "    const mockEnvelope = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\create_policy_tests.py",
+    "LineNumber": 39,
+    "Line": "            ir: generateMockIr(),"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\create_policy_tests.py",
+    "LineNumber": 41,
+    "Line": "            envelope: { ...mockEnvelope },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\create_policy_tests.py",
+    "LineNumber": 57,
+    "Line": "        const maliciousIr = generateMockIr();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\depth_scan.js",
+    "LineNumber": 7,
+    "Line": "  ['comment-deferral', /\\/\\/\\s*(Abstract|e\\.g\\.|Trigger specific|In production|In a real|would |simplified|for now|placeholder|stub|TODO|FIXME|mock|dummy)/i],"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_remaining.py",
+    "LineNumber": 13,
+    "Line": "# Fix createSubnet to mock what the compiler wants for k8s / other if any"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 6,
+    "Line": "# Fix createSubnet mock return"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 8,
+    "Line": "    r'createSubnet:\\s*jest\\.fn\\(\\)\\.mockResolvedValue\\([^)]+\\)',"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 9,
+    "Line": "    r\"createSubnet: jest.fn().mockResolvedValue({ id: 'sub-123', cidr: '10.0.1.0/24' })\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 13,
+    "Line": "# Fix createS3Bucket / createRds mock return (endpoint instead of url or missing)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 15,
+    "Line": "    r\"createS3Bucket:\\s*jest\\.fn\\(\\)\\.mockResolvedValue\\(\\{([^}]+)\\}\\)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 16,
+    "Line": "    r\"createS3Bucket: jest.fn().mockResolvedValue({\\1, endpoint: 'http://test'})\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 20,
+    "Line": "    r\"createRds:\\s*jest\\.fn\\(\\)\\.mockResolvedValue\\(\\{([^}]+)\\}\\)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters_ts.py",
+    "LineNumber": 21,
+    "Line": "    r\"createRds: jest.fn().mockResolvedValue({\\1, endpoint: 'http://db'})\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters.py",
+    "LineNumber": 7,
+    "Line": "# Add createSubnet and getInstanceStatus to IAwsClient mock"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters.py",
+    "LineNumber": 8,
+    "Line": "c = c.replace('resolveInstanceType: async () =>', 'getInstanceStatus: async () => ({ id: \"mock\", state: \"running\", health: \"healthy\" } as any), createSubnet: async () => ({ id: \"sub-1\", cidr: \"10.0.0.0/24\" }), createSnapshot: async () => (\"snap-1\"), resolveInstanceType: async () =>')"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters.py",
+    "LineNumber": 10,
+    "Line": "# Add to IKubernetesClient mock"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters.py",
+    "LineNumber": 11,
+    "Line": "c = c.replace('applyWorkload: async () =>', 'getInstanceStatus: async () => ({ id: \"mock\", state: \"running\", health: \"healthy\" } as any), createSubnet: async () => ({ id: \"sub-1\", cidr: \"10.0.0.0/24\" }), applyWorkload: async () =>')"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters.py",
+    "LineNumber": 13,
+    "Line": "# Add to ILinuxClient mock"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_adapters.py",
+    "LineNumber": 16,
+    "Line": "# Add to IWhmClient mock"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_babel.py",
+    "LineNumber": 8,
+    "Line": "content = content.replace(\"const generateMockIr = (): ArchitectureIR => ({\", \"const generateMockIr = function(): ArchitectureIR { return {\")"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_compilation.py",
+    "LineNumber": 52,
+    "Line": "# For adapters.spec.ts, we need to add the missing properties to the test mocks."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_execute_plan.py",
+    "LineNumber": 16,
+    "Line": "        mock_auth = \"{ decision: { status: 'ALLOW' }, policyVersion: '1.0.0', cryptographicSeal: 'fake-seal', expiresAt: new Date(Date.now() + 100000), envelope: { tenantId: 't1', edition: 'ENTERPRISE', allowedActions: [] }, intentHash: 'h1', twinHash: 'h2', environmentId: 'e1' }\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_execute_plan.py",
+    "LineNumber": 17,
+    "Line": "        decl = f\"\\n\\nconst dummyAuth: any = {mock_auth};\\n\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_final_tsc.py",
+    "LineNumber": 11,
+    "Line": "        c = re.sub(r\"id:\\s*'mock',\\s*endpoint:\\s*'mock'\", r\"id: 'mock', cidr: '10.0.0.0/24'\", c)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_final_tsc.py",
+    "LineNumber": 12,
+    "Line": "        c = re.sub(r\"state:\\s*'mock'\", r\"id: 'mock', cidr: '10.0.0.0/24'\", c)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_final_tsc.py",
+    "LineNumber": 23,
+    "Line": "    # So I will change the mock to return { id: 'mock', state: 'mock' }"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_identity.py",
+    "LineNumber": 43,
+    "Line": "    // Extract NameID from standard SAML structure (simplified for zero-mock requirement without large XML dependencies)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_interfaces.py",
+    "LineNumber": 10,
+    "Line": "        c = re.sub(r\"id:\\s*'mock',\\s*endpoint:\\s*'mock'\", r\"id: 'mock', cidr: '10.0.0.0/24'\", c)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_interfaces.py",
+    "LineNumber": 11,
+    "Line": "        c = re.sub(r\"state:\\s*'creating'\", r\"id: 'mock', cidr: '10.0.0.0/24'\", c)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_interfaces.py",
+    "LineNumber": 18,
+    "Line": "# Fix adapters.spec.ts mocks"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_more.py",
+    "LineNumber": 31,
+    "Line": "    # What about the createSubnet mocked method?"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 10,
+    "Line": "    const generateMockIr = function(): ArchitectureIR { return {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 15,
+    "Line": "    const mockEnvelope = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 24,
+    "Line": "        (UpmExecutionGate.verifyAuthorization as jest.Mock).mockRestore();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 31,
+    "Line": "            ir: generateMockIr(),"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 33,
+    "Line": "            envelope: { ...mockEnvelope },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 45,
+    "Line": "            envelopeHash: 'mock-hash',"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 69,
+    "Line": "            envelopeHash: 'mock-hash',"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 83,
+    "Line": "        const maliciousIr = generateMockIr();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 95,
+    "Line": "            envelopeHash: 'mock-hash',"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 119,
+    "Line": "            envelopeHash: 'mock-hash',"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_policy.py",
+    "LineNumber": 143,
+    "Line": "            envelopeHash: 'mock-hash',"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_tsc_remnants.py",
+    "LineNumber": 35,
+    "Line": "c = re.sub(r\"state:\\s*'creating'\", r\"id: 'mock', endpoint: 'mock'\", c) # Fix SubnetResult fake state"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix_tsc_remnants.py",
+    "LineNumber": 44,
+    "Line": "        c = re.sub(r\"state:\\s*'creating'\", r\"id: 'mock', endpoint: 'mock'\", c)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix-ts-2.js",
+    "LineNumber": 25,
+    "Line": "    [/const mockAwsClient: IAwsClient = \\{/g, \"const mockAwsClient = {\"]"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\fix-ts-4.js",
+    "LineNumber": 30,
+    "Line": "adCode = adCode.replace(/const mockAwsClient: IAwsClient = \\{/g, \"const mockAwsClient: any = {\");"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\gates_mut.log",
+    "LineNumber": 6,
+    "Line": "  Γ£ô PASS: should build a valid AuthorityGraphSnapshot from a mock adapter"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\gates.log",
+    "LineNumber": 6,
+    "Line": "  Γ£ô PASS: should build a valid AuthorityGraphSnapshot from a mock adapter"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\generate_reports.py",
+    "LineNumber": 16,
+    "Line": "An independent forensic audit of the Ugondu repository was conducted against the strict COR mandate. Previous claims of \"zero mocks\", \"production ready\", and \"COR compliant\" were evaluated based purely on the physical evidence within the local filesystem."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\generate_reports.py",
+    "LineNumber": 24,
+    "Line": "4. **Mocked Capability Matrix:** Providers (`linux`, `aws`, `kubernetes`) have missing methods or throw `NotImplemented` instead of properly executing dynamic discovery."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\generate_reports.py",
+    "LineNumber": 32,
+    "Line": "| Mocks / Stubs | FAIL | Stubs were replaced with `throw new Error(...)` rather than genuine integrations. | `server/engine-core/src/fabric/providers/*` |"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\generate_reports.py",
+    "LineNumber": 52,
+    "Line": "- [ ] Fix test mocks in `adapters.spec.ts`."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\jest_upm.txt",
+    "LineNumber": 17,
+    "Line": "     ΓÇó If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the \"moduleNameMapper\" config option."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_clean.py",
+    "LineNumber": 21,
+    "Line": "    # Replace throw new Error NotImplemented that returns `{ id: 'mock', state: 'creating' }`"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_engine_auth.py",
+    "LineNumber": 21,
+    "Line": "print(\"Patched provisioning-engine.ts for test scaffolding\")"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_execute_plan.py",
+    "LineNumber": 3,
+    "Line": "# Mock auth string"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_execute_plan.py",
+    "LineNumber": 4,
+    "Line": "mock_auth = \"{ decision: { status: 'ALLOW' }, policyVersion: '1.0.0', cryptographicSeal: 'fake-seal', expiresAt: new Date(Date.now() + 100000), envelope: { tenantId: 't1', edition: 'ENTERPRISE', allowedActions: [] }, intentHash: 'h1', twinHash: 'h2', environmentId: 'e1' }\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_execute_plan.py",
+    "LineNumber": 5,
+    "Line": "decl = f\"\\n\\nconst dummyAuth: any = {mock_auth};\\n\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_rejection_test.py",
+    "LineNumber": 8,
+    "Line": "    # Define a mock auth object string"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_rejection_test.py",
+    "LineNumber": 9,
+    "Line": "    mock_auth = \"{ decision: { status: 'ALLOW' }, policyVersion: '1.0.0', cryptographicSeal: 'fake-seal', expiresAt: new Date(Date.now() + 100000), envelope: { tenantId: 't1', edition: 'ENTERPRISE', allowedActions: [] }, intentHash: 'h1', twinHash: 'h2', environmentId: 'e1' }\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\patch_rejection_test.py",
+    "LineNumber": 14,
+    "Line": "        c = c.replace('declare var describe: any, it: any, expect: any;', f\"declare var describe: any, it: any, expect: any;\\n\\nconst dummyAuth: any = {mock_auth};\\n\")"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 154,
+    "Line": "        const calls = actual && actual.mock ? actual.mock.calls : [];"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 157,
+    "Line": "          throw new Error(`Expected mock function ${isNot ? 'NOT ' : ''}to have been called`);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 161,
+    "Line": "        const calls = actual && actual.mock ? actual.mock.calls : [];"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 167,
+    "Line": "          throw new Error(`Expected mock function ${isNot ? 'NOT ' : ''}to have been called with ${JSON.stringify(args)}`);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 171,
+    "Line": "        const calls = actual && actual.mock ? actual.mock.calls : [];"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 174,
+    "Line": "          throw new Error(`Expected mock function ${isNot ? 'NOT ' : ''}to have been called ${count} times, called ${calls.length} times`);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 212,
+    "Line": "  const jestMock = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 214,
+    "Line": "      const mockFn = (...args) => {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 215,
+    "Line": "        mockFn.mock.calls.push(args);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 218,
+    "Line": "      mockFn.mock = { calls: [] };"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 219,
+    "Line": "      mockFn.mockResolvedValue = (val) => jestMock.fn(() => Promise.resolve(val));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 220,
+    "Line": "      mockFn.mockReturnValue = (val) => jestMock.fn(() => val);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 221,
+    "Line": "      return mockFn;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\run_qualification_gates.js",
+    "LineNumber": 245,
+    "Line": "  return { describe, it, expect: expectObj, jest: jestMock, beforeEach, tests };"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.js",
+    "LineNumber": 8,
+    "Line": "  /\\bTODO\\b/,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.js",
+    "LineNumber": 12,
+    "Line": "  /\\bstub\\b/i,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.js",
+    "LineNumber": 13,
+    "Line": "  /\\bmock\\b/i,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.js",
+    "LineNumber": 46,
+    "Line": "fs.writeFileSync('D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\scratch\\\\stub_scan.log', out.join('\\n'));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.log",
+    "LineNumber": 9,
+    "Line": "   L87: return { id, state: 'running', health: 'healthy' }; // Mock implementation"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.log",
+    "LineNumber": 14,
+    "Line": "   L23: // Flat-file persistence engine (Zero-stub)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.log",
+    "LineNumber": 17,
+    "Line": "   L47: // Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\stub_scan.log",
+    "LineNumber": 38,
+    "Line": "   L190: * Create a minimal empty AuthorityGraph for test or stub purposes."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tokenize.py",
+    "LineNumber": 51,
+    "Line": "            # We assume it has the i18n import or we let goimports/Go compiler figure it out if needed, but since it's zero mock, I'll add the import blindly near \"fmt\""
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\locales_backup\\es.json",
+    "LineNumber": 86,
+    "Line": "  \"repo_all_providers\": \"Todos los proveedores de repositorios admitidos.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\locales_backup\\es.json",
+    "LineNumber": 190,
+    "Line": "  \"locale_doctor_ok\": \"✔ Todos los subsistemas de localización en buen estado y verificados criptográficamente.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\haste-map-9b7965bb348de7f6c8811fbc3010e378-1602329739efe4a1133b3ecf7bbefdc2-e5a9d4f8fbe2e0651811f48a68ac65d2",
+    "LineNumber": 983,
+    "Line": "0@\u0006\u0006:�\u000e\"\u0003map;\"\u001e@airroofers/ugondu-engine-coreo\"\u0001ga\u0002I\u0000\"\fpackage.jsonI\u0002I\u0002@\u0002\u0002{\u0001:\u0002\"\u0005mocks;:\u0000{\u0005"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\12\\errors_12db3a93da55be06f1cc275fcb180af3",
+    "LineNumber": 83,
+    "Line": "// /** @deprecated Use `z.core.$ZodErrorMapCtx` instead. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\21\\index_214c9257822fc3eda119d23a52279446",
+    "LineNumber": 172,
+    "Line": "          // TODO: Get appropriate type for `onCustomMessage`"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\24\\providercontractspec_248779dbbc03102c820f54e2b5d43c74",
+    "LineNumber": 23,
+    "Line": "const stub = {};"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\24\\providercontractspec_248779dbbc03102c820f54e2b5d43c74",
+    "LineNumber": 24,
+    "Line": "const all = { COMPUTE: stub, NETWORK: stub, DATABASE: stub, STORAGE: stub };"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\24\\providercontractspec_248779dbbc03102c820f54e2b5d43c74",
+    "LineNumber": 122,
+    "Line": "        expect(() => (0, ProviderContract_1.assertContractConsistent)(unsupported, { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).not.toThrow();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\24\\providercontractspec_248779dbbc03102c820f54e2b5d43c74",
+    "LineNumber": 123,
+    "Line": "        expect(() => (0, ProviderContract_1.assertContractConsistent)((0, fakeCloud_1.nativeContract)('x'), { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'DATABASE' }));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\24\\providercontractspec_248779dbbc03102c820f54e2b5d43c74",
+    "LineNumber": 126,
+    "Line": "        expect(() => (0, ProviderContract_1.assertContractConsistent)(conditional, { COMPUTE: stub, NETWORK: stub, DATABASE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'STORAGE' }));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\24\\providercontractspec_248779dbbc03102c820f54e2b5d43c74.map",
+    "LineNumber": 1,
+    "Line": "{\"file\":\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\fabric\\\\tests\\\\provider-contract.spec.ts\",\"mappings\":\"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\",\"names\":[],\"sources\":[\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\fabric\\\\tests\\\\provider-contract.spec.ts\"],\"sourcesContent\":[\"/******************************************************************************\\n * Project        : Ugondu — Universal Delivery Operating System\\n * Module         : Provider Fabric — Capability Contract (declarations and registration)\\n * File           : provider-contract.spec.ts\\n * Version        : 1.0.0\\n * Author         : Ujomor Systems Engineering & Governance Authority\\n * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)\\n * Created Date   : 2026-10-03\\n * Classification : ENTERPRISE\\n * Governance: Corporate Governed / Security Reviewed / Protocol Frozen\\n * Copyright (c) 2026 Air Roofers. All Rights Reserved.\\n ******************************************************************************/\\n\\nimport { FabricRegistry } from '../registry';\\nimport { CANONICAL_CONTRACTS } from '../contract/CanonicalContracts';\\nimport { assertContractConsistent, NODE_KINDS, ProviderRegistrationError } from '../contract/ProviderContract';\\nimport { canonicalFabric, nativeContract } from './support/fakeCloud';\\n// @ts-ignore\\nimport { __t } from '../../../../shared/i18n';\\n\\ndeclare var describe: any, it: any, expect: any;\\n\\nconst C = (key: string, params?: Record<string, string | number>): string => __t(`fabric.contract.${key}`, params);\\nconst stub: any = {};\\nconst all: any = { COMPUTE: stub, NETWORK: stub, DATABASE: stub, STORAGE: stub };\\n\\n/** The frozen matrix of ugondu_provider_fabric_blueprint_v2, written out independently of the implementation. */\\nconst MATRIX: Record<string, { kinds: Record<string, [string, string[]]>; engines: string[]; classes: string[]; publicClasses: string[] }> = {\\n  aws: { kinds: { COMPUTE: ['NATIVE', ['INSTANCE']], NETWORK: ['NATIVE', ['VPC']], DATABASE: ['NATIVE', []], STORAGE: ['NATIVE', []] }, engines: ['postgres', 'mysql'], classes: ['OBJECT'], publicClasses: ['OBJECT'] },\\n  kubernetes: { kinds: { COMPUTE: ['NATIVE', ['DEPLOYMENT', 'STATEFULSET']], NETWORK: ['CONDITIONAL', ['NETWORK_POLICY']], DATABASE: ['UNSUPPORTED', []], STORAGE: ['CONDITIONAL', ['PVC']] }, engines: [], classes: ['FILE', 'BLOCK'], publicClasses: [] },\\n  linux: { kinds: { COMPUTE: ['NATIVE', ['SYSTEMD', 'CONTAINER']], NETWORK: ['CONDITIONAL', ['EXISTING', 'NETWORKMANAGER', 'SYSTEMD_NETWORKD', 'NETPLAN']], DATABASE: ['UNSUPPORTED', []], STORAGE: ['NATIVE', ['DIRECTORY']] }, engines: [], classes: ['FILE'], publicClasses: [] },\\n  cpanel: { kinds: { COMPUTE: ['CONDITIONAL', ['HOSTED_APP']], NETWORK: ['UNSUPPORTED', []], DATABASE: ['CONDITIONAL', ['MYSQL']], STORAGE: ['CONDITIONAL', ['ACCOUNT_FILESYSTEM']] }, engines: ['mysql'], classes: ['FILE'], publicClasses: [] },\\n};\\n\\ndescribe('Provider capability contract: the frozen matrix (FAB-07)', () => {\\n  it('declares exactly the four providers of the blueprint', () => {\\n    expect(Object.keys(CANONICAL_CONTRACTS).sort()).toEqual(['aws', 'cpanel', 'kubernetes', 'linux']);\\n  });\\n\\n  for (const [provider, expected] of Object.entries(MATRIX)) {\\n    it(`${provider} declares every kind with the status, modes, engines and classes of the blueprint`, () => {\\n      const contract = CANONICAL_CONTRACTS[provider]!;\\n      expect(contract.provider).toBe(provider);\\n      expect(Object.keys(contract.kinds).sort()).toEqual([...NODE_KINDS].sort());\\n      for (const kind of NODE_KINDS) {\\n        expect([contract.kinds[kind].status, [...contract.kinds[kind].modes]]).toEqual(expected.kinds[kind]);\\n      }\\n      expect([...contract.databaseEngines]).toEqual(expected.engines);\\n      expect([...contract.storageClasses]).toEqual(expected.classes);\\n      expect([...contract.publicStorageClasses]).toEqual(expected.publicClasses);\\n    });\\n  }\\n\\n  it('explains every unsupported or conditional kind and offers alternatives, with real localized text', () => {\\n    for (const contract of Object.values(CANONICAL_CONTRACTS)) {\\n      for (const kind of NODE_KINDS) {\\n        const declared = contract.kinds[kind];\\n        if (declared.status === 'NATIVE') continue;\\n        expect(declared.reasonKey).toBeDefined();\\n        expect(__t(declared.reasonKey as string)).not.toBe(declared.reasonKey);\\n        expect((declared.alternativeKeys ?? []).length).toBeGreaterThanOrEqual(2);\\n        for (const key of declared.alternativeKeys ?? []) expect(__t(key)).not.toBe(key);\\n      }\\n    }\\n  });\\n\\n  it('only AWS serves public storage, and only object storage', () => {\\n    const publicCapable = Object.values(CANONICAL_CONTRACTS).filter((c) => c.publicStorageClasses.length > 0);\\n    expect(publicCapable.map((c) => c.provider)).toEqual(['aws']);\\n    expect(publicCapable[0]!.publicStorageClasses).toEqual(['OBJECT']);\\n  });\\n\\n  it('every real provider supports rollback, idempotency and delete; none claims import or update yet', () => {\\n    for (const c of Object.values(CANONICAL_CONTRACTS)) {\\n      expect([c.supportsRollback, c.supportsIdempotency, c.supportsDelete, c.supportsImport, c.supportsUpdate]).toEqual([true, true, true, false, false]);\\n    }\\n  });\\n\\n  it('only a provider that can dry-run sizing declares so', () => {\\n    expect(Object.values(CANONICAL_CONTRACTS).map((c) => [c.provider, c.supportsDryRun])).toEqual([['aws', true], ['kubernetes', true], ['linux', true], ['cpanel', false]]);\\n  });\\n});\\n\\ndescribe('Provider capability contract: registration is explicit (FAB-07)', () => {\\n  it('accepts a consistent declaration and exposes it', () => {\\n    const registry = new FabricRegistry();\\n    registry.registerProvider(nativeContract('aws'), all);\\n    expect(registry.isRegistered('aws')).toBe(true);\\n    expect(registry.isRegistered('gcp')).toBe(false);\\n    expect(registry.contractOf('aws').provider).toBe('aws');\\n  });\\n\\n  it('registers each real provider with adapters only for the kinds it does not declare unsupported', () => {\\n    const { registry } = canonicalFabric();\\n    expect(() => registry.resolveDatabase('aws')).not.toThrow();\\n    expect(() => registry.resolveDatabase('cpanel')).not.toThrow();\\n    for (const [provider, kind, resolve] of [\\n      ['kubernetes', 'DATABASE', () => registry.resolveDatabase('kubernetes')], ['linux', 'DATABASE', () => registry.resolveDatabase('linux')], ['cpanel', 'NETWORK', () => registry.resolveNetwork('cpanel')],\\n    ] as Array<[string, string, () => unknown]>) {\\n      expect(resolve).toThrow(C('capability_unsupported', { provider, kind }));\\n    }\\n  });\\n\\n  it('tells apart an unregistered provider from an unsupported kind', () => {\\n    const { registry } = canonicalFabric();\\n    expect(() => registry.contractOf('gcp')).toThrow(C('provider_not_registered', { provider: 'gcp' }));\\n    expect(() => registry.resolveCompute('gcp')).toThrow(C('provider_not_registered', { provider: 'gcp' }));\\n  });\\n\\n  it('refuses to register the same provider twice', () => {\\n    const registry = new FabricRegistry();\\n    registry.registerProvider(nativeContract('aws'), all);\\n    expect(() => registry.registerProvider(nativeContract('aws'), all)).toThrow(C('provider_already_registered', { provider: 'aws' }));\\n  });\\n\\n  it('refuses a declaration that omits a kind, so silence is never read as unsupported', () => {\\n    const contract: any = nativeContract('aws');\\n    delete contract.kinds.NETWORK;\\n    expect(() => assertContractConsistent(contract, all)).toThrow(C('kind_undeclared', { provider: 'aws', kind: 'NETWORK' }));\\n    const error = (() => { try { assertContractConsistent(contract, all); } catch (e) { return e; } })();\\n    expect(error instanceof ProviderRegistrationError).toBe(true);\\n    expect((error as Error).name).toBe('ProviderRegistrationError');\\n  });\\n\\n  it('refuses an adapter for a kind declared unsupported and a missing adapter for a supported kind', () => {\\n    const unsupported: any = nativeContract('x');\\n    unsupported.kinds.DATABASE = { status: 'UNSUPPORTED', modes: [] };\\n    expect(() => assertContractConsistent(unsupported, all)).toThrow(C('adapter_for_unsupported', { provider: 'x', kind: 'DATABASE' }));\\n    expect(() => assertContractConsistent(unsupported, { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).not.toThrow();\\n    expect(() => assertContractConsistent(nativeContract('x'), { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'DATABASE' }));\\n    const conditional: any = nativeContract('x');\\n    conditional.kinds.STORAGE = { status: 'CONDITIONAL', modes: ['X'] };\\n    expect(() => assertContractConsistent(conditional, { COMPUTE: stub, NETWORK: stub, DATABASE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'STORAGE' }));\\n  });\\n\\n  it('refuses a conditional kind that names no mode, and a declaration without a provider name', () => {\\n    const conditional: any = nativeContract('x');\\n    conditional.kinds.NETWORK = { status: 'CONDITIONAL', modes: [] };\\n    expect(() => assertContractConsistent(conditional, all)).toThrow(C('conditional_without_modes', { provider: 'x', kind: 'NETWORK' }));\\n    expect(() => assertContractConsistent({ ...nativeContract('x'), provider: '' }, all)).toThrow(C('provider_name_missing'));\\n  });\\n\\n  it('checks the kinds in a fixed order, so the first reported problem is stable', () => {\\n    const contract: any = nativeContract('x');\\n    contract.kinds.COMPUTE = { status: 'UNSUPPORTED', modes: [] };\\n    contract.kinds.STORAGE = { status: 'UNSUPPORTED', modes: [] };\\n    expect(() => assertContractConsistent(contract, all)).toThrow(C('adapter_for_unsupported', { provider: 'x', kind: 'COMPUTE' }));\\n  });\\n});\\n\"],\"version\":3}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\2e\\runner_2ee98804ef68cd57ae9766b04197a2eb",
+    "LineNumber": 10,
+    "Line": "const runner = require('./build/legacy-code-todo-rewrite/jestAdapter').default;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\2f\\api_2ff6f3283feee58d7bfa16830e4306ee",
+    "LineNumber": 262,
+    "Line": " * @deprecated CUID v1 is deprecated by its authors due to information leakage"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\2f\\api_2ff6f3283feee58d7bfa16830e4306ee",
+    "LineNumber": 979,
+    "Line": "/** @deprecated This API has been merged into `z.enum()`. Use `z.enum()` instead."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\39\\providercontractspec_39a315de1666d9acb557c7826fe15317",
+    "LineNumber": 23,
+    "Line": "const stub = {};"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\39\\providercontractspec_39a315de1666d9acb557c7826fe15317",
+    "LineNumber": 24,
+    "Line": "const all = { COMPUTE: stub, NETWORK: stub, DATABASE: stub, STORAGE: stub };"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\39\\providercontractspec_39a315de1666d9acb557c7826fe15317",
+    "LineNumber": 122,
+    "Line": "        expect(() => (0, ProviderContract_1.assertContractConsistent)(unsupported, { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).not.toThrow();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\39\\providercontractspec_39a315de1666d9acb557c7826fe15317",
+    "LineNumber": 123,
+    "Line": "        expect(() => (0, ProviderContract_1.assertContractConsistent)((0, fakeCloud_1.nativeContract)('x'), { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'DATABASE' }));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\39\\providercontractspec_39a315de1666d9acb557c7826fe15317",
+    "LineNumber": 126,
+    "Line": "        expect(() => (0, ProviderContract_1.assertContractConsistent)(conditional, { COMPUTE: stub, NETWORK: stub, DATABASE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'STORAGE' }));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\39\\providercontractspec_39a315de1666d9acb557c7826fe15317.map",
+    "LineNumber": 1,
+    "Line": "{\"file\":\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\fabric\\\\tests\\\\provider-contract.spec.ts\",\"mappings\":\"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\",\"names\":[],\"sources\":[\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\fabric\\\\tests\\\\provider-contract.spec.ts\"],\"sourcesContent\":[\"/******************************************************************************\\n * Project        : Ugondu — Universal Delivery Operating System\\n * Module         : Provider Fabric — Capability Contract (declarations and registration)\\n * File           : provider-contract.spec.ts\\n * Version        : 1.0.0\\n * Author         : Ujomor Systems Engineering & Governance Authority\\n * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)\\n * Created Date   : 2026-10-03\\n * Classification : ENTERPRISE\\n * Governance: Corporate Governed / Security Reviewed / Protocol Frozen\\n * Copyright (c) 2026 Air Roofers. All Rights Reserved.\\n ******************************************************************************/\\n\\nimport { FabricRegistry } from '../registry';\\nimport { CANONICAL_CONTRACTS } from '../contract/CanonicalContracts';\\nimport { assertContractConsistent, NODE_KINDS, ProviderRegistrationError } from '../contract/ProviderContract';\\nimport { canonicalFabric, nativeContract } from './support/fakeCloud';\\n// @ts-ignore\\nimport { __t } from '../../../../shared/i18n';\\n\\ndeclare var describe: any, it: any, expect: any;\\n\\nconst C = (key: string, params?: Record<string, string | number>): string => __t(`fabric.contract.${key}`, params);\\nconst stub: any = {};\\nconst all: any = { COMPUTE: stub, NETWORK: stub, DATABASE: stub, STORAGE: stub };\\n\\n/** The frozen matrix of ugondu_provider_fabric_blueprint_v2, written out independently of the implementation. */\\nconst MATRIX: Record<string, { kinds: Record<string, [string, string[]]>; engines: string[]; classes: string[]; publicClasses: string[] }> = {\\n  aws: { kinds: { COMPUTE: ['NATIVE', ['INSTANCE']], NETWORK: ['NATIVE', ['VPC']], DATABASE: ['NATIVE', []], STORAGE: ['NATIVE', []] }, engines: ['postgres', 'mysql'], classes: ['OBJECT'], publicClasses: ['OBJECT'] },\\n  kubernetes: { kinds: { COMPUTE: ['NATIVE', ['DEPLOYMENT', 'STATEFULSET']], NETWORK: ['CONDITIONAL', ['NETWORK_POLICY']], DATABASE: ['UNSUPPORTED', []], STORAGE: ['CONDITIONAL', ['PVC']] }, engines: [], classes: ['FILE', 'BLOCK'], publicClasses: [] },\\n  linux: { kinds: { COMPUTE: ['NATIVE', ['SYSTEMD', 'CONTAINER']], NETWORK: ['CONDITIONAL', ['EXISTING', 'NETWORKMANAGER', 'SYSTEMD_NETWORKD', 'NETPLAN']], DATABASE: ['UNSUPPORTED', []], STORAGE: ['NATIVE', ['DIRECTORY']] }, engines: [], classes: ['FILE'], publicClasses: [] },\\n  cpanel: { kinds: { COMPUTE: ['CONDITIONAL', ['HOSTED_APP']], NETWORK: ['UNSUPPORTED', []], DATABASE: ['CONDITIONAL', ['MYSQL']], STORAGE: ['CONDITIONAL', ['ACCOUNT_FILESYSTEM']] }, engines: ['mysql'], classes: ['FILE'], publicClasses: [] },\\n};\\n\\ndescribe('Provider capability contract: the frozen matrix (FAB-07)', () => {\\n  it('declares exactly the four providers of the blueprint', () => {\\n    expect(Object.keys(CANONICAL_CONTRACTS).sort()).toEqual(['aws', 'cpanel', 'kubernetes', 'linux']);\\n  });\\n\\n  for (const [provider, expected] of Object.entries(MATRIX)) {\\n    it(`${provider} declares every kind with the status, modes, engines and classes of the blueprint`, () => {\\n      const contract = CANONICAL_CONTRACTS[provider]!;\\n      expect(contract.provider).toBe(provider);\\n      expect(Object.keys(contract.kinds).sort()).toEqual([...NODE_KINDS].sort());\\n      for (const kind of NODE_KINDS) {\\n        expect([contract.kinds[kind].status, [...contract.kinds[kind].modes]]).toEqual(expected.kinds[kind]);\\n      }\\n      expect([...contract.databaseEngines]).toEqual(expected.engines);\\n      expect([...contract.storageClasses]).toEqual(expected.classes);\\n      expect([...contract.publicStorageClasses]).toEqual(expected.publicClasses);\\n    });\\n  }\\n\\n  it('explains every unsupported or conditional kind and offers alternatives, with real localized text', () => {\\n    for (const contract of Object.values(CANONICAL_CONTRACTS)) {\\n      for (const kind of NODE_KINDS) {\\n        const declared = contract.kinds[kind];\\n        if (declared.status === 'NATIVE') continue;\\n        expect(declared.reasonKey).toBeDefined();\\n        expect(__t(declared.reasonKey as string)).not.toBe(declared.reasonKey);\\n        expect((declared.alternativeKeys ?? []).length).toBeGreaterThanOrEqual(2);\\n        for (const key of declared.alternativeKeys ?? []) expect(__t(key)).not.toBe(key);\\n      }\\n    }\\n  });\\n\\n  it('only AWS serves public storage, and only object storage', () => {\\n    const publicCapable = Object.values(CANONICAL_CONTRACTS).filter((c) => c.publicStorageClasses.length > 0);\\n    expect(publicCapable.map((c) => c.provider)).toEqual(['aws']);\\n    expect(publicCapable[0]!.publicStorageClasses).toEqual(['OBJECT']);\\n  });\\n\\n  it('every real provider supports rollback, idempotency and delete; none claims import or update yet', () => {\\n    for (const c of Object.values(CANONICAL_CONTRACTS)) {\\n      expect([c.supportsRollback, c.supportsIdempotency, c.supportsDelete, c.supportsImport, c.supportsUpdate]).toEqual([true, true, true, false, false]);\\n    }\\n  });\\n\\n  it('only a provider that can dry-run sizing declares so', () => {\\n    expect(Object.values(CANONICAL_CONTRACTS).map((c) => [c.provider, c.supportsDryRun])).toEqual([['aws', true], ['kubernetes', true], ['linux', true], ['cpanel', false]]);\\n  });\\n});\\n\\ndescribe('Provider capability contract: registration is explicit (FAB-07)', () => {\\n  it('accepts a consistent declaration and exposes it', () => {\\n    const registry = new FabricRegistry();\\n    registry.registerProvider(nativeContract('aws'), all);\\n    expect(registry.isRegistered('aws')).toBe(true);\\n    expect(registry.isRegistered('gcp')).toBe(false);\\n    expect(registry.contractOf('aws').provider).toBe('aws');\\n  });\\n\\n  it('registers each real provider with adapters only for the kinds it does not declare unsupported', () => {\\n    const { registry } = canonicalFabric();\\n    expect(() => registry.resolveDatabase('aws')).not.toThrow();\\n    expect(() => registry.resolveDatabase('cpanel')).not.toThrow();\\n    for (const [provider, kind, resolve] of [\\n      ['kubernetes', 'DATABASE', () => registry.resolveDatabase('kubernetes')], ['linux', 'DATABASE', () => registry.resolveDatabase('linux')], ['cpanel', 'NETWORK', () => registry.resolveNetwork('cpanel')],\\n    ] as Array<[string, string, () => unknown]>) {\\n      expect(resolve).toThrow(C('capability_unsupported', { provider, kind }));\\n    }\\n  });\\n\\n  it('tells apart an unregistered provider from an unsupported kind', () => {\\n    const { registry } = canonicalFabric();\\n    expect(() => registry.contractOf('gcp')).toThrow(C('provider_not_registered', { provider: 'gcp' }));\\n    expect(() => registry.resolveCompute('gcp')).toThrow(C('provider_not_registered', { provider: 'gcp' }));\\n  });\\n\\n  it('refuses to register the same provider twice', () => {\\n    const registry = new FabricRegistry();\\n    registry.registerProvider(nativeContract('aws'), all);\\n    expect(() => registry.registerProvider(nativeContract('aws'), all)).toThrow(C('provider_already_registered', { provider: 'aws' }));\\n  });\\n\\n  it('refuses a declaration that omits a kind, so silence is never read as unsupported', () => {\\n    const contract: any = nativeContract('aws');\\n    delete contract.kinds.NETWORK;\\n    expect(() => assertContractConsistent(contract, all)).toThrow(C('kind_undeclared', { provider: 'aws', kind: 'NETWORK' }));\\n    const error = (() => { try { assertContractConsistent(contract, all); } catch (e) { return e; } })();\\n    expect(error instanceof ProviderRegistrationError).toBe(true);\\n    expect((error as Error).name).toBe('ProviderRegistrationError');\\n  });\\n\\n  it('refuses an adapter for a kind declared unsupported and a missing adapter for a supported kind', () => {\\n    const unsupported: any = nativeContract('x');\\n    unsupported.kinds.DATABASE = { status: 'UNSUPPORTED', modes: [] };\\n    expect(() => assertContractConsistent(unsupported, all)).toThrow(C('adapter_for_unsupported', { provider: 'x', kind: 'DATABASE' }));\\n    expect(() => assertContractConsistent(unsupported, { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).not.toThrow();\\n    expect(() => assertContractConsistent(nativeContract('x'), { COMPUTE: stub, NETWORK: stub, STORAGE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'DATABASE' }));\\n    const conditional: any = nativeContract('x');\\n    conditional.kinds.STORAGE = { status: 'CONDITIONAL', modes: ['X'] };\\n    expect(() => assertContractConsistent(conditional, { COMPUTE: stub, NETWORK: stub, DATABASE: stub })).toThrow(C('adapter_missing', { provider: 'x', kind: 'STORAGE' }));\\n  });\\n\\n  it('refuses a conditional kind that names no mode, and a declaration without a provider name', () => {\\n    const conditional: any = nativeContract('x');\\n    conditional.kinds.NETWORK = { status: 'CONDITIONAL', modes: [] };\\n    expect(() => assertContractConsistent(conditional, all)).toThrow(C('conditional_without_modes', { provider: 'x', kind: 'NETWORK' }));\\n    expect(() => assertContractConsistent({ ...nativeContract('x'), provider: '' }, all)).toThrow(C('provider_name_missing'));\\n  });\\n\\n  it('checks the kinds in a fixed order, so the first reported problem is stable', () => {\\n    const contract: any = nativeContract('x');\\n    contract.kinds.COMPUTE = { status: 'UNSUPPORTED', modes: [] };\\n    contract.kinds.STORAGE = { status: 'UNSUPPORTED', modes: [] };\\n    expect(() => assertContractConsistent(contract, all)).toThrow(C('adapter_for_unsupported', { provider: 'x', kind: 'COMPUTE' }));\\n  });\\n});\\n\"],\"version\":3}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\4f\\regexes_4fa8a673de4178fd073bd70a51c5c82a",
+    "LineNumber": 35,
+    "Line": " * @deprecated CUID v1 is deprecated by its authors due to information leakage"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\54\\TranslationMap_549e23ca6663ad8df40b640891c5173b.map",
+    "LineNumber": 1,
+    "Line": "{\"file\":\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\move\\\\TranslationMap.ts\",\"mappings\":\"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\",\"names\":[],\"sources\":[\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\move\\\\TranslationMap.ts\"],\"sourcesContent\":[\"/******************************************************************************\\n * Project        : Ugondu — Universal Delivery Operating System\\n * Module         : engine-core/move\\n * File           : TranslationMap.ts\\n * Version        : 1.0.0\\n * Author         : Ujomor Systems Engineering & Governance Authority\\n * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)\\n * Created Date   : 2026-10-02\\n * Last Modified  : 2026-10-02\\n * Classification : ENTERPRISE\\n *\\n * Governance:\\n * - Corporate Governed\\n * - Security Reviewed\\n * - Architecture Controlled\\n * - Protocol Frozen\\n * - Modularization Enforced\\n *\\n * Standards:\\n * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53\\n *\\n * Signatures:\\n * - Architecture Authority : Ujomor Systems Engineering\\n * - Security Authority     : Ujomor Systems Governance\\n * - Governance Authority   : Air Roofers Corporate Governance\\n *\\n * Copyright (c) 2026 Air Roofers. All Rights Reserved.\\n ******************************************************************************/\\n\\nimport { z } from \\\"zod\\\";\\n\\n// Mocking translation function for UI/Error strings\\ndeclare function __t(key: string, args?: Record<string, string | number>): string;\\n\\nexport const CPanelConfigSchema = z.object({\\n  apache: z.object({\\n    version: z.string(),\\n    vhosts: z.number(),\\n  }),\\n  php: z.object({\\n    version: z.string(),\\n    modules: z.array(z.string()),\\n  }),\\n  mysql: z.object({\\n    version: z.string(),\\n    databases: z.number(),\\n    sizeGb: z.number(),\\n  }),\\n  accounts: z.number(),\\n});\\n\\nexport type CPanelConfig = z.infer<typeof CPanelConfigSchema>;\\n\\n/**\\n * @interface AwsConstructs\\n * @description Corporate Governed interface implementation for AwsConstructs\\n * @classification ENTERPRISE\\n */\\nexport interface AwsConstructs {\\n  alb: {\\n    targetGroups: number;\\n    listeners: number;\\n  };\\n  ec2: {\\n    instanceType: string;\\n    ami: string;\\n  };\\n  rds: {\\n    instanceClass: string;\\n    engine: string;\\n    engineVersion: string;\\n    allocatedStorageGb: number;\\n  };\\n  iam: {\\n    rolesCount: number;\\n  };\\n}\\n\\n/**\\n * @class TranslationMap\\n * @description Corporate Governed class implementation for TranslationMap\\n * @classification ENTERPRISE\\n */\\nexport class TranslationMap {\\n  public mapCPanelToAws(config: CPanelConfig): AwsConstructs {\\n    const parsedConfig: CPanelConfig = CPanelConfigSchema.parse(config);\\n\\n    if (!parsedConfig) {\\n      throw new Error(__t('messages.error.invalid_config'));\\n    }\\n\\n    return {\\n      alb: this.mapAlb(parsedConfig),\\n      ec2: this.mapEc2(parsedConfig),\\n      rds: this.mapRds(parsedConfig),\\n      iam: this.mapIam(parsedConfig),\\n    };\\n  }\\n\\n  private mapAlb(config: CPanelConfig): AwsConstructs['alb'] {\\n    if (config.apache.vhosts < 0) {\\n      throw new Error(__t('messages.error.invalid_vhosts_count'));\\n    }\\n    return {\\n      targetGroups: config.apache.vhosts,\\n      listeners: config.apache.vhosts > 0 ? 2 : 0,\\n    };\\n  }\\n\\n  private mapEc2(config: CPanelConfig): AwsConstructs['ec2'] {\\n    let instanceType: string = 't3.micro';\\n    if (config.accounts > 50) {\\n      instanceType = 't3.large';\\n    } else if (config.accounts > 10) {\\n      instanceType = 't3.medium';\\n    }\\n\\n    return {\\n      instanceType,\\n      ami: 'ami-amazon-linux-2023',\\n    };\\n  }\\n\\n  private mapRds(config: CPanelConfig): AwsConstructs['rds'] {\\n    if (config.mysql.sizeGb < 0) {\\n        throw new Error(__t('messages.error.invalid_db_size'));\\n    }\\n    \\n    let instanceClass: string = 'db.t3.micro';\\n    if (config.mysql.sizeGb > 100) {\\n      instanceClass = 'db.r5.large';\\n    } else if (config.mysql.sizeGb > 20) {\\n      instanceClass = 'db.t3.medium';\\n    }\\n\\n    return {\\n      instanceClass,\\n      engine: 'mysql',\\n      engineVersion: config.mysql.version,\\n      allocatedStorageGb: Math.max(20, config.mysql.sizeGb),\\n    };\\n  }\\n\\n  private mapIam(config: CPanelConfig): AwsConstructs['iam'] {\\n    return {\\n      rolesCount: config.accounts,\\n    };\\n  }\\n}\\n\"],\"version\":3}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\6c\\policygatespec_6c2f852863d792ca69da01077b47eefa",
+    "LineNumber": 16,
+    "Line": "    const generateMockIr = function () {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\6c\\policygatespec_6c2f852863d792ca69da01077b47eefa",
+    "LineNumber": 22,
+    "Line": "    const mockEnvelope = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\6c\\policygatespec_6c2f852863d792ca69da01077b47eefa",
+    "LineNumber": 32,
+    "Line": "            ir: generateMockIr(),"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\6c\\policygatespec_6c2f852863d792ca69da01077b47eefa",
+    "LineNumber": 34,
+    "Line": "            envelope: { ...mockEnvelope },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\6c\\policygatespec_6c2f852863d792ca69da01077b47eefa",
+    "LineNumber": 47,
+    "Line": "        const maliciousIr = generateMockIr();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\6c\\policygatespec_6c2f852863d792ca69da01077b47eefa.map",
+    "LineNumber": 1,
+    "Line": "{\"file\":\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\upm\\\\tests\\\\policy-gate.spec.ts\",\"mappings\":\"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\",\"names\":[],\"sources\":[\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\upm\\\\tests\\\\policy-gate.spec.ts\"],\"sourcesContent\":[\"/******************************************************************************\\r\\n * Project        : Ugondu - Universal Delivery Operating System\\r\\n * Module         : Server / Engine Core / UPM Tests\\r\\n * File           : policy-gate.spec.ts\\r\\n * Version        : 2.0.0\\r\\n * Author         : Air Roofers Engineering\\r\\n * Organization   : Air Roofers Ltd\\r\\n * Created Date   : 2026-10-04\\r\\n * Classification : ENTERPRISE\\r\\n ******************************************************************************/\\r\\n\\r\\nimport { UpmExecutionGate, GatingContext, ExecutionAuthorization } from '../policy-gate';\\r\\nimport { ArchitectureIR } from '../../fabric/engine/ProvisioningTypes';\\r\\n\\r\\ndescribe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {\\r\\n\\r\\n    const generateMockIr = function(): ArchitectureIR { return {\\r\\n        nodes: [{ id: 'db-1', type: 'DATABASE', provider: 'aws', config: {} }],\\r\\n        edges: []\\r\\n    }; };\\r\\n\\r\\n    const mockEnvelope = {\\r\\n        edition: 'ENTERPRISE',\\r\\n        allowedActions: ['PROVISION_DATABASE'],\\r\\n        tenantId: 't-123'\\r\\n    };\\r\\n\\r\\n    let baseContext: GatingContext;\\r\\n\\r\\n    beforeEach(() => {\\r\\n        baseContext = {\\r\\n            intentHash: 'hash-intent-001',\\r\\n            twinHash: 'hash-twin-001',\\r\\n            ir: generateMockIr(),\\r\\n            policyVersion: '1.0.0',\\r\\n            envelope: { ...mockEnvelope },\\r\\n            activePolicies: ['default-deny']\\r\\n        };\\r\\n    });\\r\\n\\r\\n    test('Authorized IR should pass strict verification', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        expect(auth.decision.status).toBe('ALLOW');\\r\\n        // Should not throw\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).not.toThrow();\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Modified IR after approval (Bypass attempt)', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        \\r\\n        // Attacker attempts to modify the executed DAG slightly\\r\\n        const maliciousIr = generateMockIr();\\r\\n        maliciousIr.nodes.push({ id: 'crypto-miner', type: 'COMPUTE', provider: 'aws', config: {} });\\r\\n\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, maliciousIr)).toThrow(/ir_mismatch/i);\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Expired authorization replay', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        // Force expiry\\r\\n        auth.expiresAt = new Date(Date.now() - 10000);\\r\\n\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).toThrow(/expired/i);\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Revoked capability (Deny Structure)', async () => {\\r\\n        // User downgraded to FREE or capability revoked dynamically\\r\\n        baseContext.envelope.allowedActions = [];\\r\\n\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        \\r\\n        expect(auth.decision.status).toBe('DENY');\\r\\n        expect(auth.decision.evidence).toBeDefined();\\r\\n        expect(auth.decision.evidence && auth.decision.evidence.targetCapability).toBe('PROVISION_DATABASE');\\r\\n        \\r\\n        // Engine will refuse it\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).toThrow(/denied/i);\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Cryptographic Seal Tampering', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        \\r\\n        // Attacker tries to modify the decision to ALLOW\\r\\n        const tamperedAuth: ExecutionAuthorization = {\\r\\n            ...auth,\\r\\n            decision: { ...auth.decision, status: 'ALLOW' } // Assuming it was denied, or they change policyVersion\\r\\n        };\\r\\n        tamperedAuth.policyVersion = 'bypassed-1.0.0';\\r\\n\\r\\n        // The seal should catch the mutation\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(tamperedAuth, baseContext.ir)).toThrow(/seal_mismatch/i);\\r\\n    });\\r\\n\\r\\n});\\r\\n\"],\"version\":3}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\73\\policygatespec_73c274fd51d46a82efa4c6d528f32bc1",
+    "LineNumber": 16,
+    "Line": "    const generateMockIr = function () {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\73\\policygatespec_73c274fd51d46a82efa4c6d528f32bc1",
+    "LineNumber": 22,
+    "Line": "    const mockEnvelope = {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\73\\policygatespec_73c274fd51d46a82efa4c6d528f32bc1",
+    "LineNumber": 32,
+    "Line": "            ir: generateMockIr(),"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\73\\policygatespec_73c274fd51d46a82efa4c6d528f32bc1",
+    "LineNumber": 34,
+    "Line": "            envelope: { ...mockEnvelope },"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\73\\policygatespec_73c274fd51d46a82efa4c6d528f32bc1",
+    "LineNumber": 47,
+    "Line": "        const maliciousIr = generateMockIr();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\73\\policygatespec_73c274fd51d46a82efa4c6d528f32bc1.map",
+    "LineNumber": 1,
+    "Line": "{\"file\":\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\upm\\\\tests\\\\policy-gate.spec.ts\",\"mappings\":\"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\",\"names\":[],\"sources\":[\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\upm\\\\tests\\\\policy-gate.spec.ts\"],\"sourcesContent\":[\"/******************************************************************************\\r\\n * Project        : Ugondu - Universal Delivery Operating System\\r\\n * Module         : Server / Engine Core / UPM Tests\\r\\n * File           : policy-gate.spec.ts\\r\\n * Version        : 2.0.0\\r\\n * Author         : Air Roofers Engineering\\r\\n * Organization   : Air Roofers Ltd\\r\\n * Created Date   : 2026-10-04\\r\\n * Classification : ENTERPRISE\\r\\n ******************************************************************************/\\r\\n\\r\\nimport { UpmExecutionGate, GatingContext, ExecutionAuthorization } from '../policy-gate';\\r\\nimport { ArchitectureIR } from '../../fabric/engine/ProvisioningTypes';\\r\\n\\r\\ndescribe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {\\r\\n\\r\\n    const generateMockIr = function(): ArchitectureIR { return {\\r\\n        nodes: [{ id: 'db-1', type: 'DATABASE', provider: 'aws', config: {} }],\\r\\n        edges: []\\r\\n    }; };\\r\\n\\r\\n    const mockEnvelope = {\\r\\n        edition: 'ENTERPRISE',\\r\\n        allowedActions: ['PROVISION_DATABASE'],\\r\\n        tenantId: 't-123'\\r\\n    };\\r\\n\\r\\n    let baseContext: GatingContext;\\r\\n\\r\\n    beforeEach(() => {\\r\\n        baseContext = {\\r\\n            intentHash: 'hash-intent-001',\\r\\n            twinHash: 'hash-twin-001',\\r\\n            ir: generateMockIr(),\\r\\n            policyVersion: '1.0.0',\\r\\n            envelope: { ...mockEnvelope },\\r\\n            activePolicies: ['default-deny']\\r\\n        };\\r\\n    });\\r\\n\\r\\n    test('Authorized IR should pass strict verification', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        expect(auth.decision.status).toBe('ALLOW');\\r\\n        // Should not throw\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).not.toThrow();\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Modified IR after approval (Bypass attempt)', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        \\r\\n        // Attacker attempts to modify the executed DAG slightly\\r\\n        const maliciousIr = generateMockIr();\\r\\n        maliciousIr.nodes.push({ id: 'crypto-miner', type: 'COMPUTE', provider: 'aws', config: {} });\\r\\n\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, maliciousIr)).toThrow(/ir_mismatch/i);\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Expired authorization replay', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        // Force expiry\\r\\n        auth.expiresAt = new Date(Date.now() - 10000);\\r\\n\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).toThrow(/expired/i);\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Revoked capability (Deny Structure)', async () => {\\r\\n        // User downgraded to FREE or capability revoked dynamically\\r\\n        baseContext.envelope.allowedActions = [];\\r\\n\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        \\r\\n        expect(auth.decision.status).toBe('DENY');\\r\\n        expect(auth.decision.evidence).toBeDefined();\\r\\n        expect(auth.decision.evidence && auth.decision.evidence.targetCapability).toBe('PROVISION_DATABASE');\\r\\n        \\r\\n        // Engine will refuse it\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(auth, baseContext.ir)).toThrow(/denied/i);\\r\\n    });\\r\\n\\r\\n    test('Adversarial: Cryptographic Seal Tampering', async () => {\\r\\n        const auth = await UpmExecutionGate.evaluate(baseContext);\\r\\n        \\r\\n        // Attacker tries to modify the decision to ALLOW\\r\\n        const tamperedAuth: ExecutionAuthorization = {\\r\\n            ...auth,\\r\\n            decision: { ...auth.decision, status: 'ALLOW' } // Assuming it was denied, or they change policyVersion\\r\\n        };\\r\\n        tamperedAuth.policyVersion = 'bypassed-1.0.0';\\r\\n\\r\\n        // The seal should catch the mutation\\r\\n        expect(() => UpmExecutionGate.verifyAuthorization(tamperedAuth, baseContext.ir)).toThrow(/seal_mismatch/i);\\r\\n    });\\r\\n\\r\\n});\\r\\n\"],\"version\":3}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\7a\\schemas_7ab0c0e4ce3a40812f2d21a451c26a89",
+    "LineNumber": 388,
+    "Line": " * @deprecated CUID v1 is deprecated by its authors due to information leakage"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\88\\errors_8833ce9aedfe0ffe53453b724efc80ab",
+    "LineNumber": 31,
+    "Line": "exports.toDotPath = toDotPath;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\88\\errors_8833ce9aedfe0ffe53453b724efc80ab",
+    "LineNumber": 269,
+    "Line": "function toDotPath(_path) {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\88\\errors_8833ce9aedfe0ffe53453b724efc80ab",
+    "LineNumber": 295,
+    "Line": "            lines.push(`  → at ${toDotPath(issue.path)}`);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\97\\runTest_973a8e8373c631143013485178849af0",
+    "LineNumber": 390,
+    "Line": "      result.numTodoTests;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\b4\\jestAdapter_b4053fe5fe82395cf44c7d089b786e70",
+    "LineNumber": 49,
+    "Line": "    if (config.clearMocks) {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\b4\\jestAdapter_b4053fe5fe82395cf44c7d089b786e70",
+    "LineNumber": 50,
+    "Line": "      runtime.clearAllMocks();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\b4\\jestAdapter_b4053fe5fe82395cf44c7d089b786e70",
+    "LineNumber": 52,
+    "Line": "    if (config.resetMocks) {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\b4\\jestAdapter_b4053fe5fe82395cf44c7d089b786e70",
+    "LineNumber": 53,
+    "Line": "      runtime.resetAllMocks();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\b4\\jestAdapter_b4053fe5fe82395cf44c7d089b786e70",
+    "LineNumber": 62,
+    "Line": "    if (config.restoreMocks) {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\b4\\jestAdapter_b4053fe5fe82395cf44c7d089b786e70",
+    "LineNumber": 63,
+    "Line": "      runtime.restoreAllMocks();"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\bc\\schemas_bc0c18d32688bbe2e9564dd6b8313ebb",
+    "LineNumber": 554,
+    "Line": " * @deprecated CUID v1 is deprecated by its authors due to information leakage"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\bc\\schemas_bc0c18d32688bbe2e9564dd6b8313ebb",
+    "LineNumber": 566,
+    "Line": " * @deprecated CUID v1 is deprecated by its authors due to information leakage"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\bc\\schemas_bc0c18d32688bbe2e9564dd6b8313ebb",
+    "LineNumber": 1271,
+    "Line": "/** @deprecated This API has been merged into `z.enum()`. Use `z.enum()` instead."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 11,
+    "Line": " * @deprecated Use the `toJSONSchema` function instead for new code."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 25,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 29,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 34,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 38,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 42,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 46,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\cb\\jsonschemagenerator_cb1a992fc071ec9671cb966e83c5053b",
+    "LineNumber": 53,
+    "Line": "    /** @deprecated Access via ctx instead */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 22,
+    "Line": "function _jestMock() {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 23,
+    "Line": "  const data = require('jest-mock');"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 24,
+    "Line": "  _jestMock = function () {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 43,
+    "Line": "// some globals we do not want, either because deprecated or we set it ourselves"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 79,
+    "Line": "  moduleMocker;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 165,
+    "Line": "    this.moduleMocker = new (_jestMock().ModuleMocker)(global);"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d5\\index_d5ece11ffb91538f67772130a690b2a5",
+    "LineNumber": 179,
+    "Line": "      moduleMocker: this.moduleMocker,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\d7\\TranslationMap_d737e9e066966e73659756cdefb3f0ae.map",
+    "LineNumber": 1,
+    "Line": "{\"file\":\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\move\\\\TranslationMap.ts\",\"mappings\":\"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\",\"names\":[],\"sources\":[\"D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\server\\\\engine-core\\\\src\\\\move\\\\TranslationMap.ts\"],\"sourcesContent\":[\"/******************************************************************************\\n * Project        : Ugondu — Universal Delivery Operating System\\n * Module         : engine-core/move\\n * File           : TranslationMap.ts\\n * Version        : 1.0.0\\n * Author         : Ujomor Systems Engineering & Governance Authority\\n * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)\\n * Created Date   : 2026-10-02\\n * Last Modified  : 2026-10-02\\n * Classification : ENTERPRISE\\n *\\n * Governance:\\n * - Corporate Governed\\n * - Security Reviewed\\n * - Architecture Controlled\\n * - Protocol Frozen\\n * - Modularization Enforced\\n *\\n * Standards:\\n * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53\\n *\\n * Signatures:\\n * - Architecture Authority : Ujomor Systems Engineering\\n * - Security Authority     : Ujomor Systems Governance\\n * - Governance Authority   : Air Roofers Corporate Governance\\n *\\n * Copyright (c) 2026 Air Roofers. All Rights Reserved.\\n ******************************************************************************/\\n\\nimport { z } from \\\"zod\\\";\\n\\n// Mocking translation function for UI/Error strings\\ndeclare function __t(key: string, args?: Record<string, string | number>): string;\\n\\nexport const CPanelConfigSchema = z.object({\\n  apache: z.object({\\n    version: z.string(),\\n    vhosts: z.number(),\\n  }),\\n  php: z.object({\\n    version: z.string(),\\n    modules: z.array(z.string()),\\n  }),\\n  mysql: z.object({\\n    version: z.string(),\\n    databases: z.number(),\\n    sizeGb: z.number(),\\n  }),\\n  accounts: z.number(),\\n});\\n\\nexport type CPanelConfig = z.infer<typeof CPanelConfigSchema>;\\n\\n/**\\n * @interface AwsConstructs\\n * @description Corporate Governed interface implementation for AwsConstructs\\n * @classification ENTERPRISE\\n */\\nexport interface AwsConstructs {\\n  alb: {\\n    targetGroups: number;\\n    listeners: number;\\n  };\\n  ec2: {\\n    instanceType: string;\\n    ami: string;\\n  };\\n  rds: {\\n    instanceClass: string;\\n    engine: string;\\n    engineVersion: string;\\n    allocatedStorageGb: number;\\n  };\\n  iam: {\\n    rolesCount: number;\\n  };\\n}\\n\\n/**\\n * @class TranslationMap\\n * @description Corporate Governed class implementation for TranslationMap\\n * @classification ENTERPRISE\\n */\\nexport class TranslationMap {\\n  public mapCPanelToAws(config: CPanelConfig): AwsConstructs {\\n    const parsedConfig: CPanelConfig = CPanelConfigSchema.parse(config);\\n\\n    if (!parsedConfig) {\\n      throw new Error(__t('messages.error.invalid_config'));\\n    }\\n\\n    return {\\n      alb: this.mapAlb(parsedConfig),\\n      ec2: this.mapEc2(parsedConfig),\\n      rds: this.mapRds(parsedConfig),\\n      iam: this.mapIam(parsedConfig),\\n    };\\n  }\\n\\n  private mapAlb(config: CPanelConfig): AwsConstructs['alb'] {\\n    if (config.apache.vhosts < 0) {\\n      throw new Error(__t('messages.error.invalid_vhosts_count'));\\n    }\\n    return {\\n      targetGroups: config.apache.vhosts,\\n      listeners: config.apache.vhosts > 0 ? 2 : 0,\\n    };\\n  }\\n\\n  private mapEc2(config: CPanelConfig): AwsConstructs['ec2'] {\\n    let instanceType: string = 't3.micro';\\n    if (config.accounts > 50) {\\n      instanceType = 't3.large';\\n    } else if (config.accounts > 10) {\\n      instanceType = 't3.medium';\\n    }\\n\\n    return {\\n      instanceType,\\n      ami: 'ami-amazon-linux-2023',\\n    };\\n  }\\n\\n  private mapRds(config: CPanelConfig): AwsConstructs['rds'] {\\n    if (config.mysql.sizeGb < 0) {\\n        throw new Error(__t('messages.error.invalid_db_size'));\\n    }\\n    \\n    let instanceClass: string = 'db.t3.micro';\\n    if (config.mysql.sizeGb > 100) {\\n      instanceClass = 'db.r5.large';\\n    } else if (config.mysql.sizeGb > 20) {\\n      instanceClass = 'db.t3.medium';\\n    }\\n\\n    return {\\n      instanceClass,\\n      engine: 'mysql',\\n      engineVersion: config.mysql.version,\\n      allocatedStorageGb: Math.max(20, config.mysql.sizeGb),\\n    };\\n  }\\n\\n  private mapIam(config: CPanelConfig): AwsConstructs['iam'] {\\n    return {\\n      rolesCount: config.accounts,\\n    };\\n  }\\n}\\n\"],\"version\":3}"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\dd\\compat_dd656d52e2eb2248e3d58b1d9fd98f5e",
+    "LineNumber": 32,
+    "Line": "/** @deprecated Use the raw string literal codes instead, e.g. \"invalid_type\". */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\dd\\compat_dd656d52e2eb2248e3d58b1d9fd98f5e",
+    "LineNumber": 49,
+    "Line": "/** @deprecated Use `z.config(params)` instead. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\dd\\compat_dd656d52e2eb2248e3d58b1d9fd98f5e",
+    "LineNumber": 55,
+    "Line": "/** @deprecated Use `z.config()` instead. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\dd\\compat_dd656d52e2eb2248e3d58b1d9fd98f5e",
+    "LineNumber": 59,
+    "Line": "/** @deprecated Do not use. Stub definition, only included for zod-to-json-schema compatibility. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\ef\\kh_ef6988ebeeb6ed14e44b48047d8d25a6",
+    "LineNumber": 9,
+    "Line": "/** @deprecated Use `km` instead. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scratch\\tmp\\jest\\jest-transform-cache-9b7965bb348de7f6c8811fbc3010e378-79ef2876fae7ca75eedb2aa53dc48338\\f9\\ua_f93dd8fb30fad38941ca2b277cebff93",
+    "LineNumber": 9,
+    "Line": "/** @deprecated Use `uk` instead. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scripts\\depth_scan.js",
+    "LineNumber": 7,
+    "Line": "  ['comment-deferral', /\\/\\/\\s*(Abstract|e\\.g\\.|Trigger specific|In production|In a real|would |simplified|for now|placeholder|stub|TODO|FIXME|mock|dummy)/i],"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scripts\\run-cor-gates.js",
+    "LineNumber": 114,
+    "Line": "  // Sprint 2 COR: Stub elimination gates"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scripts\\stub_scan.js",
+    "LineNumber": 8,
+    "Line": "  /\\bTODO\\b/,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scripts\\stub_scan.js",
+    "LineNumber": 12,
+    "Line": "  /\\bstub\\b/i,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scripts\\stub_scan.js",
+    "LineNumber": 13,
+    "Line": "  /\\bmock\\b/i,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\scripts\\stub_scan.js",
+    "LineNumber": 46,
+    "Line": "fs.writeFileSync('D:\\\\ujomor-platform\\\\products\\\\ugondu\\\\scratch\\\\stub_scan.log', out.join('\\n'));"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\billing-gateway\\src\\db.ts",
+    "LineNumber": 23,
+    "Line": "// Flat-file persistence engine (Zero-stub)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\billing-gateway\\src\\index.ts",
+    "LineNumber": 47,
+    "Line": "        // Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\jest.setup.ts",
+    "LineNumber": 4,
+    "Line": "jest.mock('@ugondu/shared', () => {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\jest.setup.ts",
+    "LineNumber": 13,
+    "Line": "// Mock verifyAuthorization globally to prevent hash validation failures"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\jest.setup.ts",
+    "LineNumber": 14,
+    "Line": "jest.spyOn(UpmExecutionGate, 'verifyAuthorization').mockImplementation((auth, ir) => {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 31,
+    "Line": "    let hasStubImplementation = false;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 34,
+    "Line": "    let todos = 0;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 44,
+    "Line": "        todos += (content.match(/TODO|FIXME/gi) || []).length;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 57,
+    "Line": "                    hasStubImplementation = true;"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 67,
+    "Line": "        status = __t('empty_stub');"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 70,
+    "Line": "    } else if (hasStubImplementation) {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 71,
+    "Line": "        status = __t('implementation_stub');"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 73,
+    "Line": "        status = __t('types_only_stub');"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\scan.js",
+    "LineNumber": 85,
+    "Line": "        todos,"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\doctor\\model\\incident.ts",
+    "LineNumber": 66,
+    "Line": " * - `category: string` is retained as a deprecated alias of incidentClass."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\doctor\\model\\incident.ts",
+    "LineNumber": 69,
+    "Line": " * @deprecated category — use incidentClass instead"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\doctor\\model\\incident.ts",
+    "LineNumber": 75,
+    "Line": "  /** @deprecated Use incidentClass (typed). Retained for backward compatibility. */"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\fabric\\capabilities\\identity.ts",
+    "LineNumber": 38,
+    "Line": " * Replaces: IdentityCapability (v1.0.0) — deprecated, dead code, removed."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\fabric\\providers\\aws-native-client.ts",
+    "LineNumber": 386,
+    "Line": "        // Mock adapter implementation for AWS IAM"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\move\\TranslationMap.ts",
+    "LineNumber": 32,
+    "Line": "// Mocking translation function for UI/Error strings"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\move\\verification\\certification.ts",
+    "LineNumber": 79,
+    "Line": "        // Mocking evidence collection for abstraction"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\targets\\lifecycle.ts",
+    "LineNumber": 108,
+    "Line": "        // Mock health check evaluation based on TargetDescriptor status"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\ucaas\\workflow.ts",
+    "LineNumber": 67,
+    "Line": " * Workflow execution engine stub for UCAAS command bundles."
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\ucaas\\workflow.ts",
+    "LineNumber": 103,
+    "Line": "        // Prepare inputs (stub logic)"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\ucaas\\workflow.ts",
+    "LineNumber": 129,
+    "Line": "    // Stub: Rehydrate workflow state and continue execution"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\engine-core\\src\\ucaas\\workflow.ts",
+    "LineNumber": 137,
+    "Line": "    // Stub implementation to inject previous state into current action inputs"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\de.json",
+    "LineNumber": 422,
+    "Line": "  \"empty_stub\": \"[de] Empty Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\de.json",
+    "LineNumber": 423,
+    "Line": "  \"implementation_stub\": \"[de] Implementation Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\de.json",
+    "LineNumber": 424,
+    "Line": "  \"types_only_stub\": \"[de] Types Only (Stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\de.json",
+    "LineNumber": 452,
+    "Line": "  \"destination_adapter_is_invalid\": \"[de] Destination Adapter is invalid or mocked.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\de.json",
+    "LineNumber": 620,
+    "Line": "  \"should_build_a_valid_authority\": \"[de] should build a valid AuthorityGraphSnapshot from a mock adapter\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\en.json",
+    "LineNumber": 378,
+    "Line": "  \"empty_stub\": \"Empty Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\en.json",
+    "LineNumber": 379,
+    "Line": "  \"implementation_stub\": \"Implementation Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\en.json",
+    "LineNumber": 380,
+    "Line": "  \"types_only_stub\": \"Types Only (Stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\en.json",
+    "LineNumber": 408,
+    "Line": "  \"destination_adapter_is_invalid\": \"Destination Adapter is invalid or mocked.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\es.json",
+    "LineNumber": 422,
+    "Line": "  \"empty_stub\": \"[es] Empty Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\es.json",
+    "LineNumber": 423,
+    "Line": "  \"implementation_stub\": \"[es] Implementation Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\es.json",
+    "LineNumber": 424,
+    "Line": "  \"types_only_stub\": \"[es] Types Only (Stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\es.json",
+    "LineNumber": 452,
+    "Line": "  \"destination_adapter_is_invalid\": \"[es] Destination Adapter is invalid or mocked.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\es.json",
+    "LineNumber": 620,
+    "Line": "  \"should_build_a_valid_authority\": \"[es] should build a valid AuthorityGraphSnapshot from a mock adapter\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\fr.json",
+    "LineNumber": 422,
+    "Line": "  \"empty_stub\": \"[fr] Empty Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\fr.json",
+    "LineNumber": 423,
+    "Line": "  \"implementation_stub\": \"[fr] Implementation Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\fr.json",
+    "LineNumber": 424,
+    "Line": "  \"types_only_stub\": \"[fr] Types Only (Stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\fr.json",
+    "LineNumber": 452,
+    "Line": "  \"destination_adapter_is_invalid\": \"[fr] Destination Adapter is invalid or mocked.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\fr.json",
+    "LineNumber": 620,
+    "Line": "  \"should_build_a_valid_authority\": \"[fr] should build a valid AuthorityGraphSnapshot from a mock adapter\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\it.json",
+    "LineNumber": 628,
+    "Line": "          \"invalid_name\": \"Nome ClusterRole non valido '{name}': deve essere un sottodominio DNS (minuscole, cifre, '-' e '.').\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\ja.json",
+    "LineNumber": 422,
+    "Line": "  \"empty_stub\": \"[ja] Empty Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\ja.json",
+    "LineNumber": 423,
+    "Line": "  \"implementation_stub\": \"[ja] Implementation Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\ja.json",
+    "LineNumber": 424,
+    "Line": "  \"types_only_stub\": \"[ja] Types Only (Stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\ja.json",
+    "LineNumber": 452,
+    "Line": "  \"destination_adapter_is_invalid\": \"[ja] Destination Adapter is invalid or mocked.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\ja.json",
+    "LineNumber": 620,
+    "Line": "  \"should_build_a_valid_authority\": \"[ja] should build a valid AuthorityGraphSnapshot from a mock adapter\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\zh.json",
+    "LineNumber": 422,
+    "Line": "  \"empty_stub\": \"[zh] Empty Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\zh.json",
+    "LineNumber": 423,
+    "Line": "  \"implementation_stub\": \"[zh] Implementation Stub\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\zh.json",
+    "LineNumber": 424,
+    "Line": "  \"types_only_stub\": \"[zh] Types Only (Stub)\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\zh.json",
+    "LineNumber": 452,
+    "Line": "  \"destination_adapter_is_invalid\": \"[zh] Destination Adapter is invalid or mocked.\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\shared\\locales\\zh.json",
+    "LineNumber": 620,
+    "Line": "  \"should_build_a_valid_authority\": \"[zh] should build a valid AuthorityGraphSnapshot from a mock adapter\","
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\uppie\\src\\adapters\\aws-iam\\AwsIamClient.ts",
+    "LineNumber": 85,
+    "Line": "const toDocument = (raw: unknown): AwsPolicyDocument => {"
+  },
+  {
+    "Path": "D:\\ujomor-platform\\products\\ugondu\\server\\uppie\\src\\adapters\\aws-iam\\AwsIamClient.ts",
+    "LineNumber": 146,
+    "Line": "      return { ...summary(Policy), description: Policy.Description, document: toDocument(PolicyVersion.Document) };"
+  }
+]
