@@ -81,7 +81,7 @@ async function runLiveRecoveryDemonstration() {
         try {
             await orchestrator.analyzeBlastRadius(maliciousPlan as any, scope);
             console.error('FAIL: Negative test should have thrown a Blast Radius Violation!');
-        } catch(e) {
+        } catch(e: any) {
             console.log('SUCCESS (Negative Test): Orchestrator correctly refused out-of-bounds mutation.');
             console.log(`Rejection Reason: ${e.message}`);
         }
