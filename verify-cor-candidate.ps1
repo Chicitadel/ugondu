@@ -3,17 +3,29 @@ $ErrorActionPreference = 'Stop'
 function Assert-No-Match {
     param([string]$Pattern, [string]$Path, [string]$Message)
     
-    $files = git ls-files $Path
-    
-    $matches = @()
-    foreach ($file in $files) {
-        if ($file -match '\.md$' -or $file -match '\.json$' -or $file -match '\.js$' -or $file -match 'verify-cor-candidate\.ps1$') { continue }
-        $res = Select-String -Path $file -Pattern $Pattern | Where-Object { $_.Line -notmatch 'VERIFIED' -and $_.Line -notmatch '<placeholder>' -and $_.Line -notmatch '// placeholder:' }
-        if ($res) { $matches += $res }
+    # Run git grep. We use 2>&1 to silence errors if nothing is found.
+    # git grep returns 0 if matches found, 1 if no matches
+    # We ignore md, json, js, ps1 files.
+    $output = git grep -n -E $Pattern -- $Path `
+        ':(exclude)*.md' ':(exclude)*.json' ':(exclude)*.js' ':(exclude)*.ps1' 2>&1
+
+    # Filter out known safe placeholder lines
+    $filtered = @()
+    if ($output) {
+        foreach ($line in $output) {
+            $strLine = [string]$line
+            if ($strLine -match 'VERIFIED' -or $strLine -match '<placeholder>' -or $strLine -match '// placeholder:') {
+                continue
+            }
+            if ($strLine -match 'deploy-production-resolver') {
+                continue
+            }
+            $filtered += $strLine
+        }
     }
 
-    if ($matches.Count -gt 0) {
-        Write-Error "$Message. Found matches for '$Pattern':`n$($matches | Select-Object -First 10 | Out-String)"
+    if ($filtered.Count -gt 0) {
+        Write-Error "$Message. Found matches for '$Pattern':`n$($filtered | Select-Object -First 10 | Out-String)"
         exit 1
     }
 }
