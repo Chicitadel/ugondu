@@ -1,79 +1,85 @@
-import { PathRepositoryReconstruction } from '../../../../plugins/recovery-dependencies/src/path-repository-reconstruction';
-import { RecoveryOrchestrator } from '../../deise/engine/recovery/recovery-orchestrator';
 import { GlobalCapabilityRegistry } from '../../deise/engine/recovery/capability-registry';
-import { UpmExecutionGate } from '../../upm/policy-gate';
 import { SshLiveAdapter } from '../../deise/engine/adapters/ssh/ssh-live-adapter';
+import { executeGovernedRecovery } from '../../routes/recovery';
+import { PathRepositoryReconstruction } from '../../../plugins/recovery-dependencies/src/path-repository-reconstruction';
 
-// Simulation of ai.airroofers.eu Platform Contract (Outside Ugondu Domain)
-class AiPlatformAdapter {
-    async proposeIntent(capabilityId: string, target: string) {
+class AiPlatformContractAdapter {
+    async generateIntent(capabilityId: string, target: string) {
         return {
-            source: 'ai.airroofers.eu',
-            schemaVersion: '1.0',
-            capability: capabilityId,
+            source: 'AI_PLATFORM',
+            capabilityId: capabilityId,
             target: target
         };
     }
 }
 
 describe('COR Qualification: Model Independence & Agent Equivalence', () => {
-    let orchestrator: RecoveryOrchestrator;
-    let aiAdapter: AiPlatformAdapter;
-    let adapter: SshLiveAdapter;
-    let gate: UpmExecutionGate;
+    let aiAdapter: AiPlatformContractAdapter;
+    let executorAdapter: SshLiveAdapter;
 
-    beforeEach(() => {
-        orchestrator = new RecoveryOrchestrator();
-        aiAdapter = new AiPlatformAdapter();
-        adapter = new SshLiveAdapter();
-        gate = new UpmExecutionGate();
+    beforeAll(() => {
         GlobalCapabilityRegistry.registerCapability(new PathRepositoryReconstruction());
     });
 
-    describe('Mode 1: Deterministic / No AI', () => {
-        it('should execute purely from CLI intent without AI', async () => {
-            const cap = GlobalCapabilityRegistry.getCapability('PathRepositoryReconstruction');
-            expect(cap).toBeDefined();
-            const scope = { resourceIdentifiers: ['local'], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
-            const twin = await orchestrator.capture(adapter, scope);
-            const diagnosis = await cap!.diagnose(twin, scope);
-            const plan = await cap!.plan(diagnosis, scope);
-            const executionResult = await cap!.execute(plan, adapter, scope);
-            expect(executionResult).toBeDefined();
-        });
+    beforeEach(() => {
+        aiAdapter = new AiPlatformContractAdapter();
+        executorAdapter = new SshLiveAdapter();
     });
 
-    describe('Mode 2 & 3: Agent Equivalence & Execution Authority', () => {
-        it('should enforce that AI repair uses the exact same execution path', async () => {
-            const aiIntent = await aiAdapter.proposeIntent('PathRepositoryReconstruction', 'prod');
-            const cap = GlobalCapabilityRegistry.getCapability(aiIntent.capability);
-            expect(cap).toBeDefined();
-            
-            const scope = { resourceIdentifiers: [aiIntent.target], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
-            const twin = await orchestrator.capture(adapter, scope);
-            const diagnosis = await cap!.diagnose(twin, scope);
-            const plan = await cap!.plan(diagnosis, scope);
-            const executionResult = await cap!.execute(plan, adapter, scope);
-            
-            expect(executionResult).toBeDefined();
+    describe('Cross-Surface Governed Execution Equivalence', () => {
+        it('should generate equivalent canonical intent, plan, and execution hashes across CLI, UI, API, and AI', async () => {
+            const target = 'local_environment';
+            const capId = 'PathRepositoryReconstruction';
+
+            const cliIntent = { source: 'CLI', capabilityId: capId, target };
+            const uiIntent = { source: 'UI', capabilityId: capId, target };
+            const apiIntent = { source: 'API', capabilityId: capId, target };
+            const aiIntent = await aiAdapter.generateIntent(capId, target);
+
+            // Strip source for canonical comparison
+            const canonicalize = (intent: any) => ({ capabilityId: intent.capabilityId, target: intent.target });
+
+            const cliResult = await executeGovernedRecovery(canonicalize(cliIntent), executorAdapter, false);
+            const uiResult = await executeGovernedRecovery(canonicalize(uiIntent), executorAdapter, false);
+            const apiResult = await executeGovernedRecovery(canonicalize(apiIntent), executorAdapter, false);
+            const aiResult = await executeGovernedRecovery(canonicalize(aiIntent), executorAdapter, false);
+
+            expect(cliResult.canonicalIntentHash).toEqual(aiResult.canonicalIntentHash);
+            expect(uiResult.canonicalIntentHash).toEqual(apiResult.canonicalIntentHash);
+
+            expect(cliResult.planHash).toEqual(aiResult.planHash);
+            expect(uiResult.planHash).toEqual(apiResult.planHash);
+
+            expect(cliResult.status).toBe('CERTIFIED');
+            expect(aiResult.status).toBe('CERTIFIED');
+
+            expect(cliResult.transactionId).toBeDefined();
+            expect(aiResult.transactionId).toBeDefined();
+
+            expect(cliResult.verification.verified).toBe(true);
+            expect(aiResult.verification.verified).toBe(true);
         });
     });
 
     describe('Policy & Authorization Boundaries', () => {
-        it('should block AI via Policy if AI requests unauthorized action', async () => {
-            const aiIntent = await aiAdapter.proposeIntent('DeleteDatabase', 'unauthorized_target');
-            const cap = GlobalCapabilityRegistry.getCapability(aiIntent.capability);
-            if (!cap) {
-                // If it's missing, that's one form of rejection
-                expect(cap).toBeUndefined();
-            } else {
-                // Real gate execution
-                const result = { allowed: false }; // Mapped to gate evaluation rejection
-                expect(result.allowed).toBe(false);
-            }
+        it('should actively reject unauthorized AI intents via the governed pipeline', async () => {
+            const unauthorizedIntent = await aiAdapter.generateIntent('PathRepositoryReconstruction', 'unauthorized_target');
+            
+            await expect(executeGovernedRecovery(unauthorizedIntent, executorAdapter, false)).rejects.toThrow('UNAUTHORIZED');
+        });
+
+        it('should cleanly resume a transaction without AI dependency (AI Disappearance)', async () => {
+            // Simulated transaction resume
+            const aiIntent = await aiAdapter.generateIntent('PathRepositoryReconstruction', 'local');
+            const result = await executeGovernedRecovery(aiIntent, executorAdapter, true); // dry_run = true
+            expect(result.status).toBe('PLANNED');
+            
+            // AI is removed, execution continues via deterministic pipeline using the generated plan
+            const resumeIntent = { source: 'SYSTEM_RESUME', capabilityId: 'PathRepositoryReconstruction', target: 'local' };
+            const finalResult = await executeGovernedRecovery(resumeIntent, executorAdapter, false);
+            
+            expect(finalResult.status).toBe('CERTIFIED');
+            expect(finalResult.planHash).toEqual(result.planHash); // Matches the AI's plan
         });
     });
 });
-
-
-
