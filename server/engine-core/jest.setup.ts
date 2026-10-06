@@ -1,7 +1,7 @@
 (global as any).__t = (key: string, variables?: any) => `[en] ${key}`;
 import { UpmExecutionGate } from './src/upm/policy-gate';
 
-jest.stub('@ugondu/shared', () => {
+jest.mock('@ugondu/shared', () => {
   const actual = jest.requireActual('@ugondu/shared');
   return {
     ...actual,
@@ -14,4 +14,5 @@ jest.stub('@ugondu/shared', () => {
 jest.spyOn(UpmExecutionGate, 'verifyAuthorization').mockImplementation((auth, ir) => {
     // Just pass
 });
+
 
