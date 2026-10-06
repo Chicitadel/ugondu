@@ -1,4 +1,4 @@
-import { PathRepositoryReconstruction } from '../../../plugins/recovery-dependencies/src/path-repository-reconstruction';
+import { PathRepositoryReconstruction } from '../../../../plugins/recovery-dependencies/src/path-repository-reconstruction';
 import { RecoveryOrchestrator } from '../../deise/engine/recovery/recovery-orchestrator';
 import { GlobalCapabilityRegistry } from '../../deise/engine/recovery/capability-registry';
 import { UpmExecutionGate } from '../../upm/policy-gate';
@@ -74,5 +74,6 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
         });
     });
 });
+
 
 
