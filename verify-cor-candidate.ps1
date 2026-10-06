@@ -2,9 +2,19 @@ $ErrorActionPreference = 'Stop'
 
 function Assert-No-Match {
     param([string]$Pattern, [string]$Path, [string]$Message)
-    # Exclude node_modules, dist, and known valid enum cases like VERIFIED
-    $matches = (Get-ChildItem -Recurse -File -Path $Path -Exclude "*.md", "*.json", "node_modules*", "dist*", "*.js" | Select-String -Pattern $Pattern | Where-Object { $_.Line -notmatch 'VERIFIED' -and $_.Line -notmatch '<placeholder>' -and $_.Line -notmatch '// placeholder:' })
-    if ($matches) {
+    # Using git ls-files ensures we only search tracked files, cleanly avoiding node_modules/dist
+    $files = git -C $Path ls-files | ForEach-Object { "$Path\$_" }
+    
+    $matches = @()
+    foreach ($file in $files) {
+        if (Test-Path $file -PathType Leaf) {
+            if ($file -match '\.md$' -or $file -match '\.json$' -or $file -match '\.js$') { continue }
+            $res = Select-String -Path $file -Pattern $Pattern | Where-Object { $_.Line -notmatch 'VERIFIED' -and $_.Line -notmatch '<placeholder>' -and $_.Line -notmatch '// placeholder:' }
+            if ($res) { $matches += $res }
+        }
+    }
+
+    if ($matches.Count -gt 0) {
         Write-Error "$Message. Found matches for '$Pattern':`n$($matches | Select-Object -First 10 | Out-String)"
         exit 1
     }

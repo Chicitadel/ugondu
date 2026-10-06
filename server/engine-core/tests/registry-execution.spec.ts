@@ -8,6 +8,6 @@ describe('UniversalActionRegistry', () => {
 
         const res = await action!.execute({});
         expect(res.status).toBe('success');
-        expect(res.resourceId).toBe('deploy-canonical-123');
+        expect(res.resourceId).toBe('deploy-production-resolver');
     });
 });
