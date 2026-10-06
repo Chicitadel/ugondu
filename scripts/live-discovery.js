@@ -1,4 +1,4 @@
-require('ts-node').register();
+
 const { RecoveryOrchestrator } = require('../server/engine-core/src/deise/engine/recovery/recovery-orchestrator');
 const { DirectAdminLiveAdapter } = require('../server/engine-core/src/deise/engine/adapters/directadmin/directadmin-live-adapter');
 
@@ -20,11 +20,11 @@ async function runLiveDiscovery() {
     const adapter = new DirectAdminLiveAdapter();
 
     const scope = {
-        targetUri: \directadmin://\\,
+        targetUri: `directadmin://${targetDomain}`,
         tenantId: targetDomain,
         applicationId: 'air-roofers-federated',
-        repositoryPath: \/domains/\/public_html\,
-        resourceIdentifiers: [\domain:\\]
+        repositoryPath: `/domains/${targetDomain}/public_html`,
+        resourceIdentifiers: [`domain:${targetDomain}`]
     };
 
     const scopedCredentials = { url, directAdminToken: token };
@@ -41,7 +41,7 @@ async function runLiveDiscovery() {
         console.log('\n[LR-03] Deriving Scope from Resource Graph...');
         console.log('        Discovered Edges:');
         for (const edge of twin.resourceGraphEdges || []) {
-            console.log(\          - \ --[\]--> \\);
+            console.log(`          - ${edge.source} --[${edge.relation}]--> ${edge.target}`);
         }
         
         console.log('\n[GATE]  DNS Raw Output Snippet:');

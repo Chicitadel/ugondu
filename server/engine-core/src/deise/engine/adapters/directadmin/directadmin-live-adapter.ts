@@ -14,8 +14,8 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
         this.token = scopedCredentials.directAdminToken;
 
         // LR-01: Read-only authentication check
-        const testRes = await fetch(\\/CMD_API_SYSTEM_INFO\, {
-            headers: { 'Authorization': \Basic \\ }
+        const testRes = await fetch(`${this.url}/CMD_API_SYSTEM_INFO`, {
+            headers: { 'Authorization': `Basic ${this.token}` }
         }).catch(e => { throw new Error('Network error connecting to DirectAdmin: ' + e.message); });
 
         if (!testRes.ok) {
@@ -28,18 +28,18 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
     async captureState(scope: RecoveryScope): Promise<EnvironmentTwin> {
         // LR-02: Real environment twin capture
         console.log('[Adapter] Fetching Domain Information...');
-        const domainRes = await fetch(\\/CMD_API_ADDITIONAL_DOMAINS\, {
-            headers: { 'Authorization': \Basic \\ }
+        const domainRes = await fetch(`${this.url}/CMD_API_ADDITIONAL_DOMAINS`, {
+            headers: { 'Authorization': `Basic ${this.token}` }
         });
         
         console.log('[Adapter] Fetching Subdomain Information...');
-        const subdomainRes = await fetch(\\/CMD_API_SUBDOMAINS?domain=\\, {
-            headers: { 'Authorization': \Basic \\ }
+        const subdomainRes = await fetch(`${this.url}/CMD_API_SUBDOMAINS?domain=${scope.tenantId}`, {
+            headers: { 'Authorization': `Basic ${this.token}` }
         });
 
         console.log('[Adapter] Fetching DNS Records...');
-        const dnsRes = await fetch(\\/CMD_API_DNS_CONTROL?domain=\\, {
-            headers: { 'Authorization': \Basic \\ }
+        const dnsRes = await fetch(`${this.url}/CMD_API_DNS_CONTROL?domain=${scope.tenantId}`, {
+            headers: { 'Authorization': `Basic ${this.token}` }
         });
 
         // Parse outputs (simulated mapping logic here if the server returns non-standard formats)
@@ -50,13 +50,13 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
         // Dynamically build resource edges based on actual data
         const edges = [];
         
-        // This is a minimal abstraction. Real implementation parses \dnsBody\ and \subdomainsBody\.
-        edges.push({ source: \dns:\\, target: \ip:unknown_until_parsed\, relation: 'resolves_to' });
-        edges.push({ source: \controlplane:\\, target: \path:/domains/\/public_html\, relation: 'mapped_to' });
+        // This is a minimal abstraction. Real implementation parses `dnsBody` and `subdomainsBody`.
+        edges.push({ source: `dns:${scope.tenantId}`, target: `ip:unknown_until_parsed`, relation: 'resolves_to' });
+        edges.push({ source: `controlplane:${scope.tenantId}`, target: `path:/domains/${scope.tenantId}/public_html`, relation: 'mapped_to' });
 
         return {
             provider: { platform: 'directadmin', symlinkSupported: true, atomicRenameSupported: true, rsyncAvailable: true },
-            topology: { currentSymlinkTarget: null, currentSymlinkValid: false, webrootPath: \/domains/\/public_html\, webrootSymlinkTarget: null, availableReleases: [] },
+            topology: { currentSymlinkTarget: null, currentSymlinkValid: false, webrootPath: `/domains/${scope.tenantId}/public_html`, webrootSymlinkTarget: null, availableReleases: [] },
             application: { version: 'unknown', manifests: [], integrityStatus: 'MISSING' },
             runtime: { primaryRuntime: 'php', primaryRuntimeVersion: '8.3', missingDependencies: [] },
             fileInventory: {},
