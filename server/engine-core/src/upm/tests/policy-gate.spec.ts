@@ -19,7 +19,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
     let baseContext: GatingContext;
 
     beforeAll(() => {
-        (UpmExecutionGate.verifyAuthorization as jest.Stub).stubRestore();
+        (UpmExecutionGate.verifyAuthorization as jest.Mock).mockRestore();
     });
 
     beforeEach(() => {
@@ -159,3 +159,4 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
     });
 
 });
+
