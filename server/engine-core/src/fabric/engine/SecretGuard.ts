@@ -57,7 +57,7 @@ export function assertNoSecretValues(nodeId: string, values: Record<string, unkn
  */
 export async function resolveSecret(ref: string): Promise<string> {
   if (!ref.startsWith(SECRET_PREFIX)) {
-    throw new Error('SECURITY_VIOLATION: Attempted to resolve a secret from an invalid reference format.');
+    throw new Error(__t('msg_security_violation_attempted_to_resolve'));
   }
   const secretKey = ref.slice(SECRET_PREFIX.length).trim();
 

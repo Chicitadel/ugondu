@@ -102,13 +102,32 @@ export class TargetLifecycleManager {
     }
 
     public checkHealth(targetId: string): 'HEALTHY' | 'DEGRADED' | 'OFFLINE' {
-        const target = globalTargetFabric.getTarget(targetId);
-        if (!target) return 'OFFLINE';
+        try {
+            const target = globalTargetFabric.getTarget(targetId);
+            if (!target) {
+                Logger.warn(`[LifecycleManager] Health check failed: Target ${targetId} not found.`);
+                return 'OFFLINE';
+            }
 
-        // Mock health check evaluation based on TargetDescriptor status
-        if (target.status === 'ONLINE') return 'HEALTHY';
-        if (target.status === 'DEGRADED') return 'DEGRADED';
-        return 'OFFLINE';
+            if (!target.capabilities || target.capabilities.length === 0) {
+                Logger.warn(`[LifecycleManager] Target ${targetId} has no registered capabilities. Marking as DEGRADED.`);
+                return 'DEGRADED';
+            }
+
+            switch (target.status) {
+                case 'ONLINE':
+                    return 'HEALTHY';
+                case 'DEGRADED':
+                    return 'DEGRADED';
+                case 'OFFLINE':
+                case 'MAINTENANCE':
+                default:
+                    return 'OFFLINE';
+            }
+        } catch (error: any) {
+            Logger.error(`[LifecycleManager] Health evaluation exception for target ${targetId}: ${error.message}`);
+            return 'OFFLINE';
+        }
     }
 }
 

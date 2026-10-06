@@ -38,7 +38,7 @@ declare var it: any;
 declare var expect: any;
 declare var beforeEach: any;
 
-describe('URRE Rollback Sequences', (): void => {
+describe(__t('msg_urre_rollback_sequences'), (): void => {
   let engine: URREngine;
 
   beforeEach((): void => {

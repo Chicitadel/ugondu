@@ -31,7 +31,8 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
-import type { ProviderOptions, ResolvedValues } from './compute';
+export type ResolvedValues = Record<string, string | number | boolean>;
+export type ProviderOptions = Readonly<Record<string, unknown>> & { readonly mode?: string };
 
 export type DatabaseEngine = 'postgres' | 'mysql' | 'document';
 
@@ -40,7 +41,7 @@ export const DATABASE_ENGINES: ReadonlyArray<DatabaseEngine> = ['postgres', 'mys
 export interface DatabaseCapability {
   provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult>;
   deprovisionDatabase(id: string): Promise<void>;
-  createSnapshot(req: import('./snapshot').SnapshotRequest | { resourceType: string, resourceId: string }): Promise<string>;
+  createSnapshot(req: { resourceType: string, resourceId: string }): Promise<string>;
 }
 
 /**

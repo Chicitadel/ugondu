@@ -44,7 +44,7 @@ export class UrreContextGuard {
     public enforce(tenantContextGuard: any): void {
         const derivedTenantId = tenantContextGuard.getDerivedTenantId();
         if (!derivedTenantId) {
-            throw new Error('URRE context rejected. Tenant authority must be derived from TenantContextGuard.');
+            throw new Error(__t('msg_urre_context_rejected_tenant_authority_m'));
         }
     }
 }

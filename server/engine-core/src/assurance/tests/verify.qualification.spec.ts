@@ -14,26 +14,27 @@
 import { RecoveryVerifier } from '../verification/recovery';
 import { StabilizationVerifier } from '../verification/stabilization';
 import { StructuralVerifier } from '../verification/structural';
+import { __t } from "@ugondu/shared";
 
 declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('Verification & Assurance Qualification Gates: VERIFY-01..41', () => {
-  it('VERIFY-01..20: Preflight connectivity, reality probing & 20 formal assurance invariants', async () => {
+describe(__t('msg_verification_assurance_qualification_gat'), () => {
+  it(__t('msg_verify_01_20_preflight_connectivity_real'), async () => {
     // We instantiate structural verifier to probe invariants
     const verifier = new StructuralVerifier();
     const result = await verifier.verifyArchitectureConsistency();
     expect(result).toBe(true);
   });
 
-  it('VERIFY-21..40: Synthetic performance testing, SLO error budgets & drift stabilization', async () => {
+  it(__t('msg_verify_21_40_synthetic_performance_testi'), async () => {
     const verifier = new StabilizationVerifier();
     const result = await verifier.verifySteadyState();
     expect(result).toBe(true);
   });
 
-  it('VERIFY-41: verifyRecoveryAuthority confirms rollback capability before deployment', async () => {
+  it(__t('msg_verify_41_verifyrecoveryauthority_confir'), async () => {
     const verifier = new RecoveryVerifier();
     const result = await verifier.testRecoveryPaths();
     expect(result).toBe(true);

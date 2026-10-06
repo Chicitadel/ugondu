@@ -12,15 +12,16 @@
 import { DeploymentRepairEngine } from '../engine/repair-engine';
 import { EnvironmentTwin } from '../twin/environment-twin';
 import { DriftCategory } from '../model/drift';
+import { __t } from "@ugondu/shared";
 
-describe('DEISE - Deployment Environment Integrity & Self-Healing Engine', () => {
+describe(__t('msg_deise_deployment_environment_integrity_s'), () => {
     let deise: DeploymentRepairEngine;
 
     beforeEach(() => {
         deise = new DeploymentRepairEngine();
     });
 
-    it('COR-31.1: Distinguish application corruption from topology corruption (DirectAdmin incident)', () => {
+    it(__t('msg_cor_31_1_distinguish_application_corrupt'), () => {
         // Mocking the scenario provided by the user:
         // Migrated to DirectAdmin.
         // `releases/release_20260730` exists and is perfectly healthy.
@@ -70,7 +71,7 @@ describe('DEISE - Deployment Environment Integrity & Self-Healing Engine', () =>
         expect(repairPlan.destructiveDeleteBlocked).toBe(true);
     });
 
-    it('COR-31.2: Proceed with upload if Payload Drift is detected alongside healthy topology', () => {
+    it(__t('msg_cor_31_2_proceed_with_upload_if_payload'), () => {
         const targetTwin: EnvironmentTwin = {
             provider: {
                 platform: 'cpanel',

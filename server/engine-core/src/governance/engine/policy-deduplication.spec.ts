@@ -1,8 +1,9 @@
 import { PolicyCanonicalizer, PolicyFingerprint } from './policy-deduplication';
 import { PolicyGovernanceEngine, ProviderAuthorizationAdapter } from './policy-engine';
 import { UniversalPermission } from '../model/authorization';
+import { __t } from "@ugondu/shared";
 
-describe('POL-003 Deduplication & Testing', () => {
+describe(__t('msg_pol_003_deduplication_testing'), () => {
     let canonicalizer: PolicyCanonicalizer;
     let fingerprint: PolicyFingerprint;
     let engine: PolicyGovernanceEngine;
@@ -13,7 +14,7 @@ describe('POL-003 Deduplication & Testing', () => {
         engine = new PolicyGovernanceEngine();
     });
 
-    test('PolicyFingerprint generates same hash for identical intent with different condition ordering', () => {
+    test(__t('msg_policyfingerprint_generates_same_hash_fo'), () => {
         const intent1: UniversalPermission[] = [
             {
                 action: 'read',
@@ -36,7 +37,7 @@ describe('POL-003 Deduplication & Testing', () => {
         expect(hash1).toEqual(hash2);
     });
 
-    test('PolicyFingerprint generates same hash for identical intent with different permission ordering', () => {
+    test(__t('msg_policyfingerprint_generates_same_hash_fo'), () => {
         const intent1: UniversalPermission[] = [
             { action: 'read', resource: 'res:2' },
             { action: 'write', resource: 'res:1' }
@@ -53,7 +54,7 @@ describe('POL-003 Deduplication & Testing', () => {
         expect(hash1).toEqual(hash2);
     });
 
-    test('PolicyFingerprint generates different hashes for differing resources', () => {
+    test(__t('msg_policyfingerprint_generates_different_ha'), () => {
         const intent1: UniversalPermission[] = [
             { action: 'read', resource: 'res:1' }
         ];
@@ -68,13 +69,13 @@ describe('POL-003 Deduplication & Testing', () => {
         expect(hash1).not.toEqual(hash2);
     });
 
-    test('PolicyGovernanceEngine reuses policies instead of creating new ones if fingerprint exists', () => {
+    test(__t('msg_policygovernanceengine_reuses_policies_i'), () => {
         const mockAdapter: ProviderAuthorizationAdapter = {
             providerIdentifier: 'aws',
             translateIntent: (intent) => ({}),
             synthesizePolicy: (intent) => ({
                 id: `pol-${Date.now()}`,
-                name: 'Test Policy',
+                name: __t('msg_test_policy'),
                 description: 'Test',
                 permissions: intent
             }),

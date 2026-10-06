@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"github.com/ugondu/client/i18n"
 	"errors"
 	"fmt"
 	"os"
@@ -77,7 +78,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 
 	cleanBase, err := filepath.Abs(filepath.Clean(baseDir))
 	if err != nil {
-		return "", fmt.Errorf("ERR_BASE_DIR_RESOLUTION: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_base_dir_resolution_w"), err)
 	}
 
 	target := filepath.Join(cleanBase, targetRelPath)
@@ -89,7 +90,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 			return "", ErrSymlinkEscape
 		}
 	} else if !os.IsNotExist(err) {
-		return "", fmt.Errorf("ERR_SYMLINK_EVALUATION: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_symlink_evaluation_w"), err)
 	}
 
 	if !strings.HasPrefix(target, cleanBase+string(filepath.Separator)) && target != cleanBase {

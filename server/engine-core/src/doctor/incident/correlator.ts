@@ -55,7 +55,7 @@ export class IncidentCorrelator {
   correlate(incidents: IncidentRecord[]): CorrelationGroup[] {
     const groups = new Map<string, IncidentRecord[]>();
     for (const inc of incidents) {
-      const key = `${inc.targetId}:${inc.category}`;
+      const key = `${inc.targetId}:${inc.incidentClass}`;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(inc);
     }

@@ -39,6 +39,6 @@ export class ManualModeHandler {
     public execute(action: any, context: any): any {
         // Requires explicit user intervention and approval
         // Engine does not proceed without direct input
-        throw new Error('Manual Mode: Action requires direct user execution.');
+        throw new Error(__t('msg_manual_mode_action_requires_direct_user'));
     }
 }

@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"github.com/ugondu/client/i18n"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -58,7 +59,7 @@ type ReplayEntry struct {
 func getReplayLedgerPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("ERR_HOME_DIR: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_home_dir_w"), err)
 	}
 	return filepath.Join(home, ".ugondu", "replay_ledger.json"), nil
 }
@@ -79,7 +80,7 @@ func CheckAndRecordReplay(issuer, keyId, txId, execId, nonce string, expiresAt i
 	lockFile := ledgerPath + ".lock"
 	lock, err := AcquireTransactionLock(lockFile)
 	if err != nil {
-		return fmt.Errorf("ERR_LEDGER_LOCK: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_ledger_lock_w"), err)
 	}
 	defer ReleaseTransactionLock(lock)
 

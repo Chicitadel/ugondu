@@ -47,7 +47,7 @@ export class RealityGate {
         // The version hash is retrieved from the DB and compared against the
         // passport's execution-scoped hash stored in metadata.executionId.
         const record = await this.dbClient.query(
-            'SELECT version_hash FROM entities WHERE id = $1',
+            __t('msg_select_version_hash_from_entities_where'),
             [context.targetId]
         );
 

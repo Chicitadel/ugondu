@@ -34,6 +34,7 @@
 
 import * as crypto from 'crypto';
 import { ArchitectureCandidate } from '../model/candidate';
+import { __t } from "@ugondu/shared";
 
 /**
  * @class VerticalBVps
@@ -46,7 +47,7 @@ export class VerticalBVps {
             id: crypto.randomUUID(),
             name: __t('linux_vps_candidate'),
             provider: 'linux-vps',
-            description: 'A standard Linux Virtual Private Server architecture.',
+            description: __t('msg_a_standard_linux_virtual_private_server'),
             resources: [
                 { id: crypto.randomUUID(), type: 'compute', name: 'nginx-proxy', provider: 'linux', config: {} },
                 { id: crypto.randomUUID(), type: 'compute', name: 'systemd-service', provider: 'linux', config: {} },

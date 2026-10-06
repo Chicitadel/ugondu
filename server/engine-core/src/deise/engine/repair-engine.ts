@@ -32,7 +32,7 @@ export class DeploymentRepairEngine {
         if (!twin.topology.currentSymlinkValid) {
             diagnoses.push({
                 category: DriftCategory.TOPOLOGY_DRIFT,
-                description: 'The `current` release pointer is broken or missing.',
+                description: __t('msg_the_current_release_pointer_is_broken_or'),
                 affectedPaths: ['current'],
                 isDestructiveRecovery: false,
                 remediationAction: 'RESTORE_SYMLINK'
@@ -45,7 +45,7 @@ export class DeploymentRepairEngine {
         if (twin.topology.webrootSymlinkTarget !== 'current/public_html') {
             diagnoses.push({
                 category: DriftCategory.ENVIRONMENT_DRIFT,
-                description: 'Webroot pointer does not match expected platform topology. Possible hosting migration detected.',
+                description: __t('msg_webroot_pointer_does_not_match_expected'),
                 affectedPaths: [twin.topology.webrootPath],
                 isDestructiveRecovery: false,
                 remediationAction: 'RECONFIGURE_WEBROOT'
@@ -94,11 +94,11 @@ export class DeploymentRepairEngine {
         const safeToProceed = !destructiveDeleteBlocked;
 
         if (destructiveDeleteBlocked) {
-            Logger.warn('Destructive delete (--delete) is blocked due to detected topology anomalies.');
+            Logger.warn(__t('msg_destructive_delete_delete_is_blocked_due'));
         }
 
         if (requiresInfrastructureRepair) {
-            Logger.info('Executing Repair Plan...');
+            Logger.info(__t('msg_executing_repair_plan'));
         }
 
         return {

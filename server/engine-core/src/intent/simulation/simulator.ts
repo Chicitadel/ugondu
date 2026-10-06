@@ -149,15 +149,15 @@ export class IntentSimulator {
         if (!context.enforceStrictIsolation) return;
 
         if (intent.security.privateDatabaseNetwork && !context.targetCapabilities.includes('VPC_PEERING')) {
-            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: 'VPC_PEERING unavailable for private database boundary' }));
+            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: __t('msg_vpc_peering_unavailable_for_private_data') }));
         }
 
         if (intent.operational.scaling && !context.targetCapabilities.includes('AUTO_SCALING')) {
-            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: 'AUTO_SCALING unavailable for scaling intent' }));
+            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: __t('msg_auto_scaling_unavailable_for_scaling_int') }));
         }
 
         if (intent.availability.redundancy === 'multi-zone' && !context.targetCapabilities.includes('MULTI_ZONE')) {
-            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: 'MULTI_ZONE unavailable for redundancy requirements' }));
+            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: __t('msg_multi_zone_unavailable_for_redundancy_re') }));
         }
     }
 }

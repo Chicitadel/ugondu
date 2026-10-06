@@ -57,7 +57,7 @@ export class RevocationManager {
         }
 
         const record = await this.dbClient.query(
-            'SELECT is_revoked FROM passports WHERE id = $1',
+            __t('msg_select_is_revoked_from_passports_where_i'),
             [passportId]
         );
 
@@ -72,7 +72,7 @@ export class RevocationManager {
 
     public async revoke(passportId: string, reason: string): Promise<void> {
         await this.dbClient.execute(
-            'UPDATE passports SET is_revoked = true, revocation_reason = $1, updated_at = NOW() WHERE id = $2',
+            __t('msg_update_passports_set_is_revoked_true_rev'),
             [reason, passportId]
         );
         const cacheKey = `passport:revocation:${passportId}`;

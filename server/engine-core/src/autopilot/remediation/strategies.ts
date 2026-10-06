@@ -1,3 +1,5 @@
+import { __t } from "@ugondu/shared";
+
 /******************************************************************************
  * Project        : Ugondu Engine Core
  * Module         : Autopilot / Remediation
@@ -24,19 +26,19 @@ export class RemediationStrategies {
         ['NETWORK_TIMEOUT', {
             strategyId: 'strat-net-retry',
             name: __t('exponential_backoff_network_re'),
-            description: 'Retries transient network communication with backoff ceiling.',
+            description: __t('msg_retries_transient_network_communication'),
             steps: ['validate_dns', 'test_ping', 'retry_request']
         }],
         ['SERVICE_CRASH', {
             strategyId: 'strat-svc-restart',
             name: __t('safe_container_restart'),
-            description: 'Drains connections and restarts failing microservice container.',
+            description: __t('msg_drains_connections_and_restarts_failing'),
             steps: ['drain_traffic', 'restart_container', 'verify_health']
         }],
         ['AUTHORIZATION_DRIFT', {
             strategyId: 'strat-auth-reapply',
             name: __t('reapply_frozen_authority_matri'),
-            description: 'Reconciles live IAM with UPPIE declared authority state.',
+            description: __t('msg_reconciles_live_iam_with_uppie_declared'),
             steps: ['fetch_live_policies', 'compute_diff', 'apply_least_privilege']
         }]
     ]);

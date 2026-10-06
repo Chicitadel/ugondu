@@ -45,7 +45,7 @@ import { TenantKeyContext } from './tenant-key-context';
 export class EncryptionContext {
     constructor(private readonly keyContext: TenantKeyContext) {
         if (keyContext.rotationStatus === 'revoked') {
-            throw new Error('Cannot establish encryption context with revoked key.');
+            throw new Error(__t('msg_cannot_establish_encryption_context_with'));
         }
     }
 

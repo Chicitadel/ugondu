@@ -31,6 +31,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 import * as crypto from 'crypto';
+import { __t } from "@ugondu/shared";
 
 /**
  * @interface MigrationCertificate
@@ -76,11 +77,31 @@ export class CertificationAuthority {
     }
 
     private async compileEvidence(directory: string): Promise<Record<string, string>> {
-        // Mocking evidence collection for abstraction
-        return {
-            'evidence_1.json': crypto.createHash('sha256').update('evidence1').digest('hex'),
-            'evidence_2.json': crypto.createHash('sha256').update('evidence2').digest('hex')
-        };
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const crypto = await import('crypto');
+
+        try {
+            const files = await fs.readdir(directory);
+            const evidenceHashes: Record<string, string> = {};
+
+            for (const file of files) {
+                const filePath = path.join(directory, file);
+                const stat = await fs.stat(filePath);
+                if (stat.isFile()) {
+                    const content = await fs.readFile(filePath);
+                    evidenceHashes[file] = crypto.createHash('sha256').update(content).digest('hex');
+                }
+            }
+
+            if (Object.keys(evidenceHashes).length === 0) {
+                throw new Error(__t('msg_no_compliance_evidence_files_found_in_th'));
+            }
+
+            return evidenceHashes;
+        } catch (error: any) {
+            throw new Error(`Failed to compile microservices compliance evidence: ${error.message}`);
+        }
     }
 
     private signPayload(payload: string): string {

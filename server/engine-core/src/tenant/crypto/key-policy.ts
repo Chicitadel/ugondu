@@ -55,10 +55,10 @@ export interface KeyPolicy {
 export class KeyPolicyEnforcer {
     public validatePolicy(policy: KeyPolicy): void {
         if (policy.allowExport) {
-            throw new Error('Key export is strictly prohibited by security governance.');
+            throw new Error(__t('msg_key_export_is_strictly_prohibited_by_sec'));
         }
         if (policy.rotationIntervalDays > 90) {
-            throw new Error('Key rotation interval cannot exceed 90 days.');
+            throw new Error(__t('msg_key_rotation_interval_cannot_exceed_90_d'));
         }
     }
 }

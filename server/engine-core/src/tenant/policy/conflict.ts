@@ -53,6 +53,6 @@ export class ConflictError extends Error {
  */
 export class ConflictHandler {
   public handle(rules: string[]): never {
-    throw new ConflictError('Policy conflict detected. Resolution requires explicit action, merging is prohibited.');
+    throw new ConflictError(__t('msg_policy_conflict_detected_resolution_requ'));
   }
 }

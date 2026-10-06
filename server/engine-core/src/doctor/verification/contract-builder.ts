@@ -1,3 +1,5 @@
+import { __t } from "@ugondu/shared";
+
 /******************************************************************************
  * Project        : Air Roofers Platform
  * Module         : Doctor / Verification
@@ -22,7 +24,7 @@ export class ContractBuilder {
     public buildContract(spec: { assertions?: string[]; timeoutMs?: number }): VerificationContract {
         return {
             contractId: `contract-${Date.now()}`,
-            assertions: spec?.assertions || ['HEALTH_STATUS == GREEN'],
+            assertions: spec?.assertions || [__t('msg_health_status_green')],
             timeoutMs: spec?.timeoutMs || 5000
         };
     }

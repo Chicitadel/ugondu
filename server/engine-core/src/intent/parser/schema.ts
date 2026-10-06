@@ -1,3 +1,5 @@
+import { __t } from "@ugondu/shared";
+
 /******************************************************************************
  * Project        : Air Roofers Platform
  * Module         : Intent Engine
@@ -37,7 +39,7 @@ export const IntentSchema = {
     description: __t('schema_for_validating_parsed_i'),
     rules: [
         __t('must_contain_at_least_one_requ'),
-        "Provenance must be explicitly tagged as USER_EXPLICIT or LLM_INFERRED",
+        __t('msg_provenance_must_be_explicitly_tagged_as'),
         __t('conflict_detection_routines_mu')
     ]
 };

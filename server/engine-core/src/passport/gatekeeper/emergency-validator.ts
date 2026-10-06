@@ -43,7 +43,7 @@ export class EmergencyValidator {
 
     public async validate(context: ExecutionContext): Promise<void> {
         const record = await this.dbClient.query(
-            'SELECT is_emergency_lockdown FROM system_state LIMIT 1'
+            __t('msg_select_is_emergency_lockdown_from_system')
         );
 
         if (record.rows.length > 0 && record.rows[0].is_emergency_lockdown) {

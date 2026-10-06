@@ -34,6 +34,7 @@
 
 import * as crypto from 'crypto';
 import { ArchitectureCandidate } from '../model/candidate';
+import { __t } from "@ugondu/shared";
 
 /**
  * @class VerticalCCpanel
@@ -46,7 +47,7 @@ export class VerticalCCpanel {
             id: crypto.randomUUID(),
             name: __t('cpanel_shared_hosting_candidat'),
             provider: 'cpanel',
-            description: 'A shared hosting environment managed via cPanel.',
+            description: __t('msg_a_shared_hosting_environment_managed_via'),
             resources: [
                 { id: crypto.randomUUID(), type: 'compute', name: 'cpanel-quota-sync', provider: 'cpanel', config: {} },
                 { id: crypto.randomUUID(), type: 'database', name: 'cpanel-mysql', provider: 'cpanel', config: {} },

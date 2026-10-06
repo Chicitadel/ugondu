@@ -1,4 +1,5 @@
 import { ManagementProvenanceRecord } from '../model/provenance';
+import { __t } from "@ugondu/shared";
 
 export interface ResourceLifecycleIntent {
     resourceId: string;
@@ -38,6 +39,6 @@ export class ResourceGovernanceEngine {
         }
 
         // Unmanaged but observed? We cannot safely touch it.
-        throw new Error('POL-010 VIOLATION: Reconciliation Safety. Resource exists but lacks management provenance.');
+        throw new Error(__t('msg_pol_010_violation_reconciliation_safety'));
     }
 }

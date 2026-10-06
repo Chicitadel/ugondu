@@ -5,7 +5,7 @@ import { Logger } from '@ugondu/shared';
 export class AwsAuthenticationVerifier implements AuthenticationVerifier {
     public async verify(credential: NormalizedCredential, region: string = 'eu-west-3'): Promise<AuthenticatedIdentity> {
         if (credential.provider !== 'aws' || credential.authType !== 'access_key') {
-            throw new Error('AwsAuthenticationVerifier requires an AWS access_key credential.');
+            throw new Error(__t('msg_awsauthenticationverifier_requires_an_aw'));
         }
 
         const sts = new STSClient({
@@ -27,7 +27,7 @@ export class AwsAuthenticationVerifier implements AuthenticationVerifier {
             };
         } catch (error: any) {
             Logger.error(__t('aws_sts_authentication_verific'));
-            throw new Error('AWS Authentication failed: Check credentials or network.');
+            throw new Error(__t('msg_aws_authentication_failed_check_credenti'));
         }
     }
 }
@@ -63,7 +63,7 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
         });
 
         if (accessKeyIdx === -1 || secretKeyIdx === -1) {
-            throw new Error('AWS CSV missing essential access key columns.');
+            throw new Error(__t('msg_aws_csv_missing_essential_access_key_col'));
         }
 
         const values = parseCsvLine(lines[1]);
@@ -72,7 +72,7 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
         let userName = userNameIdx !== -1 ? values[userNameIdx] : undefined;
 
         if (!userName) {
-            Logger.info('AWS CSV missing User Name. Attempting safe recovery via STS...');
+            Logger.info(__t('msg_aws_csv_missing_user_name_attempting_saf'));
 
             // Temporary credential object to authenticate and discover identity
             const tempCred = {
@@ -85,15 +85,15 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
             try {
                 identity = await this.verifier.verify(tempCred);
             } catch (e: any) {
-                Logger.error('Cannot safely reconstruct AWS CSV: Identity authentication failed.');
-                throw new Error('Normalization blocked: Missing User Name and credentials failed STS authentication.');
+                Logger.error(__t('msg_cannot_safely_reconstruct_aws_csv_identi'));
+                throw new Error(__t('msg_normalization_blocked_missing_user_name'));
             }
 
             if (identity.principal.includes(':user/')) {
                 userName = identity.principal.split(':user/')[1].split('/')[0];
                 Logger.info(`Safely reconstructed User Name: ${userName}`);
             } else {
-                throw new Error('Normalization blocked: Identity authenticated but is not a standard IAM User (e.g. Assumed Role). Cannot inject User Name.');
+                throw new Error(__t('msg_normalization_blocked_identity_authentic'));
             }
         }
 

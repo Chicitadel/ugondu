@@ -54,7 +54,7 @@ export class TargetFabric {
             throw new Error(__t('error_key_not_found'));
         }
         if (target.status !== 'ONLINE') {
-            throw new Error('Deployment blocked by Billing Gateway. License invalid or quota exceeded.');
+            throw new Error(__t('msg_deployment_blocked_by_billing_gateway_li'));
         }
 
         switch (target.environmentType) {

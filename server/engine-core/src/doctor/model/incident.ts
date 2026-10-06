@@ -61,19 +61,10 @@ export enum IncidentSeverity {
  * - `incidentClass`: typed enum (authoritative going forward)
  * - `severity`: typed enum (replaces severity: string)
  * - `uppieContext`: UPPIE authorization diagnosis (when class = AUTHORIZATION_FAILURE)
- *
- * Backward compatibility:
- * - `category: string` is retained as a deprecated alias of incidentClass.
- *   It will be removed after migration to typed consumers is complete.
- *
- * @deprecated category — use incidentClass instead
  */
 export interface IncidentRecord {
   id:             string;
   targetId:       string;
-
-  /** @deprecated Use incidentClass (typed). Retained for backward compatibility. */
-  category:       string;
 
   /** Authoritative typed incident classification. Use this going forward. */
   incidentClass:  IncidentClass;
@@ -101,12 +92,11 @@ export function isAuthorizationFailure(
   return incident.incidentClass === IncidentClass.AUTHORIZATION_FAILURE;
 }
 
-/** Construct an IncidentRecord ensuring incidentClass and category stay in sync. */
+/** Construct an IncidentRecord. */
 export function createIncidentRecord(
-  params: Omit<IncidentRecord, 'category'>
+  params: IncidentRecord
 ): IncidentRecord {
   return {
-    ...params,
-    category: params.incidentClass.toString(),  // keep backward-compat alias synchronized
+    ...params
   };
 }

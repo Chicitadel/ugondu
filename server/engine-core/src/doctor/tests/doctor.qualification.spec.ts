@@ -22,13 +22,14 @@ import { DependencyImpact } from '../simulation/dependency-impact';
 import { SecurityImpact } from '../simulation/security-impact';
 import { ContractBuilder } from '../verification/contract-builder';
 import { Stabilization } from '../verification/stabilization';
+import { __t } from "@ugondu/shared";
 
 declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('Delivery Doctor Qualification Gates: DOC-01..36', () => {
-  it('DOC-01..12: Diagnostic telemetry ingestion, evidence gathering & passport integration', () => {
+describe(__t('msg_delivery_doctor_qualification_gates_doc'), () => {
+  it(__t('msg_doc_01_12_diagnostic_telemetry_ingestion'), () => {
     const evidence = new DoctorEvidence();
     const passportInt = new PassportIntegration();
     const gathered = evidence.gather({ passportId: 'pass-99', indicators: ['LATENCY_SPIKE'] });
@@ -37,7 +38,7 @@ describe('Delivery Doctor Qualification Gates: DOC-01..36', () => {
     expect(passportInt.getIntegrated('pass-99')).toBeDefined();
   });
 
-  it('DOC-13..24: Fault diagnosis, simulation (data, dependency, security) & contract validation', () => {
+  it(__t('msg_doc_13_24_fault_diagnosis_simulation_dat'), () => {
     const dataImpact = new DataImpact();
     const depImpact = new DependencyImpact();
     const secImpact = new SecurityImpact();
@@ -49,7 +50,7 @@ describe('Delivery Doctor Qualification Gates: DOC-01..36', () => {
     expect(builder.buildContract({}).contractId).toBeDefined();
   });
 
-  it('DOC-25..36: Remediation generation, loop prevention, circuit breaker & stabilization', async () => {
+  it(__t('msg_doc_25_36_remediation_generation_loop_pr'), async () => {
     const generator = new Generator();
     const registry = new DeterministicOperationRegistry();
     const cb = new CircuitBreaker();

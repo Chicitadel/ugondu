@@ -29,6 +29,7 @@
 
 import { hasBlockingUntranslatableRules, isFullyCovered } from '../model/authority-translation';
 import type { AuthorityTranslationRecord } from '../model/authority-translation';
+import { __t } from "@ugondu/shared";
 
 export type AuthorityContinuityCheckResult =
   | 'PASS'
@@ -92,7 +93,7 @@ export function verifyAuthorityContinuity(
       sourceAuthorityIntact:   ctx.sourceAuthorityIntact,
       targetAuthorityVerified: ctx.targetAuthorityVerified,
       evaluatedAt,
-      detail: 'No authority translation present in this migration — check skipped',
+      detail: __t('msg_no_authority_translation_present_in_this'),
     };
   }
 
@@ -109,7 +110,7 @@ export function verifyAuthorityContinuity(
       sourceAuthorityIntact:   false,
       targetAuthorityVerified: ctx.targetAuthorityVerified,
       evaluatedAt,
-      detail: 'Source authority was revoked before cutover commitment. Rollback required.',
+      detail: __t('msg_source_authority_was_revoked_before_cuto'),
     };
   }
 
@@ -167,6 +168,6 @@ export function verifyAuthorityContinuity(
     sourceAuthorityIntact:   true,
     targetAuthorityVerified: ctx.targetAuthorityVerified,
     evaluatedAt,
-    detail: 'Authority translation verified. Full coverage. No blocking items.',
+    detail: __t('msg_authority_translation_verified_full_cove'),
   };
 }

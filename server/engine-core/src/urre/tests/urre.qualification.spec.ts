@@ -21,8 +21,8 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('URRE Qualification Gates: URRE-01..30', () => {
-  it('URRE-01..05: Network & Communication Fault Resilience', async () => {
+describe(__t('msg_urre_qualification_gates_urre_01_30'), () => {
+  it(__t('msg_urre_01_05_network_communication_fault_r'), async () => {
     const retry = new RetryManager({
       maxAttempts: 3,
       baseDelayMs: 10,
@@ -40,31 +40,31 @@ describe('URRE Qualification Gates: URRE-01..30', () => {
     expect(attempts).toBe(2);
   });
 
-  it('URRE-06..10: Process crash & checkpoint persistence recovery', () => {
+  it(__t('msg_urre_06_10_process_crash_checkpoint_pers'), () => {
     const cm = new CheckpointManager();
     const cpData = { checkpointId: 'cp_100', state: 'RUNNING' as any, data: { releaseId: 'rel-1' }, timestamp: Date.now() };
     expect(() => cm.pauseAndCommit(cpData)).not.toThrow();
   });
 
-  it('URRE-11..15: Concurrency, Idempotency & Lock resolution', () => {
+  it(__t('msg_urre_11_15_concurrency_idempotency_lock'), () => {
     const resolver = new IdempotencyResolver();
     const isIdempotent = resolver.resolveIdempotency('act-1', IdempotencyClass.DETERMINISTIC, {});
     expect(typeof isIdempotent).toBe('boolean');
   });
 
-  it('URRE-16..20: Resource exhaustion & Preflight safety checks', () => {
+  it(__t('msg_urre_16_20_resource_exhaustion_preflight'), () => {
     const cm = new CheckpointManager();
     const cpData = { checkpointId: 'cp_200', state: 'COMMITTED' as any, data: { status: 'STABLE' }, timestamp: Date.now() };
     expect(() => cm.pauseAndCommit(cpData)).not.toThrow();
   });
 
-  it('URRE-21..25: State Inconsistencies & Rollback 4-phase coordination', async () => {
+  it(__t('msg_urre_21_25_state_inconsistencies_rollbac'), async () => {
     const coordinator = new RollbackCoordinator();
     await coordinator.performRollback({ recoveryPointId: 'rp-baseline-1' } as any);
     expect(true).toBe(true);
   });
 
-  it('URRE-26..30: Data Protection, Persistence & Integrity Hash Validation', () => {
+  it(__t('msg_urre_26_30_data_protection_persistence_i'), () => {
     const cm = new CheckpointManager();
     const cpData = { checkpointId: 'cp_300', state: 'COMMITTED' as any, data: { verified: true }, timestamp: Date.now() };
     expect(() => cm.pauseAndCommit(cpData)).not.toThrow();

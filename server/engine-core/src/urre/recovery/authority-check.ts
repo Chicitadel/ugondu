@@ -28,6 +28,7 @@
  ******************************************************************************/
 
 import type { UppiePreflightContext } from '../admission/authorization-readiness';
+import { __t } from "@ugondu/shared";
 
 export type RecoveryAuthorityCheckResult =
   | 'AUTHORIZED'          // Ugondu has required effective authority to perform recovery
@@ -75,7 +76,7 @@ export function verifyRecoveryAuthority(
     return {
       result:              'CANNOT_DETERMINE',
       missingCapabilities: [],
-      detail:              'No UPPIE context present — recovery authority not evaluated. Proceeding with warning.',
+      detail:              __t('msg_no_uppie_context_present_recovery_author'),
       evaluatedAt,
       operationId,
       executionId,
@@ -88,7 +89,7 @@ export function verifyRecoveryAuthority(
       return {
         result:              'AUTHORIZED',
         missingCapabilities: [],
-        detail:              'Recovery authority verified. All required capabilities present.',
+        detail:              __t('msg_recovery_authority_verified_all_required'),
         evaluatedAt,
         operationId,
         executionId,
@@ -110,7 +111,7 @@ export function verifyRecoveryAuthority(
     return {
       result:              'BLOCKED',
       missingCapabilities: uppieContext.missingCapabilities,
-      detail:              'Recovery authority missing AND provider limit exhausted. Human escalation required.',
+      detail:              __t('msg_recovery_authority_missing_and_provider'),
       evaluatedAt,
       operationId,
       executionId,

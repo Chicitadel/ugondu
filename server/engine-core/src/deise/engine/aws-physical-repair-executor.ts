@@ -8,12 +8,12 @@ export class AwsPhysicalRepairExecutor {
 
     public async executeRepair(plan: RepairPlan): Promise<boolean> {
         if (!plan.safeToProceed) {
-            Logger.error('Repair Plan is marked unsafe to proceed. Aborting physical repair.');
+            Logger.error(__t('msg_repair_plan_is_marked_unsafe_to_proceed'));
             return false;
         }
 
         if (!plan.requiresInfrastructureRepair) {
-            Logger.info('No infrastructure repair required. Environment is structurally sound.');
+            Logger.info(__t('msg_no_infrastructure_repair_required_enviro'));
             return true;
         }
 
@@ -31,7 +31,7 @@ export class AwsPhysicalRepairExecutor {
                         if (diag.expectedState && diag.expectedState.Name) {
                             const expectedName = diag.expectedState.Name;
                             const { EC2Client, CreateTagsCommand } = require('@aws-sdk/client-ec2');
-                            const ec2 = new EC2Client({ region: 'eu-west-3' });
+                            const ec2 = new EC2Client({ region: (this.awsClient as any).region || 'us-east-1' });
                             await ec2.send(new CreateTagsCommand({
                                 Resources: [affectedResourceId],
                                 Tags: [{ Key: 'Name', Value: expectedName }]

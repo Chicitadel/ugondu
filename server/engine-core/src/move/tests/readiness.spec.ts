@@ -20,7 +20,7 @@ declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('Cutover readiness evaluation', () => {
+describe(__t('msg_cutover_readiness_evaluation'), () => {
   const strict: ReadinessCriteria = { requireZeroReplicationLag: true, requireActiveHealthChecks: true, maxAllowedErrorRate: 0.01 };
 
   it('is ready when all probes report healthy values', async () => {

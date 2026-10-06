@@ -54,7 +54,7 @@ export interface ProvisioningContext {
 export class TenantProvisioner {
     public provision(context: ProvisioningContext): void {
         if (!context.tenantId) {
-            throw new Error('Tenant ID required for provisioning execution.');
+            throw new Error(__t('msg_tenant_id_required_for_provisioning_exec'));
         }
         // Allocate resources, setup isolated database schemas, initialize root key
     }

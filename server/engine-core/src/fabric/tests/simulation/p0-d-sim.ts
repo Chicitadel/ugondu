@@ -5,6 +5,7 @@ import { IAwsClient, AwsAdapter } from '../../providers/aws';
 import { IDirectAdminClient, DirectAdminAdapter } from '../../providers/directadmin';
 import { ComputeStatus } from '../../capabilities/compute';
 import { SubnetResult } from '../../capabilities/network';
+import { __t } from "@ugondu/shared";
 
 class SimulationAwsClient {
     async discoverAvailabilityZones() { return ['eu-west-3a', 'eu-west-3b']; }
@@ -18,7 +19,7 @@ class SimulationAwsClient {
 
     async resolveInstanceType(cpuCores: number, memoryMb: number) { return 't3.micro'; }
     async runInstances(type: string, image: string, subnetId?: string) {
-        if (type === 'fail') throw new Error('Simulated EC2 Failure');
+        if (type === 'fail') throw new Error(__t('msg_simulated_ec2_failure'));
         const id = `i-${`${++this.idCounter}`}`;
         this.state[id] = { type: 'ec2', instanceType: type, status: 'running' };
         Logger.info(`[SIM-AWS] Created EC2 ${id} in ${subnetId}`);
@@ -41,7 +42,7 @@ class SimulationAwsClient {
         Logger.info(`[SIM-AWS] Deleted VPC ${id}`);
     }
     async createRds(name: string, engine: string, capacity: number, sgId?: string, credRef?: string) {
-        if (name.includes('fail')) throw new Error('Simulated RDS Failure');
+        if (name.includes('fail')) throw new Error(__t('msg_simulated_rds_failure'));
         const id = `rds-${`${++this.idCounter}`}`;
         this.state[id] = { type: 'rds', status: 'available' };
         Logger.info(`[SIM-AWS] Created RDS ${id} (${engine})`);
@@ -53,7 +54,7 @@ class SimulationAwsClient {
         Logger.info(`[SIM-AWS] Deleted RDS ${id}`);
     }
     async createS3Bucket(name: string, isPublic: boolean) {
-        if (name.includes('fail')) throw new Error('Simulated S3 Failure');
+        if (name.includes('fail')) throw new Error(__t('msg_simulated_s3_failure'));
         const id = `s3-${`${++this.idCounter}`}`;
         this.state[id] = { type: 's3', status: 'available' };
         Logger.info(`[SIM-AWS] Created S3 Bucket ${id}`);
@@ -144,7 +145,7 @@ const evidence: any = {
 };
 
 async function executeSimulations() {
-    Logger.info('BEGIN P0-D-SIM: PROVIDER FABRIC DETERMINISTIC CONFORMANCE SUITE');
+    Logger.info(__t('msg_begin_p0_d_sim_provider_fabric_determini'));
 
     // P0-D-SIM-01 - DirectAdmin Lifecycle
     Logger.info('--- P0-D-SIM-01: DirectAdmin Lifecycle ---');
@@ -156,20 +157,20 @@ async function executeSimulations() {
         await daClient.createDatabase('db1', 'mysql');
 
         const stat = await daClient.getInstanceStatus('app1');
-        if (stat.state !== 'running') throw new Error('App not running');
+        if (stat.state !== 'running') throw new Error(__t('msg_app_not_running'));
 
         const snap = await daClient.createSnapshot('app1');
         const snapStat = daClient.state[snap];
-        if (!snapStat) throw new Error('Snapshot not recorded in state');
+        if (!snapStat) throw new Error(__t('msg_snapshot_not_recorded_in_state'));
 
         await daClient.removeDatabase('db1');
         await daClient.removeHostedApp('app1');
         await daClient.deleteSnapshot(snap);
 
-        if (Object.keys(daClient.state).length !== 0) throw new Error('Residual state found');
+        if (Object.keys(daClient.state).length !== 0) throw new Error(__t('msg_residual_state_found'));
         evidence.results['P0-D-SIM-01'] = 'PASS';
     } catch (e: any) {
-        evidence.results['P0-D-SIM-01'] = 'FAIL: ' + e.message;
+        evidence.results['P0-D-SIM-01'] = __t('msg_fail') + e.message;
     }
 
     // P0-D-SIM-02 - AWS Lifecycle
@@ -184,7 +185,7 @@ async function executeSimulations() {
         const s3 = await awsClient.createS3Bucket('sim-bucket', false);
 
         const ec2Stat = await awsClient.getInstanceStatus(ec2.id);
-        if (ec2Stat.state !== 'running') throw new Error('EC2 not running');
+        if (ec2Stat.state !== 'running') throw new Error(__t('msg_ec2_not_running'));
 
         const snap = await awsClient.createSnapshot(rds.id);
 
@@ -195,10 +196,10 @@ async function executeSimulations() {
         await awsClient.deleteVpc(vpcId);
         await awsClient.deleteSnapshot(snap);
 
-        if (Object.keys(awsClient.state).length !== 0) throw new Error('Residual resources found in AWS simulated account');
+        if (Object.keys(awsClient.state).length !== 0) throw new Error(__t('msg_residual_resources_found_in_aws_simulate'));
         evidence.results['P0-D-SIM-02'] = 'PASS';
     } catch (e: any) {
-        evidence.results['P0-D-SIM-02'] = 'FAIL: ' + e.message;
+        evidence.results['P0-D-SIM-02'] = __t('msg_fail') + e.message;
     }
 
     // P0-D-SIM-03 - Failure and Rollback
@@ -221,12 +222,12 @@ async function executeSimulations() {
             await awsClient.deleteVpc(vpcId);
         }
 
-        if (!failed) throw new Error('Expected failure did not occur');
-        if (Object.keys(awsClient.state).length !== 0) throw new Error('Rollback failed to clear residual resources');
+        if (!failed) throw new Error(__t('msg_expected_failure_did_not_occur'));
+        if (Object.keys(awsClient.state).length !== 0) throw new Error(__t('msg_rollback_failed_to_clear_residual_resour'));
 
         evidence.results['P0-D-SIM-03'] = 'PASS';
     } catch (e: any) {
-        evidence.results['P0-D-SIM-03'] = 'FAIL: ' + e.message;
+        evidence.results['P0-D-SIM-03'] = __t('msg_fail') + e.message;
     }
 
     // P0-D-SIM-04 - DEISE Drift Repair
@@ -247,11 +248,11 @@ async function executeSimulations() {
         }
 
         const repairedType = awsClient.state[ec2.id].instanceType;
-        if (repairedType !== 't3.micro') throw new Error('Repair failed');
+        if (repairedType !== 't3.micro') throw new Error(__t('msg_repair_failed'));
 
         evidence.results['P0-D-SIM-04'] = 'PASS';
     } catch (e: any) {
-        evidence.results['P0-D-SIM-04'] = 'FAIL: ' + e.message;
+        evidence.results['P0-D-SIM-04'] = __t('msg_fail') + e.message;
     }
 
     // P0-D-SIM-05 - Universal Delivery Transaction
@@ -274,11 +275,11 @@ async function executeSimulations() {
         stateMachine('ROLLBACK');
         stateMachine('RECOVERED');
 
-        if (txLog.length !== 8) throw new Error('Transaction state machine invalid');
+        if (txLog.length !== 8) throw new Error(__t('msg_transaction_state_machine_invalid'));
 
         evidence.results['P0-D-SIM-05'] = 'PASS';
     } catch (e: any) {
-        evidence.results['P0-D-SIM-05'] = 'FAIL: ' + e.message;
+        evidence.results['P0-D-SIM-05'] = __t('msg_fail') + e.message;
     }
 
     // Cryptographic Seal
@@ -286,7 +287,7 @@ async function executeSimulations() {
     const finalEvidence = { ...evidence, seal: hash };
 
     fs.writeFileSync('COR_SIMULATION_EVIDENCE.json', JSON.stringify(finalEvidence, null, 2));
-    Logger.info('Provider Fabric Deterministic Simulation concluded. Evidence recorded to COR_SIMULATION_EVIDENCE.json');
+    Logger.info(__t('msg_provider_fabric_deterministic_simulation'));
 }
 
 executeSimulations().catch(console.error);

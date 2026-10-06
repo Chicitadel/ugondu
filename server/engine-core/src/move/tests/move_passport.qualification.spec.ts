@@ -12,13 +12,14 @@
  ******************************************************************************/
 
 import { TranslationMap } from '../TranslationMap';
+import { __t } from "@ugondu/shared";
 
 declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('Move Engine & Delivery Passport Qualification Gates', () => {
-  it('MOVE-01..60: Source profiling, delta replication, state cutover & cPanel-to-AWS translation', () => {
+describe(__t('msg_move_engine_delivery_passport_qualificat'), () => {
+  it(__t('msg_move_01_60_source_profiling_delta_replic'), () => {
     const tm = new TranslationMap();
     const awsEquiv = tm.mapCPanelToAws({
       apache: { version: '2.4', vhosts: 2 },
@@ -30,7 +31,7 @@ describe('Move Engine & Delivery Passport Qualification Gates', () => {
     expect(awsEquiv.rds.engine).toBe('mysql');
   });
 
-  it('INV-PASS-01..30: Delivery Passport v2 Ed25519 signature & TOCTOU reality gate verification', () => {
+  it(__t('msg_inv_pass_01_30_delivery_passport_v2_ed25'), () => {
     const passportRecord = {
       passportId: 'pass-v2-100',
       algorithm: 'Ed25519',

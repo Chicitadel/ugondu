@@ -34,6 +34,7 @@
 package engine
 
 import (
+	"github.com/ugondu/client/i18n"
 	"bytes"
 	"io"
 	"net/http"
@@ -137,19 +138,19 @@ func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) 
 		return nil
 	}
 	if state.PlanHash != "" && state.PlanHash != env.PlanHash {
-		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: planHash mismatch (state=%s, recipe=%s)", state.PlanHash, env.PlanHash)
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_planhash"), state.PlanHash, env.PlanHash)
 	}
 	if state.TenantId != "" && state.TenantId != env.TenantId {
-		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: tenantId mismatch (state=%s, recipe=%s)", state.TenantId, env.TenantId)
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_tenantid"), state.TenantId, env.TenantId)
 	}
 	if state.ProjectId != "" && state.ProjectId != env.ProjectId {
-		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: projectId mismatch (state=%s, recipe=%s)", state.ProjectId, env.ProjectId)
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_projectid"), state.ProjectId, env.ProjectId)
 	}
 	if state.EnvironmentId != "" && state.EnvironmentId != env.EnvironmentId {
-		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: environmentId mismatch (state=%s, recipe=%s)", state.EnvironmentId, env.EnvironmentId)
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_environme"), state.EnvironmentId, env.EnvironmentId)
 	}
 	if state.PolicyHash != "" && state.PolicyHash != env.PolicyHash {
-		return fmt.Errorf("CRYPTOGRAPHIC_BINDING_MISMATCH: policyHash mismatch (state=%s, recipe=%s)", state.PolicyHash, env.PolicyHash)
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_policyhas"), state.PolicyHash, env.PolicyHash)
 	}
 	return nil
 }
@@ -363,7 +364,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 
 	// 1. Replay Ledger Validation
 	if err := CheckAndRecordReplay(env.Issuer, env.KeyId, env.TransactionId, env.ExecutionId, env.Nonce, env.ExpiresAt); err != nil {
-		return logs, fmt.Errorf("ERR_REPLAY_VALIDATION_FAILED: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_err_replay_validation_failed_w"), err)
 	}
 
 	// 2. Validate Capability Intersection
@@ -379,10 +380,10 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 		payload, _ := step["payload"].(map[string]interface{})
 		handler, exists := ActionRegistry[action]
 		if !exists {
-			return logs, fmt.Errorf("ERR_UNKNOWN_ACTION_PREFLIGHT: %s at step %d", action, i)
+			return logs, fmt.Errorf(i18n.T("msg_err_unknown_action_preflight_s_at_step_d"), action, i)
 		}
 		if err := handler.ValidatePreflight(payload); err != nil {
-			return logs, fmt.Errorf("ERR_PREFLIGHT_FAILED at step %d (%s): %w", i, action, err)
+			return logs, fmt.Errorf(i18n.T("msg_err_preflight_failed_at_step_d_s_w"), i, action, err)
 		}
 	}
 
@@ -411,12 +412,12 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 	}
 
 	if state.Status == "SUCCESS" {
-		return logs, fmt.Errorf("FATAL: Recipe %s has already been successfully executed", env.TransactionId)
+		return logs, fmt.Errorf(i18n.T("msg_fatal_recipe_s_has_already_been_successf"), env.TransactionId)
 	}
 
 	state.Status = "RUNNING"
 	if err := SaveState(state); err != nil {
-		return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_execution_persistence_failure_w"), err)
 	}
 
 	for i, step := range steps {
@@ -452,7 +453,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 
 		stepState.Status = "RUNNING"
 		if err := SaveState(state); err != nil {
-			return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+			return logs, fmt.Errorf(i18n.T("msg_execution_persistence_failure_w"), err)
 		}
 
 		handler, exists := ActionRegistry[action]
@@ -461,7 +462,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 			stepState.CompletedAt = time.Now().Unix()
 			state.Status = "FAILED"
 			if saveErr := SaveState(state); saveErr != nil {
-				return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", saveErr)
+				return logs, fmt.Errorf(i18n.T("msg_execution_persistence_failure_w"), saveErr)
 			}
 			return logs, fmt.Errorf(i18n.T("unknown_action_in_recipe"), action)
 		}
@@ -475,7 +476,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 			stepState.CompletedAt = time.Now().Unix()
 			state.Status = "FAILED"
 			if saveErr := SaveState(state); saveErr != nil {
-				return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", saveErr)
+				return logs, fmt.Errorf(i18n.T("msg_execution_persistence_failure_w"), saveErr)
 			}
 			return logs, execErr
 		}
@@ -483,13 +484,13 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 		stepState.Status = "SUCCESS"
 		stepState.CompletedAt = time.Now().Unix()
 		if err := SaveState(state); err != nil {
-			return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+			return logs, fmt.Errorf(i18n.T("msg_execution_persistence_failure_w"), err)
 		}
 	}
 
 	state.Status = "SUCCESS"
 	if err := SaveState(state); err != nil {
-		return logs, fmt.Errorf("EXECUTION_PERSISTENCE_FAILURE: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_execution_persistence_failure_w"), err)
 	}
 
 	return logs, nil

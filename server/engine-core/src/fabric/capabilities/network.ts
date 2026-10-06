@@ -31,7 +31,8 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
-import type { ProviderOptions, ResolvedValues } from './compute';
+export type ResolvedValues = Record<string, string | number | boolean>;
+export type ProviderOptions = Readonly<Record<string, unknown>> & { readonly mode?: string };
 
 /**
  * @interface NetworkCapability

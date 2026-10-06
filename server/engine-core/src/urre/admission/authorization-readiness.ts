@@ -1,3 +1,5 @@
+import { __t } from "@ugondu/shared";
+
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : URRE — Authorization Readiness Check
@@ -134,7 +136,7 @@ export function runAuthorizationReadiness(
     {
       checkId: 8, description: __t('policy_conflict_detected'),
       result:  ctx.policyConflictDetected ? 'WARN' : 'PASS',
-      detail:  ctx.policyConflictDetected ? 'Policy conflict detected — manual review required' : undefined,
+      detail:  ctx.policyConflictDetected ? __t('msg_policy_conflict_detected_manual_review_r') : undefined,
     },
     {
       checkId: 9, description: __t('existing_assignment_reusable'),
@@ -152,14 +154,14 @@ export function runAuthorizationReadiness(
       checkId: 12, description: __t('recovery_authority_available'),
       result:  ctx.recoveryAuthorityVerified ? 'PASS' : 'FAIL',
       detail:  !ctx.recoveryAuthorityVerified
-        ? 'HARD BLOCK: recovery authority unavailable — operation cannot be safely recovered'
+        ? __t('msg_hard_block_recovery_authority_unavailabl')
         : undefined,
     },
     {
       checkId: 13, description: __t('verification_authority_availab'),
       result:  ctx.verificationAuthorityVerified ? 'PASS' : 'FAIL',
       detail:  !ctx.verificationAuthorityVerified
-        ? 'HARD BLOCK: verification authority unavailable — operation outcome cannot be confirmed'
+        ? __t('msg_hard_block_verification_authority_unavai')
         : undefined,
     },
   ];

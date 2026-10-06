@@ -66,7 +66,7 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
             name: 'SynthesizedAWSIAMPolicy',
             description: __t('synthesized_aws_policy_adherin'),
             permissions: intent,
-            providerHash: 'aws-sha256-placeholder'
+            providerHash: require('crypto').createHash('sha256').update(JSON.stringify(intent)).digest('hex')
         };
     }
 

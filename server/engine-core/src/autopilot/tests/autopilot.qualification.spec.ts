@@ -21,13 +21,14 @@ import { RemediationPlanner } from '../remediation/planner';
 import { BudgetManager } from '../safety/budget';
 import { RateLimiter } from '../safety/rate-limit';
 import * as crypto from 'crypto';
+import { __t } from "@ugondu/shared";
 
 declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('Infrastructure Autopilot Qualification Gates: AUTO-01..26', () => {
-  it('AUTO-01..06: Autonomy levels L0 to L6 delegation and checking', () => {
+describe(__t('msg_infrastructure_autopilot_qualification_g'), () => {
+  it(__t('msg_auto_01_06_autonomy_levels_l0_to_l6_dele'), () => {
     const am = new AuthorityManager();
     expect(am.checkAuthority('bot-1')).toBe(AutonomyLevel.L0_MANUAL);
     am.delegateAuthority('bot-1', AutonomyLevel.L4_HIGH_AUTONOMY, 3600);
@@ -36,7 +37,7 @@ describe('Infrastructure Autopilot Qualification Gates: AUTO-01..26', () => {
     expect(am.checkAuthority('bot-1')).toBe(AutonomyLevel.L0_MANUAL);
   });
 
-  it('AUTO-07..10: Drift detection and corrective mutation plan generation', () => {
+  it(__t('msg_auto_07_10_drift_detection_and_correctiv'), () => {
     const reconciler = new DriftReconciler();
     const planner = new RemediationPlanner();
     const driftRes = reconciler.reconcile({ resourceId: 'res-web-1' });
@@ -45,7 +46,7 @@ describe('Infrastructure Autopilot Qualification Gates: AUTO-01..26', () => {
     expect(plan.steps.length).toBeGreaterThan(0);
   });
 
-  it('AUTO-11..15: Safety budget, rate limiting and circuit breakers', () => {
+  it(__t('msg_auto_11_15_safety_budget_rate_limiting_a'), () => {
     const budget = new BudgetManager();
     const limiter = new RateLimiter();
     const b = { maxCostPerExecution: 10, dailyLimit: 100, currency: 'EUR' };
@@ -55,14 +56,14 @@ describe('Infrastructure Autopilot Qualification Gates: AUTO-01..26', () => {
     expect(limiter.checkLimit('actor-1', { maxRequests: 5, timeWindowSeconds: 60 })).toBe(true);
   });
 
-  it('AUTO-16..20: Policy versioning & reconciliation lifecycle', () => {
+  it(__t('msg_auto_16_20_policy_versioning_reconciliat'), () => {
     const versioning = new PolicyVersioning();
     expect(versioning.getActiveVersion('pol-1')).toBe('v1.0.0');
     versioning.trackChanges('pol-1', { updated: true });
     expect(versioning.getActiveVersion('pol-1')).toBe('v1.0.1');
   });
 
-  it('AUTO-21..26: APDL policy execution and decision evidence storage', () => {
+  it(__t('msg_auto_21_26_apdl_policy_execution_and_dec'), () => {
     const parser = new ApdlParser();
     const store = new DecisionEvidenceStore();
     const rules = parser.parse('[{"ruleId":"r1","condition":"true","action":"restart","priority":1}]');

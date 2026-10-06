@@ -63,7 +63,7 @@ export class TargetIdentityValidator {
 
   public validateSshIdentity(target: SshTargetIdentity, actualFingerprint: string): void {
     if (!actualFingerprint || actualFingerprint.trim() === '') {
-      throw new Error('Identity Validation Failed: Empty fingerprint returned from target.');
+      throw new Error(__t('msg_identity_validation_failed_empty_fingerp'));
     }
 
     if (target.expectedFingerprint !== actualFingerprint) {

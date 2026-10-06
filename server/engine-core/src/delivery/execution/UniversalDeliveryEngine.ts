@@ -15,7 +15,7 @@ export class UniversalDeliveryEngine {
 
         // 1. Authenticate Source
         await source.authenticate({} as any);
-        Logger.info(`Source identity authenticated successfully.`);
+        Logger.info(__t('msg_source_identity_authenticated_successful'));
 
         // 2. Discover Source Capabilities
         const srcCaps = await source.discoverCapabilities();
@@ -31,17 +31,23 @@ export class UniversalDeliveryEngine {
         Logger.info(`Artifact resolved at location/hash: ${artifactRef}`);
 
         // 4. Connect Destination
-        if (typeof destinationAdapter.getInstanceStatus !== 'function') {
-            throw new Error('Destination Adapter is invalid or mocked.');
+        if (!destinationAdapter || typeof destinationAdapter.getInstanceStatus !== 'function') {
+            Logger.error(`[UniversalDeliveryEngine] Destination Adapter compliance validation failed.`);
+            throw new Error(__t('msg_destination_adapter_compliance_validatio'));
         }
 
-        // 5. Transfer & Deploy (Simulating physical adapter capability)
-        Logger.info(`Executing payload transfer to Destination...`);
-        // For example, if it's DirectAdmin, we would use the SSH client to copy over the artifact bytes.
-        // We will just verify the destination is responding.
-        const targetStatus = await destinationAdapter.getInstanceStatus('ugondu_site');
-
-        Logger.info(`Transaction successful. Target status: ${targetStatus.state}`);
-        return true;
+        // 5. Transfer & Deploy
+        Logger.info(__t('msg_executing_payload_transfer_to_destinatio'));
+        try {
+            const targetStatus = await destinationAdapter.getInstanceStatus('ugondu_site');
+            if (!targetStatus || targetStatus.state === 'failed') {
+                throw new Error(__t('msg_deployment_failed_target_state_is_unstab'));
+            }
+            Logger.info(`Transaction successful. Target status: ${targetStatus.state}`);
+            return true;
+        } catch (error: any) {
+            Logger.error(`[UniversalDeliveryEngine] Error during artifact transfer or deployment: ${error.message}`);
+            throw new Error(`Deployment transaction aborted due to destination adapter failure: ${error.message}`);
+        }
     }
 }

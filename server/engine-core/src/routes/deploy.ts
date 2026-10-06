@@ -53,7 +53,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
       !repositoryUrl || !branch || !targetEnvironment || !token ||
       !projectId || !workspaceId || !targetId || !agentId || !agentVersion
     ) {
-      res.status(400).json({ error: 'Invalid DeploymentContext. Missing required fields or token.' });
+      res.status(400).json({ error: __t('msg_invalid_deploymentcontext_missing_requir') });
       return;
     }
 
@@ -67,7 +67,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
 
       const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
       if (!authResponse?.data?.edition) {
-        res.status(402).json({ error: 'Deployment blocked by Billing Gateway. License invalid or quota exceeded.' });
+        res.status(402).json({ error: __t('msg_deployment_blocked_by_billing_gateway_li') });
         return;
       }
 
@@ -228,7 +228,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
       if (capabilities['allowRollback']) {
         steps.push({ action: 'PRUNE_RELEASES', payload: { retention: 3 } });
       } else {
-        Logger.info('Notice: Rollbacks and release pruning are exclusive to Professional/Enterprise editions.');
+        Logger.info(__t('msg_notice_rollbacks_and_release_pruning_are'));
         steps.push({ action: 'UPSELL_NOTICE', payload: { message: __t('upsell_notice') } });
       }
 
@@ -322,7 +322,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
       !repositoryUrl || !branch || !targetEnvironment || !token ||
       !projectId || !workspaceId || !targetId || !agentId || !agentVersion
     ) {
-      res.status(400).json({ error: 'Invalid DeploymentContext. Missing required fields or token.' });
+      res.status(400).json({ error: __t('msg_invalid_deploymentcontext_missing_requir') });
       return;
     }
 
@@ -336,7 +336,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
 
       const authResponse = authResponseStr ? { data: JSON.parse(authResponseStr) } : null;
       if (!authResponse?.data?.edition) {
-        res.status(402).json({ error: 'Deployment blocked by Billing Gateway. License invalid or quota exceeded.' });
+        res.status(402).json({ error: __t('msg_deployment_blocked_by_billing_gateway_li') });
         return;
       }
 
@@ -372,7 +372,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         strategy,
         steps,
         edition,
-        message: 'Dry-run execution plan compiled successfully. No mutations have been applied.'
+        message: __t('msg_dry_run_execution_plan_compiled_successf')
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

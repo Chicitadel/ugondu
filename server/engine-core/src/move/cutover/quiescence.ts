@@ -49,7 +49,7 @@ export class QuiescenceManager {
      */
     public async achieveQuiescence(adapters: ITrafficAdapter[], timeoutMs: number): Promise<void> {
         if (!adapters || adapters.length === 0) {
-            throw new Error('No traffic adapters provided for quiescence.');
+            throw new Error(__t('msg_no_traffic_adapters_provided_for_quiesce'));
         }
 
         const drainPromises = adapters.map(async (adapter) => {

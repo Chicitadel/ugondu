@@ -57,7 +57,7 @@ export class ExpiryManager {
             expiresAt = new Date(cachedExpiry);
         } else {
             const record = await this.dbClient.query(
-                'SELECT expires_at FROM passports WHERE id = $1',
+                __t('msg_select_expires_at_from_passports_where_i'),
                 [passportId]
             );
 

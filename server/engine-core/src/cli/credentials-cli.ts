@@ -9,7 +9,7 @@ async function run() {
     if (command === 'import') {
         const filePath = args[1];
         if (!filePath) {
-            console.error('Usage: ugondu credentials import <path-to-file>');
+            console.error(__t('msg_usage_ugondu_credentials_import_path_to'));
             process.exit(1);
         }
 

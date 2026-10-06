@@ -58,7 +58,7 @@ export class ScopeEnforcer {
     }
 
     if (!scope.targets || scope.targets.length === 0) {
-      throw new Error('Scope Violation: Discovery scope must specify at least one target');
+      throw new Error(__t('msg_scope_violation_discovery_scope_must_spe'));
     }
 
     // Additional checks on depth and exclusion patterns can be added here

@@ -1,3 +1,5 @@
+import { __t } from "@ugondu/shared";
+
 /******************************************************************************
  * Project        : Ugondu
  * Module         : move/verification
@@ -60,7 +62,7 @@ export class FunctionalVerifier {
                 const errorDetails = err instanceof Error ? err.message : String(err);
                 results.push({
                     passed: false,
-                    testName: test.name || 'Anonymous Test',
+                    testName: test.name || __t('msg_anonymous_test'),
                     errorDetails
                 });
             }

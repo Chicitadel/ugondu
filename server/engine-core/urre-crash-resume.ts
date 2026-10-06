@@ -1,42 +1,91 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { URREngine } from './src/urre/execution/urre-engine';
-import { TransactionDag } from './src/urre/transaction/transaction-dag';
+import { TransactionDag, DagNode } from './src/urre/transaction/transaction-dag';
+import { TransactionStore } from './src/urre/transaction/transaction-store';
+import { EC2Client, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
 
-const stateFile = path.join(__dirname, 'urre-state-P0-4.json');
+// We write a specific integration test for P0-4 using real AWS client
+const REGION = 'us-east-1'; // use default test region or from process.env
+
+async function registerRealHandlers(engine: URREngine) {
+    const ec2 = new EC2Client({ region: REGION });
+    
+    engine.registerHandler('aws', 'CREATE_VPC_CRASH', async (node: DagNode) => {
+        console.log('[URRE-CRASH] Process A executing CREATE_VPC_CRASH...');
+        const res = await ec2.send(new CreateVpcCommand({ CidrBlock: '10.0.99.0/24' }));
+        const vpcId = res.Vpc!.VpcId!;
+        console.log(`[URRE-CRASH] Process A VPC Created: ${vpcId}`);
+        // We simulate a hard crash right after VPC success
+        // In a real scenario, this would be mid-execution, but to test recovery
+        // we artificially exit here to prove the node is saved as SUCCESS and won't rerun.
+        setTimeout(() => {
+            console.log('[URRE-CRASH] CRASHING PROCESS A intentionally.');
+            process.exit(1);
+        }, 500);
+        return { vpcId };
+    }, async (node: DagNode) => {
+        if (node.output?.vpcId) {
+            await ec2.send(new DeleteVpcCommand({ VpcId: node.output.vpcId }));
+        }
+    });
+
+    engine.registerHandler('aws', 'CREATE_SUBNET_REAL', async (node: DagNode) => {
+        console.log('[URRE-CRASH] Process B executing CREATE_SUBNET_REAL...');
+        // We just prove execution reached here
+        return { subnet: 'success' };
+    }, async () => {});
+}
 
 async function phase1() {
     console.log('--- PROCESS A: Starting Transaction ---');
-    let tx = new TransactionDag('tx-p0-4');
-    tx.addNode('VPC', 'aws', 'CREATE_VPC');
-    tx.addNode('SUBNET', 'aws', 'CREATE_SUBNET');
+    const engine = new URREngine();
+    await registerRealHandlers(engine);
 
-    // Simulate successful VPC creation
-    const vpcNode = tx.getNode('VPC')!;
-    vpcNode.status = 'SUCCESS';
-    vpcNode.output = { vpcId: 'vpc-real-123' };
+    const tx = new TransactionDag('tx-p0-4-real');
+    tx.addNode('VPC', 'aws', 'CREATE_VPC_CRASH');
+    tx.addNode('SUBNET', 'aws', 'CREATE_SUBNET_REAL');
+    tx.addEdge('VPC', 'SUBNET'); // SUBNET depends on VPC
 
-    fs.writeFileSync(stateFile, JSON.stringify(tx.serialize()), 'utf8');
-    console.log('PROCESS A: Persisted state. Now intentionally crashing.');
-    process.exit(1);
+    console.log('PROCESS A: Submitting transaction...');
+    // This will trigger VPC creation, and then crash the process during the VPC handler's delayed exit
+    await engine.executeTransaction(tx);
+    
+    // We should not reach here if it crashes cleanly
+    await new Promise(r => setTimeout(r, 2000));
 }
 
 async function phase2() {
     console.log('--- PROCESS B: Resuming Transaction ---');
-    if (!fs.existsSync(stateFile)) {
-        throw new Error('State file missing!');
-    }
-    const stateStr = fs.readFileSync(stateFile, 'utf8');
-    const txRecovered = TransactionDag.deserialize(JSON.parse(stateStr));
+    const engine = new URREngine();
+    await registerRealHandlers(engine);
 
-    const vpcNode = txRecovered.getNode('VPC')!;
+    const store = new TransactionStore();
+    const existingTx = await store.load('tx-p0-4-real');
+    if (!existingTx) {
+        throw new Error('Transaction tx-p0-4-real not found on disk!');
+    }
+
+    const vpcNode = existingTx.getNode('VPC')!;
     if (vpcNode.status !== 'SUCCESS') {
-        throw new Error('VPC node state not restored');
+        throw new Error('VPC node state was not SUCCESS before crash!');
     }
-    console.log('PROCESS B: Resumed successfully. VPC state is SUCCESS.');
+    const vpcId = vpcNode.output.vpcId;
+    console.log(`PROCESS B: Loaded VPC ID ${vpcId} from state. Will skip recreation.`);
 
-    // Cleanup
-    fs.unlinkSync(stateFile);
+    console.log('PROCESS B: Resuming transaction execution...');
+    await engine.executeTransaction(existingTx); // this skips SUCCESS nodes
+
+    const subNode = existingTx.getNode('SUBNET')!;
+    if (subNode.status !== 'SUCCESS') {
+        throw new Error('SUBNET node did not execute successfully in Process B!');
+    }
+
+    console.log('PROCESS B: Success! Cleaning up AWS VPC...');
+    const ec2 = new EC2Client({ region: REGION });
+    await ec2.send(new DeleteVpcCommand({ VpcId: vpcId }));
+
+    console.log('PROCESS B: Cleanup done.');
     process.exit(0);
 }
 
@@ -44,4 +93,18 @@ if (process.argv[2] === 'phase1') {
     phase1();
 } else if (process.argv[2] === 'phase2') {
     phase2();
+} else {
+    // Controller orchestrating both
+    const { spawnSync } = require('child_process');
+    console.log('Running URRE Real Crash Test...');
+    const p1 = spawnSync('npx', ['ts-node', __filename, 'phase1'], { stdio: 'inherit' });
+    console.log(`Process A exited with code ${p1.status} (expected 1 for crash)`);
+    if (p1.status === 0) {
+        console.error('Process A did not crash as expected!');
+        process.exit(1);
+    }
+
+    const p2 = spawnSync('npx', ['ts-node', __filename, 'phase2'], { stdio: 'inherit' });
+    console.log(`Process B exited with code ${p2.status}`);
+    process.exit(p2.status);
 }

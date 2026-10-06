@@ -35,11 +35,11 @@ export class CredentialIntakeOrchestrator {
         }
 
         if (!matchedNormalizer) {
-            throw new Error('Credential format not recognized by any supported provider (e.g. AWS CSV, Azure JSON).');
+            throw new Error(__t('msg_credential_format_not_recognized_by_any'));
         }
 
         // 1. Normalize
-        Logger.info(`Normalizing credential...`);
+        Logger.info(__t('msg_normalizing_credential'));
         const normalized = await matchedNormalizer.normalize(rawContent);
 
         // 2. Authenticate
@@ -48,7 +48,7 @@ export class CredentialIntakeOrchestrator {
         const identity = await verifier.verify(normalized);
 
         // 3. Authorize
-        Logger.info(`Running capability authorization preflight...`);
+        Logger.info(__t('msg_running_capability_authorization_preflig'));
         const preflight = this.getPreflight(normalized.provider);
         const authResults = await preflight.preflight(normalized, identity, capabilities);
 

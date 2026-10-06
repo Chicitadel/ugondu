@@ -43,7 +43,7 @@ import { IncidentRecord } from '../model/incident';
  */
 export class IncidentFingerprinter {
   fingerprint(incident: Partial<IncidentRecord>): string {
-    const key = `${incident.targetId}:${incident.category}:${incident.severity}`;
+    const key = `${incident.targetId}:${incident.incidentClass}:${incident.severity}`;
     return createHash('sha256').update(key).digest('hex').slice(0, 16);
   }
 }

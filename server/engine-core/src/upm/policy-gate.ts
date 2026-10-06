@@ -57,7 +57,7 @@ export class UpmExecutionGate {
     /** Generates a SHA-256 hash of any canonicalized object */
     private static hashOf(obj: any): string {
         if (!process.env.UGONDU_UPM_SECRET) {
-            throw new Error('SECURITY_VIOLATION: UGONDU_UPM_SECRET is required to seal execution authorizations. The UPM must fail closed.');
+            throw new Error(__t('msg_security_violation_ugondu_upm_secret_is'));
         }
         const canonical = canonicalize(obj) || '{}';
         return crypto.createHmac('sha256', process.env.UGONDU_UPM_SECRET).update(canonical, 'utf8').digest('hex');
@@ -109,12 +109,12 @@ export class UpmExecutionGate {
                 status: 'DENY',
                 evidence: {
                     policyId: 'UPM-CAPABILITY-001',
-                    requirement: 'Edition Capability Envelope must authorize all required providers.',
+                    requirement: __t('msg_edition_capability_envelope_must_authori'),
                     targetCapability: missing.join(', '),
                     observedState: __t('capability_not_present_in_edit'),
                     affectedIrNodes: context.ir.nodes.filter(n => missing.includes(n.provider)).map(n => n.id),
                     riskLevel: 'HIGH',
-                    remediation: 'Upgrade edition or modify intent to use authorized providers.'
+                    remediation: __t('msg_upgrade_edition_or_modify_intent_to_use')
                 },
                 timestamp: new Date(),
                 policyVersion: context.policyVersion

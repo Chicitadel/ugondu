@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"github.com/ugondu/client/i18n"
 	"archive/zip"
 	"errors"
 	"fmt"
@@ -60,7 +61,7 @@ func ExtractArchiveSafe(archivePath, targetDir string) error {
 	
 	r, err := zip.OpenReader(archivePath)
 	if err != nil {
-		return fmt.Errorf("ERR_ZIP_OPEN: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_zip_open_w"), err)
 	}
 	defer r.Close()
 
@@ -109,7 +110,7 @@ func ExtractArchiveSafe(archivePath, targetDir string) error {
 func extractFile(f *zip.File, dest string) error {
 	rc, err := f.Open()
 	if err != nil {
-		return fmt.Errorf("ERR_ZIP_FILE_OPEN: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_zip_file_open_w"), err)
 	}
 	defer rc.Close()
 
@@ -117,12 +118,12 @@ func extractFile(f *zip.File, dest string) error {
 	
 	out, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 	if err != nil {
-		return fmt.Errorf("ERR_FILE_CREATE: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_file_create_w"), err)
 	}
 	defer out.Close()
 
 	if _, err := io.Copy(out, rc); err != nil {
-		return fmt.Errorf("ERR_FILE_EXTRACT: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_file_extract_w"), err)
 	}
 	return nil
 }

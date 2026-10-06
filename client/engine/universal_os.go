@@ -74,7 +74,7 @@ func CopyDir(src string, dst string, excludeGit bool) error {
 		resolver := &SafePathResolver{}
 		destPath, err := resolver.ResolveSafePath(dst, relPath)
 		if err != nil {
-			return fmt.Errorf("ERR_SAFE_PATH: %w", err)
+			return fmt.Errorf(i18n.T("msg_err_safe_path_w"), err)
 		}
 
 		if info.IsDir() {
@@ -112,7 +112,7 @@ func copyFile(src, dst string, mode os.FileMode) error {
 // Uses temp-link and rename for POSIX atomic replacement.
 func AtomicSymlink(target string, symlinkPath string) error {
 	if _, err := os.Stat(target); err != nil {
-		return fmt.Errorf("ERR_TARGET_NOT_FOUND: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_target_not_found_w"), err)
 	}
 
 	// Atomic symlink swap — no deployment gap

@@ -82,7 +82,7 @@ func (a *CopyFileAction) Execute(env *ExecutionEnvelope, payload map[string]inte
 	}
 	err = copyFile(p.Source, p.Destination, 0644)
 	if err != nil {
-		return nil, fmt.Errorf("ERR_COPY_FAILED: %w", err)
+		return nil, fmt.Errorf(i18n.T("msg_err_copy_failed_w"), err)
 	}
 	return []string{fmt.Sprintf(i18n.T("copied_to"), p.Source, p.Destination)}, nil
 }
@@ -115,7 +115,7 @@ func (a *CreateDirectoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 	}
 	err = os.MkdirAll(p.Path, 0755)
 	if err != nil {
-		return nil, fmt.Errorf("ERR_MKDIR_FAILED: %w", err)
+		return nil, fmt.Errorf(i18n.T("msg_err_mkdir_failed_w"), err)
 	}
 	return []string{fmt.Sprintf(i18n.T("created_directory"), p.Path)}, nil
 }
@@ -150,7 +150,7 @@ func (a *SymlinkAction) Execute(env *ExecutionEnvelope, payload map[string]inter
 	}
 	err = AtomicSymlink(p.Target, p.Link)
 	if err != nil {
-		return nil, fmt.Errorf("ERR_SYMLINK_FAILED: %w", err)
+		return nil, fmt.Errorf(i18n.T("msg_err_symlink_failed_w"), err)
 	}
 	return []string{fmt.Sprintf(i18n.T("created_symlink"), p.Link, p.Target)}, nil
 }
@@ -184,7 +184,7 @@ func (a *ServiceRestartAction) Execute(env *ExecutionEnvelope, payload map[strin
 	adapter := adapters.NewServiceRestartAdapter()
 	err = adapter.Restart(p.ServiceName)
 	if err != nil {
-		return nil, fmt.Errorf("ERR_SERVICE_RESTART_FAILED: %w", err)
+		return nil, fmt.Errorf(i18n.T("msg_err_service_restart_failed_w"), err)
 	}
 	return []string{fmt.Sprintf(i18n.T("restarted_service"), p.ServiceName)}, nil
 }
@@ -201,7 +201,7 @@ func (a *ComposerInstallAction) Execute(env *ExecutionEnvelope, payload map[stri
 	var logs []string
 	p, err := ValidateComposerInstallPayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf("COMPOSER_INSTALL validation failure: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_composer_install_validation_failure_w"), err)
 	}
 
 	fmt.Printf("     -> %s\n", i18n.T("composer_install_running", p.Command, p.WorkingDirectory))

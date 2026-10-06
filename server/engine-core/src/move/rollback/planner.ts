@@ -1,3 +1,5 @@
+import { __t } from "@ugondu/shared";
+
 /******************************************************************************
  * Project        : Ugondu
  * Module         : move/rollback
@@ -67,8 +69,8 @@ export class RollbackPlanner {
         const reasoning: string[] = [];
 
         if (state.targetReceivedWritesCount > 0 && state.sourceIsStrictlyQuiesced) {
-            reasoning.push('Target has received writes and source is strictly quiesced.');
-            reasoning.push('Rollback via DNS flip would result in data loss.');
+            reasoning.push(__t('msg_target_has_received_writes_and_source_is'));
+            reasoning.push(__t('msg_rollback_via_dns_flip_would_result_in_da'));
 
             return {
                 feasible: false,
@@ -77,7 +79,7 @@ export class RollbackPlanner {
             };
         }
 
-        reasoning.push('Safe to perform DNS flip rollback.');
+        reasoning.push(__t('msg_safe_to_perform_dns_flip_rollback'));
         return {
             feasible: true,
             strategy: RollbackStrategy.DNS_FLIP,

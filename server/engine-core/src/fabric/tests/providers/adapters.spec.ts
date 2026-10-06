@@ -2,9 +2,10 @@ import { AwsAdapter, IAwsClient } from '../../../fabric/providers/aws';
 import { KubernetesAdapter, IKubernetesClient } from '../../../fabric/providers/kubernetes';
 import { LinuxAdapter, ILinuxClient } from '../../../fabric/providers/linux';
 import { CpanelAdapter, IWhmClient } from '../../../fabric/providers/cpanel';
+import { __t } from "@ugondu/shared";
 
-describe('Provider Adapters (FAB-11)', () => {
-  it('AwsAdapter formats results according to the fabric contract', async () => {
+describe(__t('msg_provider_adapters_fab_11'), () => {
+  it(__t('msg_awsadapter_formats_results_according_to'), async () => {
     const mockClient = {
       resolveInstanceType: async () => 't3.micro',
       runInstances: async () => ({ id: 'i-123', ip: '10.0.0.5', state: 'running' }),
@@ -25,7 +26,7 @@ describe('Provider Adapters (FAB-11)', () => {
     expect(result.state).toBe('running');
   });
 
-  it('KubernetesAdapter formats results according to the fabric contract', async () => {
+  it(__t('msg_kubernetesadapter_formats_results_accord'), async () => {
     const mockClient: IKubernetesClient = {
       applyWorkload: async () => ({ id: 'deploy-1', state: 'running' }),
       deleteWorkload: async () => {},
@@ -41,7 +42,7 @@ describe('Provider Adapters (FAB-11)', () => {
     expect(result.id).toBe('deploy-1');
   });
 
-  it('LinuxAdapter formats results according to the fabric contract', async () => {
+  it(__t('msg_linuxadapter_formats_results_according_t'), async () => {
     const mockClient: ILinuxClient = {
       checkCapacity: async () => true,
       runProcess: async () => ({ id: 'pid-1', state: 'running' }),
@@ -57,7 +58,7 @@ describe('Provider Adapters (FAB-11)', () => {
     expect(result.id).toBe('pid-1');
   });
 
-  it('CpanelAdapter formats results according to the fabric contract', async () => {
+  it(__t('msg_cpaneladapter_formats_results_according'), async () => {
     const mockClient: IWhmClient = {
       createHostedApp: async () => ({ id: 'app-1', state: 'running' }),
       removeHostedApp: async () => {},

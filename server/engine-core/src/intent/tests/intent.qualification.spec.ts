@@ -14,15 +14,17 @@
 import { parse } from '../parser/parser';
 import { assertWellFormed, provisioningWaves } from '../../fabric/engine/PlanGraph';
 import { fakeFabric } from '../../fabric/tests/support/fakeCloud';
+import { __t } from "@ugondu/shared";
+
 // removed missing CapabilityEvaluation import
 
 declare var describe: any;
 declare var it: any;
 declare var expect: any;
 
-describe('Intent & Architecture Qualification Gates: INT-01..08, ARCH-01..07, PACK-01..06, QUAL-01..06', () => {
-  it('INT-01..08: Natural Language Intent normalization & constraint parsing', () => {
-    const rawIntent = 'Deploy containerized web app to AWS with RDS postgres';
+describe(__t('msg_intent_architecture_qualification_gates'), () => {
+  it(__t('msg_int_01_08_natural_language_intent_normal'), () => {
+    const rawIntent = __t('msg_deploy_containerized_web_app_to_aws_with');
     const parsed = parse(rawIntent);
     expect(parsed.raw).toBe(rawIntent);
     expect(parsed.application).toBeDefined();
@@ -30,7 +32,7 @@ describe('Intent & Architecture Qualification Gates: INT-01..08, ARCH-01..07, PA
     expect(parsed.availability.healthCheck).toBe(true);
   });
 
-  it('ARCH-01..07: Architecture IR synthesis, candidate generation & circular dependency prevention', () => {
+  it(__t('msg_arch_01_07_architecture_ir_synthesis_can'), () => {
     const architectureIR = {
       nodes: [
         { id: 'node-web', type: 'COMPUTE', provider: 'aws', config: { instanceName: 'web', cpuCores: 2, memoryMb: 4096, osImage: 'ubuntu' } },
@@ -52,18 +54,18 @@ describe('Intent & Architecture Qualification Gates: INT-01..08, ARCH-01..07, PA
     expect(() => provisioningWaves(circularIR as any)).toThrow();
   });
 
-  it('PACK-01..06: OutcomePack synthesis, cryptographic sealing & template immutability', () => {
+  it(__t('msg_pack_01_06_outcomepack_synthesis_cryptog'), () => {
     // Testing the shared OutcomePack definition
     const outcomePack = {
       packId: 'pack-web-rds-v1',
       version: '1.0.0',
-      intent: 'Deploy containerized web app to AWS with RDS postgres',
+      intent: __t('msg_deploy_containerized_web_app_to_aws_with'),
       verificationSuite: { requiredTests: [], successCriteria: [] }
     };
     expect(outcomePack.packId).toBe('pack-web-rds-v1');
   });
 
-  it('QUAL-01..06: Cost model estimation & deterministic reproducibility', () => {
+  it(__t('msg_qual_01_06_cost_model_estimation_determi'), () => {
     const estimate = { monthlyUsd: 120, accuracyScore: 0.95 };
     expect(estimate.accuracyScore).toBeGreaterThanOrEqual(0.9);
   });

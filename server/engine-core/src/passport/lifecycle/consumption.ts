@@ -48,7 +48,7 @@ export class ConsumptionManager {
 
     public async isConsumed(passportId: string): Promise<boolean> {
         const record = await this.dbClient.query(
-            'SELECT is_consumed FROM passports WHERE id = $1',
+            __t('msg_select_is_consumed_from_passports_where'),
             [passportId]
         );
 
@@ -61,7 +61,7 @@ export class ConsumptionManager {
 
     public async markConsumed(passportId: string, executionId: string): Promise<void> {
         await this.dbClient.execute(
-            'UPDATE passports SET is_consumed = true, consumed_by = $1, consumed_at = NOW() WHERE id = $2 AND is_consumed = false',
+            __t('msg_update_passports_set_is_consumed_true_co'),
             [executionId, passportId]
         );
     }

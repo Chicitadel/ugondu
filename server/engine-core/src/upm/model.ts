@@ -71,7 +71,7 @@ export class UpmManager {
         policies?: string[];
     }): UniversalProjectModel {
         if (!params.projectId || !params.projectName || !params.targetEnvironment) {
-            throw new Error('Invalid DeploymentContext. Missing required fields or token.');
+            throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
 
         return {
@@ -93,7 +93,7 @@ export class UpmManager {
             throw new Error(__t('error_schema_invalid'));
         }
         if (!model.projectId || !model.projectName || !model.infrastructure || !model.infrastructure.targetEnvironment) {
-            throw new Error('Invalid DeploymentContext. Missing required fields or token.');
+            throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
         return true;
     }

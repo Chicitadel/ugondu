@@ -29,8 +29,7 @@
 
 import { z } from "zod";
 
-// Mocking translation function for UI/Error strings
-declare function __t(key: string, args?: Record<string, string | number>): string;
+import { __t } from "@ugondu/shared";
 
 export const CPanelConfigSchema = z.object({
   apache: z.object({

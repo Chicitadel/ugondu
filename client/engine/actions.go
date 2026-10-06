@@ -81,7 +81,7 @@ func ValidateFetchRepositoryPayload(payload map[string]interface{}) (*FetchRepos
 	}
 	rawURL, ok := payload["url"].(string)
 	if !ok || strings.TrimSpace(rawURL) == "" {
-		return nil, fmt.Errorf("FETCH_REPOSITORY: 'url' must be a non-empty string")
+		return nil, fmt.Errorf(i18n.T("msg_fetch_repository_url_must_be_a_non_empty"))
 	}
 	branch, _ := payload["branch"].(string)
 	if strings.TrimSpace(branch) == "" {
@@ -103,10 +103,10 @@ func ValidateSyncEnvironmentPayload(payload map[string]interface{}) (*SyncEnviro
 	}
 	strategy, ok := payload["strategy"].(string)
 	if !ok || strings.TrimSpace(strategy) == "" {
-		return nil, fmt.Errorf("SYNC_ENVIRONMENT: 'strategy' must be a non-empty string")
+		return nil, fmt.Errorf(i18n.T("msg_sync_environment_strategy_must_be_a_non"))
 	}
 	if strategy != "quota-sync" && strategy != "atomic" {
-		return nil, fmt.Errorf("SYNC_ENVIRONMENT: unsupported strategy '%s' (expected 'quota-sync' or 'atomic')", strategy)
+		return nil, fmt.Errorf(i18n.T("msg_sync_environment_unsupported_strategy_s"), strategy)
 	}
 	return &SyncEnvironmentPayload{Strategy: strategy}, nil
 }
@@ -127,7 +127,7 @@ func ValidatePruneReleasesPayload(payload map[string]interface{}) (*PruneRelease
 			case int64:
 				retention = int(v)
 			default:
-				return nil, fmt.Errorf("PRUNE_RELEASES: 'retention' must be an integer number")
+				return nil, fmt.Errorf(i18n.T("msg_prune_releases_retention_must_be_an_inte"))
 			}
 		}
 	}
@@ -190,7 +190,7 @@ func ValidateNodeInstallPayload(payload map[string]interface{}) (*NodeInstallPay
 		case int64:
 			p.TimeoutMs = v
 		default:
-			return nil, fmt.Errorf("NODE_INSTALL: 'timeoutMs' must be a numeric value")
+			return nil, fmt.Errorf(i18n.T("msg_node_install_timeoutms_must_be_a_numeric"))
 		}
 	}
 
@@ -236,7 +236,7 @@ func ValidateComposerInstallPayload(payload map[string]interface{}) (*ComposerIn
 		case int64:
 			p.TimeoutMs = v
 		default:
-			return nil, fmt.Errorf("COMPOSER_INSTALL: 'timeoutMs' must be a numeric value")
+			return nil, fmt.Errorf(i18n.T("msg_composer_install_timeoutms_must_be_a_num"))
 		}
 	}
 
@@ -256,7 +256,7 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 	var logs []string
 	p, err := ValidateFetchRepositoryPayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf("FETCH_REPOSITORY validation failure: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_fetch_repository_validation_failure_w"), err)
 	}
 
 	// Extract and strip credentials to prevent process table exposure
@@ -299,7 +299,7 @@ func (a *SyncEnvironmentAction) Execute(env *ExecutionEnvelope, payload map[stri
 	var logs []string
 	p, err := ValidateSyncEnvironmentPayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf("SYNC_ENVIRONMENT validation failure: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_sync_environment_validation_failure_w"), err)
 	}
 
 	homeDir, _ := os.UserHomeDir()
@@ -340,7 +340,7 @@ func (a *PruneReleasesAction) Execute(env *ExecutionEnvelope, payload map[string
 	var logs []string
 	p, err := ValidatePruneReleasesPayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf("PRUNE_RELEASES validation failure: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_prune_releases_validation_failure_w"), err)
 	}
 
 	homeDir, _ := os.UserHomeDir()
@@ -365,7 +365,7 @@ func (a *UpsellNoticeAction) Execute(env *ExecutionEnvelope, payload map[string]
 	var logs []string
 	p, err := ValidateUpsellNoticePayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf("UPSELL_NOTICE validation failure: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_upsell_notice_validation_failure_w"), err)
 	}
 
 	fmt.Println("     -> 💰")
@@ -385,7 +385,7 @@ func (a *NodeInstallAction) Execute(env *ExecutionEnvelope, payload map[string]i
 	var logs []string
 	p, err := ValidateNodeInstallPayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf("NODE_INSTALL validation failure: %w", err)
+		return logs, fmt.Errorf(i18n.T("msg_node_install_validation_failure_w"), err)
 	}
 
 	fmt.Printf("     -> %s\n", i18n.T("node_install_running", p.PackageManager, p.WorkingDirectory))

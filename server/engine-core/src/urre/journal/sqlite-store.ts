@@ -34,6 +34,7 @@
 import { IExecutionJournal, IJournalEntry } from './journal';
 import { IntegrityManager } from './integrity';
 import Database from 'better-sqlite3';
+import { __t } from "@ugondu/shared";
 
 /**
  * @class SqliteStore
@@ -61,7 +62,7 @@ export class SqliteStore implements IExecutionJournal {
     }
 
     private getLastEntry(): IJournalEntry | null {
-        const stmt = this.db.prepare('SELECT * FROM journal_entries ORDER BY sequenceNumber DESC LIMIT 1');
+        const stmt = this.db.prepare(__t('msg_select_from_journal_entries_order_by_seq'));
         const row = stmt.get() as any;
         if (!row) return null;
         return {
@@ -75,14 +76,14 @@ export class SqliteStore implements IExecutionJournal {
         const previousHash = lastEntry ? lastEntry.hash : '';
         const timestamp = Date.now();
 
-        const stmt = this.db.prepare('INSERT INTO journal_entries (timestamp, operationType, payload, hash) VALUES (?, ?, ?, ?) RETURNING sequenceNumber');
+        const stmt = this.db.prepare(__t('msg_insert_into_journal_entries_timestamp_op'));
         const payloadStr = JSON.stringify(payload);
 
         let newSequenceNumber = 0;
         let newHash = '';
 
         const transaction = this.db.transaction(() => {
-            const nextSeqStmt = this.db.prepare('SELECT COALESCE(MAX(sequenceNumber), 0) + 1 AS nextSeq FROM journal_entries');
+            const nextSeqStmt = this.db.prepare(__t('msg_select_coalesce_max_sequencenumber_0_1_a'));
             const { nextSeq } = nextSeqStmt.get() as { nextSeq: number };
             newSequenceNumber = nextSeq;
 
@@ -103,7 +104,7 @@ export class SqliteStore implements IExecutionJournal {
     }
 
     public async getEntry(sequenceNumber: number): Promise<IJournalEntry | null> {
-        const stmt = this.db.prepare('SELECT * FROM journal_entries WHERE sequenceNumber = ?');
+        const stmt = this.db.prepare(__t('msg_select_from_journal_entries_where_sequen'));
         const row = stmt.get(sequenceNumber) as any;
         if (!row) return null;
         return {
@@ -113,7 +114,7 @@ export class SqliteStore implements IExecutionJournal {
     }
 
     public async verifyIntegrity(): Promise<boolean> {
-        const stmt = this.db.prepare('SELECT * FROM journal_entries ORDER BY sequenceNumber ASC');
+        const stmt = this.db.prepare(__t('msg_select_from_journal_entries_order_by_seq'));
         const rows = stmt.all() as any[];
         const entries: IJournalEntry[] = rows.map(r => ({
             ...r,
@@ -123,7 +124,7 @@ export class SqliteStore implements IExecutionJournal {
     }
 
     public async getRecentEntries(limit: number): Promise<IJournalEntry[]> {
-        const stmt = this.db.prepare('SELECT * FROM journal_entries ORDER BY sequenceNumber DESC LIMIT ?');
+        const stmt = this.db.prepare(__t('msg_select_from_journal_entries_order_by_seq'));
         const rows = stmt.all(limit) as any[];
         return rows.map(r => ({
             ...r,

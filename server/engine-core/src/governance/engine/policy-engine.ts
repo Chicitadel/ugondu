@@ -1,5 +1,6 @@
 import { UniversalPermission, UniversalPolicy, PolicyDecisionRecord } from '../model/authorization';
 import { PolicyCanonicalizer, PolicyFingerprint, PolicyRegistry } from './policy-deduplication';
+import { __t } from "@ugondu/shared";
 
 export interface ProviderAuthorizationAdapter {
     providerIdentifier: string;
@@ -20,17 +21,17 @@ export class PolicyGovernanceEngine {
     public evaluateIntent(provider: string, intent: UniversalPermission[], principal: string): PolicyDecisionRecord {
         const adapter = this.adapters.get(provider);
         if (!adapter) {
-            return this.createFailRecord(provider, principal, intent, 'Provider adapter not found. Failing closed.');
+            return this.createFailRecord(provider, principal, intent, __t('msg_provider_adapter_not_found_failing_close'));
         }
 
         const canEnforce = adapter.verifyCapability(intent);
         if (!canEnforce) {
-            return this.createFailRecord(provider, principal, intent, 'SECURITY BOUNDARY LOSS: Provider cannot enforce exact intent natively.');
+            return this.createFailRecord(provider, principal, intent, __t('msg_security_boundary_loss_provider_cannot_e'));
         }
 
         for (const p of intent) {
             if (p.action === '*' || p.resource === '*') {
-                return this.createFailRecord(provider, principal, intent, 'POL-002 VIOLATION: Wildcard privilege requested without justification.');
+                return this.createFailRecord(provider, principal, intent, __t('msg_pol_002_violation_wildcard_privilege_req'));
             }
         }
 
