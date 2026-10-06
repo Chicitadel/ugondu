@@ -180,3 +180,19 @@ Assert-No-Match -Pattern "(bash |sh |cp |mv |systemctl |powershell |aws |gcloud 
 
 
 
+echo "26. AI Execution Invariants Document Exists"
+if (-not (Test-Path ".governance/policies/ai-execution-invariants.yaml")) {
+    Write-Error "Missing AI Execution Invariants policy"
+    exit 1
+}
+
+echo "27. Model Independence Enforced"
+$matrix = Get-Content ".governance/policies/ai-execution-invariants.yaml" -Raw
+if (-not ($matrix -match "Model Independence Invariant")) {
+    Write-Error "Missing Model Independence Invariant"
+    exit 1
+}
+if (-not ($matrix -match "Agent Equivalence Invariant")) {
+    Write-Error "Missing Agent Equivalence Invariant"
+    exit 1
+}
