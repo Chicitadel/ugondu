@@ -32,7 +32,41 @@ export class ZddTopologyRepair implements RecoveryCapability {
         if (!plan.requiresInfrastructureRepair) return true;
         // Automatically executes the ZDD cleanup, rename, and symlink restoration sequence
         // COR-013: Do not return true if incomplete
-        throw new Error('ZddTopologyRepair is not yet fully implemented.');
+        
+        for (const repair of plan.infrastructureRepairs) {
+            if (repair.type === 'REMOVE_DUMMY_DOCROOTS') {
+                if (typeof adapter.removeDirectory === 'function') {
+                    await adapter.removeDirectory(`${scope.repositoryPath}/public_html`);
+                } else if (typeof adapter.executeAction === 'function') {
+                    await adapter.executeAction('REMOVE_DIRECTORY', { target: `${scope.repositoryPath}/public_html` });
+                } else {
+                    throw new Error('Adapter does not support removeDirectory abstraction');
+                }
+            } else if (repair.type === 'RESTORE_BKUP_DIRECTORIES') {
+                if (typeof adapter.renameDirectory === 'function') {
+                    await adapter.renameDirectory(`${scope.repositoryPath}/public_html_bkup`, `${scope.repositoryPath}/public_html`);
+                } else if (typeof adapter.executeAction === 'function') {
+                    await adapter.executeAction('RENAME_DIRECTORY', { source: `${scope.repositoryPath}/public_html_bkup`, target: `${scope.repositoryPath}/public_html` });
+                } else {
+                    throw new Error('Adapter does not support renameDirectory abstraction');
+                }
+            } else if (repair.type === 'REBUILD_SYMLINK_CHAIN') {
+                if (typeof adapter.createSymlink === 'function') {
+                    // chain is ['public_html', 'current', 'releases/latest']
+                    // current -> public_html
+                    await adapter.createSymlink(`${scope.repositoryPath}/${repair.chain[1]}`, `${scope.repositoryPath}/${repair.chain[0]}`);
+                    // releases/latest -> current
+                    await adapter.createSymlink(`${scope.repositoryPath}/${repair.chain[2]}`, `${scope.repositoryPath}/${repair.chain[1]}`);
+                } else if (typeof adapter.executeAction === 'function') {
+                    await adapter.executeAction('SYMLINK', { target: `${scope.repositoryPath}/${repair.chain[1]}`, link: `${scope.repositoryPath}/${repair.chain[0]}` });
+                    await adapter.executeAction('SYMLINK', { target: `${scope.repositoryPath}/${repair.chain[2]}`, link: `${scope.repositoryPath}/${repair.chain[1]}` });
+                } else {
+                    throw new Error('Adapter does not support createSymlink abstraction');
+                }
+            }
+        }
+        
+        return true;
     }
 }
 
