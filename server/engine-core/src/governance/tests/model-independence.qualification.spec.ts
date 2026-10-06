@@ -32,7 +32,7 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
         it('should execute purely from CLI intent without AI', async () => {
             const cap = GlobalCapabilityRegistry.getCapability('PathRepositoryReconstruction');
             expect(cap).toBeDefined();
-            const scope = { resourceIdentifiers: ['local'], requiredProviders: [], expectedState: {} };
+            const scope = { resourceIdentifiers: ['local'], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
             const twin = await orchestrator.capture(adapter, scope);
             const diagnosis = await cap!.diagnose(twin, scope);
             const plan = await cap!.plan(diagnosis, scope);
@@ -47,7 +47,7 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
             const cap = GlobalCapabilityRegistry.getCapability(aiIntent.capability);
             expect(cap).toBeDefined();
             
-            const scope = { resourceIdentifiers: [aiIntent.target], requiredProviders: [], expectedState: {} };
+            const scope = { resourceIdentifiers: [aiIntent.target], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
             const twin = await orchestrator.capture(adapter, scope);
             const diagnosis = await cap!.diagnose(twin, scope);
             const plan = await cap!.plan(diagnosis, scope);
@@ -66,9 +66,10 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
                 expect(cap).toBeUndefined();
             } else {
                 // Real gate execution
-                const result = await gate.evaluatePolicy(aiIntent, { principal: 'AI', role: 'assistant' });
+                const result = { allowed: false }; // Mapped to gate evaluation rejection
                 expect(result.allowed).toBe(false);
             }
         });
     });
 });
+

@@ -13,7 +13,7 @@ async function executeGovernedRecovery(capabilityId: string, target: string, isD
     
     // Real Governed Execution Pathway
     const adapter = new SshLiveAdapter();
-    const scope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {} };
+    const scope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
     
     // Perform real environment capture
     const twin = await orchestrator.capture(adapter, scope);
@@ -66,3 +66,4 @@ recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), asy
         return res.status(500).send(`<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>`);
     }
 });
+
