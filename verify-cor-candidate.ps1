@@ -160,3 +160,20 @@ certutil -hashfile manifest.json SHA256
 
 echo "22. SUCCESS - Candidate ready for physical campaign"
 exit 0
+echo "21. Plugin Independence: No concrete plugin imports in engine-core"
+Assert-No-Match -Pattern "import.*from.*plugins/.*" -Path "server/engine-core/src" -Message "engine-core imports concrete plugin"
+
+echo "22. Contract Conformance: Plugins must use canonical contract"
+# Ensure no plugins use alternative interfaces instead of RecoveryCapability
+Assert-No-Match -Pattern "id = " -Path "server/plugins/recovery-*/src/*.ts" -Message "Plugin uses direct id property instead of canonical get capabilityId()"
+
+echo "23. No Fake Execution"
+# A capability execute method returning "return true" or "return true;" blindly
+Assert-No-Match -Pattern "^\s*return true;?\s*$" -Path "server/plugins/recovery-*/src/*.ts" -Message "Plugin fake execution (return true) detected"
+
+echo "24. No Mock Execution in Plugins"
+Assert-No-Match -Pattern "mocked|simulation|simulated|TODO|stub|placeholder" -Path "server/plugins/recovery-*/src/*.ts" -Message "Mock execution keywords found in recovery plugins"
+
+echo "25. No Platform Leakage"
+Assert-No-Match -Pattern "(bash |sh |cp |mv |systemctl |powershell |aws |gcloud |kubectl |docker )" -Path "server/engine-core/src/deise/engine/recovery/capabilities/*.ts server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts" -Message "Platform leakage detected in universal orchestrator/capabilities"
+

@@ -34,26 +34,23 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
     private async runSshCommand(command: string): Promise<{ stdout: string, stderr: string }> {
         // In production, use a robust SSH library like 'ssh2'. 
         // For CLI execution, we wrap native SSH ensuring strict batch mode.
-        return execAsync(\ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i \ \@\ "\"\);
+        return execAsync(`ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i ${this.sshKeyPath} ${this.sshUser}@${this.sshHost} "${command}"`);
     }
 
     async captureState(scope: RecoveryScope): Promise<EnvironmentTwin> {
-        // LR-02 & LR-03: Execute physical discovery directly on the host
-        // We inject a discovery payload that securely maps the domain structure.
-        const discoveryScript = \
-            DOMAIN="\"
-            if [ -d "\\C:\Users\Professional/domains/\\" ]; then
+        const domain = scope.resourceIdentifiers[0] || 'default';
+        const discoveryScript = `
+            DOMAIN="${domain}"
+            if [ -d "/home/${this.sshUser}/domains/${domain}" ]; then
                 echo '{"repository": "intact", "subdomains": []}'
             else
                 echo '{"repository": "missing", "subdomains": []}'
             fi
-        \;
+        `;
         
-        // Output from actual SSH execution would be parsed here.
-        // For the federated architecture, we derive the resourceGraphEdges directly from physical presence.
         return {
             provider: { platform: 'ssh_linux', symlinkSupported: true, atomicRenameSupported: true, rsyncAvailable: true },
-            topology: { currentSymlinkTarget: null, currentSymlinkValid: false, webrootPath: \/domains/\/public_html\, webrootSymlinkTarget: null, availableReleases: [] },
+            topology: { currentSymlinkTarget: null, currentSymlinkValid: false, webrootPath: `/domains/${domain}/public_html`, webrootSymlinkTarget: null, availableReleases: [] },
             application: { version: 'unknown', manifests: [], integrityStatus: 'MISSING' },
             runtime: { primaryRuntime: 'linux_native', primaryRuntimeVersion: 'unknown', missingDependencies: [] },
             fileInventory: {},
@@ -66,14 +63,15 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
             cronInventory: {},
             backupInventory: {},
             resourceGraphEdges: [
-                { source: \controlplane:\\, target: \path:/domains/\/public_html\, relation: 'mapped_to' }
+                { source: `controlplane:${domain}`, target: `path:/domains/${domain}/public_html`, relation: 'mapped_to' }
             ]
         };
     }
 
     async fingerprintRepository(scope: RecoveryScope): Promise<string> {
-        const { stdout } = await this.runSshCommand(\ind /home/\/domains/\ -type f -exec sha256sum {} \\; | sort | sha256sum\);
-        return \sha256:\\;
+        const domain = scope.resourceIdentifiers[0] || 'default';
+        const { stdout } = await this.runSshCommand(`find /home/${this.sshUser}/domains/${domain} -type f -exec sha256sum {} \\; | sort | sha256sum`);
+        return `sha256:${stdout.trim()}`;
     }
 
     async checkDrift(scope: RecoveryScope, baselineFingerprint: string): Promise<boolean> {

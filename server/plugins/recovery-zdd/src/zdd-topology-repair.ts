@@ -1,6 +1,6 @@
-import { RecoveryCapability } from './recovery-capability';
-import { EnvironmentTwin } from '../../../twin/environment-twin';
-import { RecoveryScope } from '../../live-environment-adapter-contract';
+import { RecoveryCapability } from '../../../engine-core/src/deise/engine/recovery/capabilities/recovery-capability';
+import { EnvironmentTwin } from '../../../engine-core/src/deise/twin/environment-twin';
+import { RecoveryScope } from '../../../engine-core/src/deise/engine/recovery/live-environment-adapter-contract';
 
 export class ZddTopologyRepair implements RecoveryCapability {
     get capabilityId(): string {
@@ -8,8 +8,6 @@ export class ZddTopologyRepair implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        // Diagnoses cPanel-to-DirectAdmin migration corruption where ZDD structures
-        // are detached, renamed to _bkup, and symlinks (public_html -> current -> releases) are broken.
         return {
             issue: 'ZddTopologyFracture',
             confidence: 1.0,
@@ -26,12 +24,14 @@ export class ZddTopologyRepair implements RecoveryCapability {
                 { type: 'REBUILD_SYMLINK_CHAIN', chain: ['public_html', 'current', 'releases/latest'] }
             ],
             safeToProceed: true,
-            destructiveDeleteBlocked: false // Authorized to delete 0B dummy docroots
+            destructiveDeleteBlocked: false
         };
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        // Automatically executes the ZDD cleanup, rename, and symlink restoration sequence over SSH
-        return true;
+        if (!plan.requiresInfrastructureRepair) return true;
+        // Automatically executes the ZDD cleanup, rename, and symlink restoration sequence
+        // COR-013: Do not return true if stubbed
+        throw new Error('ZddTopologyRepair is not yet fully implemented.');
     }
 }

@@ -1,6 +1,6 @@
-import { RecoveryCapability } from './recovery-capability';
-import { EnvironmentTwin } from '../../../twin/environment-twin';
-import { RecoveryScope } from '../../live-environment-adapter-contract';
+import { RecoveryCapability } from '../../../engine-core/src/deise/engine/recovery/capabilities/recovery-capability';
+import { EnvironmentTwin } from '../../../engine-core/src/deise/twin/environment-twin';
+import { RecoveryScope } from '../../../engine-core/src/deise/engine/recovery/live-environment-adapter-contract';
 
 export class FrontendValidation implements RecoveryCapability {
     get capabilityId(): string {
@@ -8,16 +8,15 @@ export class FrontendValidation implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        // This capability runs AFTER topology repair to validate application execution state
-        // It fetches the root URL and parses for known PHP/Framework exceptions (500s, DB errors, missing .env)
-        const targetUrl = \https://\\;
+        // COR-011: Universal frontend validator
+        const domain = scope.resourceIdentifiers[0] || 'localhost';
+        const targetUrl = `https://${domain}`;
         
         try {
             const response = await fetch(targetUrl);
             const body = await response.text();
 
             if (response.status === 500) {
-                // Determine if it's a structural 500 or application 500
                 if (body.includes('missing_environment_variable') || body.includes('DB_HOST')) {
                     return {
                         issue: 'MissingApplicationConfiguration',
@@ -45,11 +44,12 @@ export class FrontendValidation implements RecoveryCapability {
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
         if (diagnosis.issue === 'MissingApplicationConfiguration') {
+            const domain = scope.resourceIdentifiers[0] || 'localhost';
             return {
                 requiresInfrastructureRepair: false,
                 requiresConfigurationRepair: true,
                 configurationRepairs: [
-                    { type: 'RESTORE_ENV_FILE', target: \/domains/\/current/.env\ }
+                    { type: 'RESTORE_ENV_FILE', target: `/domains/${domain}/current/.env` }
                 ],
                 safeToProceed: true
             };
@@ -58,7 +58,11 @@ export class FrontendValidation implements RecoveryCapability {
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        // Autonomously locates global vault or backup and re-injects the .env to the target
-        return true;
+        if (!plan.requiresConfigurationRepair) {
+            return true;
+        }
+        // Actually execute validation or fail
+        // COR-013: Do not return true if stubbed
+        throw new Error('FrontendValidation execution is not fully implemented yet.');
     }
 }

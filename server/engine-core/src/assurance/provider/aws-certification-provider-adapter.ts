@@ -22,7 +22,7 @@ export class AwsCertificationProviderAdapter {
     }
 
     getRepairExecutor() {
-        return new AwsPhysicalRepairExecutor(this.region);
+        return new AwsPhysicalRepairExecutor(this.getNativeClient());
     }
 
     getResidualScanner() {

@@ -4,16 +4,23 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
-	"ugondu/client/engine"
 	"ugondu/client/i18n"
 )
 
 type RepairRequest struct {
-	CapabilityId string \json:"capability"\
-	Target       string \json:"target"\
-	DryRun       bool   \json:"dry_run"\
+	CapabilityId string `json:"capability"`
+	Target       string `json:"target"`
+	DryRun       bool   `json:"dry_run"`
+}
+
+type RepairResponse struct {
+	Status        string `json:"status"`
+	TransactionId string `json:"transactionId,omitempty"`
+	Message       string `json:"message,omitempty"`
+	Evidence      string `json:"evidence,omitempty"`
 }
 
 func HandleRepairCommand(args []string) {
@@ -71,16 +78,39 @@ func HandleRepairCommand(args []string) {
 			req.Header.Set("Authorization", "Bearer "+token)
 		}
 		
-		// Note: The actual HTTP call is mocked here since the API might not be fully operational.
-		// client := &http.Client{}
-		// resp, err := client.Do(req)
+		// Execute the actual HTTP request
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("[ERROR] Network or server error: %v\n", err)
+			os.Exit(1)
+		}
+		defer resp.Body.Close()
 		
-		fmt.Printf("[OK] Capability %s accepted. Execution delegated to engine.\n", capabilityId)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		
+		if resp.StatusCode >= 400 {
+			fmt.Printf("[ERROR] API returned error (Status: %d): %s\n", resp.StatusCode, string(bodyBytes))
+			os.Exit(1)
+		}
+		
+		var repairResp RepairResponse
+		if err := json.Unmarshal(bodyBytes, &repairResp); err != nil {
+			fmt.Printf("[WARNING] Could not parse server response: %s\n", string(bodyBytes))
+		} else {
+			fmt.Printf("[RESULT] Status: %s\n", repairResp.Status)
+			if repairResp.TransactionId != "" {
+				fmt.Printf("[RESULT] Transaction ID: %s\n", repairResp.TransactionId)
+			}
+			if repairResp.Message != "" {
+				fmt.Printf("[RESULT] Message: %s\n", repairResp.Message)
+			}
+		}
 		
 		if dryRun {
 			fmt.Println("[DRY RUN] Diagnosis and Planning completed. No execution performed.")
 		} else {
-			fmt.Println("[EXECUTION] Execution pipeline triggered.")
+			fmt.Println("[EXECUTION] Execution pipeline completed.")
 		}
 		
 	} else {

@@ -65,6 +65,7 @@ export interface EnvironmentTwin {
 export interface InfrastructureTwin {
     id: string;
     type: 'EC2' | 'RDS' | 'VPC' | 'S3';
+    provider?: string;
     expectedState: Record<string, any>;
     actualState: Record<string, any>;
 }

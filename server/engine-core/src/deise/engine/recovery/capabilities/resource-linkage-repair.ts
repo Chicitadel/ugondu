@@ -1,6 +1,6 @@
 import { RecoveryCapability } from './recovery-capability';
 import { EnvironmentTwin } from '../../../twin/environment-twin';
-import { RecoveryScope } from '../../live-environment-adapter-contract';
+import { RecoveryScope } from '../live-environment-adapter-contract';
 
 export class ResourceLinkageRepair implements RecoveryCapability {
     get capabilityId(): string {

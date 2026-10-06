@@ -35,6 +35,7 @@ import { loadOrGeneratePersistentKeys } from './bootstrap/key-manager';
 import { keysRouter }                  from './routes/keys';
 import { telemetryRouter }             from './routes/telemetry';
 import { createDeployRouter }          from './routes/deploy';
+import { recoveryRouter }              from './routes/recovery';
 import { passportGuardMiddleware }      from './middleware/passport-guard.middleware';
 import { __t }                         from '@ugondu/shared';
 
@@ -51,9 +52,11 @@ app.use(express.json());
 app.use('/v1/keys',      keysRouter);
 app.use('/v1/telemetry', telemetryRouter);
 app.use('/v1/deploy',    passportGuardMiddleware, createDeployRouter(keyState, BILLING_GATEWAY_URL));
+app.use('/v1/recovery',  recoveryRouter);
 
 // ─── Server ──────────────────────────────────────────────────────────────────
 const PORT = process.env['PORT'] ?? 4001;
 app.listen(PORT, () => {
   Logger.info(__t('listening', __t('ugondu_engine_core'), PORT));
 });
+

@@ -1,36 +1,22 @@
-import { RecoveryCapability } from '../../../engine-core/src/deise/engine/recovery/capability';
-import { UgonduExecutionEnvironment, UgonduExecutionPlan } from '../../../shared/src/types';
+import { RecoveryCapability } from '../../../engine-core/src/deise/engine/recovery/capabilities/recovery-capability';
+import { EnvironmentTwin } from '../../../engine-core/src/deise/twin/environment-twin';
+import { RecoveryScope } from '../../../engine-core/src/deise/engine/recovery/live-environment-adapter-contract';
 
 export class ComposerIntegrityValidation implements RecoveryCapability {
-    id = 'ComposerIntegrityValidation';
-    name = 'Composer Integrity Validation';
-    description = 'Validates and repairs missing or broken composer dependencies.';
-    
-    async diagnose(env: UgonduExecutionEnvironment): Promise<any> {
-        return {
-            status: 'UNHEALTHY',
-            issues: ['Missing Composer autoload', 'Broken shared repository links']
-        };
+    get capabilityId(): string {
+        return 'ComposerIntegrityValidation';
     }
     
-    async plan(env: UgonduExecutionEnvironment, diagnosis: any): Promise<UgonduExecutionPlan> {
-        return {
-            steps: [
-                {
-                    id: 'step_1',
-                    action: 'composer-dump-autoload',
-                    parameters: { target: env.TargetEnvironment }
-                }
-            ],
-            estimatedDurationMs: 5000,
-            impactLevel: 'LOW'
-        };
+    async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
+        return { isReady: false, reason: 'StubImplementation' };
     }
     
-    async execute(env: UgonduExecutionEnvironment, plan: UgonduExecutionPlan): Promise<boolean> {
-        console.log('[ComposerIntegrityValidation] Executing recovery plan...');
-        console.log('[ComposerIntegrityValidation] Generating autoload files');
-        console.log('[ComposerIntegrityValidation] Composer dependencies validated.');
-        return true;
+    async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
+        return { actions: [] };
+    }
+    
+    async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
+        // COR-008: Do not fake success
+        throw new Error('ComposerIntegrityValidation is not yet implemented.');
     }
 }

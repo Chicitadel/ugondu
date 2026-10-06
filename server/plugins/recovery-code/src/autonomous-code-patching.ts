@@ -20,7 +20,8 @@ export class AutonomousCodePatching implements RecoveryCapability {
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        // Deploys the universal DOCUMENT_ROOT patch universally across platforms via Adapter
-        return true; 
+        if (!plan.requiresCodePatching) return true;
+        // COR-013: Do not return true if stubbed
+        throw new Error('AutonomousCodePatching is not yet implemented.');
     }
 }

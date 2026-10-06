@@ -8,35 +8,55 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        // In a real execution, this would parse composer.json from the twin
-        // For LR-0001 conformance, we detect the missing path
+        // Universal implementation: analyze graph to find detached dependencies
+        const missingPaths: string[] = [];
+        if (twin.resourceGraphEdges) {
+            for (const edge of twin.resourceGraphEdges) {
+                if (edge.relation === 'depends_on_path' && edge.targetStatus === 'MISSING') {
+                    missingPaths.push(edge.target);
+                }
+            }
+        }
+        
         return { 
-            issue: 'MissingLocalPathRepository', 
-            missingPaths: ['../platform-core', '../operations.airroofers.eu'],
-            confidence: 0.99 
+            issue: missingPaths.length > 0 ? 'MissingLocalPathRepository' : 'NoIssue', 
+            missingPaths: missingPaths,
+            confidence: missingPaths.length > 0 ? 0.99 : 1.0
         };
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
+        if (!diagnosis.missingPaths || diagnosis.missingPaths.length === 0) {
+            return { requiresRepositoryClone: false, safeToProceed: true };
+        }
+
+        const repositories = diagnosis.missingPaths.map((path: string) => {
+            // For now, simple heuristic based on path, in future resolve via DependencyScanner
+            const repoName = path.split('/').pop();
+            return {
+                path: path,
+                url: `https://github.com/Chicitadel/${repoName}.git`
+            };
+        });
+
         return {
             requiresRepositoryClone: true,
-            repositories: [
-                { path: 'domains/platform-core', url: 'https://github.com/Chicitadel/platform-core.git' },
-                { path: 'domains/operations.airroofers.eu', url: 'https://github.com/Chicitadel/operations.airroofers.eu.git' }
-            ],
+            repositories: repositories,
             safeToProceed: true
         };
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        for (const repo of plan.repositories) {
-            // Universal Resource Contract execution via Adapter
-            await adapter.executeCommand(\if [ ! -d "\C:\Users\Professional/\" ]; then git clone \ "\C:\Users\Professional/\"; fi\);
-            
-            // Trigger Composer Integrity Validation (simulated dump-autoload)
-            await adapter.executeCommand(\cd "\C:\Users\Professional/domains/identity.airroofers.eu/current/public_html" && composer dump-autoload --no-interaction || true\);
-            await adapter.executeCommand(\cd "\C:\Users\Professional/domains/products.airroofers.eu/current" && composer dump-autoload --no-interaction || true\);
+        if (!plan.requiresRepositoryClone) {
+            return true;
         }
+
+        for (const repo of plan.repositories) {
+            // Use universal adapter method instead of hardcoded bash
+            await adapter.executeCommand(`if [ ! -d "${repo.path}" ]; then git clone ${repo.url} "${repo.path}"; fi`);
+        }
+        
+        // This plugin should not be responsible for composer validation. That belongs to ComposerIntegrityValidation.
         return true;
     }
 }

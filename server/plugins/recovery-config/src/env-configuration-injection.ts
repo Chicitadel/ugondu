@@ -14,13 +14,24 @@ export class EnvConfigurationInjection implements RecoveryCapability {
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
         return {
             requiresConfigurationRepair: true,
-            configurationRepairs: [{ type: 'INJECT_ENV_FROM_VAULT' }],
+            configurationRepairs: [{ type: 'INJECT_ENV_FROM_VAULT', source: '.mandatag.env', target: 'current/.env' }],
             safeToProceed: true
         };
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        // Universal execution via adapter, never hardcoded bash
-        return adapter.executeCommand('cp .mandatag.env current/.env'); 
+        if (!plan.requiresConfigurationRepair) return true;
+        
+        for (const repair of plan.configurationRepairs) {
+            if (repair.type === 'INJECT_ENV_FROM_VAULT') {
+                // We assume adapter has a universal capability to copy or inject configuration artifacts
+                if (typeof adapter.copyConfigurationArtifact === 'function') {
+                    await adapter.copyConfigurationArtifact(repair.source, repair.target, scope);
+                } else {
+                    throw new Error('Adapter does not support copyConfigurationArtifact');
+                }
+            }
+        }
+        return true; 
     }
 }
