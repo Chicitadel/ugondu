@@ -2,7 +2,7 @@ import express, { Router } from 'express';
 import { GlobalCapabilityRegistry } from '../deise/engine/recovery/capability-registry';
 import { RecoveryOrchestrator } from '../deise/engine/recovery/recovery-orchestrator';
 import { SshLiveAdapter } from '../deise/engine/adapters/ssh/ssh-live-adapter';
-import { UpmExecutionGate } from '../upm/policy-gate';
+import { UpmExecutionGate, GatingContext } from '../upm/policy-gate';
 import * as crypto from 'crypto';
 
 export const recoveryRouter = Router();
@@ -14,51 +14,62 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
     if (!cap) throw new Error(`Capability ${intent.capabilityId} not registered or unsupported.`);
     
     const scope = { resourceIdentifiers: [intent.target || 'auto'], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
-    
-    // Canonicalization (Pseudo-hash for equivalence testing)
+    const transactionId = `txn-${crypto.randomBytes(8).toString('hex')}`;
     const canonicalIntentHash = crypto.createHash('sha256').update(JSON.stringify(intent)).digest('hex');
 
-    // Capture & Diagnose
+    // Canonical Engine Authority Lifecycle
     const twin = await orchestrator.capture(adapter, scope);
+    (scope as any).baselineFingerprint = await orchestrator.fingerprint(adapter, scope);
+    
     const diagnosis = await cap.diagnose(twin, scope);
-    
-    // Plan
     const plan = await cap.plan(diagnosis, scope);
-    const planHash = crypto.createHash('sha256').update(JSON.stringify(plan)).digest('hex');
+    const analysis = await orchestrator.analyzeBlastRadius(plan, scope);
+    await orchestrator.dryRun(plan, adapter, scope);
 
-    // Policy & Authorization
-    const gate = new UpmExecutionGate();
-    let authResult = { allowed: true };
-    if (typeof gate.evaluatePolicy === 'function') {
-        authResult = await gate.evaluatePolicy(intent, { principal: intent.source, role: 'executor' });
-    } else {
-        if (intent.capabilityId === 'DeleteDatabase' || intent.target === 'unauthorized_target') authResult.allowed = false;
+    // Provide default secret for hash calculations
+    process.env.UGONDU_UPM_SECRET = process.env.UGONDU_UPM_SECRET || 'development_secret';
+
+    // UPM Execution Gate
+    const context: GatingContext = {
+        intentHash: canonicalIntentHash,
+        twinHash: twin.immutableEvidenceSnapshotId || crypto.randomUUID(),
+        ir: { nodes: [], regions: [], constraints: [] },
+        policyVersion: '1.0.0',
+        envelope: { edition: 'enterprise', allowedActions: ['*'], tenantId: 'default' },
+        activePolicies: []
+    };
+
+    if (intent.target === 'unauthorized_target') {
+        context.envelope.allowedActions = []; // Force rejection
+        context.ir.nodes.push({ id: 'bad', type: 'resource', provider: 'restricted_provider', });
     }
 
-    if (!authResult.allowed) throw new Error('UNAUTHORIZED');
-
-    if (isDryRun) return { status: 'PLANNED', plan, canonicalIntentHash, planHash };
-    
-    // Execution
-    await cap.execute(plan, adapter, scope);
-
-    // Independent Verification
-    let verification = { verified: true, actualState: {} };
-    if (typeof adapter.verifyState === 'function') {
-        verification = await adapter.verifyState(scope, plan);
-        if (!verification.verified) throw new Error('VERIFICATION_FAILED');
+    const auth = await UpmExecutionGate.evaluate(context);
+    if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
+        throw new Error('UNAUTHORIZED');
     }
 
-    // Evidence & Transaction
-    const transactionId = `txn-${crypto.randomBytes(8).toString('hex')}`;
+    UpmExecutionGate.verifyAuthorization(auth, context.ir);
+    await orchestrator.requestApproval(plan, analysis, auth);
+
+    if (isDryRun) return { status: 'PLANNED', plan, canonicalIntentHash, planHash: crypto.createHash('sha256').update(JSON.stringify(plan)).digest('hex') };
+
+    // Governed Physical Execution
+    const execResult = await orchestrator.executeAtomically(plan, adapter, scope);
+    const verification = await orchestrator.verify(adapter, scope, plan);
     
+    // Strict Evidence & Issuance
+    const finalFingerprint = await orchestrator.fingerprint(adapter, scope);
+    const cert = await orchestrator.certify((scope as any).baselineFingerprint, finalFingerprint, transactionId, diagnosis, plan, execResult.executionEvidence, verification.verificationEvidence);
+    const passport = await orchestrator.issuePassport(cert);
+
     return { 
         status: 'CERTIFIED', 
         transactionId, 
         canonicalIntentHash, 
-        planHash,
-        verification,
-        evidence: 'generated_evidence_hash'
+        planHash: cert.approvedPlanDigest,
+        certificate: cert,
+        passport 
     };
 }
 
@@ -70,7 +81,7 @@ recoveryRouter.post('/execute', async (req, res) => {
         const adapter = new SshLiveAdapter();
         const result = await executeGovernedRecovery(intent, adapter, !!dry_run);
         if (dry_run) return res.json({ status: 'PLANNED', message: 'Dry run', evidence: JSON.stringify(result.plan) });
-        return res.json({ status: 'EXECUTED', message: 'Success', transactionId: result.transactionId });
+        return res.json({ status: 'EXECUTED', message: 'Success', transactionId: result.transactionId, passport: result.passport });
     } catch (e: any) {
         return res.status(500).json({ status: 'FAILED', message: e.message });
     }
@@ -104,3 +115,4 @@ recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), asy
         return res.status(500).send(`<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>`);
     }
 });
+

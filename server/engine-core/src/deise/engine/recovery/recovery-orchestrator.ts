@@ -2,6 +2,7 @@ import { RecoveryContract, BlastRadiusAnalysis, RecoveryCertificate } from './re
 import { LiveEnvironmentAdapterContract, RecoveryScope } from './live-environment-adapter-contract';
 import { EnvironmentTwin } from '../../twin/environment-twin';
 import { RepairPlan } from '../repair-engine';
+import { __t } from '@ugondu/shared';
 import * as crypto from 'crypto';
 
 export class RecoveryOrchestrator implements RecoveryContract {
@@ -21,7 +22,6 @@ export class RecoveryOrchestrator implements RecoveryContract {
     }
 
     async diagnose(twin: EnvironmentTwin): Promise<RepairPlan> {
-        // ... invoke actual repair engine diagnosis ...
         throw new Error(__t('not_implemented'));
     }
 
@@ -37,7 +37,6 @@ export class RecoveryOrchestrator implements RecoveryContract {
             dependencyGraph: []
         };
         
-        // Authoritative blast-radius check: If any targeted infrastructure is outside the scope, fail hard.
         if (plan.infrastructureRepairs) {
             for (const repair of plan.infrastructureRepairs) {
                 if (!scope.resourceIdentifiers.includes(repair.id)) {
@@ -61,13 +60,13 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return true;
     }
 
-    async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis): Promise<boolean> {
+    async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis, auth?: any): Promise<boolean> {
         if (!analysis.isSafe) throw new Error(__t('cannot_approve_an_unsafe_plan'));
-        return true; // Explicit approval gate
+        if (!auth || auth.decision.status !== 'ALLOW') throw new Error('Unconditional approval disabled: missing explicit authorization constraint.');
+        return true;
     }
 
     async executeAtomically(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }> {
-        // Pre-execution drift check
         if (!scope.baselineFingerprint) throw new Error(__t('baseline_fingerprint_missing_f'));
         const driftSafe = await adapter.checkDrift(scope, scope.baselineFingerprint);
         if (!driftSafe) {
@@ -83,6 +82,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
     }
 
     async verify(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, verificationEvidence: any }> {
+        if (typeof adapter.verifyState !== 'function') throw new Error('INDEPENDENT_VERIFICATION_UNSUPPORTED');
         const result = await adapter.verifyState(scope, expectedState);
         if (!result.verified) throw new Error(__t('verification_failed_expected_s'));
         return result;
