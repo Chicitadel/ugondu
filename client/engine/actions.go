@@ -269,7 +269,7 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 	fmt.Printf("     -> %s\n", i18n.T("sync_git", displayUrl, p.Branch))
 
-	
+
 	// Ensure token is completely hidden by configuring temp git credential helper
 	var credFile string
 	if err == nil && parsedUrl != nil && parsedUrl.User != nil {
@@ -308,7 +308,7 @@ func (a *SyncEnvironmentAction) Execute(env *ExecutionEnvelope, payload map[stri
 	if p.Strategy == "quota-sync" {
 		dest := filepath.Join(homeDir, "public_html")
 		if err := CopyDir(".", dest, true); err != nil {
-			return logs, fmt.Errorf("quota-sync copy failed: %v", err)
+			return logs, fmt.Errorf(i18n.T("msg_quota_sync_copy_failed_v"), err)
 		}
 		logs = append(logs, i18n.T("copied_files_using_quota_sync_"))
 	} else if p.Strategy == "atomic" {

@@ -423,5 +423,6 @@
   "msg_err_base_dir_resolution_w": "[RU] ERR_BASE_DIR_RESOLUTION: %w",
   "msg_err_symlink_evaluation_w": "[RU] ERR_SYMLINK_EVALUATION: %w",
   "msg_err_safe_path_w": "[RU] ERR_SAFE_PATH: %w",
-  "msg_err_target_not_found_w": "[RU] ERR_TARGET_NOT_FOUND: %w"
+  "msg_err_target_not_found_w": "[RU] ERR_TARGET_NOT_FOUND: %w",
+  "msg_quota_sync_copy_failed_v": "[RU] Quota-sync copy failed: %v"
 }
