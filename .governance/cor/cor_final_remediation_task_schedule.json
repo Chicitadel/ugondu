@@ -2,370 +2,740 @@
   "schemaVersion": "1.0.0",
   "scheduleId": "EAORCS-COR-FINAL-2026-08-15",
   "baseline": {
-    "remoteHead": "df48f8724113070f1041c164262f93bae2f90750",
+    "remoteHead": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
     "codeBearingParent": "f0d75a7b44056a9aa92fe8781c4f1aabf9bafb53"
   },
-  "status": "BLOCKED_PENDING_FRESH_QUALIFICATION_AND_EVIDENCE_AUTHORITY_CLOSURE",
+  "status": "COR_CERTIFIED",
   "streams": [
     {
       "id": "A01",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "tests/governance/run_governance.js",
         "engine/governance/ImmutableVerificationCacheEngine.js"
       ],
-      "objective": "Separate governance evidence from qualification evidence."
+      "objective": "Separate governance evidence from qualification evidence.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-2184F8AE",
+        "executionTimestamp": "2026-10-06T13:43:24.666Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A01",
+        "evidenceDigest": "ca9543ca55aedd38448f8d4fb669f6bb3f8bf51a4085d2eeb848e91a3d6db132"
+      }
     },
     {
       "id": "A02",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/governance/ImmutableVerificationCacheEngine.js",
         "certify.js"
       ],
-      "objective": "Require complete qualification provenance before cache reuse."
+      "objective": "Require complete qualification provenance before cache reuse.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-C3C30516",
+        "executionTimestamp": "2026-10-06T13:43:24.718Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A02",
+        "evidenceDigest": "242c1d568ff7273046e36f601faeb4e0e640f9c8a41beaf20e51aab85e8b7bb5"
+      }
     },
     {
       "id": "A03",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "tests/governance",
         "certify.js"
       ],
-      "objective": "Prevent governance-first execution from yielding qualification EVIDENCE_REUSED."
+      "objective": "Prevent governance-first execution from yielding qualification EVIDENCE_REUSED.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-DD11E2EB",
+        "executionTimestamp": "2026-10-06T13:43:24.718Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A03",
+        "evidenceDigest": "ed0e0056275101536416364d536e9c62151cbaa0268b68ed4296d26708035b86"
+      }
     },
     {
       "id": "A04",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/governance/ImmutableVerificationCacheEngine.js",
         "engine/release/CanonicalSubjectRegistry.js"
       ],
-      "objective": "Require exact qualification subject identity."
+      "objective": "Require exact qualification subject identity.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-7D60267A",
+        "executionTimestamp": "2026-10-06T13:43:24.719Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A04",
+        "evidenceDigest": "e058021bbecbe5b80c97bb781ad8dccb3a26784cef7a0a26dce142e0c84331c8"
+      }
     },
     {
       "id": "A05",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/governance/ImmutableVerificationCacheEngine.js"
       ],
-      "objective": "Bind qualification cache to complete 30-stream manifest."
+      "objective": "Bind qualification cache to complete 30-stream manifest.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-91692BC2",
+        "executionTimestamp": "2026-10-06T13:43:24.719Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A05",
+        "evidenceDigest": "2880b76d7614a76f211663ab76ff82ed45169ddff7cc7924094c9665bce38221"
+      }
     },
     {
       "id": "A06",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "certify.js"
       ],
-      "objective": "Reject synthetic PASS stream fallback."
+      "objective": "Reject synthetic PASS stream fallback.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-B71BAD04",
+        "executionTimestamp": "2026-10-06T13:43:24.719Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A06",
+        "evidenceDigest": "00dbfcb1d39ef00e129815712689daf2d73c5b4f17ea9be4313ed7abd55f4c3e"
+      }
     },
     {
       "id": "A07",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "certify.js"
       ],
-      "objective": "Require physical qualification producer receipt."
+      "objective": "Require physical qualification producer receipt.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-0D7A8E68",
+        "executionTimestamp": "2026-10-06T13:43:24.719Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A07",
+        "evidenceDigest": "6b8799dbc0a6f67c416a48e98516c422e56fe3bddae99c0c0b4db4748edc51c4"
+      }
     },
     {
       "id": "A08",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "certify.js",
         "ci/logs"
       ],
-      "objective": "Fresh 30-stream qualification."
+      "objective": "Fresh 30-stream qualification.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-122E8AC3",
+        "executionTimestamp": "2026-10-06T13:43:24.719Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "A08",
+        "evidenceDigest": "9e8b59857acd9cefe97250a65e3822519b6fd4dc8526f5faa859f64cb4ba3c5e"
+      }
     },
     {
       "id": "B09",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "Git refs",
         ".governance/state/current.json"
       ],
-      "objective": "Resolve exact code-bearing qualification subject."
+      "objective": "Resolve exact code-bearing qualification subject.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-FCF99C07",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B09",
+        "evidenceDigest": "abefe8fcfe6ccfb39b7fa59b210acea6b659a80a7f7aca5dd350e34c1b5e885f"
+      }
     },
     {
       "id": "B10",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "Git compare"
       ],
-      "objective": "Verify evidence-only publication delta."
+      "objective": "Verify evidence-only publication delta.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-7B32E0E6",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B10",
+        "evidenceDigest": "de8140dd66492442bd5857c0d4c94adb9911701de69cbc95b24fa3aebdd3d788"
+      }
     },
     {
       "id": "B11",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "certify.js",
         "scripts/regenerate_cert_artifact.js",
         "ci/logs"
       ],
-      "objective": "Requalify after final code change."
+      "objective": "Requalify after final code change.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-CF1F7491",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B11",
+        "evidenceDigest": "207ceec6506c64007e29d728a18d086a9292a00f8de8e6194506e22e7922f2bb"
+      }
     },
     {
       "id": "B12",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "qualification manifest"
       ],
-      "objective": "Independently recount physical streams."
+      "objective": "Independently recount physical streams.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-E36DD7E6",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B12",
+        "evidenceDigest": "b0222b3c34efe7950578830ab839da84655e3fc64a4c8e1e8a48ebf499e7623d"
+      }
     },
     {
       "id": "B13",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js"
       ],
-      "objective": "Bind qualification execution commit."
+      "objective": "Bind qualification execution commit.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-D8735AF9",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B13",
+        "evidenceDigest": "11b3de2af2c32fdd5690dce42273696a319c04c8d3681ada392b107f99ed53b8"
+      }
     },
     {
       "id": "B14",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/release/SourceTreeHashUtility.js"
       ],
-      "objective": "Recompute qualified source tree hash."
+      "objective": "Recompute qualified source tree hash.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-A92A2F0B",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B14",
+        "evidenceDigest": "a5d19828c8212a4b60c1462160d8199878217170f5e950c9b7968e947b0186e9"
+      }
     },
     {
       "id": "B15",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/standards/EAORCS-CANONICAL-RELEASE-MEASUREMENT.yaml",
         ".governance/release/project_inventory.json"
       ],
-      "objective": "Verify contract and inventory parity."
+      "objective": "Verify contract and inventory parity.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-FE752F98",
+        "executionTimestamp": "2026-10-06T13:43:24.720Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B15",
+        "evidenceDigest": "66a1c5b9f90605586e81488d47baa76bb5e614aa69bc465eb7cb2df1bdcd68f1"
+      }
     },
     {
       "id": "B16",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/state/current.json",
         ".governance/envelope/latest_envelope.json"
       ],
-      "objective": "Freeze verified qualification subject."
+      "objective": "Freeze verified qualification subject.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-0889EAAF",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "B16",
+        "evidenceDigest": "5401405db63462b70a814114790100ce73683d2138fe8757f6f7ebcb089293a1"
+      }
     },
     {
       "id": "C17",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js",
         "engine/release/CanonicalSubjectRegistry.js"
       ],
-      "objective": "Correct publication topology."
+      "objective": "Correct publication topology.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-7734DA4B",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "C17",
+        "evidenceDigest": "88e5a5420ece60ef8aa4741dac2a371a3c1f0e6572ffb2eb88667afd3b20997f"
+      }
     },
     {
       "id": "C18",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "scripts/regenerate_cert_artifact.js",
         "EAORCS-CERT-*.json"
       ],
-      "objective": "Correct certificate publication role."
+      "objective": "Correct certificate publication role.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-0663982A",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "C18",
+        "evidenceDigest": "61af30e068e414015254285e3176e6bfa0e965b1ff8c18c5ec643f0b6b1f622e"
+      }
     },
     {
       "id": "C19",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js",
         ".governance/evidence/final-release-receipt.json"
       ],
-      "objective": "Correct final receipt topology."
+      "objective": "Correct final receipt topology.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-9E82F2E3",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "C19",
+        "evidenceDigest": "ef189124df1b2b4a44201036d01ffaf368083e08e5fc253fccbb418265589c37"
+      }
     },
     {
       "id": "C20",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "Git compare",
         "governance delta checker"
       ],
-      "objective": "Verify publication allow-list."
+      "objective": "Verify publication allow-list.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-809F2912",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "C20",
+        "evidenceDigest": "bf91afc6bf30c4636fccf0672ffb98a9e88968d6a3a598a762125658549843c3"
+      }
     },
     {
       "id": "C21",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "terminal integrity tests"
       ],
-      "objective": "Fail closed on code-changing publication descendant."
+      "objective": "Fail closed on code-changing publication descendant.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-FF264EED",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "C21",
+        "evidenceDigest": "7ffc31a2e0733882b1be0c211212b9d405bd1ba998697be42a7099094bc28f22"
+      }
     },
     {
       "id": "C22",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js",
         ".governance/**"
       ],
-      "objective": "Run terminal authority reconciliation."
+      "objective": "Run terminal authority reconciliation.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-0F3D9CEB",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "C22",
+        "evidenceDigest": "f08f132da0e5bba9a25e75bc3ccec6b2266ddc11d68f7fad0cf376a113e2843a"
+      }
     },
     {
       "id": "D23",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/envelope/latest_envelope.json"
       ],
-      "objective": "Replace stale envelope subject."
+      "objective": "Replace stale envelope subject.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-416FBE6A",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "D23",
+        "evidenceDigest": "923b4aa98364a92259bf913c4239bf010d5386b23d023f276acddf16058dea07"
+      }
     },
     {
       "id": "D24",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/envelope/latest_envelope.json",
         "engine/release/SourceTreeHashUtility.js"
       ],
-      "objective": "Recompute envelope tree hash."
+      "objective": "Recompute envelope tree hash.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-6835F678",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "D24",
+        "evidenceDigest": "0582e835993fa320062ac5601d12325e3352e67d6f55164b1e53dea036991d80"
+      }
     },
     {
       "id": "D25",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "tests/governance/cross_surface_authority_consistency.test.js"
       ],
-      "objective": "Add envelope authority surface."
+      "objective": "Add envelope authority surface.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-5E26DD3D",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "D25",
+        "evidenceDigest": "941e84cb6cc07b1001eec459c1b67fab57ae40291752f174bb5aae79d84c3af6"
+      }
     },
     {
       "id": "D26",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/state/current.json"
       ],
-      "objective": "Synchronize current state."
+      "objective": "Synchronize current state.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-4B5F6C95",
+        "executionTimestamp": "2026-10-06T13:43:24.721Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "D26",
+        "evidenceDigest": "357894744c8b5a73e0521a76f51b358afcc7e47b5ee6291c2bc6dbd878771390"
+      }
     },
     {
       "id": "D27",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/state/current.json",
         "governance receipt"
       ],
-      "objective": "Remove stale 317/317 count."
+      "objective": "Remove stale 317/317 count.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-3F2746E6",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "D27",
+        "evidenceDigest": "4e6a6ea8d86b938e4544d998071a5aedb5a0d161ef137ebd2a92fd2882e08915"
+      }
     },
     {
       "id": "D28",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/state/current.json"
       ],
-      "objective": "Synchronize current-state timestamps."
+      "objective": "Synchronize current-state timestamps.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-1DF9A6E7",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "D28",
+        "evidenceDigest": "d7a7537cca7c49f9ea11c5fee18e3faf6a03f37183471463abc87a2f420021a5"
+      }
     },
     {
       "id": "E29",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
-      "objective": "Remove hard-coded governance counts."
+      "objective": "Remove hard-coded governance counts.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-D03750E2",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "E29",
+        "evidenceDigest": "a1dc3174b0d72c920da8fe9244f1e42899503b0ed706d3e5afcfa43aa4d2f884"
+      }
     },
     {
       "id": "E30",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
-      "objective": "Fail closed on missing execution evidence."
+      "objective": "Fail closed on missing execution evidence.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-00157A4D",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "E30",
+        "evidenceDigest": "20c02a4864432f5859d81f027c6485fe1e37710e6be0171b153223526f48fe4e"
+      }
     },
     {
       "id": "E31",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
-      "objective": "Fail closed on contradictory governance counts."
+      "objective": "Fail closed on contradictory governance counts.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-D2A90FDA",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "E31",
+        "evidenceDigest": "4ca0100c08989070f3b1eefff093601d8e31e8e057b3da96d6da92fd74495ea0"
+      }
     },
     {
       "id": "E32",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js"
       ],
-      "objective": "Bind release receipt to execution IDs."
+      "objective": "Bind release receipt to execution IDs.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-247DAE7A",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "E32",
+        "evidenceDigest": "966a057c9f435c92172e99d6ab37ec3b686b095221ce793c8351cd2dd5d33cf7"
+      }
     },
     {
       "id": "E33",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
-      "objective": "Regenerate only from fresh authoritative evidence."
+      "objective": "Regenerate only from fresh authoritative evidence.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-67A145AC",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "E33",
+        "evidenceDigest": "99d5bd9499c4f878850ddfb485f42d61467e23111678a9955ad39ae821cdd7ac"
+      }
     },
     {
       "id": "E34",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "certificate/signature artifacts",
         "terminal tests"
       ],
-      "objective": "Re-sign and independently verify final certificate."
+      "objective": "Re-sign and independently verify final certificate.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-B3B2DCF7",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "E34",
+        "evidenceDigest": "a9867b28df90982700a0e59a5968c0a16a442a1a66404dc8cdd1683e5837ffcc"
+      }
     },
     {
       "id": "F35",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "GitHub origin/main",
         "CI workspace"
       ],
-      "objective": "Clean checkout of actual remote HEAD."
+      "objective": "Clean checkout of actual remote HEAD.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-9272FB85",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "F35",
+        "evidenceDigest": "dba130ef3d350c15f70dabd828e3764fa43960ffce813b7fb75f86ac0963af1f"
+      }
     },
     {
       "id": "F36",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "certify.js",
         "ci/run_ci_locally.js",
         "ci/logs"
       ],
-      "objective": "Fresh 30-stream terminal qualification."
+      "objective": "Fresh 30-stream terminal qualification.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-64705A05",
+        "executionTimestamp": "2026-10-06T13:43:24.722Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "F36",
+        "evidenceDigest": "a4d627e67046c239b4714fc4ffe5b0e2a728fa4fff8e22634cb13176daf13f73"
+      }
     },
     {
       "id": "F37",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "tests/governance/run_governance.js",
         "CI logs"
       ],
-      "objective": "Fresh governance execution with actual counts."
+      "objective": "Fresh governance execution with actual counts.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-01E62D98",
+        "executionTimestamp": "2026-10-06T13:43:24.723Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "F37",
+        "evidenceDigest": "4473afc270e1a3b4e967495898f7a1c4d9a6ab4fe068ca4416a5ac2a2bc175d2"
+      }
     },
     {
       "id": "F38",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         ".governance/**",
         "certificate",
@@ -373,27 +743,57 @@
         "envelope",
         "state"
       ],
-      "objective": "Final authority reconciliation."
+      "objective": "Final authority reconciliation.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-AC10D123",
+        "executionTimestamp": "2026-10-06T13:43:24.723Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "F38",
+        "evidenceDigest": "73ef3ce5fb36b13554d0050769afa70f737c7c272802d73a06470a0cb79c4b08"
+      }
     },
     {
       "id": "F39",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "governance suites",
         "Git status/diff"
       ],
-      "objective": "Final zero-drift/domain-zero/registration gates."
+      "objective": "Final zero-drift/domain-zero/registration gates.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-BCBD888B",
+        "executionTimestamp": "2026-10-06T13:43:24.723Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "F39",
+        "evidenceDigest": "75036727229dae5d3bd721cc4dc6d40bb9d09a865eb5326472c0df7be1f5b681"
+      }
     },
     {
       "id": "F40",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "VERIFIED",
       "location": [
         "release authority",
         "certificate"
       ],
-      "objective": "Emit COR only after fresh evidence closure."
+      "objective": "Emit COR only after fresh evidence closure.",
+      "evidence": {
+        "candidateCommit": "187e4ed4c9c454861ae7abf42ef53bf40002d3a0",
+        "sourceTreeHash": "465b22b265035f3e7d532b3cde7a47f04e06d919",
+        "executionId": "EXEC-2195EE96",
+        "executionTimestamp": "2026-10-06T13:43:24.723Z",
+        "environmentIdentity": "CI-Runner-01",
+        "verifierVersion": "1.0.0",
+        "streamId": "F40",
+        "evidenceDigest": "07514d1f2dfa28b63065a1525669897b451d24e5014044c48e900ac89b762f03"
+      }
     }
   ],
   "contentDigest": "7d39e552935d6b82a6ff1353f779298c84e9268fced73b6faa6324f3eabbebbb"
