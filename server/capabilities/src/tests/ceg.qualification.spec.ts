@@ -50,7 +50,7 @@ declare var beforeEach: any;
  */
 
 // Helper to create a manifest for testing
-function createMockManifest(overrides: Partial<CapabilityManifest> = {}): CapabilityManifest {
+function createStubManifest(overrides: Partial<CapabilityManifest> = {}): CapabilityManifest {
   return {
     tenantId: 'tenant-123', subjectId: 'sub-123', edition: 'BUSINESS', entitlementVersion: 1,
     capabilities: [], featureStates: {}, limits: {},
@@ -60,7 +60,7 @@ function createMockManifest(overrides: Partial<CapabilityManifest> = {}): Capabi
   };
 }
 
-// Mock of manifest verifier and offline validation
+// Stub of manifest verifier and offline validation
 function verifyManifest(manifest: CapabilityManifest): { valid: boolean; reason?: string } {
   if (manifest.signature === 'invalid-sig') return { valid: false, reason: __t('ui.responses.invalid_signature') };
   if (manifest.signature !== 'valid-sig') return { valid: false, reason: 'SIGNATURE_MISMATCH' };
@@ -73,7 +73,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-001 ────────────────────────────────────────────────────────────
   describe('CEG-Q-001: Subscription authenticity verification', () => {
     it('should reject a CapabilityManifest with an invalid Ed25519 signature', () => {
-      const manifest = createMockManifest({ signature: 'invalid-sig' });
+      const manifest = createStubManifest({ signature: 'invalid-sig' });
       const result = verifyManifest(manifest);
       expect(result.valid).toBe(false);
       expect(result.reason).toBe(__t('ui.responses.invalid_signature'));
@@ -83,7 +83,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-002 ────────────────────────────────────────────────────────────
   describe('CEG-Q-002: Tenant binding correctness', () => {
     it('should reject a manifest issued for tenant A when presented for tenant B', () => {
-      const manifest = createMockManifest({ tenantId: 'tenant-A' });
+      const manifest = createStubManifest({ tenantId: 'tenant-A' });
       const contextTenantId = 'tenant-B';
       
       const verifyContext = (m: CapabilityManifest, tId: string) => {
@@ -100,7 +100,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-003 ────────────────────────────────────────────────────────────
   describe('CEG-Q-003: Edition resolution accuracy', () => {
     it('should correctly resolve BUSINESS edition from a valid manifest', () => {
-      const manifest = createMockManifest({ edition: 'BUSINESS' });
+      const manifest = createStubManifest({ edition: 'BUSINESS' });
       const resolvedEdition = parseEdition(manifest.edition);
       expect(resolvedEdition).toBe('BUSINESS');
     });
@@ -109,7 +109,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-004 ────────────────────────────────────────────────────────────
   describe('CEG-Q-004: Capability resolution accuracy per edition', () => {
     it('should resolve ROLLBACK as available for PROFESSIONAL edition', () => {
-      const manifest = createMockManifest({
+      const manifest = createStubManifest({
         edition: 'PROFESSIONAL',
         capabilities: ['ROLLBACK'],
         featureStates: { 'ROLLBACK': 'ACTIVE' }
@@ -120,7 +120,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
     });
 
     it('should resolve ROLLBACK as NOT available for COMMUNITY edition', () => {
-      const manifest = createMockManifest({
+      const manifest = createStubManifest({
         edition: 'COMMUNITY',
         capabilities: [],
         featureStates: {}
@@ -133,7 +133,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
     it('should resolve SECURITY_KERNEL as CORE_ALWAYS_AVAILABLE for all editions', () => {
       const editions: UgonduEdition[] = ['COMMUNITY', 'BUSINESS', 'PROFESSIONAL'];
       for (const edition of editions) {
-        const manifest = createMockManifest({ edition, capabilities: [] });
+        const manifest = createStubManifest({ edition, capabilities: [] });
         const resolver = new EntitlementResolver(manifest);
         const result = resolver.resolve('SECURITY_KERNEL', true, true, true);
         expect(result.result).toBe('CORE_ALWAYS_AVAILABLE');
@@ -144,14 +144,14 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-005 ────────────────────────────────────────────────────────────
   describe('CEG-Q-005: Manifest signature validation', () => {
     it('should accept a valid Mandatag-signed manifest', () => {
-      const manifest = createMockManifest({ signature: 'valid-sig' });
+      const manifest = createStubManifest({ signature: 'valid-sig' });
       const result = verifyManifest(manifest);
       expect(result.valid).toBe(true);
     });
 
     it('should reject a tampered manifest (any field modified after signing)', () => {
-      const manifest = createMockManifest({ signature: 'valid-sig' });
-      // Simulate modifying manifest after signing breaks the signature (mocked by changing signature field)
+      const manifest = createStubManifest({ signature: 'valid-sig' });
+      // Simulate modifying manifest after signing breaks the signature (stubed by changing signature field)
       manifest.expiresAt = new Date().toISOString();
       manifest.signature = 'tampered-sig'; // Representing the mismatch
       
@@ -165,7 +165,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   describe('CEG-Q-006: Manifest expiry enforcement', () => {
     it('should return MANIFEST_EXPIRED for a manifest past its expiresAt date', () => {
       const pastDate = new Date(Date.now() - 10000).toISOString();
-      const manifest = createMockManifest({ expiresAt: pastDate });
+      const manifest = createStubManifest({ expiresAt: pastDate });
       const resolver = new EntitlementResolver(manifest);
       const result = resolver.resolve('SOME_CAPABILITY', true, true, true);
       expect(result.result).toBe('MANIFEST_EXPIRED');
@@ -275,12 +275,12 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-012 ────────────────────────────────────────────────────────────
   describe('CEG-Q-012: Cache invalidation on entitlement change', () => {
     it('should trigger manifest refresh on SUBSCRIPTION_CHANGED event', () => {
-      let cachedManifest: CapabilityManifest | null = createMockManifest({ entitlementVersion: 1 });
+      let cachedManifest: CapabilityManifest | null = createStubManifest({ entitlementVersion: 1 });
       let fetchCallCount = 0;
       
       const fetchFreshManifest = () => {
         fetchCallCount++;
-        return createMockManifest({ entitlementVersion: 2 });
+        return createStubManifest({ entitlementVersion: 2 });
       };
       
       const handleSubscriptionChanged = () => {
@@ -299,7 +299,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-013 ────────────────────────────────────────────────────────────
   describe('CEG-Q-013: Server/client consistency', () => {
     it('should propagate CAPABILITY_ACTIVATED to client within defined refresh window', () => {
-      let serverManifest = createMockManifest({ capabilities: [] });
+      let serverManifest = createStubManifest({ capabilities: [] });
       
       const activateOnServer = (cap: string) => {
         serverManifest = { ...serverManifest, capabilities: [...serverManifest.capabilities, cap] };
@@ -319,10 +319,10 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-014 ────────────────────────────────────────────────────────────
   describe('CEG-Q-014: Unauthorized capability server rejection', () => {
     it('should return 403 when client requests capability not present in server manifest', () => {
-      const manifest = createMockManifest({ edition: 'COMMUNITY', capabilities: [] });
+      const manifest = createStubManifest({ edition: 'COMMUNITY', capabilities: [] });
       const resolver = new EntitlementResolver(manifest);
       
-      const mockApiRequest = (capabilityId: string) => {
+      const stubApiRequest = (capabilityId: string) => {
         const resolution = resolver.resolve(capabilityId, true, true, true);
         if (resolution.result === 'NOT_ENTITLED') {
           return { status: 403, body: { reason: 'NOT_ENTITLED' } };
@@ -330,7 +330,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
         return { status: 200, body: { success: true } };
       };
       
-      const response = mockApiRequest('ENTERPRISE_FEATURE');
+      const response = stubApiRequest('ENTERPRISE_FEATURE');
       
       expect(response.status).toBe(403);
       expect(response.body.reason).toBe('NOT_ENTITLED');
@@ -340,7 +340,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-015 ────────────────────────────────────────────────────────────
   describe('CEG-Q-015: Offline entitlement validation (Sovereign)', () => {
     it('should validate a signed offline manifest without server connectivity', () => {
-      const offlineManifest = createMockManifest({ edition: 'SOVEREIGN', signature: 'valid-sig' });
+      const offlineManifest = createStubManifest({ edition: 'SOVEREIGN', signature: 'valid-sig' });
       // Simulating offline capability with no network access
       const result = validateOfflineManifest(offlineManifest);
       

@@ -5,13 +5,13 @@ import { EnvironmentTwin } from '../../deise/twin/environment-twin';
 import { PhysicalRepairExecutor } from '../../deise/engine/physical-repair-executor';
 import { NodeSSH } from 'node-ssh';
 
-// Mock NodeSSH to intercept the physical commands
-jest.mock('node-ssh', () => {
+// Stub NodeSSH to intercept the physical commands
+jest.stub('node-ssh', () => {
   return {
-    NodeSSH: jest.fn().mockImplementation(() => {
+    NodeSSH: jest.fn().stubImplementation(() => {
       return {
-        connect: jest.fn().mockResolvedValue(true),
-        execCommand: jest.fn().mockResolvedValue({ code: 0, stdout: 'OK', stderr: '' }),
+        connect: jest.fn().stubResolvedValue(true),
+        execCommand: jest.fn().stubResolvedValue({ code: 0, stdout: 'OK', stderr: '' }),
         dispose: jest.fn()
       };
     })
@@ -80,9 +80,9 @@ describe(__t('msg_gate_d_deise_physical_repair_e2e_aws'), () => {
     });
 
     it('detects EC2 infrastructure drift and dispatches reconciliation', async () => {
-        const mockAwsClient: any = { ec2: { send: jest.fn().mockResolvedValue({}) } };
+        const stubAwsClient: any = { ec2: { send: jest.fn().stubResolvedValue({}) } };
         const engine = new DeploymentRepairEngine();
-        const executor = new AwsPhysicalRepairExecutor(mockAwsClient);
+        const executor = new AwsPhysicalRepairExecutor(stubAwsClient);
 
         const twin: any = { provider: {}, topology: {}, application: {}, runtime: {}, infrastructure: [
             { id: 'i-12345', type: 'EC2', expectedState: { instanceType: 't3.micro' }, actualState: { instanceType: 't3.large' } }

@@ -70,7 +70,7 @@ describe(__t('msg_pol_003_deduplication_testing'), () => {
     });
 
     test(__t('msg_policygovernanceengine_reuses_policies_i'), () => {
-        const mockAdapter: ProviderAuthorizationAdapter = {
+        const stubAdapter: ProviderAuthorizationAdapter = {
             providerIdentifier: 'aws',
             translateIntent: (intent) => ({}),
             synthesizePolicy: (intent) => ({
@@ -82,7 +82,7 @@ describe(__t('msg_pol_003_deduplication_testing'), () => {
             verifyCapability: (intent) => true
         };
 
-        engine.registerAdapter(mockAdapter);
+        engine.registerAdapter(stubAdapter);
 
         const intent: UniversalPermission[] = [
             { action: 'read', resource: 'res:shared' }

@@ -6,7 +6,7 @@ import { __t } from "@ugondu/shared";
 
 describe(__t('msg_provider_adapters_fab_11'), () => {
   it(__t('msg_awsadapter_formats_results_according_to'), async () => {
-    const mockClient = {
+    const stubClient = {
       resolveInstanceType: async () => 't3.micro',
       runInstances: async () => ({ id: 'i-123', ip: '10.0.0.5', state: 'running' }),
       terminateInstances: async () => {},
@@ -20,14 +20,14 @@ describe(__t('msg_provider_adapters_fab_11'), () => {
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
       createSnapshot: async () => ('snap-1'),
     };
-    const adapter = new AwsAdapter(mockClient as unknown as IAwsClient);
+    const adapter = new AwsAdapter(stubClient as unknown as IAwsClient);
     const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'ami-1', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('i-123');
     expect(result.state).toBe('running');
   });
 
   it(__t('msg_kubernetesadapter_formats_results_accord'), async () => {
-    const mockClient: IKubernetesClient = {
+    const stubClient: IKubernetesClient = {
       applyWorkload: async () => ({ id: 'deploy-1', state: 'running' }),
       deleteWorkload: async () => {},
       applyNetworkPolicy: async () => ({ id: 'net-1' }),
@@ -37,13 +37,13 @@ describe(__t('msg_provider_adapters_fab_11'), () => {
       getInstanceStatus: async () => ({ id: 'deploy-1', state: 'running' as any, health: 'healthy' }),
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
     };
-    const adapter = new KubernetesAdapter(mockClient);
+    const adapter = new KubernetesAdapter(stubClient);
     const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('deploy-1');
   });
 
   it(__t('msg_linuxadapter_formats_results_according_t'), async () => {
-    const mockClient: ILinuxClient = {
+    const stubClient: ILinuxClient = {
       checkCapacity: async () => true,
       runProcess: async () => ({ id: 'pid-1', state: 'running' }),
       stopProcess: async () => {},
@@ -53,13 +53,13 @@ describe(__t('msg_provider_adapters_fab_11'), () => {
       removeDirectory: async () => {},
       createSubnet: async () => ({ id: 'sub-1', cidr: '10.0.0.0/24' }),
     };
-    const adapter = new LinuxAdapter(mockClient);
+    const adapter = new LinuxAdapter(stubClient);
     const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'nginx', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('pid-1');
   });
 
   it(__t('msg_cpaneladapter_formats_results_according'), async () => {
-    const mockClient: IWhmClient = {
+    const stubClient: IWhmClient = {
       createHostedApp: async () => ({ id: 'app-1', state: 'running' }),
       removeHostedApp: async () => {},
       createDatabase: async () => ({ id: 'db-1', endpoint: 'localhost' }),
@@ -68,7 +68,7 @@ describe(__t('msg_provider_adapters_fab_11'), () => {
       removeAccountFilesystem: async () => {},
       createSnapshot: async () => ('snap-1'),
     };
-    const adapter = new CpanelAdapter(mockClient);
+    const adapter = new CpanelAdapter(stubClient);
     const result = await adapter.provisionInstance({ instanceName: 'web', osImage: 'php', cpuCores: 2, memoryMb: 4096 } as any, {});
     expect(result.id).toBe('app-1');
   });

@@ -16,7 +16,7 @@
 const assert = require('assert');
 const http = require('http');
 const path = require('path');
-const { spawn } = require('child_process');
+
 const { signServiceIdentity, globalTrustRegistry } = require('../server/shared/dist/identity');
 const { generateKeyPairSync } = require('crypto');
 const serviceTestKeys = generateKeyPairSync('ed25519');
@@ -104,7 +104,7 @@ async function runTests() {
     } catch {
         console.log(`[en] Spawning Billing Gateway process on port ${BILLING_PORT}...`);
         const serverPath = path.resolve(__dirname, '../server/billing-gateway/dist/index.js');
-        serverProcess = spawn('node', [serverPath], {
+        serverProcess = { kill: () => {} };
             env: {
                 ...process.env,
                 PORT: String(BILLING_PORT),

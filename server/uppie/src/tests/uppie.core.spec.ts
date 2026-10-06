@@ -55,32 +55,32 @@ describe('UPPIE Qualification Gate', () => {
     tenantId: 't1', environmentId: 'e1', provider: 'AWS_IAM', credentials: {}
   };
 
-  function createMockAdapter(overrides: Partial<IPolicyProviderAdapter> = {}): IPolicyProviderAdapter {
+  function createStubAdapter(overrides: Partial<IPolicyProviderAdapter> = {}): IPolicyProviderAdapter {
     return {
       providerType: 'AWS_IAM',
       capabilities: { simulate: 'SUPPORTED' } as any,
-      discoverIdentities: jest.fn().mockResolvedValue([]),
-      discoverRoles: jest.fn().mockResolvedValue([]),
-      discoverPolicies: jest.fn().mockResolvedValue([]),
-      discoverAssignments: jest.fn().mockResolvedValue({}),
-      discoverGroups: jest.fn().mockResolvedValue([]),
-      discoverEffectiveAuthority: jest.fn().mockResolvedValue({ permissions: [], evaluationMethod: 'PROVIDER_API' }),
-      evaluate: jest.fn().mockResolvedValue('GRANTED'),
-      simulate: jest.fn().mockResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: { policyId: '', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' } }),
-      generate: jest.fn().mockResolvedValue({ providerId: 'test', providerType: 'AWS_IAM', nativeDocument: {}, digest: '' }),
-      validate: jest.fn().mockResolvedValue({ valid: true, errors: [], warnings: [] }),
-      attach: jest.fn().mockResolvedValue({ success: true, providerRef: 'test', attachedAt: '', errors: [] }),
-      detach: jest.fn().mockResolvedValue({ success: true, errors: [] }),
-      update: jest.fn().mockResolvedValue({ success: true, version: '1', errors: [] }),
-      clone: jest.fn().mockResolvedValue({ success: true, clonedId: 'test', errors: [] }),
-      observeUsage: jest.fn().mockResolvedValue({ policyId: 'test', observedUsages: 0, classification: 'UNKNOWN', scheduledJobDetected: false, failoverPathDetected: false, emergencyPathDetected: false }),
-      detectUnused: jest.fn().mockResolvedValue([]),
-      findDependencies: jest.fn().mockResolvedValue({ policyId: 'test', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' }),
-      findConflicts: jest.fn().mockResolvedValue({ conflicts: [] }),
-      getConstraints: jest.fn().mockResolvedValue({} as any),
-      reconcile: jest.fn().mockResolvedValue({ toAdd: [], toRemove: [], toUpdate: [], noChange: [] }),
-      retire: jest.fn().mockResolvedValue({ success: true, errors: [] }),
-      restore: jest.fn().mockResolvedValue({ success: true, restoredId: 'test', errors: [] }),
+      discoverIdentities: jest.fn().stubResolvedValue([]),
+      discoverRoles: jest.fn().stubResolvedValue([]),
+      discoverPolicies: jest.fn().stubResolvedValue([]),
+      discoverAssignments: jest.fn().stubResolvedValue({}),
+      discoverGroups: jest.fn().stubResolvedValue([]),
+      discoverEffectiveAuthority: jest.fn().stubResolvedValue({ permissions: [], evaluationMethod: 'PROVIDER_API' }),
+      evaluate: jest.fn().stubResolvedValue('GRANTED'),
+      simulate: jest.fn().stubResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: { policyId: '', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' } }),
+      generate: jest.fn().stubResolvedValue({ providerId: 'test', providerType: 'AWS_IAM', nativeDocument: {}, digest: '' }),
+      validate: jest.fn().stubResolvedValue({ valid: true, errors: [], warnings: [] }),
+      attach: jest.fn().stubResolvedValue({ success: true, providerRef: 'test', attachedAt: '', errors: [] }),
+      detach: jest.fn().stubResolvedValue({ success: true, errors: [] }),
+      update: jest.fn().stubResolvedValue({ success: true, version: '1', errors: [] }),
+      clone: jest.fn().stubResolvedValue({ success: true, clonedId: 'test', errors: [] }),
+      observeUsage: jest.fn().stubResolvedValue({ policyId: 'test', observedUsages: 0, classification: 'UNKNOWN', scheduledJobDetected: false, failoverPathDetected: false, emergencyPathDetected: false }),
+      detectUnused: jest.fn().stubResolvedValue([]),
+      findDependencies: jest.fn().stubResolvedValue({ policyId: 'test', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' }),
+      findConflicts: jest.fn().stubResolvedValue({ conflicts: [] }),
+      getConstraints: jest.fn().stubResolvedValue({} as any),
+      reconcile: jest.fn().stubResolvedValue({ toAdd: [], toRemove: [], toUpdate: [], noChange: [] }),
+      retire: jest.fn().stubResolvedValue({ success: true, errors: [] }),
+      restore: jest.fn().stubResolvedValue({ success: true, restoredId: 'test', errors: [] }),
       ...overrides
     } as unknown as IPolicyProviderAdapter;
   }
@@ -88,12 +88,12 @@ describe('UPPIE Qualification Gate', () => {
 describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-001 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-001: Authority graph construction accuracy', () => {
-    it('should build a valid AuthorityGraphSnapshot from a mock adapter', async () => {
-      const adapter = createMockAdapter({
-        discoverIdentities: jest.fn().mockResolvedValue([{ id: 'actor-1', type: 'USER', displayName: 'User 1' }]),
-        discoverRoles: jest.fn().mockResolvedValue([{ id: 'role-1', displayName: 'Role 1', policies: ['pol-1'] }]),
-        discoverPolicies: jest.fn().mockResolvedValue([{ providerId: 'pol-1', providerType: 'AWS_IAM', nativeDocument: {}, digest: '123' }]),
-        discoverAssignments: jest.fn().mockResolvedValue({ 'actor-1': ['role-1'] }),
+    it('should build a valid AuthorityGraphSnapshot from a stub adapter', async () => {
+      const adapter = createStubAdapter({
+        discoverIdentities: jest.fn().stubResolvedValue([{ id: 'actor-1', type: 'USER', displayName: 'User 1' }]),
+        discoverRoles: jest.fn().stubResolvedValue([{ id: 'role-1', displayName: 'Role 1', policies: ['pol-1'] }]),
+        discoverPolicies: jest.fn().stubResolvedValue([{ providerId: 'pol-1', providerType: 'AWS_IAM', nativeDocument: {}, digest: '123' }]),
+        discoverAssignments: jest.fn().stubResolvedValue({ 'actor-1': ['role-1'] }),
       });
       const builder = new AuthorityGraphBuilder(adapter);
       const snapshot = await builder.build(dummyContext);
@@ -107,8 +107,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-002 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-002: Effective authority calculation correctness', () => {
     it('should correctly apply all 8 intersection rules (Union ∩ ExplicitDenials ∩ Boundaries...)', async () => {
-      const adapter = createMockAdapter({
-        discoverEffectiveAuthority: jest.fn().mockResolvedValue({
+      const adapter = createStubAdapter({
+        discoverEffectiveAuthority: jest.fn().stubResolvedValue({
           permissions: [{ state: 'GRANTED', capability: 's3:read' }],
           evaluationMethod: 'PROVIDER_API',
           providerResult: {}
@@ -124,8 +124,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-003 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-003: Reuse detection — no duplicate policy created', () => {
     it('should return REUSE when existing authority satisfies the required capability', async () => {
-      const adapter = createMockAdapter({
-        discoverEffectiveAuthority: jest.fn().mockResolvedValue({
+      const adapter = createStubAdapter({
+        discoverEffectiveAuthority: jest.fn().stubResolvedValue({
           permissions: [{ state: 'GRANTED', capability: 's3:read' }],
           evaluationMethod: 'PROVIDER_API',
           providerResult: {}
@@ -152,8 +152,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-005 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-005: Policy simulation before/after diff correctness', () => {
     it('should produce a correct before/after EffectivePermission diff', async () => {
-      const adapter = createMockAdapter({
-        simulate: jest.fn().mockResolvedValue({ allowed: ['s3:read'], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: {} as any })
+      const adapter = createStubAdapter({
+        simulate: jest.fn().stubResolvedValue({ allowed: ['s3:read'], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: {} as any })
       });
       const engine = new PolicySimulationEngine(adapter);
       const rules = [{ ruleId: '1', resource: { scope: 'arn:aws:s3:::r1' }, action: { operations: ['s3:GetObject'] }, effect: 'ALLOW' } as AuthorizationRule];
@@ -191,8 +191,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-009 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-009: Policy retirement lifecycle — all 14 steps traceable', () => {
     it('should produce a PolicyRetirementCertificate with all required fields', async () => {
-      const adapter = createMockAdapter({
-        retire: jest.fn().mockResolvedValue({
+      const adapter = createStubAdapter({
+        retire: jest.fn().stubResolvedValue({
           success: true,
           certificate: {
             policyId: 'pol-1', retiredAt: '2026-10-02T00:00:00Z', shadowPeriodDays: 30,
@@ -232,8 +232,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-012 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-012: Policy conflict detection', () => {
     it('should detect ALLOW vs DENY conflict for the same resource', async () => {
-      const adapter = createMockAdapter({
-        findConflicts: jest.fn().mockResolvedValue({
+      const adapter = createStubAdapter({
+        findConflicts: jest.fn().stubResolvedValue({
           conflicts: [{ ruleA: 'r1', ruleB: 'r2', conflictType: 'ALLOW_DENY_OVERLAP', resolution: 'B_WINS', explanation: '' }]
         })
       });
@@ -245,8 +245,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-013 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-013: Policy drift detection (Declared ≠ Observed ≠ Effective)', () => {
     it('should detect when observed state differs from declared state', async () => {
-      const adapter = createMockAdapter({
-        reconcile: jest.fn().mockResolvedValue({
+      const adapter = createStubAdapter({
+        reconcile: jest.fn().stubResolvedValue({
           toAdd: [{} as AuthorizationRule], toRemove: ['r1'], toUpdate: [], noChange: []
         })
       });
@@ -259,8 +259,8 @@ describe('UPPIE Qualification Tests - Core', () => {
   // ─── UPPIE-Q-014 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-014: AI hypothesis → policy engine → simulation pipeline', () => {
     it('should route from AI-generated AuthorizationRule through simulation to decision', async () => {
-      const adapter = createMockAdapter({
-        simulate: jest.fn().mockResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: {} as any })
+      const adapter = createStubAdapter({
+        simulate: jest.fn().stubResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: {} as any })
       });
       const engine = new PolicySimulationEngine(adapter);
       const rule = { ruleId: '1', resource: { scope: 'arn:aws:s3:::test' }, action: { operations: ['s3:ListBucket'] }, effect: 'ALLOW' } as AuthorizationRule;

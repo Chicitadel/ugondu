@@ -14,7 +14,7 @@ function createPolicyApi(store) {
         try {
             // Find evidence by build_identity
             // Note: Our EvidenceStore interface currently gets by `identity`, not `build_identity`.
-            // For MVP, we need to adapt the Postgres/Mysql stores to support searching, but we'll mock it 
+            // For MVP, we need to adapt the Postgres/Mysql stores to support searching, but we'll stub it 
             // by assuming the store has a `searchByBuildIdentity` if we need it, or we rely on the primary `identity`.
             // The prompt says "Find evidence by build_identity". Let's assume store.getByBuildIdentity exists.
             

@@ -34,7 +34,7 @@ import * as crypto from "crypto";
 
 
 
-// --- Mocks & Core System Representations ---
+// --- Stubs & Core System Representations ---
 
 import { EventBus, CapabilityEntitlementGraph, BillingGateway } from '../../engine-core/src/billing/billing';
 

@@ -5,12 +5,12 @@ import { __t } from "@ugondu/shared";
 
 describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
 
-    const generateMockIr = function(): ArchitectureIR { return {
+    const generateStubIr = function(): ArchitectureIR { return {
         nodes: [{ id: 'db-1', type: 'DATABASE', provider: 'aws', config: {} }],
         edges: []
     }; };
 
-    const mockEnvelope = {
+    const stubEnvelope = {
         edition: 'ENTERPRISE',
         allowedActions: ['PROVISION_DATABASE'],
         tenantId: 't-123'
@@ -19,16 +19,16 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
     let baseContext: GatingContext;
 
     beforeAll(() => {
-        (UpmExecutionGate.verifyAuthorization as jest.Mock).mockRestore();
+        (UpmExecutionGate.verifyAuthorization as jest.Stub).stubRestore();
     });
 
     beforeEach(() => {
         baseContext = {
             intentHash: 'hash-intent-001',
             twinHash: 'hash-twin-001',
-            ir: generateMockIr(),
+            ir: generateStubIr(),
             policyVersion: '1.0.0',
-            envelope: { ...mockEnvelope },
+            envelope: { ...stubEnvelope },
             activePolicies: ['default-deny']
         };
     });
@@ -40,7 +40,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() + 100000),
-            envelopeHash: 'mock-hash',
+            envelopeHash: 'stub-hash',
             intentHash: 'hash-intent-001',
             twinHash: 'hash-twin-001',
             irHash: UpmExecutionGate['hashOf'](baseContext.ir)
@@ -64,7 +64,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() + 100000),
-            envelopeHash: 'mock-hash',
+            envelopeHash: 'stub-hash',
             intentHash: 'hash-intent-001',
             twinHash: 'hash-twin-001',
             irHash: UpmExecutionGate['hashOf'](baseContext.ir)
@@ -78,7 +78,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
             envelopeHash: auth.envelopeHash
         });
 
-        const maliciousIr = generateMockIr();
+        const maliciousIr = generateStubIr();
         maliciousIr.nodes.push({ id: 'crypto-miner', type: 'COMPUTE', provider: 'aws', config: {} });
         expect(() => UpmExecutionGate.verifyAuthorization(auth, maliciousIr)).toThrow(/hash_mismatch/i);
     });
@@ -90,7 +90,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() - 10000), // Expired
-            envelopeHash: 'mock-hash',
+            envelopeHash: 'stub-hash',
             intentHash: 'hash-intent-001',
             twinHash: 'hash-twin-001',
             irHash: UpmExecutionGate['hashOf'](baseContext.ir)
@@ -114,7 +114,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() + 100000),
-            envelopeHash: 'mock-hash',
+            envelopeHash: 'stub-hash',
             intentHash: 'hash-intent-001',
             twinHash: 'hash-twin-001',
             irHash: UpmExecutionGate['hashOf'](baseContext.ir)
@@ -138,7 +138,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
             policyVersion: '1.0.0',
             cryptographicSeal: '',
             expiresAt: new Date(Date.now() + 100000),
-            envelopeHash: 'mock-hash',
+            envelopeHash: 'stub-hash',
             intentHash: 'hash-intent-001',
             twinHash: 'hash-twin-001',
             irHash: UpmExecutionGate['hashOf'](baseContext.ir)

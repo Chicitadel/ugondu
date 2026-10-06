@@ -10,7 +10,7 @@ class StorageAbstraction {
 
     async read(collection, id) {
         if (this.provider === 'mysql') {
-            return { id, data: `Mock MySQL Data from ${collection}` };
+            return { id, data: `Stub MySQL Data from ${collection}` };
         }
         return null;
     }

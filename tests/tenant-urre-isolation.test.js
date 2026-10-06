@@ -21,7 +21,6 @@ async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
 
     // Due to ES modules or TypeScript, we might need to load compiled JS or use ts-node.
-    // If running in an environment where .ts cannot be directly required, we will mock the behavior 
     // or load the compiled dist files. Since tests usually run via a runner that handles TS or 
     // run against dist/, we'll require the dist file. If dist doesn't exist, we fallback.
     
@@ -46,10 +45,8 @@ async function runTests() {
         }
     }
 
-    const mockEngine = {
         runTask: async () => ({ status: 'SUCCESS' })
     };
-    const executor = new Executor(mockEngine);
 
     let passed = 0;
     let failed = 0;

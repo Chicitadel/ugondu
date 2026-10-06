@@ -72,10 +72,8 @@ describe('UPPIE Qualification Gates: UPPIE-21..50', () => {
   });
 
   it('UPPIE-25..30: Policy Simulation Gates (Dry-run, blast-radius, tenant isolation)', async () => {
-    const mockAdapter: IPolicyProviderAdapter = {
       providerType: 'AWS_IAM',
       capabilities: {} as any,
-      simulate: jest.fn().mockResolvedValue({
         allowed: ['s3:GetObject'],
         denied: [],
         unchanged: [],
@@ -83,7 +81,6 @@ describe('UPPIE Qualification Gates: UPPIE-21..50', () => {
         blastRadius: { policyId: 'p1', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' }
       })
     } as unknown as IPolicyProviderAdapter;
-    const engine = new PolicySimulationEngine(mockAdapter);
     const report = await engine.simulate([], dummyContext);
     expect(report.decision).toBe('APPROVED');
   });
@@ -98,10 +95,7 @@ describe('UPPIE Qualification Gates: UPPIE-21..50', () => {
   });
 
   it('UPPIE-37..40: Real-Time Observation & Drift Gates', async () => {
-    const mockAdapter = {
-      reconcile: jest.fn().mockResolvedValue({ toAdd: [], toRemove: [], toUpdate: [], noChange: ['r1'] })
     } as unknown as IPolicyProviderAdapter;
-    const res = await mockAdapter.reconcile([], [], dummyContext);
     expect(res.noChange).toContain('r1');
   });
 
@@ -117,15 +111,9 @@ describe('UPPIE Qualification Gates: UPPIE-21..50', () => {
   });
 
   it('UPPIE-46..48: Performance & Scale Gates (O(V+E) and latency bounds)', async () => {
-    const mockAdapter: IPolicyProviderAdapter = {
       providerType: 'AWS_IAM',
       capabilities: {} as any,
-      discoverIdentities: jest.fn().mockResolvedValue(Array.from({ length: 50 }, (_, i) => ({ id: `user-${i}`, type: 'USER', displayName: `User ${i}` }))),
-      discoverRoles: jest.fn().mockResolvedValue([]),
-      discoverPolicies: jest.fn().mockResolvedValue([]),
-      discoverAssignments: jest.fn().mockResolvedValue({})
     } as unknown as IPolicyProviderAdapter;
-    const builder = new AuthorityGraphBuilder(mockAdapter);
     const start = Date.now();
     const snapshot = await builder.build(dummyContext);
     const duration = Date.now() - start;

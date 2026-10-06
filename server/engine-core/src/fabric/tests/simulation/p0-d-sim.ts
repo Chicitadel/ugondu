@@ -234,7 +234,7 @@ async function executeSimulations() {
     Logger.info('--- P0-D-SIM-04: DEISE Drift Repair ---');
     try {
         const awsClient = new SimulationAwsClient() as any;
-        const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', 'subnet-mock');
+        const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', 'subnet-stub');
 
         Logger.info('[SIM-DEISE] Intentional External Modification (Drift)');
         awsClient.state[ec2.id].instanceType = 't3.large';

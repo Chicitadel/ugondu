@@ -17,9 +17,9 @@ recoveryRouter.post('/execute', async (req, res) => {
         return res.status(404).json({ status: 'UNSUPPORTED', message: `Capability ${capability} not registered or unsupported.` });
     }
 
-    // Mock environment twin and scope for now, in reality this invokes the Orchestrator
-    const mockScope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {} };
-    const mockTwin = {
+    // Stub environment twin and scope for now, in reality this invokes the Orchestrator
+    const stubScope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {} };
+    const stubTwin = {
         provider: { platform: 'unknown' },
         topology: { currentSymlinkValid: false, webrootPath: '', webrootSymlinkTarget: null, availableReleases: [] },
         application: { version: '1.0', manifests: [], integrityStatus: 'MISSING' as const },
@@ -27,19 +27,19 @@ recoveryRouter.post('/execute', async (req, res) => {
     };
 
     try {
-        const diagnosis = await cap.diagnose(mockTwin, mockScope);
-        const plan = await cap.plan(diagnosis, mockScope);
+        const diagnosis = await cap.diagnose(stubTwin, stubScope);
+        const plan = await cap.plan(diagnosis, stubScope);
         
         if (dry_run) {
             return res.json({ status: 'PLANNED', message: 'Dry run completed', evidence: JSON.stringify(plan) });
         }
 
-        // We use a mock adapter here that just logs
-        const mockAdapter = {
+        // We use a stub adapter here that just logs
+        const stubAdapter = {
             executeCommand: async (cmd: string) => { console.log(`[Adapter Exec] ${cmd}`); }
         };
 
-        await cap.execute(plan, mockAdapter, mockScope);
+        await cap.execute(plan, stubAdapter, stubScope);
         
         return res.json({ status: 'EXECUTED', message: 'Capability executed successfully', transactionId: `txn-${Date.now()}` });
     } catch (e: any) {
@@ -90,26 +90,26 @@ recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), asy
     }
 
     try {
-        const mockScope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {} };
-        const mockTwin = {
+        const stubScope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {} };
+        const stubTwin = {
             provider: { platform: 'unknown' },
             topology: { currentSymlinkValid: false, webrootPath: '', webrootSymlinkTarget: null, availableReleases: [] },
             application: { version: '1.0', manifests: [], integrityStatus: 'MISSING' as const },
             runtime: { primaryRuntime: 'unknown', primaryRuntimeVersion: 'unknown', missingDependencies: [] }
         };
 
-        const diagnosis = await cap.diagnose(mockTwin, mockScope);
-        const plan = await cap.plan(diagnosis, mockScope);
+        const diagnosis = await cap.diagnose(stubTwin, stubScope);
+        const plan = await cap.plan(diagnosis, stubScope);
         
         if (isDryRun) {
             return res.send(`<h1>Dry Run Completed</h1><pre>${JSON.stringify(plan, null, 2)}</pre><a href="/v1/recovery/ui">Back</a>`);
         }
 
-        const mockAdapter = {
+        const stubAdapter = {
             executeCommand: async (cmd: string) => { console.log(`[Adapter Exec] ${cmd}`); }
         };
 
-        await cap.execute(plan, mockAdapter, mockScope);
+        await cap.execute(plan, stubAdapter, stubScope);
         return res.send(`<h1>Execution Completed</h1><p>Successfully executed ${capability} against ${target}.</p><a href="/v1/recovery/ui">Back</a>`);
     } catch (e: any) {
         return res.status(500).send(`<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>`);

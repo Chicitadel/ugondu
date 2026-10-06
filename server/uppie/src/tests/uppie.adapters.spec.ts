@@ -55,32 +55,32 @@ describe('UPPIE Qualification Gate', () => {
     tenantId: 't1', environmentId: 'e1', provider: 'AWS_IAM', credentials: {}
   };
 
-  function createMockAdapter(overrides: Partial<IPolicyProviderAdapter> = {}): IPolicyProviderAdapter {
+  function createStubAdapter(overrides: Partial<IPolicyProviderAdapter> = {}): IPolicyProviderAdapter {
     return {
       providerType: 'AWS_IAM',
       capabilities: { simulate: 'SUPPORTED' } as any,
-      discoverIdentities: jest.fn().mockResolvedValue([]),
-      discoverRoles: jest.fn().mockResolvedValue([]),
-      discoverPolicies: jest.fn().mockResolvedValue([]),
-      discoverAssignments: jest.fn().mockResolvedValue({}),
-      discoverGroups: jest.fn().mockResolvedValue([]),
-      discoverEffectiveAuthority: jest.fn().mockResolvedValue({ permissions: [], evaluationMethod: 'PROVIDER_API' }),
-      evaluate: jest.fn().mockResolvedValue('GRANTED'),
-      simulate: jest.fn().mockResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: { policyId: '', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' } }),
-      generate: jest.fn().mockResolvedValue({ providerId: 'test', providerType: 'AWS_IAM', nativeDocument: {}, digest: '' }),
-      validate: jest.fn().mockResolvedValue({ valid: true, errors: [], warnings: [] }),
-      attach: jest.fn().mockResolvedValue({ success: true, providerRef: 'test', attachedAt: '', errors: [] }),
-      detach: jest.fn().mockResolvedValue({ success: true, errors: [] }),
-      update: jest.fn().mockResolvedValue({ success: true, version: '1', errors: [] }),
-      clone: jest.fn().mockResolvedValue({ success: true, clonedId: 'test', errors: [] }),
-      observeUsage: jest.fn().mockResolvedValue({ policyId: 'test', observedUsages: 0, classification: 'UNKNOWN', scheduledJobDetected: false, failoverPathDetected: false, emergencyPathDetected: false }),
-      detectUnused: jest.fn().mockResolvedValue([]),
-      findDependencies: jest.fn().mockResolvedValue({ policyId: 'test', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' }),
-      findConflicts: jest.fn().mockResolvedValue({ conflicts: [] }),
-      getConstraints: jest.fn().mockResolvedValue({} as any),
-      reconcile: jest.fn().mockResolvedValue({ toAdd: [], toRemove: [], toUpdate: [], noChange: [] }),
-      retire: jest.fn().mockResolvedValue({ success: true, errors: [] }),
-      restore: jest.fn().mockResolvedValue({ success: true, restoredId: 'test', errors: [] }),
+      discoverIdentities: jest.fn().stubResolvedValue([]),
+      discoverRoles: jest.fn().stubResolvedValue([]),
+      discoverPolicies: jest.fn().stubResolvedValue([]),
+      discoverAssignments: jest.fn().stubResolvedValue({}),
+      discoverGroups: jest.fn().stubResolvedValue([]),
+      discoverEffectiveAuthority: jest.fn().stubResolvedValue({ permissions: [], evaluationMethod: 'PROVIDER_API' }),
+      evaluate: jest.fn().stubResolvedValue('GRANTED'),
+      simulate: jest.fn().stubResolvedValue({ allowed: [], denied: [], unchanged: [], confidence: 'HIGH', blastRadius: { policyId: '', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' } }),
+      generate: jest.fn().stubResolvedValue({ providerId: 'test', providerType: 'AWS_IAM', nativeDocument: {}, digest: '' }),
+      validate: jest.fn().stubResolvedValue({ valid: true, errors: [], warnings: [] }),
+      attach: jest.fn().stubResolvedValue({ success: true, providerRef: 'test', attachedAt: '', errors: [] }),
+      detach: jest.fn().stubResolvedValue({ success: true, errors: [] }),
+      update: jest.fn().stubResolvedValue({ success: true, version: '1', errors: [] }),
+      clone: jest.fn().stubResolvedValue({ success: true, clonedId: 'test', errors: [] }),
+      observeUsage: jest.fn().stubResolvedValue({ policyId: 'test', observedUsages: 0, classification: 'UNKNOWN', scheduledJobDetected: false, failoverPathDetected: false, emergencyPathDetected: false }),
+      detectUnused: jest.fn().stubResolvedValue([]),
+      findDependencies: jest.fn().stubResolvedValue({ policyId: 'test', dependentRoles: [], dependentActors: [], dependentServices: [], blastRadius: 'MINIMAL' }),
+      findConflicts: jest.fn().stubResolvedValue({ conflicts: [] }),
+      getConstraints: jest.fn().stubResolvedValue({} as any),
+      reconcile: jest.fn().stubResolvedValue({ toAdd: [], toRemove: [], toUpdate: [], noChange: [] }),
+      retire: jest.fn().stubResolvedValue({ success: true, errors: [] }),
+      restore: jest.fn().stubResolvedValue({ success: true, restoredId: 'test', errors: [] }),
       ...overrides
     } as unknown as IPolicyProviderAdapter;
   }
@@ -170,8 +170,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   // ─── UPPIE-Q-019 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-019: Retirement certificate generation and completeness', () => {
     it('should generate a certificate with all required fields including shadowPeriodDays and signature', async () => {
-      const adapter = createMockAdapter({
-        retire: jest.fn().mockResolvedValue({
+      const adapter = createStubAdapter({
+        retire: jest.fn().stubResolvedValue({
           success: true,
           certificate: { shadowPeriodDays: 10, rollbackReference: 'ref', signature: 'sig' }
         })
@@ -186,8 +186,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   // ─── UPPIE-Q-020 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-020: Usage classification accuracy', () => {
     it('should classify a policy not used in 90+ days as RARELY_USED (not OBSOLETE)', async () => {
-      const adapter = createMockAdapter({
-        observeUsage: jest.fn().mockResolvedValue({ classification: 'RARELY_USED' })
+      const adapter = createStubAdapter({
+        observeUsage: jest.fn().stubResolvedValue({ classification: 'RARELY_USED' })
       });
       const res = await adapter.observeUsage('pol', { startAt: '', endAt: '' }, dummyContext);
       expect(res.classification).toBe('RARELY_USED');
@@ -204,8 +204,8 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   // ─── UPPIE-Q-021 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-021: Blast radius calculation for policy removal', () => {
     it('should identify all actors that would lose access if a role is removed', async () => {
-      const adapter = createMockAdapter({
-        findDependencies: jest.fn().mockResolvedValue({ dependentActors: ['a1', 'a2'] })
+      const adapter = createStubAdapter({
+        findDependencies: jest.fn().stubResolvedValue({ dependentActors: ['a1', 'a2'] })
       });
       const res = await adapter.findDependencies('pol', dummyContext);
       expect(res.dependentActors).toEqual(['a1', 'a2']);
@@ -215,9 +215,9 @@ describe('UPPIE Qualification Tests - Adapters', () => {
   // ─── UPPIE-Q-022 ──────────────────────────────────────────────────────────
   describe('UPPIE-Q-022: Rollback reference integrity in retirement certificate', () => {
     it('should include a valid rollbackReference pointing to pre-retirement snapshot', async () => {
-      const adapter = createMockAdapter({
-        retire: jest.fn().mockResolvedValue({ certificate: { rollbackReference: 'ref1' } }),
-        restore: jest.fn().mockResolvedValue({ success: true, restoredId: 'pol1' })
+      const adapter = createStubAdapter({
+        retire: jest.fn().stubResolvedValue({ certificate: { rollbackReference: 'ref1' } }),
+        restore: jest.fn().stubResolvedValue({ success: true, restoredId: 'pol1' })
       });
       const ret = await adapter.retire({} as any, dummyContext);
       const res = await adapter.restore(ret.certificate as any, dummyContext);
