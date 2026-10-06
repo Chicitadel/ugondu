@@ -33,7 +33,7 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
     const context: GatingContext = {
         intentHash: canonicalIntentHash,
         twinHash: twin.immutableEvidenceSnapshotId || crypto.randomUUID(),
-        ir: { nodes: [], regions: [], constraints: [] },
+        ir: { nodes: [], edges: [] },
         policyVersion: '1.0.0',
         envelope: { edition: 'enterprise', allowedActions: ['*'], tenantId: 'default' },
         activePolicies: []
@@ -41,7 +41,7 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
 
     if (intent.target === 'unauthorized_target') {
         context.envelope.allowedActions = []; // Force rejection
-        context.ir.nodes.push({ id: 'bad', type: 'resource', provider: 'restricted_provider', });
+        context.ir.nodes.push({ id: 'bad', type: 'resource', provider: 'restricted_provider', config: {} });
     }
 
     const auth = await UpmExecutionGate.evaluate(context);
@@ -115,4 +115,3 @@ recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), asy
         return res.status(500).send(`<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>`);
     }
 });
-

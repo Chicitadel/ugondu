@@ -1,9 +1,13 @@
 import { LiveEnvironmentAdapterContract, RecoveryScope } from '../../recovery/live-environment-adapter-contract';
 import { EnvironmentTwin } from '../../../twin/environment-twin';
-import { RepairPlan } from '../../recovery/repair-engine';
+import { RepairPlan } from '../../repair-engine';
 import * as crypto from 'crypto';
 
 export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
+    async identify(scope: RecoveryScope): Promise<any> {
+        return {};
+    }
+
     async captureState(scope: RecoveryScope): Promise<EnvironmentTwin> {
         return {
             provider: { platform: 'ssh', region: 'local' },
@@ -14,7 +18,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
         } as unknown as EnvironmentTwin;
     }
 
-    async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean; actualState: any; verificationEvidence?: any }> {
+    async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean; actualState: any; verificationEvidence: any }> {
         return { verified: true, actualState: {}, verificationEvidence: { checkedAt: new Date().toISOString() } };
     }
 
@@ -22,8 +26,8 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
         return true;
     }
 
-    async dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ safe: boolean; expectedMutations: any[] }> {
-        return { safe: true, expectedMutations: [] };
+    async dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ safe: boolean; plannedMutations: any[] }> {
+        return { safe: true, plannedMutations: [] };
     }
 
     async executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean; evidence: any; checkpointId: string }> {
