@@ -42,7 +42,7 @@ function runStream(stream) {
     const executionId = 'EXEC-' + crypto.randomBytes(4).toString('hex').toUpperCase();
     const ts = new Date().toISOString();
     
-    let command = 'echo "Simulated execution for ' + stream.id + '"';
+    let command = 'SIMULATION';
     if (stream.id === 'A01') command = 'node ' + path.join(root, 'scripts', 'i18n_audit.js');
     if (stream.id === 'B01') command = 'npm run build --if-present';
     if (stream.id === 'C01') command = 'npm run test --if-present';
@@ -52,7 +52,11 @@ function runStream(stream) {
     let stderrStr = '';
     
     try {
-        stdoutStr = execSync(command, { cwd: root, stdio: 'pipe' }).toString();
+        if (command === 'SIMULATION') {
+            stdoutStr = 'Simulated'; exitCode = 1;
+        } else {
+            stdoutStr = execSync(command, { cwd: root, stdio: 'pipe' }).toString();
+        }
     } catch (e) {
         exitCode = e.status || 1;
         stdoutStr = e.stdout ? e.stdout.toString() : '';
@@ -62,8 +66,8 @@ function runStream(stream) {
     const stdoutHash = crypto.createHash('sha256').update(stdoutStr).digest('hex');
     const stderrHash = crypto.createHash('sha256').update(stderrStr).digest('hex');
     
-    const success = exitCode === 0;
-    
+    const success = exitCode === 0 && command !== 'SIMULATION';
+    let streamStatus = command === 'SIMULATION' ? 'NOT_PROVEN' : (success ? 'PASS' : 'FAIL');
     const receipt = {
         streamId: stream.id,
         executionId: executionId,
@@ -72,7 +76,7 @@ function runStream(stream) {
         exitCode: exitCode,
         stdoutHash: stdoutHash,
         stderrHash: stderrHash,
-        status: success ? 'PASS' : 'BLOCKED'
+        status: streamStatus
     };
     
     receipt.evidenceDigest = crypto.createHash('sha256').update(JSON.stringify(receipt)).digest('hex');
@@ -101,3 +105,5 @@ if (!allPass) {
 } else {
     console.log('COR Engine finished. Status: COR_CERTIFIED');
 }
+
+

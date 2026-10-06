@@ -1,12 +1,13 @@
+import { RecoveryCapability } from './capabilities/recovery-capability';
 export class CapabilityRegistry {
-    private plugins: Map<string, any> = new Map();
+    private plugins: Map<string, RecoveryCapability> = new Map();
 
     constructor() {
         // P3: Plugins will be dynamically discovered or registered via an external loader
         // engine-core no longer imports concrete plugins directly.
     }
 
-    registerCapability(capability: any): void {
+    registerCapability(capability: RecoveryCapability): void {
         if (!capability || typeof capability.capabilityId !== 'string') {
             throw new Error(__t('invalid_capability_contract'));
         }
@@ -23,3 +24,4 @@ export class CapabilityRegistry {
 }
 
 export const GlobalCapabilityRegistry = new CapabilityRegistry();
+

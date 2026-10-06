@@ -117,7 +117,7 @@ Assert-No-Match -Pattern "new EC2Client|new ECSClient|new RDSClient|new IAMClien
 echo "15. Semantic placeholder blacklist"
 Assert-No-Match -Pattern "(secret:dummy|dummy-arn|sha256:dummy|ami-placeholder|subnet-placeholder|mock-tx|mocking|mocked|simulation|simulate|simulated|fake|dummy|synthetic|stub|placeholder|skip physical|skip physical describe|public\.ecr\.aws|latest|fake-ami|test-ami|mock-ami)" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts server/engine-core/src/fabric server/engine-core/src/deise server/engine-core/src/urre server/engine-core/src/evidence" -Message "Semantic placeholders found in production/certification paths"
 
-return 0; echo "16. Enforce strict residual scan logic"
+echo "16. Enforce strict residual scan logic"
 $physicalCert = Get-Content "server/engine-core/src/assurance/fault/aws-residual-scanner.ts" -Raw
 $requiredChecks = @("describeVpcs", "describeSubnets", "describeInstances", "describeDBInstances")
 foreach ($check in $requiredChecks) {
@@ -158,8 +158,6 @@ Get-Content manifest.json
 echo "21. SHA-256 candidate manifest"
 certutil -hashfile manifest.json SHA256
 
-echo "22. SUCCESS - Candidate ready for physical campaign"
-exit 0
 echo "21. Plugin Independence: No concrete plugin imports in engine-core"
 Assert-No-Match -Pattern "import.*from.*plugins/.*" -Path "server/engine-core/src" -Message "engine-core imports concrete plugin"
 
@@ -196,3 +194,7 @@ if (-not ($matrix -match "Agent Equivalence Invariant")) {
     Write-Error "Missing Agent Equivalence Invariant"
     exit 1
 }
+
+echo "28. SUCCESS - Candidate ready for physical campaign"
+exit 0
+

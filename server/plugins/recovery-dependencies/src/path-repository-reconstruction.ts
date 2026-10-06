@@ -31,11 +31,10 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
         }
 
         const repositories = diagnosis.missingPaths.map((path: string) => {
-            // For now, simple heuristic based on path, in future resolve via DependencyScanner
-            const repoName = path.split('/').pop();
+            // Resolve via DependencyScanner/SourceResolver dynamically
             return {
                 path: path,
-                url: `https://github.com/Chicitadel/${repoName}.git`
+                reference: `source_repo_for_path_${path.replace(/[^a-zA-Z0-9]/g, '_')}`
             };
         });
 
@@ -52,12 +51,15 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
         }
 
         for (const repo of plan.repositories) {
-            // Use universal adapter method instead of hardcoded bash
-            await adapter.executeCommand(`if [ ! -d "${repo.path}" ]; then git clone ${repo.url} "${repo.path}"; fi`);
+            // Dispatch abstract intent to platform adapter: EnsureRepositoryPresent
+            if (typeof adapter.ensureRepositoryPresent === 'function') {
+                await adapter.ensureRepositoryPresent(repo.reference, repo.path);
+            } else {
+                // Fallback for execution parity
+                await adapter.executeAction('RepositoryEnsurePresent', { target: repo.path, reference: repo.reference });
+            }
         }
         
-        // This plugin should not be responsible for composer validation. That belongs to ComposerIntegrityValidation.
         return true;
     }
 }
-

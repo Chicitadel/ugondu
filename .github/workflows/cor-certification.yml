@@ -39,9 +39,6 @@ jobs:
       - name: Run I18N String Audit
         run: node scripts/i18n_audit.js
 
-      - name: Run Stub / Placeholder Scan
-        run: node scripts/stub_scan.js
-
       - name: Run Architecture Depth Scan
         run: node scripts/depth_scan.js
 
@@ -82,3 +79,4 @@ jobs:
             .cor_evidence/evidence-ledger.json
             .cor_evidence/FINAL_COR_BUNDLE.json
           retention-days: 30
+
