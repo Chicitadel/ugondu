@@ -1,0 +1,33 @@
+editions:
+  - id: COMMUNITY
+    description: "Basic recovery and diagnostic tools for standard applications."
+    capabilities:
+      - ResourceLinkageRepair
+      - BasicHealthCheck
+
+  - id: ENTERPRISE
+    description: "Advanced topological repair, zero-downtime framework support, and fleet management."
+    capabilities:
+      - ResourceLinkageRepair
+      - BasicHealthCheck
+      - ZddTopologyRepair
+      - FrontendValidation
+      - EnvConfigurationInjection
+
+  - id: SOVEREIGN
+    description: "Full autonomous resilience, AI-driven root cause patching, and isolated fault domain reconstruction."
+    capabilities:
+      - ResourceLinkageRepair
+      - BasicHealthCheck
+      - ZddTopologyRepair
+      - FrontendValidation
+      - EnvConfigurationInjection
+      - AutonomousCodePatching
+      - LiveDatabaseStateReconstruction
+      - MultiRegionFailoverOrchestration
+
+architecture_invariants:
+  - rule: "Plugin Independency"
+    description: "Capabilities MUST NEVER be hardcoded into engine-core. They must be registered via the CapabilityRegistry as independent plugins/microservices."
+  - rule: "Universal Platform Abstraction"
+    description: "Capabilities MUST NEVER rely on specific OS commands (e.g. bash, systemd) directly in the orchestrator. All execution must pass through LiveEnvironmentAdapterContract."
