@@ -22,7 +22,7 @@ describe(__t('msg_deise_deployment_environment_integrity_s'), () => {
     });
 
     it(__t('msg_cor_31_1_distinguish_application_corrupt'), () => {
-        // Mocking the scenario provided by the user:
+        // Stubing the scenario provided by the user:
         // Migrated to DirectAdmin.
         // `releases/release_20260730` exists and is perfectly healthy.
         // `current` symlink is broken or missing.

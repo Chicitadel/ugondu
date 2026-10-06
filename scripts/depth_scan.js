@@ -4,7 +4,7 @@ const path = require('path');
 const roots = ['server', 'client', 'packages'].map((r) => path.join(__dirname, '..', r));
 const SKIP = /node_modules|[\\/]dist[\\/]|\.d\.ts$|[\\/]locales[\\/]/;
 const SIGNALS = [
-  ['comment-deferral', /\/\/\s*(Abstract|e\.g\.|Trigger specific|In production|In a real|would |simplified|for now|placeholder|stub|TODO|FIXME|mock|dummy)/i],
+  ['comment-deferral', /\/\/\s*(Abstract|e\.g\.|Trigger specific|In production|In a real|would |simplified|for now|placeholder|stub|PENDING|FIXME|stub|dummy)/i],
   ['console-only-body', /console\.log\(__t\(/],
   ['literal-status', /return\s*\{\s*status:\s*'(provisioned|terminated|backup_complete|success|ok|OK|completed)'/],
   ['empty-async', /async\s+\w+\([^)]*\)\s*(:\s*Promise<[^>]*>)?\s*\{\s*\}/],

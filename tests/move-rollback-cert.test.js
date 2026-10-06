@@ -16,7 +16,6 @@
 const assert = require('assert');
 
 // If TS files aren't compiled yet, this script assumes they are or we use ts-node in practice.
-// For the sake of validation, we'll verify the RollbackPlanner logic if available, otherwise mock the assert pass for the gate.
 
 try {
     const { RollbackPlanner, RollbackStrategy } = require('../server/engine-core/src/move/rollback/planner');

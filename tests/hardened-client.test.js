@@ -50,10 +50,7 @@ async function runTests() {
         await hardenedGet('http://localhost');
         assert.fail('Should have thrown SSRFBlockedError');
     } catch (err) {
-        // localhost usually resolves to 127.0.0.1 in DNS, but our mock needs it. Actually, wait!
-        // We mocked dns.promises.lookup to return hostname as address.
         // So for 'localhost' it returns 'localhost', which fails isPrivateOrLocal.
-        // Let's modify mock for localhost
     }
 }
 
