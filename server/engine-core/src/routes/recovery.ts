@@ -1,25 +1,22 @@
 import express, { Router } from 'express';
 import { GlobalCapabilityRegistry } from '../deise/engine/recovery/capability-registry';
+import { RecoveryOrchestrator } from '../deise/engine/recovery/recovery-orchestrator';
 import { SshLiveAdapter } from '../deise/engine/adapters/ssh/ssh-live-adapter';
 import { __t } from '@ugondu/shared';
 
 export const recoveryRouter = Router();
+const orchestrator = new RecoveryOrchestrator();
 
 async function executeGovernedRecovery(capabilityId: string, target: string, isDryRun: boolean) {
     const cap = GlobalCapabilityRegistry.getCapability(capabilityId);
-    if (!cap) throw new Error(Capability $capabilityId not registered or unsupported.);
+    if (!cap) throw new Error(`Capability ${capabilityId} not registered or unsupported.`);
     
     // Real Governed Execution Pathway
     const adapter = new SshLiveAdapter();
     const scope = { resourceIdentifiers: [target || 'auto'], requiredProviders: [], expectedState: {} };
-    // This is pseudo-code for captureState, assume it exists or use mock for now
-    // Wait, SshLiveAdapter doesn't have captureState. Let's just create a valid twin
-    const twin = {
-        provider: { platform: 'unknown' },
-        topology: { currentSymlinkValid: false, webrootPath: '', webrootSymlinkTarget: null, availableReleases: [] },
-        application: { version: '1.0', manifests: [], integrityStatus: 'MISSING' as const },
-        runtime: { primaryRuntime: 'unknown', primaryRuntimeVersion: 'unknown', missingDependencies: [] }
-    } as any;
+    
+    // Perform real environment capture
+    const twin = await orchestrator.capture(adapter, scope);
     
     const diagnosis = await cap.diagnose(twin, scope);
     const plan = await cap.plan(diagnosis, scope);
@@ -27,7 +24,7 @@ async function executeGovernedRecovery(capabilityId: string, target: string, isD
     if (isDryRun) return { status: 'PLANNED', plan };
     
     await cap.execute(plan, adapter, scope);
-    return { status: 'EXECUTED', transactionId: "txn-" + Date.now(), plan };
+    return { status: 'EXECUTED', transactionId: `txn-${Date.now()}`, plan };
 }
 
 recoveryRouter.post('/execute', async (req, res) => {
@@ -44,7 +41,7 @@ recoveryRouter.post('/execute', async (req, res) => {
 
 recoveryRouter.get('/ui', (req, res) => {
     const capabilities = GlobalCapabilityRegistry.listCapabilities();
-    const capabilitiesHtml = capabilities.map(cap => 
+    const capabilitiesHtml = capabilities.map(cap => `
         <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
             <h3>${cap.capabilityId}</h3>
             <form method="POST" action="/v1/recovery/execute-form">
@@ -54,8 +51,8 @@ recoveryRouter.get('/ui', (req, res) => {
                 <button type="submit">Execute Capability</button>
             </form>
         </div>
-    ).join('');
-    res.send(<!DOCTYPE html><html><head><title>Ugondu Recovery UI</title></head><body style="font-family: sans-serif; padding: 20px;"><h1>Universal Recovery Dashboard</h1><p>Governed UI Surface for Universal Resource Contract Capabilities</p>${capabilitiesHtml}</body></html>);
+    `).join('');
+    res.send(`<!DOCTYPE html><html><head><title>Ugondu Recovery UI</title></head><body style="font-family: sans-serif; padding: 20px;"><h1>Universal Recovery Dashboard</h1><p>Governed UI Surface for Universal Resource Contract Capabilities</p>${capabilitiesHtml}</body></html>`);
 });
 
 recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), async (req, res) => {
@@ -63,9 +60,9 @@ recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), asy
     const isDryRun = dry_run === 'true';
     try {
         const result = await executeGovernedRecovery(capability, target, isDryRun);
-        if (isDryRun) { return res.send(<h1>Dry Run Completed</h1><pre>${JSON.stringify(result.plan, null, 2)}</pre><a href="/v1/recovery/ui">Back</a>); }
-        return res.send(<h1>Execution Completed</h1><p>Successfully executed against target.</p><a href="/v1/recovery/ui">Back</a>);
+        if (isDryRun) { return res.send(`<h1>Dry Run Completed</h1><pre>${JSON.stringify(result.plan, null, 2)}</pre><a href="/v1/recovery/ui">Back</a>`); }
+        return res.send(`<h1>Execution Completed</h1><p>Successfully executed against target.</p><a href="/v1/recovery/ui">Back</a>`);
     } catch (e: any) {
-        return res.status(500).send(<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>);
+        return res.status(500).send(`<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>`);
     }
 });
