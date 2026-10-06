@@ -1,7 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const localesDir = 'D:/ujomor-platform/products/ugondu/server/shared/locales';
+const root = process.env.UGONDU_ROOT || path.resolve(__dirname, '..');
+const localesDir = path.join(root, 'server', 'shared', 'locales');
+
+if (!fs.existsSync(localesDir)) {
+    throw new Error('Locales directory not found: ' + localesDir);
+}
+
 const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
 
 const tokens = {
@@ -73,10 +79,12 @@ const deepMerge = (target, source) => {
 
 for (const file of files) {
     const fullPath = path.join(localesDir, file);
-    let data = {};
+    let data;
     try {
         data = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-    } catch(e) {}
+    } catch(e) {
+        throw new Error('COR BLOCKED: Corrupt locale file ' + file + ' - ' + e.message);
+    }
     
     deepMerge(data, tokens);
     fs.writeFileSync(fullPath, JSON.stringify(data, null, 2));

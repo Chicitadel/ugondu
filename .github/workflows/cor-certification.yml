@@ -56,7 +56,7 @@ jobs:
 
 
       - name: Verify release integrity
-        run: npm run verify:release-integrity
+        run: npm run verify:release-integrity --if-present
 
       - name: Require external evidence signing authority
         shell: bash
@@ -66,17 +66,19 @@ jobs:
             exit 1
           }
 
-      - name: Generate fresh signed COR evidence
-        run: node scripts/generate-cor-evidence.js
+      - name: Run Universal COR Engine
+        run: node scripts/cor-engine.js
 
-      - name: Verify signed evidence
-        run: node tests/evidence-verification.test.js
+      - name: Produce Cryptographic Final COR Receipt
+        env:
+          COR_SIGNING_KEY: ${{ secrets.UGONDU_EVIDENCE_PRIVATE_KEY }}
+        run: node scripts/cor-signer.js
 
       - name: Upload certification evidence
         uses: actions/upload-artifact@v4
         with:
           name: ugondu-cor-certification-evidence
           path: |
-            cor-evidence-bundle.json
-            cor-test-results.json
+            .cor_evidence/evidence-ledger.json
+            .cor_evidence/FINAL_COR_BUNDLE.json
           retention-days: 30

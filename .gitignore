@@ -36,3 +36,5 @@ cor-test-results.json
 # Local engineering tooling (never shipped)
 scratch/
 
+
+.cor_evidence/
