@@ -60,6 +60,32 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
             case 'TERMINATE_EC2':
             case 'compute:instance:terminate':
                 return ['ec2:TerminateInstances'];
+            case 'CREATE_EBS_SNAPSHOT':
+                return ['ec2:CreateSnapshot'];
+            case 'CREATE_RDS_SUBNET_GROUP':
+                return ['rds:CreateDBSubnetGroup'];
+            case 'CREATE_RDS':
+                return ['rds:CreateDBInstance'];
+            case 'TERMINATE_RDS':
+                return ['rds:DeleteDBInstance'];
+            case 'CREATE_RDS_SNAPSHOT':
+                return ['rds:CreateDBSnapshot'];
+            case 'CREATE_S3_BUCKET':
+                return ['s3:CreateBucket'];
+            case 'PUT_S3':
+                return ['s3:PutObject'];
+            case 'TERMINATE_SUBNET':
+                return ['ec2:DeleteSubnet'];
+            case 'TERMINATE_SECURITY_GROUP':
+                return ['ec2:DeleteSecurityGroup'];
+            case 'TERMINATE_EBS_SNAPSHOT':
+                return ['ec2:DeleteSnapshot'];
+            case 'TERMINATE_RDS_SUBNET_GROUP':
+                return ['rds:DeleteDBSubnetGroup'];
+            case 'TERMINATE_RDS_SNAPSHOT':
+                return ['rds:DeleteDBSnapshot'];
+            case 'TERMINATE_S3_BUCKET':
+                return ['s3:DeleteBucket'];
             case 'container:registry:create':
                 return ['ecr:CreateRepository', 'ecr:PutImage', 'ecr:GetAuthorizationToken'];
             case 'container:task-definition:create':

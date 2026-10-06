@@ -1,7 +1,7 @@
-import { URREngine, DagNode } from '../urre/execution/urre-engine';
+import { URREngine } from '../urre/execution/urre-engine';
+import { DagNode } from '../urre/transaction/transaction-dag';
 import { UniversalActionRegistry } from './action-registry';
 import { AwsNativeClient } from '../fabric/providers/aws-native-client';
-import { EC2, RDS, S3 } from '@aws-sdk/client-ec2'; // alias classes or import from their own module
 import * as ec2Client from '@aws-sdk/client-ec2';
 import * as rdsClient from '@aws-sdk/client-rds';
 import * as s3Client from '@aws-sdk/client-s3';

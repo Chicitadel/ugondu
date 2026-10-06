@@ -1,6 +1,5 @@
 import { createProductionActionRegistry } from './src/registry/action-registry-factory';
-import { EvidenceCollector } from './src/evidence/evidence-engine';
-import { EC2, RDS, S3 } from '@aws-sdk/client-ec2'; // these get aliased properly inside factory but here we use them for read-only
+import { EvidenceCollector, PhysicalProviderObservation } from './src/evidence/evidence-engine';
 import * as ec2Client from '@aws-sdk/client-ec2';
 import * as rdsClient from '@aws-sdk/client-rds';
 import * as s3Client from '@aws-sdk/client-s3';
