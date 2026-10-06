@@ -42,7 +42,7 @@ function runStream(stream) {
     const executionId = 'EXEC-' + crypto.randomBytes(4).toString('hex').toUpperCase();
     const ts = new Date().toISOString();
     
-    let command = 'SIMULATION';
+    let command = 'node scripts/physical-stream-runner.js ' + streamId;
     if (stream.id === 'A01') command = 'node ' + path.join(root, 'scripts', 'i18n_audit.js');
     if (stream.id === 'B01') command = 'npm run build --if-present';
     if (stream.id === 'C01') command = 'npm run test --if-present';
@@ -105,5 +105,6 @@ if (!allPass) {
 } else {
     console.log('COR Engine finished. Status: COR_CERTIFIED');
 }
+
 
 
