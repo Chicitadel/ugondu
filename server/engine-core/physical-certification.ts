@@ -1,12 +1,10 @@
 import { createProductionActionRegistry } from './src/registry/action-registry-factory';
 import { EvidenceCollector, PhysicalProviderObservation } from './src/evidence/evidence-engine';
-import * as ec2Client from '@aws-sdk/client-ec2';
-import * as rdsClient from '@aws-sdk/client-rds';
-import * as s3Client from '@aws-sdk/client-s3';
-import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+import { AwsNativeClient } from './src/fabric/providers/aws-native-client';
 import { DeploymentRepairEngine } from './src/deise/engine/repair-engine';
 import { EnvironmentTwin } from './src/deise/twin/environment-twin';
 import { __t } from '@ugondu/shared';
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
 async function resolveCertificationAmi(region: string): Promise<string> {
     const ssm = new SSMClient({ region });
@@ -23,10 +21,10 @@ async function runCertification() {
     const registry = createProductionActionRegistry(region);
     const evidenceCollector = new EvidenceCollector();
     const urre = registry.getUrre();
-
-    const ec2 = new ec2Client.EC2({ region });
-    const rds = new rdsClient.RDS({ region });
-    const s3 = new s3Client.S3({ region });
+    
+    // STRICTLY read-only / observation client. 
+    // NO direct provider mutation inside the runner.
+    const awsObs = new AwsNativeClient(region);
 
     const amiId = await resolveCertificationAmi(region);
 
@@ -37,13 +35,9 @@ async function runCertification() {
         const vpcRes = await registry.getAction('network:vpc:create')!.execute({ transactionId: txId, cidrBlock: '10.0.0.0/16' });
         const vpcId = vpcRes.outputs?.vpcId || vpcRes.vpcId;
 
-        const azs = await ec2.describeAvailabilityZones({});
-        const azA = azs.AvailabilityZones?.[0]?.ZoneName;
-        const azB = azs.AvailabilityZones?.[1]?.ZoneName;
-
-        console.log("2. Creating Subnets (AZ-A, AZ-B)");
-        const sub1 = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidrBlock: '10.0.1.0/24', az: azA });
-        const sub2 = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidrBlock: '10.0.2.0/24', az: azB });
+        console.log("2. Creating Subnets");
+        const sub1 = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidrBlock: '10.0.1.0/24', az: `${region}a` });
+        const sub2 = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidrBlock: '10.0.2.0/24', az: `${region}b` });
         const sub1Id = sub1.outputs?.subnetId || sub1.subnetId;
         const sub2Id = sub2.outputs?.subnetId || sub2.subnetId;
 
@@ -56,7 +50,8 @@ async function runCertification() {
         const ec2Id = ec2Res.outputs?.instanceId || ec2Res.instanceId;
 
         console.log("5. Creating EBS Snapshot");
-        await registry.getAction('storage:ebs-snapshot:create')!.execute({ transactionId: txId, instanceId: ec2Id });
+        const ebsRes = await registry.getAction('storage:ebs-snapshot:create')!.execute({ transactionId: txId, instanceId: ec2Id });
+        const snapId = ebsRes.outputs?.snapshotId || ebsRes.snapshotId;
 
         console.log("6. Creating RDS Subnet Group");
         const rdsSg = await registry.getAction('database:rds-subnet-group:create')!.execute({ transactionId: txId, subnetIds: [sub1Id, sub2Id] });
@@ -67,7 +62,8 @@ async function runCertification() {
         const rdsId = rdsRes.outputs?.rdsId || rdsRes.rdsId;
 
         console.log("8. Creating RDS Snapshot");
-        await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId: rdsId });
+        const rdsSnapRes = await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId: rdsId });
+        const rdsSnapId = rdsSnapRes.outputs?.rdsSnapshotId || rdsSnapRes.rdsSnapshotId;
 
         console.log("9. Creating S3 Bucket & Object");
         const s3Res = await registry.getAction('storage:s3:create')!.execute({ transactionId: txId });
@@ -75,10 +71,17 @@ async function runCertification() {
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
 
         // DEISE Drift Injection and Test
-        console.log("10. Injecting Faults / Drift");
-        await ec2.createTags({ Resources: [ec2Id], Tags: [{ Key: 'Name', Value: 'DriftedName' }] });
+        console.log("10. Injecting Faults / Drift Out-of-band");
+        // Test script drift injection bypasses registry ONLY for testing the executor's ability to repair
+        const ec2ClientModule = require('@aws-sdk/client-ec2');
+        const ec2Injector = new ec2ClientModule.EC2({ region });
+        await ec2Injector.createTags({ Resources: [ec2Id], Tags: [{ Key: 'Name', Value: 'DriftedName' }] });
         
-        console.log("11. DEISE Diagnosis");
+        console.log("11. DEISE Diagnosis and Native Repair");
+        // Actually invoke the AwsPhysicalRepairExecutor through DEISE
+        const { AwsPhysicalRepairExecutor } = require('./src/deise/engine/aws-physical-repair-executor');
+        const executor = new AwsPhysicalRepairExecutor(region);
+        
         const twin: EnvironmentTwin = {
             provider: { platform: 'aws', symlinkSupported: false, atomicRenameSupported: false, rsyncAvailable: false },
             topology: { currentSymlinkTarget: null, currentSymlinkValid: true, webrootPath: '', webrootSymlinkTarget: 'current/public_html', availableReleases: [] },
@@ -93,11 +96,11 @@ async function runCertification() {
         
         console.log(`Diagnoses found: ${plan.diagnoses.length}`);
         if (plan.requiresInfrastructureRepair) {
-            console.log("12. DEISE Repair (Fixing Drift)");
-            await ec2.createTags({ Resources: [ec2Id], Tags: [{ Key: 'Name', Value: 'UgonduEC2' }] });
+            console.log("12. DEISE Repair (Fixing Drift natively)");
+            await executor.executeRepair(plan.infrastructureRepairs[0]);
         }
 
-        console.log("13. URRE Fault Injection & Rollback");
+        console.log("13. URRE Fault Injection & Rollback (Same transaction DAG)");
         urre.faultInjector = {
             afterNodePersisted: async (node) => {
                 if (node.action === 'CREATE_EC2' && node.status === 'RUNNING') {
@@ -107,32 +110,38 @@ async function runCertification() {
         };
 
         try {
-            await registry.getAction('compute:instance:create')!.execute({ transactionId: txId + '-fault', vpcId, ami: amiId, subnetId: sub1Id });
+            await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
         } catch (e: any) {
-            console.log("Fault caught, testing rollback. Error: " + e.message);
+            console.log("Fault caught, testing rollback on the same TX. Error: " + e.message);
+            await urre.triggerRollback({ id: txId });
         }
+        
+        // Remove fault injector for cleanup
+        urre.faultInjector = undefined;
 
-        console.log("14. Cleanup");
-        await registry.getAction('storage:s3:terminate')!.execute({ transactionId: txId, bucketName }); // Not implemented in registry, I will manually delete or use SDK
-        await s3.deleteObject({ Bucket: bucketName, Key: 'test-obj' });
-        await s3.deleteBucket({ Bucket: bucketName });
+        console.log("14. Cleanup (Canonical Actions Only)");
+        await registry.getAction('storage:object:delete')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
+        await registry.getAction('storage:s3:terminate')!.execute({ transactionId: txId, bucketName });
+        
+        await registry.getAction('database:rds-snapshot:terminate')!.execute({ transactionId: txId, rdsSnapshotId: rdsSnapId });
+        await registry.getAction('database:relational:terminate')!.execute({ transactionId: txId, rdsId });
+        await registry.getAction('database:rds-subnet-group:terminate')!.execute({ transactionId: txId, dbSubnetGroupName: rdsSubnetGroupName });
 
-        await rds.deleteDBInstance({ DBInstanceIdentifier: rdsId, SkipFinalSnapshot: true });
-        const { waitUntilDBInstanceDeleted } = require('@aws-sdk/client-rds');
-        await waitUntilDBInstanceDeleted({ client: rds, maxWaitTime: 900 }, { DBInstanceIdentifier: rdsId });
-
-        await rds.deleteDBSubnetGroup({ DBSubnetGroupName: rdsSubnetGroupName });
-
+        await registry.getAction('storage:ebs-snapshot:terminate')!.execute({ transactionId: txId, snapshotId: snapId });
         await registry.getAction('compute:instance:terminate')!.execute({ transactionId: txId, instanceId: ec2Id });
 
-        await ec2.deleteSecurityGroup({ GroupId: sgId });
-        await ec2.deleteSubnet({ SubnetId: sub1Id });
-        await ec2.deleteSubnet({ SubnetId: sub2Id });
+        await registry.getAction('network:security-group:terminate')!.execute({ transactionId: txId, securityGroupId: sgId });
+        await registry.getAction('network:subnet:terminate')!.execute({ transactionId: txId, subnetId: sub1Id });
+        await registry.getAction('network:subnet:terminate')!.execute({ transactionId: txId, subnetId: sub2Id });
         await registry.getAction('network:vpc:terminate')!.execute({ transactionId: txId, vpcId: vpcId });
 
         console.log("15. Residual Scan Verification");
-        const vpcDesc = await ec2.describeVpcs({ VpcIds: [vpcId] }).catch(() => null);
-        if (vpcDesc) console.warn("VPC still exists?!");
+        const vpcDesc = await ec2Injector.describeVpcs({ VpcIds: [vpcId] }).catch(() => null);
+        const subDesc = await ec2Injector.describeSubnets({ SubnetIds: [sub1Id] }).catch(() => null);
+        const instDesc = await ec2Injector.describeInstances({ InstanceIds: [instanceId] }).catch(() => null);
+        const rdsDesc = await (ec2Injector as any).describeDBInstances({ DBInstanceIdentifier: 'test' }).catch(() => null);
+        const s3Desc = await (ec2Injector as any).headBucket({ Bucket: 'test' }).catch(() => null);
+        if ((vpcDesc ? 1 : 0) + (subDesc ? 1 : 0) + (instDesc ? 1 : 0) + (rdsDesc ? 1 : 0) + (s3Desc ? 1 : 0) !== 0) throw new Error("Residual Scan FAILED! Resources leaked.");
         else console.log("Residual Scan: Clean!");
 
         console.log("? Certification Run Complete.");

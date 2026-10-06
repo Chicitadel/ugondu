@@ -82,6 +82,15 @@ export interface IAwsClient {
 
   // CloudWatch Logs
   createLogGroup(name: string): Promise<string>;
+
+  // Additional Methods
+  deleteSubnet(id: string): Promise<void>;
+  modifyInstanceSecurityGroups(instanceId: string, securityGroupIds: string[]): Promise<void>;
+  describeInstanceVolumes(instanceId: string): Promise<string[]>;
+  deleteEbsSnapshot(snapId: string): Promise<void>;
+  deleteRdsSnapshot(snapId: string): Promise<void>;
+  putS3Object(bucket: string, key: string, body: string): Promise<void>;
+  deleteS3Object(bucket: string, key: string): Promise<void>;
 }
 
 export class AwsAdapter implements ComputeCapability, NetworkCapability, DatabaseCapability, StorageCapability {

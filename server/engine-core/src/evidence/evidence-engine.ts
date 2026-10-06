@@ -68,8 +68,8 @@ export interface ObservationRecord {
   provider: string;
   operation: string;
   request: any;
-  response: any;
-  verification: any;
+  mutationResponse?: any;
+  verificationResponse?: any;
   resourceIdentity: string;
   executionContext: string;
   providerResponseHash: string;
@@ -92,8 +92,8 @@ export class EvidenceCollector {
         provider: params.provider,
         operation: params.operation,
         request: params.request,
-        response: params.mutationResponse || null,
-        verification: params.verificationResponse || null,
+        mutationResponse: params.mutationResponse || null,
+        verificationResponse: params.verificationResponse || null,
         resourceIdentity: params.resourceIdentity,
         executionContext: params.executionContext,
         providerResponseHash: '',
@@ -110,8 +110,8 @@ export class EvidenceCollector {
       provider: params.provider,
       operation: params.operation,
       request: params.request,
-      response: params.mutationResponse,
-      verification: params.verificationResponse,
+      mutationResponse: params.mutationResponse,
+      verificationResponse: params.verificationResponse,
       resourceIdentity: params.resourceIdentity,
       executionContext: params.executionContext,
       providerResponseHash: hash,

@@ -10,10 +10,10 @@ describe('Evidence Engine Adversarial Tests', () => {
       provider: 'p1', 
       operation: 'TEST_OP',
       request: {},
-      response, 
-      verification: { ok: true },
+      mutationResponse: response, 
+      verificationResponse: { ok: true },
       resourceIdentity: 'urn:test:res',
-      executionContext: 'ctx1'
+      executionContext: 'ctx1', accountId: '123', region: 'us-east-1', expectedState: {}, observedState: {}
     });
     
     // Adversary tampers with the hash
@@ -32,10 +32,10 @@ describe('Evidence Engine Adversarial Tests', () => {
       provider: 'p1', 
       operation: 'TEST_OP',
       request: {},
-      response, 
-      verification: { ok: true },
+      mutationResponse: response, 
+      verificationResponse: { ok: true },
       resourceIdentity: 'urn:test:res',
-      executionContext: 'ctx1'
+      executionContext: 'ctx1', accountId: '123', region: 'us-east-1', expectedState: {}, observedState: {}
     });
 
     // Adversary creates a hash that includes the volatile timestamp field
@@ -60,8 +60,8 @@ describe('Evidence Engine Adversarial Tests', () => {
       provider: 'p1',
       operation: 'TEST_OP',
       request: {},
-      response: { data: 'important' },
-      verification: { ok: true },
+      mutationResponse: { data: 'important' },
+      verificationResponse: { ok: true },
       resourceIdentity: 'urn:test:res',
       executionContext: 'ctx1',
       providerResponseHash: '',
@@ -80,22 +80,22 @@ describe('Evidence Engine Adversarial Tests', () => {
       provider: 'p1', 
       operation: 'TEST_OP',
       request: {},
-      response: null,
-      verification: { ok: true },
+      mutationResponse: null,
+      verificationResponse: { ok: true },
       resourceIdentity: 'urn:test:res',
-      executionContext: 'ctx1' 
+      executionContext: 'ctx1', accountId: '123', region: 'us-east-1', expectedState: {}, observedState: {} 
     });
     
     expect(record.status).toBe('NOT_PROVEN');
     expect(record.providerResponseHash).toBe('');
     
-    // And if an adversary tries to claim PROVEN for a missing response:
+    // And if an adversary tries to claim PROVEN for a missing mutationResponse:
     const fakeRecord: ObservationRecord = {
       provider: 'p1',
       operation: 'TEST_OP',
       request: {},
-      response: null,
-      verification: { ok: true },
+      mutationResponse: null,
+      verificationResponse: { ok: true },
       resourceIdentity: 'urn:test:res',
       executionContext: 'ctx1',
       providerResponseHash: 'somehash',

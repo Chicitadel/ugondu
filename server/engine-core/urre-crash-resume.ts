@@ -3,7 +3,7 @@ import * as path from 'path';
 import { URREngine } from './src/urre/execution/urre-engine';
 import { TransactionDag, DagNode } from './src/urre/transaction/transaction-dag';
 import { TransactionStore } from './src/urre/transaction/transaction-store';
-import { EC2Client, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
+import { EC2Client, CreateVpcCommand, DeleteVpcCommand, CreateSubnetCommand, DeleteSubnetCommand } from '@aws-sdk/client-ec2';
 import { __t } from '@ugondu/shared';
 
 const REGION = process.env.UGONDU_CERT_REGION;
@@ -28,9 +28,17 @@ async function registerRealHandlers(engine: URREngine) {
 
     engine.registerHandler('aws', 'CREATE_SUBNET_REAL', async (node: DagNode) => {
         console.log('[URRE-CRASH] Process B executing CREATE_SUBNET_REAL...');
-        // We just prove execution reached here
-        return { subnet: 'success' };
-    }, async () => {});
+        const store = new TransactionStore();
+        const tx = await store.load('tx-p0-4-real');
+        const vpcId = tx?.getNode('VPC')?.output?.vpcId;
+        if (!vpcId) throw new Error("Missing VPC ID");
+        const res = await ec2.send(new CreateSubnetCommand({ VpcId: vpcId, CidrBlock: '10.0.99.0/28' }));
+        return { subnetId: res.Subnet!.SubnetId! };
+    }, async (node: DagNode) => {
+        if (node.output?.subnetId) {
+            await ec2.send(new DeleteSubnetCommand({ SubnetId: node.output.subnetId }));
+        }
+    });
 }
 
 async function phase1() {
@@ -86,6 +94,9 @@ async function phase2() {
 
     console.log('PROCESS B: Success! Cleaning up AWS VPC...');
     const ec2 = new EC2Client({ region: REGION });
+    if (subNode.output?.subnetId) {
+        await ec2.send(new DeleteSubnetCommand({ SubnetId: subNode.output.subnetId }));
+    }
     await ec2.send(new DeleteVpcCommand({ VpcId: vpcId }));
 
     console.log('PROCESS B: Cleanup done.');

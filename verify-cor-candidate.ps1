@@ -1,8 +1,7 @@
-$ErrorActionPreference = 'Stop'
-
 param (
     [string]$ExpectedTag = ""
 )
+$ErrorActionPreference = 'Stop'
 
 function Assert-No-Match {
     param([string]$Pattern, [string]$Path, [string]$Message)
@@ -69,7 +68,13 @@ if ($ExpectedTag) {
         Write-Error "Release pipeline for $ExpectedTag failed!"
         exit 1
     }
-    echo "GitHub Actions Release Pipeline passed."
+    
+    $slsaCheck = (gh run view $runData[0].databaseId --log | Select-String "SLSA provenance = PASS")
+    if (-not $slsaCheck) {
+        Write-Error "Release pipeline did not output 'SLSA provenance = PASS'"
+        exit 1
+    }
+    echo "GitHub Actions Release Pipeline passed (SLSA provenance verified)."
 }
 
 cd server/engine-core
@@ -107,10 +112,28 @@ echo "13. No hardcoded AWS account IDs"
 Assert-No-Match -Pattern "123456789012" -Path "server/engine-core" -Message "Hardcoded AWS Account ID found"
 
 echo "14. No direct mutation APIs in certification"
-Assert-No-Match -Pattern "new EC2Client|new ECSClient|new RDSClient|new IAMClient|new S3Client" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts" -Message "Direct AWS mutation clients found in certification files. Must use Action Registry -> URRE path for mutations."
+Assert-No-Match -Pattern "new EC2Client|new ECSClient|new RDSClient|new IAMClient|new S3Client|import \* as ec2Client|ec2Client\.EC2|new S3\(" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts" -Message "Direct AWS mutation clients found in certification files. Must use Action Registry -> URRE path for mutations."
 
 echo "15. Semantic placeholder blacklist"
-Assert-No-Match -Pattern "(ami-placeholder|subnet-placeholder|mock-tx|mocking|mocked|simulation|simulate|simulated|fake|dummy|synthetic|stub|placeholder|skip physical|skip physical describe|public\.ecr\.aws|latest|fake-ami|test-ami|mock-ami)" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts server/engine-core/src/fabric server/engine-core/src/deise server/engine-core/src/urre server/engine-core/src/evidence" -Message "Semantic placeholders found in production/certification paths"
+Assert-No-Match -Pattern "(secret:dummy|dummy-arn|sha256:dummy|ami-placeholder|subnet-placeholder|mock-tx|mocking|mocked|simulation|simulate|simulated|fake|dummy|synthetic|stub|placeholder|skip physical|skip physical describe|public\.ecr\.aws|latest|fake-ami|test-ami|mock-ami)" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts server/engine-core/src/fabric server/engine-core/src/deise server/engine-core/src/urre server/engine-core/src/evidence" -Message "Semantic placeholders found in production/certification paths"
+
+echo "16. Enforce strict residual scan logic"
+$physicalCert = Get-Content "server/engine-core/physical-certification.ts" -Raw
+$requiredChecks = @("describeVpcs", "describeSubnets", "describeInstances", "describeDBInstances")
+foreach ($check in $requiredChecks) {
+    if (-not ($physicalCert -match $check)) {
+        Write-Error "Missing residual scan check for $check in physical-certification.ts"
+        exit 1
+    }
+}
+if (-not ($physicalCert -match "listBuckets" -or $physicalCert -match "listObjects" -or $physicalCert -match "headBucket")) {
+    Write-Error "Missing residual scan check for S3 in physical-certification.ts"
+    exit 1
+}
+if (-not ($physicalCert -match "=== 0" -or $physicalCert -match "== 0" -or $physicalCert -match "\.length -eq 0")) {
+    Write-Error "Missing count == 0 assertion in residual scan logic"
+    exit 1
+}
 
 echo "20. Generating candidate manifest"
 $tag = (git tag --points-at HEAD | Select-Object -First 1)

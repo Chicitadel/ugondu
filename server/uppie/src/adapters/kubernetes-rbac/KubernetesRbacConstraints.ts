@@ -1,3 +1,4 @@
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : UPPIE — Kubernetes RBAC Adapter

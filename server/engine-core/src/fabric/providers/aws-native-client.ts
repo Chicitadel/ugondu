@@ -27,7 +27,13 @@ import {
     CreateSecurityGroupCommand,
     AuthorizeSecurityGroupIngressCommand,
     DeleteSecurityGroupCommand,
-    CreateTagsCommand
+    CreateTagsCommand,
+    DeleteSubnetCommand,
+    ModifyInstanceAttributeCommand,
+    DescribeVolumesCommand,
+    DeleteSnapshotCommand,
+    DescribeSubnetsCommand,
+    DescribeVpcsCommand
 } from '@aws-sdk/client-ec2';
 
 import {
@@ -37,13 +43,17 @@ import {
     CreateDBSubnetGroupCommand,
     DeleteDBSubnetGroupCommand,
     DescribeDBInstancesCommand,
-    ModifyDBInstanceCommand
+    ModifyDBInstanceCommand,
+    DeleteDBSnapshotCommand,
+    DescribeDBSnapshotsCommand
 } from '@aws-sdk/client-rds';
 
 import {
     S3Client,
     CreateBucketCommand,
-    DeleteBucketCommand
+    DeleteBucketCommand,
+    PutObjectCommand,
+    DeleteObjectCommand
 } from '@aws-sdk/client-s3';
 
 import {
@@ -55,7 +65,8 @@ import {
     ECSClient,
     CreateClusterCommand,
     RegisterTaskDefinitionCommand,
-    CreateServiceCommand
+    CreateServiceCommand,
+    DescribeServicesCommand
 } from '@aws-sdk/client-ecs';
 
 import {
@@ -106,6 +117,18 @@ export class AwsNativeClient implements IAwsClient {
         if (cpuCores <= 4 && memoryMb <= 16384) return 'm5.xlarge';
         return 'm5.2xlarge';
     }
+
+    
+    public async deleteSubnet(params: any): Promise<any> { return this.ec2.send(new DeleteSubnetCommand(params)); }
+    public async modifyInstanceSecurityGroups(instanceId: string, securityGroupIds: string[]): Promise<any> { return this.ec2.send(new ModifyInstanceAttributeCommand({ InstanceId: instanceId, Groups: securityGroupIds })); }
+    public async describeInstanceVolumes(instanceId: string): Promise<any> { return this.ec2.send(new DescribeVolumesCommand({ Filters: [{ Name: 'attachment.instance-id', Values: [instanceId] }] })); }
+    public async deleteEbsSnapshot(params: any): Promise<any> { return this.ec2.send(new DeleteSnapshotCommand(params)); }
+    public async deleteRdsSnapshot(params: any): Promise<any> { return this.rds.send(new DeleteDBSnapshotCommand(params)); }
+    public async putS3Object(params: any): Promise<any> { return this.s3.send(new PutObjectCommand(params)); }
+    public async deleteS3Object(params: any): Promise<any> { return this.s3.send(new DeleteObjectCommand(params)); }
+    public async describeServices(cluster: string, services: string[]): Promise<any> { return this.ecs.send(new DescribeServicesCommand({ cluster, services })); }
+    public async describeVpcs(params: any): Promise<any> { return this.ec2.send(new DescribeVpcsCommand(params)); }
+    public async describeSubnets(params: any): Promise<any> { return this.ec2.send(new DescribeSubnetsCommand(params)); }
 
     private async sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
