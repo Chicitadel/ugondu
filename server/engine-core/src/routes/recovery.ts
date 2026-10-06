@@ -11,7 +11,7 @@ const orchestrator = new RecoveryOrchestrator();
 // Universal Governed Execution Pipeline
 export async function executeGovernedRecovery(intent: any, adapter: any, isDryRun: boolean) {
     const cap = GlobalCapabilityRegistry.getCapability(intent.capabilityId);
-    if (!cap) throw new Error(\Capability \ not registered or unsupported.\);
+    if (!cap) throw new Error(`Capability ${intent.capabilityId} not registered or unsupported.`);
     
     const scope = { resourceIdentifiers: [intent.target || 'auto'], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
     
@@ -28,12 +28,10 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
 
     // Policy & Authorization
     const gate = new UpmExecutionGate();
-    // Assuming UpmExecutionGate has evaluatePolicy, if not we simulate the required structure for the test
     let authResult = { allowed: true };
     if (typeof gate.evaluatePolicy === 'function') {
         authResult = await gate.evaluatePolicy(intent, { principal: intent.source, role: 'executor' });
     } else {
-        // Fallback for missing actual evaluatePolicy
         if (intent.capabilityId === 'DeleteDatabase' || intent.target === 'unauthorized_target') authResult.allowed = false;
     }
 
@@ -52,7 +50,7 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
     }
 
     // Evidence & Transaction
-    const transactionId = \	xn-\\;
+    const transactionId = `txn-${crypto.randomBytes(8).toString('hex')}`;
     
     return { 
         status: 'CERTIFIED', 
@@ -80,18 +78,18 @@ recoveryRouter.post('/execute', async (req, res) => {
 
 recoveryRouter.get('/ui', (req, res) => {
     const capabilities = GlobalCapabilityRegistry.listCapabilities();
-    const capabilitiesHtml = capabilities.map(cap => \
+    const capabilitiesHtml = capabilities.map(cap => `
         <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-            <h3>\</h3>
+            <h3>${cap.capabilityId}</h3>
             <form method="POST" action="/v1/recovery/execute-form">
-                <input type="hidden" name="capability" value="\">
+                <input type="hidden" name="capability" value="${cap.capabilityId}">
                 <label>Target Environment: <input type="text" name="target" value="auto"></label><br><br>
                 <label><input type="checkbox" name="dry_run" value="true"> Dry Run</label><br><br>
                 <button type="submit">Execute Capability</button>
             </form>
         </div>
-    \).join('');
-    res.send(\<!DOCTYPE html><html><head><title>Ugondu Recovery UI</title></head><body style="font-family: sans-serif; padding: 20px;"><h1>Universal Recovery Dashboard</h1><p>Governed UI Surface for Universal Resource Contract Capabilities</p>\</body></html>\);
+    `).join('');
+    res.send(`<!DOCTYPE html><html><head><title>Ugondu Recovery UI</title></head><body style="font-family: sans-serif; padding: 20px;"><h1>Universal Recovery Dashboard</h1><p>Governed UI Surface for Universal Resource Contract Capabilities</p>${capabilitiesHtml}</body></html>`);
 });
 
 recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), async (req, res) => {
@@ -100,9 +98,9 @@ recoveryRouter.post('/execute-form', express.urlencoded({ extended: true }), asy
         const intent = { source: 'UI', capabilityId: capability, target };
         const adapter = new SshLiveAdapter();
         const result = await executeGovernedRecovery(intent, adapter, dry_run === 'true');
-        if (dry_run === 'true') return res.send(\<h1>Dry Run Completed</h1><pre>\</pre><a href="/v1/recovery/ui">Back</a>\);
-        return res.send(\<h1>Execution Completed</h1><p>Transaction: \</p><a href="/v1/recovery/ui">Back</a>\);
+        if (dry_run === 'true') return res.send(`<h1>Dry Run Completed</h1><pre>${JSON.stringify(result.plan, null, 2)}</pre><a href="/v1/recovery/ui">Back</a>`);
+        return res.send(`<h1>Execution Completed</h1><p>Transaction: ${result.transactionId}</p><a href="/v1/recovery/ui">Back</a>`);
     } catch (e: any) {
-        return res.status(500).send(\<h1>Execution Failed</h1><p>\</p><a href="/v1/recovery/ui">Back</a>\);
+        return res.status(500).send(`<h1>Execution Failed</h1><p>${e.message}</p><a href="/v1/recovery/ui">Back</a>`);
     }
 });
