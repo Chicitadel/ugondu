@@ -11,6 +11,7 @@ jest.stub('@ugondu/shared', () => {
 });
 
 // Stub verifyAuthorization globally to prevent hash validation failures
-jest.spyOn(UpmExecutionGate, 'verifyAuthorization').stubImplementation((auth, ir) => {
+jest.spyOn(UpmExecutionGate, 'verifyAuthorization').mockImplementation((auth, ir) => {
     // Just pass
 });
+
