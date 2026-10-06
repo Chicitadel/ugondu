@@ -133,7 +133,7 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
         return {
             id: `aws-synth-${policyHash.substring(0, 8)}`,
             name: 'SynthesizedAWSIAMPolicy',
-            description: typeof __t !== 'undefined' ? __t('synthesized_aws_policy_adherin') : __t('synthesized_aws_iam_policy'),
+            description: __t('synthesized_aws_iam_policy'),
             permissions: intent,
             providerResponseHash: policyHash
         };
@@ -163,3 +163,4 @@ export function registerAwsAdapter(engine: PolicyGovernanceEngine) {
     const adapter = new AwsGovernanceAdapter();
     engine.registerAdapter(adapter);
 }
+
