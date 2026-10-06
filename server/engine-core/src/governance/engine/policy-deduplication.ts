@@ -43,7 +43,7 @@ export class PolicyRegistry {
     private policies = new Map<string, StoredPolicy>();
 
     public lookup(fingerprint: string): StoredPolicy | null {
-        for (const policy of this.policies.values()) {
+        for (const policy of Array.from(this.policies.values())) {
             if (policy.fingerprint === fingerprint && policy.lifecycleState === 'ACTIVE') {
                 return policy;
             }

@@ -35,6 +35,7 @@
 import { ProviderAuthorizationAdapter, PolicyGovernanceEngine } from '../../engine/policy-engine';
 import { UniversalPermission, UniversalPolicy } from '../../model/authorization';
 import * as crypto from 'crypto';
+import { __t } from '@ugondu/shared';
 
 export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
     providerIdentifier = 'aws';
