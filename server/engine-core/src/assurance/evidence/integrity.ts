@@ -34,17 +34,12 @@
 import * as crypto from 'crypto';
 import { Evidence } from './collector';
 
-/**
- * @class EvidenceIntegrity
- * @description Corporate Governed class implementation for EvidenceIntegrity
- * @classification ENTERPRISE
- */
 export class EvidenceIntegrity {
     public verifyEvidence(evidence: Evidence): boolean {
         const expectedHash = crypto.createHash('sha256')
             .update(`${evidence.id}:${evidence.timestamp}:${evidence.payload}`)
             .digest('hex');
-
+        
         return expectedHash === evidence.hash;
     }
 

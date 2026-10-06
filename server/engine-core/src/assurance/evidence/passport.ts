@@ -30,25 +30,17 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
-// @ts-ignore
-import { __t } from '@ugondu/shared';
-
 
 import { Evidence } from './collector';
 import { EvidenceIntegrity } from './integrity';
 
-/**
- * @class EvidencePassport
- * @description Corporate Governed class implementation for EvidencePassport
- * @classification ENTERPRISE
- */
 export class EvidencePassport {
     private readonly evidences: Evidence[] = [];
     private readonly integrityChecker = new EvidenceIntegrity();
 
     public addEvidence(evidence: Evidence): void {
         if (!this.integrityChecker.verifyEvidence(evidence)) {
-            throw new Error(__t('messages.error.evidence_integrity_check_failed'));
+            throw new Error('Evidence integrity check failed.');
         }
         this.evidences.push(evidence);
     }

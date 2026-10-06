@@ -34,11 +34,6 @@
 import * as crypto from 'crypto';
 import { Certificate } from './certificate';
 
-/**
- * @class CertificateValidator
- * @description Corporate Governed class implementation for CertificateValidator
- * @classification ENTERPRISE
- */
 export class CertificateValidator {
     public verifySignature(data: string, signatureBase64: string, publicKeyPem: string): boolean {
         try {

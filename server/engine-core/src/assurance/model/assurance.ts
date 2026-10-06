@@ -38,22 +38,12 @@ export enum AssuranceLevel {
     CRITICAL = 'CRITICAL'
 }
 
-/**
- * @interface AssuranceMetadata
- * @description Corporate Governed interface implementation for AssuranceMetadata
- * @classification ENTERPRISE
- */
 export interface AssuranceMetadata {
     readonly timestamp: number;
     readonly agentId: string;
     readonly environment: string;
 }
 
-/**
- * @interface AssuranceRecord
- * @description Corporate Governed interface implementation for AssuranceRecord
- * @classification ENTERPRISE
- */
 export interface AssuranceRecord {
     readonly id: string;
     readonly level: AssuranceLevel;

@@ -33,11 +33,6 @@
 
 import * as crypto from 'crypto';
 
-/**
- * @class Certificate
- * @description Corporate Governed class implementation for Certificate
- * @classification ENTERPRISE
- */
 export class Certificate {
     constructor(
         public readonly id: string,

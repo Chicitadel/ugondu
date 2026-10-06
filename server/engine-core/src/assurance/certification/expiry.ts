@@ -30,17 +30,9 @@
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.
  ******************************************************************************/
-// @ts-ignore
-import { __t } from '@ugondu/shared';
-
 
 import { Certificate } from './certificate';
 
-/**
- * @class ExpiryManager
- * @description Corporate Governed class implementation for ExpiryManager
- * @classification ENTERPRISE
- */
 export class ExpiryManager {
     public static readonly DEFAULT_VALIDITY_MS = 1000 * 60 * 60 * 24 * 365; // 1 year
 
@@ -50,7 +42,7 @@ export class ExpiryManager {
 
     public enforceExpiry(cert: Certificate): void {
         if (cert.isExpired()) {
-            throw new Error(__t('messages.error.certificate_has_expired', { 'cert_id': cert.id }));
+            throw new Error(`Certificate ${cert.id} has expired.`);
         }
     }
 }

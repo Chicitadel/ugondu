@@ -33,11 +33,6 @@
 
 import * as crypto from 'crypto';
 
-/**
- * @class CertificateSigner
- * @description Corporate Governed class implementation for CertificateSigner
- * @classification ENTERPRISE
- */
 export class CertificateSigner {
     constructor(private readonly privateKeyPem: string) {}
 
