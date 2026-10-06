@@ -7,11 +7,6 @@ export class AwsPhysicalRepairExecutor {
     constructor(private readonly awsClient: IAwsClient) {}
 
     public async executeRepair(plan: RepairPlan): Promise<boolean> {
-        if (!plan.safeToProceed) {
-            Logger.error(__t('msg_repair_plan_is_marked_unsafe_to_proceed'));
-            return false;
-        }
-
         if (!plan.requiresInfrastructureRepair) {
             Logger.info(__t('msg_no_infrastructure_repair_required_enviro'));
             return true;

@@ -10,11 +10,6 @@ export class PhysicalRepairExecutor {
     constructor(private readonly daClient: DirectAdminNativeClient) {}
 
     public async executeRepair(plan: RepairPlan, instanceId: string, username: string): Promise<boolean> {
-        if (!plan.safeToProceed) {
-            Logger.error(__t('msg_repair_plan_is_marked_unsafe_to_proceed'));
-            return false;
-        }
-
         if (!plan.requiresTopologyRepair) {
             Logger.info(__t('msg_no_topology_repair_required_environment'));
             return true; // Nothing to repair physically

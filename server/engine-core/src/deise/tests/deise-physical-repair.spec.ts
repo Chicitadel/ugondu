@@ -70,8 +70,17 @@ describe(__t('msg_gate_d_deise_physical_repair_e2e_directa'), () => {
 import { AwsPhysicalRepairExecutor } from '../../deise/engine/aws-physical-repair-executor';
 
 describe(__t('msg_gate_d_deise_physical_repair_e2e_aws'), () => {
+    let originalEnv: any;
+    beforeEach(() => {
+        originalEnv = { ...process.env };
+        process.env.UGONDU_CERT_REGION = 'eu-west-3';
+    });
+    afterEach(() => {
+        process.env = originalEnv;
+    });
+
     it('detects EC2 infrastructure drift and dispatches reconciliation', async () => {
-        const mockAwsClient: any = { };
+        const mockAwsClient: any = { ec2: { send: jest.fn().mockResolvedValue({}) } };
         const engine = new DeploymentRepairEngine();
         const executor = new AwsPhysicalRepairExecutor(mockAwsClient);
 
@@ -86,4 +95,3 @@ describe(__t('msg_gate_d_deise_physical_repair_e2e_aws'), () => {
         expect(success).toBe(true);
     });
 });
-
