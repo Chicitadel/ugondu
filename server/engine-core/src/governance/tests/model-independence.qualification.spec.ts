@@ -1,3 +1,4 @@
+import { PathRepositoryReconstruction } from '../../../plugins/recovery-dependencies/src/path-repository-reconstruction';
 import { RecoveryOrchestrator } from '../../deise/engine/recovery/recovery-orchestrator';
 import { GlobalCapabilityRegistry } from '../../deise/engine/recovery/capability-registry';
 import { UpmExecutionGate } from '../../upm/policy-gate';
@@ -26,6 +27,7 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
         aiAdapter = new AiPlatformAdapter();
         adapter = new SshLiveAdapter();
         gate = new UpmExecutionGate();
+        GlobalCapabilityRegistry.registerCapability(new PathRepositoryReconstruction());
     });
 
     describe('Mode 1: Deterministic / No AI', () => {
@@ -72,4 +74,5 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
         });
     });
 });
+
 
