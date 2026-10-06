@@ -8,7 +8,7 @@ recoveryRouter.post('/execute', async (req, res) => {
     const { capability, target, dry_run } = req.body;
     
     if (!capability) {
-        return res.status(400).json({ status: 'ERROR', message: 'Capability ID is required' });
+        return res.status(400).json({ status: 'ERROR', message: __t('capability_id_is_required') });
     }
 
     const cap = GlobalCapabilityRegistry.getCapability(capability);
@@ -31,7 +31,7 @@ recoveryRouter.post('/execute', async (req, res) => {
         const plan = await cap.plan(diagnosis, mockScope);
         
         if (dry_run) {
-            return res.json({ status: 'PLANNED', message: 'Dry run completed', evidence: JSON.stringify(plan) });
+            return res.json({ status: 'PLANNED', message: __t('dry_run_completed'), evidence: JSON.stringify(plan) });
         }
 
         // We use a mock adapter here that just logs
@@ -41,7 +41,7 @@ recoveryRouter.post('/execute', async (req, res) => {
 
         await cap.execute(plan, mockAdapter, mockScope);
         
-        return res.json({ status: 'EXECUTED', message: 'Capability executed successfully', transactionId: `txn-${Date.now()}` });
+        return res.json({ status: 'EXECUTED', message: __t('capability_executed_successful'), transactionId: `txn-${Date.now()}` });
     } catch (e: any) {
         return res.status(500).json({ status: 'FAILED', message: e.message });
     }

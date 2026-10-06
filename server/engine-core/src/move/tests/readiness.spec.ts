@@ -23,7 +23,7 @@ declare var expect: any;
 describe(__t('msg_cutover_readiness_evaluation'), () => {
   const strict: ReadinessCriteria = { requireZeroReplicationLag: true, requireActiveHealthChecks: true, maxAllowedErrorRate: 0.01 };
 
-  it('is ready when all probes report healthy values', async () => {
+  it(__t('is_ready_when_all_probes_repor'), async () => {
     const evaluator = new ReadinessEvaluator({
       replicationLagMs: async () => 0,
       systemHealthy: async () => true,
@@ -34,7 +34,7 @@ describe(__t('msg_cutover_readiness_evaluation'), () => {
     expect(result.reasons.length).toBe(0);
   });
 
-  it('blocks cutover on replication lag with a localized reason', async () => {
+  it(__t('blocks_cutover_on_replication_'), async () => {
     const evaluator = new ReadinessEvaluator({
       replicationLagMs: async () => 250,
       systemHealthy: async () => true,
@@ -45,7 +45,7 @@ describe(__t('msg_cutover_readiness_evaluation'), () => {
     expect(result.reasons).toContain(__t('messages.error.readiness_replication_lag', { lag: 250 }));
   });
 
-  it('blocks cutover when health checks fail', async () => {
+  it(__t('blocks_cutover_when_health_che'), async () => {
     const evaluator = new ReadinessEvaluator({
       replicationLagMs: async () => 0,
       systemHealthy: async () => false,
@@ -56,7 +56,7 @@ describe(__t('msg_cutover_readiness_evaluation'), () => {
     expect(result.reasons).toContain(__t('messages.error.readiness_health_failed'));
   });
 
-  it('blocks cutover when the error rate exceeds the maximum', async () => {
+  it(__t('blocks_cutover_when_the_error_'), async () => {
     const evaluator = new ReadinessEvaluator({
       replicationLagMs: async () => 0,
       systemHealthy: async () => true,
@@ -67,13 +67,13 @@ describe(__t('msg_cutover_readiness_evaluation'), () => {
     expect(result.reasons).toContain(__t('messages.error.readiness_error_rate', { errorRate: 0.5, maxAllowed: 0.01 }));
   });
 
-  it('fails closed when no probes are supplied', async () => {
+  it(__t('fails_closed_when_no_probes_ar'), async () => {
     const result = await new ReadinessEvaluator().evaluate(strict);
     expect(result.isReady).toBe(false);
     expect(result.reasons.length).toBe(3);
   });
 
-  it('fails closed when a probe returns a non-numeric value', async () => {
+  it(__t('fails_closed_when_a_probe_retu'), async () => {
     const evaluator = new ReadinessEvaluator({
       replicationLagMs: async () => Number.NaN,
       systemHealthy: async () => true,

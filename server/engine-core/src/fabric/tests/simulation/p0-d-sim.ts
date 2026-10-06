@@ -148,7 +148,7 @@ async function executeSimulations() {
     Logger.info(__t('msg_begin_p0_d_sim_provider_fabric_determini'));
 
     // P0-D-SIM-01 - DirectAdmin Lifecycle
-    Logger.info('--- P0-D-SIM-01: DirectAdmin Lifecycle ---');
+    Logger.info(__t('p0_d_sim_01_directadmin_lifecy'));
     try {
         const daClient = new SimulationDirectAdminClient();
         const da = new DirectAdminAdapter(daClient);
@@ -174,7 +174,7 @@ async function executeSimulations() {
     }
 
     // P0-D-SIM-02 - AWS Lifecycle
-    Logger.info('--- P0-D-SIM-02: AWS Lifecycle ---');
+    Logger.info(__t('p0_d_sim_02_aws_lifecycle'));
     try {
         const awsClient = new SimulationAwsClient() as any;
 
@@ -203,7 +203,7 @@ async function executeSimulations() {
     }
 
     // P0-D-SIM-03 - Failure and Rollback
-    Logger.info('--- P0-D-SIM-03: Failure and Rollback ---');
+    Logger.info(__t('p0_d_sim_03_failure_and_rollba'));
     try {
         const awsClient = new SimulationAwsClient() as any;
 
@@ -231,7 +231,7 @@ async function executeSimulations() {
     }
 
     // P0-D-SIM-04 - DEISE Drift Repair
-    Logger.info('--- P0-D-SIM-04: DEISE Drift Repair ---');
+    Logger.info(__t('p0_d_sim_04_deise_drift_repair'));
     try {
         const awsClient = new SimulationAwsClient() as any;
         const ec2 = await awsClient.runInstances('t3.micro', 'ami-sim', 'subnet-mock');
@@ -256,7 +256,7 @@ async function executeSimulations() {
     }
 
     // P0-D-SIM-05 - Universal Delivery Transaction
-    Logger.info('--- P0-D-SIM-05: Universal Delivery Transaction ---');
+    Logger.info(__t('p0_d_sim_05_universal_delivery'));
     try {
         const txLog: string[] = [];
         const stateMachine = (state: string) => {

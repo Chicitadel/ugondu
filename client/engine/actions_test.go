@@ -86,7 +86,7 @@ func TestPayloadValidators(t *testing.T) {
 	}
 	_, err = ValidateFetchRepositoryPayload(map[string]interface{}{"url": ""})
 	if err == nil {
-		t.Errorf("Expected validation error for empty URL")
+		t.Errorf(i18n.T("expected_validation_error_for_"))
 	}
 	pFetch, err := ValidateFetchRepositoryPayload(map[string]interface{}{"url": "https://example.com/repo.git"})
 	if err != nil || pFetch.Branch != "main" {
@@ -96,7 +96,7 @@ func TestPayloadValidators(t *testing.T) {
 	// SyncEnvironmentPayload validation
 	_, err = ValidateSyncEnvironmentPayload(map[string]interface{}{"strategy": "invalid-strategy"})
 	if err == nil {
-		t.Errorf("Expected validation error for invalid strategy")
+		t.Errorf(i18n.T("expected_validation_error_for_"))
 	}
 	pSync, err := ValidateSyncEnvironmentPayload(map[string]interface{}{"strategy": "quota-sync"})
 	if err != nil || pSync.Strategy != "quota-sync" {
@@ -108,11 +108,11 @@ func TestGitAdapterArgSanitization(t *testing.T) {
 	adapter := adapters.NewGitAdapter()
 	err := adapter.Pull("https://github.com/repo.git", "../../../etc/passwd", ".", "")
 	if err == nil {
-		t.Errorf("Expected error for branch name with path traversal")
+		t.Errorf(i18n.T("expected_error_for_branch_name"))
 	}
 	err = adapter.Pull("file:///etc/passwd", "main", ".", "")
 	if err == nil {
-		t.Errorf("Expected error for invalid repo URL scheme")
+		t.Errorf(i18n.T("expected_error_for_invalid_rep"))
 	}
 }
 
@@ -120,11 +120,11 @@ func TestServiceAdapterNameValidation(t *testing.T) {
 	adapter := adapters.NewServiceRestartAdapter()
 	err := adapter.Restart("my-service; rm -rf /")
 	if err == nil {
-		t.Errorf("Expected error for service name with semicolon")
+		t.Errorf(i18n.T("expected_error_for_service_nam"))
 	}
-	err = adapter.Restart("my service")
+	err = adapter.Restart(i18n.T("my_service"))
 	if err == nil {
-		t.Errorf("Expected error for service name with spaces")
+		t.Errorf(i18n.T("expected_error_for_service_nam"))
 	}
 }
 

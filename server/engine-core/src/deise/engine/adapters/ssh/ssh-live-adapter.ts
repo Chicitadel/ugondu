@@ -13,7 +13,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async identify(scope: RecoveryScope, scopedCredentials: any): Promise<string> {
         if (!scopedCredentials || !scopedCredentials.sshHost || !scopedCredentials.sshUser || !scopedCredentials.sshKeyPath) {
-            throw new Error('SSH adapter requires sshHost, sshUser, and sshKeyPath.');
+            throw new Error(__t('ssh_adapter_requires_sshhost_s'));
         }
         this.sshHost = scopedCredentials.sshHost;
         this.sshUser = scopedCredentials.sshUser;
@@ -23,11 +23,11 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
             // LR-01: Read-only authentication check
             const { stdout } = await this.runSshCommand('whoami');
             if (stdout.trim() !== this.sshUser) {
-                throw new Error('SSH Authentication succeeded but user mismatch.');
+                throw new Error(__t('ssh_authentication_succeeded_b'));
             }
             return 'ssh-protected-host';
         } catch (e: any) {
-            throw new Error('SSH Authentication Failed: ' + e.message);
+            throw new Error(__t('ssh_authentication_failed') + e.message);
         }
     }
 
@@ -84,7 +84,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
     }
 
     async executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }> {
-        throw new Error('Mutation disabled in read-only adapter.');
+        throw new Error(__t('mutation_disabled_in_read_only'));
     }
 
     async rollback(checkpointId: string): Promise<boolean> {

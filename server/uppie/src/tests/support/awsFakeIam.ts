@@ -55,7 +55,7 @@ export function fakeIam() {
   const usage = new Map<string, Array<{ service: string; lastAuthenticated?: Date }>>();
   const calls: string[] = [];
   const copy = <T>(v: T): T => JSON.parse(JSON.stringify(v), (_k, val) => val);
-  const need = (arn: string) => { const p = policies.get(arn); if (!p) throw new AwsApiError('no such entity', 'NoSuchEntity', 404); return p; };
+  const need = (arn: string) => { const p = policies.get(arn); if (!p) throw new AwsApiError(__t('no_such_entity'), 'NoSuchEntity', 404); return p; };
   const keyOf = (kind: AwsPrincipalKind, name: string): string => `${kind}/${name}`;
   const docsFor = (key: string): AwsPolicyDocument[] => [...attachments].filter(([, set]) => set.has(key)).map(([arn]) => need(arn).versions.find((v) => v.isDefault)!.document);
   const summary = (arn: string) => { const p = need(arn); return { arn, name: p.name, path: p.path, defaultVersionId: p.versions.find((v) => v.isDefault)?.id, attachmentCount: attachments.get(arn)?.size ?? 0 }; };
@@ -65,7 +65,7 @@ export function fakeIam() {
     async getPolicy(arn) { const p = need(arn); return { ...summary(arn), description: p.description, document: copy(p.versions.find((v) => v.isDefault)!.document) }; },
     async createPolicy({ name, path = '/', description, document }) {
       const arn = ARN.policy(name, path);
-      if (policies.has(arn)) throw new AwsApiError('already exists', 'EntityAlreadyExists', 409);
+      if (policies.has(arn)) throw new AwsApiError(__t('already_exists'), 'EntityAlreadyExists', 409);
       policies.set(arn, { name, path, description, versions: [{ id: 'v1', document: copy(document), isDefault: true, createDate: new Date(1_700_000_000_000) }], counter: 1 });
       calls.push(`createPolicy:${name}`);
       return arn;
@@ -73,7 +73,7 @@ export function fakeIam() {
     async listPolicyVersions(arn) { return need(arn).versions.map((v) => ({ versionId: v.id, isDefault: v.isDefault, createDate: v.createDate })); },
     async createPolicyVersion(arn, document) {
       const p = need(arn);
-      if (p.versions.length >= 5) throw new AwsApiError('version limit', 'LimitExceeded', 409);
+      if (p.versions.length >= 5) throw new AwsApiError(__t('version_limit'), 'LimitExceeded', 409);
       p.counter++;
       p.versions.forEach((v) => { v.isDefault = false; });
       p.versions.push({ id: `v${p.counter}`, document: copy(document), isDefault: true, createDate: new Date(1_700_000_000_000 + p.counter * 1000) });
@@ -81,16 +81,16 @@ export function fakeIam() {
     },
     async deletePolicyVersion(arn, id) {
       const p = need(arn);
-      if (p.versions.find((v) => v.id === id)?.isDefault) throw new AwsApiError('default version', 'DeleteConflict', 409);
+      if (p.versions.find((v) => v.id === id)?.isDefault) throw new AwsApiError(__t('default_version'), 'DeleteConflict', 409);
       p.versions = p.versions.filter((v) => v.id !== id);
     },
     async deletePolicy(arn) {
       const p = need(arn);
-      if ((attachments.get(arn)?.size ?? 0) > 0 || p.versions.length > 1) throw new AwsApiError('delete conflict', 'DeleteConflict', 409);
+      if ((attachments.get(arn)?.size ?? 0) > 0 || p.versions.length > 1) throw new AwsApiError(__t('delete_conflict'), 'DeleteConflict', 409);
       policies.delete(arn);
     },
     async attachPolicy(kind, name, arn) { need(arn); (attachments.get(arn) ?? attachments.set(arn, new Set()).get(arn)!).add(keyOf(kind, name)); },
-    async detachPolicy(kind, name, arn) { if (!attachments.get(arn)?.delete(keyOf(kind, name))) throw new AwsApiError('not attached', 'NoSuchEntity', 404); },
+    async detachPolicy(kind, name, arn) { if (!attachments.get(arn)?.delete(keyOf(kind, name))) throw new AwsApiError(__t('not_attached'), 'NoSuchEntity', 404); },
     async listEntitiesForPolicy(arn) { return [...(attachments.get(arn) ?? [])].map((k) => ({ kind: k.split('/')[0] as AwsPrincipalKind, name: k.split('/')[1] })); },
     async listPrincipals(kind) { return principals.filter((p) => p.kind === kind); },
     async listAttachedPolicies(kind, name) { return [...attachments].filter(([, set]) => set.has(keyOf(kind, name))).map(([arn]) => arn); },

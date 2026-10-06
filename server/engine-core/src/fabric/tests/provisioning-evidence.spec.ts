@@ -1,1 +1,1 @@
-describe('Test', () => { it('should pass', () => { expect(true).toBe(true); }); });
+describe('Test', () => { it(__t('should_pass'), () => { expect(true).toBe(true); }); });

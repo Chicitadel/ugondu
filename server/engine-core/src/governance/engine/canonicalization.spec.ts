@@ -1,7 +1,7 @@
 import { CanonicalPolicySerializer } from '../canonicalization';
 
 describe('CanonicalPolicySerializer', () => {
-    it('should generate identical hashes for equivalent IAM policies with different key orders', () => {
+    it(__t('should_generate_identical_hash'), () => {
         const policyA = {
             Version: '2012-10-17',
             Statement: [
@@ -30,7 +30,7 @@ describe('CanonicalPolicySerializer', () => {
         expect(hashA).toBe(hashB);
     });
 
-    it('should generate identical hashes for equivalent IAM policies with different array element orders', () => {
+    it(__t('should_generate_identical_hash'), () => {
         const policyA = {
             Version: '2012-10-17',
             Statement: [
@@ -59,7 +59,7 @@ describe('CanonicalPolicySerializer', () => {
         expect(hashA).toBe(hashB);
     });
     
-    it('should generate identical hashes for identical arrays of objects in different order', () => {
+    it(__t('should_generate_identical_hash'), () => {
         const policyA = {
             Version: '2012-10-17',
             Statement: [
@@ -82,7 +82,7 @@ describe('CanonicalPolicySerializer', () => {
         expect(hashA).toBe(hashB);
     });
 
-    it('should generate different hashes for differing IAM policies', () => {
+    it(__t('should_generate_different_hash'), () => {
         const policyA = {
             Version: '2012-10-17',
             Statement: [

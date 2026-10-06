@@ -24,7 +24,7 @@ declare var it: any;
 declare var expect: any;
 declare var jest: any;
 
-describe('UPPIE Qualification Gates: UPPIE-21..50', () => {
+describe(__t('uppie_qualification_gates_uppi'), () => {
   const dummyContext: AdapterContext = {
     tenantId: 't1', environmentId: 'e1', provider: 'AWS_IAM', credentials: {}
   };
@@ -71,7 +71,7 @@ describe('UPPIE Qualification Gates: UPPIE-21..50', () => {
     expect(validation.valid).toBe(true);
   });
 
-  it('UPPIE-25..30: Policy Simulation Gates (Dry-run, blast-radius, tenant isolation)', async () => {
+  it(__t('uppie_25_30_policy_simulation_'), async () => {
     const mockAdapter: IPolicyProviderAdapter = {
       providerType: 'AWS_IAM',
       capabilities: {} as any,

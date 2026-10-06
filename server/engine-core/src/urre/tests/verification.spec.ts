@@ -52,14 +52,14 @@ function makePoint(overrides: Record<string, unknown> = {}): any {
 }
 
 describe('BackupVerifier', () => {
-  it('certifies a verified backup using a recorded restore test and a real SHA-256 digest', async () => {
+  it(__t('certifies_a_verified_backup_us'), async () => {
     const cert = await new BackupVerifier().validateBackup(makePoint());
     expect(cert.isValid).toBe(true);
     expect(cert.recoveryPointId).toBe('rp-001');
     expect(/^[a-f0-9]{64}$/.test(cert.digest as string)).toBe(true);
   });
 
-  it('produces a deterministic digest that ignores signature but reflects content changes', async () => {
+  it(__t('produces_a_deterministic_diges'), async () => {
     const v = new BackupVerifier();
     const a = await v.validateBackup(makePoint());
     const b = await v.validateBackup(makePoint({ signature: 'different' }));
@@ -68,13 +68,13 @@ describe('BackupVerifier', () => {
     expect(a.digest === c.digest).toBe(false);
   });
 
-  it('rejects a point without a database backup reference', async () => {
+  it(__t('rejects_a_point_without_a_data'), async () => {
     let message = '';
     try { await new BackupVerifier().validateBackup(makePoint({ databaseBackupRef: null })); } catch (e: any) { message = e.message; }
     expect(message).toBe(__t('messages.error.backup_validation_failed_for', { point_id: 'rp-001' }));
   });
 
-  it('rejects an empty or unverified backup', async () => {
+  it(__t('rejects_an_empty_or_unverified'), async () => {
     const v = new BackupVerifier();
     let failures = 0;
     for (const o of [
@@ -87,25 +87,25 @@ describe('BackupVerifier', () => {
     expect(failures).toBe(3);
   });
 
-  it('rejects malformed artifact digests', async () => {
+  it(__t('rejects_malformed_artifact_dig'), async () => {
     let threw = false;
     try { await new BackupVerifier().validateBackup(makePoint({ artifactDigests: { app: 'not-a-sha256' } })); } catch { threw = true; }
     expect(threw).toBe(true);
   });
 
-  it('fails closed when no restore test is recorded and no probe is supplied', async () => {
+  it(__t('fails_closed_when_no_restore_t'), async () => {
     let threw = false;
     try { await new BackupVerifier().validateBackup(makePoint({ backupRestoreTestedAt: null })); } catch { threw = true; }
     expect(threw).toBe(true);
   });
 
-  it('rejects a recorded restore test that predates the backup', async () => {
+  it(__t('rejects_a_recorded_restore_tes'), async () => {
     let threw = false;
     try { await new BackupVerifier().validateBackup(makePoint({ backupRestoreTestedAt: 500 })); } catch { threw = true; }
     expect(threw).toBe(true);
   });
 
-  it('delegates the read-test to the restore probe when supplied', async () => {
+  it(__t('delegates_the_read_test_to_the'), async () => {
     const ok = new BackupVerifier({ readTest: async () => true });
     const bad = new BackupVerifier({ readTest: async () => false });
     const cert = await ok.validateBackup(makePoint({ backupRestoreTestedAt: null }));

@@ -89,7 +89,7 @@ export class EntitlementResolver {
       return {
         capabilityId,
         result: 'MANIFEST_EXPIRED',
-        detail: 'Entitlement manifest has expired. Please refresh your session.',
+        detail: __t('entitlement_manifest_has_expir'),
       };
     }
 

@@ -21,7 +21,7 @@ import { __t } from '../../../shared/i18n';
 declare var describe: any, it: any, expect: any;
 
 const T = (key: string, params?: Record<string, string | number>): string => __t(`uppie.adapter.gcp.${key}`, params);
-const COND = { title: 'until 2030', expression: 'request.time < timestamp("2030-01-01T00:00:00.000Z")' };
+const COND = { title: __t('until_2030'), expression: 'request.time < timestamp("2030-01-01T00:00:00.000Z")' };
 
 function setup() {
   const gcp = fakeGcp();
@@ -31,8 +31,8 @@ const op = (...operations: string[]) => ({ action: { capability: 'x', operations
 const by = (id: string) => ({ subject: { type: 'USER', id } });
 const failure = async (run: () => Promise<any>): Promise<string> => { try { await run(); return ''; } catch (e: any) { return e.message; } };
 
-describe('GCP IAM discovery', () => {
-  it('lists the custom roles of the project and organization as native policies', async () => {
+describe(__t('gcp_iam_discovery'), () => {
+  it(__t('lists_the_custom_roles_of_the_'), async () => {
     const { adapter, seed } = setup();
     const own = await adapter.generate([rule()], ctx);
     await adapter.attach(own, USER, ctx);
@@ -48,7 +48,7 @@ describe('GCP IAM discovery', () => {
     expect(org.digest.length).toBe(64);
   });
 
-  it('maps members to roles across the whole hierarchy without duplicates', async () => {
+  it(__t('maps_members_to_roles_across_t'), async () => {
     const { adapter, seed } = setup();
     seed.bind(PROJECT, VIEWER, [USER, SA]);
     seed.bind(FOLDER, VIEWER, [USER]);
@@ -57,7 +57,7 @@ describe('GCP IAM discovery', () => {
     expect(await adapter.discoverAssignments(ctx)).toEqual({ [USER]: [VIEWER, 'roles/storage.objectAdmin'], [SA]: [VIEWER], [GROUP]: ['roles/storage.objectAdmin'] });
   });
 
-  it('separates individual identities from groups, domains and principal sets', async () => {
+  it(__t('separates_individual_identitie'), async () => {
     const { adapter, seed } = setup();
     seed.bind(PROJECT, VIEWER, [USER, SA, GROUP, 'domain:example.com']);
     seed.bind(ORG, VIEWER, ['principalSet://iam.googleapis.com/projects/1/locations/global/workloadIdentityPools/p/*']);
@@ -68,7 +68,7 @@ describe('GCP IAM discovery', () => {
     expect(groups.every((g) => g.members.length === 0)).toBe(true);
   });
 
-  it('lists granted and defined roles, skipping bindings to roles that no longer exist', async () => {
+  it(__t('lists_granted_and_defined_role'), async () => {
     const { adapter, seed } = setup();
     seed.role(`${PROJECT}/roles/mine`, ['storage.objects.get'], { title: 'Mine' });
     seed.bind(PROJECT, VIEWER, [USER]);
@@ -85,8 +85,8 @@ describe('GCP IAM discovery', () => {
   });
 });
 
-describe('GCP IAM dependencies', () => {
-  it('names the members holding a role across the hierarchy and sizes the blast radius', async () => {
+describe(__t('gcp_iam_dependencies'), () => {
+  it(__t('names_the_members_holding_a_ro'), async () => {
     const { adapter, seed } = setup();
     const policy = await adapter.generate([rule(at(ORG))], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -102,7 +102,7 @@ describe('GCP IAM dependencies', () => {
     expect((await adapter.findDependencies(policy.providerId, ctx)).blastRadius).toBe('SIGNIFICANT');
   });
 
-  it('is MINIMAL for an unbound role and BROAD as soon as a group depends on it', async () => {
+  it(__t('is_minimal_for_an_unbound_role'), async () => {
     const { adapter, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -115,8 +115,8 @@ describe('GCP IAM dependencies', () => {
 
 function at(scope: string) { return { resource: { type: 't', scope } }; }
 
-describe('GCP IAM effective authority (model)', () => {
-  it('merges the permissions of every role the member holds on the resource and its ancestors', async () => {
+describe(__t('gcp_iam_effective_authority_mo'), () => {
+  it(__t('merges_the_permissions_of_ever'), async () => {
     const { adapter, seed } = setup();
     seed.bind(FOLDER, VIEWER, [USER]);
     seed.bind(PROJECT, 'roles/storage.objectAdmin', [USER]);
@@ -134,7 +134,7 @@ describe('GCP IAM effective authority (model)', () => {
     expect(atFolder.permissions.map((p) => p.capability)).toEqual(['resourcemanager.projects.get', 'storage.objects.get']);
   });
 
-  it('marks conditional grants as conditional unless an unconditional grant also gives the permission', async () => {
+  it(__t('marks_conditional_grants_as_co'), async () => {
     const { adapter, seed } = setup();
     seed.bind(PROJECT, VIEWER, [USER], COND);
     seed.bind(PROJECT, 'roles/storage.objectAdmin', [USER]);
@@ -149,7 +149,7 @@ describe('GCP IAM effective authority (model)', () => {
     expect(later).toMatchObject({ state: 'GRANTED', confidence: 'MEDIUM' });
   });
 
-  it('does not see group-derived access, skips deleted roles and rejects bad input', async () => {
+  it(__t('does_not_see_group_derived_acc'), async () => {
     const { adapter, seed } = setup();
     seed.bind(PROJECT, VIEWER, [GROUP]);
     seed.group(GROUP, ['alice@example.com']);
@@ -166,8 +166,8 @@ describe('GCP IAM effective authority (model)', () => {
   });
 });
 
-describe('GCP IAM evaluation and simulation (troubleshooter)', () => {
-  it('evaluates through the hierarchy and group membership, and reports denial and uncertainty', async () => {
+describe(__t('gcp_iam_evaluation_and_simulat'), () => {
+  it(__t('evaluates_through_the_hierarch'), async () => {
     const { adapter, seed } = setup();
     const ask = (id: string, ...ops: string[]) => adapter.evaluate(rule({ ...by(id), ...op(...ops) }), ctx);
     expect(await ask(USER, 'storage.objects.get')).toBe('DENIED');
@@ -183,17 +183,17 @@ describe('GCP IAM evaluation and simulation (troubleshooter)', () => {
     expect(await ask(SA, 'storage.objects.get')).toBe('UNKNOWN');
   });
 
-  it('answers UNKNOWN when the question cannot be put to the troubleshooter', async () => {
+  it(__t('answers_unknown_when_the_quest'), async () => {
     const { adapter } = setup();
     const ask = (r: any) => adapter.evaluate(r, ctx);
     expect(await ask(rule({ ...by('domain:example.com') }))).toBe('UNKNOWN');
-    expect(await ask(rule({ ...op('not a permission') }))).toBe('UNKNOWN');
+    expect(await ask(rule({ ...op(__t('not_a_permission')) }))).toBe('UNKNOWN');
     expect(await ask(rule({ ...op() }))).toBe('UNKNOWN');
     expect(await ask(rule({ ...at(OTHER) }))).toBe('UNKNOWN');
     expect(await adapter.evaluate(rule(), { ...ctx, environmentId: 'missing' })).toBe('UNKNOWN');
   });
 
-  it('simulates what a proposed Allow would add, with confidence that reflects what was decided', async () => {
+  it(__t('simulates_what_a_proposed_allo'), async () => {
     const { adapter, seed } = setup();
     seed.bind(FOLDER, VIEWER, [USER]);
     const ops = op('storage.objects.get', 'storage.objects.list');
@@ -212,7 +212,7 @@ describe('GCP IAM evaluation and simulation (troubleshooter)', () => {
     expect(partial.allowed).toEqual([`${BOB}:${PROJECT}:storage.objects.list`]);
   });
 
-  it('leaves Deny rules and unanswerable subjects unchanged at LOW confidence, and flags groups as BROAD', async () => {
+  it(__t('leaves_deny_rules_and_unanswer'), async () => {
     const { adapter } = setup();
     const res = await adapter.simulate([rule({ effect: 'DENY' }), rule({ ...by('domain:example.com') })], ctx);
     expect(res.allowed).toEqual([]);
@@ -224,8 +224,8 @@ describe('GCP IAM evaluation and simulation (troubleshooter)', () => {
   });
 });
 
-describe('GCP IAM conflicts', () => {
-  it('reports a Deny that overlaps an Allow of the same subject as ambiguous', async () => {
+describe(__t('gcp_iam_conflicts'), () => {
+  it(__t('reports_a_deny_that_overlaps_a'), async () => {
     const { adapter } = setup();
     const allow = rule({ ruleId: 'allow', ...at(PROJECT) });
     const deny = rule({ ruleId: 'deny', effect: 'DENY', ...at(FOLDER), ...op('storage.objects.list') });
@@ -236,7 +236,7 @@ describe('GCP IAM conflicts', () => {
     }]);
   });
 
-  it('finds nothing when there is no Deny, another subject, or no shared permission', async () => {
+  it(__t('finds_nothing_when_there_is_no'), async () => {
     const { adapter } = setup();
     expect((await adapter.findConflicts([rule()], ctx)).conflicts).toEqual([]);
     expect((await adapter.findConflicts([rule(), rule({ ruleId: 'd', effect: 'DENY', ...by(BOB) })], ctx)).conflicts).toEqual([]);
@@ -245,8 +245,8 @@ describe('GCP IAM conflicts', () => {
   });
 });
 
-describe('GCP IAM reconciliation and constraints', () => {
-  it('diffs desired Allow rules against the observed roles by resource, condition and permissions', async () => {
+describe(__t('gcp_iam_reconciliation_and_con'), () => {
+  it(__t('diffs_desired_allow_rules_agai'), async () => {
     const { adapter } = setup();
     const kept = await adapter.generate([rule()], ctx);
     const stale = await adapter.generate([rule({ ...at(PROJECT), ...op('storage.buckets.get') , ...{ conditions: [{ type: 'TIME_BOUND', value: { notAfter: '2030-01-01T00:00:00Z' } }] } })], ctx);
@@ -269,13 +269,13 @@ describe('GCP IAM reconciliation and constraints', () => {
     expect(again.toRemove.sort()).toEqual([keyOf(PROJECT), keyOf(PROJECT, (stale.nativeDocument as GcpRoleDocument).condition?.expression)].sort());
   });
 
-  it('wraps reconciliation failures with the localized error', async () => {
+  it(__t('wraps_reconciliation_failures_'), async () => {
     const { adapter } = setup();
     const msg = await failure(() => adapter.reconcile([rule({ ruleId: 'd', effect: 'DENY' })], [], ctx));
     expect(msg).toBe(T('reconcile_error', { error: T('deny_unsupported', { ruleId: 'd' }) }));
   });
 
-  it('publishes the documented Google Cloud limits', async () => {
+  it(__t('publishes_the_documented_googl'), async () => {
     const { adapter } = setup();
     const c = await adapter.getConstraints(ctx);
     expect(c).toBe(GCP_IAM_CONSTRAINTS);

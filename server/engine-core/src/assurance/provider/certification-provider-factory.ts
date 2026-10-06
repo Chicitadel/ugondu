@@ -2,5 +2,5 @@ import { AwsCertificationProviderAdapter } from './aws-certification-provider-ad
 
 export function getProviderAdapter(platform: string, region: string) {
     if (platform === 'aws') return new AwsCertificationProviderAdapter(region);
-    throw new Error('Unsupported platform for physical certification: ' + platform);
+    throw new Error(__t('unsupported_platform_for_physi') + platform);
 }

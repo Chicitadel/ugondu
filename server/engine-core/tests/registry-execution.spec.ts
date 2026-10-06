@@ -1,7 +1,7 @@
 import { UniversalActionRegistry } from '../../src/registry/action-registry';
 
 describe('UniversalActionRegistry', () => {
-    it('should invoke ugondu:deploy universally', async () => {
+    it(__t('should_invoke_ugondu_deploy_un'), async () => {
         const registry = new UniversalActionRegistry();
         const action = registry.getAction('ugondu:deploy');
         expect(action).toBeDefined();

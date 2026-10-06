@@ -38,10 +38,10 @@ export class MigrationEngine {
 
         actions.push({ action: 'FETCH_REPOSITORY', payload: { branch: 'main' } });
 
-        if (content.includes('npm install') || content.includes('npm ci')) {
+        if (content.includes(__t('npm_install')) || content.includes(__t('npm_ci'))) {
             actions.push({ action: 'NODE_INSTALL', payload: { workingDirectory: '.' } });
         }
-        if (content.includes('composer install')) {
+        if (content.includes(__t('composer_install'))) {
             actions.push({ action: 'COMPOSER_INSTALL', payload: { workingDirectory: '.' } });
         }
         if (content.includes('sh ') || content.includes('bat ')) {

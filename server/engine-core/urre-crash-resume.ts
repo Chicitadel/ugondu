@@ -31,7 +31,7 @@ async function registerRealHandlers(engine: URREngine) {
         const store = new TransactionStore();
         const tx = await store.load('tx-p0-4-real');
         const vpcId = tx?.getNode('VPC')?.output?.vpcId;
-        if (!vpcId) throw new Error("Missing VPC ID");
+        if (!vpcId) throw new Error(__t('missing_vpc_id'));
         const res = await ec2.send(new CreateSubnetCommand({ VpcId: vpcId, CidrBlock: '10.0.99.0/28' }));
         return { subnetId: res.Subnet!.SubnetId! };
     }, async (node: DagNode) => {
@@ -42,7 +42,7 @@ async function registerRealHandlers(engine: URREngine) {
 }
 
 async function phase1() {
-    console.log('--- PROCESS A: Starting Transaction ---');
+    console.log(__t('process_a_starting_transaction'));
     const engine = new URREngine({
         async afterNodePersisted(node: DagNode) {
             if (node.id === 'VPC' && node.status === 'SUCCESS') {
@@ -58,7 +58,7 @@ async function phase1() {
     tx.addNode('SUBNET', 'aws', 'CREATE_SUBNET_REAL');
     tx.addEdge('VPC', 'SUBNET'); // SUBNET depends on VPC
 
-    console.log('PROCESS A: Submitting transaction...');
+    console.log(__t('process_a_submitting_transacti'));
     // This will trigger VPC creation, and then crash the process via the fault injector
     await engine.executeTransaction(tx);
     
@@ -67,7 +67,7 @@ async function phase1() {
 }
 
 async function phase2() {
-    console.log('--- PROCESS B: Resuming Transaction ---');
+    console.log(__t('process_b_resuming_transaction'));
     const engine = new URREngine();
     await registerRealHandlers(engine);
 
@@ -84,7 +84,7 @@ async function phase2() {
     const vpcId = vpcNode.output.vpcId;
     console.log(`PROCESS B: Loaded VPC ID ${vpcId} from state. Will skip recreation.`);
 
-    console.log('PROCESS B: Resuming transaction execution...');
+    console.log(__t('process_b_resuming_transaction'));
     await engine.executeTransaction(existingTx); // this skips SUCCESS nodes
 
     const subNode = existingTx.getNode('SUBNET')!;
@@ -92,19 +92,19 @@ async function phase2() {
         throw new Error(__t('engine.urre.err_subnet_no_success'));
     }
 
-    console.log('PROCESS B: Success! Cleaning up AWS VPC...');
+    console.log(__t('process_b_success_cleaning_up_'));
     const ec2 = new EC2Client({ region: REGION });
     if (subNode.output?.subnetId) {
         await ec2.send(new DeleteSubnetCommand({ SubnetId: subNode.output.subnetId }));
     }
     await ec2.send(new DeleteVpcCommand({ VpcId: vpcId }));
 
-    console.log('PROCESS B: Cleanup done.');
+    console.log(__t('process_b_cleanup_done'));
     process.exit(0);
 }
 
 async function phase3() {
-    console.log('--- PROCESS C: Testing Idempotency ---');
+    console.log(__t('process_c_testing_idempotency'));
     const engine = new URREngine();
     await registerRealHandlers(engine);
 
@@ -114,14 +114,14 @@ async function phase3() {
         throw new Error(__t('engine.urre.err_tx_not_found'));
     }
 
-    console.log('PROCESS C: Executing transaction again...');
+    console.log(__t('process_c_executing_transactio'));
     await engine.executeTransaction(existingTx);
 
     if (existingTx.status !== 'SUCCESS') {
         throw new Error(__t('engine.urre.err_tx_not_immediate_success'));
     }
 
-    console.log('PROCESS C: Idempotency proven.');
+    console.log(__t('process_c_idempotency_proven'));
     process.exit(0);
 }
 
@@ -134,11 +134,11 @@ if (process.argv[2] === 'phase1') {
 } else {
     // Controller orchestrating both
     const { spawnSync } = require('child_process');
-    console.log('Running URRE Real Crash Test...');
+    console.log(__t('running_urre_real_crash_test'));
     const p1 = spawnSync('npx', ['ts-node', __filename, 'phase1'], { stdio: 'inherit' });
     console.log(`Process A exited with code ${p1.status} (expected 1 for crash)`);
     if (p1.status === 0) {
-        console.error('Process A did not crash as expected!');
+        console.error(__t('process_a_did_not_crash_as_exp'));
         process.exit(1);
     }
 

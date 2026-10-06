@@ -31,7 +31,7 @@ const timed = (notBefore?: string, notAfter?: string) => ({ conditions: [{ type:
 const failure = async (run: () => Promise<any>): Promise<string> => { try { await run(); return ''; } catch (e: any) { return e.message; } };
 const writes = (calls: string[], prefix: string): number => calls.filter((c) => c.startsWith(prefix)).length;
 
-describe('GCP IAM compilation', () => {
+describe(__t('gcp_iam_compilation'), () => {
   it('builds one deterministic, order-independent custom role at the rules\' resource', async () => {
     const { adapter } = setup();
     const rules = [rule({ ruleId: 'a' }), rule({ ruleId: 'b', ...op('storage.objects.delete', 'storage.objects.get') })];
@@ -51,7 +51,7 @@ describe('GCP IAM compilation', () => {
     expect(b.providerId).toBe(a.providerId);
   });
 
-  it('defines the role at the organization for folder and organization grants', async () => {
+  it(__t('defines_the_role_at_the_organi'), async () => {
     const { adapter } = setup();
     const folder = await adapter.generate([rule(at(FOLDER))], ctx);
     const org = await adapter.generate([rule(at(ORG))], ctx);
@@ -68,7 +68,7 @@ describe('GCP IAM compilation', () => {
     expect(((await adapter.generate([rule(at('*'))], { ...ctx, environmentId: PROJECT })).nativeDocument as GcpRoleDocument).resource).toBe(PROJECT);
   });
 
-  it('compiles time bounds and expiry into one canonical condition (latest start, earliest end)', async () => {
+  it(__t('compiles_time_bounds_and_expir'), async () => {
     const { adapter } = setup();
     const r = rule({
       ...timed('2026-01-01T00:00:00Z', '2026-12-01T00:00:00Z'),
@@ -82,7 +82,7 @@ describe('GCP IAM compilation', () => {
     expect(expiry.condition?.expression).toBe('request.time < timestamp("2026-06-01T00:00:00.000Z")');
   });
 
-  it('fails closed on everything an allow binding cannot express', async () => {
+  it(__t('fails_closed_on_everything_an_'), async () => {
     const { adapter } = setup();
     const gen = (...rules: any[]) => failure(() => adapter.generate(rules, ctx));
     expect(await gen(rule({ ruleId: 'd', effect: 'DENY' }))).toBe(T('deny_unsupported', { ruleId: 'd' }));
@@ -108,7 +108,7 @@ describe('GCP IAM compilation', () => {
   });
 });
 
-describe('GCP IAM validation', () => {
+describe(__t('gcp_iam_validation'), () => {
   const check = async (patch: (d: GcpRoleDocument) => void) => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule()], ctx);
@@ -116,7 +116,7 @@ describe('GCP IAM validation', () => {
     return adapter.validate({ ...policy, digest: '' }, ctx);
   };
 
-  it('accepts a generated role and warns on permissions that let the holder widen access', async () => {
+  it(__t('accepts_a_generated_role_and_w'), async () => {
     const { adapter } = setup();
     expect((await adapter.validate(await adapter.generate([rule()], ctx), ctx))).toEqual({ valid: true, errors: [], warnings: [] });
     const risky = await adapter.generate([rule(op('resourcemanager.projects.setIamPolicy', 'iam.serviceAccounts.actAs', 'storage.objects.get'))], ctx);
@@ -125,17 +125,17 @@ describe('GCP IAM validation', () => {
     expect(res.warnings).toEqual([T('validate.escalating_permission', { permission: 'iam.serviceAccounts.actAs' }), T('validate.escalating_permission', { permission: 'resourcemanager.projects.setIamPolicy' })]);
   });
 
-  it('rejects malformed roles with one precise error each', async () => {
+  it(__t('rejects_malformed_roles_with_o'), async () => {
     expect((await check((d) => { d.role.includedPermissions = []; })).errors).toEqual([T('validate.no_permissions')]);
     expect((await check((d) => { d.role.includedPermissions = ['read']; })).errors).toEqual([T('validate.invalid_permission', { permission: 'read' })]);
-    expect((await check((d) => { d.role.name = 'bad name'; })).errors).toEqual([T('validate.invalid_role_name', { name: 'bad name' })]);
+    expect((await check((d) => { d.role.name = __t('bad_name'); })).errors).toEqual([T('validate.invalid_role_name', { name: __t('bad_name') })]);
     expect((await check((d) => { d.resource = 'buckets/x'; })).errors).toEqual([T('invalid_resource', { resource: 'buckets/x' })]);
     expect((await check((d) => { d.role.title = 'x'.repeat(101); })).errors).toEqual([T('validate.text_too_long', { title: 100, description: 300 })]);
     expect((await check((d) => { d.condition = { title: 't', expression: 'x'.repeat(3001) }; })).errors).toEqual([T('validate.expression_too_long', { limit: 3000 })]);
     expect((await check((d) => { d.role.includedPermissions = Array.from({ length: 3001 }, (_, i) => `svc.res.v${i}`); })).errors).toEqual([T('validate.too_many_permissions', { count: 3001, limit: 3000 })]);
   });
 
-  it('detects a digest that no longer matches the document', async () => {
+  it(__t('detects_a_digest_that_no_longe'), async () => {
     const { adapter } = setup();
     const policy = await adapter.generate([rule()], ctx);
     (policy.nativeDocument as GcpRoleDocument).role.includedPermissions.push('storage.objects.delete');
@@ -143,7 +143,7 @@ describe('GCP IAM validation', () => {
   });
 });
 
-describe('GCP IAM attach', () => {
+describe(__t('gcp_iam_attach'), () => {
   it('creates the role and the binding on the rules\' resource', async () => {
     const { adapter, policyOf, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
@@ -156,7 +156,7 @@ describe('GCP IAM attach', () => {
     expect(policyOf(FOLDER).bindings).toEqual([]);
   });
 
-  it('is idempotent and merges further members into the same binding', async () => {
+  it(__t('is_idempotent_and_merges_furth'), async () => {
     const { adapter, policyOf, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -168,7 +168,7 @@ describe('GCP IAM attach', () => {
     expect(policyOf(PROJECT).bindings).toEqual([{ role: policy.providerId, members: [USER, SA, GROUP] }]);
   });
 
-  it('binds conditionally, keeping conditional and unconditional grants of one role apart', async () => {
+  it(__t('binds_conditionally_keeping_co'), async () => {
     const { adapter, policyOf } = setup();
     const open = await adapter.generate([rule()], ctx);
     const timedPolicy = await adapter.generate([rule(timed(undefined, '2030-01-01T00:00:00Z'))], ctx);
@@ -180,7 +180,7 @@ describe('GCP IAM attach', () => {
     expect(policyOf(PROJECT).bindings).toHaveLength(2);
   });
 
-  it('grants folder-level access through the organization role and inherits down the hierarchy', async () => {
+  it(__t('grants_folder_level_access_thr'), async () => {
     const { adapter, policyOf, client } = setup();
     const policy = await adapter.generate([rule(at(FOLDER))], ctx);
     expect((await adapter.attach(policy, USER, ctx)).success).toBe(true);
@@ -190,7 +190,7 @@ describe('GCP IAM attach', () => {
     expect(await client.troubleshoot('alice@example.com', OTHER, 'storage.objects.get')).toBe('NOT_GRANTED');
   });
 
-  it('grants a predefined role that exists and refuses one that does not', async () => {
+  it(__t('grants_a_predefined_role_that_'), async () => {
     const { adapter, policyOf } = setup();
     const native = (name: string) => ({ providerId: name, providerType: 'GCP_IAM' as const, digest: '', nativeDocument: { role: { name, title: 't', description: 'd', stage: 'GA', includedPermissions: ['storage.objects.get'] }, resource: PROJECT } });
     expect((await adapter.attach(native(VIEWER), BOB, ctx)).success).toBe(true);
@@ -200,7 +200,7 @@ describe('GCP IAM attach', () => {
     expect(missing.errors).toEqual([T('attach_error', { error: 'no role roles/nothing.here' })]);
   });
 
-  it('refuses invalid members, invalid documents and resources outside the environment without writing', async () => {
+  it(__t('refuses_invalid_members_invali'), async () => {
     const { adapter, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     for (const member of ['alice@example.com', 'allUsers', 'allAuthenticatedUsers', 'user:']) {
@@ -215,7 +215,7 @@ describe('GCP IAM attach', () => {
     expect(calls).toEqual([]);
   });
 
-  it('never replaces a role of the same name that grants something different', async () => {
+  it(__t('never_replaces_a_role_of_the_s'), async () => {
     const { adapter, seed, calls, policyOf, roles } = setup();
     const policy = await adapter.generate([rule()], ctx);
     seed.role(policy.providerId, ['storage.objects.get']);
@@ -226,7 +226,7 @@ describe('GCP IAM attach', () => {
     expect(roles.get(policy.providerId)?.includedPermissions).toEqual(['storage.objects.get']);
   });
 
-  it('revives an identical soft-deleted role instead of failing', async () => {
+  it(__t('revives_an_identical_soft_dele'), async () => {
     const { adapter, seed, roles, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     seed.role(policy.providerId, ['storage.objects.get', 'storage.objects.list'], { deleted: true });
@@ -235,7 +235,7 @@ describe('GCP IAM attach', () => {
     expect(calls).toContain(`undeleteRole:${policy.providerId}`);
   });
 
-  it('retries a concurrent edit on a fresh read and gives up without overwriting', async () => {
+  it(__t('retries_a_concurrent_edit_on_a'), async () => {
     const { adapter, seed, calls, policyOf } = setup();
     const policy = await adapter.generate([rule()], ctx);
     seed.bind(PROJECT, VIEWER, [BOB]);
@@ -250,7 +250,7 @@ describe('GCP IAM attach', () => {
     expect(policyOf(PROJECT).bindings.some((b) => b.role === VIEWER && b.members.includes(BOB))).toBe(true);
   });
 
-  it('stops at the principal limit and at the provider\'s role quota, reporting the provider\'s reason', async () => {
+  it('stops at the principal limit and at the provider\'s role quota, reporting the provider\__t('s_reason'), async () => {
     const { adapter, seed, policyOf } = setup();
     seed.bind(PROJECT, VIEWER, Array.from({ length: 1500 }, (_, i) => `user:u${i}@example.com`));
     const policy = await adapter.generate([rule()], ctx);
@@ -259,10 +259,10 @@ describe('GCP IAM attach', () => {
     const limited = setup({ roleLimit: 1 });
     await limited.adapter.attach(await limited.adapter.generate([rule()], ctx), USER, ctx);
     const second = await limited.adapter.attach(await limited.adapter.generate([rule(op('storage.buckets.get'))], ctx), USER, ctx);
-    expect(second.errors).toEqual([T('attach_error', { error: 'role quota' })]);
+    expect(second.errors).toEqual([T('attach_error', { error: __t('role_quota') })]);
   });
 
-  it('builds the client once per environment and retries after a failed build', async () => {
+  it(__t('builds_the_client_once_per_env'), async () => {
     const gcp = fakeGcp();
     let builds = 0;
     const adapter = new GcpIamAdapter(async () => { builds++; if (builds === 1) throw new Error('offline'); return gcp.client; });
@@ -274,7 +274,7 @@ describe('GCP IAM attach', () => {
   });
 });
 
-describe('GCP IAM detach', () => {
+describe(__t('gcp_iam_detach'), () => {
   it('removes only the member from the role\'s bindings and drops bindings left empty', async () => {
     const { adapter, policyOf, seed } = setup();
     const policy = await adapter.generate([rule()], ctx);
@@ -287,7 +287,7 @@ describe('GCP IAM detach', () => {
     expect(policyOf(PROJECT).bindings).toEqual([{ role: VIEWER, members: [USER] }]);
   });
 
-  it('detaches from every resource of the hierarchy where the role is bound, and only there', async () => {
+  it(__t('detaches_from_every_resource_o'), async () => {
     const { adapter, policyOf, seed, calls } = setup();
     const policy = await adapter.generate([rule(at(ORG))], ctx);
     await adapter.attach(policy, USER, ctx);
@@ -303,7 +303,7 @@ describe('GCP IAM detach', () => {
     expect(policyOf(OTHER).bindings).toEqual([{ role: policy.providerId, members: [USER] }]);
   });
 
-  it('writes nothing when the member does not hold the role, and rejects invalid members', async () => {
+  it(__t('writes_nothing_when_the_member'), async () => {
     const { adapter, calls } = setup();
     const policy = await adapter.generate([rule()], ctx);
     expect((await adapter.detach(policy.providerId, USER, ctx)).success).toBe(true);

@@ -28,7 +28,7 @@ export class EnvConfigurationInjection implements RecoveryCapability {
                 if (typeof adapter.copyConfigurationArtifact === 'function') {
                     await adapter.copyConfigurationArtifact(repair.source, repair.target, scope);
                 } else {
-                    throw new Error('Adapter does not support copyConfigurationArtifact');
+                    throw new Error(__t('adapter_does_not_support_copyc'));
                 }
             }
         }

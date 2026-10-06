@@ -3,10 +3,10 @@ import { DirectAdminLiveAdapter } from '../../src/deise/engine/adapters/directad
 import { RecoveryScope } from '../../src/deise/engine/recovery/live-environment-adapter-contract';
 
 async function runLiveResourceStateDivergenceConformance() {
-    console.log('UGONDU LIVE RECOVERY CONFORMANCE');
+    console.log(__t('ugondu_live_recovery_conforman'));
     console.log('================================');
     console.log('Target:              DirectAdmin / Air Roofers (Instance #0001)');
-    console.log('Mode:                PROTECTED PRODUCTION');
+    console.log(__t('mode_protected_production'));
     console.log('Mutation:            DISABLED / DRY-RUN\n');
 
     const orchestrator = new RecoveryOrchestrator();
@@ -40,7 +40,7 @@ async function runLiveResourceStateDivergenceConformance() {
         const diagnosis = { 
             diagnoses: [{
                 issue: 'LiveResourceStateDivergence',
-                evidence: 'Control-plane declares root X, but HTTP returns 404. DNS resolves to Y.'
+                evidence: __t('control_plane_declares_root_x_')
             }], 
             requiresInfrastructureRepair: true,
             infrastructureRepairs: [
@@ -81,7 +81,7 @@ async function runLiveResourceStateDivergenceConformance() {
         }
 
         if (!negativePassed) {
-            throw new Error('FAIL: Orchestrator permitted out-of-bounds mutation.');
+            throw new Error(__t('fail_orchestrator_permitted_ou'));
         }
         console.log('[PASS] Out-of-scope mutation rejection');
         console.log('[PASS] Credential isolation');
