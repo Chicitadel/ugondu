@@ -17,6 +17,8 @@ export interface RepairPlan {
 
 export class DeploymentRepairEngine {
 
+    private capabilityRegistry = require('./recovery/capability-registry').GlobalCapabilityRegistry;
+
     /**
      * Inspects the Environment Twin and generates a Repair Plan, classifying drifts.
      */
