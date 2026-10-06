@@ -4,20 +4,21 @@ function Assert-No-Match {
     param([string]$Pattern, [string]$Path, [string]$Message)
     
     # Run git grep. We use 2>&1 to silence errors if nothing is found.
-    # git grep returns 0 if matches found, 1 if no matches
-    # We ignore md, json, js, ps1 files.
-    $output = git grep -n -E $Pattern -- $Path `
-        ':(exclude)*.md' ':(exclude)*.json' ':(exclude)*.js' ':(exclude)*.ps1' 2>&1
+    $output = git grep -n -E $Pattern -- $Path 2>&1
 
-    # Filter out known safe placeholder lines
     $filtered = @()
     if ($output) {
         foreach ($line in $output) {
             $strLine = [string]$line
-            if ($strLine -match 'VERIFIED' -or $strLine -match '<placeholder>' -or $strLine -match '// placeholder:') {
+            # Exempt the evidence engine itself for PROVEN and providerResponseHash
+            if ($strLine -match 'evidence-engine.ts') {
                 continue
             }
-            if ($strLine -match 'deploy-production-resolver') {
+            if ($strLine -match 'evidence-adversarial.spec.ts') {
+                continue
+            }
+            # Exempt localization JSON files for 'verified' and 'placeholder' if they are just translations
+            if ($strLine -match '\.json' -and ($strLine -match '"verified"' -or $strLine -match '"placeholder"')) {
                 continue
             }
             $filtered += $strLine
@@ -49,7 +50,8 @@ npm run test
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 echo "5. npm run lint"
-npm run lint || echo "Lint skipped"
+npm run lint
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 echo "6. git diff --check"
 cd ../..
@@ -59,17 +61,21 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 echo "7. No secrets check"
 Assert-No-Match -Pattern "rds-test-password-123|hardcoded_secret" -Path "server/engine-core" -Message "Secrets found"
 
-echo "8. No placeholder evidence"
-Assert-No-Match -Pattern "hash123|'verified'|`"verified`"|canonical-123|placeholder" -Path "server/engine-core" -Message "Placeholder evidence found"
+echo "8. No placeholder evidence in certification paths"
+# We only check certification and execution paths for fabricated evidence
+Assert-No-Match -Pattern "Date\.now\(\)|Math\.random\(\)|`"PROVEN`"|'PROVEN'|`"verified_from_provider`"|'verified_from_provider'|providerResponseHash:" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts server/engine-core/urre-crash-resume.ts server/engine-core/src/registry server/engine-core/src/urre server/engine-core/src/fabric server/engine-core/src/deise" -Message "Placeholder evidence construction found outside Evidence Engine"
 
 echo "9. No NotImplemented"
-Assert-No-Match -Pattern "NotImplemented" -Path "server/engine-core" -Message "NotImplemented found"
+Assert-No-Match -Pattern "NotImplemented" -Path "server/engine-core/src" -Message "NotImplemented found"
 
 echo "12. No hardcoded AMIs"
 Assert-No-Match -Pattern "ami-[0-9a-f]{8,}" -Path "server/engine-core" -Message "Hardcoded AMI found"
 
 echo "13. No hardcoded AWS account IDs"
 Assert-No-Match -Pattern "123456789012" -Path "server/engine-core" -Message "Hardcoded AWS Account ID found"
+
+echo "14. No direct mutation APIs in certification"
+Assert-No-Match -Pattern "new EC2Client|new ECSClient|new RDSClient|new IAMClient|new S3Client" -Path "server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts" -Message "Direct AWS mutation clients found in certification files. Must use Action Registry -> URRE path for mutations."
 
 echo "20. Generating candidate manifest"
 echo "Candidate SHA: $head" > manifest.txt

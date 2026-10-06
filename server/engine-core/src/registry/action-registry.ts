@@ -22,9 +22,13 @@ export class UniversalActionRegistry {
     private actions = new Map<string, ActionContract>();
     private urre: URREngine;
 
-    constructor() {
-        this.urre = new URREngine();
+    constructor(urre?: URREngine) {
+        this.urre = urre || new URREngine();
         this.initializeCanonicalActions();
+    }
+
+    public getUrre(): URREngine {
+        return this.urre;
     }
 
     private initializeCanonicalActions() {
@@ -90,7 +94,10 @@ export class UniversalActionRegistry {
         // Governance Policy evaluation
         const govEngine = new PolicyGovernanceEngine();
         govEngine.registerAdapter(new AwsGovernanceAdapter());
-        const decision = govEngine.evaluateIntent('aws', [{ action: operationType, resource: '*' }], 'action-resolver');
+        
+        const resourceIdentity = params.resourceId || params.id || `urn:ugondu:aws:${operationType.toLowerCase()}`;
+        
+        const decision = govEngine.evaluateIntent('aws', [{ action: operationType, resource: resourceIdentity }], 'action-resolver');
         if (decision.decision === 'DENY') {
             throw new Error(`Governance Denied: ${decision.reason}`);
         }

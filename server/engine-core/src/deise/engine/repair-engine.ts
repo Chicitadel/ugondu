@@ -77,13 +77,27 @@ export class DeploymentRepairEngine {
                     if (expected !== actual) {
                         Logger.warn(`Drift Detected: Expected ${expected}, observed ${actual}`);
 
+                        let repairOperation = 'UNKNOWN';
+                        if (infra.type === 'EC2' && key === 'Name') {
+                            repairOperation = 'ec2:CreateTags';
+                        } else if (infra.type === 'RDS') {
+                            repairOperation = 'rds:ModifyDBInstance';
+                        }
+
                         diagnoses.push({
                             category: DriftCategory.INFRASTRUCTURE_DRIFT,
                             description: `Infrastructure drift on ${infra.id} (${infra.type}): ${key} expected ${expected} but was ${actual}`,
                             affectedPaths: [infra.id],
                             isDestructiveRecovery: false,
-                            remediationAction: 'REPAIR_INFRASTRUCTURE'
-                        });
+                            remediationAction: 'REPAIR_INFRASTRUCTURE',
+                            provider: 'aws',
+                            resourceType: infra.type,
+                            resourceId: infra.id,
+                            attribute: key,
+                            expectedValue: expected,
+                            actualValue: actual,
+                            repairOperation: repairOperation
+                        } as import('../model/drift').InfrastructureDriftDiagnostic);
                         requiresInfrastructureRepair = true;
                     }
                 }

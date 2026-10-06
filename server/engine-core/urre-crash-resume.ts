@@ -16,13 +16,6 @@ async function registerRealHandlers(engine: URREngine) {
         const res = await ec2.send(new CreateVpcCommand({ CidrBlock: '10.0.99.0/24' }));
         const vpcId = res.Vpc!.VpcId!;
         console.log(`[URRE-CRASH] Process A VPC Created: ${vpcId}`);
-        // We simulate a hard crash right after VPC success
-        // In a real scenario, this would be mid-execution, but to test recovery
-        // we artificially exit here to prove the node is saved as SUCCESS and won't rerun.
-        setTimeout(() => {
-            console.log('[URRE-CRASH] CRASHING PROCESS A intentionally.');
-            process.exit(1);
-        }, 500);
         return { vpcId };
     }, async (node: DagNode) => {
         if (node.output?.vpcId) {
@@ -39,7 +32,14 @@ async function registerRealHandlers(engine: URREngine) {
 
 async function phase1() {
     console.log('--- PROCESS A: Starting Transaction ---');
-    const engine = new URREngine();
+    const engine = new URREngine({
+        async afterNodePersisted(node: DagNode) {
+            if (node.id === 'VPC' && node.status === 'SUCCESS') {
+                console.log('[URRE-CRASH] Fault Injector: CRASHING PROCESS A intentionally after VPC SUCCESS.');
+                process.exit(1);
+            }
+        }
+    });
     await registerRealHandlers(engine);
 
     const tx = new TransactionDag('tx-p0-4-real');
@@ -48,11 +48,11 @@ async function phase1() {
     tx.addEdge('VPC', 'SUBNET'); // SUBNET depends on VPC
 
     console.log('PROCESS A: Submitting transaction...');
-    // This will trigger VPC creation, and then crash the process during the VPC handler's delayed exit
+    // This will trigger VPC creation, and then crash the process via the fault injector
     await engine.executeTransaction(tx);
     
     // We should not reach here if it crashes cleanly
-    await new Promise(r => setTimeout(r, 2000));
+    throw new Error('Process A did not crash as expected!');
 }
 
 async function phase2() {
@@ -89,10 +89,34 @@ async function phase2() {
     process.exit(0);
 }
 
+async function phase3() {
+    console.log('--- PROCESS C: Testing Idempotency ---');
+    const engine = new URREngine();
+    await registerRealHandlers(engine);
+
+    const store = new TransactionStore();
+    const existingTx = await store.load('tx-p0-4-real');
+    if (!existingTx) {
+        throw new Error('Transaction tx-p0-4-real not found on disk!');
+    }
+
+    console.log('PROCESS C: Executing transaction again...');
+    await engine.executeTransaction(existingTx);
+
+    if (existingTx.status !== 'SUCCESS') {
+        throw new Error('Transaction should be SUCCESS immediately!');
+    }
+
+    console.log('PROCESS C: Idempotency proven.');
+    process.exit(0);
+}
+
 if (process.argv[2] === 'phase1') {
     phase1();
 } else if (process.argv[2] === 'phase2') {
     phase2();
+} else if (process.argv[2] === 'phase3') {
+    phase3();
 } else {
     // Controller orchestrating both
     const { spawnSync } = require('child_process');
@@ -106,5 +130,11 @@ if (process.argv[2] === 'phase1') {
 
     const p2 = spawnSync('npx', ['ts-node', __filename, 'phase2'], { stdio: 'inherit' });
     console.log(`Process B exited with code ${p2.status}`);
-    process.exit(p2.status);
+    if (p2.status !== 0) {
+        process.exit(p2.status);
+    }
+
+    const p3 = spawnSync('npx', ['ts-node', __filename, 'phase3'], { stdio: 'inherit' });
+    console.log(`Process C exited with code ${p3.status}`);
+    process.exit(p3.status);
 }

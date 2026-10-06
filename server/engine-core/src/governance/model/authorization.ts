@@ -9,7 +9,7 @@ export interface UniversalPolicy {
     name: string;
     description: string;
     permissions: UniversalPermission[];
-    providerHash?: string;
+    providerResponseHash?: string;
 }
 
 export interface PolicyDecisionRecord {

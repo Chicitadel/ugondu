@@ -61,12 +61,15 @@ export class AwsGovernanceAdapter implements ProviderAuthorizationAdapter {
     }
 
     synthesizePolicy(intent: UniversalPermission[]): UniversalPolicy {
+        const canonicalizer = require('../../canonicalization').CanonicalPolicySerializer;
+        const iamPolicy = this.translateIntent(intent);
+        
         return {
             id: `aws-synth-${Date.now()}`,
             name: 'SynthesizedAWSIAMPolicy',
-            description: __t('synthesized_aws_policy_adherin'),
+            description: typeof __t !== 'undefined' ? __t('synthesized_aws_policy_adherin') : 'Synthesized AWS IAM Policy',
             permissions: intent,
-            providerHash: require('crypto').createHash('sha256').update(JSON.stringify(intent)).digest('hex')
+            providerResponseHash: canonicalizer.hash(iamPolicy)
         };
     }
 

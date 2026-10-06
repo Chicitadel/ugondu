@@ -19,29 +19,31 @@ export class AwsPhysicalRepairExecutor {
 
         Logger.info(` Executing Physical Repair for AWS Infrastructure Drift...`);
 
+        const region = process.env.UGONDU_CERT_REGION;
+        if (!region) {
+            throw new Error("UGONDU_CERT_REGION is missing from the environment");
+        }
+
         for (const diag of plan.diagnoses) {
             if (diag.category === DriftCategory.INFRASTRUCTURE_DRIFT) {
-                Logger.info(`Repairing Infrastructure Drift: ${diag.description}`);
+                const drift = diag as import('../model/drift').InfrastructureDriftDiagnostic;
+                Logger.info(`Repairing Infrastructure Drift: ${drift.provider} ${drift.resourceType} ${drift.resourceId}`);
 
                 try {
-                    const affectedResourceId = diag.affectedPaths[0];
-
-                    if (diag.description.includes('EC2')) {
-                        Logger.info(`Dispatching ec2:CreateTags for ${affectedResourceId}`);
-                        if (diag.expectedState && diag.expectedState.Name) {
-                            const expectedName = diag.expectedState.Name;
-                            const { EC2Client, CreateTagsCommand } = require('@aws-sdk/client-ec2');
-                            const ec2 = new EC2Client({ region: (this.awsClient as any).region || 'us-east-1' });
-                            await ec2.send(new CreateTagsCommand({
-                                Resources: [affectedResourceId],
-                                Tags: [{ Key: 'Name', Value: expectedName }]
-                            }));
-                            Logger.info(`Successfully dispatched reconciliation for ${affectedResourceId}`);
-                        } else {
-                            Logger.warn(`Could not parse expected tag from expectedState for ${affectedResourceId}`);
+                    if (drift.repairOperation === 'ec2:CreateTags') {
+                        Logger.info(`Dispatching ec2:CreateTags for ${drift.resourceId}`);
+                        const { CreateTagsCommand } = require('@aws-sdk/client-ec2');
+                        const ec2Client = (this.awsClient as any).ec2;
+                        if (!ec2Client) {
+                            throw new Error("Injected IAwsClient does not expose native ec2 client");
                         }
-                    } else if (diag.description.includes('RDS')) {
-                        Logger.info(` Dispatching rds:ModifyDBInstance for ${affectedResourceId}`);
+                        await ec2Client.send(new CreateTagsCommand({
+                            Resources: [drift.resourceId],
+                            Tags: [{ Key: drift.attribute, Value: drift.expectedValue }]
+                        }));
+                        Logger.info(`Successfully dispatched reconciliation for ${drift.resourceId}`);
+                    } else if (drift.repairOperation === 'rds:ModifyDBInstance') {
+                        Logger.info(` Dispatching rds:ModifyDBInstance for ${drift.resourceId}`);
                     }
                 } catch (err: any) {
                     Logger.error(`Physical repair failed: ${err.message}`);

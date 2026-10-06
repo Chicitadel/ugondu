@@ -73,3 +73,13 @@ export interface DriftDiagnosis {
     expectedState?: any;
     actualState?: any;
 }
+
+export interface InfrastructureDriftDiagnostic extends DriftDiagnosis {
+    provider: string;
+    resourceType: string;
+    resourceId: string;
+    attribute: string;
+    expectedValue: any;
+    actualValue: any;
+    repairOperation: string;
+}

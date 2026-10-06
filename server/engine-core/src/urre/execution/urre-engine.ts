@@ -20,10 +20,19 @@ export interface RollbackEvent {
 export type ActionHandler = (node: DagNode) => Promise<Record<string, any>>;
 export type RollbackHandler = (node: DagNode) => Promise<void>;
 
+export interface ExecutionFaultInjector {
+    afterNodePersisted?(node: DagNode): Promise<void>;
+}
+
 export class URREngine {
     private store = new TransactionStore();
     private handlers: Record<string, ActionHandler> = {};
     private rollbacks: Record<string, RollbackHandler> = {};
+    public faultInjector?: ExecutionFaultInjector;
+
+    constructor(faultInjector?: ExecutionFaultInjector) {
+        this.faultInjector = faultInjector;
+    }
 
     public registerHandler(provider: string, action: string, handler: ActionHandler, rollback: RollbackHandler) {
         const key = `${provider}:${action}`;
@@ -89,6 +98,9 @@ export class URREngine {
 
             node.status = 'RUNNING';
             await this.store.save(tx);
+            if (this.faultInjector?.afterNodePersisted) {
+                await this.faultInjector.afterNodePersisted(node);
+            }
 
             try {
                 const key = `${node.provider}:${node.action}`;
@@ -97,6 +109,10 @@ export class URREngine {
                 node.output = await this.handlers[key](node);
                 node.status = 'SUCCESS';
                 await this.store.save(tx);
+
+                if (this.faultInjector?.afterNodePersisted) {
+                    await this.faultInjector.afterNodePersisted(node);
+                }
 
                 adj[nodeId].forEach(neighbor => {
                     inDegree[neighbor]--;
@@ -108,6 +124,9 @@ export class URREngine {
                 node.error = error.message;
                 tx.status = 'FAILED';
                 await this.store.save(tx);
+                if (this.faultInjector?.afterNodePersisted) {
+                    await this.faultInjector.afterNodePersisted(node);
+                }
 
                 Logger.error(`Transaction ${tx.id} failed at node ${node.id}: ${error.message}`);
 
@@ -149,6 +168,9 @@ export class URREngine {
             if (rollbackEligible.includes(nodeId) && node.status !== 'ROLLBACK_SUCCESS') {
                 node.status = 'ROLLBACK_PENDING';
                 await this.store.save(tx);
+                if (this.faultInjector?.afterNodePersisted) {
+                    await this.faultInjector.afterNodePersisted(node);
+                }
 
                 try {
                     const key = `${node.provider}:${node.action}`;
@@ -161,10 +183,16 @@ export class URREngine {
                     node.error = error.message;
                     tx.status = 'FAILED'; // Rollback itself failed
                     await this.store.save(tx);
+                    if (this.faultInjector?.afterNodePersisted) {
+                        await this.faultInjector.afterNodePersisted(node);
+                    }
                     Logger.error(`Rollback failed at node ${node.id}: ${error.message}`);
                     return { id: `rb-${tx.id}`, timestamp: Date.now(), status: tx.status };
                 }
                 await this.store.save(tx);
+                if (this.faultInjector?.afterNodePersisted) {
+                    await this.faultInjector.afterNodePersisted(node);
+                }
             }
 
             adj[nodeId].forEach(neighbor => {
