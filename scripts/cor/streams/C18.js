@@ -25,9 +25,7 @@ function runTest(context) {
             ? 'npm.cmd'
             : 'npm';
 
-    return spawnSync(
-        npmCommand,
-        [
+    return spawnSync(process.execPath, ['C:\Users\Professional\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js', 
             'test',
             '--workspace',
             'server/capabilities',
