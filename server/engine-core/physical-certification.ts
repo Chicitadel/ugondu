@@ -76,10 +76,10 @@ async function runCertification() {
         const twin = {
             provider: { platform: 'aws', symlinkSupported: false, atomicRenameSupported: false, rsyncAvailable: false },
             topology: { currentSymlinkTarget: null, currentSymlinkValid: true, webrootPath: '', webrootSymlinkTarget: 'current/public_html', availableReleases: [] },
-            application: { version: '1', manifests: [], integrityStatus: 'VALID' },
+            application: { version: '1', manifests: [], integrityStatus: ('VALID' as 'VALID' | 'CORRUPTED' | 'MISSING') },
             runtime: { primaryRuntime: 'node', primaryRuntimeVersion: '20', missingDependencies: [] },
             infrastructure: [
-                { id: ec2Id, type: 'EC2', expectedState: { Name: 'UgonduEC2' }, actualState: { Name: 'DriftedName' } }
+                { id: ec2Id, type: ('EC2' as 'EC2'), expectedState: { Name: 'UgonduEC2' }, actualState: { Name: 'DriftedName' } }
             ]
         };
         const repairEngine = new DeploymentRepairEngine();
@@ -88,7 +88,7 @@ async function runCertification() {
         console.log(__t('cert.diagnoses.found', { count: plan.diagnoses.length }));
         if (plan.requiresInfrastructureRepair) {
             console.log(__t('cert.phase.repairing_drift'));
-            await executor.executeRepair(plan.infrastructureRepairs[0]);
+            await executor.executeRepair(plan.infrastructureRepairs![0]);
         }
 
         console.log(__t('cert.phase.urre_fault_injection'));
@@ -102,9 +102,9 @@ async function runCertification() {
 
         try {
             await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
-        } catch (e) {
+        } catch (e: any) {
             console.log(__t('cert.phase.testing_rollback', { error: e.message }));
-            await urre.triggerRollback({ id: txId });
+            await urre.triggerRollback(({ id: txId, targetEnvironment: 'production' } as any));
         }
         
         urre.faultInjector = undefined;
@@ -139,7 +139,7 @@ async function runCertification() {
 
         console.log(__t('cert.run.complete'));
 
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
         process.exit(1);
     }

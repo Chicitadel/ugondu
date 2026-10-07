@@ -109,7 +109,7 @@ async function runFargateCertification() {
         if (!reverted) throw new Error(__t('error.cert.fargate.revert_fail'));
 
         console.log(__t('cert.fargate.complete'));
-    } catch (error) {
+    } catch (error: any) {
         console.error(__t('error.cert.fargate.fatal', { error: error.message }), error);
         process.exit(1);
     }
