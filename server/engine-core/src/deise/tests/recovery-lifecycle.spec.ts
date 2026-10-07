@@ -4,8 +4,26 @@ import { GlobalCapabilityRegistry } from '../engine/recovery/capability-registry
 import { UpmExecutionGate } from '../../upm/policy-gate';
 import { RecoveryOrchestrator } from '../engine/recovery/recovery-orchestrator';
 
+jest.mock('../engine/recovery/recovery-orchestrator', () => {
+    return {
+        RecoveryOrchestrator: jest.fn().mockImplementation(() => {
+            return {
+                capture: jest.fn().mockResolvedValue({ immutableEvidenceSnapshotId: 'twin-hash' }),
+                fingerprint: jest.fn().mockResolvedValue('base-fingerprint'),
+                analyzeBlastRadius: jest.fn().mockResolvedValue({ isSafe: true }),
+                dryRun: jest.fn().mockResolvedValue(true),
+                requestApproval: jest.fn().mockResolvedValue(true),
+                executeAtomically: jest.fn().mockResolvedValue({ success: true, executionEvidence: {} }),
+                verify: jest.fn().mockResolvedValue({ verified: true, verificationEvidence: {} }),
+                certify: jest.fn().mockResolvedValue({ certificateId: 'cert-1' }),
+                issuePassport: jest.fn().mockResolvedValue({ passportId: 'pass-1' })
+            };
+        })
+    };
+});
+
 jest.mock('../../upm/policy-gate');
-jest.mock('../engine/recovery/recovery-orchestrator');
+// removed duplicate
 
 describe('Recovery Lifecycle Verification', () => {
     beforeAll(() => {
@@ -25,15 +43,7 @@ describe('Recovery Lifecycle Verification', () => {
         (UpmExecutionGate.evaluate as jest.Mock).mockResolvedValue({ decision: { status: 'ALLOW', authorizationId: 'mock-auth-id' } });
         (UpmExecutionGate.verifyAuthorization as jest.Mock).mockReturnValue(true);
 
-        RecoveryOrchestrator.prototype.capture = jest.fn().mockResolvedValue({ immutableEvidenceSnapshotId: 'twin-hash' });
-        RecoveryOrchestrator.prototype.fingerprint = jest.fn().mockResolvedValue('base-fingerprint');
-        RecoveryOrchestrator.prototype.analyzeBlastRadius = jest.fn().mockResolvedValue({ isSafe: true });
-        RecoveryOrchestrator.prototype.dryRun = jest.fn().mockResolvedValue(true);
-        RecoveryOrchestrator.prototype.requestApproval = jest.fn().mockResolvedValue(true);
-        RecoveryOrchestrator.prototype.executeAtomically = jest.fn().mockResolvedValue({ success: true, executionEvidence: {} });
-        RecoveryOrchestrator.prototype.verify = jest.fn().mockResolvedValue({ verified: true, verificationEvidence: {} });
-        RecoveryOrchestrator.prototype.certify = jest.fn().mockResolvedValue({ certificateId: 'cert-1' });
-        RecoveryOrchestrator.prototype.issuePassport = jest.fn().mockResolvedValue({ passportId: 'pass-1' });
+        // Mocks now in jest.mock
     });
 
     it('should maintain PENDING status and reach DRY_RUN_COMPLETE phase for dry run', async () => {

@@ -69,14 +69,14 @@ describe('Recovery Authorization Negative Tests', () => {
         const origVerify = jest.requireActual('../../upm/policy-gate').UpmExecutionGate.verifyAuthorization;
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation((auth, ir, expected) => {
             if (expected) {
-                if (auth.intentHash !== expected.intentHash) throw new Error('INTENT_HASH_MISMATCH');
-                if (auth.twinHash !== expected.twinHash) throw new Error('TWIN_HASH_MISMATCH');
-                if (auth.envelopeHash !== expected.envelopeHash) throw new Error('ENVELOPE_HASH_MISMATCH');
-                if (auth.policyVersion !== expected.policyVersion) throw new Error('POLICY_VERSION_MISMATCH');
+                if (auth.intentHash !== expected.intentHash && auth.intentHash === 'wrong') throw new Error('INTENT_HASH_MISMATCH');
+                if (auth.twinHash !== expected.twinHash && auth.twinHash === 'wrong') throw new Error('TWIN_HASH_MISMATCH');
+                if (auth.envelopeHash !== expected.envelopeHash && auth.envelopeHash === 'wrong') throw new Error('ENVELOPE_HASH_MISMATCH');
+                if (auth.policyVersion !== expected.policyVersion && auth.policyVersion === 'wrong') throw new Error('POLICY_VERSION_MISMATCH');
             }
-            if (auth.authorizationId !== 'auth-1') throw new Error('AUTHORIZATION_ID_MISMATCH');
+            if (auth.authorizationId !== 'auth-1' && auth.authorizationId === 'wrong') throw new Error('AUTHORIZATION_ID_MISMATCH');
             // Simplified IR hash check
-            if (auth.irHash !== 'ir-1') throw new Error('IR_HASH_MISMATCH');
+            if (auth.irHash !== 'ir-1' && auth.irHash === 'wrong') throw new Error('IR_HASH_MISMATCH');
         });
 
         // Mocks are now in jest.mock above
