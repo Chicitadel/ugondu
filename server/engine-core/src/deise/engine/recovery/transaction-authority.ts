@@ -534,7 +534,7 @@ export class TransactionAuthority {
 
         if (
             current === 'PENDING' &&
-            !['RUNNING', 'FAILED']
+            !['PENDING', 'RUNNING', 'FAILED']
                 .includes(next)
         ) {
             throw new Error(
