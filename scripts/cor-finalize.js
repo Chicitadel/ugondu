@@ -125,6 +125,7 @@ function verifyReceipt(receipt, commitSHA, treeSHA) {
     };
 
     delete unsigned.evidenceDigest;
+    delete unsigned.objective;
 
     if (
         digest(unsigned) !==
