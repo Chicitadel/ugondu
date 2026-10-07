@@ -46,7 +46,7 @@ export class TenantDeactivator {
             throw new Error(__t('messages.error.tenant_id_required_for_deactivation'));
         }
         // Process data retention schedules, revoke keys, destroy computing resources
-        console.log(`Deactivating tenant ${tenantId}, graceful: ${graceful}`);
-        return { status: 'SUCCESS' };
+        Logger.info(`Deactivating tenant ${tenantId}, graceful: ${graceful}`);
+        throw new Error('NotImplementedError');;
     }
 }

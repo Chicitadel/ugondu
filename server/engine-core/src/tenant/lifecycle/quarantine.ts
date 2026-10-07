@@ -46,7 +46,7 @@ export class TenantQuarantiner {
             throw new Error(__t('msg_tenant_id_required_for_quarantine_execut'));
         }
         // Zero-trust enforcement: isolate completely, block all outbound and inbound
-        console.log(`Quarantining tenant ${tenantId} at threat level ${threatLevel}`);
-        return { status: 'SUCCESS' };
+        Logger.info(`Quarantining tenant ${tenantId} at threat level ${threatLevel}`);
+        throw new Error('NotImplementedError');;
     }
 }

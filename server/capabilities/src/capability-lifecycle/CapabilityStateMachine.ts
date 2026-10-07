@@ -34,7 +34,7 @@ type TransitionMap = Partial<Record<CapabilityState, CapabilityState[]>>;
  * Any transition not listed here is PROHIBITED.
  */
 const VALID_TRANSITIONS: TransitionMap = {
-  AVAILABLE:          ['ACTIVE', 'PENDING_ACTIVATION', 'UNSUPPORTED'],
+  AVAILABLE:          ['ACTIVE', 'PENDING_ACTIVATION', 'UNSUPPORTED', 'UNQUALIFIED'],
   ACTIVE:             ['IN_USE', 'LIMITED', 'SUSPENDED', 'DEACTIVATING', 'GRACE', 'BLOCKED'],
   IN_USE:             ['ACTIVE', 'LIMITED', 'SUSPENDED', 'BLOCKED'],
   LIMITED:            ['ACTIVE', 'SUSPENDED', 'DEACTIVATING', 'BLOCKED'],
@@ -46,6 +46,7 @@ const VALID_TRANSITIONS: TransitionMap = {
   GRACE:              ['ACTIVE', 'DEACTIVATING', 'SUSPENDED'],
   BLOCKED:            ['AVAILABLE', 'SUSPENDED'],
   UNSUPPORTED:        ['AVAILABLE'],
+  UNQUALIFIED:        ['AVAILABLE'],
 };
 
 /**

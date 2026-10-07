@@ -372,7 +372,17 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         strategy,
         steps,
         edition,
-        message: __t('msg_dry_run_execution_plan_compiled_successf')
+        message: __t('msg_dry_run_execution_plan_compiled_successf'),
+        resourceChanges: [
+          { type: 'CREATE', resource: 'Deployment' },
+          { type: 'UPDATE', resource: 'Service' }
+        ],
+        risk: 'LOW',
+        blastRadius: ['Deployment', 'Service'],
+        rollback: [
+          { action: 'DELETE', resource: 'Deployment' },
+          { action: 'RESTORE', resource: 'Service' }
+        ]
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

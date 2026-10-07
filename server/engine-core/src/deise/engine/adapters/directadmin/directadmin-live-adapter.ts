@@ -27,17 +27,17 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async captureState(scope: RecoveryScope): Promise<EnvironmentTwin> {
         // LR-02: Real environment twin capture
-        console.log('[Adapter] Fetching Domain Information...');
+        Logger.info('[Adapter] Fetching Domain Information...');
         const domainRes = await fetch(`${this.url}/CMD_API_ADDITIONAL_DOMAINS`, {
             headers: { 'Authorization': `Basic ${this.token}` }
         });
         
-        console.log('[Adapter] Fetching Subdomain Information...');
+        Logger.info('[Adapter] Fetching Subdomain Information...');
         const subdomainRes = await fetch(`${this.url}/CMD_API_SUBDOMAINS?domain=${scope.tenantId}`, {
             headers: { 'Authorization': `Basic ${this.token}` }
         });
 
-        console.log('[Adapter] Fetching DNS Records...');
+        Logger.info('[Adapter] Fetching DNS Records...');
         const dnsRes = await fetch(`${this.url}/CMD_API_DNS_CONTROL?domain=${scope.tenantId}`, {
             headers: { 'Authorization': `Basic ${this.token}` }
         });
@@ -92,7 +92,7 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
     }
 
     async rollback(checkpointId: string): Promise<boolean> {
-        return true;
+        throw new Error('NotImplementedError');
     }
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, actualState: any, verificationEvidence: any }> {

@@ -33,7 +33,7 @@ export interface RecoveryContract {
     
     analyzeBlastRadius(plan: RepairPlan, scope: RecoveryScope): Promise<BlastRadiusAnalysis>;
     
-    dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean>;
+    dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean; resourceChanges: any[]; risk: string; blastRadius: string[]; rollback: string[] }>;
     
     requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis): Promise<boolean>;
     

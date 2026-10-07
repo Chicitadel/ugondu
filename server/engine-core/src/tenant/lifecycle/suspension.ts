@@ -49,7 +49,7 @@ export class TenantSuspender {
             throw new Error(__t('msg_suspension_reason_must_be_recorded_for_a'));
         }
         // Disable incoming requests, revoke active sessions
-        console.log(`Suspending tenant ${tenantId} for reason: ${reason}`);
-        return { status: 'SUCCESS' };
+        Logger.info(`Suspending tenant ${tenantId} for reason: ${reason}`);
+        throw new Error('NotImplementedError');;
     }
 }

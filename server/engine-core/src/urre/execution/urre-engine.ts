@@ -1,6 +1,8 @@
 import { TransactionDag, DagNode, TransactionState, NodeState } from '../transaction/transaction-dag';
 import { TransactionStore } from '../transaction/transaction-store';
 import { Logger } from '@ugondu/shared';
+import { protectedKernel } from './kernel';
+
 
 // @ts-ignore
 import { __t } from '@ugondu/shared';
@@ -106,7 +108,21 @@ export class URREngine {
                 const key = `${node.provider}:${node.action}`;
                 if (!this.handlers[key]) throw new Error(`No handler registered for ${key}`);
 
-                node.output = await this.handlers[key](node);
+                await protectedKernel.executeAction({
+                    actionId: node.id,
+                    type: 'DEPLOY',
+                    safetyContract: { timeoutMs: 30000, idempotent: true },
+                    payload: async () => {
+                        node.output = await this.handlers[key](node);
+                        
+                        // Independent Post-Execution Observation
+                        if (typeof this.handlers[`${key}:verify`] === 'function') {
+                            const verified = await this.handlers[`${key}:verify`](node);
+                            if (!verified) throw new Error('INDEPENDENT_VERIFICATION_FAILED');
+                        }
+                    }
+                } as any);
+
                 node.status = 'SUCCESS';
                 await this.store.save(tx);
 

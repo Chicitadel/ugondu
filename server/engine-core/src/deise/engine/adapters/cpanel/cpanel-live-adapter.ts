@@ -31,7 +31,7 @@ export class CPanelLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async fingerprintRepository(scope: RecoveryScope): Promise<string> {
         // Must return SHA-256 of the actual file tree via SSH or cPanel File Manager API
-        return 'sha256:fingerprint-placeholder';
+        throw new Error('NotImplementedError');
     }
 
     async checkDrift(scope: RecoveryScope, baselineFingerprint: string): Promise<boolean> {
@@ -51,8 +51,8 @@ export class CPanelLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async rollback(checkpointId: string): Promise<boolean> {
         // Rollback via explicit compensating transactions
-        console.log(`Rolling back checkpoint ${checkpointId}`);
-        return true;
+        Logger.info(`Rolling back checkpoint ${checkpointId}`);
+        throw new Error('NotImplementedError');
     }
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, actualState: any, verificationEvidence: any }> {

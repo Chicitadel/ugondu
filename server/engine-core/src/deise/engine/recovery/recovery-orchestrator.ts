@@ -4,6 +4,7 @@ import { EnvironmentTwin } from '../../twin/environment-twin';
 import { RepairPlan } from '../repair-engine';
 import { __t } from '@ugondu/shared';
 import * as crypto from 'crypto';
+import { TransactionAuthority } from './transaction-authority';
 
 export class RecoveryOrchestrator implements RecoveryContract {
     
@@ -48,12 +49,12 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return analysis;
     }
 
-    async dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
+    async dryRun(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean; resourceChanges: any[]; risk: string; blastRadius: string[]; rollback: string[] }> {
         const dryResult = await adapter.dryRun(plan, scope);
         if (!dryResult.safe) {
             throw new Error(__t('dry_run_indicates_unsafe_mutat'));
         }
-        return true;
+        return { success: true, resourceChanges: [], risk: 'LOW', blastRadius: [], rollback: [] };
     }
 
     async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis, auth?: any): Promise<boolean> {
@@ -62,7 +63,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
         if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
             throw new Error('Authorization denied.');
         }
-        return true;
+        return { success: true, resourceChanges: [], risk: 'LOW', blastRadius: [], rollback: [] };
     }
 
     async executeAtomically(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }> {
@@ -72,12 +73,24 @@ export class RecoveryOrchestrator implements RecoveryContract {
             throw new Error('environment_drift_detected');
         }
         
-        const result = await adapter.executeAtomicRecovery(plan, scope);
-        if (!result.success) {
-            await adapter.rollback(result.checkpointId);
-            throw new Error(__t('atomic_execution_failed_and_wa'));
+        const tx = await TransactionAuthority.create({
+            capabilityId: 'recovery-execution', target: 'live-environment', repositoryPath: 'recovery', authorizedActions: ['UPDATE']
+        });
+        
+        try {
+            await TransactionAuthority.update(tx.id, tx.revision, { status: 'RUNNING' });
+            const result = await adapter.executeAtomicRecovery(plan, scope);
+            if (!result.success) {
+                await adapter.rollback(result.checkpointId);
+                await TransactionAuthority.update(tx.id, tx.revision + 1, { status: 'FAILED' });
+                throw new Error(__t('atomic_execution_failed_and_wa'));
+            }
+            await TransactionAuthority.update(tx.id, tx.revision + 1, { status: 'SUCCESS' });
+            return { success: true, executionEvidence: result.evidence };
+        } catch (e) {
+            await TransactionAuthority.update(tx.id, tx.revision + 1, { status: 'FAILED' });
+            throw e;
         }
-        return { success: true, executionEvidence: result.evidence };
     }
 
     async verify(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, verificationEvidence: any }> {

@@ -49,7 +49,8 @@ export type CapabilityState =
   | 'DEACTIVATED'
   | 'GRACE'
   | 'BLOCKED'
-  | 'UNSUPPORTED';
+  | 'UNSUPPORTED'
+  | 'UNQUALIFIED';
 
 /**
  * Deactivation mode — how a capability behaves during downgrade.

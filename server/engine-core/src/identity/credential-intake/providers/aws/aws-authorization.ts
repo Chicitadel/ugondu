@@ -1,9 +1,10 @@
 import { AuthorizationPreflight, NormalizedCredential, AuthenticatedIdentity } from '../../core';
-import { IAMClient, SimulatePrincipalPolicyCommand } from '@aws-sdk/client-iam';
+
 import { Logger } from '@ugondu/shared';
 
 export class AwsAuthorizationPreflight implements AuthorizationPreflight {
     public async preflight(credential: NormalizedCredential, identity: AuthenticatedIdentity, capabilities: string[]): Promise<Record<string, boolean>> {
+        const { IAMClient, SimulatePrincipalPolicyCommand } = require('@aws-sdk/client-iam');
         const iam = new IAMClient({
             region: identity.region || 'eu-west-3',
             credentials: {

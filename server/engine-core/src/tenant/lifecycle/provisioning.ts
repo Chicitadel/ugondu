@@ -57,7 +57,7 @@ export class TenantProvisioner {
             throw new Error(__t('msg_tenant_id_required_for_provisioning_exec'));
         }
         // Allocate resources, setup isolated database schemas, initialize root key
-        console.log(`Provisioning tenant ${context.tenantId} at tier ${context.tier}`);
-        return { status: 'SUCCESS' };
+        Logger.info(`Provisioning tenant ${context.tenantId} at tier ${context.tier}`);
+        throw new Error('NotImplementedError');;
     }
 }

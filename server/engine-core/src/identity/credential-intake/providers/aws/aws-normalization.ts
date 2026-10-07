@@ -1,5 +1,5 @@
 import { CredentialNormalizer, NormalizedCredential, AuthenticatedIdentity, AuthenticationVerifier } from '../../core';
-import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
+
 import { Logger } from '@ugondu/shared';
 
 export class AwsAuthenticationVerifier implements AuthenticationVerifier {
@@ -8,6 +8,7 @@ export class AwsAuthenticationVerifier implements AuthenticationVerifier {
             throw new Error(__t('msg_awsauthenticationverifier_requires_an_aw'));
         }
 
+        const { STSClient, GetCallerIdentityCommand } = require('@aws-sdk/client-sts');
         const sts = new STSClient({
             region,
             credentials: {

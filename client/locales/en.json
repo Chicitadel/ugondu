@@ -935,5 +935,17 @@
   "wraps_failures_with_the_locali": "wraps failures with the localized reconcile error",
   "wraps_reconciliation_failures_": "wraps reconciliation failures with the localized error",
   "writes_nothing_when_the_member": "writes nothing when the member does not hold the role, and rejects invalid members",
-  "zddtopologyrepair_is_not_yet_f": "ZddTopologyRepair is not yet fully implemented."
+  "zddtopologyrepair_is_not_yet_f": "ZddTopologyRepair is not yet fully implemented.",
+  "repair_usage": "Usage: ugondu repair run <capability-id> [--target <target-env>] [--dry-run]",
+  "repair_invoking": "Invoking capability: %s via Universal Resource Contract\n",
+  "repair_err_marshal": "Failed to marshal request: %v\n",
+  "repair_err_create_req": "Failed to create request: %v\n",
+  "repair_err_network": "[ERROR] Network or server error: %v\n",
+  "repair_err_api": "[ERROR] API returned error (Status: %d): %s\n",
+  "repair_warn_parse": "[WARNING] Could not parse server response: %s\n",
+  "repair_res_status": "[RESULT] Status: %s\n",
+  "repair_res_tx": "[RESULT] Transaction ID: %s\n",
+  "repair_res_msg": "[RESULT] Message: %s\n",
+  "repair_dry_run_done": "[DRY RUN] Diagnosis and Planning completed. No execution performed.",
+  "repair_exec_done": "[EXECUTION] Execution pipeline completed."
 }

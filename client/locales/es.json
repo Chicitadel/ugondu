@@ -935,5 +935,17 @@
   "wraps_failures_with_the_locali": "[ES] wraps failures with the localized reconcile error",
   "wraps_reconciliation_failures_": "[ES] wraps reconciliation failures with the localized error",
   "writes_nothing_when_the_member": "[ES] writes nothing when the member does not hold the role, and rejects invalid members",
-  "zddtopologyrepair_is_not_yet_f": "[ES] ZddTopologyRepair is not yet fully implemented."
+  "zddtopologyrepair_is_not_yet_f": "[ES] ZddTopologyRepair is not yet fully implemented.",
+  "repair_usage": "[ES] Usage: ugondu repair run <capability-id> [--target <target-env>] [--dry-run]",
+  "repair_invoking": "[ES] Invoking capability: %s via Universal Resource Contract\n",
+  "repair_err_marshal": "[ES] Failed to marshal request: %v\n",
+  "repair_err_create_req": "[ES] Failed to create request: %v\n",
+  "repair_err_network": "[ES] [ERROR] Network or server error: %v\n",
+  "repair_err_api": "[ES] [ERROR] API returned error (Status: %d): %s\n",
+  "repair_warn_parse": "[ES] [WARNING] Could not parse server response: %s\n",
+  "repair_res_status": "[ES] [RESULT] Status: %s\n",
+  "repair_res_tx": "[ES] [RESULT] Transaction ID: %s\n",
+  "repair_res_msg": "[ES] [RESULT] Message: %s\n",
+  "repair_dry_run_done": "[ES] [DRY RUN] Diagnosis and Planning completed. No execution performed.",
+  "repair_exec_done": "[ES] [EXECUTION] Execution pipeline completed."
 }

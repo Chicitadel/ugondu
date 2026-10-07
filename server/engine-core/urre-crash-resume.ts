@@ -12,7 +12,8 @@ if (!REGION) {
 }
 
 async function registerRealHandlers(engine: URREngine) {
-    const ec2 = new EC2Client({ region: REGION });
+    const { EC2Client, DescribeInstancesCommand } = require('@aws-sdk/client-ec2');
+const ec2 = new EC2Client({ region: REGION });
     
     engine.registerHandler('aws', 'CREATE_VPC_CRASH', async (node: DagNode) => {
         console.log('[URRE-CRASH] Process A executing CREATE_VPC_CRASH...');
@@ -93,7 +94,8 @@ async function phase2() {
     }
 
     console.log(__t('process_b_success_cleaning_up_'));
-    const ec2 = new EC2Client({ region: REGION });
+    const { EC2Client, DescribeInstancesCommand } = require('@aws-sdk/client-ec2');
+const ec2 = new EC2Client({ region: REGION });
     if (subNode.output?.subnetId) {
         await ec2.send(new DeleteSubnetCommand({ SubnetId: subNode.output.subnetId }));
     }

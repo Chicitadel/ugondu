@@ -77,7 +77,7 @@ export class WorkflowEngine {
     context: ExecutionContext,
     initialInputs: Record<string, any> = {}
   ): Promise<WorkflowStatus> {
-    console.log(`Starting execution for bundle: ${bundle.id}`);
+    Logger.info(`Starting execution for bundle: ${bundle.id}`);
 
     // In a real system, we'd have a DAG solver here to resolve `dependsOn`
     const state: Record<string, any> = { ...initialInputs };
@@ -86,7 +86,7 @@ export class WorkflowEngine {
       const action = this.registry.get(step.actionId);
 
       if (!action) {
-        console.error(`Action ${step.actionId} not found in registry.`);
+        Logger.error(`Action ${step.actionId} not found in registry.`);
         return WorkflowStatus.FAILED;
       }
 
@@ -98,7 +98,7 @@ export class WorkflowEngine {
       }
 
       try {
-        console.log(`Executing step: ${step.stepId} (Action: ${action.name})`);
+        Logger.info(`Executing step: ${step.stepId} (Action: ${action.name})`);
 
         const stepInput = this.resolveInputs(step.inputTemplate, state);
 
@@ -108,12 +108,12 @@ export class WorkflowEngine {
         state[step.stepId] = result;
 
       } catch (error) {
-        console.error(`Step ${step.stepId} failed:`, error);
+        Logger.error(`Step ${step.stepId} failed:`, error);
         return WorkflowStatus.FAILED;
       }
     }
 
-    console.log(`Bundle ${bundle.id} execution completed successfully.`);
+    Logger.info(`Bundle ${bundle.id} execution completed successfully.`);
     return WorkflowStatus.COMPLETED;
   }
 
@@ -124,16 +124,16 @@ export class WorkflowEngine {
     workflowExecutionId: string,
     approvalId: string
   ): Promise<WorkflowStatus> {
-    console.log(`Resuming workflow ${workflowExecutionId} with approval ${approvalId}`);
+    Logger.info(`Resuming workflow ${workflowExecutionId} with approval ${approvalId}`);
     try {
         if (!workflowExecutionId || !approvalId) {
             throw new Error(__t('msg_invalid_resumption_parameters_workflowex'));
         }
         // Verify authorization via Governance API before resuming
-        console.log(`Rehydrating state for workflow ${workflowExecutionId}...`);
-        return WorkflowStatus.RUNNING;
+        Logger.info(`Rehydrating state for workflow ${workflowExecutionId}...`);
+        throw new Error('NotImplementedError');
     } catch (error: any) {
-        console.error(`Workflow resumption failed for ${workflowExecutionId}:`, error.message);
+        Logger.error(`Workflow resumption failed for ${workflowExecutionId}:`, error.message);
         return WorkflowStatus.FAILED;
     }
   }
@@ -156,7 +156,7 @@ export class WorkflowEngine {
         }
         return resolved;
     } catch (error: any) {
-        console.error(__t('msg_input_resolution_failed'), error.message);
+        Logger.error(__t('msg_input_resolution_failed'), error.message);
         throw error;
     }
   }

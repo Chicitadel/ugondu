@@ -44,7 +44,8 @@ export interface SafetyDeclaration {
  */
 export interface Action {
     safetyDeclaration?: SafetyDeclaration;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'UNKNOWN';
+    operationType?: string;
 }
 
 /**
