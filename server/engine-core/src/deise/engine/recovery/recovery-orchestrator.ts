@@ -54,7 +54,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
         if (!dryResult.safe) {
             throw new Error(__t('dry_run_indicates_unsafe_mutat'));
         }
-        return { success: true, resourceChanges: [], risk: 'LOW', blastRadius: [], rollback: [] };
+        return true;
     }
 
     async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis, auth?: any): Promise<boolean> {
@@ -63,7 +63,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
         if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
             throw new Error('Authorization denied.');
         }
-        return { success: true, resourceChanges: [], risk: 'LOW', blastRadius: [], rollback: [] };
+        return true;
     }
 
     async executeAtomically(plan: RepairPlan, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<{ success: boolean, executionEvidence: any }> {

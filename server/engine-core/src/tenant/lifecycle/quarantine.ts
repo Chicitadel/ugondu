@@ -1,3 +1,4 @@
+import { Logger } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu
  * Module         : Tenant Lifecycle
