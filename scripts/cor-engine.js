@@ -10,7 +10,7 @@ const SCHEDULE = path.join(
   ROOT,
   '.governance',
   'cor',
-  'cor_final_remediation_task_schedule.json'
+  'ugondu-cor-qualification-manifest.json'
 );
 const EVIDENCE_DIR =
   process.env.COR_EVIDENCE_DIR || path.join(ROOT, '.cor_evidence');
@@ -210,3 +210,4 @@ async function main() {
 }
 
 main().catch(() => block('unexpected COR engine failure'));
+

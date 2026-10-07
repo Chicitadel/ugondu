@@ -24,13 +24,10 @@ export interface RecoveryCertificate {
 }
 
 export interface RecoveryContract {
-    discover(scope: RecoveryScope): Promise<LiveEnvironmentAdapterContract>;
     
     capture(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<EnvironmentTwin>;
     
     fingerprint(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<string>;
-    
-    diagnose(twin: EnvironmentTwin): Promise<RepairPlan>;
     
     generateRecoveryPlan(diagnosis: RepairPlan): Promise<RepairPlan>;
     
@@ -48,3 +45,4 @@ export interface RecoveryContract {
     
     issuePassport(certificate: RecoveryCertificate): Promise<any>;
 }
+

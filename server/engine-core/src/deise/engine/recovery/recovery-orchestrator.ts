@@ -6,9 +6,7 @@ import { __t } from '@ugondu/shared';
 import * as crypto from 'crypto';
 
 export class RecoveryOrchestrator implements RecoveryContract {
-    async discover(scope: RecoveryScope): Promise<LiveEnvironmentAdapterContract> {
-        throw new Error(__t('adapter_resolution_delegated_t'));
-    }
+    
 
     async capture(adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<EnvironmentTwin> {
         const twin = await adapter.captureState(scope);
@@ -21,9 +19,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return adapter.fingerprintRepository(scope);
     }
 
-    async diagnose(twin: EnvironmentTwin): Promise<RepairPlan> {
-        throw new Error(__t('not_implemented'));
-    }
+    
 
     async generateRecoveryPlan(diagnosis: RepairPlan): Promise<RepairPlan> {
         return diagnosis;
@@ -112,3 +108,4 @@ export class RecoveryOrchestrator implements RecoveryContract {
         return { passportId: crypto.randomUUID(), certificateId: certificate.certificateId, status: 'RECOVERY_VALIDATED' };
     }
 }
+
