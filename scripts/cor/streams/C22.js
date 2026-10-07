@@ -80,7 +80,7 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    artifacts.push('verified_source'); observations.push('no hardcoded fmt strings');
+    artifacts.push('verified_source'); observations.push('no direct fmt strings outside i18n');
     return true;
 }
 

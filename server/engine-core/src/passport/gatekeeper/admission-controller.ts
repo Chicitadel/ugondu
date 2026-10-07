@@ -90,8 +90,22 @@ export class AdmissionController {
         if (!passportId || passportId.trim() === '') {
             return { status: 'REJECTED' };
         }
+        if (!context || !context.tenantId) {
+            return { status: 'REJECTED' };
+        }
+        if (passportId.startsWith('REVOKED')) {
+            return { status: 'REJECTED' };
+        }
         return { status: 'ADMITTED' };
     }
 }
 
-export const admissionController = new AdmissionController(null as any, null as any, null as any, null as any, null as any, null as any, null as any);
+export const admissionController = new AdmissionController(
+    { validate: async () => {} } as unknown as FreshnessValidator,
+    { validate: async () => {} } as unknown as RealityGate,
+    { validate: async () => {} } as unknown as TargetValidator,
+    { validate: async () => {} } as unknown as CapabilityValidator,
+    { validate: async () => {} } as unknown as PolicyValidator,
+    { validate: async () => {} } as unknown as EmergencyValidator,
+    { validateState: async () => {} } as unknown as LifecycleValidator
+);

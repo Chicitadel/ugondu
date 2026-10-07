@@ -80,9 +80,15 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    const content = JSON.parse(fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/package.json'), 'utf8'));
-    if (content.dependencies && content.dependencies && content.dependencies['@aws-sdk/client-sts']) return false;
-    artifacts.push('verified_source'); observations.push('aws-sdk not in production dependencies');
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'package.json');
+    const content = JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (content.dependencies) {
+        for (const dep of Object.keys(content.dependencies)) {
+            if (dep.startsWith('@aws-sdk/') || dep === 'aws-sdk') return false;
+        }
+    }
+    artifacts.push('verified_source'); observations.push('no aws-sdk prod dependencies');
     return true;
 }
 

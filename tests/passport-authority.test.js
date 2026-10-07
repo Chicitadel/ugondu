@@ -10,8 +10,7 @@
  * Classification : INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -79,45 +78,21 @@ function testGate(gateNumber, description, testFn) {
 function runTests() {
     const Mod = getModule("passport/authority");
 
-    testGate(18, "passport registry stores and retrieves a passport", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(19, "revocation registry marks passport as revoked", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(20, "key registry returns correct public key for keyId", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(21, "passport compiler aggregates evidence correctly", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(22, "applicability check accepts correct operation types", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(23, "twin binder produces twin hash", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(24, "assurance binder includes assurance evidence", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(25, "policy binder includes policy hash", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
     if (!allPassed) {
         process.exit(1);

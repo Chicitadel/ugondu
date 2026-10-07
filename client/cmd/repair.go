@@ -27,7 +27,7 @@ func HandleRepairCommand(args []string) {
 	fmt.Println(i18n.T("universal_recovery_pipeline_init"))
 	
 	if len(args) < 2 {
-		fmt.Println("Usage: ugondu repair run <capability-id> [--target <target-env>] [--dry-run]")
+		fmt.Println(i18n.T("Usage: ugondu repair run <capability-id> [--target <target-env>] [--dry-run]"))
 		os.Exit(1)
 	}
 
@@ -47,7 +47,7 @@ func HandleRepairCommand(args []string) {
 	}
 
 	if subcmd == "run" {
-		fmt.Printf("Invoking capability: %s via Universal Resource Contract\n", capabilityId)
+		fmt.Printf(i18n.T("Invoking capability: %s via Universal Resource Contract\n"), capabilityId)
 		
 		apiURL := os.Getenv("UGONDU_API_URL")
 		if apiURL == "" {
@@ -62,27 +62,27 @@ func HandleRepairCommand(args []string) {
 		
 		jsonBody, err := json.Marshal(reqBody)
 		if err != nil {
-			fmt.Printf("Failed to marshal request: %v\n", err)
+			fmt.Printf(i18n.T("Failed to marshal request: %v\n"), err)
 			os.Exit(1)
 		}
 		
 		req, err := http.NewRequest("POST", apiURL+"/recovery/execute", bytes.NewBuffer(jsonBody))
 		if err != nil {
-			fmt.Printf("Failed to create request: %v\n", err)
+			fmt.Printf(i18n.T("Failed to create request: %v\n"), err)
 			os.Exit(1)
 		}
 		
 		req.Header.Set("Content-Type", "application/json")
 		token := os.Getenv("UGONDU_TOKEN")
 		if token != "" {
-			req.Header.Set("Authorization", i18n.T("bearer")+token)
+			req.Header.Set("Authorization", "Bearer "+token)
 		}
 		
 		// Execute the actual HTTP request
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			fmt.Printf("[ERROR] Network or server error: %v\n", err)
+			fmt.Printf(i18n.T("[ERROR] Network or server error: %v\n"), err)
 			os.Exit(1)
 		}
 		defer resp.Body.Close()
@@ -90,27 +90,27 @@ func HandleRepairCommand(args []string) {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		
 		if resp.StatusCode >= 400 {
-			fmt.Printf("[ERROR] API returned error (Status: %d): %s\n", resp.StatusCode, string(bodyBytes))
+			fmt.Printf(i18n.T("[ERROR] API returned error (Status: %d): %s\n"), resp.StatusCode, string(bodyBytes))
 			os.Exit(1)
 		}
 		
 		var repairResp RepairResponse
 		if err := json.Unmarshal(bodyBytes, &repairResp); err != nil {
-			fmt.Printf("[WARNING] Could not parse server response: %s\n", string(bodyBytes))
+			fmt.Printf(i18n.T("[WARNING] Could not parse server response: %s\n"), string(bodyBytes))
 		} else {
-			fmt.Printf("[RESULT] Status: %s\n", repairResp.Status)
+			fmt.Printf(i18n.T("[RESULT] Status: %s\n"), repairResp.Status)
 			if repairResp.TransactionId != "" {
-				fmt.Printf("[RESULT] Transaction ID: %s\n", repairResp.TransactionId)
+				fmt.Printf(i18n.T("[RESULT] Transaction ID: %s\n"), repairResp.TransactionId)
 			}
 			if repairResp.Message != "" {
-				fmt.Printf("[RESULT] Message: %s\n", repairResp.Message)
+				fmt.Printf(i18n.T("[RESULT] Message: %s\n"), repairResp.Message)
 			}
 		}
 		
 		if dryRun {
-			fmt.Println("[DRY RUN] Diagnosis and Planning completed. No execution performed.")
+			fmt.Println(i18n.T("[DRY RUN] Diagnosis and Planning completed. No execution performed."))
 		} else {
-			fmt.Println("[EXECUTION] Execution pipeline completed.")
+			fmt.Println(i18n.T("[EXECUTION] Execution pipeline completed."))
 		}
 		
 	} else {

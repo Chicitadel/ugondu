@@ -113,9 +113,15 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
                 return;
             }
 
+            const MAX_BYTES = 10 * 1024 * 1024; // 10MB limit
             let responseData = '';
+            res.on('error', reject);
             res.on('data', (chunk) => {
                 responseData += chunk;
+                if (responseData.length > MAX_BYTES) {
+                    req.destroy();
+                    reject(new Error('Response size exceeded limit'));
+                }
             });
             res.on('end', () => {
                 resolve(responseData);

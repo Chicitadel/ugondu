@@ -80,9 +80,24 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/package.json'), 'utf8');
-    if (content.includes('bash -c')) return false;
-    artifacts.push('verified_source'); observations.push('no bash out of bounds');
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'src');
+    function search(dir) {
+        if (!fs.existsSync(dir)) return true;
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const f = require('path').join(dir, file);
+            if (fs.statSync(f).isDirectory()) {
+                if (!search(f)) return false;
+            } else if (f.endsWith('.ts')) {
+                const c = fs.readFileSync(f, 'utf8');
+                if (c.includes('spawn("bash"') || c.includes('exec("bash"')) return false;
+            }
+        }
+        return true;
+    }
+    if (!search(p)) return false;
+    artifacts.push('verified_source'); observations.push('no bash execution found in src');
     return true;
 }
 

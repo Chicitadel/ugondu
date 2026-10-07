@@ -80,6 +80,12 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'src', 'deise', 'engine', 'recovery', 'recovery-orchestrator.ts');
+    if (fs.existsSync(p)) {
+        const c = fs.readFileSync(p, 'utf8');
+        if (!c.includes('checkDrift') && !c.includes('executeAtomicRecovery')) return false;
+    }
     artifacts.push('verified_source'); observations.push('execution check drift ok');
     return true;
 }

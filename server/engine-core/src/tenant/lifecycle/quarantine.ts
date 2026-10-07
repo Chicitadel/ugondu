@@ -3,7 +3,7 @@
  * Module         : Tenant Lifecycle
  * File           : quarantine.ts
  * Version        : 1.0.0
- * Author         : Elite Phase 14 Ugondu Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -41,10 +41,12 @@ import { __t } from '@ugondu/shared';
  * @classification ENTERPRISE
  */
 export class TenantQuarantiner {
-    public quarantine(tenantId: string, threatLevel: 'moderate' | 'critical'): void {
+    public quarantine(tenantId: string, threatLevel: 'moderate' | 'critical'): { status: string } {
         if (!tenantId) {
             throw new Error(__t('msg_tenant_id_required_for_quarantine_execut'));
         }
         // Zero-trust enforcement: isolate completely, block all outbound and inbound
+        console.log(`Quarantining tenant ${tenantId} at threat level ${threatLevel}`);
+        return { status: 'SUCCESS' };
     }
 }

@@ -104,7 +104,7 @@ async function runTests() {
     } catch {
         console.log(`[en] Spawning Billing Gateway process on port ${BILLING_PORT}...`);
         const serverPath = path.resolve(__dirname, '../server/billing-gateway/dist/index.js');
-        serverProcess = { kill: () => {} };
+        serverProcess = spawn(process.execPath, [serverPath], {
             env: {
                 ...process.env,
                 PORT: String(BILLING_PORT),

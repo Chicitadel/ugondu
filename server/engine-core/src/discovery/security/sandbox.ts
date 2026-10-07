@@ -60,9 +60,11 @@ export class CommandSandbox {
       throw new Error(__t('messages.error.sandbox_violation_command_is_not_in_the_allow', { 'command': command }));
     }
 
-    // In a real execution environment, this would securely dispatch the command
-    // without invoking an interactive shell (e.g., using direct execve).
-    return `Simulated successful execution of: ${command}`;
+    try {
+      return require('child_process').execSync(command).toString();
+    } catch (e: any) {
+      return `Execution failed: ${e.message}`;
+    }
   }
 
   public registerTemplate(template: string): void {

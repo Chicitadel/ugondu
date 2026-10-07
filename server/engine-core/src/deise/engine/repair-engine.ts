@@ -119,6 +119,7 @@ export class DeploymentRepairEngine {
             requiresApplicationUpload,
             requiresTopologyRepair,
             requiresInfrastructureRepair,
+            infrastructureRepairs: [],
             safeToProceed,
             destructiveDeleteBlocked
         };

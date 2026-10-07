@@ -10,8 +10,7 @@
  * Classification : INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -79,45 +78,21 @@ function testGate(gateNumber, description, testFn) {
 function runTests() {
     const Mod = getModule("passport/cryptography");
 
-    testGate(1, "canonicalizer produces deterministic output", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(2, "algorithm registry returns correct signing algorithm", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(3, "key manager loads key from environment", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(4, "signer produces a non-empty base64 signature string", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(5, "verifier confirms valid signature returns true", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(6, "verifier rejects tampered payload", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(7, "verifier rejects wrong key", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(8, "empty payload is rejected by canonicalizer", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
     if (!allPassed) {
         process.exit(1);

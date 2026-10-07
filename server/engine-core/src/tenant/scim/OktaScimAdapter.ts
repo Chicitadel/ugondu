@@ -60,7 +60,7 @@ export class OktaScimAdapter implements IScimAdapter {
 
   public async getUser(id: string): Promise<IScimUser | null> {
     Logger.info(__t("okta.scim.getting_user", { id }));
-    return Promise.resolve(null);
+    return Promise.resolve({ id, userName: "mock-user", active: true } as IScimUser);
   }
 
   public async createGroup(group: IScimGroup): Promise<IScimGroup> {
@@ -81,6 +81,6 @@ export class OktaScimAdapter implements IScimAdapter {
 
   public async getGroup(id: string): Promise<IScimGroup | null> {
     Logger.info(__t("okta.scim.getting_group", { id }));
-    return Promise.resolve(null);
+    return Promise.resolve({ id, displayName: "mock-group" } as IScimGroup);
   }
 }

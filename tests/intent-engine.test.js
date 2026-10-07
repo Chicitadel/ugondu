@@ -10,8 +10,7 @@
  * Classification : INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Architecture Controlled
+  * - Architecture Controlled
  *
  * Copyright (c) 2026 Air Roofers
  * All Rights Reserved.

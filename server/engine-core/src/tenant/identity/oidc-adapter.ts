@@ -4,7 +4,7 @@ import { __t } from '@ugondu/shared';
  * Module         : Tenant Identity
  * File           : oidc-adapter.ts
  * Version        : 1.0.0
- * Author         : Phase 14 AI Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01

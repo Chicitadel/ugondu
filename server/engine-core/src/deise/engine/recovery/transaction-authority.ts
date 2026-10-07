@@ -22,7 +22,8 @@ export type TransactionPhase =
     | 'CERTIFIED'
     | 'AUTHORIZATION_DENIED'
     | 'DRY_RUN_COMPLETE'
-    | 'VERIFICATION_FAILED';
+    | 'VERIFICATION_FAILED'
+    | 'FAILED';
 
 export interface CanonicalIntent {
     capabilityId: string;

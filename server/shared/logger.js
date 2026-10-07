@@ -10,8 +10,7 @@ __t('use_strict');
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced

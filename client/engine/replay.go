@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"github.com/ugondu/client/i18n"
 	"encoding/json"
 	"errors"
@@ -43,8 +44,8 @@ import (
 )
 
 var (
-	ErrReplayDetected = errors.New("ERR_REPLAY_DETECTED")
-	ErrExpired        = errors.New("ERR_TRANSACTION_EXPIRED")
+	ErrReplayDetected = errors.New(i18n.T("ERR_REPLAY_DETECTED"))
+	ErrExpired        = errors.New(i18n.T("ERR_TRANSACTION_EXPIRED"))
 )
 
 type ReplayEntry struct {

@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"errors"
 )
 
@@ -80,10 +81,10 @@ func init() {
 }
 
 var (
-	ErrKeyNotFound = errors.New("ERR_KEY_NOT_FOUND")
-	ErrKeyRevoked  = errors.New("ERR_KEY_REVOKED")
-	ErrKeyRotated  = errors.New("ERR_KEY_ROTATED")
-	ErrKeyPurpose  = errors.New("ERR_PURPOSE_MISMATCH")
+	ErrKeyNotFound = errors.New(i18n.T("ERR_KEY_NOT_FOUND"))
+	ErrKeyRevoked  = errors.New(i18n.T("ERR_KEY_REVOKED"))
+	ErrKeyRotated  = errors.New(i18n.T("ERR_KEY_ROTATED"))
+	ErrKeyPurpose  = errors.New(i18n.T("ERR_PURPOSE_MISMATCH"))
 )
 
 func (r *TrustRegistry) RegisterKey(keyId string, status KeyStatus, purpose KeyPurpose) {

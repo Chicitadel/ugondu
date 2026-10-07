@@ -135,14 +135,14 @@ func TestSignatureEnforcedDirectCall(t *testing.T) {
 
 	pubKeyBytes, _ := x509.MarshalPKIXPublicKey(pub)
 	pubKeyPem := pem.EncodeToMemory(&pem.Block{
-		Type:  i18n.T("public_key"),
+		Type:  "PUBLIC KEY",
 		Bytes: pubKeyBytes,
 	})
 
 	validEnv := &ExecutionEnvelope{
 		TransactionId: "txn-direct-test",
 		PlanHash:      "dummyhash",
-		CanonicalEnvelope: {"transactionId":"txn-direct-test"},
+		CanonicalEnvelope: "{\"transactionId\":\"txn-direct-test\"}",
 	}
 	validSig := ed25519.Sign(priv, []byte(validEnv.CanonicalEnvelope))
 	validEnv.Signature = base64.StdEncoding.EncodeToString(validSig)
@@ -166,7 +166,7 @@ func TestSignatureEnforcedDirectCall(t *testing.T) {
 	tamperedEnv := &ExecutionEnvelope{
 		TransactionId: "txn-direct-test",
 		PlanHash:      "dummyhash",
-		CanonicalEnvelope: {"transactionId":"txn-direct-test"},
+		CanonicalEnvelope: "{\"transactionId\":\"txn-direct-test\"}",
 		Signature:     base64.StdEncoding.EncodeToString([]byte("bad_signature")),
 	}
 

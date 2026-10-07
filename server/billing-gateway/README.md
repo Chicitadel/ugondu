@@ -5,8 +5,7 @@
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -56,3 +55,4 @@ npm start
 ## Test Seeding
 - Seed data for tests can be found in `src/test/seeder.ts`.
 - **WARNING**: `src/test/seeder.ts` must **NEVER** be imported in production.
+

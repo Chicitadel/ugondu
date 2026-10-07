@@ -1,6 +1,6 @@
 import { Logger } from '@ugondu/shared';
 /******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System
+ * Project : Ugondu — Universal Delivery Operating System
  * Module         : CLI
  * File           : cli.ts
  * Version        : 1.0.0

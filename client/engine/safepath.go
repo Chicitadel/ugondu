@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"github.com/ugondu/client/i18n"
 	"errors"
 	"fmt"
@@ -42,13 +43,13 @@ import (
 )
 
 var (
-	ErrPathTraversal = errors.New("ERR_PATH_TRAVERSAL_ATTEMPT")
-	ErrAbsolutePath  = errors.New("ERR_ABSOLUTE_PATH_ATTEMPT")
-	ErrUNCPath       = errors.New("ERR_UNC_PATH_ATTEMPT")
-	ErrNTFSStream    = errors.New("ERR_NTFS_STREAM_ATTEMPT")
-	ErrDeviceName    = errors.New("ERR_DEVICE_NAME_ATTEMPT")
-	ErrSymlinkEscape = errors.New("ERR_SYMLINK_ESCAPE")
-	ErrEscapeBaseDir = errors.New("ERR_ESCAPE_BASE_DIR")
+	ErrPathTraversal = errors.New(i18n.T("ERR_PATH_TRAVERSAL_ATTEMPT"))
+	ErrAbsolutePath  = errors.New(i18n.T("ERR_ABSOLUTE_PATH_ATTEMPT"))
+	ErrUNCPath       = errors.New(i18n.T("ERR_UNC_PATH_ATTEMPT"))
+	ErrNTFSStream    = errors.New(i18n.T("ERR_NTFS_STREAM_ATTEMPT"))
+	ErrDeviceName    = errors.New(i18n.T("ERR_DEVICE_NAME_ATTEMPT"))
+	ErrSymlinkEscape = errors.New(i18n.T("ERR_SYMLINK_ESCAPE"))
+	ErrEscapeBaseDir = errors.New(i18n.T("ERR_ESCAPE_BASE_DIR"))
 )
 
 type SafePathResolver struct{}

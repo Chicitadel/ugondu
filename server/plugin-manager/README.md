@@ -5,8 +5,7 @@
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -52,3 +51,4 @@ Access is restricted strictly to the `engine-core` origin.
 
 ## Security
 Publisher signature verification is performed via **Ed25519**.
+

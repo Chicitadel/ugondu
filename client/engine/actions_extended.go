@@ -60,12 +60,12 @@ type CopyFilePayload struct {
 
 func ValidateCopyFilePayload(payload map[string]interface{}) (*CopyFilePayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf("ERR_PAYLOAD_REQUIRED")
+		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	src, ok1 := payload["source"].(string)
 	dst, ok2 := payload["destination"].(string)
 	if !ok1 || !ok2 || strings.TrimSpace(src) == "" || strings.TrimSpace(dst) == "" {
-		return nil, fmt.Errorf("ERR_INVALID_COPY_FILE_PAYLOAD")
+		return nil, fmt.Errorf(i18n.T("ERR_INVALID_COPY_FILE_PAYLOAD"))
 	}
 	return &CopyFilePayload{Source: src, Destination: dst}, nil
 }
@@ -94,11 +94,11 @@ type CreateDirectoryPayload struct {
 
 func ValidateCreateDirectoryPayload(payload map[string]interface{}) (*CreateDirectoryPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf("ERR_PAYLOAD_REQUIRED")
+		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	path, ok := payload["path"].(string)
 	if !ok || strings.TrimSpace(path) == "" {
-		return nil, fmt.Errorf("ERR_INVALID_CREATE_DIRECTORY_PAYLOAD")
+		return nil, fmt.Errorf(i18n.T("ERR_INVALID_CREATE_DIRECTORY_PAYLOAD"))
 	}
 	return &CreateDirectoryPayload{Path: path}, nil
 }
@@ -128,12 +128,12 @@ type SymlinkPayload struct {
 
 func ValidateSymlinkPayload(payload map[string]interface{}) (*SymlinkPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf("ERR_PAYLOAD_REQUIRED")
+		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	target, ok1 := payload["target"].(string)
 	link, ok2 := payload["link"].(string)
 	if !ok1 || !ok2 || strings.TrimSpace(target) == "" || strings.TrimSpace(link) == "" {
-		return nil, fmt.Errorf("ERR_INVALID_SYMLINK_PAYLOAD")
+		return nil, fmt.Errorf(i18n.T("ERR_INVALID_SYMLINK_PAYLOAD"))
 	}
 	return &SymlinkPayload{Target: target, Link: link}, nil
 }
@@ -162,11 +162,11 @@ type ServiceRestartPayload struct {
 
 func ValidateServiceRestartPayload(payload map[string]interface{}) (*ServiceRestartPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf("ERR_PAYLOAD_REQUIRED")
+		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	name, ok := payload["serviceName"].(string)
 	if !ok || strings.TrimSpace(name) == "" {
-		return nil, fmt.Errorf("ERR_INVALID_SERVICE_RESTART_PAYLOAD")
+		return nil, fmt.Errorf(i18n.T("ERR_INVALID_SERVICE_RESTART_PAYLOAD"))
 	}
 	return &ServiceRestartPayload{ServiceName: name}, nil
 }

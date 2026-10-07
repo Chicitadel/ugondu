@@ -3,7 +3,7 @@
  * Module         : Tenant Lifecycle
  * File           : provisioning.ts
  * Version        : 1.0.0
- * Author         : Elite Phase 14 Ugondu Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -52,10 +52,12 @@ export interface ProvisioningContext {
  * @classification ENTERPRISE
  */
 export class TenantProvisioner {
-    public provision(context: ProvisioningContext): void {
+    public provision(context: ProvisioningContext): { status: string } {
         if (!context.tenantId) {
             throw new Error(__t('msg_tenant_id_required_for_provisioning_exec'));
         }
         // Allocate resources, setup isolated database schemas, initialize root key
+        console.log(`Provisioning tenant ${context.tenantId} at tier ${context.tier}`);
+        return { status: 'SUCCESS' };
     }
 }

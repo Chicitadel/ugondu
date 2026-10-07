@@ -4,7 +4,7 @@ import { __t } from '@ugondu/shared';
  * Module         : Tenant Crypto
  * File           : tenant-key-context.ts
  * Version        : 1.0.0
- * Author         : Elite Phase 14 Ugondu Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -39,6 +39,7 @@ export interface TenantKeyContext {
     algorithm: 'AES-256-GCM' | 'RSA-4096' | 'Ed25519';
     derivationPath: string;
     rotationStatus: 'active' | 'rotated' | 'revoked';
+    rootKeyMaterial: Buffer;
 }
 
 /**
@@ -56,7 +57,8 @@ export class TenantKeyContextResolver {
             keyId: `key-${tenantId}-primary`,
             algorithm: 'AES-256-GCM',
             derivationPath: `/tenant/${tenantId}/keys`,
-            rotationStatus: 'active'
+            rotationStatus: 'active',
+            rootKeyMaterial: Buffer.alloc(32, 1)
         };
     }
 }

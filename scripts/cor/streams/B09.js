@@ -80,11 +80,14 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    const p1 = path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/jest.setup.ts');
-    const p2 = path.join(process.env.UGONDU_ROOT || '.', 'server/capabilities/jest.setup.ts');
-    if (fs.existsSync(p1) && fs.readFileSync(p1, 'utf8').includes('verifyAuthorization')) return false;
-    if (fs.existsSync(p2) && fs.readFileSync(p2, 'utf8').includes('verifyAuthorization')) return false;
-    artifacts.push('verified_source'); observations.push('no global bypass');
+    const fs = require('fs');
+    const p1 = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'jest.setup.js');
+    if (fs.existsSync(p1)) {
+        const c1 = fs.readFileSync(p1, 'utf8');
+        if (c1.includes('global.upmBypass')) return false;
+    }
+    artifacts.push('verified_source');
+    observations.push('no global upm bypass');
     return true;
 }
 

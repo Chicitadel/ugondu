@@ -80,8 +80,14 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    if (!fs.existsSync(path.join(process.env.UGONDU_ROOT || '.', 'server/shared/locales/fr.json'))) return false;
-    artifacts.push('verified_source'); observations.push('fr.json exists');
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'shared', 'locales', 'fr.json');
+    if (!fs.existsSync(p)) return false;
+    try {
+        const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+        if (!j || typeof j !== 'object') return false;
+    } catch(e) { return false; }
+    artifacts.push('verified_source'); observations.push('fr.json exists and parses');
     return true;
 }
 

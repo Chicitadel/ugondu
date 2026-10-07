@@ -5,8 +5,7 @@
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -24,3 +23,4 @@ The Event Bus manages internal messaging and async communication between Ugondu 
 - `src/index.ts`: Main entrypoint for the event bus.
 - `src/db.ts`: Database connection and storage for event persistence.
 - `dist/`: Compiled JavaScript output.
+

@@ -28,7 +28,8 @@ export class TransactionStore {
         if (!fs.existsSync(file)) return null;
         try {
             const data = fs.readFileSync(file, 'utf8');
-            return JSON.parse(data) as TransactionDag;
+            const parsed = JSON.parse(data);
+            return TransactionDag.deserialize(parsed);
         } catch {
             return null;
         }

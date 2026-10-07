@@ -461,7 +461,7 @@ func getGitRemoteUrl() string {
 	adapter := adapters.NewGitAdapter()
 	out, err := adapter.GetRemoteURL(".")
 	if err != nil {
-		return "local-repo"
+		return i18n.T("local-repo")
 	}
 	return strings.TrimSpace(out)
 }
@@ -470,7 +470,7 @@ func getGitBranch() string {
 	adapter := adapters.NewGitAdapter()
 	out, err := adapter.GetBranch(".")
 	if err != nil {
-		return "main"
+		return i18n.T("main")
 	}
 	return strings.TrimSpace(out)
 }

@@ -55,6 +55,10 @@ app.use('/v1/deploy',    passportGuardMiddleware, createDeployRouter(keyState, B
 app.use('/v1/recovery',  recoveryRouter);
 
 // ─── Server ──────────────────────────────────────────────────────────────────
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  res.status(500).json({ error: 'INTERNAL_ERROR', message: err.message });
+});
+
 const PORT = process.env['PORT'] ?? 4001;
 app.listen(PORT, () => {
   Logger.info(__t('listening', __t('ugondu_engine_core'), PORT));

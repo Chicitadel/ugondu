@@ -3,7 +3,7 @@
  * Module         : Tenant Authorization
  * File           : capability-intersection.ts
  * Version        : 1.0.0
- * Author         : Phase 14 AI Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01

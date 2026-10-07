@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System (UAIGOS)
+ * Project : Ugondu — Universal Delivery Operating System (UAIGOS)
  * Module         : URRE Emergency
  * File           : abort.ts
  * Version        : 3.0.0

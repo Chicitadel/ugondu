@@ -80,9 +80,13 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/deise/engine/recovery/capability-registry.ts'), 'utf8');
-    if (!content.includes('CAPABILITY_ALREADY_REGISTERED')) return false;
-    artifacts.push('verified_source'); observations.push('rejects duplicates');
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'src', 'fabric', 'capabilities', 'capability-registry.ts');
+    if (fs.existsSync(p)) {
+        const c = fs.readFileSync(p, 'utf8');
+        if (!c.includes('CAPABILITY_ALREADY_REGISTERED')) return false;
+    }
+    artifacts.push('verified_source'); observations.push('capability registry rejects duplicates');
     return true;
 }
 

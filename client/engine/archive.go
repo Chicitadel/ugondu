@@ -33,6 +33,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"github.com/ugondu/client/i18n"
 	"archive/zip"
 	"errors"
@@ -43,11 +44,11 @@ import (
 )
 
 var (
-	ErrZipSlip            = errors.New("ERR_ZIP_SLIP_DETECTED")
-	ErrSymlinkRejection   = errors.New("ERR_SYMLINK_REJECTED")
-	ErrCompressionRatio   = errors.New("ERR_COMPRESSION_RATIO_EXCEEDED")
-	ErrMaxFilesExceeded   = errors.New("ERR_MAX_FILES_EXCEEDED")
-	ErrMaxExpandedSize    = errors.New("ERR_MAX_EXPANDED_SIZE_EXCEEDED")
+	ErrZipSlip            = errors.New(i18n.T("ERR_ZIP_SLIP_DETECTED"))
+	ErrSymlinkRejection   = errors.New(i18n.T("ERR_SYMLINK_REJECTED"))
+	ErrCompressionRatio   = errors.New(i18n.T("ERR_COMPRESSION_RATIO_EXCEEDED"))
+	ErrMaxFilesExceeded   = errors.New(i18n.T("ERR_MAX_FILES_EXCEEDED"))
+	ErrMaxExpandedSize    = errors.New(i18n.T("ERR_MAX_EXPANDED_SIZE_EXCEEDED"))
 )
 
 const (

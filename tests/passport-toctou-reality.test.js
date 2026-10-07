@@ -10,8 +10,7 @@
  * Classification : INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -79,30 +78,15 @@ function testGate(gateNumber, description, testFn) {
 function runTests() {
     const Mod = getModule("passport/toctou");
 
-    testGate(37, "pre-admission stage verifies passport signature", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(38, "admission stage verifies live twin hash matches passport twin hash", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(39, "pre-mutation stage re-validates twin hash has not changed", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(40, "TOCTOU: twin mutated between admission and pre-mutation causes rejection", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(41, "reality gate accepts when twin hash is stable", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
     if (!allPassed) {
         process.exit(1);

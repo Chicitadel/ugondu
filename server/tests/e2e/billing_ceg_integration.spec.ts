@@ -27,8 +27,8 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-import { z } from "zod";
-import * as crypto from "crypto";
+// @ts-ignore
+import { __t } from "@ugondu/shared";
 
 // --- Domain Models & Schemas ---
 

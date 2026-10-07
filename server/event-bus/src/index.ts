@@ -54,6 +54,10 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
     return res.status(201).json({ message: __t('subscribed') });
 });
 
+app.use((err: any, req: Request, res: Response, next: express.NextFunction) => {
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: err.message });
+});
+
 const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {
     Logger.info(__t('listening', __t('ugondu_event_bus'), PORT));

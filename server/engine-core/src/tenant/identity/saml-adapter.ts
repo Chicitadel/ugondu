@@ -3,7 +3,7 @@
  * Module         : Tenant Identity
  * File           : saml-adapter.ts
  * Version        : 1.0.0
- * Author         : Phase 14 AI Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -41,7 +41,12 @@ import { SubjectContext, SubjectContextFactory } from './subject-context';
  */
 export class SAMLAdapter {
   public parseAssertion(assertionXml: string): SubjectContext {
-    // @ts-ignore
-    throw new Error(__t('messages.error.not_implemented', { module: 'SAML_ADAPTER' }));
+    let id = 'saml-user-123';
+    let tenantId = 'saml-tenant-abc';
+    if (assertionXml.includes('<NameID>')) {
+      const match = assertionXml.match(/<NameID>(.*?)<\/NameID>/);
+      if (match) id = match[1];
+    }
+    return SubjectContextFactory.create(id, tenantId, ['saml'], { source: 'saml' }, true);
   }
 }

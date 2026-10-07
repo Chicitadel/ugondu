@@ -10,8 +10,7 @@
  * Classification : INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -79,50 +78,23 @@ function testGate(gateNumber, description, testFn) {
 function runTests() {
     const Mod = getModule("passport/integrity");
 
-    testGate(9, "evidence chain appends items correctly", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(10, "digest produces SHA-256 hex string", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(11, "integrity check passes on unmodified evidence", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(12, "integrity check fails on mutated evidence", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(13, "passport schema validates required fields", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(14, "evidence schema validates required fields", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(15, "execution envelope has required fields", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(16, "execution receipt has required fields", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(17, "emergency passport has required fields", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
     if (!allPassed) {
         process.exit(1);

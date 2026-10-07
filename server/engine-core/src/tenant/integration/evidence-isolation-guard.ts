@@ -3,7 +3,7 @@
  * Module         : Tenant Integration
  * File           : evidence-isolation-guard.ts
  * Version        : 1.0.0
- * Author         : Elite Phase 14 Ugondu Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01

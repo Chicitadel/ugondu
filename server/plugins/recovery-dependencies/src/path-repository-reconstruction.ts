@@ -47,7 +47,7 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         if (!plan.requiresRepositoryClone) {
-            return true;
+            return plan !== null;
         }
 
         for (const repo of plan.repositories) {
@@ -60,7 +60,7 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
             }
         }
         
-        return true;
+        return adapter !== null;
     }
 }
 

@@ -10,8 +10,7 @@
  * Classification : GOVERNMENT | ENTERPRISE | PUBLIC | INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced

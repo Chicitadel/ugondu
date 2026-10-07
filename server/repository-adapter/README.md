@@ -5,8 +5,7 @@
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -24,3 +23,4 @@ The Repository Adapter abstracts the storage layer for Ugondu, providing standar
 - `src/index.ts`: Main adapter implementation and entrypoint.
 - `dist/`: Compiled JavaScript output.
 - `Dockerfile`: Container build definition.
+

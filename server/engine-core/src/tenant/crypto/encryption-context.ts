@@ -3,7 +3,7 @@
  * Module         : Tenant Crypto
  * File           : encryption-context.ts
  * Version        : 1.0.0
- * Author         : Elite Phase 14 Ugondu Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Ujomor Platform
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -34,6 +34,7 @@
 
 // @ts-ignore
 import { __t } from '@ugondu/shared';
+import * as crypto from 'crypto';
 
 import { TenantKeyContext } from './tenant-key-context';
 
@@ -50,15 +51,20 @@ export class EncryptionContext {
     }
 
     public encrypt(payload: Buffer): Buffer {
-        // Deterministic implementation representing AES-256-GCM setup
-        return Buffer.concat([Buffer.from('ENCRYPTED:'), payload]);
+        const iv = crypto.randomBytes(12);
+        const cipher = crypto.createCipheriv('aes-256-gcm', this.keyContext.rootKeyMaterial, iv);
+        const encrypted = Buffer.concat([cipher.update(payload), cipher.final()]);
+        const tag = cipher.getAuthTag();
+        return Buffer.concat([iv, tag, encrypted]);
     }
 
     public decrypt(cipher: Buffer): Buffer {
-        const prefix = Buffer.from('ENCRYPTED:');
-        if (!cipher.subarray(0, prefix.length).equals(prefix)) {
-            throw new Error(__t('messages.error.invalid_cipher_payload_format'));
-        }
-        return cipher.subarray(prefix.length);
+        if (cipher.length < 28) throw new Error(__t('messages.error.invalid_cipher_payload_format'));
+        const iv = cipher.subarray(0, 12);
+        const tag = cipher.subarray(12, 28);
+        const encrypted = cipher.subarray(28);
+        const decipher = crypto.createDecipheriv('aes-256-gcm', this.keyContext.rootKeyMaterial, iv);
+        decipher.setAuthTag(tag);
+        return Buffer.concat([decipher.update(encrypted), decipher.final()]);
     }
 }

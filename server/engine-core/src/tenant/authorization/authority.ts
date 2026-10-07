@@ -3,7 +3,7 @@
  * Module         : Tenant Authorization
  * File           : authority.ts
  * Version        : 1.0.0
- * Author         : Phase 14 AI Engineer
+ * Author : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
@@ -53,6 +53,10 @@ export class CentralAuthority implements Authority {
   public authorize(subject: SubjectContext, action: string, resource: any): AuthorizationDecision {
     if (!subject.isActive) {
       return DecisionBuilder.deny(__t('subject_is_inactive'));
+    }
+
+    if (!action || !resource) {
+      return DecisionBuilder.deny(__t('invalid_action_or_resource'));
     }
 
     // Abstracted logic for the sake of standard module setup

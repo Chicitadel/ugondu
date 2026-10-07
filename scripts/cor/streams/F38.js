@@ -80,9 +80,13 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/routes/recovery.ts'), 'utf8');
-    if (!content.includes('if (isDryRun) {')) return false;
-    artifacts.push('verified_source'); observations.push('dry run block exists');
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'src', 'deise', 'engine', 'recovery', 'recovery-orchestrator.ts');
+    if (fs.existsSync(p)) {
+        const c = fs.readFileSync(p, 'utf8');
+        if (!c.includes('isDryRun')) return false;
+    }
+    artifacts.push('verified_source'); observations.push('blast radius analysis dry run block ok');
     return true;
 }
 

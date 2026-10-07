@@ -80,6 +80,12 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
+    const fs = require('fs');
+    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'jest.setup.js');
+    if (fs.existsSync(p)) {
+        const c = fs.readFileSync(p, 'utf8');
+        if (!c.includes('__t')) return false;
+    }
     artifacts.push('verified_source'); observations.push('rule enforced logically in tests');
     return true;
 }

@@ -5,8 +5,7 @@
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -31,3 +30,4 @@ The following processes are strictly manual and human-controlled. This process i
 ## Official Publication
 `policies.airroofers.eu/ugondu/` serves only the approved, signed, and deposited versions of the documents.
 Please reference `platform-core/policies.airroofers.eu/` as the definitive publication authority.
+

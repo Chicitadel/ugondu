@@ -10,8 +10,7 @@
  * Classification : INTERNAL
  *
  * Governance:
- * - AI Governed
- * - Security Reviewed
+  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -79,60 +78,27 @@ function testGate(gateNumber, description, testFn) {
 function runTests() {
     const Mod = getModule("passport/freshness");
 
-    testGate(26, "freshness validator accepts passport within TTL", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(27, "freshness validator rejects expired passport", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(28, "nonce is included in passport payload", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(29, "duplicate nonce is rejected", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(30, "issuedAt is required", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(31, "expiresAt is required and must be after issuedAt", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(32, "passport TTL is enforced (5 min default)", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(33, "replay with same nonce is rejected", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(34, "replay with same executionId is rejected", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(35, "replay authority records execution IDs", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
-    testGate(36, "replay record persists across calls", () => {
-        if (!Mod) throw new Error("SKIP");
-        assert.ok(true);
-    });
+    // Removed tautological test mock
 
     if (!allPassed) {
         process.exit(1);
