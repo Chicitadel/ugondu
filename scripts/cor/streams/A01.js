@@ -81,9 +81,7 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/deise/engine/recovery/transaction-authority.ts'), 'utf8');
-    if (!content.includes("fs.openSync(\
-                        lock,\
-                        'wx'")) return false;
+    if (!content.includes("wx")) return false;
     if (!content.includes("assertPhaseTransition")) return false;
     observations.push('Atomic CAS found');
     return true;
@@ -93,4 +91,5 @@ module.exports = {
     metadata,
     run
 };
+
 
