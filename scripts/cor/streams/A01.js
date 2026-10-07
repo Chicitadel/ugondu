@@ -82,12 +82,33 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
     const path = require('path');
-    const pkgPath = path.join(context.root, 'package.json');
-    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-    if (!pkg.name) throw new Error('INVALID_PACKAGE');
-    artifacts.push('package.json');
-    observations.push(`Verified physical project ${pkg.name}`);
+
+    const authPath = path.join(context.root, 'server', 'engine-core', 'src', 'deise', 'engine', 'recovery', 'transaction-authority.ts'); 
+
+    if (!fs.existsSync(authPath)) {
+        throw new Error('A01_FILE_NOT_FOUND: transaction-authority.ts not found');
+    }
+
+    const source = fs.readFileSync(authPath, 'utf8');
+
+    const requiredPatterns = [
+        { desc: '1 & 2. update() calls withLock() / get() occurs inside withLock()', pattern: /withLock\s*\(/ },
+        { desc: '3. expectedRevision is compared inside lock', pattern: /expectedRevision\s*!==\s*(?:this\.)?[\w]+\.revision/ },
+        { desc: '4. next revision is current.revision + 1', pattern: /\.revision\s*\+\s*1/ },
+        { desc: '5 & 6. writeAtomic uses temporary file + fsync + rename', pattern: /writeAtomic.*tmp.*fsync.*rename/is },
+        { desc: '7. lock is per transaction', pattern: /lock.*transaction/i },
+        { desc: '8. stale lock handling exists', pattern: /stale/i }
+    ];
+
+    for (const req of requiredPatterns) {
+        if (!req.pattern.test(source)) {
+            throw new Error(`A01_CAS_VIOLATION: Source missing required behavior - ${req.desc}`);
+        }
+    }
+
+    observations.push('Verified TransactionAuthority CAS semantics in source');
+    artifacts.push('transaction-authority.ts');
+
     return true;
 }
 

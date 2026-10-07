@@ -1,101 +1,91 @@
 'use strict';
 
 const crypto = require('crypto');
+const { spawnSync } = require('child_process');
 
 const STREAM_ID = 'C19';
 const OBJECTIVE = 'Verify uppie tests pass independently';
 
 const metadata = {
     streamId: STREAM_ID,
-    verifierVersion: '1.0.0',
-    objectiveHash:
-        crypto
-            .createHash('sha256')
-            .update(
-                OBJECTIVE,
-                'utf8'
-            )
-            .digest('hex'),
-    evidenceSchemaVersion: '1.0.0'
+    verifierVersion: '2.0.0',
+    objectiveHash: crypto
+        .createHash('sha256')
+        .update(OBJECTIVE, 'utf8')
+        .digest('hex'),
+    evidenceSchemaVersion: '2.0.0',
+    verificationMode: 'TEST'
 };
 
 async function run(context) {
-    if (
-        context.streamId !==
-        STREAM_ID
-    ) {
+    if (!context || context.streamId !== STREAM_ID) {
+        throw new Error('STREAM_CONTEXT_MISMATCH');
+    }
+
+    const npmCommand =
+        process.platform === 'win32'
+            ? 'npm.cmd'
+            : 'npm';
+
+    const result = spawnSync(
+        npmCommand,
+        [
+            'test',
+            '--workspace',
+            'server/uppie',
+            '--',
+            '--runInBand'
+        ],
+        {
+            cwd: context.root,
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'pipe'],
+            shell: false
+        }
+    );
+
+    if (result.error) {
         throw new Error(
-            'STREAM_CONTEXT_MISMATCH'
+            `C19_TEST_PROCESS_ERROR: ${result.error.message}`
         );
     }
 
-    const observations = [];
-    const artifacts = [];
-
-    const objectivePassed =
-        await verifyObjective(
-            context,
-            observations,
-            artifacts
-        );
-
-    if (!objectivePassed) {
+    if (result.status !== 0) {
         throw new Error(
-            'COR_OBJECTIVE_NOT_PROVEN'
+            `C19_TEST_FAILED: ${(result.stderr || '').slice(-8000)}`
         );
     }
 
     const receipt = {
         status: 'PASS',
         streamId: STREAM_ID,
-        executionId:
-            context.executionId,
-        commitSHA:
-            context.commitSHA,
-        treeSHA:
-            context.treeSHA,
-        objectiveHash:
-            metadata.objectiveHash,
-        startedAt:
-            context.startedAt,
-        completedAt:
-            new Date().toISOString(),
-        observations,
-        artifacts
+        executionId: context.executionId,
+        commitSHA: context.commitSHA,
+        treeSHA: context.treeSHA,
+        objectiveHash: metadata.objectiveHash,
+        startedAt: context.startedAt,
+        completedAt: new Date().toISOString(),
+        observations: [
+            'server/uppie test command completed with exit code 0'
+        ],
+        artifacts: [
+            'server/uppie/package.json',
+            'uppie-test-output'
+        ],
+        testExitCode: result.status,
+        stdoutTail: (result.stdout || '').slice(-4000),
+        stderrTail: (result.stderr || '').slice(-4000)
     };
 
-    receipt.evidenceDigest =
-        crypto
-            .createHash('sha256')
-            .update(
-                JSON.stringify(receipt),
-                'utf8'
-            )
-            .digest('hex');
+    receipt.evidenceDigest = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(receipt), 'utf8')
+        .digest('hex');
 
     return receipt;
-}
-
-const fs = require('fs');
-
-async function verifyObjective(context, observations, artifacts) {
-    const { spawnSync } = require('child_process');
-    const result = spawnSync('go', ['test', './...'], { cwd: require('path').join(context.root, 'client'), encoding: 'utf8', shell: true });
-    if (result.status !== 0) {
-        const out = (result.stdout || '') + (result.stderr || '');
-        if (out.includes('not recognized') || (result.error && result.error.code === 'ENOENT')) {
-            observations.push('go test bypassed locally');
-        } else {
-            throw new Error('UPPIE_TEST_FAILED: ' + out);
-        }
-    }
-    artifacts.push('uppie-test-output');
-    observations.push('Uppie tests passed');
-    return true;
 }
 
 module.exports = {
     metadata,
     run
 };
-

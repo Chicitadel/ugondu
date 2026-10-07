@@ -174,24 +174,6 @@ if (
     );
 }
 
-const payload = {
-    schemaVersion: '3.0.0',
-    repository: 'Chicitadel/ugondu',
-    candidateSHA: commitSHA,
-    treeSHA,
-    manifestDigest:
-        finalization.manifestDigest,
-    qualificationEvidenceRoot:
-        ledger.evidenceRoot,
-    finalizationDigest:
-        finalization.finalizationDigest,
-    status:
-        'COR_CERTIFIED_LAUNCH_APPROVED'
-};
-
-const payloadText =
-    JSON.stringify(payload);
-
 const privateKey =
     crypto.createPrivateKey(
         process.env.COR_SIGNING_KEY
@@ -201,6 +183,32 @@ const publicKey =
     crypto.createPublicKey(
         process.env.COR_PUBLIC_KEY
     );
+
+const TEST_PAYLOAD = Buffer.from('COR_KEY_TEST_PAYLOAD', 'utf8');
+const testSignature = crypto.sign('sha256', TEST_PAYLOAD, privateKey);
+const testVerified = crypto.verify('sha256', TEST_PAYLOAD, publicKey, testSignature);
+
+if (!testVerified) {
+    block('private key does not correspond to trusted public key');
+}
+
+const payload = {
+    schemaVersion: '3.0.0',
+    repository: 'Chicitadel/ugondu',
+    candidateSHA: commitSHA,
+    candidateTree: treeSHA,
+    manifestDigest:
+        finalization.manifestDigest,
+    evidenceRoot:
+        ledger.evidenceRoot,
+    finalizationDigest:
+        finalization.finalizationDigest,
+    status:
+        'COR_SIGNATURE_VALID'
+};
+
+const payloadText =
+    JSON.stringify(payload);
 
 const signature =
     crypto.sign(
@@ -276,5 +284,5 @@ if (!clean()) {
 }
 
 process.stdout.write(
-    `COR CERTIFIED — LAUNCH APPROVED: ${commitSHA}\n`
+    `COR_SIGNATURE_VALID: ${commitSHA}\n`
 );

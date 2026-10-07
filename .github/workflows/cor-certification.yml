@@ -9,7 +9,6 @@ on:
     branches:
       - main
       - phase4/production-hardening
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,6 +29,11 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
+
+      - name: Assert EXACT SHA
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
 
       - name: Assert clean checkout
         shell: bash

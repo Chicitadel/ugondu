@@ -18,12 +18,13 @@ async function runFargateCertification() {
         const campaignId = `ugondu-cor-fargate-001`;
         console.log(__t('cert.fargate.campaign_id', { id: campaignId }));
 
-        const registry = createProductionActionRegistry(region);
+        // Certification runner must ONLY be an observer via read-only abstraction
+        const awsObs = providerAdapter.getNativeClient();
+
+        const registry = createProductionActionRegistry(awsObs);
         const urre = registry.getUrre();
         const evidenceCollector = new EvidenceCollector();
         
-        // Certification runner must ONLY be an observer via read-only abstraction
-        const awsObs = providerAdapter.getNativeClient();
         const txId = `tx-fargate- + campaignId`;
 
         // Trigger canonical actions for Fargate lifecycle

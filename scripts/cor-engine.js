@@ -32,8 +32,12 @@ const EXPECTED_IDS = [
     'F35','F36','F37','F38','F39','F40'
 ];
 
+const canonicalize = require('canonicalize');
+
 function canonical(value) {
-    return JSON.stringify(value);
+    const result = canonicalize(value);
+    if (result === undefined) throw new Error('CANONICALIZE_FAILED');
+    return result;
 }
 
 function sha256Text(value) {
@@ -153,35 +157,35 @@ function assertManifest(manifest, commitSHA, treeSHA) {
 }
 
 function loadExecutor(stream, commitSHA) {
-    const executorPath = path.join(
-        EXECUTOR_DIR,
-        `${stream.id}.js`
-    );
+    const executorPath = path.join(EXECUTOR_DIR, `${stream.id}.js`);
 
     if (!fs.existsSync(executorPath)) {
-        block(
-            `${stream.id} verifier file is missing`
-        );
+        block(`${stream.id} verifier file is missing`);
+    }
+
+    const source = fs.readFileSync(executorPath, 'utf8');
+
+    if (/return\s+true\s*;/.test(source) && !/throw\s+new\s+Error|fail\(/.test(source) && !/assert/.test(source)) {
+        block(`${stream.id} verifier rejected: obvious return true stub`);
+    }
+
+    if (source.includes('verified_source') && source.match(/artifacts\.push\(['"]verified_source['"]\)/)) {
+        block(`${stream.id} verifier rejected: obvious verified_source stub`);
     }
 
     let executor;
-
     try {
         executor = require(executorPath);
     } catch (error) {
-        block(
-            `${stream.id} verifier could not be loaded`
-        );
+        block(`${stream.id} verifier could not be loaded`);
     }
 
-    if (
-        !executor ||
-        typeof executor.run !== 'function' ||
-        !executor.metadata
-    ) {
-        block(
-            `${stream.id} verifier does not satisfy the COR executor contract`
-        );
+    if (!executor || typeof executor.run !== 'function' || !executor.metadata) {
+        block(`${stream.id} verifier does not satisfy the COR executor contract`);
+    }
+
+    if (!['STATIC', 'TEST', 'PHYSICAL', 'INDEPENDENT', 'MANUAL'].includes(executor.metadata.verificationMode)) {
+        block(`${stream.id} verifier missing valid verificationMode in metadata`);
     }
 
     if (executor.metadata.streamId !== stream.id) {

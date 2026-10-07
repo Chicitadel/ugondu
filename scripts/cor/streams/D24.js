@@ -1,98 +1,91 @@
 'use strict';
 
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const STREAM_ID = 'D24';
 const OBJECTIVE = 'Verify en.json exists in server shared locales';
 
 const metadata = {
     streamId: STREAM_ID,
-    verifierVersion: '1.0.0',
-    objectiveHash:
-        crypto
-            .createHash('sha256')
-            .update(
-                OBJECTIVE,
-                'utf8'
-            )
-            .digest('hex'),
-    evidenceSchemaVersion: '1.0.0'
+    verifierVersion: '2.0.0',
+    objectiveHash: crypto
+        .createHash('sha256')
+        .update(OBJECTIVE, 'utf8')
+        .digest('hex'),
+    evidenceSchemaVersion: '2.0.0',
+    verificationMode: 'STATIC'
 };
 
 async function run(context) {
-    if (
-        context.streamId !==
-        STREAM_ID
-    ) {
+    if (!context || context.streamId !== STREAM_ID) {
+        throw new Error('STREAM_CONTEXT_MISMATCH');
+    }
+
+    const file =
+        path.join(
+            context.root,
+            'server',
+            'shared',
+            'locales',
+            'en.json'
+        );
+
+    if (!fs.existsSync(file)) {
+        throw new Error('D24_EN_LOCALE_MISSING');
+    }
+
+    let parsed;
+
+    try {
+        parsed =
+            JSON.parse(
+                fs.readFileSync(file, 'utf8')
+            );
+    } catch (error) {
         throw new Error(
-            'STREAM_CONTEXT_MISMATCH'
+            `D24_EN_LOCALE_INVALID_JSON: ${error.message}`
         );
     }
 
-    const observations = [];
-    const artifacts = [];
-
-    const objectivePassed =
-        await verifyObjective(
-            context,
-            observations,
-            artifacts
-        );
-
-    if (!objectivePassed) {
+    if (
+        !parsed ||
+        typeof parsed !== 'object' ||
+        Array.isArray(parsed)
+    ) {
         throw new Error(
-            'COR_OBJECTIVE_NOT_PROVEN'
+            'D24_EN_LOCALE_INVALID_OBJECT'
         );
     }
 
     const receipt = {
         status: 'PASS',
         streamId: STREAM_ID,
-        executionId:
-            context.executionId,
-        commitSHA:
-            context.commitSHA,
-        treeSHA:
-            context.treeSHA,
-        objectiveHash:
-            metadata.objectiveHash,
-        startedAt:
-            context.startedAt,
-        completedAt:
-            new Date().toISOString(),
-        observations,
-        artifacts
+        executionId: context.executionId,
+        commitSHA: context.commitSHA,
+        treeSHA: context.treeSHA,
+        objectiveHash: metadata.objectiveHash,
+        startedAt: context.startedAt,
+        completedAt: new Date().toISOString(),
+        observations: [
+            'server/shared/locales/en.json exists',
+            'en.json parses as a JSON object'
+        ],
+        artifacts: [
+            'server/shared/locales/en.json'
+        ]
     };
 
-    receipt.evidenceDigest =
-        crypto
-            .createHash('sha256')
-            .update(
-                JSON.stringify(receipt),
-                'utf8'
-            )
-            .digest('hex');
+    receipt.evidenceDigest = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(receipt), 'utf8')
+        .digest('hex');
 
     return receipt;
-}
-
-const fs = require('fs');
-const path = require('path');
-
-async function verifyObjective(context, observations, artifacts) {
-    const fs = require('fs');
-    const p = require('path').join(context.root, 'server', 'shared', 'locales', 'en.json');
-    if (!fs.existsSync(p)) return false;
-    try {
-        const j = JSON.parse(fs.readFileSync(p, 'utf8'));
-        if (!j || typeof j !== 'object') return false;
-    } catch(e) { return false; }
-    artifacts.push('verified_source'); observations.push('en.json exists and parses');
-    return true;
 }
 
 module.exports = {
     metadata,
     run
 };
-

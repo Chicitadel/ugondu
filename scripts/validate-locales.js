@@ -63,11 +63,30 @@ for (const localesDir of localeDirs) {
         const extra = targetKeyNames.filter(k => !sourceKeyNames.includes(k));
         if (extra.length > 0) block(`Extra keys in ${file}: ${extra.join(', ')}`);
 
+        // Explicit allowlist for proper nouns that don't need translation
+        const allowedUnchanged = ['app.name', 'company.name', 'product.brand'];
+
         for (const k of sourceKeyNames) {
-            if (typeof targetKeys[k] !== 'string') block(`Malformed value for key ${k} in ${file}`);
+            const tgtVal = targetKeys[k];
+            const srcVal = sourceKeys[k];
             
-            const sourceP = getPlaceholders(sourceKeys[k]);
-            const targetP = getPlaceholders(targetKeys[k]);
+            // Leaf type parity
+            if (typeof tgtVal !== typeof srcVal) {
+                block(`Type mismatch for key ${k} in ${file}. Expected ${typeof srcVal}, got ${typeof tgtVal}`);
+            }
+
+            if (typeof tgtVal === 'string') {
+                if (tgtVal === "") block(`Empty string not allowed for key ${k} in ${file}`);
+                if (tgtVal === "__UNTRANSLATED__") block(`__UNTRANSLATED__ not allowed for key ${k} in ${file}`);
+                
+                // Untranslated English rejection
+                if (tgtVal === srcVal && !allowedUnchanged.includes(k)) {
+                    block(`Unchanged English string for key ${k} in ${file}. Must be translated or allowlisted.`);
+                }
+            }
+            
+            const sourceP = getPlaceholders(srcVal);
+            const targetP = getPlaceholders(tgtVal);
             if (JSON.stringify(sourceP) !== JSON.stringify(targetP)) {
                 block(`Placeholder mismatch for key ${k} in ${file}`);
             }

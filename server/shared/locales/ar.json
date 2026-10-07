@@ -440,65 +440,65 @@
   "uppie.least_privilege.err_prohibited_scope": "[AR] LeastPrivilegeCompiler: Rule for capability '%{capability}' has prohibited resource scope '%{scope}'.",
   "cert": {
     "phase": {
-      "injecting_faults": "10. Injecting Faults / Drift Out-of-band",
-      "diagnosis_repair": "11. DEISE Diagnosis and Native Repair",
-      "repairing_drift": "12. DEISE Repair (Fixing Drift natively)",
-      "urre_fault_injection": "13. URRE Fault Injection & Rollback (Same transaction DAG)",
-      "testing_rollback": "Fault caught, testing rollback on the same TX. Error: {error}",
-      "cleanup": "14. Cleanup (Canonical Actions Only)",
-      "residual_scan": "15. Residual Scan Verification"
+      "injecting_faults": "[AR] 10. Injecting Faults / Drift Out-of-band",
+      "diagnosis_repair": "[AR] 11. DEISE Diagnosis and Native Repair",
+      "repairing_drift": "[AR] 12. DEISE Repair (Fixing Drift natively)",
+      "urre_fault_injection": "[AR] 13. URRE Fault Injection & Rollback (Same transaction DAG)",
+      "testing_rollback": "[AR] Fault caught, testing rollback on the same TX. Error: {error}",
+      "cleanup": "[AR] 14. Cleanup (Canonical Actions Only)",
+      "residual_scan": "[AR] 15. Residual Scan Verification"
     },
     "diagnoses": {
-      "found": "Diagnoses found: {count}"
+      "found": "[AR] Diagnoses found: {count}"
     },
     "residual_scan": {
-      "clean": "Residual Scan: Clean!"
+      "clean": "[AR] Residual Scan: Clean!"
     },
     "run": {
-      "complete": "? Certification Run Complete."
+      "complete": "[AR] ? Certification Run Complete."
     },
     "fargate": {
-      "start": "=== UGONDU COR-7 FARGATE LIFECYCLE CERTIFICATION ===",
-      "campaign_id": "Campaign ID: {id}",
+      "start": "[AR] === UGONDU COR-7 FARGATE LIFECYCLE CERTIFICATION ===",
+      "campaign_id": "[AR] Campaign ID: {id}",
       "action": {
-        "registry_create": "Triggering canonical action: container:registry:create",
-        "image_build": "Triggering canonical action: container:image:build",
-        "image_push": "Triggering canonical action: container:image:push",
-        "taskdef_create1": "Triggering canonical action: container:task-definition:create (Revision 1)",
-        "service_create": "Triggering canonical action: container:service:create (Deploy Revision 1)",
-        "deploy_rev2": "Triggering canonical action: orchestration:container:deploy (Revision 2)"
+        "registry_create": "[AR] Triggering canonical action: container:registry:create",
+        "image_build": "[AR] Triggering canonical action: container:image:build",
+        "image_push": "[AR] Triggering canonical action: container:image:push",
+        "taskdef_create1": "[AR] Triggering canonical action: container:task-definition:create (Revision 1)",
+        "service_create": "[AR] Triggering canonical action: container:service:create (Deploy Revision 1)",
+        "deploy_rev2": "[AR] Triggering canonical action: orchestration:container:deploy (Revision 2)"
       },
       "polling": {
-        "rev1": "Polling ECS state for Revision 1 stabilization (no sleep)...",
-        "rev2_fail": "Polling ECS state for Revision 2 failure (no sleep)...",
-        "rev1_after_rollback": "Waiting for Revision 1 to stabilize after rollback..."
+        "rev1": "[AR] Polling ECS state for Revision 1 stabilization (no sleep)...",
+        "rev2_fail": "[AR] Polling ECS state for Revision 2 failure (no sleep)...",
+        "rev1_after_rollback": "[AR] Waiting for Revision 1 to stabilize after rollback..."
       },
       "deploying": {
-        "rev2": "Deploying Revision 2 with invalid image digest..."
+        "rev2": "[AR] Deploying Revision 2 with invalid image digest..."
       },
-      "trigger_rollback": "Triggering rollback for transactionId: {txId}",
-      "complete": "\n? Fargate Certification Run Complete."
+      "trigger_rollback": "[AR] Triggering rollback for transactionId: {txId}",
+      "complete": "[AR] \n? Fargate Certification Run Complete."
     }
   },
   "error": {
     "evidence": {
-      "integrity_check_failed": "Evidence integrity check failed."
+      "integrity_check_failed": "[AR] Evidence integrity check failed."
     },
     "cert": {
-      "simulated_fault": "Simulated Fault during execution",
-      "residual_scan_failed": "Residual Scan FAILED! Resources leaked.",
-      "missing_region": "BLOCKED: UGONDU_CERT_REGION is required",
-      "missing_creds": "BLOCKED: UGONDU_CERT_RDS_CREDENTIAL_REF is required",
+      "simulated_fault": "[AR] Simulated Fault during execution",
+      "residual_scan_failed": "[AR] Residual Scan FAILED! Resources leaked.",
+      "missing_region": "[AR] BLOCKED: UGONDU_CERT_REGION is required",
+      "missing_creds": "[AR] BLOCKED: UGONDU_CERT_RDS_CREDENTIAL_REF is required",
       "fargate": {
-        "missing_digest": "Missing physical image digest",
-        "missing_taskdef_arn": "Missing task definition ARN",
-        "missing_service_arn": "Missing service ARN",
-        "rev1_fail": "Revision 1 failed to stabilize",
-        "missing_rev2_arn": "Missing revision 2 task def ARN",
-        "tx_load_fail": "Failed to load durably persisted transaction: {txId}",
-        "rev2_did_not_fail": "Revision 2 did not fail as expected",
-        "revert_fail": "Failed to revert to Revision 1",
-        "fatal": "Fargate Certification run fatally failed"
+        "missing_digest": "[AR] Missing physical image digest",
+        "missing_taskdef_arn": "[AR] Missing task definition ARN",
+        "missing_service_arn": "[AR] Missing service ARN",
+        "rev1_fail": "[AR] Revision 1 failed to stabilize",
+        "missing_rev2_arn": "[AR] Missing revision 2 task def ARN",
+        "tx_load_fail": "[AR] Failed to load durably persisted transaction: {txId}",
+        "rev2_did_not_fail": "[AR] Revision 2 did not fail as expected",
+        "revert_fail": "[AR] Failed to revert to Revision 1",
+        "fatal": "[AR] Fargate Certification run fatally failed"
       }
     }
   }

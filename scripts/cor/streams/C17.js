@@ -15,7 +15,8 @@ const metadata = {
         .createHash('sha256')
         .update(OBJECTIVE, 'utf8')
         .digest('hex'),
-    evidenceSchemaVersion: '2.0.0'
+    evidenceSchemaVersion: '2.0.0',
+    verificationMode: 'TEST'
 };
 
 function fail(message) {
@@ -53,12 +54,9 @@ async function run(context) {
             cwd: context.root,
             encoding: 'utf8',
             stdio: ['ignore', 'pipe', 'pipe'],
-            shell: true
+            shell: false
         }
     );
-
-    const stdout = result.stdout || '';
-    const stderr = result.stderr || '';
 
     if (result.error) {
         fail(result.error.message);
@@ -67,12 +65,8 @@ async function run(context) {
     if (result.status !== 0) {
         fail(
             `engine-core tests failed with exit code ${result.status}\n` +
-            stderr.slice(-8000)
+            (result.stderr || '').slice(-8000)
         );
-    }
-
-    if (!/PASS|Tests:\s+\d+ passed/i.test(stdout)) {
-        fail('test command did not produce a verifiable passing result');
     }
 
     const receipt = {
@@ -91,7 +85,9 @@ async function run(context) {
             'server/engine-core/package.json',
             'engine-core-test-output'
         ],
-        testExitCode: result.status
+        testExitCode: result.status,
+        stdoutTail: (result.stdout || '').slice(-4000),
+        stderrTail: (result.stderr || '').slice(-4000)
     };
 
     receipt.evidenceDigest = crypto

@@ -82,12 +82,30 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
     const path = require('path');
-    const pkgPath = path.join(context.root, 'package.json');
-    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkgPath = path.join(context.root, 'server', 'engine-core', 'package.json');
+
+    if (!fs.existsSync(pkgPath)) {
+        throw new Error('C20_FILE_NOT_FOUND: server/engine-core/package.json');
+    }
+
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-    if (!pkg.name) throw new Error('INVALID_PACKAGE');
-    artifacts.push('package.json');
-    observations.push(`Verified physical project ${pkg.name}`);
+
+    if (
+        pkg.dependencies &&
+        Object.keys(pkg.dependencies).some(name => name.startsWith('@aws-sdk/'))
+    ) {
+        throw new Error('C20_AWS_PRODUCTION_DEPENDENCY');
+    }
+
+    const prodDeps = pkg.dependencies ? Object.keys(pkg.dependencies) : [];
+    const devDeps = pkg.devDependencies ? Object.keys(pkg.devDependencies) : [];
+
+    artifacts.push('server/engine-core/package.json');
+
+    observations.push(`Production dependency list: ${prodDeps.join(', ') || 'none'}`);
+    observations.push(`Dev dependency list: ${devDeps.join(', ') || 'none'}`);
+    observations.push('Verified @aws-sdk is not a production dependency in engine-core');
+
     return true;
 }
 

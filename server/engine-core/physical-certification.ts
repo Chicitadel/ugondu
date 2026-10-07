@@ -13,7 +13,8 @@ async function runCertification() {
     const providerAdapter = getProviderAdapter('aws', region);
     const campaignId = `UGONDU-COR- + new Date().toISOString().split('T')[0] + -001`;
 
-    const registry = createProductionActionRegistry(region);
+    const awsObs = providerAdapter.getNativeClient();
+    const registry = createProductionActionRegistry(awsObs);
     const evidenceCollector = new EvidenceCollector();
     const urre = registry.getUrre();
     

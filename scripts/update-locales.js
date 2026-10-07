@@ -43,10 +43,10 @@ function mergeMissing(src, tgt, filePath) {
         }
     }
     
-    // Remove extra keys to ensure deterministic output matching source schema
+    // Check for extra keys to ensure deterministic output matching source schema
     for (const k in tgt) {
         if (!(k in src)) {
-            changed = true;
+            block(`Extra translation key '${k}' in ${filePath}. Extra keys are not allowed.`);
         }
     }
     

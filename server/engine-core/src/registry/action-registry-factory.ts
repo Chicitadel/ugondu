@@ -1,12 +1,11 @@
 import { URREngine } from '../urre/execution/urre-engine';
 import { DagNode } from '../urre/transaction/transaction-dag';
 import { UniversalActionRegistry } from './action-registry';
-import { AwsNativeClient } from '../fabric/providers/aws-native-client';
 
-export function createProductionActionRegistry(region: string): UniversalActionRegistry {
+export function createProductionActionRegistry(adapter: any): UniversalActionRegistry {
     const urre = new URREngine();
     const registry = new UniversalActionRegistry(urre);
-    const aws = new AwsNativeClient(region);
+    const aws = adapter;
 
     // VPC
     urre.registerHandler('aws', 'CREATE_VPC', async (node: DagNode) => {
