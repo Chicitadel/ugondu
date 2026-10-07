@@ -67,7 +67,6 @@ export class UniversalActionRegistry {
                 execute: async (p) => this.dispatchToURRE('TERMINATE_VPC', p)
             },
             {
-                {
                     id: 'container:registry:create', domain: 'container', operation: 'create', providerAgnostic: true, description: __t('msg_create_container_registry'),
                     inputSchema: {}, outputSchema: {}, risk: 'MEDIUM', requiredCapabilities: ['orchestration.deploy'],
                     execute: async (p) => this.dispatchToURRE('CREATE_CONTAINER_REGISTRY', p)

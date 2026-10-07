@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "test": "jest --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "echo no build needed"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
