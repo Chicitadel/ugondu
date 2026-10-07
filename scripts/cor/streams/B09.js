@@ -1,6 +1,8 @@
 'use strict';
 
 const crypto = require('crypto');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
 const STREAM_ID = 'B09';
 const OBJECTIVE = 'Verify removal of global upm bypass from jest.setup.ts';
@@ -69,7 +71,7 @@ async function run(context) {
         crypto
             .createHash('sha256')
             .update(
-                JSON.stringify(receipt),
+                canonicalize(receipt),
                 'utf8'
             )
             .digest('hex');

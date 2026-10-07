@@ -1,6 +1,8 @@
 'use strict';
 
 const crypto = require('crypto');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
 const STREAM_ID = 'B16';
 const OBJECTIVE = 'Verify absence of out-of-bounds bash execution in core engine';

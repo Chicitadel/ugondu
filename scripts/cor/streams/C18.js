@@ -1,6 +1,8 @@
 'use strict';
 
 const crypto = require('crypto');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 const { spawnSync } = require('child_process');
 
 const STREAM_ID = 'C18';
@@ -84,7 +86,7 @@ async function run(context) {
 
     receipt.evidenceDigest = crypto
         .createHash('sha256')
-        .update(JSON.stringify(receipt), 'utf8')
+        .update(canonicalize(receipt), 'utf8')
         .digest('hex');
 
     return receipt;

@@ -1,6 +1,8 @@
 'use strict';
 
 const crypto = require('crypto');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 const fs = require('fs');
 const path = require('path');
 
@@ -57,7 +59,7 @@ async function run(context) {
         artifacts
     };
 
-    receipt.evidenceDigest = crypto.createHash('sha256').update(JSON.stringify(receipt), 'utf8').digest('hex');
+    receipt.evidenceDigest = crypto.createHash('sha256').update(canonicalize(receipt), 'utf8').digest('hex');
     return receipt;
 }
 

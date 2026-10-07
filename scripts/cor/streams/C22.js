@@ -1,6 +1,8 @@
 'use strict';
 
 const crypto = require('crypto');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
 const STREAM_ID = 'C22';
 const OBJECTIVE = 'Verify zero hardcoded fmt strings in client repair CLI';
@@ -69,7 +71,7 @@ async function run(context) {
         crypto
             .createHash('sha256')
             .update(
-                JSON.stringify(receipt),
+                canonicalize(receipt),
                 'utf8'
             )
             .digest('hex');
