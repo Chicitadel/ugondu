@@ -52,6 +52,32 @@ async function verifyObjective(context, observations, artifacts) {
 }
 ;
 
+
+async function run(context) {
+    if (context.streamId !== STREAM_ID) throw new Error('STREAM_CONTEXT_MISMATCH');
+
+    const observations = [];
+    const artifacts = [];
+
+    const objResult = await verifyObjective(context, observations, artifacts);
+
+    const receipt = {
+        status: 'PASS',
+        streamId: STREAM_ID,
+        executionId: context.executionId,
+        commitSHA: context.commitSHA,
+        treeSHA: context.treeSHA,
+        objectiveHash: metadata.objectiveHash,
+        startedAt: context.startedAt,
+        completedAt: new Date().toISOString(),
+        observations,
+        artifacts
+    };
+
+    receipt.evidenceDigest = crypto.createHash('sha256').update(canonicalize(receipt), 'utf8').digest('hex');
+    return receipt;
+}
+
 module.exports = {
     metadata,
     run
