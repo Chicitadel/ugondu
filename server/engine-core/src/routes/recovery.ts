@@ -24,7 +24,7 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
         throw new Error('UGONDU_UPM_SECRET missing. Policy gate failed closed.');
     }
 
-    const canonicalIntentHash = crypto.createHash('sha256').update(JSON.stringify(intent)).digest('hex');
+    const pureIntent = { capabilityId: intent.capabilityId, target: intent.target, authorizedActions: intent.authorizedActions }; const canonicalIntentHash = crypto.createHash('sha256').update(JSON.stringify(pureIntent)).digest('hex');
     if (existingTxnId) { const existingTxn = TransactionAuthority.get(existingTxnId); if (existingTxn.intentHash !== canonicalIntentHash) throw new Error('Intent cryptographic binding mismatch on resume'); }
     const cap = GlobalCapabilityRegistry.getCapability(intent.capabilityId);
     if (!cap) throw new Error(`Capability ${intent.capabilityId} not registered or unsupported.`);
@@ -32,7 +32,7 @@ export async function executeGovernedRecovery(intent: any, adapter: any, isDryRu
     const txn = existingTxnId ? TransactionAuthority.get(existingTxnId) : TransactionAuthority.create(intent);
     TransactionAuthority.update(txn.id, { status: 'RUNNING' });
 
-    const scope = { resourceIdentifiers: [intent.target || 'auto'], requiredProviders: [], expectedState: {}, targetUri: 'local', tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
+    const scope = { resourceIdentifiers: [intent.target || 'auto'], requiredProviders: [], expectedState: {}, targetUri: intent.target, tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
     const twin = await orchestrator.capture(adapter, scope);
     (scope as any).baselineFingerprint = await orchestrator.fingerprint(adapter, scope);
     
@@ -95,5 +95,6 @@ recoveryRouter.post('/execute', express.json(), async (req, res) => {
         return res.status(500).json({ status: 'FAILED', message: e.message });
     }
 });
+
 
 

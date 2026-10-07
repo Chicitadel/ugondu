@@ -15,17 +15,16 @@ export class TransactionAuthority {
     private static storeDir = path.join(process.cwd(), '.ugondu_transactions');
 
     private static ensureDir() {
-        if (!fs.existsSync(this.storeDir)) {
-            fs.mkdirSync(this.storeDir, { recursive: true });
-        }
+        if (!fs.existsSync(this.storeDir)) fs.mkdirSync(this.storeDir, { recursive: true });
     }
 
     public static create(intent: any): PersistedTransaction {
         this.ensureDir();
         const id = `txn-${crypto.randomBytes(8).toString('hex')}`;
-        const intentHash = crypto.createHash('sha256').update(JSON.stringify(intent)).digest('hex');
+        const pureIntent = { capabilityId: intent.capabilityId, target: intent.target, authorizedActions: intent.authorizedActions };
+        const intentHash = crypto.createHash('sha256').update(JSON.stringify(pureIntent)).digest('hex');
         const txn: PersistedTransaction = { id, status: 'PENDING', intent, intentHash };
-        fs.writeFileSync(path.join(this.storeDir, `${id}.json`), JSON.stringify(txn, null, 2));
+        this.writeAtomic(id, txn);
         return txn;
     }
 
@@ -39,7 +38,14 @@ export class TransactionAuthority {
     public static update(id: string, updates: Partial<PersistedTransaction>): PersistedTransaction {
         const txn = this.get(id);
         Object.assign(txn, updates);
-        fs.writeFileSync(path.join(this.storeDir, `${id}.json`), JSON.stringify(txn, null, 2));
+        this.writeAtomic(id, txn);
         return txn;
+    }
+
+    private static writeAtomic(id: string, data: any) {
+        const file = path.join(this.storeDir, `${id}.json`);
+        const tmp = file + '.tmp';
+        fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+        fs.renameSync(tmp, file);
     }
 }

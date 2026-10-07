@@ -11,7 +11,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
 
     private execRemote(target: string, cmd: string) {
         if (target === 'localhost') return execSync(cmd).toString().trim();
-        return execSync(`ssh -o StrictHostKeyChecking=no ${target} "${cmd}"`).toString().trim();
+        return execSync(`ssh -o StrictHostKeyChecking=no -o BatchMode=yes ${target} "${cmd}"`).toString().trim();
     }
 
     async identify(scope: RecoveryScope): Promise<any> {
@@ -26,13 +26,14 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean; actualState: any; verificationEvidence: any }> {
         const current = await this.identify(scope);
-        const verified = current.host === expectedState?.host || true; 
+        const verified = current.host === expectedState?.host; 
         return { verified, actualState: current, verificationEvidence: { checkedAt: new Date().toISOString(), match: verified } };
     }
 
     async rollback(checkpointId: string): Promise<boolean> {
+        const target = this.getTarget({} as any);
         try {
-            this.execRemote('localhost', `echo "Rolling back ${checkpointId}"`);
+            this.execRemote(target, `rm -f /tmp/ugondu_recovery_${checkpointId}`);
             return true;
         } catch { return false; }
     }
@@ -47,7 +48,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
         const evidence: any[] = [];
         if (plan.infrastructureRepairs) {
             for (const repair of plan.infrastructureRepairs) {
-                const res = this.execRemote(target, `echo 'executing ${repair.id}'`);
+                const res = this.execRemote(target, `mkdir -p /tmp/ugondu_recovery_${repair.id} && echo 'recovered' > /tmp/ugondu_recovery_${repair.id}/state`);
                 evidence.push({ repair: repair.id, status: 'mutated', output: res });
             }
         }
@@ -56,10 +57,9 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async fingerprintRepository(scope: RecoveryScope): Promise<string> {
         const target = this.getTarget(scope);
-        try {
-            const h = this.execRemote(target, 'sha256sum /etc/os-release | awk \'{print $1}\'');
-            return h;
-        } catch { return crypto.randomBytes(16).toString('hex'); }
+        const h = this.execRemote(target, 'ls -la / | sha256sum | awk \'{print $1}\'');
+        if (!h || h.length < 10) throw new Error("Fingerprint generation failed. Failing closed.");
+        return h;
     }
 
     async checkDrift(scope: RecoveryScope, baselineFingerprint: string): Promise<boolean> {

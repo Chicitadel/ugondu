@@ -69,7 +69,7 @@ function runStream(stream) {
     const success = exitCode === 0 && command !== 'SIMULATION';
     let streamStatus = command === 'SIMULATION' ? 'NOT_PROVEN' : (success ? 'PASS' : 'FAIL');
     const receipt = {
-        stream.id: stream.id,
+        streamId: stream.id,
         executionId: executionId,
         executionTimestamp: ts,
         command: command,
@@ -105,6 +105,7 @@ if (!allPass) {
 } else {
     console.log('COR Engine finished. Status: COR_CERTIFIED');
 }
+
 
 
 
