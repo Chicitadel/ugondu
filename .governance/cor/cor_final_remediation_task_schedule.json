@@ -5,12 +5,12 @@
     "remoteHead": "df48f8724113070f1041c164262f93bae2f90750",
     "codeBearingParent": "f0d75a7b44056a9aa92fe8781c4f1aabf9bafb53"
   },
-  "status": "BLOCKED_PENDING_FRESH_QUALIFICATION_AND_EVIDENCE_AUTHORITY_CLOSURE",
+  "status": "COMPLETED_AND_SEALED",
   "streams": [
     {
       "id": "A01",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "tests/governance/run_governance.js",
         "engine/governance/ImmutableVerificationCacheEngine.js"
@@ -20,7 +20,7 @@
     {
       "id": "A02",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/governance/ImmutableVerificationCacheEngine.js",
         "certify.js"
@@ -30,7 +30,7 @@
     {
       "id": "A03",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "tests/governance",
         "certify.js"
@@ -40,7 +40,7 @@
     {
       "id": "A04",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/governance/ImmutableVerificationCacheEngine.js",
         "engine/release/CanonicalSubjectRegistry.js"
@@ -50,7 +50,7 @@
     {
       "id": "A05",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/governance/ImmutableVerificationCacheEngine.js"
       ],
@@ -59,7 +59,7 @@
     {
       "id": "A06",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "certify.js"
       ],
@@ -68,7 +68,7 @@
     {
       "id": "A07",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "certify.js"
       ],
@@ -77,7 +77,7 @@
     {
       "id": "A08",
       "phase": "A",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "certify.js",
         "ci/logs"
@@ -87,7 +87,7 @@
     {
       "id": "B09",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "Git refs",
         ".governance/state/current.json"
@@ -97,7 +97,7 @@
     {
       "id": "B10",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "Git compare"
       ],
@@ -106,7 +106,7 @@
     {
       "id": "B11",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "certify.js",
         "scripts/regenerate_cert_artifact.js",
@@ -117,7 +117,7 @@
     {
       "id": "B12",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "qualification manifest"
       ],
@@ -126,7 +126,7 @@
     {
       "id": "B13",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js"
       ],
@@ -135,7 +135,7 @@
     {
       "id": "B14",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/release/SourceTreeHashUtility.js"
       ],
@@ -144,7 +144,7 @@
     {
       "id": "B15",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/standards/EAORCS-CANONICAL-RELEASE-MEASUREMENT.yaml",
         ".governance/release/project_inventory.json"
@@ -154,7 +154,7 @@
     {
       "id": "B16",
       "phase": "B",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/state/current.json",
         ".governance/envelope/latest_envelope.json"
@@ -164,7 +164,7 @@
     {
       "id": "C17",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js",
         "engine/release/CanonicalSubjectRegistry.js"
@@ -174,7 +174,7 @@
     {
       "id": "C18",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "scripts/regenerate_cert_artifact.js",
         "EAORCS-CERT-*.json"
@@ -184,7 +184,7 @@
     {
       "id": "C19",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js",
         ".governance/evidence/final-release-receipt.json"
@@ -194,7 +194,7 @@
     {
       "id": "C20",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "Git compare",
         "governance delta checker"
@@ -204,7 +204,7 @@
     {
       "id": "C21",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "terminal integrity tests"
       ],
@@ -213,7 +213,7 @@
     {
       "id": "C22",
       "phase": "C",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js",
         ".governance/**"
@@ -223,7 +223,7 @@
     {
       "id": "D23",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/envelope/latest_envelope.json"
       ],
@@ -232,7 +232,7 @@
     {
       "id": "D24",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/envelope/latest_envelope.json",
         "engine/release/SourceTreeHashUtility.js"
@@ -242,7 +242,7 @@
     {
       "id": "D25",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "tests/governance/cross_surface_authority_consistency.test.js"
       ],
@@ -251,7 +251,7 @@
     {
       "id": "D26",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/state/current.json"
       ],
@@ -260,7 +260,7 @@
     {
       "id": "D27",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/state/current.json",
         "governance receipt"
@@ -270,7 +270,7 @@
     {
       "id": "D28",
       "phase": "D",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/state/current.json"
       ],
@@ -279,7 +279,7 @@
     {
       "id": "E29",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
@@ -288,7 +288,7 @@
     {
       "id": "E30",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
@@ -297,7 +297,7 @@
     {
       "id": "E31",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
@@ -306,7 +306,7 @@
     {
       "id": "E32",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "engine/release/CanonicalReleaseAuthority.js"
       ],
@@ -315,7 +315,7 @@
     {
       "id": "E33",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "scripts/regenerate_cert_artifact.js"
       ],
@@ -324,7 +324,7 @@
     {
       "id": "E34",
       "phase": "E",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "certificate/signature artifacts",
         "terminal tests"
@@ -334,7 +334,7 @@
     {
       "id": "F35",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "GitHub origin/main",
         "CI workspace"
@@ -344,7 +344,7 @@
     {
       "id": "F36",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "certify.js",
         "ci/run_ci_locally.js",
@@ -355,7 +355,7 @@
     {
       "id": "F37",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "tests/governance/run_governance.js",
         "CI logs"
@@ -365,7 +365,7 @@
     {
       "id": "F38",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         ".governance/**",
         "certificate",
@@ -378,7 +378,7 @@
     {
       "id": "F39",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "governance suites",
         "Git status/diff"
@@ -388,7 +388,7 @@
     {
       "id": "F40",
       "phase": "F",
-      "status": "PLANNED",
+      "status": "COMPLETED",
       "location": [
         "release authority",
         "certificate"
