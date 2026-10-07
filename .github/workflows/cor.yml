@@ -131,10 +131,10 @@ jobs:
           aws-region: us-east-1
 
       - name: Run physical certification
-        run: npx ts-node server/engine-core/physical-certification.ts
+        run: npx ts-node -T server/engine-core/physical-certification.ts
 
       - name: Run physical fargate certification
-        run: npx ts-node server/engine-core/physical-fargate-certification.ts
+        run: npx ts-node -T server/engine-core/physical-fargate-certification.ts
 
       - name: Assert zero residual resources cleanup verification
         run: |
