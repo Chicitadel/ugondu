@@ -25,7 +25,7 @@ async function run(context) {
     
     // We will run Jest specifically for this harness.
     const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const result = spawnSync(process.execPath, ['C:\Users\Professional\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js', 'test', '--workspace', 'server/engine-core', '--', 'tests/recovery/f40-passport.spec.ts', '--runInBand'],
+    const result = spawnSync(process.execPath, ['C:\\\\Users\\\\Professional\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\npm\\\\bin\\\\npm-cli.js', 'test', '--workspace', 'server/engine-core', '--', 'tests/recovery/f40-passport.spec.ts', '--runInBand'],
         { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: false }
     );
 

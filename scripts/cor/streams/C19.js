@@ -29,7 +29,7 @@ async function run(context) {
             ? 'npm.cmd'
             : 'npm';
 
-    const result = spawnSync(process.execPath, ['C:\Users\Professional\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js', 
+    const result = spawnSync(process.execPath, ['C:\\\\Users\\\\Professional\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\npm\\\\bin\\\\npm-cli.js', 
             'test',
             '--workspace',
             'server/uppie',
