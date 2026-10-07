@@ -43,6 +43,7 @@ import { KubernetesRbacAdapter } from '../adapters/kubernetes-rbac/KubernetesRba
 import { LinuxAclAdapter } from '../adapters/linux-acl/LinuxAclAdapter';
 import type { IPolicyProviderAdapter, AdapterContext, ProviderNativePolicy, DependencyReport, ConflictReport, ReconciliationPlan } from '../adapters/IPolicyProviderAdapter';
 import type { AuthorizationRule, AuthorizationAction, AuthorizationResource, AuthorizationValidity, AuthorizationConstraints, EffectiveAuthorityResult, PolicyRetirementCertificate, UsageClassification, AuthorizationProvenance } from '../types/index';
+import { __t } from '../../../shared/i18n';
 
 declare var describe: any;
 declare var it: any;

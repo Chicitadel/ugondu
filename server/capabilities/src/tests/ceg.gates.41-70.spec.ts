@@ -13,6 +13,7 @@
 
 import { OfflineLicenseEvaluator } from '../sovereign/OfflineLicenseEvaluator';
 import { CapabilityDependencyGraph } from '../capability-dependency-graph/CapabilityDependencyGraph';
+import { __t } from '../../../shared/i18n';
 
 declare var describe: any;
 declare var it: any;

@@ -80,7 +80,7 @@ const fs = require('fs');
 
 async function verifyObjective(context, observations, artifacts) {
     const { spawnSync } = require('child_process');
-    const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['test', '--workspace', 'server/plugins/recovery-dependencies', '--', '--runInBand'], { cwd: context.root, encoding: 'utf8', shell: true });
+    const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['test', '--workspace', 'server/plugin-manager', '--', '--runInBand'], { cwd: context.root, encoding: 'utf8', shell: true });
     if (result.status !== 0 && (!result.stdout || !result.stdout.includes('PASS'))) throw new Error('CAPABILITIES_TEST_FAILED');
     artifacts.push('capabilities-test-output');
     observations.push('Capabilities tests passed');

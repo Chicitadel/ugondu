@@ -4,4 +4,5 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['**/*.spec.ts'],
   testTimeout: 10000,
+  transformIgnorePatterns: ['node_modules/(?!(canonicalize)/)'],
 };
