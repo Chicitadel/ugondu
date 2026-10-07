@@ -55,7 +55,7 @@ describe('Recovery Lifecycle Verification', () => {
         
         const txn = TransactionAuthority.get(result.transactionId);
         expect(txn.status).toBe('PENDING');
-        expect(txn.state.phase).toBe('DRY_RUN_COMPLETE');
+        expect(txn!.state!.phase).toBe('DRY_RUN_COMPLETE');
     });
 
     it('should progress through all phases for a real run', async () => {
@@ -69,7 +69,7 @@ describe('Recovery Lifecycle Verification', () => {
         
         const txn = TransactionAuthority.get(result.transactionId);
         expect(txn.status).toBe('SUCCESS');
-        expect(txn.state.phase).toBe('CERTIFIED');
+        expect(txn!.state!.phase).toBe('CERTIFIED');
 
         const updates = updateSpy.mock.calls.map(call => call[2] as any);
         
