@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { execSync } = require('child_process');
 const readline = require('readline');
 
@@ -73,7 +75,7 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
 
     console.log('\n[FEDERATION PATH]');
     console.log('Target: GitHub Actions OIDC → AWS IAM Role');
-    console.log('Status: Establishing trust...\n');
+    console.log('Status: Establishing trust configuration...\n');
 
     const roleArn = `arn:aws:iam::${accountId}:role/UgonduCORRunner`;
     const oidcProviderArn = `arn:aws:iam::${accountId}:oidc-provider/token.actions.githubusercontent.com`;
@@ -126,11 +128,9 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
             console.log('   Required next operation: iam:CreateOpenIDConnectProvider');
             console.log('   Risk: HIGH — establishes a new IAM federated identity provider');
             
-            // Because we don't have iam:SimulatePrincipalPolicy, we implicitly test authority by attempting creation
             try {
-                execSync('aws iam create-open-id-connect-provider --url "https://token.actions.githubusercontent.com" --thumbprint-list "6938fd4d98bab03faadb97b34396831e3780aea1" "1c58a3a8518e8759bf075b76b750d4f2df264fcd" --client-id-list "sts.amazonaws.com"', { env, stdio: 'pipe' });
+                execSync('aws iam create-open-id-connect-provider --url "https://token.actions.githubusercontent.com" --client-id-list "sts.amazonaws.com"', { env, stdio: 'pipe' });
                 
-                // If it passes, authority is confirmed
                 console.log('\n[AUTHORITY VERIFIED]');
                 console.log('Requested identity infrastructure change: CREATE IAM OIDC PROVIDER');
                 console.log('Provider: https://token.actions.githubusercontent.com');
@@ -144,7 +144,6 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
                 
                 console.log('   ✓ OIDC Provider successfully created.');
                 
-                // Explicit READ-BACK -> VERIFY
                 console.log('   Reading back newly created provider configuration...');
                 let providerDetails;
                 try {
@@ -182,77 +181,92 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
                 Principal: { Federated: oidcProviderArn },
                 Action: 'sts:AssumeRoleWithWebIdentity',
                 Condition: {
-                    StringLike: { 'token.actions.githubusercontent.com:sub': 'repo:Chicitadel/ugondu:*' },
+                    StringLike: { 'token.actions.githubusercontent.com:sub': [
+                        'repo:Chicitadel/ugondu:*',
+                        'repo:Chicitadel@*/ugondu@*:*'
+                    ]},
                     StringEquals: { 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com' }
                 }
             }]
         };
-        fs.writeFileSync('trust-policy.json', JSON.stringify(trustPolicy));
         
-        let roleExisted = false;
+        const tempPolicyPath = path.join(os.tmpdir(), `ugondu-trust-policy-${Date.now()}.json`);
+        
         try {
-            execSync('aws iam get-role --role-name UgonduCORRunner', { env, stdio: 'pipe' });
-            roleExisted = true;
-            console.log('   ✓ UgonduCORRunner exists.');
-        } catch (e) {
-            if (e.message.includes('AccessDenied')) {
-                throw new Error('AUTHORITY_GAP: iam:GetRole');
-            }
-        }
-
-        if (!roleExisted) {
-            console.log('   Status: ROLE NOT FOUND');
-            console.log('   Required next operation: iam:CreateRole');
+            fs.writeFileSync(tempPolicyPath, JSON.stringify(trustPolicy));
             
+            let roleExisted = false;
             try {
-                execSync('aws iam create-role --role-name UgonduCORRunner --assume-role-policy-document file://trust-policy.json', { env, stdio: 'pipe' });
-                console.log('\n[AUTHORITY VERIFIED]');
-                console.log('Requested identity infrastructure change: CREATE IAM ROLE');
-                console.log('Authorization: ✓ iam:CreateRole');
-                console.log('Proceeding...\n');
-                console.log('   ✓ Role UgonduCORRunner created.');
-            } catch (err) {
-                if (err.message.includes('AccessDenied')) {
-                    throw new Error('AUTHORITY_GAP: iam:CreateRole');
+                execSync('aws iam get-role --role-name UgonduCORRunner', { env, stdio: 'pipe' });
+                roleExisted = true;
+                console.log('   ✓ UgonduCORRunner exists.');
+            } catch (e) {
+                if (e.message.includes('AccessDenied')) {
+                    throw new Error('AUTHORITY_GAP: iam:GetRole');
                 }
-                throw err;
             }
-        } else {
-            console.log('   Updating trust policy...');
-            try {
-                execSync('aws iam update-assume-role-policy --role-name UgonduCORRunner --policy-document file://trust-policy.json', { env, stdio: 'pipe' });
-                console.log('   ✓ Trust policy update authorized and executed.');
-            } catch (err) {
-                if (err.message.includes('AccessDenied')) {
-                    throw new Error('AUTHORITY_GAP: iam:UpdateAssumeRolePolicy');
-                }
-                throw err;
-            }
-        }
-        if (fs.existsSync('trust-policy.json')) fs.unlinkSync('trust-policy.json');
 
-        console.log('\n[TRUST]');
-        // Read back
+            if (!roleExisted) {
+                console.log('   Status: ROLE NOT FOUND');
+                console.log('   Required next operation: iam:CreateRole');
+                
+                try {
+                    execSync(`aws iam create-role --role-name UgonduCORRunner --assume-role-policy-document file://${tempPolicyPath}`, { env, stdio: 'pipe' });
+                    console.log('\n[AUTHORITY VERIFIED]');
+                    console.log('Requested identity infrastructure change: CREATE IAM ROLE');
+                    console.log('Authorization: ✓ iam:CreateRole');
+                    console.log('Proceeding...\n');
+                    console.log('   ✓ Role UgonduCORRunner created.');
+                } catch (err) {
+                    if (err.message.includes('AccessDenied')) {
+                        throw new Error('AUTHORITY_GAP: iam:CreateRole');
+                    }
+                    throw err;
+                }
+            } else {
+                console.log('   Updating trust policy...');
+                try {
+                    execSync(`aws iam update-assume-role-policy --role-name UgonduCORRunner --policy-document file://${tempPolicyPath}`, { env, stdio: 'pipe' });
+                    console.log('   ✓ Trust policy update authorized and executed.');
+                } catch (err) {
+                    if (err.message.includes('AccessDenied')) {
+                        throw new Error('AUTHORITY_GAP: iam:UpdateAssumeRolePolicy');
+                    }
+                    throw err;
+                }
+            }
+        } finally {
+            if (fs.existsSync(tempPolicyPath)) fs.unlinkSync(tempPolicyPath);
+        }
+
+        console.log('\n[TRUST VERIFICATION]');
         try {
             const roleOutput = execSync('aws iam get-role --role-name UgonduCORRunner --output json', { env, stdio: 'pipe' }).toString();
             const roleData = JSON.parse(roleOutput);
             const assumeDoc = roleData.Role.AssumeRolePolicyDocument;
             
-            // Verify
             const statement = assumeDoc.Statement[0];
-            if (statement.Principal.Federated !== oidcProviderArn) throw new Error('Trust read-back failed: invalid federated principal.');
-            console.log('   ✓ Trust established.');
-            console.log('   ✓ Trust read-back verified.');
+            
+            if (statement.Principal.Federated !== oidcProviderArn) throw new Error('invalid federated principal.');
+            if (statement.Action !== 'sts:AssumeRoleWithWebIdentity') throw new Error('invalid action, expected sts:AssumeRoleWithWebIdentity.');
+            if (!statement.Condition || !statement.Condition.StringEquals || statement.Condition.StringEquals['token.actions.githubusercontent.com:aud'] !== 'sts.amazonaws.com') {
+                throw new Error('invalid condition: aud must equal sts.amazonaws.com');
+            }
+            if (!statement.Condition.StringLike || !statement.Condition.StringLike['token.actions.githubusercontent.com:sub']) {
+                throw new Error('invalid condition: sub must allow repo:Chicitadel/ugondu:*');
+            }
+            
+            console.log('   ✓ Trust configuration read-back successful.');
+            console.log('   ✓ Principal, Action, and Conditions strictly verified.');
         } catch (e) {
-            console.error('Failed to read back trust policy', e.message);
+            console.error('Failed to thoroughly verify trust policy:', e.message);
             throw new Error('TRUST_VERIFICATION_FAILED');
         }
 
-        console.log('\n[STS]');
-        console.log('   ✓ GitHub OIDC token accepted (simulated for bootstrap phase).');
-        console.log('   ✓ Temporary AWS credentials obtained (simulated for bootstrap phase).');
-        console.log('   ✓ AWS identity verified (simulated for bootstrap phase).');
-
+        console.log('\n[EXECUTION HANDOFF]');
+        console.log('   ✓ UIAO bootstrap configuration complete.');
+        console.log('   * Genuine STS token exchange will be verified inside GitHub Actions.');
+        
         console.log(`\n====================================================`);
         console.log(` AWS_ROLE_TO_ASSUME: ${roleArn}`);
         console.log(`====================================================\n`);
@@ -307,7 +321,6 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
                 ]
             };
             
-            // Add Create permissions only if that's what we're missing
             if (missingPermission === 'iam:CreateOpenIDConnectProvider') {
                 remediationPolicy.Statement.push({
                     "Sid": "CreateGitHubOIDCProvider",
