@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
 const ROOT =
     process.env.UGONDU_ROOT ||
@@ -25,6 +27,12 @@ const LEDGER =
     path.join(
         EVIDENCE_DIR,
         'evidence-ledger.json'
+    );
+
+const GATE_SUMMARY =
+    path.join(
+        EVIDENCE_DIR,
+        'gate-summary.json'
     );
 
 const OUTPUT =
@@ -75,11 +83,23 @@ function readJson(file) {
     }
 }
 
+function canonical(value) {
+    const result = canonicalize(value);
+
+    if (!result) {
+        throw new Error(
+            'COR_CANONICALIZATION_FAILED'
+        );
+    }
+
+    return result;
+}
+
 function digest(value) {
     return crypto
         .createHash('sha256')
         .update(
-            JSON.stringify(value),
+            canonical(value),
             'utf8'
         )
         .digest('hex');
@@ -150,11 +170,55 @@ if (!fs.existsSync(LEDGER)) {
     );
 }
 
+if (!fs.existsSync(GATE_SUMMARY)) {
+    block(
+        'gate-summary missing'
+    );
+}
+
 const manifest =
     readJson(MANIFEST);
 
 const ledger =
     readJson(LEDGER);
+
+const gateSummary =
+    readJson(GATE_SUMMARY);
+
+if (
+    gateSummary.allGatesPassed !== true
+) {
+    block(
+        'allGatesPassed != true'
+    );
+}
+
+if (
+    gateSummary.skippedGates &&
+    gateSummary.skippedGates.length > 0
+) {
+    block(
+        'skippedGates not empty'
+    );
+}
+
+if (
+    gateSummary.notRunGates &&
+    gateSummary.notRunGates.length > 0
+) {
+    block(
+        'notRunGates not empty'
+    );
+}
+
+if (
+    gateSummary.failedGates &&
+    gateSummary.failedGates.length > 0
+) {
+    block(
+        'failedGates not empty'
+    );
+}
 
 if (
     manifest.repository !==
@@ -211,6 +275,22 @@ const commitSHA =
 
 const treeSHA =
     git(['rev-parse', 'HEAD^{tree}']);
+
+if (
+    manifest.candidateCommit !== commitSHA
+) {
+    block(
+        'manifest candidateCommit mismatch'
+    );
+}
+
+if (
+    manifest.candidateTree !== treeSHA
+) {
+    block(
+        'manifest candidateTree mismatch'
+    );
+}
 
 if (
     ledger.candidate?.repository !==
@@ -328,6 +408,8 @@ const finalization = {
         digest(manifest),
     qualificationEvidenceRoot:
         ledger.evidenceRoot,
+    gateSummaryDigest:
+        digest(gateSummary),
     status:
         'READY_FOR_COR_SIGNATURE',
     finalizedAt:

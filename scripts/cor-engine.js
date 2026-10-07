@@ -32,7 +32,8 @@ const EXPECTED_IDS = [
     'F35','F36','F37','F38','F39','F40'
 ];
 
-const canonicalize = require('canonicalize');
+const canonicalizeModule = require('canonicalize');
+const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
 function canonical(value) {
     const result = canonicalize(value);
