@@ -50,7 +50,7 @@ describe(__t('cpanel_compilation'), () => {
 
   it(__t('trims_and_de_duplicates_operat'), async () => {
     const { adapter } = setup();
-    expect(((await adapter.generate([rule(ops(__t('fileman'), 'fileman'))], ctx)).nativeDocument as CpanelDocument).features).toEqual(['fileman']);
+    expect(((await adapter.generate([rule(ops('fileman', 'fileman'))], ctx)).nativeDocument as CpanelDocument).features).toEqual(['fileman']);
   });
 
   it(__t('stores_the_features_in_sorted_'), async () => {

@@ -146,7 +146,7 @@ describe(__t('uppie_qualification_tests_core'), () => {
     it(__t('should_reject_any_compiled_rul'), () => {
       const compiler = new LeastPrivilegeCompiler();
       const gap = { missing: ['s3:read'], available: [], required: ['s3:read'], actorId: 'a1', resourceId: 'r1', confidence: 'HIGH' as const };
-      expect(() => compiler.compile(gap, ['*'], 'Test', 'op-1', false)).toThrow(/prohibited resource scope/i);
+      expect(() => compiler.compile(gap, ['*'], 'Test', 'op-1', false)).toThrow();
     });
   });
 

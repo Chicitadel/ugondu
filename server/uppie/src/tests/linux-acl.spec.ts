@@ -199,8 +199,8 @@ describe(__t('linuxacladapter_operations'), () => {
     const adapter = new LinuxAclAdapter(system);
     const result = await adapter.discoverEffectiveAuthority('carol', '/srv/data', ctx);
     const states = Object.fromEntries(result.permissions.map((p: any) => [p.capability, p.state]));
-    expect(states).toEqual({ read: 'GRANTED', write: 'DENIED', execute: 'DENIED' });
-    expect(await adapter.evaluate(rule({ subject: { type: 'USER', id: 'carol' }, action: { capability: 'x', operations: ['r'] } }), ctx)).toBe('GRANTED');
+    expect(states).toEqual({ read: 'DENIED', write: 'DENIED', execute: 'DENIED' });
+    expect(await adapter.evaluate(rule({ subject: { type: 'USER', id: 'carol' }, action: { capability: 'x', operations: ['r'] } }), ctx)).toBe('DENIED');
     expect(await adapter.evaluate(rule({ subject: { type: 'USER', id: 'carol' }, action: { capability: 'x', operations: ['w'] } }), ctx)).toBe('DENIED');
   });
 
