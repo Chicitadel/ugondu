@@ -16,7 +16,8 @@ const metadata = {
                 'utf8'
             )
             .digest('hex'),
-    evidenceSchemaVersion: '1.0.0'
+    evidenceSchemaVersion: '2.0.0',
+    verificationMode: 'STATIC'
 };
 
 async function run(context) {

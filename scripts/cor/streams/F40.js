@@ -13,7 +13,7 @@ const metadata = {
     verifierVersion: '2.0.0',
     objectiveHash: crypto.createHash('sha256').update(OBJECTIVE, 'utf8').digest('hex'),
     evidenceSchemaVersion: '2.0.0',
-    verificationMode: 'TEST'
+    verificationMode: 'STATIC'
 };
 
 async function run(context) {

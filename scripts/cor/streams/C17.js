@@ -16,7 +16,7 @@ const metadata = {
         .update(OBJECTIVE, 'utf8')
         .digest('hex'),
     evidenceSchemaVersion: '2.0.0',
-    verificationMode: 'TEST'
+    verificationMode: 'STATIC'
 };
 
 function fail(message) {
