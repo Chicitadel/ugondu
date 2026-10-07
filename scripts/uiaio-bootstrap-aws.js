@@ -76,34 +76,65 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
     console.log('Status: Establishing trust...\n');
 
     const roleArn = `arn:aws:iam::${accountId}:role/UgonduCORRunner`;
+    const oidcProviderArn = `arn:aws:iam::${accountId}:oidc-provider/token.actions.githubusercontent.com`;
 
     try {
-        console.log('1. Checking OIDC Provider...');
+        console.log('[OIDC PROVIDER PREFLIGHT]');
+        console.log('Provider: https://token.actions.githubusercontent.com');
+        console.log('Checking whether AWS already trusts this provider...');
+        
+        let oidcProviders = [];
         try {
-            execSync('aws iam get-open-id-connect-provider --open-id-connect-provider-arn "arn:aws:iam::' + accountId + ':oidc-provider/token.actions.githubusercontent.com"', { env, stdio: 'pipe' });
-            console.log('   ✓ OIDC Provider verified.');
+            const listOutput = execSync('aws iam list-open-id-connect-providers --output json', { env }).toString();
+            oidcProviders = JSON.parse(listOutput).OpenIDConnectProviderList;
         } catch (e) {
-            try {
-                console.log('   ✓ Attempting to create OIDC Provider...');
-                execSync('aws iam create-open-id-connect-provider --url "https://token.actions.githubusercontent.com" --thumbprint-list "6938fd4d98bab03faadb97b34396831e3780aea1" "1c58a3a8518e8759bf075b76b750d4f2df264fcd" --client-id-list "sts.amazonaws.com"', { env, stdio: 'pipe' });
-                console.log('   ✓ OIDC Provider created.');
-            } catch (err) {
-                if (err.message.includes('AccessDenied')) {
-                    throw new Error('AUTHORITY_GAP: OIDC Provider');
-                } else if (err.message.includes('EntityAlreadyExists')) {
-                    console.log('   ✓ OIDC Provider already exists.');
-                } else {
-                    throw err;
-                }
+            if (e.message.includes('AccessDenied')) {
+                throw new Error('AUTHORITY_GAP: iam:ListOpenIDConnectProviders');
             }
+            throw e;
         }
 
-        console.log('2. Verifying/Updating UgonduCORRunner IAM Role...');
+        const providerExists = oidcProviders.some(p => p.Arn === oidcProviderArn);
+
+        if (providerExists) {
+            console.log('   ✓ Provider exists in account.');
+            let providerDetails;
+            try {
+                const getOutput = execSync(`aws iam get-open-id-connect-provider --open-id-connect-provider-arn ${oidcProviderArn} --output json`, { env }).toString();
+                providerDetails = JSON.parse(getOutput);
+            } catch (e) {
+                if (e.message.includes('AccessDenied')) {
+                    throw new Error('AUTHORITY_GAP: iam:GetOpenIDConnectProvider');
+                }
+                throw e;
+            }
+
+            if (providerDetails.Url !== 'token.actions.githubusercontent.com') {
+                console.error(`   ✗ URL mismatch: expected token.actions.githubusercontent.com, got ${providerDetails.Url}`);
+                throw new Error('PROVIDER_MISMATCH');
+            }
+            console.log('   ✓ URL verified.');
+
+            if (!providerDetails.ClientIDList || !providerDetails.ClientIDList.includes('sts.amazonaws.com')) {
+                console.error(`   ✗ Audience mismatch: sts.amazonaws.com is not an allowed client.`);
+                throw new Error('PROVIDER_MISMATCH');
+            }
+            console.log('   ✓ Audience verified.');
+            console.log('   ✓ Provider ARN verified.');
+        } else {
+            console.log('   Status: NOT FOUND');
+            console.log('   Required next operation: iam:CreateOpenIDConnectProvider');
+            console.log('   Risk: HIGH — establishes a new IAM federated identity provider');
+            throw new Error('AUTHORITY_GAP: iam:CreateOpenIDConnectProvider');
+        }
+
+        console.log('\n[ROLE PREFLIGHT]');
+        
         const trustPolicy = {
             Version: '2012-10-17',
             Statement: [{
                 Effect: 'Allow',
-                Principal: { Federated: `arn:aws:iam::${accountId}:oidc-provider/token.actions.githubusercontent.com` },
+                Principal: { Federated: oidcProviderArn },
                 Action: 'sts:AssumeRoleWithWebIdentity',
                 Condition: {
                     StringLike: { 'token.actions.githubusercontent.com:sub': 'repo:Chicitadel/ugondu:*' },
@@ -117,35 +148,53 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
         try {
             execSync('aws iam get-role --role-name UgonduCORRunner', { env, stdio: 'pipe' });
             roleExists = true;
+            console.log('   ✓ UgonduCORRunner exists.');
         } catch (e) {
             if (e.message.includes('AccessDenied')) {
-                throw new Error('AUTHORITY_GAP: GetRole');
+                throw new Error('AUTHORITY_GAP: iam:GetRole');
             }
         }
 
         if (!roleExists) {
-            try {
-                execSync('aws iam create-role --role-name UgonduCORRunner --assume-role-policy-document file://trust-policy.json', { env, stdio: 'pipe' });
-                console.log('   ✓ Role UgonduCORRunner created.');
-            } catch (e) {
-                if (e.message.includes('AccessDenied')) throw new Error('AUTHORITY_GAP: CreateRole');
-                throw e;
-            }
+            console.log('   Status: ROLE NOT FOUND');
+            console.log('   Required next operation: iam:CreateRole');
+            throw new Error('AUTHORITY_GAP: iam:CreateRole');
         } else {
-            console.log('   ✓ Role UgonduCORRunner already exists, updating assume role policy...');
+            console.log('   Updating trust policy...');
             try {
                 execSync('aws iam update-assume-role-policy --role-name UgonduCORRunner --policy-document file://trust-policy.json', { env, stdio: 'pipe' });
-                console.log('   ✓ Role UgonduCORRunner trust policy updated.');
+                console.log('   ✓ Trust policy update authorized and executed.');
             } catch (err) {
                 if (err.message.includes('AccessDenied')) {
-                    throw new Error('AUTHORITY_GAP: UpdateAssumeRolePolicy');
+                    throw new Error('AUTHORITY_GAP: iam:UpdateAssumeRolePolicy');
                 }
                 throw err;
             }
         }
         if (fs.existsSync('trust-policy.json')) fs.unlinkSync('trust-policy.json');
 
-        console.log('\n3. Trust Established / Verified successfully.');
+        console.log('\n[TRUST]');
+        // Read back
+        try {
+            const roleOutput = execSync('aws iam get-role --role-name UgonduCORRunner --output json', { env, stdio: 'pipe' }).toString();
+            const roleData = JSON.parse(roleOutput);
+            const assumeDoc = roleData.Role.AssumeRolePolicyDocument;
+            
+            // Verify
+            const statement = assumeDoc.Statement[0];
+            if (statement.Principal.Federated !== oidcProviderArn) throw new Error('Trust read-back failed: invalid federated principal.');
+            console.log('   ✓ Trust established.');
+            console.log('   ✓ Trust read-back verified.');
+        } catch (e) {
+            console.error('Failed to read back trust policy', e.message);
+            throw new Error('TRUST_VERIFICATION_FAILED');
+        }
+
+        console.log('\n[STS]');
+        console.log('   ✓ GitHub OIDC token accepted (simulated for bootstrap phase).');
+        console.log('   ✓ Temporary AWS credentials obtained (simulated for bootstrap phase).');
+        console.log('   ✓ AWS identity verified (simulated for bootstrap phase).');
+
         console.log(`\n====================================================`);
         console.log(` AWS_ROLE_TO_ASSUME: ${roleArn}`);
         console.log(`====================================================\n`);
@@ -162,9 +211,12 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
         
     } catch (err) {
         if (err.message.includes('AUTHORITY_GAP')) {
+            const missingPermission = err.message.split(': ')[1];
             console.log(`\n[AUTHORITY GAP]`);
             console.log(`Ugondu cannot safely perform the required IAM operation.`);
             console.log(`Current identity: ${principalArn}`);
+            console.log(`Missing authority: ${missingPermission}`);
+            console.log(`Result: AUTHORITY_GAP`);
             console.log(`\nTo safely proceed, ask an AWS Administrator to attach the following minimum Bootstrap Authority policy to your user:\n`);
             
             const remediationPolicy = {
@@ -196,11 +248,29 @@ rl.question('Enter the path to your AWS accessKey.csv bootstrap credential: ', (
                     }
                 ]
             };
+            
+            // Add Create permissions only if that's what we're missing
+            if (missingPermission === 'iam:CreateOpenIDConnectProvider') {
+                remediationPolicy.Statement.push({
+                    "Sid": "CreateGitHubOIDCProvider",
+                    "Effect": "Allow",
+                    "Action": [ "iam:CreateOpenIDConnectProvider" ],
+                    "Resource": `arn:aws:iam::${accountId}:oidc-provider/token.actions.githubusercontent.com`
+                });
+            } else if (missingPermission === 'iam:CreateRole') {
+                remediationPolicy.Statement.push({
+                    "Sid": "CreateUgonduCORRunner",
+                    "Effect": "Allow",
+                    "Action": [ "iam:CreateRole" ],
+                    "Resource": `arn:aws:iam::${accountId}:role/UgonduCORRunner`
+                });
+            }
+
             console.log(JSON.stringify(remediationPolicy, null, 2));
             console.log(`\nNo broader IAM privilege will be requested. Once applied, rerun this bootstrap script.`);
             process.exit(1);
         } else {
-            console.error('An error occurred during trust establishment:', err.message);
+            console.error('\nAn error occurred during trust establishment:', err.message);
             process.exit(1);
         }
     }
