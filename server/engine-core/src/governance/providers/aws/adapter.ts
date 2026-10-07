@@ -162,15 +162,7 @@ export function registerAwsAdapter(engine: PolicyGovernanceEngine) {
     const adapter = new AwsGovernanceAdapter();
     engine.registerAdapter(adapter);
 
-    async deployFargate(params: any): Promise<any> { return { id: `fargate-${Date.now()}` }; }
-    async createContainerRegistry(name: string): Promise<any> { return { id: `ecr-${Date.now()}` }; }
-    async deleteContainerRegistry(id: string): Promise<void> {}
-    async buildContainerImage(dockerfile: string, tag: string): Promise<any> { return { id: `img-${Date.now()}` }; }
-    async pushContainerImage(imageId: string, registryId: string): Promise<any> { return { id: `push-${Date.now()}` }; }
-    async createTaskDefinition(family: string, image: string): Promise<any> { return { id: `taskdef-${Date.now()}` }; }
-    async deleteTaskDefinition(id: string): Promise<void> {}
-    async createContainerService(cluster: string, serviceName: string, taskDefArn: string): Promise<any> { return { id: `service-${Date.now()}` }; }
-    async deleteContainerService(id: string): Promise<void> {}
+
 
 }
 
