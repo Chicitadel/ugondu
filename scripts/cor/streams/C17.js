@@ -52,7 +52,8 @@ async function run(context) {
         {
             cwd: context.root,
             encoding: 'utf8',
-            stdio: ['ignore', 'pipe', 'pipe']
+            stdio: ['ignore', 'pipe', 'pipe'],
+            shell: true
         }
     );
 
