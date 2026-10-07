@@ -81,7 +81,7 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/deise/engine/recovery/capability-registry.ts'), 'utf8');
-    if (!content.includes('already registered')) return false;
+    if (!content.includes('CAPABILITY_ALREADY_REGISTERED')) return false;
     artifacts.push('verified_source'); observations.push('rejects duplicates');
     return true;
 }
@@ -90,5 +90,6 @@ module.exports = {
     metadata,
     run
 };
+
 
 
