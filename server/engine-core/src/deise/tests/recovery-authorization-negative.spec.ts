@@ -6,7 +6,23 @@ import { RecoveryOrchestrator } from '../engine/recovery/recovery-orchestrator';
 import * as crypto from 'crypto';
 
 jest.mock('../../upm/policy-gate');
-// Removed jest.mock for orchestrator to allow prototype mocking
+jest.mock('../engine/recovery/recovery-orchestrator', () => {
+    return {
+        RecoveryOrchestrator: jest.fn().mockImplementation(() => {
+            return {
+                capture: jest.fn().mockResolvedValue({ immutableEvidenceSnapshotId: 'twin-hash' }),
+                fingerprint: jest.fn().mockResolvedValue('base-fingerprint'),
+                analyzeBlastRadius: jest.fn().mockResolvedValue({ isSafe: true }),
+                dryRun: jest.fn().mockResolvedValue(true),
+                requestApproval: jest.fn().mockResolvedValue(true),
+                executeAtomically: jest.fn().mockResolvedValue({ success: true, executionEvidence: {} }),
+                verify: jest.fn().mockResolvedValue({ verified: true, verificationEvidence: {} }),
+                certify: jest.fn().mockResolvedValue({ certificateId: 'cert-1' }),
+                issuePassport: jest.fn().mockResolvedValue({ passportId: 'pass-1' })
+            };
+        })
+    };
+});
 
 describe('Recovery Authorization Negative Tests', () => {
     let mockAuth: ExecutionAuthorization;
@@ -63,15 +79,7 @@ describe('Recovery Authorization Negative Tests', () => {
             if (auth.irHash !== 'ir-1') throw new Error('IR_HASH_MISMATCH');
         });
 
-        RecoveryOrchestrator.prototype.capture = jest.fn().mockResolvedValue({ immutableEvidenceSnapshotId: 'twin-hash' });
-        RecoveryOrchestrator.prototype.fingerprint = jest.fn().mockResolvedValue('base-fingerprint');
-        RecoveryOrchestrator.prototype.analyzeBlastRadius = jest.fn().mockResolvedValue({ isSafe: true });
-        RecoveryOrchestrator.prototype.dryRun = jest.fn().mockResolvedValue(true);
-        RecoveryOrchestrator.prototype.requestApproval = jest.fn().mockResolvedValue(true);
-        RecoveryOrchestrator.prototype.executeAtomically = jest.fn().mockResolvedValue({ success: true, executionEvidence: {} });
-        RecoveryOrchestrator.prototype.verify = jest.fn().mockResolvedValue({ verified: true, verificationEvidence: {} });
-        RecoveryOrchestrator.prototype.certify = jest.fn().mockResolvedValue({ certificateId: 'cert-1' });
-        RecoveryOrchestrator.prototype.issuePassport = jest.fn().mockResolvedValue({ passportId: 'pass-1' });
+        // Mocks are now in jest.mock above
     });
 
     const runRecovery = async (intentOverrides = {}, txnId?: string, rev?: number) => {
@@ -131,8 +139,19 @@ describe('Recovery Authorization Negative Tests', () => {
     });
 
     it('should fail closed on changed baseline', async () => {
-        RecoveryOrchestrator.prototype.executeAtomically = jest.fn().mockImplementation(() => {
-            throw new Error('environment_drift_detected');
+        const { RecoveryOrchestrator } = require('../engine/recovery/recovery-orchestrator');
+        RecoveryOrchestrator.mockImplementationOnce(() => {
+            return {
+                capture: jest.fn().mockResolvedValue({ immutableEvidenceSnapshotId: 'twin-hash' }),
+                fingerprint: jest.fn().mockResolvedValue('base-fingerprint'),
+                analyzeBlastRadius: jest.fn().mockResolvedValue({ isSafe: true }),
+                dryRun: jest.fn().mockResolvedValue(true),
+                requestApproval: jest.fn().mockResolvedValue(true),
+                executeAtomically: jest.fn().mockImplementation(() => { throw new Error('environment_drift_detected'); }),
+                verify: jest.fn().mockResolvedValue({ verified: true, verificationEvidence: {} }),
+                certify: jest.fn().mockResolvedValue({ certificateId: 'cert-1' }),
+                issuePassport: jest.fn().mockResolvedValue({ passportId: 'pass-1' })
+            };
         });
         await expect(runRecovery()).rejects.toThrow('ATOMIC_EXECUTION_FAILED');
     });
