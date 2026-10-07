@@ -162,6 +162,8 @@ class ExecutionKernel {
       });
 
       this.transition('FAILED');
+      
+      console.error(`KERNEL_RAW_ERROR: ${error instanceof Error ? error.message : String(error)}`);
 
       throw new Error(
         __t('messages.error.action_execution_failed', {
