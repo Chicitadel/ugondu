@@ -5,4 +5,7 @@ module.exports = {
   testMatch: ['**/*.spec.ts'],
   testTimeout: 10000,
   transformIgnorePatterns: ['node_modules/(?!(canonicalize)/)'],
+  moduleNameMapper: {
+    '^canonicalize$': '<rootDir>/tests/canonicalize-mock.js'
+  }
 };

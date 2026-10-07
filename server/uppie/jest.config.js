@@ -20,4 +20,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/tests/**'],
   transformIgnorePatterns: ['node_modules/(?!(canonicalize)/)'],
+  moduleNameMapper: {
+    '^canonicalize$': '<rootDir>/tests/canonicalize-mock.js'
+  }
 };
