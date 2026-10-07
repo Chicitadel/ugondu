@@ -8,7 +8,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const STREAM_ID = 'F40';
-const OBJECTIVE = 'Verify final independent passport certification bindings';
+const OBJECTIVE = 'Verify final independent passport certification';
 
 const metadata = {
     streamId: STREAM_ID,

@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const STREAM_ID = 'E34';
-const OBJECTIVE = 'Verify client locale packs are present, parseable, schema-complete, and integrated with the client localization loader';
+const OBJECTIVE = 'Verify client/locales obsolete directory is absent';
 
 const metadata = {
     streamId: STREAM_ID,
