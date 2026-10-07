@@ -64,7 +64,7 @@
             "status": "PLANNED",
             "objective": "Verify COR certification workflow exists",
             "location": [
-                ".github/workflows/cor-certification.yml"
+                ".github/workflows/cor.yml"
             ]
         },
         {

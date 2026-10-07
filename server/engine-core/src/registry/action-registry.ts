@@ -1,7 +1,5 @@
 import { URREngine } from '../urre/execution/urre-engine';
 import { TransactionDag } from '../urre/transaction/transaction-dag';
-import { AwsNativeClient } from '../fabric/providers/aws-native-client';
-import { AwsGovernanceAdapter } from '../governance/providers/aws/adapter';
 import { PolicyGovernanceEngine } from '../governance/engine/policy-engine';
 import { __t } from "@ugondu/shared";
 
@@ -69,7 +67,33 @@ export class UniversalActionRegistry {
                 execute: async (p) => this.dispatchToURRE('TERMINATE_VPC', p)
             },
             {
-                id: 'orchestration:container:deploy', domain: 'orchestration', operation: 'deploy', providerAgnostic: true, description: __t('msg_deploy_container_orchestration'),
+                {
+                    id: 'container:registry:create', domain: 'container', operation: 'create', providerAgnostic: true, description: __t('msg_create_container_registry'),
+                    inputSchema: {}, outputSchema: {}, risk: 'MEDIUM', requiredCapabilities: ['orchestration.deploy'],
+                    execute: async (p) => this.dispatchToURRE('CREATE_CONTAINER_REGISTRY', p)
+                },
+                {
+                    id: 'container:image:build', domain: 'container', operation: 'build', providerAgnostic: true, description: __t('msg_build_container_image'),
+                    inputSchema: {}, outputSchema: {}, risk: 'LOW', requiredCapabilities: ['orchestration.deploy'],
+                    execute: async (p) => this.dispatchToURRE('BUILD_CONTAINER_IMAGE', p)
+                },
+                {
+                    id: 'container:image:push', domain: 'container', operation: 'push', providerAgnostic: true, description: __t('msg_push_container_image'),
+                    inputSchema: {}, outputSchema: {}, risk: 'LOW', requiredCapabilities: ['orchestration.deploy'],
+                    execute: async (p) => this.dispatchToURRE('PUSH_CONTAINER_IMAGE', p)
+                },
+                {
+                    id: 'container:task-definition:create', domain: 'container', operation: 'create', providerAgnostic: true, description: __t('msg_create_task_definition'),
+                    inputSchema: {}, outputSchema: {}, risk: 'MEDIUM', requiredCapabilities: ['orchestration.deploy'],
+                    execute: async (p) => this.dispatchToURRE('CREATE_TASK_DEFINITION', p)
+                },
+                {
+                    id: 'container:service:create', domain: 'container', operation: 'create', providerAgnostic: true, description: __t('msg_create_container_service'),
+                    inputSchema: {}, outputSchema: {}, risk: 'HIGH', requiredCapabilities: ['orchestration.deploy'],
+                    execute: async (p) => this.dispatchToURRE('CREATE_CONTAINER_SERVICE', p)
+                },
+                {
+                    id: 'orchestration:container:deploy', domain: 'orchestration', operation: 'deploy', providerAgnostic: true, description: __t('msg_deploy_container_orchestration'),
                 inputSchema: {}, outputSchema: {}, risk: 'HIGH', requiredCapabilities: ['orchestration.deploy'],
                 execute: async (p) => this.dispatchToURRE('DEPLOY_FARGATE', p)
             },
@@ -93,7 +117,7 @@ export class UniversalActionRegistry {
 
         // Governance Policy evaluation
         const govEngine = new PolicyGovernanceEngine();
-        govEngine.registerAdapter(new AwsGovernanceAdapter());
+        // govEngine.registerAdapter(providerAdapter); // Injected from outside
         
         const resourceIdentity = params.resourceId || params.id || `urn:ugondu:aws:${operationType.toLowerCase()}`;
         

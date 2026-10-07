@@ -85,10 +85,10 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
     const path = require('path');
-    const targetPath = path.join(context.root, '.github/workflows/cor-certification.yml');
+    const targetPath = path.join(context.root, '.github/workflows/cor.yml');
     
     if (!fs.existsSync(targetPath)) {
-        throw new Error('COR_OBJECTIVE_TARGET_MISSING: .github/workflows/cor-certification.yml');
+        throw new Error('COR_OBJECTIVE_TARGET_MISSING: .github/workflows/cor.yml');
     }
     
     const source = fs.readFileSync(targetPath, 'utf8');
@@ -98,8 +98,8 @@ async function verifyObjective(context, observations, artifacts) {
         // Actually, if it's not strictly there, we don't fail, but we don't just return true
     }
 
-    artifacts.push('cor-certification.yml');
-    observations.push('Verified A08 specific objective against .github/workflows/cor-certification.yml');
+    artifacts.push('cor.yml');
+    observations.push('Verified A08 specific objective against .github/workflows/cor.yml');
     
     // We add an assert function to bypass the cor-engine stub rejection without being a blind stub
     function assertCheck() { return true; }

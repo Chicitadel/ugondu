@@ -153,5 +153,42 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
         });
     }
 
+    
+    urre.registerHandler('aws', 'DEPLOY_FARGATE', async (node: DagNode) => {
+        const res = await aws.deployFargate(node.output!);
+        return { deploymentId: res.id };
+    }, async (node: DagNode) => {});
+
+    urre.registerHandler('aws', 'CREATE_CONTAINER_REGISTRY', async (node: DagNode) => {
+        const res = await aws.createContainerRegistry(node.output!.name);
+        return { registryId: res.id };
+    }, async (node: DagNode) => {
+        if (node.output?.registryId) await aws.deleteContainerRegistry(node.output!.registryId);
+    });
+
+    urre.registerHandler('aws', 'BUILD_CONTAINER_IMAGE', async (node: DagNode) => {
+        const res = await aws.buildContainerImage(node.output!.dockerfile, node.output!.tag);
+        return { imageId: res.id };
+    }, async (node: DagNode) => {});
+
+    urre.registerHandler('aws', 'PUSH_CONTAINER_IMAGE', async (node: DagNode) => {
+        const res = await aws.pushContainerImage(node.output!.imageId, node.output!.registryId);
+        return { pushedImageId: res.id };
+    }, async (node: DagNode) => {});
+
+    urre.registerHandler('aws', 'CREATE_TASK_DEFINITION', async (node: DagNode) => {
+        const res = await aws.createTaskDefinition(node.output!.family, node.output!.image);
+        return { taskDefinitionArn: res.id };
+    }, async (node: DagNode) => {
+        if (node.output?.taskDefinitionArn) await aws.deleteTaskDefinition(node.output!.taskDefinitionArn);
+    });
+
+    urre.registerHandler('aws', 'CREATE_CONTAINER_SERVICE', async (node: DagNode) => {
+        const res = await aws.createContainerService(node.output!.cluster, node.output!.serviceName, node.output!.taskDefinitionArn);
+        return { serviceArn: res.id };
+    }, async (node: DagNode) => {
+        if (node.output?.serviceArn) await aws.deleteContainerService(node.output!.serviceArn);
+    });
+
     return registry;
 }

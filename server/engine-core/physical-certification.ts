@@ -11,7 +11,7 @@ async function runCertification() {
     if (!region) throw new Error(__t('error.cert.missing_region'));
 
     const providerAdapter = getProviderAdapter('aws', region);
-    const campaignId = `UGONDU-COR- + new Date().toISOString().split('T')[0] + -001`;
+    const campaignId = `UGONDU-COR-${new Date().toISOString().slice(0, 10)}-001`;
 
     const awsObs = providerAdapter.getNativeClient();
     const registry = createProductionActionRegistry(awsObs);
@@ -19,8 +19,7 @@ async function runCertification() {
     const urre = registry.getUrre();
     
     // STRICTLY read-only / observation client via adapter
-    const awsObs = providerAdapter.getNativeClient();
-    const txId = `tx- + campaignId`;
+    const txId = `tx-${campaignId}`;
 
     const amiId = await providerAdapter.resolveDefaultAmi();
 

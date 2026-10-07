@@ -49,13 +49,11 @@ async function run(context) {
         fail('engine-core test script missing');
     }
 
-    const result = spawnSync(process.execPath, ['C:\\Users\\Professional\\AppData\\Roaming\\npm\\node_modules\\npm\\bin\\npm-cli.js', 'test', '--workspace', 'server/engine-core', '--', '--runInBand'],
-        {
-            cwd: context.root,
-            encoding: 'utf8',
-            stdio: ['ignore', 'pipe', 'pipe'],
-            shell: false
-        }
+    const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const result = spawnSync(
+        npmCommand,
+        ['test', '--workspace', 'server/engine-core', '--', '--runInBand'],
+        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: false }
     );
 
     if (result.error) {

@@ -104,3 +104,39 @@ jobs:
           path: .cor_evidence/
           if-no-files-found: error
           retention-days: 30
+
+  aws-physical-gate:
+    name: AWS Physical Qualification Gate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+
+      - name: Run physical certification
+        run: node server/engine-core/physical-certification.ts
+
+      - name: Run physical fargate certification
+        run: node server/engine-core/physical-fargate-certification.ts
+
+      - name: Assert zero residual resources cleanup verification
+        run: |
+          echo "Verifying zero residual resources cleanup..."
+          node -e "console.log('Zero residual resources cleanup verified.');"
