@@ -1,3 +1,4 @@
+const __t = (str: string) => str;
 import { URREngine } from '../urre/execution/urre-engine';
 import { DagNode } from '../urre/transaction/transaction-dag';
 import { UniversalActionRegistry } from './action-registry';
