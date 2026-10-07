@@ -7,7 +7,20 @@ export type TransactionStatus =
     | 'PENDING'
     | 'RUNNING'
     | 'SUCCESS'
-    | 'FAILED';
+    | 'FAILED' | 'RUNNING' | 'AUTHORIZATION_DENIED' | 'DRY_RUN_COMPLETE' | 'VERIFICATION_FAILED';
+
+export type TransactionPhase =
+    | 'CREATED'
+    | 'BASELINED'
+    | 'PLANNED'
+    | 'AUTHORIZED'
+    | 'APPROVED'
+    | 'EXECUTING'
+    | 'EXECUTED'
+    | 'VERIFYING'
+    | 'VERIFIED'
+    | 'CERTIFIED'
+    | 'FAILED' | 'RUNNING' | 'AUTHORIZATION_DENIED' | 'DRY_RUN_COMPLETE' | 'VERIFICATION_FAILED';
 
 export interface CanonicalIntent {
     capabilityId: string;
@@ -25,7 +38,7 @@ export interface PersistedTransaction {
     intentHash: string;
     plan?: unknown;
     planHash?: string;
-    state?: unknown;
+    state?: { phase?: TransactionPhase; [key: string]: any };
     executionReceipt?: unknown;
     certificationReceipt?: unknown;
     updatedAt: string;
@@ -101,6 +114,7 @@ export class TransactionAuthority {
             status: 'PENDING',
             intent: canonicalIntent,
             intentHash,
+            state: { phase: 'CREATED' },
             updatedAt: new Date().toISOString()
         };
 
@@ -135,9 +149,14 @@ export class TransactionAuthority {
 
     public static update(
         id: string,
+        expectedRevision: number,
         updates: Partial<Omit<PersistedTransaction, 'id' | 'revision' | 'schemaVersion' | 'intentHash'>>
     ): PersistedTransaction {
         const current = this.get(id);
+
+        if (current.revision !== expectedRevision) {
+            throw new Error('TRANSACTION_REVISION_CONFLICT');
+        }
 
         if (updates.status) {
             this.assertTransition(current.status, updates.status);
@@ -199,6 +218,27 @@ export class TransactionAuthority {
         if (recalculated !== txn.intentHash) {
             throw new Error('TRANSACTION_INTENT_BINDING_BROKEN');
         }
+
+        if (txn.plan !== undefined) {
+            if (typeof txn.planHash !== 'string') {
+                throw new Error('TRANSACTION_PLAN_HASH_MISSING');
+            }
+
+            const serialized = canonicalize(txn.plan);
+
+            if (!serialized) {
+                throw new Error('TRANSACTION_PLAN_CANONICALIZATION_FAILED');
+            }
+
+            const recalculatedPlan = crypto
+                .createHash('sha256')
+                .update(serialized, 'utf8')
+                .digest('hex');
+
+            if (recalculatedPlan !== txn.planHash) {
+                throw new Error('TRANSACTION_PLAN_BINDING_BROKEN');
+            }
+        }
     }
 
     private static filePath(id: string): string {
@@ -222,6 +262,4 @@ export class TransactionAuthority {
         fs.renameSync(tmp, file);
     }
 }
-
-
 

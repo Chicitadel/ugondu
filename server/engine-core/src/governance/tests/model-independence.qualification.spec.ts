@@ -1,40 +1,74 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { GlobalCapabilityRegistry } from '../../deise/engine/recovery/capability-registry';
-import { SshLiveAdapter } from '../../deise/engine/adapters/ssh/ssh-live-adapter';
-import { executeGovernedRecovery } from '../../routes/recovery';
 import { TransactionAuthority } from '../../deise/engine/recovery/transaction-authority';
 
 describe('COR Qualification: Model Independence & Agent Equivalence', () => {
-    let executorAdapter: SshLiveAdapter;
-
     beforeAll(() => {
         process.env.UGONDU_UPM_SECRET = 'test_secret';
-        process.env.UGONDU_TRANSACTION_DIR = require('path').join(__dirname, '.test_transactions');
-        require('fs').mkdirSync(process.env.UGONDU_TRANSACTION_DIR, { recursive: true });
+
+        const transactionDir = path.join(
+            process.cwd(),
+            '.cor-test-transactions'
+        );
+
+        process.env.UGONDU_TRANSACTION_DIR = transactionDir;
+        fs.rmSync(transactionDir, { recursive: true, force: true });
+        fs.mkdirSync(transactionDir, { recursive: true });
     });
 
-    beforeEach(() => {
-        executorAdapter = new SshLiveAdapter();
+    afterAll(() => {
+        const transactionDir = process.env.UGONDU_TRANSACTION_DIR;
+        if (transactionDir) {
+            fs.rmSync(transactionDir, { recursive: true, force: true });
+        }
     });
 
-    it('should assert capability is registered and not mocked, or fail COR', async () => {
-        const capability = GlobalCapabilityRegistry.getCapability('PathRepositoryReconstruction');
+    test('requires the real production PathRepositoryReconstruction capability', () => {
+        const capability =
+            GlobalCapabilityRegistry.getCapability(
+                'PathRepositoryReconstruction'
+            );
+
+        expect(capability).toBeDefined();
+
         if (!capability) {
-            console.warn('COR BLOCKED: PathRepositoryReconstruction is not implemented in production');
-            expect(true).toBe(true); // Graceful test exit when blocked, actual execution tests skip
-            return;
+            throw new Error(
+                'COR BLOCKED: PathRepositoryReconstruction is not registered as a production capability.'
+            );
         }
 
-        const target = 'localhost';
-        const repositoryPath = '/tmp/ugondu-test-repo';
-        const capId = 'PathRepositoryReconstruction';
+        expect(capability.capabilityId).toBe(
+            'PathRepositoryReconstruction'
+        );
+    });
 
-        const cliIntent = { source: 'CLI', capabilityId: capId, target, repositoryPath, authorizedActions: [capId] };
-        const aiIntent = { source: 'AI_PLATFORM', capabilityId: capId, target, repositoryPath, authorizedActions: [capId] };
+    test('canonicalizes CLI and AI source metadata to identical governed intent', () => {
+        const common = {
+            capabilityId: 'PathRepositoryReconstruction',
+            target: 'localhost',
+            repositoryPath: '/tmp/ugondu-test-repo',
+            authorizedActions: [
+                'PathRepositoryReconstruction'
+            ]
+        };
 
-        // Real invocation is prohibited without SSH trust material and target paths, but canonical intent parsing must match
-        const hash1 = TransactionAuthority.hashIntent(cliIntent);
-        const hash2 = TransactionAuthority.hashIntent(aiIntent);
+        const cliIntent = {
+            source: 'CLI',
+            ...common
+        };
 
-        expect(hash1).toEqual(hash2);
+        const aiIntent = {
+            source: 'AI_PLATFORM',
+            ...common
+        };
+
+        const cliHash =
+            TransactionAuthority.hashIntent(cliIntent);
+
+        const aiHash =
+            TransactionAuthority.hashIntent(aiIntent);
+
+        expect(cliHash).toBe(aiHash);
     });
 });

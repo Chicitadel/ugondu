@@ -16,3 +16,8 @@ jest.spyOn(UpmExecutionGate, 'verifyAuthorization').mockImplementation((auth, ir
 });
 
 
+import { GlobalCapabilityRegistry } from './src/deise/engine/recovery/capability-registry';
+import { PathRepositoryReconstruction } from '../plugins/recovery-dependencies/src/path-repository-reconstruction';
+
+GlobalCapabilityRegistry.registerCapability(new PathRepositoryReconstruction());
+

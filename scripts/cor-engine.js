@@ -1,95 +1,225 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const crypto = require('crypto');
 
-const root = process.env.UGONDU_ROOT || path.resolve(__dirname, '..');
-const schedulePath = path.join(root, '.governance', 'cor', 'cor_final_remediation_task_schedule.json');
-const evidenceDir = process.env.COR_EVIDENCE_DIR || path.join(root, '.cor_evidence');
+const root =
+    process.env.UGONDU_ROOT ||
+    path.resolve(__dirname, '..');
 
-if (!fs.existsSync(evidenceDir)) {
-    fs.mkdirSync(evidenceDir, { recursive: true });
+const schedulePath = path.join(
+    root,
+    '.governance',
+    'cor',
+    'cor_final_remediation_task_schedule.json'
+);
+
+const evidenceDir =
+    process.env.COR_EVIDENCE_DIR ||
+    path.join(root, '.cor_evidence');
+
+fs.mkdirSync(evidenceDir, { recursive: true });
+
+function sha256(value) {
+    return crypto
+        .createHash('sha256')
+        .update(value, 'utf8')
+        .digest('hex');
 }
 
-// 1. Verify clean checkout
-const status = execSync('git status --porcelain', { cwd: root }).toString().trim();
-if (status !== '') {
-    console.error('COR BLOCKED: Source tree is not clean.');
+function runGit(args) {
+    return execFileSync(
+        'git',
+        args,
+        {
+            cwd: root,
+            encoding: 'utf8'
+        }
+    ).trim();
+}
+
+function fail(message) {
+    console.error(`COR BLOCKED: ${message}`);
     process.exit(1);
 }
 
-const sha = execSync('git rev-parse HEAD', { cwd: root }).toString().trim();
-const treeSha = execSync('git write-tree', { cwd: root }).toString().trim();
+const porcelain = runGit(['status', '--porcelain']);
 
-const schedule = JSON.parse(fs.readFileSync(schedulePath, 'utf8'));
+if (porcelain !== '') {
+    fail('source tree is not clean.');
+}
 
-// We will build a dynamic evidence ledger, we DO NOT modify the schedule.
+const commitSHA = runGit(['rev-parse', 'HEAD']);
+const treeSHA = runGit(['write-tree']);
+
+const schedule =
+    JSON.parse(
+        fs.readFileSync(schedulePath, 'utf8')
+    );
+
+if (!Array.isArray(schedule.streams)) {
+    fail('schedule.streams is not an array.');
+}
+
+if (schedule.streams.length !== 40) {
+    fail(
+        `authoritative schedule contains ${schedule.streams.length} streams; exactly 40 are required.`
+    );
+}
+
+for (const stream of schedule.streams) {
+    if (stream.status !== 'PLANNED') {
+        fail(
+            `${stream.id} is not PLANNED. ` +
+            'The schedule is a requirement manifest, not an evidence source.'
+        );
+    }
+}
+
 const evidenceLedger = {
+    schemaVersion: '1.0.0',
     candidate: {
-        repository: "Chicitadel/ugondu",
-        commitSHA: sha,
-        treeSHA: treeSha,
+        repository: 'Chicitadel/ugondu',
+        commitSHA,
+        treeSHA
     },
-    executionTimestamp: new Date().toISOString(),
+    scheduleDigest: sha256(
+        JSON.stringify(schedule)
+    ),
+    executionTimestamp:
+        new Date().toISOString(),
     streams: []
 };
 
-let allPass = true;
-
 for (const stream of schedule.streams) {
-    console.log(Executing \: \);
-    
-    let stdoutStr = '';
+    console.log(
+        `Executing ${stream.id}: ${stream.objective}`
+    );
+
+    let stdout = '';
+    let stderr = '';
     let exitCode = 0;
-    
+
     try {
-        stdoutStr = execSync(
-ode scripts/physical-stream-runner.js \, { cwd: root, stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
-    } catch (e) {
-        exitCode = e.status || 1;
-        stdoutStr = e.stdout ? e.stdout.toString().trim() : '';
+        stdout = execFileSync(
+            'node',
+            [
+                path.join(
+                    root,
+                    'scripts',
+                    'physical-stream-runner.js'
+                ),
+                stream.id
+            ],
+            {
+                cwd: root,
+                encoding: 'utf8'
+            }
+        );
+    } catch (error) {
+        exitCode =
+            typeof error.status === 'number'
+                ? error.status
+                : 1;
+
+        stdout =
+            error.stdout
+                ? error.stdout.toString()
+                : '';
+
+        stderr =
+            error.stderr
+                ? error.stderr.toString()
+                : String(error.message || error);
     }
 
-    let receipt;
-    try {
-        receipt = JSON.parse(stdoutStr.split('\n').pop());
-    } catch {
-        receipt = null;
+    const stdoutHash = sha256(stdout);
+    const stderrHash = sha256(stderr);
+
+    let executorReceipt = null;
+
+    if (exitCode === 0) {
+        try {
+            executorReceipt =
+                JSON.parse(stdout);
+
+            if (
+                executorReceipt.streamId !== stream.id ||
+                executorReceipt.commitSHA !== commitSHA ||
+                executorReceipt.treeSHA !== treeSHA ||
+                executorReceipt.status !== 'PASS'
+            ) {
+                exitCode = 1;
+            }
+        } catch {
+            exitCode = 1;
+        }
     }
-    
-    if (!receipt || receipt.status !== 'PASS' || receipt.commitSHA !== sha || receipt.treeSHA !== treeSha || receipt.streamId !== stream.id) {
-        console.error(COR BLOCKED: Stream \ failed verification or missing valid receipt.);
-        allPass = false;
-        break;
-    }
-    
+
+    const status =
+        exitCode === 0
+            ? 'PASS'
+            : 'NOT_PROVEN';
+
+    const receipt = {
+        streamId: stream.id,
+        objective: stream.objective,
+        executionTimestamp:
+            new Date().toISOString(),
+        commitSHA,
+        treeSHA,
+        exitCode,
+        stdoutHash,
+        stderrHash,
+        status,
+        executorReceipt
+    };
+
+    receipt.evidenceDigest =
+        sha256(JSON.stringify(receipt));
+
     evidenceLedger.streams.push(receipt);
+
+    if (status !== 'PASS') {
+        evidenceLedger.status = 'COR_BLOCKED';
+
+        fs.writeFileSync(
+            path.join(
+                evidenceDir,
+                'evidence-ledger.json'
+            ),
+            JSON.stringify(
+                evidenceLedger,
+                null,
+                2
+            ),
+            'utf8'
+        );
+
+        fail(
+            `${stream.id} did not produce an independently verifiable PASS.`
+        );
+    }
 }
 
-if (!allPass || evidenceLedger.streams.length !== schedule.streams.length) {
-    evidenceLedger.status = 'COR_BLOCKED';
-    const ledgerPath = path.join(evidenceDir, 'evidence-ledger.json');
-    fs.writeFileSync(ledgerPath, JSON.stringify(evidenceLedger, null, 2));
-    console.error('COR BLOCKED');
-    process.exit(1);
-}
+evidenceLedger.status =
+    'COR_CERTIFIED_PENDING_INDEPENDENT_AUTHORITY_RECONCILIATION';
 
-const finalCertificate = {
-    repository: "Chicitadel/ugondu",
-    commitSHA: sha,
-    treeSHA: treeSha,
-    status: "COR_CERTIFIED",
-    receipts: evidenceLedger.streams.map(r => r.evidenceDigest)
-};
+fs.writeFileSync(
+    path.join(
+        evidenceDir,
+        'evidence-ledger.json'
+    ),
+    JSON.stringify(
+        evidenceLedger,
+        null,
+        2
+    ),
+    'utf8'
+);
 
-const certHash = crypto.createHash('sha256').update(JSON.stringify(finalCertificate)).digest('hex');
-finalCertificate.certificateDigest = certHash;
-
-evidenceLedger.status = 'COR_CERTIFIED';
-evidenceLedger.finalCertificate = finalCertificate;
-
-fs.writeFileSync(path.join(evidenceDir, 'evidence-ledger.json'), JSON.stringify(evidenceLedger, null, 2));
-fs.writeFileSync(path.join(evidenceDir, 'final-certificate.json'), JSON.stringify(finalCertificate, null, 2));
-
-console.log('COR Engine finished. Status: COR_CERTIFIED');
-process.exit(0);
+console.log(
+    'All physical streams passed. Independent governance/release authority reconciliation is still required before COR.'
+);

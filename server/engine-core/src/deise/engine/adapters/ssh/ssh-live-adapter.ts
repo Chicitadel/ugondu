@@ -14,14 +14,17 @@ interface RecoveryOperation {
     content?: string;
     mode?: number;
     expectedHash?: string;
+    expectedExists?: boolean;
 }
 
 interface CheckpointOperation {
     operationId: string;
     path: string;
     existedBefore: boolean;
+    objectType: 'FILE' | 'DIRECTORY' | 'SYMLINK' | 'ABSENT';
     backupPath?: string;
     previousHash?: string;
+    previousMode?: number;
 }
 
 interface RecoveryCheckpoint {
@@ -33,8 +36,12 @@ interface RecoveryCheckpoint {
 
 export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
     private getTarget(scope: RecoveryScope): string {
-        if (!scope.targetUri || scope.targetUri === 'local') {
-            return 'localhost';
+        if (!scope.targetUri) {
+            throw new Error('TARGET_URI_REQUIRED');
+        }
+
+        if (!/^[a-zA-Z0-9.-]+$/.test(scope.targetUri) && scope.targetUri !== 'localhost') {
+            throw new Error('INVALID_TARGET_URI_FORMAT');
         }
 
         return scope.targetUri;
@@ -180,15 +187,32 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
                 : [];
 
         const operationResults = expectedOperations.map(operation => {
-            const actualHash = this.hashPath(scope, operation.targetPath);
+            let matched = false;
+
+            if (operation.kind === 'CREATE_DIRECTORY') {
+                const isDir = this.isDirectory(scope, operation.targetPath);
+                matched = isDir;
+            } else if (operation.kind === 'WRITE_FILE') {
+                if (typeof operation.expectedHash !== 'string' || operation.expectedHash.length !== 64) {
+                    throw new Error(`VERIFICATION_EXPECTED_HASH_MISSING_${operation.id}`);
+                }
+                const actualHash = this.hashPath(scope, operation.targetPath);
+                const isReg = this.isRegularFile(scope, operation.targetPath);
+                matched = isReg && actualHash === operation.expectedHash;
+            } else if (operation.kind === 'DELETE_FILE') {
+                if (operation.expectedExists !== false) {
+                    throw new Error(`VERIFICATION_EXPECTED_EXISTS_FALSE_MISSING_${operation.id}`);
+                }
+                const exists = this.pathExists(scope, operation.targetPath);
+                matched = !exists;
+            } else {
+                throw new Error(`UNSUPPORTED_VERIFICATION_KIND_${operation.kind}`);
+            }
 
             return {
                 operationId: operation.id,
-                expected: operation.expectedHash || null,
-                actual: actualHash,
-                matched: operation.expectedHash
-                    ? actualHash === operation.expectedHash
-                    : true
+                kind: operation.kind,
+                matched
             };
         });
 
@@ -216,14 +240,20 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
                 if (operation.backupPath) {
                     this.execRemote(
                         checkpoint.target,
+                        'rm',
+                        ['-rf', operation.path]
+                    );
+
+                    this.execRemote(
+                        checkpoint.target,
                         'cp',
-                        [operation.backupPath, operation.path]
+                        ['-a', operation.backupPath, operation.path]
                     );
                 } else if (!operation.existedBefore) {
                     this.execRemote(
                         checkpoint.target,
                         'rm',
-                        ['-f', operation.path]
+                        ['-rf', operation.path]
                     );
                 }
             }
@@ -289,8 +319,9 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
 
         try {
             for (const repair of repairs) {
-                const exists = this.pathExists(scope, repair.targetPath);
-                const previousHash = exists
+                const objectType = this.getObjectType(scope, repair.targetPath);
+                const exists = objectType !== 'ABSENT';
+                const previousHash = objectType === 'FILE'
                     ? this.hashPath(scope, repair.targetPath)
                     : undefined;
 
@@ -301,7 +332,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
                     this.execRemote(
                         target,
                         'cp',
-                        [repair.targetPath, backupPath]
+                        ['-a', repair.targetPath, backupPath]
                     );
                 }
 
@@ -309,6 +340,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
                     operationId: repair.id,
                     path: repair.targetPath,
                     existedBefore: exists,
+                    objectType,
                     backupPath,
                     previousHash
                 });
@@ -333,7 +365,7 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
                         break;
 
                     case 'DELETE_FILE':
-                        this.execRemote(target, 'rm', ['-f', repair.targetPath]);
+                        this.execRemote(target, 'rm', ['-rf', repair.targetPath]);
                         break;
 
                     default:
@@ -402,8 +434,6 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
         baselineFingerprint: string
     ): Promise<boolean> {
         const current = await this.fingerprintRepository(scope);
-
-        // true means "safe: no drift".
         return current === baselineFingerprint;
     }
 
@@ -413,6 +443,36 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
             return true;
         } catch {
             return false;
+        }
+    }
+
+    private isDirectory(scope: RecoveryScope, targetPath: string): boolean {
+        try {
+            this.execRemote(this.getTarget(scope), 'test', ['-d', targetPath]);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private isRegularFile(scope: RecoveryScope, targetPath: string): boolean {
+        try {
+            this.execRemote(this.getTarget(scope), 'test', ['-f', targetPath]);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private getObjectType(scope: RecoveryScope, targetPath: string): 'FILE' | 'DIRECTORY' | 'SYMLINK' | 'ABSENT' {
+        try {
+            const out = this.execRemote(this.getTarget(scope), 'stat', ['-c', '%F', targetPath]).toLowerCase();
+            if (out.includes('directory')) return 'DIRECTORY';
+            if (out.includes('symbolic link')) return 'SYMLINK';
+            if (out.includes('regular file') || out.includes('regular empty file')) return 'FILE';
+            return 'FILE';
+        } catch {
+            return 'ABSENT';
         }
     }
 

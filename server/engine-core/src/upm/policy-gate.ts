@@ -4,10 +4,8 @@ import * as crypto from 'crypto';
 import canonicalize from 'canonicalize';
 import { ArchitectureIR } from '../fabric/engine/ProvisioningTypes';
 
-/** 6A - UPM Decision Contract */
 export type UpmDecisionStatus = 'ALLOW' | 'ALLOW_WITH_CONDITIONS' | 'REVIEW_REQUIRED' | 'DENY';
 
-/** 6D - Structured DENY/REVIEW Evidence */
 export interface UpmDecisionEvidence {
     policyId: string;
     requirement: string;
@@ -23,9 +21,9 @@ export interface UpmDecision {
     evidence?: UpmDecisionEvidence;
     timestamp: Date;
     policyVersion: string;
+    authorizationId?: string;
 }
 
-/** 6B - Architecture IR Authorization Binding */
 export interface CapabilityEnvelope {
     edition: string;
     allowedActions: string[];
@@ -40,7 +38,7 @@ export interface ExecutionAuthorization {
     policyVersion: string;
     decision: UpmDecision;
     envelopeHash: string;
-    cryptographicSeal: string; // The seal over all hashes
+    cryptographicSeal: string;
     expiresAt: Date;
 }
 
@@ -54,7 +52,6 @@ export interface GatingContext {
 }
 
 export class UpmExecutionGate {
-    /** Generates a SHA-256 hash of any canonicalized object */
     private static hashOf(obj: any): string {
         if (!process.env.UGONDU_UPM_SECRET) {
             throw new Error(__t('msg_security_violation_ugondu_upm_secret_is'));
@@ -63,7 +60,6 @@ export class UpmExecutionGate {
         return crypto.createHmac('sha256', process.env.UGONDU_UPM_SECRET).update(canonical, 'utf8').digest('hex');
     }
 
-    /** 6A & 6B - Evaluates policies and issues a cryptographically bound ExecutionAuthorization */
     public static async evaluate(context: GatingContext): Promise<ExecutionAuthorization> {
         Logger.info(__t('messages.upm.evaluating_ir_gate'));
 
@@ -84,7 +80,7 @@ export class UpmExecutionGate {
         const cryptographicSeal = this.hashOf(authPayload);
 
         return {
-            authorizationId: crypto.randomUUID(),
+            authorizationId: decision.authorizationId || crypto.randomUUID(),
             intentHash: context.intentHash,
             twinHash: context.twinHash,
             irHash,
@@ -92,29 +88,30 @@ export class UpmExecutionGate {
             decision,
             envelopeHash,
             cryptographicSeal,
-            expiresAt: new Date(Date.now() + 15 * 60 * 1000) // 15 minute TTL
+            expiresAt: new Date(Date.now() + 15 * 60 * 1000)
         };
     }
 
     private static async executePolicyRules(context: GatingContext): Promise<UpmDecision> {
-        const requiredCapabilities = new Set<string>();
+        const requiredActions = new Set<string>();
         for (const node of context.ir.nodes) {
-            requiredCapabilities.add(node.provider);
+            const action = (node as any).operation || node.provider;
+            requiredActions.add(action);
         }
 
-        const missing = Array.from(requiredCapabilities).filter(cap => !context.envelope.allowedActions.includes(cap) && !context.envelope.allowedActions.includes('*'));
+        const missing = Array.from(requiredActions).filter(action => !context.envelope.allowedActions.includes(action));
 
         if (missing.length > 0) {
             return {
                 status: 'DENY',
                 evidence: {
                     policyId: 'UPM-CAPABILITY-001',
-                    requirement: __t('msg_edition_capability_envelope_must_authori'),
+                    requirement: 'Edition Capability Envelope must authorize all required node operations',
                     targetCapability: missing.join(', '),
-                    observedState: __t('capability_not_present_in_edit'),
-                    affectedIrNodes: context.ir.nodes.filter(n => missing.includes(n.provider)).map(n => n.id),
+                    observedState: 'Capability or operation not present in edition allowedActions',
+                    affectedIrNodes: context.ir.nodes.filter(n => missing.includes((n as any).operation || n.provider)).map(n => n.id),
                     riskLevel: 'HIGH',
-                    remediation: __t('msg_upgrade_edition_or_modify_intent_to_use')
+                    remediation: 'Upgrade edition or modify intent to use authorized capabilities/operations.'
                 },
                 timestamp: new Date(),
                 policyVersion: context.policyVersion
@@ -124,31 +121,27 @@ export class UpmExecutionGate {
         return {
             status: 'ALLOW',
             timestamp: new Date(),
-            policyVersion: context.policyVersion
+            policyVersion: context.policyVersion,
+            authorizationId: crypto.randomUUID()
         };
     }
 
-    /** 6C - Validates an execution permit right before the provisioning engine begins. */
     public static verifyAuthorization(auth: ExecutionAuthorization, executionIr: ArchitectureIR): void {
         Logger.info(__t('messages.upm.verifying_authorization', { id: auth.authorizationId }));
 
-        // 1. Verify Expiration
         if (new Date() > auth.expiresAt) {
             throw new Error(__t('messages.error.execution_authorization_expired'));
         }
 
-        // 2. Verify Decision
         if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
             throw new Error(__t('messages.error.execution_authorization_denied', { status: auth.decision.status }));
         }
 
-        // 3. Verify IR Identity (Tamper Check)
         const executionIrHash = this.hashOf(executionIr);
         if (executionIrHash !== auth.irHash) {
             throw new Error(__t('messages.error.ir_hash_mismatch'));
         }
 
-        // 4. Verify Cryptographic Seal
         const authPayload = {
             intentHash: auth.intentHash,
             twinHash: auth.twinHash,

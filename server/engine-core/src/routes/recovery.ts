@@ -1,3 +1,4 @@
+import { RepairPlan } from '../deise/engine/repair-engine';
 import express, { Router } from 'express';
 import canonicalize from 'canonicalize';
 import { GlobalCapabilityRegistry } from '../deise/engine/recovery/capability-registry';
@@ -86,24 +87,16 @@ function assertConditionalAuthorization(auth: any): void {
         return;
     }
 
-    if (auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
-        throw new Error('AUTHORIZATION_NOT_EXECUTABLE');
-    }
-
-    if (!auth.decision.evidence) {
-        throw new Error('CONDITIONAL_AUTHORIZATION_MISSING_EVIDENCE');
-    }
-
-    throw new Error(
-        'CONDITIONAL_AUTHORIZATION_REQUIRES_EXPLICIT_CONDITION_HANDLER'
-    );
+    // Per P0-21, we explicitly fail on ALLOW_WITH_CONDITIONS as the condition evaluator does not exist
+    throw new Error('CONDITIONAL_AUTHORIZATION_REQUIRES_EXPLICIT_CONDITION_HANDLER');
 }
 
 export async function executeGovernedRecovery(
     intent: any,
     adapter: SshLiveAdapter,
     isDryRun: boolean,
-    existingTxnId?: string
+    existingTxnId?: string,
+    expectedRevision?: number
 ) {
     if (!process.env.UGONDU_UPM_SECRET) {
         throw new Error('UGONDU_UPM_SECRET missing. Policy gate failed closed.');
@@ -134,8 +127,9 @@ export async function executeGovernedRecovery(
         throw new Error('TRANSACTION_ALREADY_COMPLETE');
     }
 
-    txn = TransactionAuthority.update(txn.id, {
-        status: 'RUNNING'
+    txn = TransactionAuthority.update(txn.id, expectedRevision || txn.revision, {
+        status: 'RUNNING',
+        state: { ...txn.state, phase: 'RUNNING' }
     });
 
     const scope: any = {
@@ -149,6 +143,8 @@ export async function executeGovernedRecovery(
     };
 
     const twin = await orchestrator.capture(adapter, scope);
+    const twinHash = twin.immutableEvidenceSnapshotId || sha256(twin);
+
     const baselineFingerprint =
         await orchestrator.fingerprint(adapter, scope);
 
@@ -156,22 +152,31 @@ export async function executeGovernedRecovery(
 
     const diagnosis = await capability.diagnose(twin, scope);
 
-    const plan = txn.plan || await capability.plan(diagnosis, scope);
+    let plan = txn.plan as RepairPlan;
+    let planHash = txn.planHash;
 
     if (!plan) {
-        throw new Error('RECOVERY_PLAN_MISSING');
-    }
-
-    const planHash = sha256(plan);
-
-    txn = TransactionAuthority.update(txn.id, {
-        plan,
-        planHash,
-        state: {
-            phase: 'PLANNED',
-            baselineFingerprint
+        plan = await capability.plan(diagnosis, scope);
+        if (!plan) {
+            throw new Error('RECOVERY_PLAN_MISSING');
         }
-    });
+        planHash = sha256(plan);
+        
+        txn = TransactionAuthority.update(txn.id, txn.revision, {
+            plan,
+            planHash,
+            state: {
+                phase: 'PLANNED',
+                baselineFingerprint,
+                twinHash,
+                planHash
+            }
+        });
+    } else {
+        if (!planHash || planHash !== sha256(plan)) {
+            throw new Error('TRANSACTION_PLAN_BINDING_BROKEN');
+        }
+    }
 
     const analysis =
         await orchestrator.analyzeBlastRadius(plan, scope);
@@ -184,11 +189,11 @@ export async function executeGovernedRecovery(
         pureIntent.repositoryPath
     );
 
+    const irHash = sha256(ir);
+
     const context: GatingContext = {
         intentHash: canonicalIntentHash,
-        twinHash:
-            twin.immutableEvidenceSnapshotId ||
-            sha256(twin),
+        twinHash,
         ir,
         policyVersion: '1.0.0',
         envelope: {
@@ -205,7 +210,7 @@ export async function executeGovernedRecovery(
         auth.decision.status !== 'ALLOW' &&
         auth.decision.status !== 'ALLOW_WITH_CONDITIONS'
     ) {
-        TransactionAuthority.update(txn.id, {
+        TransactionAuthority.update(txn.id, txn.revision, {
             status: 'FAILED',
             state: {
                 phase: 'AUTHORIZATION_DENIED',
@@ -221,13 +226,24 @@ export async function executeGovernedRecovery(
 
     await orchestrator.requestApproval(plan, analysis, auth);
 
+    const envelopeHash = sha256(context.envelope);
+
+    txn = TransactionAuthority.update(txn.id, txn.revision, {
+        state: {
+            ...txn.state,
+            phase: 'AUTHORIZED',
+            irHash,
+            authorizationId: auth.decision.authorizationId || 'static',
+            envelopeHash
+        }
+    });
+
     if (isDryRun) {
-        TransactionAuthority.update(txn.id, {
+        TransactionAuthority.update(txn.id, txn.revision, {
             status: 'PENDING',
             state: {
-                phase: 'DRY_RUN_COMPLETE',
-                baselineFingerprint,
-                planHash
+                ...txn.state,
+                phase: 'DRY_RUN_COMPLETE'
             }
         });
 
@@ -239,17 +255,30 @@ export async function executeGovernedRecovery(
         };
     }
 
+    txn = TransactionAuthority.update(txn.id, txn.revision, {
+        state: { ...txn.state, phase: 'EXECUTING' }
+    });
+
     const execResult =
         await orchestrator.executeAtomically(plan, adapter, scope);
 
     if (!execResult.success) {
-        TransactionAuthority.update(txn.id, {
+        TransactionAuthority.update(txn.id, txn.revision, {
             status: 'FAILED',
-            executionReceipt: execResult.executionEvidence
+            executionReceipt: execResult.executionEvidence,
+            state: { ...txn.state, phase: 'FAILED' }
         });
 
         throw new Error('ATOMIC_EXECUTION_FAILED');
     }
+
+    txn = TransactionAuthority.update(txn.id, txn.revision, {
+        state: { ...txn.state, phase: 'EXECUTED' }
+    });
+
+    txn = TransactionAuthority.update(txn.id, txn.revision, {
+        state: { ...txn.state, phase: 'VERIFYING' }
+    });
 
     const verification =
         await orchestrator.verify(
@@ -262,9 +291,10 @@ export async function executeGovernedRecovery(
         );
 
     if (!verification.verified) {
-        TransactionAuthority.update(txn.id, {
+        TransactionAuthority.update(txn.id, txn.revision, {
             status: 'FAILED',
             state: {
+                ...txn.state,
                 phase: 'VERIFICATION_FAILED',
                 verification
             }
@@ -272,6 +302,10 @@ export async function executeGovernedRecovery(
 
         throw new Error('INDEPENDENT_VERIFICATION_FAILED');
     }
+
+    txn = TransactionAuthority.update(txn.id, txn.revision, {
+        state: { ...txn.state, phase: 'VERIFIED' }
+    });
 
     const finalFingerprint =
         await orchestrator.fingerprint(adapter, scope);
@@ -286,9 +320,13 @@ export async function executeGovernedRecovery(
         verification.verificationEvidence
     );
 
+    (cert as any).authorizationId = auth.decision.authorizationId || 'static';
+    (cert as any).intentHash = canonicalIntentHash;
+    (cert as any).irHash = irHash;
+
     const passport = await orchestrator.issuePassport(cert);
 
-    TransactionAuthority.update(txn.id, {
+    TransactionAuthority.update(txn.id, txn.revision, {
         status: 'SUCCESS',
         executionReceipt: execResult.executionEvidence,
         certificationReceipt: {
@@ -296,6 +334,7 @@ export async function executeGovernedRecovery(
             passport
         },
         state: {
+            ...txn.state,
             phase: 'CERTIFIED',
             baselineFingerprint,
             finalFingerprint
@@ -321,7 +360,8 @@ recoveryRouter.post(
             target,
             dry_run,
             authorizedActions,
-            transactionId
+            transactionId,
+            expectedRevision
         } = req.body;
 
         try {
@@ -355,7 +395,8 @@ recoveryRouter.post(
                 intent,
                 new SshLiveAdapter(),
                 !!dry_run,
-                transactionId
+                transactionId,
+                expectedRevision
             );
 
             return res.json(result);
@@ -367,6 +408,7 @@ recoveryRouter.post(
         }
     }
 );
+
 
 
 
