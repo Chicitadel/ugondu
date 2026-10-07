@@ -28,7 +28,7 @@ async function run(context) {
 
     const dockerfile = path.join(
         context.root,
-        'Dockerfile'
+        'server/engine-core/Dockerfile'
     );
 
     if (!fs.existsSync(dockerfile)) {

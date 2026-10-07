@@ -19,4 +19,5 @@ module.exports = {
   testTimeout: 10000,
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/tests/**'],
+  transformIgnorePatterns: ['node_modules/(?!(canonicalize)/)'],
 };
