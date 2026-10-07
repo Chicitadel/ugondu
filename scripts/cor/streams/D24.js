@@ -81,7 +81,7 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p = require('path').join(context.workspaceRoot, 'server', 'shared', 'locales', 'en.json');
+    const p = require('path').join(context.root, 'server', 'shared', 'locales', 'en.json');
     if (!fs.existsSync(p)) return false;
     try {
         const j = JSON.parse(fs.readFileSync(p, 'utf8'));

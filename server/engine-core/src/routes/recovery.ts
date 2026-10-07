@@ -131,7 +131,9 @@ export async function executeGovernedRecovery(
         throw new Error('TRANSACTION_ALREADY_COMPLETE');
     }
 
-    txn = TransactionAuthority.update(txn.id, revision, {
+    txn = TransactionAuthority.update(txn.id, revision, isDryRun ? {
+        state: { ...txn.state }
+    } : {
         status: 'RUNNING',
         state: { ...txn.state }
     });

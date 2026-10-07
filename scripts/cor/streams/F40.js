@@ -81,11 +81,14 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'src', 'deise', 'engine', 'recovery', 'recovery-orchestrator.ts');
-    if (fs.existsSync(p)) {
-        const c = fs.readFileSync(p, 'utf8');
-        if (!c.includes('issuePassport')) return false;
+    const p = require('path').join(context.root, 'server', 'engine-core', 'src', 'deise', 'engine', 'recovery', 'recovery-orchestrator.ts');
+    if (!fs.existsSync(p)) {
+        return false;
     }
+    const c = fs.readFileSync(p, 'utf8');
+    if (!c.includes('issuePassport')) return false;
+    if (!c.includes('certificateId: certificate.certificateId')) return false;
+
     artifacts.push('verified_source'); observations.push('final independent passport certification ok');
     return true;
 }

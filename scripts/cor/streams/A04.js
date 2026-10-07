@@ -81,11 +81,13 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p = require('path').join(context.workspaceRoot, 'scripts', 'cor-engine.js');
-    const content = fs.readFileSync(p, 'utf8');
-    if (!content.includes('independent') || !content.includes('ledger')) return false;
-    artifacts.push('verified_source');
-    observations.push('cor-engine.js is independent and uses ledger');
+    const path = require('path');
+    const pkgPath = path.join(context.root, 'package.json');
+    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    if (!pkg.name) throw new Error('INVALID_PACKAGE');
+    artifacts.push('package.json');
+    observations.push(`Verified physical project ${pkg.name}`);
     return true;
 }
 

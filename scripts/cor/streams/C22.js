@@ -80,7 +80,14 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    artifacts.push('verified_source'); observations.push('no direct fmt strings outside i18n');
+    const fs = require('fs');
+    const path = require('path');
+    const pkgPath = path.join(context.root, 'package.json');
+    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    if (!pkg.name) throw new Error('INVALID_PACKAGE');
+    artifacts.push('package.json');
+    observations.push(`Verified physical project ${pkg.name}`);
     return true;
 }
 

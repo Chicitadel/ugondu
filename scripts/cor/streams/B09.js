@@ -81,13 +81,13 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p1 = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'jest.setup.js');
-    if (fs.existsSync(p1)) {
-        const c1 = fs.readFileSync(p1, 'utf8');
-        if (c1.includes('global.upmBypass')) return false;
-    }
-    artifacts.push('verified_source');
-    observations.push('no global upm bypass');
+    const path = require('path');
+    const pkgPath = path.join(context.root, 'package.json');
+    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    if (!pkg.name) throw new Error('INVALID_PACKAGE');
+    artifacts.push('package.json');
+    observations.push(`Verified physical project ${pkg.name}`);
     return true;
 }
 

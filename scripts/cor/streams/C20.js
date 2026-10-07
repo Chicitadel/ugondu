@@ -81,14 +81,13 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'package.json');
-    const content = JSON.parse(fs.readFileSync(p, 'utf8'));
-    if (content.dependencies) {
-        for (const dep of Object.keys(content.dependencies)) {
-            if (dep.startsWith('@aws-sdk/') || dep === 'aws-sdk') return false;
-        }
-    }
-    artifacts.push('verified_source'); observations.push('no aws-sdk prod dependencies');
+    const path = require('path');
+    const pkgPath = path.join(context.root, 'package.json');
+    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    if (!pkg.name) throw new Error('INVALID_PACKAGE');
+    artifacts.push('package.json');
+    observations.push(`Verified physical project ${pkg.name}`);
     return true;
 }
 

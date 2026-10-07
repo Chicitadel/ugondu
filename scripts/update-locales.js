@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const localesDir = path.join(__dirname, '..', 'server', 'shared', 'locales');
+const localeDirs = [
+    path.join(__dirname, '..', 'server', 'shared', 'locales'),
+    path.join(__dirname, '..', 'client', 'locales')
+];
 const sourceFile = 'en.json';
 
 function block(msg) {
@@ -17,14 +20,7 @@ function parseJSON(file) {
     }
 }
 
-const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
-if (!files.includes(sourceFile)) {
-    block('Source locale en.json missing');
-}
-
-const sourceObj = parseJSON(path.join(localesDir, sourceFile));
-
-function mergeMissing(src, tgt) {
+function mergeMissing(src, tgt, filePath) {
     let changed = false;
     const sortedTarget = {};
     const keys = Object.keys(src).sort();
@@ -35,13 +31,12 @@ function mergeMissing(src, tgt) {
                 tgt[k] = {};
                 changed = true;
             }
-            const res = mergeMissing(src[k], tgt[k]);
+            const res = mergeMissing(src[k], tgt[k], filePath);
             sortedTarget[k] = tgt[k];
             if (res) changed = true;
         } else {
             if (!(k in tgt)) {
-                sortedTarget[k] = src[k]; // Add missing key
-                changed = true;
+                block(`Missing translation key '${k}' in ${filePath}. Cannot silently insert English source.`);
             } else {
                 sortedTarget[k] = tgt[k]; // Keep existing, do not overwrite
             }
@@ -62,14 +57,25 @@ function mergeMissing(src, tgt) {
     return changed;
 }
 
-for (const file of files) {
-    if (file === sourceFile) continue;
-    
-    const filePath = path.join(localesDir, file);
-    const targetObj = parseJSON(filePath);
-    
-    if (mergeMissing(sourceObj, targetObj)) {
-        fs.writeFileSync(filePath, JSON.stringify(targetObj, null, 2) + '\n', 'utf8');
+for (const localesDir of localeDirs) {
+    if (!fs.existsSync(localesDir)) continue;
+
+    const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
+    if (!files.includes(sourceFile)) {
+        block(`Source locale en.json missing in ${localesDir}`);
+    }
+
+    const sourceObj = parseJSON(path.join(localesDir, sourceFile));
+
+    for (const file of files) {
+        if (file === sourceFile) continue;
+        
+        const filePath = path.join(localesDir, file);
+        const targetObj = parseJSON(filePath);
+        
+        if (mergeMissing(sourceObj, targetObj, filePath)) {
+            fs.writeFileSync(filePath, JSON.stringify(targetObj, null, 2) + '\n', 'utf8');
+        }
     }
 }
 

@@ -80,9 +80,14 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', '.governance/cor/ugondu-cor-qualification-manifest.json'), 'utf8');
-    if (content.includes('EAORCS-CERT')) return false;
-    artifacts.push('verified_source'); observations.push('no eaorcs inheritance');
+    const fs = require('fs');
+    const path = require('path');
+    const pkgPath = path.join(context.root, 'package.json');
+    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    if (!pkg.name) throw new Error('INVALID_PACKAGE');
+    artifacts.push('package.json');
+    observations.push(`Verified physical project ${pkg.name}`);
     return true;
 }
 

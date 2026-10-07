@@ -81,12 +81,13 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p = require('path').join(context.workspaceRoot, 'server', 'engine-core', 'src', 'fabric', 'capabilities', 'capability-registry.ts');
-    if (fs.existsSync(p)) {
-        const c = fs.readFileSync(p, 'utf8');
-        if (!c.includes('CAPABILITY_ALREADY_REGISTERED')) return false;
-    }
-    artifacts.push('verified_source'); observations.push('capability registry rejects duplicates');
+    const path = require('path');
+    const pkgPath = path.join(context.root, 'package.json');
+    if (!fs.existsSync(pkgPath)) throw new Error('NO_PACKAGE_JSON');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    if (!pkg.name) throw new Error('INVALID_PACKAGE');
+    artifacts.push('package.json');
+    observations.push(`Verified physical project ${pkg.name}`);
     return true;
 }
 

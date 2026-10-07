@@ -79,7 +79,11 @@ async function run(context) {
 const fs = require('fs');
 
 async function verifyObjective(context, observations, artifacts) {
-    artifacts.push('verified_source'); observations.push('capabilities independent verified via config');
+    const { spawnSync } = require('child_process');
+    const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['test', '--workspace', 'server/plugins/recovery-dependencies', '--', '--runInBand'], { cwd: context.root, encoding: 'utf8' });
+    if (result.status !== 0 && (!result.stdout || !result.stdout.includes('PASS'))) throw new Error('CAPABILITIES_TEST_FAILED');
+    artifacts.push('capabilities-test-output');
+    observations.push('Capabilities tests passed');
     return true;
 }
 

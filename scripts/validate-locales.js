@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const localesDir = path.join(__dirname, '..', 'server', 'shared', 'locales');
+const localeDirs = [
+    path.join(__dirname, '..', 'server', 'shared', 'locales'),
+    path.join(__dirname, '..', 'client', 'locales')
+];
 const sourceFile = 'en.json';
 
 function flatten(obj, prefix = '') {
@@ -29,41 +32,45 @@ function block(msg) {
     process.exit(1);
 }
 
-const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
-if (!files.includes(sourceFile)) {
-    block('Source locale en.json missing');
-}
+for (const localesDir of localeDirs) {
+    if (!fs.existsSync(localesDir)) continue;
 
-const locales = {};
-for (const file of files) {
-    try {
-        locales[file] = flatten(JSON.parse(fs.readFileSync(path.join(localesDir, file), 'utf8')));
-    } catch (e) {
-        block(`Malformed JSON in ${file}`);
+    const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
+    if (!files.includes(sourceFile)) {
+        block(`Source locale en.json missing in ${localesDir}`);
     }
-}
 
-const sourceKeys = locales[sourceFile];
-const sourceKeyNames = Object.keys(sourceKeys);
+    const locales = {};
+    for (const file of files) {
+        try {
+            locales[file] = flatten(JSON.parse(fs.readFileSync(path.join(localesDir, file), 'utf8')));
+        } catch (e) {
+            block(`Malformed JSON in ${file}`);
+        }
+    }
 
-for (const file of files) {
-    if (file === sourceFile) continue;
-    const targetKeys = locales[file];
-    const targetKeyNames = Object.keys(targetKeys);
+    const sourceKeys = locales[sourceFile];
+    const sourceKeyNames = Object.keys(sourceKeys);
 
-    const missing = sourceKeyNames.filter(k => !targetKeyNames.includes(k));
-    if (missing.length > 0) block(`Missing keys in ${file}: ${missing.join(', ')}`);
+    for (const file of files) {
+        if (file === sourceFile) continue;
+        const targetKeys = locales[file];
+        const targetKeyNames = Object.keys(targetKeys);
 
-    const extra = targetKeyNames.filter(k => !sourceKeyNames.includes(k));
-    if (extra.length > 0) block(`Extra keys in ${file}: ${extra.join(', ')}`);
+        const missing = sourceKeyNames.filter(k => !targetKeyNames.includes(k));
+        if (missing.length > 0) block(`Missing keys in ${file}: ${missing.join(', ')}`);
 
-    for (const k of sourceKeyNames) {
-        if (typeof targetKeys[k] !== 'string') block(`Malformed value for key ${k} in ${file}`);
-        
-        const sourceP = getPlaceholders(sourceKeys[k]);
-        const targetP = getPlaceholders(targetKeys[k]);
-        if (JSON.stringify(sourceP) !== JSON.stringify(targetP)) {
-            block(`Placeholder mismatch for key ${k} in ${file}`);
+        const extra = targetKeyNames.filter(k => !sourceKeyNames.includes(k));
+        if (extra.length > 0) block(`Extra keys in ${file}: ${extra.join(', ')}`);
+
+        for (const k of sourceKeyNames) {
+            if (typeof targetKeys[k] !== 'string') block(`Malformed value for key ${k} in ${file}`);
+            
+            const sourceP = getPlaceholders(sourceKeys[k]);
+            const targetP = getPlaceholders(targetKeys[k]);
+            if (JSON.stringify(sourceP) !== JSON.stringify(targetP)) {
+                block(`Placeholder mismatch for key ${k} in ${file}`);
+            }
         }
     }
 }

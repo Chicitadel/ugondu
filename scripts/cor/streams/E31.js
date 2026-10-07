@@ -81,13 +81,12 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     const fs = require('fs');
-    const p = require('path').join(context.workspaceRoot, 'server', 'shared', 'locales', 'pt.json');
-    if (!fs.existsSync(p)) return false;
-    try {
-        const j = JSON.parse(fs.readFileSync(p, 'utf8'));
-        if (!j || typeof j !== 'object') return false;
-    } catch(e) { return false; }
-    artifacts.push('verified_source'); observations.push('pt.json exists and parses');
+    const path = require('path');
+    const p = path.join(context.root, 'server/shared/locales/pt.json');
+    if (!fs.existsSync(p)) throw new Error('LOCALE_MISSING');
+    JSON.parse(fs.readFileSync(p, 'utf8'));
+    artifacts.push('pt.json');
+    observations.push('Parsed pt.json successfully');
     return true;
 }
 
