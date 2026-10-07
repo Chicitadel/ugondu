@@ -51,3 +51,8 @@ async function verifyObjective(context, observations, artifacts) {
     return true;
 }
 ;
+
+module.exports = {
+    metadata,
+    run
+};
