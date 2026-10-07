@@ -23,7 +23,8 @@ export type TransactionPhase =
     | 'AUTHORIZATION_DENIED'
     | 'DRY_RUN_COMPLETE'
     | 'VERIFICATION_FAILED'
-    | 'FAILED';
+    | 'FAILED'
+    | 'PASSPORT_ISSUED';
 
 export interface CanonicalIntent {
     capabilityId: string;
@@ -69,7 +70,12 @@ const PHASE_ORDER =
         ['EXECUTED', 70],
         ['VERIFYING', 80],
         ['VERIFIED', 90],
-        ['CERTIFIED', 100]
+        ['CERTIFIED', 100],
+        ['AUTHORIZATION_DENIED', 999],
+        ['DRY_RUN_COMPLETE', 999],
+        ['VERIFICATION_FAILED', 999],
+        ['FAILED', 999],
+        ['PASSPORT_ISSUED', 110]
     ]);
 
 export class TransactionAuthority {
