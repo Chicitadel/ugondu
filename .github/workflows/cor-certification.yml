@@ -1,1 +1,102 @@
+name: COR Certification
 
+on:
+  push:
+    branches:
+      - main
+      - phase4/production-hardening
+  pull_request:
+    branches:
+      - main
+      - phase4/production-hardening
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cor:
+    name: COR Certification
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_VERSION: "20"
+      COR_SIGNING_KEY: ${{ secrets.COR_SIGNING_KEY }}
+      COR_PUBLIC_KEY: ${{ secrets.COR_PUBLIC_KEY }}
+
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Assert clean checkout
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate locales
+        run: node scripts/validate-locales.js
+
+      - name: I18N audit
+        run: node scripts/i18n_audit.js
+
+      - name: Architecture depth scan
+        run: node scripts/depth_scan.js
+
+      - name: Import scan
+        run: node scripts/import_scan.js
+
+      - name: Type check
+        run: npm exec --workspaces -- tsc --noEmit --skipLibCheck
+
+      - name: Workspace tests
+        run: npm run test --workspaces --if-present
+
+      - name: Release integrity
+        run: npm run verify:release-integrity --if-present
+
+      - name: Verify COR signing trust root
+        shell: bash
+        run: |
+          test -n "${COR_SIGNING_KEY}"
+          test -n "${COR_PUBLIC_KEY}"
+
+      - name: Validate stream registry
+        run: node scripts/check-cor-stream-registry.js
+
+      - name: Run fresh COR qualification
+        run: node scripts/cor-engine.js
+
+      - name: Independently finalize COR
+        run: node scripts/cor-finalize.js
+
+      - name: Sign final COR authority
+        run: node scripts/cor-signer.js
+
+      - name: Final candidate integrity check
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -z "$(git status --porcelain)"
+
+      - name: Upload COR evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ugondu-cor-evidence-${{ github.sha }}
+          path: .cor_evidence/
+          if-no-files-found: error
+          retention-days: 30

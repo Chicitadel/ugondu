@@ -68,6 +68,7 @@ export class UpmExecutionGate {
     }
 
     public static async evaluate(context: GatingContext): Promise<ExecutionAuthorization> {
+        if (context.envelope.allowedActions.some(action => action === '*' || action.includes('*'))) { throw new Error('WILDCARD_CAPABILITY_NOT_PERMITTED'); }
         Logger.info(__t('messages.upm.evaluating_ir_gate'));
 
         const irHash = this.hashOf(context.ir);
@@ -172,4 +173,5 @@ export class UpmExecutionGate {
         Logger.info(__t('messages.upm.authorization_verified'));
     }
 }
+
 

@@ -1,33 +1,71 @@
-'use strict';
-
 const fs = require('fs');
 const path = require('path');
 
-const ROOT =
-    process.env.UGONDU_ROOT ||
-    path.resolve(__dirname, '..');
+const localesDir = path.join(__dirname, '..', 'server', 'shared', 'locales');
+const sourceFile = 'en.json';
 
-const LOCALES_DIR =
-    path.join(ROOT, 'server', 'shared', 'locales');
-
-if (!fs.existsSync(LOCALES_DIR)) {
-    throw new Error('LOCALES_DIRECTORY_NOT_FOUND');
+function flatten(obj, prefix = '') {
+    let result = {};
+    for (const key in obj) {
+        const val = obj[key];
+        const newKey = prefix ? `${prefix}.${key}` : key;
+        if (typeof val === 'object' && val !== null) {
+            Object.assign(result, flatten(val, newKey));
+        } else {
+            result[newKey] = val;
+        }
+    }
+    return result;
 }
 
-const files = fs.readdirSync(LOCALES_DIR).filter(f => f.endsWith('.json'));
+function getPlaceholders(str) {
+    if (typeof str !== 'string') return [];
+    const matches = str.match(/{{[^}]+}}/g) || [];
+    return matches.sort();
+}
 
-let failed = false;
+function block(msg) {
+    console.error(`COR BLOCKED: ${msg}`);
+    process.exit(1);
+}
+
+const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
+if (!files.includes(sourceFile)) {
+    block('Source locale en.json missing');
+}
+
+const locales = {};
 for (const file of files) {
-    const fullPath = path.join(LOCALES_DIR, file);
     try {
-        JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+        locales[file] = flatten(JSON.parse(fs.readFileSync(path.join(localesDir, file), 'utf8')));
     } catch (e) {
-        console.error('Invalid JSON in locale file: ' + file);
-        failed = true;
+        block(`Malformed JSON in ${file}`);
     }
 }
 
-if (failed) {
-    process.exit(1);
+const sourceKeys = locales[sourceFile];
+const sourceKeyNames = Object.keys(sourceKeys);
+
+for (const file of files) {
+    if (file === sourceFile) continue;
+    const targetKeys = locales[file];
+    const targetKeyNames = Object.keys(targetKeys);
+
+    const missing = sourceKeyNames.filter(k => !targetKeyNames.includes(k));
+    if (missing.length > 0) block(`Missing keys in ${file}: ${missing.join(', ')}`);
+
+    const extra = targetKeyNames.filter(k => !sourceKeyNames.includes(k));
+    if (extra.length > 0) block(`Extra keys in ${file}: ${extra.join(', ')}`);
+
+    for (const k of sourceKeyNames) {
+        if (typeof targetKeys[k] !== 'string') block(`Malformed value for key ${k} in ${file}`);
+        
+        const sourceP = getPlaceholders(sourceKeys[k]);
+        const targetP = getPlaceholders(targetKeys[k]);
+        if (JSON.stringify(sourceP) !== JSON.stringify(targetP)) {
+            block(`Placeholder mismatch for key ${k} in ${file}`);
+        }
+    }
 }
-console.log('Locales validated successfully');
+
+console.log('Localization validation PASS');

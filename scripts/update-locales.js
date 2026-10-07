@@ -1,27 +1,76 @@
-'use strict';
-
 const fs = require('fs');
 const path = require('path');
 
-const ROOT =
-    process.env.UGONDU_ROOT ||
-    path.resolve(__dirname, '..');
+const localesDir = path.join(__dirname, '..', 'server', 'shared', 'locales');
+const sourceFile = 'en.json';
 
-const LOCALES_DIR =
-    path.join(ROOT, 'server', 'shared', 'locales');
-
-if (!fs.existsSync(LOCALES_DIR)) {
-    throw new Error('LOCALES_DIRECTORY_NOT_FOUND');
+function block(msg) {
+    console.error(`COR BLOCKED: ${msg}`);
+    process.exit(1);
 }
 
-const files = fs.readdirSync(LOCALES_DIR).filter(f => f.endsWith('.json'));
-
-for (const file of files) {
-    const fullPath = path.join(LOCALES_DIR, file);
+function parseJSON(file) {
     try {
-        JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-    } catch (e) {
-        throw new Error('COR BLOCKED: Corrupt locale file ' + file + ' - ' + e.message);
+        return JSON.parse(fs.readFileSync(file, 'utf8'));
+    } catch {
+        block(`Malformed JSON in ${path.basename(file)}`);
     }
 }
+
+const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
+if (!files.includes(sourceFile)) {
+    block('Source locale en.json missing');
+}
+
+const sourceObj = parseJSON(path.join(localesDir, sourceFile));
+
+function mergeMissing(src, tgt) {
+    let changed = false;
+    const sortedTarget = {};
+    const keys = Object.keys(src).sort();
+    
+    for (const k of keys) {
+        if (typeof src[k] === 'object' && src[k] !== null) {
+            if (!tgt[k] || typeof tgt[k] !== 'object') {
+                tgt[k] = {};
+                changed = true;
+            }
+            const res = mergeMissing(src[k], tgt[k]);
+            sortedTarget[k] = tgt[k];
+            if (res) changed = true;
+        } else {
+            if (!(k in tgt)) {
+                sortedTarget[k] = src[k]; // Add missing key
+                changed = true;
+            } else {
+                sortedTarget[k] = tgt[k]; // Keep existing, do not overwrite
+            }
+        }
+    }
+    
+    // Remove extra keys to ensure deterministic output matching source schema
+    for (const k in tgt) {
+        if (!(k in src)) {
+            changed = true;
+        }
+    }
+    
+    // Mutate original object to preserve reference
+    for (const k in tgt) delete tgt[k];
+    for (const k in sortedTarget) tgt[k] = sortedTarget[k];
+    
+    return changed;
+}
+
+for (const file of files) {
+    if (file === sourceFile) continue;
+    
+    const filePath = path.join(localesDir, file);
+    const targetObj = parseJSON(filePath);
+    
+    if (mergeMissing(sourceObj, targetObj)) {
+        fs.writeFileSync(filePath, JSON.stringify(targetObj, null, 2) + '\n', 'utf8');
+    }
+}
+
 console.log('Locales updated successfully');

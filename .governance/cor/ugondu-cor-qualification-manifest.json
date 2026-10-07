@@ -1,359 +1,328 @@
 {
-  "schemaVersion": "1.0.0",
-  "candidateTree": "a98134648e93615516614f18aedb2c6bb56d5142",
-  "streams": [
-    {
-      "id": "A01",
-      "objective": "Separate governance evidence from qualification evidence.",
-      "location": [
-        "tests/governance/run_governance.js",
-        "engine/governance/ImmutableVerificationCacheEngine.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A02",
-      "objective": "Require complete qualification provenance before cache reuse.",
-      "location": [
-        "engine/governance/ImmutableVerificationCacheEngine.js",
-        "certify.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A03",
-      "objective": "Prevent governance-first execution from yielding qualification EVIDENCE_REUSED.",
-      "location": [
-        "tests/governance",
-        "certify.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A04",
-      "objective": "Require exact qualification subject identity.",
-      "location": [
-        "engine/governance/ImmutableVerificationCacheEngine.js",
-        "engine/release/CanonicalSubjectRegistry.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A05",
-      "objective": "Bind qualification cache to complete 30-stream manifest.",
-      "location": [
-        "engine/governance/ImmutableVerificationCacheEngine.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A06",
-      "objective": "Reject synthetic PASS stream fallback.",
-      "location": [
-        "certify.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A07",
-      "objective": "Require physical qualification producer receipt.",
-      "location": [
-        "certify.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "A08",
-      "objective": "Fresh 30-stream qualification.",
-      "location": [
-        "certify.js",
-        "ci/logs"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B09",
-      "objective": "Resolve exact code-bearing qualification subject.",
-      "location": [
-        "Git refs",
-        ".governance/state/current.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B10",
-      "objective": "Verify evidence-only publication delta.",
-      "location": [
-        "Git compare"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B11",
-      "objective": "Requalify after final code change.",
-      "location": [
-        "certify.js",
-        "scripts/regenerate_cert_artifact.js",
-        "ci/logs"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B12",
-      "objective": "Independently recount physical streams.",
-      "location": [
-        "qualification manifest"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B13",
-      "objective": "Bind qualification execution commit.",
-      "location": [
-        "engine/release/CanonicalReleaseAuthority.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B14",
-      "objective": "Recompute qualified source tree hash.",
-      "location": [
-        "engine/release/SourceTreeHashUtility.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B15",
-      "objective": "Verify contract and inventory parity.",
-      "location": [
-        ".governance/standards/EAORCS-CANONICAL-RELEASE-MEASUREMENT.yaml",
-        ".governance/release/project_inventory.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "B16",
-      "objective": "Freeze verified qualification subject.",
-      "location": [
-        ".governance/state/current.json",
-        ".governance/envelope/latest_envelope.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "C17",
-      "objective": "Correct publication topology.",
-      "location": [
-        "engine/release/CanonicalReleaseAuthority.js",
-        "engine/release/CanonicalSubjectRegistry.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "C18",
-      "objective": "Correct certificate publication role.",
-      "location": [
-        "scripts/regenerate_cert_artifact.js",
-        "EAORCS-CERT-*.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "C19",
-      "objective": "Correct final receipt topology.",
-      "location": [
-        "engine/release/CanonicalReleaseAuthority.js",
-        ".governance/evidence/final-release-receipt.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "C20",
-      "objective": "Verify publication allow-list.",
-      "location": [
-        "Git compare",
-        "governance delta checker"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "C21",
-      "objective": "Fail closed on code-changing publication descendant.",
-      "location": [
-        "terminal integrity tests"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "C22",
-      "objective": "Run terminal authority reconciliation.",
-      "location": [
-        "engine/release/CanonicalReleaseAuthority.js",
-        ".governance/**"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "D23",
-      "objective": "Replace stale envelope subject.",
-      "location": [
-        ".governance/envelope/latest_envelope.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "D24",
-      "objective": "Recompute envelope tree hash.",
-      "location": [
-        ".governance/envelope/latest_envelope.json",
-        "engine/release/SourceTreeHashUtility.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "D25",
-      "objective": "Add envelope authority surface.",
-      "location": [
-        "tests/governance/cross_surface_authority_consistency.test.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "D26",
-      "objective": "Synchronize current state.",
-      "location": [
-        ".governance/state/current.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "D27",
-      "objective": "Remove stale 317/317 count.",
-      "location": [
-        ".governance/state/current.json",
-        "governance receipt"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "D28",
-      "objective": "Synchronize current-state timestamps.",
-      "location": [
-        ".governance/state/current.json"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "E29",
-      "objective": "Remove hard-coded governance counts.",
-      "location": [
-        "scripts/regenerate_cert_artifact.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "E30",
-      "objective": "Fail closed on missing execution evidence.",
-      "location": [
-        "scripts/regenerate_cert_artifact.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "E31",
-      "objective": "Fail closed on contradictory governance counts.",
-      "location": [
-        "scripts/regenerate_cert_artifact.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "E32",
-      "objective": "Bind release receipt to execution IDs.",
-      "location": [
-        "engine/release/CanonicalReleaseAuthority.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "E33",
-      "objective": "Regenerate only from fresh authoritative evidence.",
-      "location": [
-        "scripts/regenerate_cert_artifact.js"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "E34",
-      "objective": "Re-sign and independently verify final certificate.",
-      "location": [
-        "certificate/signature artifacts",
-        "terminal tests"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "F35",
-      "objective": "Clean checkout of actual remote HEAD.",
-      "location": [
-        "GitHub origin/main",
-        "CI workspace"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "F36",
-      "objective": "Fresh 30-stream terminal qualification.",
-      "location": [
-        "certify.js",
-        "ci/run_ci_locally.js",
-        "ci/logs"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "F37",
-      "objective": "Fresh governance execution with actual counts.",
-      "location": [
-        "tests/governance/run_governance.js",
-        "CI logs"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "F38",
-      "objective": "Final authority reconciliation.",
-      "location": [
-        ".governance/**",
-        "certificate",
-        "receipt",
-        "envelope",
-        "state"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "F39",
-      "objective": "Final zero-drift/domain-zero/registration gates.",
-      "location": [
-        "governance suites",
-        "Git status/diff"
-      ],
-      "status": "PLANNED"
-    },
-    {
-      "id": "F40",
-      "objective": "Emit COR only after fresh evidence closure.",
-      "location": [
-        "release authority",
-        "certificate"
-      ],
-      "status": "PLANNED"
-    }
-  ],
-  "repository": "Chicitadel/ugondu",
-  "status": "PLANNED",
-  "scheduleId": "UGONDU-COR-FINAL-2026-10-07",
-  "candidateCommit": "6c5c08940c187c73cea0b004901e339f55f8034f",
-  "manifestDigest": null
+    "repository": "Chicitadel/ugondu",
+    "candidateCommit": null,
+    "candidateTree": null,
+    "streams": [
+        {
+            "id": "A01",
+            "status": "PLANNED",
+            "objective": "Verify atomic CAS implementation in transaction-authority.ts",
+            "location": [
+                "server/engine-core/src/deise/engine/recovery/transaction-authority.ts"
+            ]
+        },
+        {
+            "id": "A02",
+            "status": "PLANNED",
+            "objective": "Verify policy-gate wildcard prohibition",
+            "location": [
+                "server/engine-core/src/upm/policy-gate.ts"
+            ]
+        },
+        {
+            "id": "A03",
+            "status": "PLANNED",
+            "objective": "Verify recovery logic binding envelope hash",
+            "location": [
+                "server/engine-core/src/routes/recovery.ts"
+            ]
+        },
+        {
+            "id": "A04",
+            "status": "PLANNED",
+            "objective": "Verify independence of cor-engine.js",
+            "location": [
+                "scripts/cor-engine.js"
+            ]
+        },
+        {
+            "id": "A05",
+            "status": "PLANNED",
+            "objective": "Verify independence of cor-finalize.js",
+            "location": [
+                "scripts/cor-finalize.js"
+            ]
+        },
+        {
+            "id": "A06",
+            "status": "PLANNED",
+            "objective": "Verify independent signature in cor-signer.js",
+            "location": [
+                "scripts/cor-signer.js"
+            ]
+        },
+        {
+            "id": "A07",
+            "status": "PLANNED",
+            "objective": "Verify stream registry validator exists",
+            "location": [
+                "scripts/check-cor-stream-registry.js"
+            ]
+        },
+        {
+            "id": "A08",
+            "status": "PLANNED",
+            "objective": "Verify COR certification workflow exists",
+            "location": [
+                ".github/workflows/cor-certification.yml"
+            ]
+        },
+        {
+            "id": "B09",
+            "status": "PLANNED",
+            "objective": "Verify removal of global upm bypass from jest.setup.ts",
+            "location": [
+                "server/engine-core/jest.setup.js",
+                "server/capabilities/jest.setup.js"
+            ]
+        },
+        {
+            "id": "B10",
+            "status": "PLANNED",
+            "objective": "Verify unit-test translation fixture rule enforcement",
+            "location": [
+                "server/engine-core/jest.setup.js"
+            ]
+        },
+        {
+            "id": "B11",
+            "status": "PLANNED",
+            "objective": "Verify locale update script does not overwrite translations",
+            "location": [
+                "scripts/update-locales.js"
+            ]
+        },
+        {
+            "id": "B12",
+            "status": "PLANNED",
+            "objective": "Verify locale validation script checks key parity",
+            "location": [
+                "scripts/validate-locales.js"
+            ]
+        },
+        {
+            "id": "B13",
+            "status": "PLANNED",
+            "objective": "Verify Ugondu manifest does not contain EAORCS inheritance",
+            "location": [
+                ".governance/cor/ugondu-cor-qualification-manifest.json"
+            ]
+        },
+        {
+            "id": "B14",
+            "status": "PLANNED",
+            "objective": "Verify capability registry rejects duplicates",
+            "location": [
+                "server/engine-core/src/fabric/capabilities/capability-registry.ts"
+            ]
+        },
+        {
+            "id": "B15",
+            "status": "PLANNED",
+            "objective": "Verify recovery diagnosis delegates to capability",
+            "location": [
+                "server/engine-core/src/routes/recovery.ts"
+            ]
+        },
+        {
+            "id": "B16",
+            "status": "PLANNED",
+            "objective": "Verify absence of out-of-bounds bash execution in core engine",
+            "location": [
+                "server/engine-core/package.json"
+            ]
+        },
+        {
+            "id": "C17",
+            "status": "PLANNED",
+            "objective": "Verify core engine tests pass independently",
+            "location": [
+                "server/engine-core/package.json"
+            ]
+        },
+        {
+            "id": "C18",
+            "status": "PLANNED",
+            "objective": "Verify capabilities tests pass independently",
+            "location": [
+                "server/capabilities/package.json"
+            ]
+        },
+        {
+            "id": "C19",
+            "status": "PLANNED",
+            "objective": "Verify uppie tests pass independently",
+            "location": [
+                "server/uppie/package.json"
+            ]
+        },
+        {
+            "id": "C20",
+            "status": "PLANNED",
+            "objective": "Verify aws-sdk is not a production dependency in engine-core",
+            "location": [
+                "server/engine-core/package.json"
+            ]
+        },
+        {
+            "id": "C21",
+            "status": "PLANNED",
+            "objective": "Verify Fargate deployment container identity structure",
+            "location": [
+                "Dockerfile"
+            ]
+        },
+        {
+            "id": "C22",
+            "status": "PLANNED",
+            "objective": "Verify zero hardcoded fmt strings in client repair CLI",
+            "location": [
+                "client/cmd/repair.go"
+            ]
+        },
+        {
+            "id": "D23",
+            "status": "PLANNED",
+            "objective": "Verify localized string injection in client actions",
+            "location": [
+                "client/engine/actions_extended.go"
+            ]
+        },
+        {
+            "id": "D24",
+            "status": "PLANNED",
+            "objective": "Verify en.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/en.json"
+            ]
+        },
+        {
+            "id": "D25",
+            "status": "PLANNED",
+            "objective": "Verify ar.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/ar.json"
+            ]
+        },
+        {
+            "id": "D26",
+            "status": "PLANNED",
+            "objective": "Verify de.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/de.json"
+            ]
+        },
+        {
+            "id": "D27",
+            "status": "PLANNED",
+            "objective": "Verify es.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/es.json"
+            ]
+        },
+        {
+            "id": "D28",
+            "status": "PLANNED",
+            "objective": "Verify fr.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/fr.json"
+            ]
+        },
+        {
+            "id": "E29",
+            "status": "PLANNED",
+            "objective": "Verify it.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/it.json"
+            ]
+        },
+        {
+            "id": "E30",
+            "status": "PLANNED",
+            "objective": "Verify ja.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/ja.json"
+            ]
+        },
+        {
+            "id": "E31",
+            "status": "PLANNED",
+            "objective": "Verify pt.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/pt.json"
+            ]
+        },
+        {
+            "id": "E32",
+            "status": "PLANNED",
+            "objective": "Verify ru.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/ru.json"
+            ]
+        },
+        {
+            "id": "E33",
+            "status": "PLANNED",
+            "objective": "Verify zh.json exists in server shared locales",
+            "location": [
+                "server/shared/locales/zh.json"
+            ]
+        },
+        {
+            "id": "E34",
+            "status": "PLANNED",
+            "objective": "Verify client/locales obsolete directory is absent",
+            "location": [
+                "client/locales"
+            ]
+        },
+        {
+            "id": "F35",
+            "status": "PLANNED",
+            "objective": "Verify recovery orchestration correctly requests approval",
+            "location": [
+                "server/engine-core/src/routes/recovery.ts"
+            ]
+        },
+        {
+            "id": "F36",
+            "status": "PLANNED",
+            "objective": "Verify recovery execution verifies authorization",
+            "location": [
+                "server/engine-core/src/routes/recovery.ts"
+            ]
+        },
+        {
+            "id": "F37",
+            "status": "PLANNED",
+            "objective": "Verify immutable recovery twin hashing",
+            "location": [
+                "server/engine-core/src/routes/recovery.ts"
+            ]
+        },
+        {
+            "id": "F38",
+            "status": "PLANNED",
+            "objective": "Verify blast radius analysis dry run block",
+            "location": [
+                "server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts"
+            ]
+        },
+        {
+            "id": "F39",
+            "status": "PLANNED",
+            "objective": "Verify execution atomically handles check drift",
+            "location": [
+                "server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts"
+            ]
+        },
+        {
+            "id": "F40",
+            "status": "PLANNED",
+            "objective": "Verify final independent passport certification",
+            "location": [
+                "server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts"
+            ]
+        }
+    ]
 }
