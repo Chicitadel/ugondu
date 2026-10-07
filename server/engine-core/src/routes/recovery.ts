@@ -1,100 +1,372 @@
 import express, { Router } from 'express';
+import canonicalize from 'canonicalize';
 import { GlobalCapabilityRegistry } from '../deise/engine/recovery/capability-registry';
 import { RecoveryOrchestrator } from '../deise/engine/recovery/recovery-orchestrator';
 import { SshLiveAdapter } from '../deise/engine/adapters/ssh/ssh-live-adapter';
 import { UpmExecutionGate, GatingContext } from '../upm/policy-gate';
-import { TransactionAuthority } from '../deise/engine/recovery/transaction-authority';
+import {
+    TransactionAuthority
+} from '../deise/engine/recovery/transaction-authority';
 import * as crypto from 'crypto';
 
 export const recoveryRouter = Router();
 const orchestrator = new RecoveryOrchestrator();
 
-function mapPlanToIR(plan: any): any {
-    const nodes = [];
-    if (plan && plan.infrastructureRepairs) {
-        for (const rep of plan.infrastructureRepairs) {
-            nodes.push({ id: rep.id, type: 'resource', provider: rep.provider || 'unknown', config: {} });
-        }
+function sha256(value: unknown): string {
+    const canonical = canonicalize(value);
+
+    if (!canonical) {
+        throw new Error('CANONICALIZATION_FAILED');
     }
-    return { nodes, edges: [] };
+
+    return crypto
+        .createHash('sha256')
+        .update(canonical, 'utf8')
+        .digest('hex');
 }
 
-export async function executeGovernedRecovery(intent: any, adapter: any, isDryRun: boolean, existingTxnId?: string) {
+function canonicalIntent(intent: any) {
+    if (!intent?.capabilityId || !intent?.target) {
+        throw new Error('INVALID_RECOVERY_INTENT');
+    }
+
+    if (!Array.isArray(intent.authorizedActions)) {
+        throw new Error('INVALID_AUTHORIZED_ACTIONS');
+    }
+
+    return {
+        capabilityId: intent.capabilityId,
+        target: intent.target,
+        repositoryPath: intent.repositoryPath,
+        authorizedActions: Array.from(new Set(intent.authorizedActions.map((v: unknown) => String(v)))).sort() as string[]
+    };
+}
+
+function mapPlanToIR(plan: any, target: string, repositoryPath: string): any {
+    const repairs = Array.isArray(plan?.infrastructureRepairs)
+        ? plan.infrastructureRepairs
+        : [];
+
+    if (repairs.length === 0) {
+        throw new Error('EMPTY_EXECUTION_PLAN');
+    }
+
+    return {
+        nodes: repairs.map((rep: any) => ({
+            id: String(rep.id),
+            type: 'recovery-operation',
+            operation: rep.kind || rep.operation || null,
+            resourceId: rep.resourceId || rep.targetPath || rep.id,
+            resourceType: rep.resourceType || 'unknown',
+            provider: rep.provider || 'unknown',
+            target,
+            repositoryPath,
+            parameters: rep.parameters || {
+                targetPath: rep.targetPath,
+                content: rep.content,
+                mode: rep.mode
+            },
+            expectedState: rep.expectedState || null,
+            dependencies: Array.isArray(rep.dependencies)
+                ? rep.dependencies
+                : [],
+            destructive: rep.destructive === true
+        })),
+        edges: repairs.flatMap((rep: any) =>
+            (rep.dependencies || []).map((dependency: string) => ({
+                from: dependency,
+                to: String(rep.id)
+            }))
+        )
+    };
+}
+
+function assertConditionalAuthorization(auth: any): void {
+    if (auth.decision.status === 'ALLOW') {
+        return;
+    }
+
+    if (auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
+        throw new Error('AUTHORIZATION_NOT_EXECUTABLE');
+    }
+
+    if (!auth.decision.evidence) {
+        throw new Error('CONDITIONAL_AUTHORIZATION_MISSING_EVIDENCE');
+    }
+
+    throw new Error(
+        'CONDITIONAL_AUTHORIZATION_REQUIRES_EXPLICIT_CONDITION_HANDLER'
+    );
+}
+
+export async function executeGovernedRecovery(
+    intent: any,
+    adapter: SshLiveAdapter,
+    isDryRun: boolean,
+    existingTxnId?: string
+) {
     if (!process.env.UGONDU_UPM_SECRET) {
         throw new Error('UGONDU_UPM_SECRET missing. Policy gate failed closed.');
     }
 
-    const pureIntent = { capabilityId: intent.capabilityId, target: intent.target, authorizedActions: intent.authorizedActions }; const canonicalIntentHash = crypto.createHash('sha256').update(JSON.stringify(pureIntent)).digest('hex');
-    if (existingTxnId) { const existingTxn = TransactionAuthority.get(existingTxnId); if (existingTxn.intentHash !== canonicalIntentHash) throw new Error('Intent cryptographic binding mismatch on resume'); }
-    const cap = GlobalCapabilityRegistry.getCapability(intent.capabilityId);
-    if (!cap) throw new Error(`Capability ${intent.capabilityId} not registered or unsupported.`);
-    
-    const txn = existingTxnId ? TransactionAuthority.get(existingTxnId) : TransactionAuthority.create(intent);
-    TransactionAuthority.update(txn.id, { status: 'RUNNING' });
+    const pureIntent = canonicalIntent(intent);
+    const canonicalIntentHash = TransactionAuthority.hashIntent(pureIntent);
 
-    const scope = { resourceIdentifiers: [intent.target || 'auto'], requiredProviders: [], expectedState: {}, targetUri: intent.target, tenantId: 'default', applicationId: 'default', repositoryPath: '/' };
+    let txn = existingTxnId
+        ? TransactionAuthority.get(existingTxnId)
+        : TransactionAuthority.create(pureIntent);
+
+    if (txn.intentHash !== canonicalIntentHash) {
+        throw new Error('INTENT_CRYPTOGRAPHIC_BINDING_MISMATCH');
+    }
+
+    const capability = GlobalCapabilityRegistry.getCapability(
+        pureIntent.capabilityId
+    );
+
+    if (!capability) {
+        throw new Error(
+            `Capability ${pureIntent.capabilityId} not registered or unsupported.`
+        );
+    }
+
+    if (txn.status === 'SUCCESS') {
+        throw new Error('TRANSACTION_ALREADY_COMPLETE');
+    }
+
+    txn = TransactionAuthority.update(txn.id, {
+        status: 'RUNNING'
+    });
+
+    const scope: any = {
+        resourceIdentifiers: [pureIntent.target],
+        requiredProviders: [],
+        expectedState: {},
+        targetUri: pureIntent.target,
+        tenantId: 'default',
+        applicationId: 'default',
+        repositoryPath: pureIntent.repositoryPath
+    };
+
     const twin = await orchestrator.capture(adapter, scope);
-    (scope as any).baselineFingerprint = await orchestrator.fingerprint(adapter, scope);
-    
-    const diagnosis = await cap.diagnose(twin, scope);
-    const plan = txn.plan || await cap.plan(diagnosis, scope);
-    TransactionAuthority.update(txn.id, { plan });
+    const baselineFingerprint =
+        await orchestrator.fingerprint(adapter, scope);
 
-    const analysis = await orchestrator.analyzeBlastRadius(plan, scope);
+    scope.baselineFingerprint = baselineFingerprint;
+
+    const diagnosis = await capability.diagnose(twin, scope);
+
+    const plan = txn.plan || await capability.plan(diagnosis, scope);
+
+    if (!plan) {
+        throw new Error('RECOVERY_PLAN_MISSING');
+    }
+
+    const planHash = sha256(plan);
+
+    txn = TransactionAuthority.update(txn.id, {
+        plan,
+        planHash,
+        state: {
+            phase: 'PLANNED',
+            baselineFingerprint
+        }
+    });
+
+    const analysis =
+        await orchestrator.analyzeBlastRadius(plan, scope);
+
     await orchestrator.dryRun(plan, adapter, scope);
+
+    const ir = mapPlanToIR(
+        plan,
+        pureIntent.target,
+        pureIntent.repositoryPath
+    );
 
     const context: GatingContext = {
         intentHash: canonicalIntentHash,
-        twinHash: twin.immutableEvidenceSnapshotId || crypto.randomUUID(),
-        ir: mapPlanToIR(plan),
+        twinHash:
+            twin.immutableEvidenceSnapshotId ||
+            sha256(twin),
+        ir,
         policyVersion: '1.0.0',
-        envelope: { edition: 'enterprise', allowedActions: intent.authorizedActions || [], tenantId: 'default' },
+        envelope: {
+            edition: 'enterprise',
+            allowedActions: pureIntent.authorizedActions,
+            tenantId: 'default'
+        },
         activePolicies: []
     };
 
     const auth = await UpmExecutionGate.evaluate(context);
-    if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
-        TransactionAuthority.update(txn.id, { status: 'FAILED' });
+
+    if (
+        auth.decision.status !== 'ALLOW' &&
+        auth.decision.status !== 'ALLOW_WITH_CONDITIONS'
+    ) {
+        TransactionAuthority.update(txn.id, {
+            status: 'FAILED',
+            state: {
+                phase: 'AUTHORIZATION_DENIED',
+                authorization: auth
+            }
+        });
+
         throw new Error('UNAUTHORIZED');
     }
 
-    UpmExecutionGate.verifyAuthorization(auth, context.ir);
+    UpmExecutionGate.verifyAuthorization(auth, ir);
+    assertConditionalAuthorization(auth);
+
     await orchestrator.requestApproval(plan, analysis, auth);
 
     if (isDryRun) {
-        TransactionAuthority.update(txn.id, { status: 'PENDING' });
-        return { status: 'PLANNED', plan, transactionId: txn.id, canonicalIntentHash, planHash: crypto.createHash('sha256').update(JSON.stringify(plan)).digest('hex') };
+        TransactionAuthority.update(txn.id, {
+            status: 'PENDING',
+            state: {
+                phase: 'DRY_RUN_COMPLETE',
+                baselineFingerprint,
+                planHash
+            }
+        });
+
+        return {
+            status: 'PLANNED',
+            transactionId: txn.id,
+            canonicalIntentHash,
+            planHash
+        };
     }
 
-    const execResult = await orchestrator.executeAtomically(plan, adapter, scope);
-    const verification = await orchestrator.verify(adapter, scope, plan);
-    
-    const finalFingerprint = await orchestrator.fingerprint(adapter, scope);
-    const cert = await orchestrator.certify((scope as any).baselineFingerprint, finalFingerprint, txn.id, diagnosis, plan, execResult.executionEvidence, verification.verificationEvidence);
+    const execResult =
+        await orchestrator.executeAtomically(plan, adapter, scope);
+
+    if (!execResult.success) {
+        TransactionAuthority.update(txn.id, {
+            status: 'FAILED',
+            executionReceipt: execResult.executionEvidence
+        });
+
+        throw new Error('ATOMIC_EXECUTION_FAILED');
+    }
+
+    const verification =
+        await orchestrator.verify(
+            adapter,
+            scope,
+            {
+                host: (await adapter.identify(scope)).host,
+                operations: plan.infrastructureRepairs || []
+            }
+        );
+
+    if (!verification.verified) {
+        TransactionAuthority.update(txn.id, {
+            status: 'FAILED',
+            state: {
+                phase: 'VERIFICATION_FAILED',
+                verification
+            }
+        });
+
+        throw new Error('INDEPENDENT_VERIFICATION_FAILED');
+    }
+
+    const finalFingerprint =
+        await orchestrator.fingerprint(adapter, scope);
+
+    const cert = await orchestrator.certify(
+        baselineFingerprint,
+        finalFingerprint,
+        txn.id,
+        diagnosis,
+        plan,
+        execResult.executionEvidence,
+        verification.verificationEvidence
+    );
+
     const passport = await orchestrator.issuePassport(cert);
 
-    TransactionAuthority.update(txn.id, { status: 'SUCCESS' });
-    return { 
-        status: 'CERTIFIED', 
-        transactionId: txn.id, 
-        canonicalIntentHash, 
-        planHash: cert.approvedPlanDigest,
+    TransactionAuthority.update(txn.id, {
+        status: 'SUCCESS',
+        executionReceipt: execResult.executionEvidence,
+        certificationReceipt: {
+            certificate: cert,
+            passport
+        },
+        state: {
+            phase: 'CERTIFIED',
+            baselineFingerprint,
+            finalFingerprint
+        }
+    });
+
+    return {
+        status: 'CERTIFIED',
+        transactionId: txn.id,
+        canonicalIntentHash,
+        planHash,
         certificate: cert,
-        passport 
+        passport
     };
 }
 
-recoveryRouter.post('/execute', express.json(), async (req, res) => {
-    const { capability, target, dry_run, authorizedActions, transactionId } = req.body;
-    try {
-        const intent = { source: 'API', capabilityId: capability, target, authorizedActions: authorizedActions || [] };
-        const adapter = new SshLiveAdapter();
-        const result = await executeGovernedRecovery(intent, adapter, !!dry_run, transactionId);
-        return res.json(result);
-    } catch (e: any) {
-        return res.status(500).json({ status: 'FAILED', message: e.message });
+recoveryRouter.post(
+    '/execute',
+    express.json(),
+    async (req, res) => {
+        const {
+            capability,
+            target,
+            dry_run,
+            authorizedActions,
+            transactionId
+        } = req.body;
+
+        try {
+            if (
+                typeof capability !== 'string' ||
+                typeof target !== 'string'
+            ) {
+                return res.status(400).json({
+                    status: 'FAILED',
+                    message: 'capability and target are required'
+                });
+            }
+
+            const repositoryPath = req.body.repositoryPath;
+
+            if (typeof repositoryPath !== 'string' || !repositoryPath) {
+                return res.status(400).json({
+                    status: 'FAILED',
+                    message: 'repositoryPath is required'
+                });
+            }
+
+            const intent = {
+                capabilityId: capability,
+                target,
+                repositoryPath,
+                authorizedActions: authorizedActions || []
+            };
+
+            const result = await executeGovernedRecovery(
+                intent,
+                new SshLiveAdapter(),
+                !!dry_run,
+                transactionId
+            );
+
+            return res.json(result);
+        } catch (error: any) {
+            return res.status(500).json({
+                status: 'FAILED',
+                message: error?.message || 'Recovery failed'
+            });
+        }
     }
-});
+);
 
 
 
