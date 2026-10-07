@@ -6,7 +6,7 @@ import { RecoveryOrchestrator } from '../engine/recovery/recovery-orchestrator';
 import * as crypto from 'crypto';
 
 jest.mock('../../upm/policy-gate');
-jest.mock('../engine/recovery/recovery-orchestrator');
+// Removed jest.mock for orchestrator to allow prototype mocking
 
 describe('Recovery Authorization Negative Tests', () => {
     let mockAuth: ExecutionAuthorization;
