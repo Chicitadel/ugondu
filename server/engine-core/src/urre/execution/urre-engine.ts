@@ -191,20 +191,20 @@ export class URREngine {
                 try {
                     const key = `${node.provider}:${node.action}`;
                     if (this.rollbacks[key]) {
-                        await this.rollbacks[key](node);
+                        await this.rollbacks[key](structuredClone(node));
                     }
                     node.status = 'ROLLBACK_SUCCESS';
                 } catch (error: any) {
                     node.status = 'ROLLBACK_FAILED';
-                    node.error = error.message;
+                    node.error = error instanceof Error ? error.message : String(error);
                     tx.status = 'FAILED'; // Rollback itself failed
                     await this.store.save(tx);
                     if (this.faultInjector?.afterNodePersisted) {
                         await this.faultInjector.afterNodePersisted(node);
                     }
-                    Logger.error(`Rollback failed at node ${node.id}: ${error.message}`);
-                    continue; // Do not return early, continue rolling back other nodes
+                    Logger.error(`Rollback failed at node ${node.id}: ${node.error}`);
                 }
+                
                 await this.store.save(tx);
                 if (this.faultInjector?.afterNodePersisted) {
                     await this.faultInjector.afterNodePersisted(node);
