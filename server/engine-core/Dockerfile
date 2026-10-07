@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:20-alpine AS builder
+FROM node:20-alpine@sha256:4346eb4a05f15dcf236f0db5b3e6c0c279930f35e4d2a6a6196fffc7cdbebdc3 AS builder
 
 WORKDIR /usr/src/app
 
@@ -17,7 +17,7 @@ RUN npm ci
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20-alpine AS runner
+FROM node:20-alpine@sha256:4346eb4a05f15dcf236f0db5b3e6c0c279930f35e4d2a6a6196fffc7cdbebdc3 AS runner
 
 WORKDIR /usr/src/app
 
