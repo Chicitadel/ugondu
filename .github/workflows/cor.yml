@@ -131,9 +131,13 @@ jobs:
           aws-region: us-east-1
 
       - name: Run physical certification
+        env:
+          UGONDU_CERT_REGION: us-east-1
         run: npx ts-node -T server/engine-core/physical-certification.ts
 
       - name: Run physical fargate certification
+        env:
+          UGONDU_CERT_REGION: us-east-1
         run: npx ts-node -T server/engine-core/physical-fargate-certification.ts
 
       - name: Assert zero residual resources cleanup verification
