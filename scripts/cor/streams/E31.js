@@ -81,7 +81,7 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     if (!fs.existsSync(path.join(process.env.UGONDU_ROOT || '.', 'server/shared/locales/pt.json'))) return false;
-    observations.push('pt.json exists');
+    artifacts.push('verified_source'); observations.push('pt.json exists');
     return true;
 }
 

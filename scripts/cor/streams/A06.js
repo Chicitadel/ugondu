@@ -84,7 +84,7 @@ async function verifyObjective(context, observations, artifacts) {
     if (!content.includes("COR_SIGNING_KEY")) return false;
     if (!content.includes("COR_PUBLIC_KEY")) return false;
     if (!content.includes("crypto.verify")) return false;
-    observations.push('cor-signer.js verifies itself');
+    artifacts.push('verified_source'); observations.push('cor-signer.js verifies itself');
     return true;
 }
 

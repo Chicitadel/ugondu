@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'scripts/update-locales.js'), 'utf8');
     if (content.includes('Object.assign') && !content.includes('mergeMissing')) return false;
-    observations.push('locale update is safe');
+    artifacts.push('verified_source'); observations.push('locale update is safe');
     return true;
 }
 

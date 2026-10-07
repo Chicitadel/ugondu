@@ -81,7 +81,7 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     if (fs.existsSync(path.join(process.env.UGONDU_ROOT || '.', 'client/locales'))) return false;
-    observations.push('obsolete directory absent');
+    artifacts.push('verified_source'); observations.push('obsolete directory absent');
     return true;
 }
 

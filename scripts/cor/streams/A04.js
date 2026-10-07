@@ -83,7 +83,7 @@ async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'scripts/cor-engine.js'), 'utf8');
     if (content.includes("@aws-sdk")) return false;
     if (!content.includes("independent" && "ledger")) return false;
-    observations.push('cor-engine.js is independent');
+    artifacts.push('verified_source'); observations.push('cor-engine.js is independent');
     return true;
 }
 

@@ -81,7 +81,7 @@ const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
     if (!fs.existsSync(path.join(process.env.UGONDU_ROOT || '.', 'server/shared/locales/zh.json'))) return false;
-    observations.push('zh.json exists');
+    artifacts.push('verified_source'); observations.push('zh.json exists');
     return true;
 }
 

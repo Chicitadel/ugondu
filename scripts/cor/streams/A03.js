@@ -83,7 +83,7 @@ async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/routes/recovery.ts'), 'utf8');
     if (!content.includes("envelopeHash")) return false;
     if (!content.includes("UpmExecutionGate.verifyAuthorization(auth, ir, { intentHash: canonicalIntentHash, twinHash, envelopeHash, policyVersion: context.policyVersion })")) return false;
-    observations.push('Envelope hash bound in verifyAuthorization');
+    artifacts.push('verified_source'); observations.push('Envelope hash bound in verifyAuthorization');
     return true;
 }
 

@@ -83,7 +83,7 @@ async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/upm/policy-gate.ts'), 'utf8');
     if (!content.includes("action === '*' || action.includes('*')")) return false;
     if (!content.includes("WILDCARD_CAPABILITY_NOT_PERMITTED")) return false;
-    observations.push('Wildcard blocked');
+    artifacts.push('verified_source'); observations.push('Wildcard blocked');
     return true;
 }
 

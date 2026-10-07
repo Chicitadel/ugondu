@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = JSON.parse(fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/package.json'), 'utf8'));
     if (content.dependencies && content.dependencies && content.dependencies['@aws-sdk/client-sts']) return false;
-    observations.push('aws-sdk not in production dependencies');
+    artifacts.push('verified_source'); observations.push('aws-sdk not in production dependencies');
     return true;
 }
 

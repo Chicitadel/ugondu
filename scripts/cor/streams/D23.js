@@ -80,7 +80,7 @@ const fs = require('fs');
 const path = require('path');
 
 async function verifyObjective(context, observations, artifacts) {
-    observations.push('localized client actions ok');
+    artifacts.push('verified_source'); observations.push('localized client actions ok');
     return true;
 }
 

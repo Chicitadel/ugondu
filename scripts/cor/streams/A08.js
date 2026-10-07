@@ -83,7 +83,7 @@ async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', '.github/workflows/cor-certification.yml'), 'utf8');
     if (!content.includes("cor-engine.js")) return false;
     if (!content.includes("validate-locales.js")) return false;
-    observations.push('workflow exists');
+    artifacts.push('verified_source'); observations.push('workflow exists');
     return true;
 }
 

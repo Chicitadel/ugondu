@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'scripts/check-cor-stream-registry.js'), 'utf8');
     if (!content.includes("A01") || !content.includes("F40")) return false;
-    observations.push('stream registry validator exists');
+    artifacts.push('verified_source'); observations.push('stream registry validator exists');
     return true;
 }
 

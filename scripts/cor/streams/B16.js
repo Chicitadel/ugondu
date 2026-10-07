@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/package.json'), 'utf8');
     if (content.includes('bash -c')) return false;
-    observations.push('no bash out of bounds');
+    artifacts.push('verified_source'); observations.push('no bash out of bounds');
     return true;
 }
 

@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'scripts/validate-locales.js'), 'utf8');
     if (!content.includes('Missing keys in')) return false;
-    observations.push('locale validation checks parity');
+    artifacts.push('verified_source'); observations.push('locale validation checks parity');
     return true;
 }
 

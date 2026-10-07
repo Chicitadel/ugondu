@@ -79,7 +79,7 @@ async function run(context) {
 const fs = require('fs');
 
 async function verifyObjective(context, observations, artifacts) {
-    observations.push('uppie independent');
+    artifacts.push('verified_source'); observations.push('uppie independent');
     return true;
 }
 

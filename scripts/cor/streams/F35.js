@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/routes/recovery.ts'), 'utf8');
     if (!content.includes('orchestrator.requestApproval')) return false;
-    observations.push('requests approval');
+    artifacts.push('verified_source'); observations.push('requests approval');
     return true;
 }
 

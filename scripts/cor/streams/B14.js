@@ -82,7 +82,7 @@ const path = require('path');
 async function verifyObjective(context, observations, artifacts) {
     const content = fs.readFileSync(path.join(process.env.UGONDU_ROOT || '.', 'server/engine-core/src/fabric/capabilities/capability-registry.ts'), 'utf8');
     if (!content.includes('already registered')) return false;
-    observations.push('rejects duplicates');
+    artifacts.push('verified_source'); observations.push('rejects duplicates');
     return true;
 }
 
