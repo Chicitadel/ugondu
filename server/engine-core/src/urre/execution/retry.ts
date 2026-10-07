@@ -73,6 +73,7 @@ export class RetryManager {
                 return result as T;
             } catch (error) {
                 if (attempt >= this.config.maxAttempts) {
+                    console.error(`RETRY_RAW_ERROR: ${error instanceof Error ? error.message : String(error)}`);
                     throw new Error(__t('messages.error.max_retry_attempts_reached_last_error', { 'error': error }));
                 }
 
