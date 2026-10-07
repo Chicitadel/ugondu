@@ -27,7 +27,7 @@
 // @ts-ignore
 import { __t } from './i18n';
 
-__t('use_strict');
+'use strict';
 
 import * as path from 'path';
 

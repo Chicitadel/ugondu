@@ -127,8 +127,8 @@ export class UniversalActionRegistry {
 
         // Execute via URREngine
         await this.urre.executeTransaction(dag);
-        if (dag.status === 'FAILED') {
-            throw new Error(`Action execution failed through URRE: ${dag.nodes.find(n=>n.status==='FAILED')?.error || __t('msg_unknown_error')}`);
+        if (dag.status === 'FAILED' || dag.status === 'RECOVERED') {
+            throw new Error(`Action execution failed through URRE (Status: ${dag.status}): ${dag.nodes.find(n=>n.status==='FAILED' || n.status==='ROLLBACK_SUCCESS' || n.status==='ROLLBACK_PENDING')?.error || __t('msg_unknown_error')}`);
         }
 
         // Extract outputs

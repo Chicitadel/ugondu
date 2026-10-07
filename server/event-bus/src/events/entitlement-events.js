@@ -1,4 +1,4 @@
-__t('use_strict');
+'use strict';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Event Bus — Entitlement Events
