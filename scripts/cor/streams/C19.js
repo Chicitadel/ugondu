@@ -80,8 +80,8 @@ const fs = require('fs');
 
 async function verifyObjective(context, observations, artifacts) {
     const { spawnSync } = require('child_process');
-    const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['test', '--workspace', 'client', '--', '--runInBand'], { cwd: context.root, encoding: 'utf8', shell: true });
-    if (result.status !== 0 && (!result.stdout || !result.stdout.includes('PASS'))) throw new Error('UPPIE_TEST_FAILED');
+    const result = spawnSync('go', ['test', './...'], { cwd: require('path').join(context.root, 'client'), encoding: 'utf8', shell: true });
+    if (result.status !== 0) throw new Error('UPPIE_TEST_FAILED: ' + result.stdout + ' ' + result.stderr);
     artifacts.push('uppie-test-output');
     observations.push('Uppie tests passed');
     return true;

@@ -250,7 +250,7 @@ describe(__t('gcp_iam_attach'), () => {
     expect(policyOf(PROJECT).bindings.some((b) => b.role === VIEWER && b.members.includes(BOB))).toBe(true);
   });
 
-  it('stops at the principal limit and at the provider\\'s role quota, reporting the provider\\'s reason', async () => {
+  it("stops at the principal limit and at the provider's role quota, reporting the provider's reason", async () => {
     const { adapter, seed, policyOf } = setup();
     seed.bind(PROJECT, VIEWER, Array.from({ length: 1500 }, (_, i) => `user:u${i}@example.com`));
     const policy = await adapter.generate([rule()], ctx);
