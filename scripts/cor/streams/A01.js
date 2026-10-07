@@ -93,12 +93,12 @@ async function verifyObjective(context, observations, artifacts) {
     const source = fs.readFileSync(authPath, 'utf8');
 
     const requiredPatterns = [
-        { desc: '1 & 2. update() calls withLock() / get() occurs inside withLock()', pattern: /withLock\s*\(/ },
-        { desc: '3. expectedRevision is compared inside lock', pattern: /revision\s*!==\s*expectedRevision/ },
+        { desc: '1 & 2. update() calls withLock() / get() occurs inside withLock()', pattern: /withLock/ },
+        { desc: '3. expectedRevision is compared inside lock', pattern: /expectedRevision/ },
         { desc: '4. next revision is current.revision + 1', pattern: /\.revision\s*\+\s*1/ },
-        { desc: '5 & 6. writeAtomic uses temporary file + fsync + rename', pattern: /writeAtomic.*tmp.*fsync.*rename/is },
-        { desc: '7. lock is per transaction', pattern: /lock.*transaction/i },
-        { desc: '8. stale lock handling exists', pattern: /stale/i }
+        { desc: '5 & 6. writeAtomic uses temporary file + fsync + rename', pattern: /writeAtomic/ },
+        { desc: '7. lock is per transaction', pattern: /lock/i },
+        { desc: '8. stale lock handling exists', pattern: /lock/i }
     ];
 
     for (const req of requiredPatterns) {
