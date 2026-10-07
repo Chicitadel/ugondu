@@ -24,6 +24,13 @@ export interface UpmDecision {
     authorizationId?: string;
 }
 
+export interface AuthorizationExpectations {
+    intentHash: string;
+    twinHash: string;
+    envelopeHash: string;
+    policyVersion: string;
+}
+
 export interface CapabilityEnvelope {
     edition: string;
     allowedActions: string[];
@@ -126,7 +133,13 @@ export class UpmExecutionGate {
         };
     }
 
-    public static verifyAuthorization(auth: ExecutionAuthorization, executionIr: ArchitectureIR): void {
+    public static verifyAuthorization(auth: ExecutionAuthorization, executionIr: ArchitectureIR, expected?: AuthorizationExpectations): void {
+        if (expected) {
+            if (auth.intentHash !== expected.intentHash) throw new Error('INTENT_HASH_MISMATCH');
+            if (auth.twinHash !== expected.twinHash) throw new Error('TWIN_HASH_MISMATCH');
+            if (auth.envelopeHash !== expected.envelopeHash) throw new Error('ENVELOPE_HASH_MISMATCH');
+            if (auth.policyVersion !== expected.policyVersion) throw new Error('POLICY_VERSION_MISMATCH');
+        }
         Logger.info(__t('messages.upm.verifying_authorization', { id: auth.authorizationId }));
 
         if (new Date() > auth.expiresAt) {
@@ -159,3 +172,4 @@ export class UpmExecutionGate {
         Logger.info(__t('messages.upm.authorization_verified'));
     }
 }
+

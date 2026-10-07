@@ -1,70 +1,122 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { execFileSync } = require('child_process');
 
-const root = process.env.UGONDU_ROOT || path.resolve(__dirname, '..');
-const evidenceDir = process.env.COR_EVIDENCE_DIR || path.join(root, '.cor_evidence');
-const ledgerPath = path.join(evidenceDir, 'evidence-ledger.json');
+const ROOT = process.env.UGONDU_ROOT || path.resolve(__dirname, '..');
+const EVIDENCE_DIR =
+  process.env.COR_EVIDENCE_DIR || path.join(ROOT, '.cor_evidence');
 
-if (!fs.existsSync(ledgerPath)) {
-    console.error('Evidence ledger not found.');
-    process.exit(1);
+const LEDGER = path.join(EVIDENCE_DIR, 'evidence-ledger.json');
+const FINALIZATION = path.join(EVIDENCE_DIR, 'cor-finalization.json');
+const OUTPUT = path.join(EVIDENCE_DIR, 'FINAL_COR_BUNDLE.json');
+
+function git(args) {
+  return execFileSync('git', args, {
+    cwd: ROOT,
+    encoding: 'utf8'
+  }).trim();
 }
 
-const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
-
-if (ledger.status !== 'COR_CERTIFIED') {
-    console.error('Cannot sign uncertified schedule.');
-    process.exit(1);
+function block(reason) {
+  process.stderr.write(`COR BLOCKED: ${reason}\n`);
+  process.exit(1);
 }
 
-// 1. Independent Verification of Identity
-const sha = require('child_process').execSync('git rev-parse HEAD', { cwd: root }).toString().trim();
-const treeSha = require('child_process').execSync('git write-tree', { cwd: root }).toString().trim();
-
-if (ledger.candidate.commitSHA !== sha) {
-    console.error('COR BLOCKED: Evidence candidate SHA does not match current HEAD.');
-    process.exit(1);
-}
-if (ledger.candidate.treeSHA !== treeSha) {
-    console.error('COR BLOCKED: Evidence tree SHA does not match current source tree.');
-    process.exit(1);
+function readJson(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    block(`invalid evidence: ${file}`);
+  }
 }
 
-// 2. Persistent Trust Root
-let privateKeyPem = process.env.COR_SIGNING_KEY;
-let publicKeyPem = process.env.COR_PUBLIC_KEY;
-
-if (!privateKeyPem) {
-    console.warn('WARN: COR_SIGNING_KEY not provided. Using ephemeral key for demonstration. A physical certification must provide a persistent HSM/KMS-backed signing key via environment.');
-    const keys = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 2048,
-        publicKeyEncoding: { type: 'spki', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-    });
-    privateKeyPem = keys.privateKey;
-    publicKeyPem = keys.publicKey;
+if (!process.env.COR_SIGNING_KEY) {
+  block('persistent COR_SIGNING_KEY is required');
 }
 
-const dataToSign = Buffer.from(JSON.stringify(ledger.streams) + ledger.candidate.commitSHA + ledger.candidate.treeSHA);
+if (!fs.existsSync(LEDGER)) block('fresh qualification ledger missing');
+if (!fs.existsSync(FINALIZATION)) block('independent finalization missing');
 
-const sign = crypto.createSign('SHA256');
-sign.update(dataToSign);
-sign.end();
-const signature = sign.sign(privateKeyPem, 'hex');
+const ledger = readJson(LEDGER);
+const finalization = readJson(FINALIZATION);
 
-const corBundle = {
-    candidateSHA: ledger.candidate.commitSHA,
-    treeSHA: ledger.candidate.treeSHA,
-    status: ledger.status,
-    signature: signature,
-    publicKey: publicKeyPem,
-    timestamp: new Date().toISOString(),
-    evidenceDigest: crypto.createHash('sha256').update(JSON.stringify(ledger.streams)).digest('hex')
+if (ledger.result !== 'QUALIFICATION_PASS') {
+  block('qualification is not PASS');
+}
+
+if (finalization.status !== 'READY_FOR_COR_SIGNATURE') {
+  block('final authority did not authorize signature');
+}
+
+const commitSHA = git(['rev-parse', 'HEAD']);
+const treeSHA = git(['rev-parse', 'HEAD^{tree}']);
+
+if (ledger.candidate.commitSHA !== commitSHA) {
+  block('qualification commit differs from HEAD');
+}
+
+if (ledger.candidate.treeSHA !== treeSHA) {
+  block('qualification tree differs from HEAD');
+}
+
+if (finalization.candidateSHA !== commitSHA) {
+  block('finalization commit differs from HEAD');
+}
+
+if (finalization.treeSHA !== treeSHA) {
+  block('finalization tree differs from HEAD');
+}
+
+if (!Array.isArray(ledger.streams) || ledger.streams.length !== 40) {
+  block('40 stream receipts required');
+}
+
+for (const receipt of ledger.streams) {
+  if (receipt.status !== 'PASS') block(`${receipt.streamId} is not PASS`);
+  if (receipt.commitSHA !== commitSHA) block(`${receipt.streamId} commit mismatch`);
+  if (receipt.treeSHA !== treeSHA) block(`${receipt.streamId} tree mismatch`);
+}
+
+const payload = {
+  schemaVersion: '2.0.0',
+  repository: 'Chicitadel/ugondu',
+  candidateSHA: commitSHA,
+  treeSHA,
+  qualificationEvidenceRoot: ledger.evidenceRoot,
+  finalizationDigest: finalization.finalizationDigest,
+  status: 'COR_CERTIFIED_LAUNCH_APPROVED'
 };
 
-const bundlePath = path.join(evidenceDir, 'FINAL_COR_BUNDLE.json');
-fs.writeFileSync(bundlePath, JSON.stringify(corBundle, null, 2));
+const payloadText = JSON.stringify(payload);
 
-console.log('COR CERTIFIED — LAUNCH APPROVED');
-console.log('Signature: ' + signature);
+const signature = crypto.sign(
+  'sha256',
+  Buffer.from(payloadText, 'utf8'),
+  crypto.createPrivateKey(process.env.COR_SIGNING_KEY)
+).toString('base64');
+
+const bundle = {
+  ...payload,
+  payloadDigest:
+    'sha256:' +
+    crypto
+      .createHash('sha256')
+      .update(payloadText, 'utf8')
+      .digest('hex'),
+  signatureAlgorithm: 'RSA-SHA256',
+  signature,
+  issuedAt: new Date().toISOString()
+};
+
+fs.writeFileSync(
+  OUTPUT,
+  JSON.stringify(bundle, null, 2) + '\n',
+  { encoding: 'utf8', mode: 0o600 }
+);
+
+process.stdout.write(
+  `COR CERTIFIED — LAUNCH APPROVED: ${commitSHA}\n`
+);

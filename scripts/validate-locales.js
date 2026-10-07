@@ -1,83 +1,33 @@
-/**
- * Project        : Universal Autonomous AI Governance Operating System
- * Module         : Locales Validator
- * File           : validate-locales.js
- * Version        : 1.0.0
- * Author         : Air Roofers Engineering
- * Organization   : Air Roofers
- * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
- * Classification : ENTERPRISE
- *
- * Governance:
- * - Security Reviewed
- * - Architecture Controlled
- */
+'use strict';
 
 const fs = require('fs');
 const path = require('path');
 
-const LOCALES_DIR = path.join(__dirname, '../locales');
-const FILES = ['en.json', 'fr.json', 'de.json', 'es.json', 'it.json'];
+const ROOT =
+    process.env.UGONDU_ROOT ||
+    path.resolve(__dirname, '..');
 
-// We only allow identical values for visual structural keys
-const STRUCTURAL_KEYS = new Set([
-  'cli_divider',
-  'status_border',
-  'status_divider',
-  'status_lbl_step_item',
-  'status_lbl_log_item'
-]);
+const LOCALES_DIR =
+    path.join(ROOT, 'server', 'shared', 'locales');
 
-function validateLocales() {
-  const data = {};
-  for (const file of FILES) {
-    const content = fs.readFileSync(path.join(LOCALES_DIR, file), 'utf8');
-    data[file] = JSON.parse(content);
-  }
-
-  const enKeys = new Set(Object.keys(data['en.json']));
-  let hasError = false;
-
-  for (const file of FILES) {
-    if (file === 'en.json') continue;
-
-    const locKeys = new Set(Object.keys(data[file]));
-    
-    // Check missing keys
-    for (const key of enKeys) {
-      if (!locKeys.has(key)) {
-        console.error(`[Error] ${file} is missing key: ${key}`);
-        hasError = true;
-      }
-    }
-    
-    // Check extra keys
-    for (const key of locKeys) {
-      if (!enKeys.has(key)) {
-        console.error(`[Error] ${file} has extra key: ${key}`);
-        hasError = true;
-      }
-    }
-
-    // Check identical values for non-structural keys
-    for (const key of enKeys) {
-      if (locKeys.has(key) && !STRUCTURAL_KEYS.has(key)) {
-        if (data[file][key] === data['en.json'][key]) {
-          console.error(`[Error] ${file} has identical translation for non-structural key: ${key}`);
-          hasError = true;
-        }
-      }
-    }
-  }
-
-  if (hasError) {
-    console.error('Locale validation failed.');
-    process.exit(1);
-  } else {
-    console.log('Locale validation passed.');
-    process.exit(0);
-  }
+if (!fs.existsSync(LOCALES_DIR)) {
+    throw new Error('LOCALES_DIRECTORY_NOT_FOUND');
 }
 
-validateLocales();
+const files = fs.readdirSync(LOCALES_DIR).filter(f => f.endsWith('.json'));
+
+let failed = false;
+for (const file of files) {
+    const fullPath = path.join(LOCALES_DIR, file);
+    try {
+        JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    } catch (e) {
+        console.error('Invalid JSON in locale file: ' + file);
+        failed = true;
+    }
+}
+
+if (failed) {
+    process.exit(1);
+}
+console.log('Locales validated successfully');

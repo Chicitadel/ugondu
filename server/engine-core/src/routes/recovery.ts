@@ -105,6 +105,15 @@ export async function executeGovernedRecovery(
     const pureIntent = canonicalIntent(intent);
     const canonicalIntentHash = TransactionAuthority.hashIntent(pureIntent);
 
+    if (existingTxnId && !Number.isInteger(expectedRevision)) {
+        throw new Error('EXPECTED_REVISION_REQUIRED_FOR_RESUME');
+    }
+
+    const revision =
+        existingTxnId
+            ? expectedRevision!
+            : txn.revision;
+
     let txn = existingTxnId
         ? TransactionAuthority.get(existingTxnId)
         : TransactionAuthority.create(pureIntent);
@@ -127,7 +136,7 @@ export async function executeGovernedRecovery(
         throw new Error('TRANSACTION_ALREADY_COMPLETE');
     }
 
-    txn = TransactionAuthority.update(txn.id, expectedRevision || txn.revision, {
+    txn = TransactionAuthority.update(txn.id, revision, {
         status: 'RUNNING',
         state: { ...txn.state, phase: 'RUNNING' }
     });
@@ -408,6 +417,9 @@ recoveryRouter.post(
         }
     }
 );
+
+
+
 
 
 
