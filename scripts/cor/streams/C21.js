@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const STREAM_ID = 'C21';
-const OBJECTIVE = 'Verify Dockerfile immutability and security constraints'; // Update to match your actual objective if different
+const OBJECTIVE = 'Verify Fargate deployment container identity structure';
 
 const metadata = {
     streamId: STREAM_ID,
