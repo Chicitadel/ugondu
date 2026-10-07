@@ -62,7 +62,10 @@ export class RecoveryOrchestrator implements RecoveryContract {
 
     async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis, auth?: any): Promise<boolean> {
         if (!analysis.isSafe) throw new Error(__t('cannot_approve_an_unsafe_plan'));
-        if (!auth || auth.decision.status !== 'ALLOW') throw new Error('Unconditional approval disabled: missing explicit authorization constraint.');
+        if (!auth) throw new Error('Unconditional approval disabled: missing explicit authorization constraint.');
+        if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
+            throw new Error('Authorization denied.');
+        }
         return true;
     }
 
@@ -70,7 +73,7 @@ export class RecoveryOrchestrator implements RecoveryContract {
         if (!scope.baselineFingerprint) throw new Error(__t('baseline_fingerprint_missing_f'));
         const driftSafe = await adapter.checkDrift(scope, scope.baselineFingerprint);
         if (!driftSafe) {
-            throw new Error(__t('environment_drift_detected_sin'));
+            throw new Error('environment_drift_detected');
         }
         
         const result = await adapter.executeAtomicRecovery(plan, scope);

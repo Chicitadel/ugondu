@@ -30,83 +30,66 @@ const evidenceLedger = {
         commitSHA: sha,
         treeSHA: treeSha,
     },
-    environmentIdentity: process.env.GITHUB_RUN_ID ? `GitHub-Action-${process.env.GITHUB_RUN_ID}` : 'Local-Runner',
     executionTimestamp: new Date().toISOString(),
     streams: []
 };
 
 let allPass = true;
 
-function runStream(stream) {
-    console.log(`Executing ${stream.id}: ${stream.objective}`);
-    const executionId = 'EXEC-' + crypto.randomBytes(4).toString('hex').toUpperCase();
-    const ts = new Date().toISOString();
+for (const stream of schedule.streams) {
+    console.log(Executing \: \);
     
-    let command = 'node scripts/physical-stream-runner.js ' + stream.id;
-    if (stream.id === 'A01') command = 'node ' + path.join(root, 'scripts', 'i18n_audit.js');
-    if (stream.id === 'B01') command = 'npm run build --if-present';
-    if (stream.id === 'C01') command = 'npm run test --if-present';
-    
-    let exitCode = 0;
     let stdoutStr = '';
-    let stderrStr = '';
+    let exitCode = 0;
     
     try {
-        if (command === 'SIMULATION') {
-            stdoutStr = 'Simulated'; exitCode = 1;
-        } else {
-            stdoutStr = execSync(command, { cwd: root, stdio: 'pipe' }).toString();
-        }
+        stdoutStr = execSync(
+ode scripts/physical-stream-runner.js \, { cwd: root, stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
     } catch (e) {
         exitCode = e.status || 1;
-        stdoutStr = e.stdout ? e.stdout.toString() : '';
-        stderrStr = e.stderr ? e.stderr.toString() : e.message;
+        stdoutStr = e.stdout ? e.stdout.toString().trim() : '';
+    }
+
+    let receipt;
+    try {
+        receipt = JSON.parse(stdoutStr.split('\n').pop());
+    } catch {
+        receipt = null;
     }
     
-    const stdoutHash = crypto.createHash('sha256').update(stdoutStr).digest('hex');
-    const stderrHash = crypto.createHash('sha256').update(stderrStr).digest('hex');
-    
-    const success = exitCode === 0 && command !== 'SIMULATION';
-    let streamStatus = command === 'SIMULATION' ? 'NOT_PROVEN' : (success ? 'PASS' : 'FAIL');
-    const receipt = {
-        streamId: stream.id,
-        executionId: executionId,
-        executionTimestamp: ts,
-        command: command,
-        exitCode: exitCode,
-        stdoutHash: stdoutHash,
-        stderrHash: stderrHash,
-        status: streamStatus
-    };
-    
-    receipt.evidenceDigest = crypto.createHash('sha256').update(JSON.stringify(receipt)).digest('hex');
-    
-    return receipt;
-}
-
-for (const stream of schedule.streams) {
-    const receipt = runStream(stream);
-    evidenceLedger.streams.push(receipt);
-    if (receipt.status !== 'PASS') {
+    if (!receipt || receipt.status !== 'PASS' || receipt.commitSHA !== sha || receipt.treeSHA !== treeSha || receipt.streamId !== stream.id) {
+        console.error(COR BLOCKED: Stream \ failed verification or missing valid receipt.);
         allPass = false;
-        console.error(`Stream ${stream.id} failed!`);
-        break; // Fail fast
+        break;
     }
+    
+    evidenceLedger.streams.push(receipt);
 }
 
-evidenceLedger.status = allPass ? 'COR_CERTIFIED' : 'COR_BLOCKED';
-
-const ledgerPath = path.join(evidenceDir, 'evidence-ledger.json');
-fs.writeFileSync(ledgerPath, JSON.stringify(evidenceLedger, null, 2));
-
-if (!allPass) {
+if (!allPass || evidenceLedger.streams.length !== schedule.streams.length) {
+    evidenceLedger.status = 'COR_BLOCKED';
+    const ledgerPath = path.join(evidenceDir, 'evidence-ledger.json');
+    fs.writeFileSync(ledgerPath, JSON.stringify(evidenceLedger, null, 2));
     console.error('COR BLOCKED');
     process.exit(1);
-} else {
-    console.log('COR Engine finished. Status: COR_CERTIFIED');
 }
 
+const finalCertificate = {
+    repository: "Chicitadel/ugondu",
+    commitSHA: sha,
+    treeSHA: treeSha,
+    status: "COR_CERTIFIED",
+    receipts: evidenceLedger.streams.map(r => r.evidenceDigest)
+};
 
+const certHash = crypto.createHash('sha256').update(JSON.stringify(finalCertificate)).digest('hex');
+finalCertificate.certificateDigest = certHash;
 
+evidenceLedger.status = 'COR_CERTIFIED';
+evidenceLedger.finalCertificate = finalCertificate;
 
+fs.writeFileSync(path.join(evidenceDir, 'evidence-ledger.json'), JSON.stringify(evidenceLedger, null, 2));
+fs.writeFileSync(path.join(evidenceDir, 'final-certificate.json'), JSON.stringify(finalCertificate, null, 2));
 
+console.log('COR Engine finished. Status: COR_CERTIFIED');
+process.exit(0);
