@@ -1813,5 +1813,14 @@
   "unexpected_token": "Tradotto: unexpected token",
   "refuses_hosts_that_are_not_pla": "Tradotto: refuses hosts that are not pla",
   "abcdefgh_2345678": "Tradotto: abcdefgh 2345678",
-  "nonexistent_token_xyz": "Tradotto: nonexistent token xyz"
+  "nonexistent_token_xyz": "Tradotto: nonexistent token xyz",
+  "engine.placement.err_cannot_meet_constraints": "Tradotto: Cannot meet constraints for placement intent %s. No valid regions found.",
+  "plugin.aws_vpc.err_ownership_not_proven": "Tradotto: Safety Violation: Ownership not proven for VPC %s. Cannot manage untagged orphan.",
+  "plugin.aws_vpc.err_verification_failed": "Tradotto: Post-operation verification failed for VPC %s. Tags not applied.",
+  "plugin.aws_vpc.msg_recovered_tagged": "Tradotto: VPC %s recovered and ownership claimed with tags.",
+  "scripts.aws_vpc.msg_initiating_stream": "Tradotto: Initiating AWS VPC Orphan Reconciliation Stream...",
+  "scripts.aws_vpc.msg_found_orphans": "Tradotto: Found %s real untagged orphan VPC(s).",
+  "scripts.aws_vpc.msg_evaluating_orphan": "Tradotto: Evaluating orphan VPC: %s",
+  "scripts.aws_vpc.msg_successfully_handled": "Tradotto: Successfully handled VPC: %s with evidence:",
+  "scripts.aws_vpc.msg_reconciliation_aborted": "Tradotto: Reconciliation aborted for %s: %s"
 }

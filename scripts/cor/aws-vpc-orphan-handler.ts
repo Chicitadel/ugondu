@@ -1,6 +1,7 @@
 import { AwsVpcReconciler } from '../../server/plugins/aws-vpc-adapter/src/aws-vpc-reconciler';
 import { EC2Client, DescribeVpcsCommand } from '@aws-sdk/client-ec2';
 import { CloudTrailClient, LookupEventsCommand } from '@aws-sdk/client-cloudtrail';
+import { __t } from '../../server/shared/i18n';
 
 const ec2Client = new EC2Client({ region: process.env.AWS_REGION || 'us-east-1' });
 const cloudTrailClient = new CloudTrailClient({ region: process.env.AWS_REGION || 'us-east-1' });
@@ -10,7 +11,7 @@ const cloudTrailClient = new CloudTrailClient({ region: process.env.AWS_REGION |
  * Handles execution of untagged orphan VPC workflows.
  */
 async function runVpcOrphanReconciliation() {
-    console.log('Initiating AWS VPC Orphan Reconciliation Stream...');
+    console.log(__t('scripts.aws_vpc.msg_initiating_stream'));
     const reconciler = new AwsVpcReconciler();
 
     // Fetch real untagged VPCs from AWS
@@ -20,7 +21,7 @@ async function runVpcOrphanReconciliation() {
     // Identify orphan VPCs (those without tags or without expected managed tags)
     const orphanVpcs = (vpcsResponse.Vpcs || []).filter(vpc => !vpc.Tags || vpc.Tags.length === 0);
 
-    console.log(`Found ${orphanVpcs.length} real untagged orphan VPC(s).`);
+    console.log(__t('scripts.aws_vpc.msg_found_orphans', orphanVpcs.length));
 
     // We will still pass historical graph if any exists from some external graph DB
     // For this handler, we will simulate the external graph source as it represents historical architecture DB, not AWS.
@@ -30,7 +31,7 @@ async function runVpcOrphanReconciliation() {
         if (!vpc.VpcId) continue;
         const vpcId = vpc.VpcId;
         try {
-            console.log(`Evaluating orphan VPC: ${vpcId}`);
+            console.log(__t('scripts.aws_vpc.msg_evaluating_orphan', vpcId));
 
             // Fetch real CloudTrail evidence for the VPC
             const lookupEventsCommand = new LookupEventsCommand({
@@ -46,9 +47,9 @@ async function runVpcOrphanReconciliation() {
             }));
 
             const evidence = await reconciler.handleOrphanVpc(vpcId, cloudTrailLogs, historicalGraph);
-            console.log(`Successfully handled VPC: ${vpcId} with evidence:`, JSON.stringify(evidence, null, 2));
+            console.log(__t('scripts.aws_vpc.msg_successfully_handled', vpcId), JSON.stringify(evidence, null, 2));
         } catch (error: any) {
-            console.error(`Reconciliation aborted for ${vpcId}: ${error.message}`);
+            console.error(__t('scripts.aws_vpc.msg_reconciliation_aborted', vpcId, error.message));
         }
     }
 }

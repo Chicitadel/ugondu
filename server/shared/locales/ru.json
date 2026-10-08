@@ -1813,5 +1813,14 @@
   "unexpected_token": "Переведено: unexpected token",
   "refuses_hosts_that_are_not_pla": "Переведено: refuses hosts that are not pla",
   "abcdefgh_2345678": "Переведено: abcdefgh 2345678",
-  "nonexistent_token_xyz": "Переведено: nonexistent token xyz"
+  "nonexistent_token_xyz": "Переведено: nonexistent token xyz",
+  "engine.placement.err_cannot_meet_constraints": "Переведено: Cannot meet constraints for placement intent %s. No valid regions found.",
+  "plugin.aws_vpc.err_ownership_not_proven": "Переведено: Safety Violation: Ownership not proven for VPC %s. Cannot manage untagged orphan.",
+  "plugin.aws_vpc.err_verification_failed": "Переведено: Post-operation verification failed for VPC %s. Tags not applied.",
+  "plugin.aws_vpc.msg_recovered_tagged": "Переведено: VPC %s recovered and ownership claimed with tags.",
+  "scripts.aws_vpc.msg_initiating_stream": "Переведено: Initiating AWS VPC Orphan Reconciliation Stream...",
+  "scripts.aws_vpc.msg_found_orphans": "Переведено: Found %s real untagged orphan VPC(s).",
+  "scripts.aws_vpc.msg_evaluating_orphan": "Переведено: Evaluating orphan VPC: %s",
+  "scripts.aws_vpc.msg_successfully_handled": "Переведено: Successfully handled VPC: %s with evidence:",
+  "scripts.aws_vpc.msg_reconciliation_aborted": "Переведено: Reconciliation aborted for %s: %s"
 }

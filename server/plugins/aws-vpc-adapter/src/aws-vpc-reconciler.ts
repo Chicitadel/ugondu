@@ -2,6 +2,7 @@ import { ActionClassification, SafetyGatesValidator } from '../../../engine-core
 import { ResourceProtocol } from '../../../shared/protocols/resource.protocol';
 import { EC2Client, DescribeVpcsCommand, CreateTagsCommand } from '@aws-sdk/client-ec2';
 import * as crypto from 'crypto';
+import { __t } from '../../../shared/i18n';
 
 // Simulated imports based on Universal Provenance Architect's contracts
 // import { ResourceClassification } from '../../../shared/schemas/resource-classification.schema';
@@ -47,7 +48,7 @@ export class AwsVpcReconciler {
         // 1. Prove ownership via CloudTrail or historical graphs
         const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, historicalGraph);
         if (!ownershipProven) {
-            throw new Error(`Safety Violation: Ownership not proven for VPC ${vpcId}. Cannot manage untagged orphan.`);
+            throw new Error(__t('plugin.aws_vpc.err_ownership_not_proven', vpcId));
         }
 
         // Generate cryptographic SafetyGate evidence
@@ -82,7 +83,7 @@ export class AwsVpcReconciler {
         // 4. Post-operation verification (Real AWS API verification)
         const verified = await this.verifyVpcRecovered(vpcId);
         if (!verified) {
-             throw new Error(`Post-operation verification failed for VPC ${vpcId}. Tags not applied.`);
+             throw new Error(__t('plugin.aws_vpc.err_verification_failed', vpcId));
         }
 
         return {
@@ -116,7 +117,7 @@ export class AwsVpcReconciler {
             ]
         });
         await ec2Client.send(command);
-        console.log(`VPC ${vpcId} recovered and ownership claimed with tags.`);
+        console.log(__t('plugin.aws_vpc.msg_recovered_tagged', vpcId));
     }
 
     private async verifyVpcRecovered(vpcId: string): Promise<boolean> {

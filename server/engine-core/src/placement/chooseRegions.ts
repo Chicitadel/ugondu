@@ -34,6 +34,7 @@
 
 import { PlacementIntent, RegionDecision } from './types';
 import { PlacementBlockedError } from './PlacementBlockedError';
+import { __t } from '../../../shared/i18n';
 
 // Strictly governed known regions to prevent silent region invention
 const KNOWN_REGIONS = [
@@ -70,7 +71,7 @@ export function chooseRegions(intent: PlacementIntent): RegionDecision {
     });
 
     if (validRegions.length === 0) {
-        throw new PlacementBlockedError(`Cannot meet constraints for placement intent ${intent.id}. No valid regions found.`);
+        throw new PlacementBlockedError(__t('engine.placement.err_cannot_meet_constraints', intent.id));
     }
 
     // Cost optimization and latency prioritization
