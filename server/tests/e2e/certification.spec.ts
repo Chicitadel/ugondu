@@ -32,14 +32,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-// Global declarations to satisfy strict isolated compilation
-declare const describe: (name: string, fn: () => void) => void;
-declare const it: (name: string, fn: () => Promise<void> | void) => void;
-declare const expect: (val: any) => { 
-  toBe: (expected: any) => void, 
-  toThrow: (expected?: any) => void,
-  toBeDefined: () => void
-};
+// Globals are provided by testing framework
 
 class IntegrationOrchestrator {
     public async certify(

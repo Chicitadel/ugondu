@@ -139,6 +139,5 @@ async function runCertification() {
         }
     }
 }
-}
 
 runCertification();
