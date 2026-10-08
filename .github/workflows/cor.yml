@@ -74,14 +74,7 @@ jobs:
         run: npm run verify:release-integrity --if-present
 
       - name: Verify COR signing trust root
-        shell: bash
-        run: |
-          if [ -z "${COR_SIGNING_KEY}" ] || [ -z "${COR_PUBLIC_KEY}" ]; then
-            echo "::error::COR_TRUST_ROOT_MISSING: The COR signing trust root is not configured in the GitHub Actions environment."
-            exit 1
-          fi
-          echo "Trust root configuration detected."
-          echo "Public Key Fingerprint: $(echo -n "${COR_PUBLIC_KEY}" | sha256sum | awk '{print $1}')"
+        run: node scripts/ci/verify-trust-root.js
 
       - name: Validate stream registry
         run: node scripts/check-cor-stream-registry.js
