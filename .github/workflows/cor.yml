@@ -1,6 +1,7 @@
 name: COR Certification
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
