@@ -20,10 +20,14 @@ describe('Credential Redaction Security', () => {
             interceptedLog = msg;
         };
 
+        const originalNodeEnv = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'development';
+
         try {
             Logger.info('Authenticating to provider', sensitiveContext);
         } finally {
             console.log = originalConsoleLog;
+            process.env.NODE_ENV = originalNodeEnv;
         }
 
         expect(interceptedLog).toContain('[REDACTED]');

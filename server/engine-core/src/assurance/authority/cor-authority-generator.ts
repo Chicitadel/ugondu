@@ -108,7 +108,7 @@ const AWS_AUTHORITY_MAP: Record<string, AuthorityPermission[]> = {
     ],
     'database:rds-subnet-group:create': [
         { action: 'rds:CreateDBSubnetGroup', resources: ['arn:aws:rds:*:*:subgrp:*'] },
-        { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:subgrp:*'] }
+        { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:subgrp:*'], conditions: { "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] } } }
     ],
     'database:rds-subnet-group:terminate': [
         { action: 'rds:DeleteDBSubnetGroup', resources: ['arn:aws:rds:*:*:subgrp:*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
@@ -117,14 +117,14 @@ const AWS_AUTHORITY_MAP: Record<string, AuthorityPermission[]> = {
         // Ensure dependent permissions are covered for RDS Create in a VPC.
         // RDS doesn't use secgrp ARNs during creation in IAM, but it does require describe permissions.
         { action: 'rds:CreateDBInstance', resources: ['arn:aws:rds:*:*:db:*', 'arn:aws:rds:*:*:subgrp:*'] },
-        { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:db:*'] }
+        { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:db:*'], conditions: { "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] } } }
     ],
     'database:relational:terminate': [
         { action: 'rds:DeleteDBInstance', resources: ['arn:aws:rds:*:*:db:*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'database:rds-snapshot:create': [
         { action: 'rds:CreateDBSnapshot', resources: ['arn:aws:rds:*:*:snapshot:*', 'arn:aws:rds:*:*:db:*'] },
-        { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:snapshot:*'] }
+        { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:snapshot:*'], conditions: { "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] } } }
     ],
     'database:rds-snapshot:terminate': [
         { action: 'rds:DeleteDBSnapshot', resources: ['arn:aws:rds:*:*:snapshot:*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
@@ -143,8 +143,8 @@ const AWS_AUTHORITY_MAP: Record<string, AuthorityPermission[]> = {
         { action: 's3:DeleteObject', resources: ['arn:aws:s3:::ugondu-cor-*/*'] }
     ],
     'drift:injection': [
-        { action: 'ec2:CreateTags', resources: ['*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } },
-        { action: 'ec2:DeleteTags', resources: ['*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
+        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:instance/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" }, "ForAllValues:StringEquals": { "aws:TagKeys": ["Name"] } } },
+        { action: 'ec2:DeleteTags', resources: ['arn:aws:ec2:*:*:instance/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" }, "ForAllValues:StringEquals": { "aws:TagKeys": ["Name"] } } }
     ],
     'drift:residual-scan': [
         { action: 'ec2:DescribeVpcs', resources: ['*'] },

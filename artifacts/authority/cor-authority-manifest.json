@@ -150,7 +150,15 @@
       "action": "rds:AddTagsToResource",
       "resources": [
         "arn:aws:rds:us-east-1:971671216490:subgrp:*"
-      ]
+      ],
+      "conditions": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "action": "rds:CreateDBInstance",
@@ -163,7 +171,15 @@
       "action": "rds:AddTagsToResource",
       "resources": [
         "arn:aws:rds:us-east-1:971671216490:db:*"
-      ]
+      ],
+      "conditions": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "action": "rds:CreateDBSnapshot",
@@ -176,7 +192,15 @@
       "action": "rds:AddTagsToResource",
       "resources": [
         "arn:aws:rds:us-east-1:971671216490:snapshot:*"
-      ]
+      ],
+      "conditions": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "action": "s3:CreateBucket",
@@ -199,22 +223,32 @@
     {
       "action": "ec2:CreateTags",
       "resources": [
-        "*"
+        "arn:aws:ec2:us-east-1:971671216490:instance/*"
       ],
       "conditions": {
         "StringLike": {
           "aws:ResourceTag/UgonduCOR": "*"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "Name"
+          ]
         }
       }
     },
     {
       "action": "ec2:DeleteTags",
       "resources": [
-        "*"
+        "arn:aws:ec2:us-east-1:971671216490:instance/*"
       ],
       "conditions": {
         "StringLike": {
           "aws:ResourceTag/UgonduCOR": "*"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "Name"
+          ]
         }
       }
     },

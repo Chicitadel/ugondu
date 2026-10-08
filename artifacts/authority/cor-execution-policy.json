@@ -151,7 +151,15 @@
       "Sid": "CORAuthority12",
       "Effect": "Allow",
       "Action": "rds:AddTagsToResource",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*"
+      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority13",
@@ -166,7 +174,15 @@
       "Sid": "CORAuthority14",
       "Effect": "Allow",
       "Action": "rds:AddTagsToResource",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:db:*"
+      "Resource": "arn:aws:rds:us-east-1:971671216490:db:*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority15",
@@ -181,7 +197,15 @@
       "Sid": "CORAuthority16",
       "Effect": "Allow",
       "Action": "rds:AddTagsToResource",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:snapshot:*"
+      "Resource": "arn:aws:rds:us-east-1:971671216490:snapshot:*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority17",
@@ -205,10 +229,15 @@
       "Sid": "CORAuthority20",
       "Effect": "Allow",
       "Action": "ec2:CreateTags",
-      "Resource": "*",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*",
       "Condition": {
         "StringLike": {
           "aws:ResourceTag/UgonduCOR": "*"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "Name"
+          ]
         }
       }
     },
@@ -216,10 +245,15 @@
       "Sid": "CORAuthority21",
       "Effect": "Allow",
       "Action": "ec2:DeleteTags",
-      "Resource": "*",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*",
       "Condition": {
         "StringLike": {
           "aws:ResourceTag/UgonduCOR": "*"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "Name"
+          ]
         }
       }
     },

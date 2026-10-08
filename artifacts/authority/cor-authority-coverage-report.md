@@ -35,8 +35,8 @@ Every operation in the physical COR graph maps precisely to calculated execution
 - **storage:object:put**:
   - `s3:PutObject` on `arn:aws:s3:::ugondu-cor-*/*`
 - **drift:injection**:
-  - `ec2:CreateTags` on `*`
-  - `ec2:DeleteTags` on `*`
+  - `ec2:CreateTags` on `arn:aws:ec2:*:*:instance/*`
+  - `ec2:DeleteTags` on `arn:aws:ec2:*:*:instance/*`
 - **storage:object:delete**:
   - `s3:DeleteObject` on `arn:aws:s3:::ugondu-cor-*/*`
 - **storage:s3:terminate**:
@@ -76,6 +76,6 @@ Every operation in the physical COR graph maps precisely to calculated execution
 
 ## 3. Cryptographic Provenance
 - **Graph Hash**: `2c1aa941173959e99680040713ba75c09508e90bec80e67717e3c5519e692ea2`
-- **Manifest Hash**: `9b324c490a9198b29818dff572c6b582d4667592397591e6e6f39eda26c0d1b8`
-- **Policy Hash**: `2e6c6f5b91d15b9ee8282a26247d4f777e2c31e0fa547daaaab4042ce8be0994`
-- **Commit Hash**: `8c8632f0bb60bfe8155eec9588672a7d6b5a9c06`
+- **Manifest Hash**: `98605c9b01b6d41a58d32397c7fe7a8459b716f30243a5fd9ef3ce990a0c8218`
+- **Policy Hash**: `a5792a3fb5e7186899353fbd12c1ad935cef3d328be077c0542e8883eff12527`
+- **Commit Hash**: `449e64c9e8611922610e7c7176ba0cb0fb8d08fb`

@@ -37,9 +37,7 @@ async function main() {
         'ec2:DescribeSecurityGroups',
         'ec2:DescribeInstances',
         'rds:DescribeDBInstances',
-        's3:ListAllMyBuckets',
-        'ec2:CreateTags',
-        'ec2:DeleteTags'
+        's3:ListAllMyBuckets'
     ];
 
     for (const stmt of iamPolicy.Statement) {
