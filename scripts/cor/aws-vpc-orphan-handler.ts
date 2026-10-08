@@ -58,6 +58,16 @@ async function runVpcOrphanReconciliation() {
 
             const action = process.env.COR_ACTION === 'CLEANUP' ? 'CLEANUP' : 'RECOVER';
             
+            const transactionId = process.env.UGONDU_TRANSACTION_ID;
+            const intentHash = process.env.UGONDU_INTENT_HASH;
+            const approvalSignatureString = process.env.UGONDU_APPROVAL_SIGNATURES;
+
+            if (!transactionId || !intentHash || !approvalSignatureString) {
+                throw new Error('DESTRUCTIVE_ACTION_BLOCKED REASON=NO_VALID_AUTHORIZATION');
+            }
+
+            const approvalSignatures = approvalSignatureString.split(',').map(s => s.trim());
+
             const envelope = {
                 principalArn,
                 accountId,
@@ -65,8 +75,8 @@ async function runVpcOrphanReconciliation() {
                 resourceId: vpcId,
                 action: action,
                 classification: 'ORPHANED_RESOURCE',
-                transactionId: `tx-${Date.now()}`,
-                intentHash: 'simulated-hash-for-now',
+                transactionId: transactionId,
+                intentHash: intentHash,
                 policyVersion: '1.0',
                 expiration: Date.now() + 60000
             };
@@ -76,7 +86,8 @@ async function runVpcOrphanReconciliation() {
                 action as 'RECOVER' | 'CLEANUP',
                 cloudTrailLogs,
                 envelope,
-                ['simulated-signature-1', 'simulated-signature-2']
+                approvalSignatures,
+                transactionId
             );
             console.log(__t('scripts.aws_vpc.msg_successfully_handled', vpcId), JSON.stringify(evidence, null, 2));
         } catch (error: any) {

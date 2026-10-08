@@ -80,15 +80,34 @@ export interface ActionContext {
   proof: SafetyProof | null;
 }
 
-export class SafetyGatesValidator {
-  
-  private readonly stateDir: string;
+export interface DistributedSafetyLease {
+  leaseId: string;
+  transactionId: string;
+  resourceId: string;
+  actionId: string;
+  owner: string;
+  principalArn: string;
+  accountId: string;
+  region: string;
+  intentHash: string;
+  fencingToken: number;
+  issuedAt: number;
+  expiresAt: number;
+  renewedAt: number;
+  policyVersion: string;
+}
 
-  constructor() {
-    this.stateDir = path.join(process.cwd(), '.governance', 'state', 'leases');
-    if (!fs.existsSync(this.stateDir)) {
-      fs.mkdirSync(this.stateDir, { recursive: true });
-    }
+export interface DistributedSafetyLeaseProvider {
+  acquireLease(request: Omit<DistributedSafetyLease, 'fencingToken' | 'issuedAt' | 'expiresAt' | 'renewedAt' | 'leaseId'>): Promise<DistributedSafetyLease | null>;
+  renewLease(leaseId: string, fencingToken: number): Promise<DistributedSafetyLease | null>;
+  releaseLease(leaseId: string, fencingToken: number): Promise<void>;
+}
+
+export class SafetyGatesValidator {
+  private leaseProvider?: DistributedSafetyLeaseProvider;
+
+  constructor(leaseProvider?: DistributedSafetyLeaseProvider) {
+    this.leaseProvider = leaseProvider;
   }
 
   /**
@@ -101,33 +120,31 @@ export class SafetyGatesValidator {
 
   /**
    * Attempts to acquire an exclusive safety lease for a high-risk operation.
-   * Uses file-system exclusive file creation (wx flag) to simulate atomic compare-and-swap.
+   * Now requires a genuinely shared/durable coordination mechanism.
    */
-  public async acquireSafetyLease(actionId: string, resourceId: string): Promise<boolean> {
-    const safeResourceId = resourceId.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const lockFile = path.join(this.stateDir, `${safeResourceId}.lock`);
-    const now = Date.now();
-
-    try {
-      // Clean up stale locks safely
-      if (fs.existsSync(lockFile)) {
-        const stats = fs.statSync(lockFile);
-        if (now - stats.mtimeMs > 30000) {
-          fs.unlinkSync(lockFile);
-        } else {
-          return false; // Lock held and fresh
-        }
-      }
-      
-      // Atomic write using wx (exclusive flag)
-      fs.writeFileSync(lockFile, JSON.stringify({ actionId, expiresAt: now + 30000 }), { flag: 'wx' });
-      return true;
-    } catch (err: any) {
-      if (err.code === 'EEXIST') {
-        return false; // Lock acquired by another process concurrently
-      }
-      throw err;
+  public async acquireSafetyLease(actionId: string, resourceId: string, canonicalEnvelope?: CanonicalActionEnvelope): Promise<boolean> {
+    if (!this.leaseProvider) {
+      throw new Error('Safety Violation: A DistributedSafetyLeaseProvider must be configured for distributed exclusive locks.');
     }
+    
+    if (!canonicalEnvelope) {
+        throw new Error('Safety Violation: Canonical envelope required for lease acquisition.');
+    }
+
+    const request = {
+      transactionId: canonicalEnvelope.transactionId,
+      resourceId: resourceId,
+      actionId: actionId,
+      owner: 'ugondu-reconciler',
+      principalArn: canonicalEnvelope.principalArn,
+      accountId: canonicalEnvelope.accountId,
+      region: canonicalEnvelope.region,
+      intentHash: canonicalEnvelope.intentHash,
+      policyVersion: canonicalEnvelope.policyVersion
+    };
+
+    const lease = await this.leaseProvider.acquireLease(request);
+    return lease !== null;
   }
 
   private verifyApprovalSignature(canonicalEnvelope: CanonicalActionEnvelope, signaturePayload: string): boolean {
@@ -212,7 +229,7 @@ export class SafetyGatesValidator {
       context.classification === ActionClassification.DESTRUCTIVE || 
       context.classification === ActionClassification.IRREVERSIBLE
     ) {
-      const leaseAcquired = await this.acquireSafetyLease(context.actionId, context.resourceId);
+      const leaseAcquired = await this.acquireSafetyLease(context.actionId, context.resourceId, context.proof?.canonicalEnvelope);
       if (!leaseAcquired) {
         throw new Error('Security Violation: Failed to acquire exclusive safety lease for high-risk operation.');
       }

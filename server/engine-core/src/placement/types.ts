@@ -96,6 +96,7 @@ export interface RegionCapability {
 
 export interface RegionCapabilityRegistry {
     discoverCapabilities(): Promise<RegionCapability[]>;
+    resolveAnchorRegion(service: string): string;
 }
 
 export interface PlacedResource {

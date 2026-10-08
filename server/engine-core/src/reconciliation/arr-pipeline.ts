@@ -74,7 +74,7 @@ export class AutonomousResourceReconciler {
         this.providers.set(name, provider);
     }
 
-    public async runPipeline(providerName: string, quotaContext: QuotaContext): Promise<ResourceState[]> {
+    public async runPipeline(providerName: string, quotaContext: QuotaContext, authority: import('../safety/safety-gates').SafetyProof): Promise<ResourceState[]> {
         const provider = this.providers.get(providerName);
         if (!provider) {
             throw new Error(`Provider ${providerName} is not registered`);
@@ -85,7 +85,7 @@ export class AutonomousResourceReconciler {
         const correlated = await this.correlate(provider, identified);
         const classified = await this.classify(correlated);
         const proofed = await this.proof(provider, classified);
-        const locked = await this.lock(proofed);
+        const locked = await this.lock(proofed, authority);
         const executed = await this.execute(provider, locked, quotaContext);
         const verified = await this.verify(provider, executed);
 
@@ -137,7 +137,7 @@ export class AutonomousResourceReconciler {
         return results;
     }
 
-    private async lock(resources: ResourceState[]): Promise<ResourceState[]> {
+    private async lock(resources: ResourceState[], authority: import('../safety/safety-gates').SafetyProof): Promise<ResourceState[]> {
         const locked: ResourceState[] = [];
         for (const r of resources) {
             if (!r.metadata['proofed']) continue;
@@ -146,30 +146,13 @@ export class AutonomousResourceReconciler {
             const actionType = isDestructive ? ActionClassification.DESTRUCTIVE : ActionClassification.RECOVERABLE;
 
             const evaluation = await this.safetyGate.validateAction({
-                actionId: `action-${Date.now()}`,
+                actionId: authority.canonicalEnvelope!.transactionId,
                 resourceId: r.id,
                 classification: actionType,
                 blastRadius: 0,
                 dependencyGraph: [],
                 isAutonomous: true,
-                proof: {
-                    authenticatedUserId: 'system-agent',
-                    mfaVerified: true,
-                    intentHash: 'unknown',
-                    approvalSignatures: [],
-                    canonicalEnvelope: {
-                        principalArn: 'unknown',
-                        accountId: 'unknown',
-                        region: 'unknown',
-                        resourceId: r.id,
-                        action: 'RECONCILE',
-                        classification: r.classification as string,
-                        transactionId: 'unknown',
-                        intentHash: 'unknown',
-                        policyVersion: '1.0',
-                        expiration: Date.now() + 60000
-                    }
-                }
+                proof: authority
             });
 
             if (evaluation) {

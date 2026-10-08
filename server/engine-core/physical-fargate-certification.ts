@@ -108,17 +108,42 @@ async function runFargateCertification() {
         }
         if (!reverted) throw new Error(__t('error.cert.fargate.revert_fail'));
 
-        console.log(__t('cert.fargate.cleanup'));
-        await registry.getAction('container:service:terminate')!.execute({ transactionId: txId, clusterName: globalClusterName, serviceName: `${campaignId}-svc` });
-        await registry.getAction('container:task-definition:terminate')!.execute({ transactionId: txId, taskDefinitionArn: taskDefArn1 });
-        await registry.getAction('container:task-definition:terminate')!.execute({ transactionId: txId, taskDefinitionArn: taskDefArn2 });
-        await registry.getAction('container:image:delete')!.execute({ transactionId: txId, repositoryName: campaignId, tag: `${campaignId}:cert-build` });
-        await registry.getAction('container:registry:terminate')!.execute({ transactionId: txId, repositoryName: campaignId });
-
         console.log(__t('cert.fargate.complete'));
+
     } catch (error: any) {
-        console.error(__t('error.cert.fargate.fatal', { error: error.message }), error);
-        process.exit(1);
+        console.error('Fargate Execution Failed. Engaging URRE Dependency-Aware Rollback...', error);
+        process.exitCode = 1;
+    } finally {
+        console.log(__t('cert.fargate.cleanup'));
+        try {
+            // URRE rollback will clean up everything correctly tracked in the ledger
+            const { TransactionStore } = require('./src/urre/transaction/transaction-store');
+            const store = new TransactionStore();
+            const mainTxId = `tx-fargate-ugondu-cor-fargate-001`; 
+            
+            // Re-resolve registry and urre in case it crashed before initializing
+            const providerAdapter = getProviderAdapter('aws', process.env.UGONDU_CERT_REGION!);
+            const registry = createProductionActionRegistry(providerAdapter.getNativeClient());
+            const urre = registry.getUrre();
+
+            await urre.triggerRollback({ id: mainTxId, targetEnvironment: 'production' } as any);
+        } catch (cleanupErr: any) {
+            console.error('Fatal: URRE Fargate Rollback also failed during cleanup phase!', cleanupErr);
+            process.exitCode = 1;
+        }
+
+        const providerAdapter = getProviderAdapter('aws', process.env.UGONDU_CERT_REGION!);
+        const residualScanner = providerAdapter.getResidualScanner();
+        
+        // This is a minimal scanner check here, but the CI residual-scanner.ts will do the deep scan
+        const leaked = await residualScanner.scanForLeakedResources({ transactionId: `tx-fargate-ugondu-cor-fargate-001` });
+        
+        if (leaked) {
+            console.error(__t('error.cert.residual_scan_failed'));
+            process.exitCode = 1;
+        } else {
+            console.log(__t('cert.residual_scan.clean'));
+        }
     }
 }
 

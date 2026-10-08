@@ -28,8 +28,8 @@ export class CloudTrailOwnershipEvidenceProvider {
                     response.Events.map(e => ({
                         resourceId: vpcId,
                         action: e.EventName,
-                        principal: e.Username || 'unknown',
-                        account: e.AccessKeyId || 'unknown',
+                        principal: e.Username,
+                        account: e.AccessKeyId,
                         rawCloudTrailEvent: e.CloudTrailEvent
                     }))
                 );
@@ -89,10 +89,11 @@ export class AwsVpcReconciler {
         action: 'RECOVER' | 'CLEANUP', 
         cloudTrailLogs: any[], 
         canonicalEnvelope: import('../../../engine-core/src/safety/safety-gates').CanonicalActionEnvelope, 
-        externalApprovalSignatures: string[]
+        externalApprovalSignatures: string[],
+        transactionId?: string
     ): Promise<any> {
         // 1. Prove ownership via CloudTrail
-        const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, null);
+        const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, canonicalEnvelope);
         if (!ownershipProven) {
             throw new Error(__t('plugin.aws_vpc.err_ownership_not_proven', vpcId));
         }
@@ -155,13 +156,29 @@ export class AwsVpcReconciler {
         }
     }
 
-    private proveOwnership(vpcId: string, cloudTrailLogs: any[], historicalGraph: any): boolean {
+    private proveOwnership(vpcId: string, cloudTrailLogs: any[], canonicalEnvelope: import('../../../engine-core/src/safety/safety-gates').CanonicalActionEnvelope): boolean {
         // Tokenized Governance constraints: Must not bypass security validation
         // Implement rigorous checks using CloudTrail events
-        const hasCloudTrailEvidence = cloudTrailLogs.some(log => log.resourceId === vpcId && log.action === 'CreateVpc');
-        const hasGraphEvidence = historicalGraph && historicalGraph.nodes.includes(vpcId);
+        const hasCloudTrailEvidence = cloudTrailLogs.some(log => {
+            if (log.resourceId !== vpcId || log.action !== 'CreateVpc') return false;
+            if (!log.rawCloudTrailEvent) return false;
 
-        return hasCloudTrailEvidence || hasGraphEvidence;
+            try {
+                const event = JSON.parse(log.rawCloudTrailEvent);
+                
+                const isMatchingAccount = event.recipientAccountId === canonicalEnvelope.accountId;
+                const isMatchingRegion = event.awsRegion === canonicalEnvelope.region;
+                
+                const eventPrincipalArn = event.userIdentity?.arn || '';
+                const isMatchingPrincipal = eventPrincipalArn === canonicalEnvelope.principalArn;
+
+                return isMatchingAccount && isMatchingRegion && isMatchingPrincipal;
+            } catch (e) {
+                return false;
+            }
+        });
+
+        return hasCloudTrailEvidence;
     }
 
     private async tagRecoveredVpc(vpcId: string): Promise<void> {

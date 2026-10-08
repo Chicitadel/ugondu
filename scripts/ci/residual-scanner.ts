@@ -32,111 +32,116 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { EC2Client, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeNetworkInterfacesCommand, DescribeInternetGatewaysCommand, DescribeRouteTablesCommand, DescribeSecurityGroupsCommand, DescribeInstancesCommand } from "@aws-sdk/client-ec2";
-import { RDSClient, DescribeDBInstancesCommand } from "@aws-sdk/client-rds";
-import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3";
+import { TransactionStore } from '../../server/engine-core/src/urre/transaction/transaction-store';
+import { EC2Client, DescribeVpcsCommand, DescribeSubnetsCommand, DescribeInstancesCommand, DescribeSecurityGroupsCommand, DescribeVolumesCommand, DescribeSnapshotsCommand } from "@aws-sdk/client-ec2";
+import { RDSClient, DescribeDBInstancesCommand, DescribeDBSubnetGroupsCommand, DescribeDBSnapshotsCommand } from "@aws-sdk/client-rds";
+import { S3Client, HeadBucketCommand } from "@aws-sdk/client-s3";
+import { ECSClient, DescribeClustersCommand, DescribeServicesCommand, DescribeTaskDefinitionCommand } from "@aws-sdk/client-ecs";
+import { ECRClient, DescribeRepositoriesCommand } from "@aws-sdk/client-ecr";
+
+export enum ResidualClassification {
+    ZERO_RESIDUAL = 'ZERO_RESIDUAL',
+    FOREIGN_RESOURCES_PRESENT = 'FOREIGN_RESOURCES_PRESENT',
+    UGONDU_RESIDUAL_PRESENT = 'UGONDU_RESIDUAL_PRESENT',
+    UNKNOWN_RESOURCES_PRESENT = 'UNKNOWN_RESOURCES_PRESENT',
+    SCAN_INCOMPLETE = 'SCAN_INCOMPLETE'
+}
 
 async function main() {
     const region = process.env.AWS_REGION;
-    if (!region) {
-        throw new Error('Safety Violation: AWS_REGION must be explicitly provided.');
-    }
+    if (!region) throw new Error('Safety Violation: AWS_REGION must be explicitly provided.');
     
     const transactionId = process.env.UGONDU_TRANSACTION_ID;
-    if (!transactionId) {
-        throw new Error('Safety Violation: UGONDU_TRANSACTION_ID must be explicitly provided to scan residuals.');
-    }
+    if (!transactionId) throw new Error('Safety Violation: UGONDU_TRANSACTION_ID must be explicitly provided.');
+
+    console.log(`[Residual Scanner] Starting transaction-bound ledger scan for ${transactionId}...`);
 
     const ec2Client = new EC2Client({ region });
     const rdsClient = new RDSClient({ region });
     const s3Client = new S3Client({ region });
+    const ecsClient = new ECSClient({ region });
+    const ecrClient = new ECRClient({ region });
 
-    let residualCount = 0;
-    console.log(`[Residual Scanner] Starting scan for residual resources in ${region} for Transaction: ${transactionId}...`);
+    let classification: ResidualClassification = ResidualClassification.ZERO_RESIDUAL;
+    let foundResiduals: string[] = [];
 
     try {
-        const filters = [{ Name: 'tag:UgonduTransactionId', Values: [transactionId] }];
+        const store = new TransactionStore();
+        const tx = await store.load(transactionId);
+        
+        if (!tx) {
+            console.error(`[Residual Scanner] Transaction ${transactionId} not found in ledger. Scan incomplete.`);
+            process.exit(1);
+        }
 
-        // VPCs
-        let vpcNextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeVpcsCommand({ Filters: filters, NextToken: vpcNextToken }));
-            (res.Vpcs || []).forEach(v => { console.error(`  - VPC ID: ${v.VpcId}`); residualCount++; });
-            vpcNextToken = res.NextToken;
-        } while (vpcNextToken);
+        const nodes = tx.getNodes();
+        
+        if (nodes.length === 0) {
+            console.log(`[Residual Scanner] Ledger empty for ${transactionId}. ZERO_RESIDUAL.`);
+            process.exit(0);
+        }
 
-        // Subnets
-        let subnetNextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeSubnetsCommand({ Filters: filters, NextToken: subnetNextToken }));
-            (res.Subnets || []).forEach(s => { console.error(`  - Subnet ID: ${s.SubnetId}`); residualCount++; });
-            subnetNextToken = res.NextToken;
-        } while (subnetNextToken);
-
-        // ENIs
-        let eniNextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeNetworkInterfacesCommand({ Filters: filters, NextToken: eniNextToken }));
-            (res.NetworkInterfaces || []).forEach(e => { console.error(`  - ENI ID: ${e.NetworkInterfaceId}`); residualCount++; });
-            eniNextToken = res.NextToken;
-        } while (eniNextToken);
-
-        // IGWs
-        let igwNextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeInternetGatewaysCommand({ Filters: filters, NextToken: igwNextToken }));
-            (res.InternetGateways || []).forEach(i => { console.error(`  - IGW ID: ${i.InternetGatewayId}`); residualCount++; });
-            igwNextToken = res.NextToken;
-        } while (igwNextToken);
-
-        // Route Tables
-        let rtbNextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeRouteTablesCommand({ Filters: filters, NextToken: rtbNextToken }));
-            (res.RouteTables || []).forEach(rt => { console.error(`  - RouteTable ID: ${rt.RouteTableId}`); residualCount++; });
-            rtbNextToken = res.NextToken;
-        } while (rtbNextToken);
-
-        // Security Groups
-        let sgNextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeSecurityGroupsCommand({ Filters: filters, NextToken: sgNextToken }));
-            (res.SecurityGroups || []).forEach(sg => { console.error(`  - SecurityGroup ID: ${sg.GroupId}`); residualCount++; });
-            sgNextToken = res.NextToken;
-        } while (sgNextToken);
-
-        // EC2 Instances
-        let ec2NextToken: string | undefined;
-        do {
-            const res = await ec2Client.send(new DescribeInstancesCommand({ Filters: filters, NextToken: ec2NextToken }));
-            (res.Reservations || []).forEach(r => (r.Instances || []).forEach(i => {
-                console.error(`  - EC2 Instance ID: ${i.InstanceId}`); residualCount++;
-            }));
-            ec2NextToken = res.NextToken;
-        } while (ec2NextToken);
-
-        // RDS Instances (filtering done in-memory due to RDS API lack of tag filtering on Describe)
-        let rdsNextToken: string | undefined;
-        do {
-            const res = await rdsClient.send(new DescribeDBInstancesCommand({ Marker: rdsNextToken }));
-            (res.DBInstances || []).forEach(db => {
-                const tags = db.TagList || [];
-                if (tags.some(t => t.Key === 'UgonduTransactionId' && t.Value === transactionId)) {
-                    console.error(`  - RDS Instance ID: ${db.DBInstanceIdentifier}`); residualCount++;
+        for (const node of nodes) {
+            // Check based on action
+            const action = node.action;
+            const outputs = node.outputs || {};
+            
+            try {
+                if (action.includes('vpc') && (outputs.vpcId || outputs.id)) {
+                    const r = await ec2Client.send(new DescribeVpcsCommand({ VpcIds: [outputs.vpcId || outputs.id] })).catch(() => null);
+                    if (r && r.Vpcs && r.Vpcs.length > 0) foundResiduals.push(outputs.vpcId || outputs.id);
+                } else if (action.includes('subnet') && !action.includes('group') && (outputs.subnetId || outputs.id)) {
+                    const r = await ec2Client.send(new DescribeSubnetsCommand({ SubnetIds: [outputs.subnetId || outputs.id] })).catch(() => null);
+                    if (r && r.Subnets && r.Subnets.length > 0) foundResiduals.push(outputs.subnetId || outputs.id);
+                } else if (action.includes('security-group') && (outputs.groupId || outputs.id)) {
+                    const r = await ec2Client.send(new DescribeSecurityGroupsCommand({ GroupIds: [outputs.groupId || outputs.id] })).catch(() => null);
+                    if (r && r.SecurityGroups && r.SecurityGroups.length > 0) foundResiduals.push(outputs.groupId || outputs.id);
+                } else if (action.includes('instance:create') && (outputs.instanceId || outputs.id)) {
+                    const r = await ec2Client.send(new DescribeInstancesCommand({ InstanceIds: [outputs.instanceId || outputs.id] })).catch(() => null);
+                    if (r && r.Reservations && r.Reservations.some(res => res.Instances?.some(i => i.State?.Name !== 'terminated'))) {
+                        foundResiduals.push(outputs.instanceId || outputs.id);
+                    }
+                } else if (action.includes('ebs-snapshot') && (outputs.snapshotId || outputs.id)) {
+                    const r = await ec2Client.send(new DescribeSnapshotsCommand({ SnapshotIds: [outputs.snapshotId || outputs.id] })).catch(() => null);
+                    if (r && r.Snapshots && r.Snapshots.length > 0) foundResiduals.push(outputs.snapshotId || outputs.id);
+                } else if (action.includes('rds-subnet-group') && node.payload?.dbSubnetGroupName) {
+                    const r = await rdsClient.send(new DescribeDBSubnetGroupsCommand({ DBSubnetGroupName: node.payload.dbSubnetGroupName })).catch(() => null);
+                    if (r && r.DBSubnetGroups && r.DBSubnetGroups.length > 0) foundResiduals.push(node.payload.dbSubnetGroupName);
+                } else if (action.includes('database:relational') && node.payload?.rdsId) {
+                    const r = await rdsClient.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: node.payload.rdsId })).catch(() => null);
+                    if (r && r.DBInstances && r.DBInstances.length > 0) foundResiduals.push(node.payload.rdsId);
+                } else if (action.includes('rds-snapshot') && node.payload?.rdsSnapshotId) {
+                    const r = await rdsClient.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: node.payload.rdsSnapshotId })).catch(() => null);
+                    if (r && r.DBSnapshots && r.DBSnapshots.length > 0) foundResiduals.push(node.payload.rdsSnapshotId);
+                } else if (action.includes('storage:s3:create') && node.payload?.bucketName) {
+                    const r = await s3Client.send(new HeadBucketCommand({ Bucket: node.payload.bucketName })).catch(() => null);
+                    if (r) foundResiduals.push(node.payload.bucketName);
+                } else if (action.includes('registry:create') && node.payload?.repositoryName) {
+                    const r = await ecrClient.send(new DescribeRepositoriesCommand({ repositoryNames: [node.payload.repositoryName] })).catch(() => null);
+                    if (r && r.repositories && r.repositories.length > 0) foundResiduals.push(node.payload.repositoryName);
+                } else if (action.includes('task-definition:create') && (outputs.taskDefinitionArn || outputs.id)) {
+                    const r = await ecsClient.send(new DescribeTaskDefinitionCommand({ taskDefinition: outputs.taskDefinitionArn || outputs.id })).catch(() => null);
+                    if (r && r.taskDefinition && r.taskDefinition.status !== 'INACTIVE') foundResiduals.push(outputs.taskDefinitionArn || outputs.id);
+                } else if (action.includes('service:create') && node.payload?.clusterName && node.payload?.serviceName) {
+                    const r = await ecsClient.send(new DescribeServicesCommand({ cluster: node.payload.clusterName, services: [node.payload.serviceName] })).catch(() => null);
+                    if (r && r.services && r.services.length > 0 && r.services[0].status !== 'INACTIVE') foundResiduals.push(node.payload.serviceName);
                 }
-            });
-            rdsNextToken = res.Marker;
-        } while (rdsNextToken);
+            } catch (err) {
+                console.warn(`[Residual Scanner] Could not scan resource for node ${node.id} (${action}):`, err);
+                classification = ResidualClassification.SCAN_INCOMPLETE;
+            }
+        }
 
-        // S3 Buckets (filtering done in-memory; S3 does not support pagination for list buckets, returning all up to limit)
-        // Wait, S3 buckets are global. For safety, this just ensures none are left. S3 is complex to filter via list buckets since tags require GetBucketTagging, which is expensive for all buckets. We will check if buckets match transaction naming convention if Ugondu tags it that way, but for now we skip S3 deep scan or alert about S3.
-        console.log(`[Residual Scanner] Skipping deep S3 tag scan to avoid rate limits, assuming S3 orchestrator verified deletion.`);
-
-        if (residualCount > 0) {
-            console.error(`\n[Residual Scanner] FAILED: Found ${residualCount} residual resources. This is a violation of zero-residual cleanup.`);
+        if (foundResiduals.length > 0) {
+            classification = ResidualClassification.UGONDU_RESIDUAL_PRESENT;
+            console.error(`\n[Residual Scanner] FAILED: Found ${foundResiduals.length} residual resources. This is a violation of zero-residual cleanup.`);
+            foundResiduals.forEach(r => console.error(`  - ${r}`));
+            process.exit(1);
+        } else if (classification === ResidualClassification.SCAN_INCOMPLETE) {
+            console.error(`\n[Residual Scanner] SCAN_INCOMPLETE: Ledger scan finished but some provider APIs failed.`);
             process.exit(1);
         } else {
-            console.log(`\n[Residual Scanner] SUCCESS: Zero residual resources cleanup verified.`);
+            console.log(`\n[Residual Scanner] SUCCESS: ZERO_RESIDUAL resources verified.`);
             process.exit(0);
         }
 

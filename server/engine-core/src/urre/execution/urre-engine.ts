@@ -241,12 +241,12 @@ export class URREngine {
         return eventId.startsWith('rb-') && eventId !== 'rb-fail-id';
     }
 
-    public async triggerReconciliation(providerName: string, quotaContext: QuotaContext): Promise<any[]> {
+    public async triggerReconciliation(providerName: string, quotaContext: QuotaContext, authority: import('../../safety/safety-gates').SafetyProof): Promise<any[]> {
         if (!this.arr) {
             throw new Error('AutonomousResourceReconciler not initialized');
         }
         Logger.info(`[URRE] Triggering reconciliation for provider ${providerName}...`);
-        const result = await this.arr.runPipeline(providerName, quotaContext);
+        const result = await this.arr.runPipeline(providerName, quotaContext, authority);
         Logger.info(`[URRE] Reconciliation completed for ${providerName}. Managed ${result.length} resources.`);
         return result;
     }
