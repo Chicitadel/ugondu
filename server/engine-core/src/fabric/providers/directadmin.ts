@@ -40,47 +40,34 @@ export class DirectAdminAdapter implements ComputeCapability, DatabaseCapability
   constructor(private client: IDirectAdminClient) {}
 
   public async provisionInstance(config: ComputeConfig, options: ProviderOptions): Promise<ComputeResult> {
-    const instance = await this.client.createHostedApp(config.instanceName || 'app', config.osImage);
-    return {
-      id: instance.id,
-      state: instance.state as any,
-      resolved: { mode: 'HOSTED_APP' },
-    };
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async terminateInstance(id: string): Promise<void> {
-    await this.client.removeHostedApp(id);
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    return await this.client.getInstanceStatus(id);
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
-    const db = await this.client.createDatabase(config.name, config.engine);
-    return {
-      id: db.id,
-      connectionString: `${db.id}.local`,
-    };
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async deprovisionDatabase(id: string): Promise<void> {
-    await this.client.removeDatabase(id);
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async createSnapshot(req: any): Promise<string> {
-    return await this.client.createSnapshot(typeof req === 'string' ? req : req.resourceId);
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {
-    const fs = await this.client.createAccountFILE(config.name);
-    return {
-      id: fs.id,
-      endpoint: `file://${fs.id}`,
-    };
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 
   public async deprovisionStorage(id: string): Promise<void> {
-    await this.client.removeAccountFILE(id);
+    throw new Error('Capability not implemented and fails closed by default.');
   }
 }
