@@ -59,7 +59,7 @@ export class FrontendValidation implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         if (!plan.requiresConfigurationRepair) {
-            return true;
+            throw new Error('UNIMPLEMENTED')
         }
         
         // Execute configuration repairs
@@ -68,7 +68,7 @@ export class FrontendValidation implements RecoveryCapability {
                 await adapter.applyConfigurationRepair(repair.type, repair.target);
             } catch (error) {
                 console.error(`[FrontendValidation] Repair failed for ${repair.type}:`, error);
-                return false;
+                throw new Error('UNIMPLEMENTED')
             }
         }
 
@@ -82,7 +82,7 @@ export class FrontendValidation implements RecoveryCapability {
             try {
                 const response = await fetch(targetUrl);
                 if (response.ok) {
-                    return true;
+                    throw new Error('UNIMPLEMENTED')
                 }
             } catch (error) {
                 // Fetch failed, loop will retry
@@ -93,7 +93,7 @@ export class FrontendValidation implements RecoveryCapability {
             }
         }
 
-        return false;
+        throw new Error('UNIMPLEMENTED')
     }
 }
 

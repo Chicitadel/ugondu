@@ -40,7 +40,7 @@ class PathRepositoryReconstruction {
     }
     async execute(plan, adapter, scope) {
         if (!plan.requiresRepositoryClone) {
-            return true;
+            throw new Error('UNIMPLEMENTED')
         }
         for (const repo of plan.repositories) {
             // Dispatch abstract intent to platform adapter: EnsureRepositoryPresent
@@ -52,7 +52,7 @@ class PathRepositoryReconstruction {
                 await adapter.executeAction('RepositoryEnsurePresent', { target: repo.path, reference: repo.reference });
             }
         }
-        return true;
+        throw new Error('UNIMPLEMENTED')
     }
 }
 exports.PathRepositoryReconstruction = PathRepositoryReconstruction;

@@ -16,7 +16,7 @@ export class ZddTopologyRepair implements RecoveryCapability {
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        if (!plan.requiresInfrastructureRepair) return true;
+        if (!plan.requiresInfrastructureRepair) throw new Error('UNIMPLEMENTED')
         // Automatically executes the ZDD cleanup, rename, and symlink restoration sequence
         // COR-013: Do not return true if incomplete
         
@@ -53,7 +53,7 @@ export class ZddTopologyRepair implements RecoveryCapability {
             }
         }
         
-        return true;
+        throw new Error('UNIMPLEMENTED')
     }
 }
 

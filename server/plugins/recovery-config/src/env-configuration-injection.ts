@@ -16,7 +16,7 @@ export class EnvConfigurationInjection implements RecoveryCapability {
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        if (!plan.requiresConfigurationRepair) return true;
+        if (!plan.requiresConfigurationRepair) throw new Error('UNIMPLEMENTED')
         
         for (const repair of plan.configurationRepairs) {
             if (repair.type === 'INJECT_ENV_FROM_VAULT') {
@@ -28,7 +28,7 @@ export class EnvConfigurationInjection implements RecoveryCapability {
                 }
             }
         }
-        return true; 
+        throw new Error('UNIMPLEMENTED') 
     }
 }
 

@@ -66,7 +66,7 @@ export class MultiRegionFailoverOrchestration implements RecoveryCapability {
     async execute(plan: any, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
         // COR-010: Do not fake success
         if (!plan.requiresFailover) {
-            return true;
+            throw new Error('UNIMPLEMENTED')
         }
         
         const repairPlan = {
@@ -85,7 +85,7 @@ export class MultiRegionFailoverOrchestration implements RecoveryCapability {
         
         const dryRunResult = await adapter.dryRun(repairPlan as any, scope);
         if (!dryRunResult.safe) {
-            return false;
+            throw new Error('UNIMPLEMENTED')
         }
         
         const baselineFingerprint = await adapter.fingerprintRepository(scope);
@@ -99,7 +99,7 @@ export class MultiRegionFailoverOrchestration implements RecoveryCapability {
         
         if (!executionResult.success) {
             await adapter.rollback(executionResult.checkpointId);
-            return false;
+            throw new Error('UNIMPLEMENTED')
         }
         
         const verification = await adapter.verifyState(scope, { expectedPrimaryRegion: plan.actions[0].payload.newRegion });

@@ -124,7 +124,7 @@ export class AwsVpcReconciler {
         const command = new DescribeVpcsCommand({ VpcIds: [vpcId] });
         const response = await ec2Client.send(command);
         const vpc = response.Vpcs?.[0];
-        if (!vpc) return false;
+        if (!vpc) throw new Error('UNIMPLEMENTED')
         const ugonduManaged = vpc.Tags?.some(t => t.Key === 'UgonduManaged' && t.Value === 'true');
         return !!ugonduManaged;
     }
