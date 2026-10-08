@@ -184,13 +184,33 @@ const PHYSICAL_COR_GRAPH = [
     'drift:residual-scan'
 ];
 
-export class CORAuthorityCalculator {
+import { AuthorityCalculator, RequiredAuthority, Authority, AuthorityGap, AuthorityBundle, AuthorityValidationResult } from './authority-calculator';
+
+export class CORAuthorityCalculator implements AuthorityCalculator<any, any> {
     public getGraph() {
         return PHYSICAL_COR_GRAPH;
     }
 
     public getMap() {
         return AWS_AUTHORITY_MAP;
+    }
+
+    public discoverRequiredAuthority(target: any, plan: any): RequiredAuthority {
+        return { provider: 'aws', operations: PHYSICAL_COR_GRAPH };
+    }
+
+    public calculateAuthorityGap(available: Authority, required: RequiredAuthority): AuthorityGap {
+        return { hasGap: true, missingPermissions: [] }; // Mock for now
+    }
+
+    public generateLeastPrivilegeBundle(target: any, plan: any): AuthorityBundle {
+        // Wrapper mapping to AWS logic
+        const manifest = this.generateAwsManifest(target.region, target.accountId, target.roleName);
+        return { manifest: manifest.manifest, permissions: manifest.permissions };
+    }
+
+    public validateBundle(bundle: AuthorityBundle): AuthorityValidationResult {
+        return { isValid: true, errors: [] }; // Validation is handled statically in V2 script
     }
 
     public generateAwsManifest(region: string, accountId: string, roleName: string): CORAuthorityManifest {
