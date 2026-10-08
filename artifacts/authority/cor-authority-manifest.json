@@ -13,7 +13,7 @@
     {
       "action": "ssm:GetParameter",
       "resources": [
-        "arn:aws:ssm:us-east-1:971671216490:parameter/aws/service/ami-amazon-linux-latest/*"
+        "arn:aws:ssm:us-east-1::parameter/aws/service/ami-amazon-linux-latest/*"
       ]
     },
     {

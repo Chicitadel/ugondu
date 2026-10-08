@@ -1,4 +1,4 @@
-import { CORAuthorityCalculator } from '../server/engine-core/src/assurance/authority/cor-authority-generator.ts';
+import { CORAuthorityCalculator } from '../server/engine-core/src/assurance/authority/cor-authority-generator';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
@@ -178,3 +178,4 @@ ${calculator.getGraph().map(op => {
 }
 
 main().catch(console.error);
+

@@ -238,7 +238,7 @@ export class TransactionAuthority {
 
         this.writeAtomic(txn);
 
-        return txn;
+        return structuredClone(txn);
     }
 
     public static get(
@@ -275,15 +275,15 @@ export class TransactionAuthority {
                         'utf8'
                     )
                 ) as PersistedTransaction;
-        } catch {
+        } catch (error) {
             throw new Error(
-                'TRANSACTION_STATE_CORRUPTED'
+                `TRANSACTION_STATE_CORRUPTED: ${error instanceof Error ? error.message : String(error)}`
             );
         }
 
         this.validate(txn);
 
-        return txn;
+        return structuredClone(txn);
     }
 
     public static update(
@@ -389,7 +389,7 @@ export class TransactionAuthority {
                 this.validate(next);
                 this.writeAtomic(next);
 
-                return next;
+                return structuredClone(next);
             }
         );
     }
@@ -434,7 +434,7 @@ export class TransactionAuthority {
                     (error as NodeJS.ErrnoException)
                         .code !== 'EEXIST'
                 ) {
-                    throw error;
+                    throw new Error(`TRANSACTION_LOCK_FAILED: ${error instanceof Error ? error.message : String(error)}`);
                 }
 
                 if (

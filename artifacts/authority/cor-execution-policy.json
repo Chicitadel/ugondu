@@ -5,7 +5,7 @@
       "Sid": "CORAuthority0",
       "Effect": "Allow",
       "Action": "ssm:GetParameter",
-      "Resource": "arn:aws:ssm:us-east-1:971671216490:parameter/aws/service/ami-amazon-linux-latest/*"
+      "Resource": "arn:aws:ssm:us-east-1::parameter/aws/service/ami-amazon-linux-latest/*"
     },
     {
       "Sid": "CORAuthority1",

@@ -76,6 +76,6 @@ Every operation in the physical COR graph maps precisely to calculated execution
 
 ## 3. Cryptographic Provenance
 - **Graph Hash**: `2c1aa941173959e99680040713ba75c09508e90bec80e67717e3c5519e692ea2`
-- **Manifest Hash**: `fc1397708e6560c98bc8efb7364f10b6c87bf6074cb3d3ef4b84115d270baf0d`
-- **Policy Hash**: `be9a9699816f3c4d088ebc8aba68bac8af03f2a9d21ff61056d19fed82757361`
-- **Commit Hash**: `c34c1fda735ec79cfebbb5df495705eefb72e604`
+- **Manifest Hash**: `faa0c4ba38dce91a4bee392fc676880a532c21bf3bde0552ce6bbff74759e216`
+- **Policy Hash**: `8735786173adc8d2229ea3fc16708d171ae9425376f7d56299222593126579b6`
+- **Commit Hash**: `70981d5f9713fe9d0d1b86a69c8c00e6da42f181`

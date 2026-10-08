@@ -113,11 +113,11 @@ export class URREngine {
                     type: 'DEPLOY',
                     safetyContract: { timeoutMs: 30000, idempotent: true },
                     payload: async () => {
-                        node.output = await this.handlers[key](node);
+                        node.output = await this.handlers[key](structuredClone(node));
                         
                         // Independent Post-Execution Observation
                         if (typeof this.handlers[`${key}:verify`] === 'function') {
-                            const verified = await this.handlers[`${key}:verify`](node);
+                            const verified = await this.handlers[`${key}:verify`](structuredClone(node));
                             if (!verified) throw new Error('INDEPENDENT_VERIFICATION_FAILED');
                         }
                     }
@@ -135,16 +135,16 @@ export class URREngine {
                     if (inDegree[neighbor] === 0) queue.push(neighbor);
                 });
 
-            } catch (error: any) {
+            } catch (error: unknown) {
                 node.status = 'FAILED';
-                node.error = error.message;
+                node.error = error instanceof Error ? error.message : String(error);
                 tx.status = 'FAILED';
                 await this.store.save(tx);
                 if (this.faultInjector?.afterNodePersisted) {
                     await this.faultInjector.afterNodePersisted(node);
                 }
 
-                Logger.error(`Transaction ${tx.id} failed at node ${node.id}: ${error.message}`);
+                Logger.error(`Transaction ${tx.id} failed at node ${node.id}: ${node.error}`);
 
                 // Immediately invoke URRE Rollback Engine
                 await this.triggerRollback({ id: tx.id, targetEnvironment: '', tx });
@@ -217,7 +217,8 @@ export class URREngine {
             });
         }
 
-        tx.status = 'RECOVERED';
+        const hasRollbackFailure = tx.nodes.some(n => n.status === 'ROLLBACK_FAILED');
+        tx.status = hasRollbackFailure ? 'FAILED' : 'RECOVERED';
         await this.store.save(tx);
 
         return {
