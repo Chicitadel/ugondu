@@ -13,50 +13,41 @@ export class CPanelLiveAdapter implements LiveEnvironmentAdapterContract {
     }
 
     async captureState(scope: RecoveryScope): Promise<EnvironmentTwin> {
-        return {
-            provider: { platform: 'cpanel', symlinkSupported: true, atomicRenameSupported: true, rsyncAvailable: true },
-            topology: { currentSymlinkTarget: null, currentSymlinkValid: false, webrootPath: `/home/${scope.tenantId}/public_html`, webrootSymlinkTarget: null, availableReleases: [] },
-            application: { version: '0.0.0', manifests: [], integrityStatus: 'MISSING' },
-            runtime: { primaryRuntime: 'php', primaryRuntimeVersion: '8.2', missingDependencies: [] },
-            fileInventory: {},
-            permissionInventory: {},
-            configurationInventory: {},
-            databaseInventory: {},
-            dnsInventory: {},
-            runtimeInventory: {},
-            certificateInventory: {},
-            cronInventory: {},
-            backupInventory: {}
-        };
+        throw new Error('UNIMPLEMENTED');
     }
 
     async fingerprintRepository(scope: RecoveryScope): Promise<string> {
-        // Must return SHA-256 of the actual file tree via SSH or cPanel File Manager API
-        throw new Error('NotImplementedError');
+        throw new Error('UNIMPLEMENTED');
     }
 
     async checkDrift(scope: RecoveryScope, baselineFingerprint: string): Promise<boolean> {
-        const current = await this.fingerprintRepository(scope);
-        return current === baselineFingerprint;
+        throw new Error('UNIMPLEMENTED');
     }
 
     async dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ plannedMutations: any[], safe: boolean }> {
+        throw new Error('UNIMPLEMENTED');
+    }> {
         // Enforce safety constraint: No file outside scope.repositoryPath can be mutated.
         return { plannedMutations: [], safe: true };
     }
 
     async executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }> {
+        throw new Error('UNIMPLEMENTED');
+    }> {
         // Uses explicit compensating-transaction checkpoints
         return { success: true, checkpointId: 'chk-' + Date.now(), evidence: [] };
     }
 
     async rollback(checkpointId: string): Promise<boolean> {
-        // Rollback via explicit compensating transactions
-        Logger.info(`Rolling back checkpoint ${checkpointId}`);
+        throw new Error('UNIMPLEMENTED');
+    }`);
         throw new Error('NotImplementedError');
     }
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, actualState: any, verificationEvidence: any }> {
+        throw new Error('UNIMPLEMENTED');
+    }> {
         return { verified: true, actualState: {}, verificationEvidence: {} };
     }
 }
+

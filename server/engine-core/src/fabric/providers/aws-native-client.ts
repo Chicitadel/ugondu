@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 import { Logger, __t } from '@ugondu/shared';
+import * as crypto from 'crypto';
 import { IAwsClient } from './aws';
 import { resolveSecret } from '../engine/SecretGuard';
 import { ComputeStatus } from '../capabilities/compute';
@@ -119,7 +120,16 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     
-    public async deleteSubnet(params: any): Promise<any> { return this.ec2.send(new DeleteSubnetCommand(params)); }
+    public async deleteSubnet(params: any): Promise<any> {
+        // Check ownership tags
+        const tagRes = await this.ec2.send(new DescribeSubnetsCommand({ SubnetIds: [params.SubnetId] }));
+        const tags = tagRes.Subnets?.[0]?.Tags || [];
+        if (!tags.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some((t: any) => t.Key === 'UgonduTransactionId')) {
+            throw new Error(`Refusing to delete Subnet ${params.SubnetId}: missing ownership tags`);
+        }
+
+        return this.ec2.send(new DeleteSubnetCommand(params));
+    }
     public async modifyInstanceSecurityGroups(instanceId: string, securityGroupIds: string[]): Promise<any> { return this.ec2.send(new ModifyInstanceAttributeCommand({ InstanceId: instanceId, Groups: securityGroupIds })); }
     public async describeInstanceVolumes(instanceId: string): Promise<any> { return this.ec2.send(new DescribeVolumesCommand({ Filters: [{ Name: 'attachment.instance-id', Values: [instanceId] }] })); }
     public async deleteEbsSnapshot(params: any): Promise<any> { return this.ec2.send(new DeleteSnapshotCommand(params)); }
@@ -152,11 +162,11 @@ export class AwsNativeClient implements IAwsClient {
             TagSpecifications: [
                 {
                     ResourceType: 'instance',
-                    Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
                 },
                 {
                     ResourceType: 'volume',
-                    Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
                 }
             ]
         });
@@ -190,6 +200,13 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async terminateInstances(id: string): Promise<void> {
+        // Check ownership tags
+        const tagRes = await this.ec2.send(new DescribeInstancesCommand({ InstanceIds: [id] }));
+        const tags = tagRes.Reservations?.[0]?.Instances?.[0]?.Tags || [];
+        if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
+            throw new Error(`Refusing to terminate instance ${id}: missing ownership tags`);
+        }
+
         const cmd = new TerminateInstancesCommand({ InstanceIds: [id] });
         await this.ec2.send(cmd);
         
@@ -210,7 +227,7 @@ export class AwsNativeClient implements IAwsClient {
     public async createVpc(cidr: string, name: string): Promise<string> {
         const cmd = new CreateVpcCommand({ 
             CidrBlock: cidr,
-            TagSpecifications: [{ ResourceType: 'vpc', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+            TagSpecifications: [{ ResourceType: 'vpc', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
         });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Vpc || !res.Vpc.VpcId) throw new Error(__t('aws_vpc_creation_failed'));
@@ -221,6 +238,13 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async deleteVpc(id: string): Promise<void> {
+        // Check ownership tags
+        const tagRes = await this.ec2.send(new DescribeVpcsCommand({ VpcIds: [id] }));
+        const tags = tagRes.Vpcs?.[0]?.Tags || [];
+        if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
+            throw new Error(`Refusing to delete VPC ${id}: missing ownership tags`);
+        }
+
         const cmd = new DeleteVpcCommand({ VpcId: id });
         
         Logger.info(`Deleting VPC ${id}...`);
@@ -253,7 +277,7 @@ export class AwsNativeClient implements IAwsClient {
             VpcId: vpcId, 
             CidrBlock: cidr, 
             AvailabilityZone: az,
-            TagSpecifications: [{ ResourceType: 'subnet', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+            TagSpecifications: [{ ResourceType: 'subnet', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
         });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Subnet || !res.Subnet.SubnetId) throw new Error(__t('aws_subnet_creation_failed'));
@@ -265,7 +289,7 @@ export class AwsNativeClient implements IAwsClient {
             VpcId: vpcId, 
             GroupName: name, 
             Description: `Ugondu Managed SG ${name}`,
-            TagSpecifications: [{ ResourceType: 'security-group', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+            TagSpecifications: [{ ResourceType: 'security-group', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
         });
         const res = await this.ec2.send(cmd) as any;
         if (!res.GroupId) throw new Error(__t('aws_security_group_creation_fa'));
@@ -273,6 +297,14 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async deleteSecurityGroup(id: string): Promise<void> {
+        // Check ownership tags
+        const { DescribeSecurityGroupsCommand } = require('@aws-sdk/client-ec2');
+        const tagRes = await this.ec2.send(new DescribeSecurityGroupsCommand({ GroupIds: [id] }));
+        const tags = (tagRes as any).SecurityGroups?.[0]?.Tags || [];
+        if (!tags.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some((t: any) => t.Key === 'UgonduTransactionId')) {
+            throw new Error(`Refusing to delete Security Group ${id}: missing ownership tags`);
+        }
+
         await this.ec2.send(new DeleteSecurityGroupCommand({ GroupId: id }));
     }
 
@@ -281,7 +313,7 @@ export class AwsNativeClient implements IAwsClient {
             DBSubnetGroupName: name,
             DBSubnetGroupDescription: __t('ugondu_managed_db_subnet_group'),
             SubnetIds: subnetIds,
-            Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+            Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
         });
         const res = await this.rds.send(cmd);
         if (!res.DBSubnetGroup || !res.DBSubnetGroup.DBSubnetGroupName) throw new Error(__t('aws_db_subnet_group_creation_f'));
@@ -310,7 +342,7 @@ export class AwsNativeClient implements IAwsClient {
             MasterUserPassword: password,
             VpcSecurityGroupIds: securityGroupId ? [securityGroupId] : undefined,
             DBSubnetGroupName: dbSubnetGroupName,
-            Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+            Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
         });
 
         const res = await this.rds.send(cmd);
@@ -343,6 +375,13 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async deleteRds(id: string): Promise<void> {
+        // Check ownership tags
+        const tagRes = await this.rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: id }));
+        const tags = tagRes.DBInstances?.[0]?.TagList || [];
+        if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
+            throw new Error(`Refusing to delete RDS ${id}: missing ownership tags`);
+        }
+
         const cmd = new DeleteDBInstanceCommand({ DBInstanceIdentifier: id, SkipFinalSnapshot: true });
         await this.rds.send(cmd);
     }
@@ -354,6 +393,23 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async deleteS3Bucket(id: string): Promise<void> {
+        // Check ownership tags
+        const { GetBucketTaggingCommand } = require('@aws-sdk/client-s3');
+        try {
+            const tagRes = await this.s3.send(new GetBucketTaggingCommand({ Bucket: id }));
+            const tags = (tagRes as any).TagSet || [];
+            if (!tags.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some((t: any) => t.Key === 'UgonduTransactionId')) {
+                throw new Error(`Refusing to delete S3 bucket ${id}: missing ownership tags`);
+            }
+        } catch (e: any) {
+            if (e.name === 'NoSuchTagSet' || e.name === 'NoSuchTagSetError' || e.name === 'NoSuchTagSetException') {
+                throw new Error(`Refusing to delete S3 bucket ${id}: missing ownership tags`);
+            }
+            if (e.message && e.message.includes('missing ownership tags')) {
+                throw e;
+            }
+        }
+
         const cmd = new DeleteBucketCommand({ Bucket: id });
         await this.s3.send(cmd);
     }
@@ -378,7 +434,7 @@ export class AwsNativeClient implements IAwsClient {
             const cmd = new CreateDBSnapshotCommand({ 
                 DBInstanceIdentifier: id, 
                 DBSnapshotIdentifier: snapId,
-                Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+                Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
             });
             await this.rds.send(cmd);
             return snapId;
@@ -386,7 +442,7 @@ export class AwsNativeClient implements IAwsClient {
             const { CreateSnapshotCommand } = require('@aws-sdk/client-ec2');
             const cmd = new CreateSnapshotCommand({ 
                 VolumeId: id,
-                TagSpecifications: [{ ResourceType: 'snapshot', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+                TagSpecifications: [{ ResourceType: 'snapshot', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
             });
             const res = await this.ec2.send(cmd) as any;
             if (!res.SnapshotId) throw new Error(__t('ebs_snapshot_creation_failed'));
@@ -402,7 +458,7 @@ export class AwsNativeClient implements IAwsClient {
         throw new Error(`Unsupported AWS snapshot resourceType: ${type}`);
     }
     public async createEcsCluster(name: string): Promise<string> {
-        const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name }));
+        const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name, tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: crypto.randomUUID() }] }));
         if (!res.cluster || !res.cluster.clusterName) throw new Error(__t('ecs_cluster_creation_failed'));
         return res.cluster.clusterName;
     }
@@ -438,6 +494,7 @@ export class AwsNativeClient implements IAwsClient {
     public async createEcsService(clusterName: string, serviceName: string, taskDefinitionArn: string, desiredCount: number, subnets: string[], securityGroups: string[], targetGroupArn?: string): Promise<string> {
         const cmd = new CreateServiceCommand({
             cluster: clusterName,
+            tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: crypto.randomUUID() }],
             serviceName: serviceName,
             taskDefinition: taskDefinitionArn,
             desiredCount,
@@ -461,13 +518,13 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async createEcrRepository(name: string): Promise<string> {
-        const res = await this.ecr.send(new CreateRepositoryCommand({ repositoryName: name }));
+        const res = await this.ecr.send(new CreateRepositoryCommand({ repositoryName: name, tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }));
         if (!res.repository || !res.repository.repositoryUri) throw new Error(__t('ecr_repository_creation_failed'));
         return res.repository.repositoryUri;
     }
 
     public async createLogGroup(name: string): Promise<string> {
-        await this.cw.send(new CreateLogGroupCommand({ logGroupName: name }));
+        await this.cw.send(new CreateLogGroupCommand({ logGroupName: name, tags: { 'UgonduCOR': 'true', 'UgonduTransactionId': crypto.randomUUID() } }));
         return name;
     }
 

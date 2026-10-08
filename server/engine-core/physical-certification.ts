@@ -112,7 +112,7 @@ async function runCertification() {
         console.log(__t('cert.run.complete'));
 
     } catch (e: any) {
-        console.error('Execution Failed. Engaging URRE Dependency-Aware Rollback...', e);
+        console.error(__t('cert.error.execution_failed_urre'), e);
         // Explicitly block and wait for complete dependency-aware rollback
         process.exitCode = 1;
     } finally {
@@ -121,7 +121,7 @@ async function runCertification() {
             // Guarantee cleanup is executed via Transaction Ledger using URRE rollback
             await urre.triggerRollback(({ id: txId, targetEnvironment: 'production' } as any));
         } catch (cleanupErr: any) {
-            console.error('Fatal: URRE Rollback also failed during cleanup phase!', cleanupErr);
+            console.error(__t('cert.error.urre_rollback_failed_cleanup'), cleanupErr);
             process.exitCode = 1;
         }
 

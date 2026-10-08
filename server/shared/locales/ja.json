@@ -1822,5 +1822,20 @@
   "scripts.aws_vpc.msg_found_orphans": "翻訳済み: Found %s real untagged orphan VPC(s).",
   "scripts.aws_vpc.msg_evaluating_orphan": "翻訳済み: Evaluating orphan VPC: %s",
   "scripts.aws_vpc.msg_successfully_handled": "翻訳済み: Successfully handled VPC: %s with evidence:",
-  "scripts.aws_vpc.msg_reconciliation_aborted": "翻訳済み: Reconciliation aborted for %s: %s"
+  "scripts.aws_vpc.msg_reconciliation_aborted": "翻訳済み: Reconciliation aborted for %s: %s",
+  "cert.error.execution_failed_urre": "翻訳済み: Execution Failed. Engaging URRE Dependency-Aware Rollback...",
+  "cert.error.urre_rollback_failed_cleanup": "翻訳済み: Fatal: URRE Rollback also failed during cleanup phase!",
+  "cert.fargate.error.execution_failed_urre": "翻訳済み: Fargate Execution Failed. Engaging URRE Dependency-Aware Rollback...",
+  "cert.fargate.error.urre_rollback_failed_cleanup": "翻訳済み: Fatal: URRE Fargate Rollback also failed during cleanup phase!",
+  "cert.urre.process_a_exec": "翻訳済み: [URRE-CRASH] Process A executing CREATE_VPC_CRASH...",
+  "cert.urre.process_a_vpc_created": "翻訳済み: [URRE-CRASH] Process A VPC Created: %s",
+  "cert.urre.process_b_exec": "翻訳済み: [URRE-CRASH] Process B executing CREATE_SUBNET_REAL...",
+  "cert.urre.fault_injector_crash": "翻訳済み: [URRE-CRASH] Fault Injector: CRASHING PROCESS A intentionally after VPC SUCCESS.",
+  "cert.urre.process_b_loaded_vpc": "翻訳済み: PROCESS B: Loaded VPC ID %s from state. Will skip recreation.",
+  "cert.urre.process_a_exited": "翻訳済み: Process A exited with code %s (expected 1 for crash)",
+  "cert.urre.process_b_exited": "翻訳済み: Process B exited with code %s",
+  "cert.urre.process_c_exited": "翻訳済み: Process C exited with code %s",
+  "cert.error.quota_exceeded": "翻訳済み: Quota Exceeded",
+  "cert.error.rollback_failed": "翻訳済み: Rollback Failed",
+  "cert.error.foreign_resource_refusal": "翻訳済み: Foreign Resource Refusal"
 }

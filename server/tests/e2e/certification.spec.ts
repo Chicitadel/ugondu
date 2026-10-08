@@ -1,3 +1,4 @@
+import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests
@@ -45,17 +46,17 @@ class IntegrationOrchestrator {
         verificationEvidence: any
     ): Promise<any> {
         return {
-            id: 'cert-' + txId,
-            evidence: {
-                baselineFingerprint,
-                finalFingerprint,
-                txId,
-                diagnosis,
-                plan,
-                executionEvidence,
-                verificationEvidence
-            },
-            status: 'CERTIFIED'
+            certificateId: 'cert-' + txId,
+            baselineFingerprint,
+            finalFingerprint,
+            transactionId: txId,
+            diagnosisDigest: 'mock-diag-digest',
+            approvedPlanDigest: 'mock-plan-digest',
+            mutationEvidence: executionEvidence,
+            verificationEvidence: verificationEvidence,
+            adapterVersion: '1.0.0',
+            policyVersions: { 'live-recovery-invariants': '1.0.0' },
+            timestamp: new Date().toISOString()
         };
     }
 
@@ -64,9 +65,9 @@ class IntegrationOrchestrator {
     }
 
     public async executeAtomically(plan: any, adapter: any, scope: any): Promise<any> {
-        if (plan.failQuota) throw new Error('Quota Exceeded');
-        if (plan.failRollback) throw new Error('Rollback Failed');
-        if (plan.foreignResource) throw new Error('Foreign Resource Refusal');
+        if (plan.failQuota) throw new Error(__t('cert.error.quota_exceeded'));
+        if (plan.failRollback) throw new Error(__t('cert.error.rollback_failed'));
+        if (plan.foreignResource) throw new Error(__t('cert.error.foreign_resource_refusal'));
 
         return { executionEvidence: { status: 'SUCCESS' } };
     }
@@ -89,8 +90,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
         );
         await orchestrator.issuePassport(cert);
         
-        expect(cert.status).toBe('CERTIFIED');
-        expect(cert.evidence.txId).toBe('tx-cleanup');
+        expect(cert.certificateId).toBeDefined();
+        expect(cert.transactionId).toBe('tx-cleanup');
     });
 
     it('should generate evidence for quota failures', async () => {
@@ -104,8 +105,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
                 'fp-1', 'fp-1', 'tx-quota', {}, plan, { error: e.message }, null
             );
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Quota Exceeded');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe(__t('cert.error.quota_exceeded'));
         }
         expect(executionFailed).toBe(true);
     });
@@ -121,8 +122,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
                 'fp-1', 'fp-1', 'tx-rollback', {}, plan, { error: e.message }, null
             );
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Rollback Failed');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe(__t('cert.error.rollback_failed'));
         }
         expect(executionFailed).toBe(true);
     });
@@ -138,8 +139,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
                 'fp-1', 'fp-1', 'tx-foreign', {}, plan, { error: e.message }, null
             );
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Foreign Resource Refusal');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe(__t('cert.error.foreign_resource_refusal'));
         }
         expect(executionFailed).toBe(true);
     });
@@ -154,7 +155,7 @@ describe('Certification Evidence Builder - E2E Integration', () => {
         );
         await orchestrator.issuePassport(cert);
         
-        expect(cert.status).toBe('CERTIFIED');
-        expect(cert.evidence.txId).toBe('tx-orphan');
+        expect(cert.certificateId).toBeDefined();
+        expect(cert.transactionId).toBe('tx-orphan');
     });
 });

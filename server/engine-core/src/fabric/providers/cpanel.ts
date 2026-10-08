@@ -63,41 +63,40 @@ export class CpanelAdapter implements ComputeCapability, DatabaseCapability, Sto
   constructor(private client: IWhmClient) {}
 
   public async provisionInstance(config: ComputeConfig, options: ProviderOptions): Promise<ComputeResult> {
-    const instance = await this.client.createHostedApp(config.instanceName, config.osImage);
-    return {
-      id: instance.id,
-      state: instance.state,
-      resolved: { mode: 'HOSTED_APP' },
+    throw new Error('UNIMPLEMENTED');
+  },
     };
   }
 
   public async terminateInstance(id: string): Promise<void> {
-    await this.client.removeHostedApp(id);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    return { id, state: 'running', health: 'healthy' };
+    throw new Error('UNIMPLEMENTED');
+  };
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
-    const db = await this.client.createDatabase(config.name, config.engine, config.capacity, config.credentialsRef);
-    return { id: db.id, connectionString: db.endpoint, resolved: { engine: config.engine, mode: 'MYSQL' } };
+    throw new Error('UNIMPLEMENTED');
+  } };
   }
 
   public async deprovisionDatabase(id: string): Promise<void> {
-    await this.client.removeDatabase(id);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async createSnapshot(req: any): Promise<string> {
-    return await this.client.createSnapshot(typeof req === 'string' ? req : req.resourceId);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {
-    const fs = await this.client.createAccountFilesystem(config.name);
-    return { id: fs.id, endpoint: fs.endpoint, resolved: { storageClass: 'FILE', mode: 'ACCOUNT_FILESYSTEM' } };
+    throw new Error('UNIMPLEMENTED');
+  } };
   }
 
   public async deprovisionStorage(id: string): Promise<void> {
-    await this.client.removeAccountFilesystem(id);
+    throw new Error('UNIMPLEMENTED');
   }
 }
+

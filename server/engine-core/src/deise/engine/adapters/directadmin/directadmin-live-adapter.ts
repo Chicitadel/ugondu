@@ -27,76 +27,37 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
     }
 
     async captureState(scope: RecoveryScope): Promise<EnvironmentTwin> {
-        // LR-02: Real environment twin capture
-        Logger.info('[Adapter] Fetching Domain Information...');
-        const domainRes = await fetch(`${this.url}/CMD_API_ADDITIONAL_DOMAINS`, {
-            headers: { 'Authorization': `Basic ${this.token}` }
-        });
-        
-        Logger.info('[Adapter] Fetching Subdomain Information...');
-        const subdomainRes = await fetch(`${this.url}/CMD_API_SUBDOMAINS?domain=${scope.tenantId}`, {
-            headers: { 'Authorization': `Basic ${this.token}` }
-        });
-
-        Logger.info('[Adapter] Fetching DNS Records...');
-        const dnsRes = await fetch(`${this.url}/CMD_API_DNS_CONTROL?domain=${scope.tenantId}`, {
-            headers: { 'Authorization': `Basic ${this.token}` }
-        });
-
-        // Parse outputs (simulated mapping logic here if the server returns non-standard formats)
-        // For actual production, we parse DA's urlencoded string bodies.
-        const dnsBody = await dnsRes.text();
-        const subdomainsBody = await subdomainRes.text();
-
-        // Dynamically build resource edges based on actual data
-        const edges = [];
-        
-        // This is a minimal abstraction. Real implementation parses `dnsBody` and `subdomainsBody`.
-        edges.push({ source: `dns:${scope.tenantId}`, target: `ip:unknown_until_parsed`, relation: 'resolves_to' });
-        edges.push({ source: `controlplane:${scope.tenantId}`, target: `path:/domains/${scope.tenantId}/public_html`, relation: 'mapped_to' });
-
-        return {
-            provider: { platform: 'directadmin', symlinkSupported: true, atomicRenameSupported: true, rsyncAvailable: true },
-            topology: { currentSymlinkTarget: null, currentSymlinkValid: false, webrootPath: `/domains/${scope.tenantId}/public_html`, webrootSymlinkTarget: null, availableReleases: [] },
-            application: { version: 'unknown', manifests: [], integrityStatus: 'MISSING' },
-            runtime: { primaryRuntime: 'php', primaryRuntimeVersion: '8.3', missingDependencies: [] },
-            fileInventory: {},
-            permissionInventory: {},
-            configurationInventory: {},
-            databaseInventory: {},
-            dnsInventory: { raw: dnsBody },
-            runtimeInventory: {},
-            certificateInventory: {},
-            cronInventory: {},
-            backupInventory: {},
-            resourceGraphEdges: edges
-        };
+        throw new Error('UNIMPLEMENTED');
     }
 
     async fingerprintRepository(scope: RecoveryScope): Promise<string> {
-        // In a real execution, we would call CMD_API_FILE_MANAGER to hash the repository root,
-        // or trigger an SSH exec if the SSH adapter is chained.
-        return 'sha256:directadmin-fingerprint-live';
+        throw new Error('UNIMPLEMENTED');
     }
 
     async checkDrift(scope: RecoveryScope, baselineFingerprint: string): Promise<boolean> {
-        const current = await this.fingerprintRepository(scope);
-        return current === baselineFingerprint;
+        throw new Error('UNIMPLEMENTED');
     }
 
     async dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ plannedMutations: any[], safe: boolean }> {
+        throw new Error('UNIMPLEMENTED');
+    }> {
         return { plannedMutations: [], safe: true };
     }
 
     async executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }> {
+        throw new Error('UNIMPLEMENTED');
+    }> {
         throw new Error(__t('mutation_disabled_lr_01_throug'));
     }
 
     async rollback(checkpointId: string): Promise<boolean> {
-        throw new Error('NotImplementedError');
+        throw new Error('UNIMPLEMENTED');
     }
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, actualState: any, verificationEvidence: any }> {
+        throw new Error('UNIMPLEMENTED');
+    }> {
         return { verified: true, actualState: {}, verificationEvidence: {} };
     }
 }
+

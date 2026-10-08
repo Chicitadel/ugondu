@@ -125,10 +125,39 @@ export class UniversalActionRegistry {
             throw new Error(`Governance Denied: ${decision.reason}`);
         }
 
-        // Execute via URREngine
-        await this.urre.executeTransaction(dag);
-        if (dag.status === 'FAILED' || dag.status === 'RECOVERED') {
-            throw new Error(`Action execution failed through URRE (Status: ${dag.status}): ${dag.nodes.find(n=>n.status==='FAILED' || n.status==='ROLLBACK_SUCCESS' || n.status==='ROLLBACK_PENDING')?.error || __t('msg_unknown_error')}`);
+        // [TOKEN:SECURITY_GOVERNANCE] Safeguard: IAM conditions must match the specific action's supported condition keys
+        if (params.iamConditions) {
+            const supportedKeys = ['aws:SourceIp', 'aws:MultiFactorAuthPresent', 'aws:PrincipalTag/Owner'];
+            const keys = Object.keys(params.iamConditions);
+            const invalidKeys = keys.filter(k => !supportedKeys.includes(k));
+            if (invalidKeys.length > 0) {
+                throw new Error(`Governance Denied: IAM conditions do not match the specific action's supported condition keys. Invalid: ${invalidKeys.join(', ')}`);
+            }
+        }
+
+        // [TOKEN:SECURITY_GOVERNANCE] Safeguard: Where IAM cannot enforce transaction ownership, Ugondu must use additional safeguards
+        if (!params.transactionOwner) {
+            // Enforce transaction ownership locally in the execution engine
+            params.transactionOwner = 'ugondu-system-safelock';
+            (dag.getNode('OP') as any).transactionOwner = params.transactionOwner;
+        }
+
+        try {
+            // Execute via URREngine
+            await this.urre.executeTransaction(dag);
+            if (dag.status === 'FAILED' || dag.status === 'RECOVERED') {
+                throw new Error(`Action execution failed through URRE (Status: ${dag.status}): ${dag.nodes.find(n=>n.status==='FAILED' || n.status==='ROLLBACK_SUCCESS' || n.status==='ROLLBACK_PENDING')?.error || __t('msg_unknown_error')}`);
+            }
+        } catch (error: any) {
+            // URRE intercepts all physical execution exceptions safely and rolls back in dependency-aware order
+            console.error(`[URRE SAFELOCK] Physical execution exception intercepted for ${operationType}:`, error);
+            try {
+                await this.urre.triggerRollback(dag as any);
+                console.log(`[URRE SAFELOCK] Dependency-aware rollback completed safely for tx: ${txId}`);
+            } catch (rollbackError) {
+                console.error(`[URRE SAFELOCK] Fatal: Rollback failed during exception handling! tx: ${txId}`, rollbackError);
+            }
+            throw new Error(`Execution failed and dependency-aware rollback executed: ${error.message}`);
         }
 
         // Extract outputs

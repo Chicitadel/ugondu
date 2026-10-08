@@ -54,8 +54,8 @@ export class AwsVpcReconciler {
     public async createVpc(transactionId: string, params: any): Promise<any> {
         // Enforce Ugondu creation tags
         const enforcedTags = [
-            { Key: 'UgonduManaged', Value: 'true' },
-            { Key: 'UgonduTransactionId', Value: transactionId }
+            { Key: 'UgonduCOR', Value: 'true' },
+            { Key: 'UgonduTransactionId', Value: transactionId || require('crypto').randomUUID() }
         ];
 
         const finalTags = params.tags ? [...params.tags, ...enforcedTags] : enforcedTags;
@@ -186,7 +186,7 @@ export class AwsVpcReconciler {
         const command = new CreateTagsCommand({
             Resources: [vpcId],
             Tags: [
-                { Key: 'UgonduManaged', Value: 'true' },
+                { Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: 'recovered' },
                 { Key: 'COR_Recovered', Value: 'true' }
             ]
         });
@@ -200,12 +200,18 @@ export class AwsVpcReconciler {
         const response = await ec2Client.send(command);
         const vpc = response.Vpcs?.[0];
         if (!vpc) return false;
-        const ugonduManaged = vpc.Tags?.some(t => t.Key === 'UgonduManaged' && t.Value === 'true');
+        const ugonduManaged = vpc.Tags?.some(t => t.Key === 'UgonduCOR' && t.Value === 'true');
         return !!ugonduManaged;
     }
 
     private async deleteVpc(vpcId: string): Promise<void> {
-        // Real AWS deletion
+                // Real AWS deletion
+        const tagRes = await ec2Client.send(new DescribeVpcsCommand({ VpcIds: [vpcId] }));
+        const tags = tagRes.Vpcs?.[0]?.Tags || [];
+        if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
+            throw new Error(`Refusing to delete VPC ${vpcId}: missing ownership tags`);
+        }
+
         const command = new DeleteVpcCommand({ VpcId: vpcId });
         await ec2Client.send(command);
         console.log(`VPC ${vpcId} successfully deleted.`);

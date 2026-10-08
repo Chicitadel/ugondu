@@ -16,10 +16,10 @@ async function registerRealHandlers(engine: URREngine) {
 const ec2 = new EC2Client({ region: REGION });
     
     engine.registerHandler('aws', 'CREATE_VPC_CRASH', async (node: DagNode) => {
-        console.log('[URRE-CRASH] Process A executing CREATE_VPC_CRASH...');
+        console.log(__t('cert.urre.process_a_exec'));
         const res = await ec2.send(new CreateVpcCommand({ CidrBlock: '10.0.99.0/24' }));
         const vpcId = res.Vpc!.VpcId!;
-        console.log(`[URRE-CRASH] Process A VPC Created: ${vpcId}`);
+        console.log(__t('cert.urre.process_a_vpc_created', vpcId));
         return { vpcId };
     }, async (node: DagNode) => {
         if (node.output?.vpcId) {
@@ -28,7 +28,7 @@ const ec2 = new EC2Client({ region: REGION });
     });
 
     engine.registerHandler('aws', 'CREATE_SUBNET_REAL', async (node: DagNode) => {
-        console.log('[URRE-CRASH] Process B executing CREATE_SUBNET_REAL...');
+        console.log(__t('cert.urre.process_b_exec'));
         const store = new TransactionStore();
         const tx = await store.load('tx-p0-4-real');
         const vpcId = tx?.getNode('VPC')?.output?.vpcId;
@@ -47,7 +47,7 @@ async function phase1() {
     const engine = new URREngine({
         async afterNodePersisted(node: DagNode) {
             if (node.id === 'VPC' && node.status === 'SUCCESS') {
-                console.log('[URRE-CRASH] Fault Injector: CRASHING PROCESS A intentionally after VPC SUCCESS.');
+                console.log(__t('cert.urre.fault_injector_crash'));
                 process.exit(1);
             }
         }
@@ -83,7 +83,7 @@ async function phase2() {
         throw new Error(__t('engine.urre.err_vpc_not_success'));
     }
     const vpcId = vpcNode.output.vpcId;
-    console.log(`PROCESS B: Loaded VPC ID ${vpcId} from state. Will skip recreation.`);
+    console.log(__t('cert.urre.process_b_loaded_vpc', vpcId));
 
     console.log(__t('process_b_resuming_transaction'));
     await engine.executeTransaction(existingTx); // this skips SUCCESS nodes
@@ -138,19 +138,19 @@ if (process.argv[2] === 'phase1') {
     const { spawnSync } = require('child_process');
     console.log(__t('running_urre_real_crash_test'));
     const p1 = spawnSync('npx', ['ts-node', __filename, 'phase1'], { stdio: 'inherit' });
-    console.log(`Process A exited with code ${p1.status} (expected 1 for crash)`);
+    console.log(__t('cert.urre.process_a_exited', p1.status));
     if (p1.status === 0) {
         console.error(__t('process_a_did_not_crash_as_exp'));
         process.exit(1);
     }
 
     const p2 = spawnSync('npx', ['ts-node', __filename, 'phase2'], { stdio: 'inherit' });
-    console.log(`Process B exited with code ${p2.status}`);
+    console.log(__t('cert.urre.process_b_exited', p2.status));
     if (p2.status !== 0) {
         process.exit(p2.status);
     }
 
     const p3 = spawnSync('npx', ['ts-node', __filename, 'phase3'], { stdio: 'inherit' });
-    console.log(`Process C exited with code ${p3.status}`);
+    console.log(__t('cert.urre.process_c_exited', p3.status));
     process.exit(p3.status);
 }

@@ -52,17 +52,17 @@ class MockOrchestrator {
         verificationEvidence: any
     ): Promise<any> {
         return {
-            id: 'cert-' + txId,
-            evidence: {
-                baselineFingerprint,
-                finalFingerprint,
-                txId,
-                diagnosis,
-                plan,
-                executionEvidence,
-                verificationEvidence
-            },
-            status: 'CERTIFIED'
+            certificateId: 'cert-' + txId,
+            baselineFingerprint,
+            finalFingerprint,
+            transactionId: txId,
+            diagnosisDigest: 'mock-diag-digest',
+            approvedPlanDigest: 'mock-plan-digest',
+            mutationEvidence: executionEvidence,
+            verificationEvidence: verificationEvidence,
+            adapterVersion: '1.0.0',
+            policyVersions: { 'live-recovery-invariants': '1.0.0' },
+            timestamp: new Date().toISOString()
         };
     }
 
@@ -96,8 +96,8 @@ describe('Certification Evidence Builder - Engine Core', () => {
         );
         await orchestrator.issuePassport(cert);
         
-        expect(cert.status).toBe('CERTIFIED');
-        expect(cert.evidence.txId).toBe('tx-cleanup');
+        expect(cert.certificateId).toBeDefined();
+        expect(cert.transactionId).toBe('tx-cleanup');
     });
 
     it('should generate evidence for quota failures', async () => {
@@ -111,8 +111,8 @@ describe('Certification Evidence Builder - Engine Core', () => {
                 'fp-1', 'fp-1', 'tx-quota', {}, plan, { error: e.message }, null
             );
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Quota Exceeded');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe('Quota Exceeded');
         }
         expect(executionFailed).toBe(true);
     });
@@ -128,8 +128,8 @@ describe('Certification Evidence Builder - Engine Core', () => {
                 'fp-1', 'fp-1', 'tx-rollback', {}, plan, { error: e.message }, null
             );
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Rollback Failed');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe('Rollback Failed');
         }
         expect(executionFailed).toBe(true);
     });
@@ -145,8 +145,8 @@ describe('Certification Evidence Builder - Engine Core', () => {
                 'fp-1', 'fp-1', 'tx-foreign', {}, plan, { error: e.message }, null
             );
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Foreign Resource Refusal');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe('Foreign Resource Refusal');
         }
         expect(executionFailed).toBe(true);
     });
@@ -161,7 +161,7 @@ describe('Certification Evidence Builder - Engine Core', () => {
         );
         await orchestrator.issuePassport(cert);
         
-        expect(cert.status).toBe('CERTIFIED');
-        expect(cert.evidence.txId).toBe('tx-orphan');
+        expect(cert.certificateId).toBeDefined();
+        expect(cert.transactionId).toBe('tx-orphan');
     });
 });

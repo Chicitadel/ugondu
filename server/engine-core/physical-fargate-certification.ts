@@ -111,7 +111,7 @@ async function runFargateCertification() {
         console.log(__t('cert.fargate.complete'));
 
     } catch (error: any) {
-        console.error('Fargate Execution Failed. Engaging URRE Dependency-Aware Rollback...', error);
+        console.error(__t('cert.fargate.error.execution_failed_urre'), error);
         process.exitCode = 1;
     } finally {
         console.log(__t('cert.fargate.cleanup'));
@@ -128,7 +128,7 @@ async function runFargateCertification() {
 
             await urre.triggerRollback({ id: mainTxId, targetEnvironment: 'production' } as any);
         } catch (cleanupErr: any) {
-            console.error('Fatal: URRE Fargate Rollback also failed during cleanup phase!', cleanupErr);
+            console.error(__t('cert.fargate.error.urre_rollback_failed_cleanup'), cleanupErr);
             process.exitCode = 1;
         }
 

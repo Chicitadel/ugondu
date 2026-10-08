@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const shared_1 = require("@ugondu/shared");
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests
@@ -36,17 +38,17 @@
 class IntegrationOrchestrator {
     async certify(baselineFingerprint, finalFingerprint, txId, diagnosis, plan, executionEvidence, verificationEvidence) {
         return {
-            id: 'cert-' + txId,
-            evidence: {
-                baselineFingerprint,
-                finalFingerprint,
-                txId,
-                diagnosis,
-                plan,
-                executionEvidence,
-                verificationEvidence
-            },
-            status: 'CERTIFIED'
+            certificateId: 'cert-' + txId,
+            baselineFingerprint,
+            finalFingerprint,
+            transactionId: txId,
+            diagnosisDigest: 'mock-diag-digest',
+            approvedPlanDigest: 'mock-plan-digest',
+            mutationEvidence: executionEvidence,
+            verificationEvidence: verificationEvidence,
+            adapterVersion: '1.0.0',
+            policyVersions: { 'live-recovery-invariants': '1.0.0' },
+            timestamp: new Date().toISOString()
         };
     }
     async issuePassport(certificate) {
@@ -54,11 +56,11 @@ class IntegrationOrchestrator {
     }
     async executeAtomically(plan, adapter, scope) {
         if (plan.failQuota)
-            throw new Error('Quota Exceeded');
+            throw new Error((0, shared_1.__t)('cert.error.quota_exceeded'));
         if (plan.failRollback)
-            throw new Error('Rollback Failed');
+            throw new Error((0, shared_1.__t)('cert.error.rollback_failed'));
         if (plan.foreignResource)
-            throw new Error('Foreign Resource Refusal');
+            throw new Error((0, shared_1.__t)('cert.error.foreign_resource_refusal'));
         return { executionEvidence: { status: 'SUCCESS' } };
     }
     async verify(adapter, scope, criteria) {
@@ -73,8 +75,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
         const verification = await orchestrator.verify({}, {}, { state: 'RECOVERED' });
         const cert = await orchestrator.certify('fp-1', 'fp-2', 'tx-cleanup', {}, plan, execution.executionEvidence, verification.verificationEvidence);
         await orchestrator.issuePassport(cert);
-        expect(cert.status).toBe('CERTIFIED');
-        expect(cert.evidence.txId).toBe('tx-cleanup');
+        expect(cert.certificateId).toBeDefined();
+        expect(cert.transactionId).toBe('tx-cleanup');
     });
     it('should generate evidence for quota failures', async () => {
         const plan = { type: 'DEPLOY', failQuota: true };
@@ -86,8 +88,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
             executionFailed = true;
             const cert = await orchestrator.certify('fp-1', 'fp-1', 'tx-quota', {}, plan, { error: e.message }, null);
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Quota Exceeded');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe((0, shared_1.__t)('cert.error.quota_exceeded'));
         }
         expect(executionFailed).toBe(true);
     });
@@ -101,8 +103,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
             executionFailed = true;
             const cert = await orchestrator.certify('fp-1', 'fp-1', 'tx-rollback', {}, plan, { error: e.message }, null);
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Rollback Failed');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe((0, shared_1.__t)('cert.error.rollback_failed'));
         }
         expect(executionFailed).toBe(true);
     });
@@ -116,8 +118,8 @@ describe('Certification Evidence Builder - E2E Integration', () => {
             executionFailed = true;
             const cert = await orchestrator.certify('fp-1', 'fp-1', 'tx-foreign', {}, plan, { error: e.message }, null);
             await orchestrator.issuePassport(cert);
-            expect(cert.status).toBe('CERTIFIED');
-            expect(cert.evidence.executionEvidence.error).toBe('Foreign Resource Refusal');
+            expect(cert.certificateId).toBeDefined();
+            expect(cert.mutationEvidence.error).toBe((0, shared_1.__t)('cert.error.foreign_resource_refusal'));
         }
         expect(executionFailed).toBe(true);
     });
@@ -127,7 +129,7 @@ describe('Certification Evidence Builder - E2E Integration', () => {
         const verification = await orchestrator.verify({}, {}, { state: 'RECOVERED' });
         const cert = await orchestrator.certify('fp-1', 'fp-2', 'tx-orphan', {}, plan, execution.executionEvidence, verification.verificationEvidence);
         await orchestrator.issuePassport(cert);
-        expect(cert.status).toBe('CERTIFIED');
-        expect(cert.evidence.txId).toBe('tx-orphan');
+        expect(cert.certificateId).toBeDefined();
+        expect(cert.transactionId).toBe('tx-orphan');
     });
 });
