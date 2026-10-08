@@ -131,6 +131,17 @@ jobs:
       - name: Compile scripts
         run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck --target ES2022 --moduleResolution node --downlevelIteration --esModuleInterop
 
+      - name: Verify AWS Region Configuration
+        shell: bash
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          if [ -z "${AWS_REGION}" ]; then
+            echo "::error::AWS_REGION_MISSING: AWS certification region is not configured."
+            exit 1
+          fi
+          echo "AWS certification region: ${AWS_REGION}"
+
       - name: Configure AWS credentials from OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
