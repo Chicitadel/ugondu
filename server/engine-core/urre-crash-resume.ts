@@ -8,7 +8,7 @@ import { __t } from '@ugondu/shared';
 
 const REGION = process.env.UGONDU_CERT_REGION;
 if (!REGION) {
-    throw new Error('UGONDU_CERT_REGION environment variable is required and must not be empty.');
+    throw new Error(__t('error.cert.missing_region'));
 }
 
 async function registerRealHandlers(engine: URREngine) {
