@@ -51,3 +51,16 @@ export interface RegionDecision {
     estimatedCost: number;
     estimatedLatencyMs: number;
 }
+
+export interface RegionInfo {
+    id: string;
+    compliance: string[];
+    residency: string[];
+    baseLatencyMs: number;
+    baseCost: number;
+    quota: number;
+}
+
+export interface RegionDiscoveryProvider {
+    discoverAvailableRegions(): Promise<RegionInfo[]>;
+}
