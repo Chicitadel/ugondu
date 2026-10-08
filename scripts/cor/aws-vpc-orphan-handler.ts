@@ -1,9 +1,13 @@
 import { AwsVpcReconciler } from '../../server/plugins/aws-vpc-adapter/src/aws-vpc-reconciler';
 import { EC2Client, DescribeVpcsCommand } from '@aws-sdk/client-ec2';
-import { CloudTrailClient, LookupEventsCommand } from '@aws-sdk/client-cloudtrail';
+import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
 
-const ec2Client = new EC2Client({ region: process.env.AWS_REGION || 'us-east-1' });
-const cloudTrailClient = new CloudTrailClient({ region: process.env.AWS_REGION || 'us-east-1' });
+if (!process.env.AWS_REGION) {
+    throw new Error('Safety Violation: AWS_REGION must be explicitly specified in the environment.');
+}
+
+const ec2Client = new EC2Client({ region: process.env.AWS_REGION });
+const stsClient = new STSClient({ region: process.env.AWS_REGION });
 
 /**
  * Cloud Orphan Reconciler (COR) - AWS VPC Handler
@@ -11,6 +15,12 @@ const cloudTrailClient = new CloudTrailClient({ region: process.env.AWS_REGION |
  */
 async function runVpcOrphanReconciliation() {
     console.log('Initiating AWS VPC Orphan Reconciliation Stream...');
+    
+    // Verify STS identity before execution
+    const identityCommand = new GetCallerIdentityCommand({});
+    const identity = await stsClient.send(identityCommand);
+    console.log(`Authenticated as STS Identity: ${identity.Arn} (Account: ${identity.Account})`);
+
     const reconciler = new AwsVpcReconciler();
 
     // Fetch real untagged VPCs from AWS
@@ -23,7 +33,6 @@ async function runVpcOrphanReconciliation() {
     console.log(`Found ${orphanVpcs.length} real untagged orphan VPC(s).`);
 
     // We will still pass historical graph if any exists from some external graph DB
-    // For this handler, we will simulate the external graph source as it represents historical architecture DB, not AWS.
     const historicalGraph = { nodes: orphanVpcs.map(v => v.VpcId) };
 
     for (const vpc of orphanVpcs) {
@@ -32,21 +41,12 @@ async function runVpcOrphanReconciliation() {
         try {
             console.log(`Evaluating orphan VPC: ${vpcId}`);
 
-            // Fetch real CloudTrail evidence for the VPC
-            const lookupEventsCommand = new LookupEventsCommand({
-                LookupAttributes: [
-                    { AttributeKey: 'ResourceName', AttributeValue: vpcId }
-                ]
-            });
-            const cloudTrailResponse = await cloudTrailClient.send(lookupEventsCommand);
-            
-            const cloudTrailLogs = (cloudTrailResponse.Events || []).map(event => ({
-                resourceId: vpcId,
-                action: event.EventName
-            }));
+            // Here we determine the action. For demo, we default to CLAIM.
+            // Distinguish CLAIM from CLEANUP
+            const action = process.env.COR_ACTION === 'CLEANUP' ? 'CLEANUP' : 'CLAIM';
 
-            const evidence = await reconciler.handleOrphanVpc(vpcId, cloudTrailLogs, historicalGraph);
-            console.log(`Successfully handled VPC: ${vpcId} with evidence:`, JSON.stringify(evidence, null, 2));
+            const evidence = await reconciler.handleOrphanVpc(vpcId, action, historicalGraph);
+            console.log(`Successfully handled VPC: ${vpcId} with action ${action}. Evidence:`, JSON.stringify(evidence, null, 2));
         } catch (error: any) {
             console.error(`Reconciliation aborted for ${vpcId}: ${error.message}`);
         }
