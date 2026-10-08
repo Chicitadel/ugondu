@@ -26,14 +26,18 @@ export interface ExecutionFaultInjector {
     afterNodePersisted?(node: DagNode): Promise<void>;
 }
 
+import { AutonomousResourceReconciler, QuotaContext } from '../../reconciliation/arr-pipeline';
+
 export class URREngine {
     private store = new TransactionStore();
     private handlers: Record<string, ActionHandler> = {};
     private rollbacks: Record<string, RollbackHandler> = {};
     public faultInjector?: ExecutionFaultInjector;
+    public arr?: AutonomousResourceReconciler;
 
-    constructor(faultInjector?: ExecutionFaultInjector) {
+    constructor(faultInjector?: ExecutionFaultInjector, arr?: AutonomousResourceReconciler) {
         this.faultInjector = faultInjector;
+        this.arr = arr;
     }
 
     public registerHandler(provider: string, action: string, handler: ActionHandler, rollback: RollbackHandler) {
@@ -235,5 +239,15 @@ export class URREngine {
         // In reality this would load the tx and check status. Since interface is sync,
         // we'll just parse the eventId to see if it's properly formed.
         return eventId.startsWith('rb-') && eventId !== 'rb-fail-id';
+    }
+
+    public async triggerReconciliation(providerName: string, quotaContext: QuotaContext): Promise<any[]> {
+        if (!this.arr) {
+            throw new Error('AutonomousResourceReconciler not initialized');
+        }
+        Logger.info(`[URRE] Triggering reconciliation for provider ${providerName}...`);
+        const result = await this.arr.runPipeline(providerName, quotaContext);
+        Logger.info(`[URRE] Reconciliation completed for ${providerName}. Managed ${result.length} resources.`);
+        return result;
     }
 }
