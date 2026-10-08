@@ -148,6 +148,14 @@ const PHYSICAL_COR_GRAPH = [
 ];
 
 export class CORAuthorityCalculator {
+    public getGraph() {
+        return PHYSICAL_COR_GRAPH;
+    }
+
+    public getMap() {
+        return AWS_AUTHORITY_MAP;
+    }
+
     public generateAwsManifest(region: string, accountId: string, roleName: string): CORAuthorityManifest {
         const permissionsMap = new Map<string, Set<string>>();
 

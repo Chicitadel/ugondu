@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "manifest": "ugondu-cor-authority",
+  "provider": "aws",
+  "region": "us-east-1",
+  "corProfile": "physical-fargate-v1",
+  "executionRole": {
+    "name": "UgonduCORRunner"
+  },
+  "permissions": [
+    {
+      "action": "ssm:GetParameter",
+      "resources": [
+        "arn:aws:ssm:us-east-1:971671216490:parameter/aws/service/ami-amazon-linux-latest/*"
+      ]
+    },
+    {
+      "action": "ec2:CreateVpc",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:vpc/*"
+      ]
+    },
+    {
+      "action": "ec2:CreateTags",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:vpc/*",
+        "arn:aws:ec2:us-east-1:971671216490:subnet/*",
+        "arn:aws:ec2:us-east-1:971671216490:security-group/*",
+        "arn:aws:ec2:us-east-1:971671216490:instance/*",
+        "arn:aws:ec2:us-east-1:971671216490:snapshot/*"
+      ]
+    },
+    {
+      "action": "ec2:CreateSubnet",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:subnet/*",
+        "arn:aws:ec2:us-east-1:971671216490:vpc/*"
+      ]
+    },
+    {
+      "action": "ec2:CreateSecurityGroup",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:security-group/*",
+        "arn:aws:ec2:us-east-1:971671216490:vpc/*"
+      ]
+    },
+    {
+      "action": "ec2:RunInstances",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:instance/*",
+        "arn:aws:ec2:us-east-1:971671216490:subnet/*",
+        "arn:aws:ec2:us-east-1:971671216490:network-interface/*",
+        "arn:aws:ec2:us-east-1:971671216490:volume/*",
+        "arn:aws:ec2:us-east-1:971671216490:security-group/*",
+        "arn:aws:ec2:us-east-1:971671216490:image/*"
+      ]
+    },
+    {
+      "action": "ec2:CreateSnapshot",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:volume/*",
+        "arn:aws:ec2:us-east-1:971671216490:snapshot/*"
+      ]
+    },
+    {
+      "action": "rds:CreateDBSubnetGroup",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:subgrp:*"
+      ]
+    },
+    {
+      "action": "rds:AddTagsToResource",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:subgrp:*",
+        "arn:aws:rds:us-east-1:971671216490:db:*",
+        "arn:aws:rds:us-east-1:971671216490:snapshot:*"
+      ]
+    },
+    {
+      "action": "rds:CreateDBInstance",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:db:*",
+        "arn:aws:rds:us-east-1:971671216490:subgrp:*",
+        "arn:aws:rds:us-east-1:971671216490:secgrp:*"
+      ]
+    },
+    {
+      "action": "rds:CreateDBSnapshot",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:snapshot:*",
+        "arn:aws:rds:us-east-1:971671216490:db:*"
+      ]
+    },
+    {
+      "action": "s3:CreateBucket",
+      "resources": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "action": "s3:PutBucketTagging",
+      "resources": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "action": "s3:PutObject",
+      "resources": [
+        "arn:aws:s3:::*/*"
+      ]
+    },
+    {
+      "action": "ec2:DeleteTags",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:instance/*"
+      ]
+    },
+    {
+      "action": "s3:DeleteObject",
+      "resources": [
+        "arn:aws:s3:::*/*"
+      ]
+    },
+    {
+      "action": "s3:DeleteBucket",
+      "resources": [
+        "arn:aws:s3:::*"
+      ]
+    },
+    {
+      "action": "rds:DeleteDBSnapshot",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:snapshot:*"
+      ]
+    },
+    {
+      "action": "rds:DeleteDBInstance",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:db:*"
+      ]
+    },
+    {
+      "action": "rds:DeleteDBSubnetGroup",
+      "resources": [
+        "arn:aws:rds:us-east-1:971671216490:subgrp:*"
+      ]
+    },
+    {
+      "action": "ec2:DeleteSnapshot",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:snapshot/*"
+      ]
+    },
+    {
+      "action": "ec2:TerminateInstances",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:instance/*"
+      ]
+    },
+    {
+      "action": "ec2:DeleteSecurityGroup",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:security-group/*"
+      ]
+    },
+    {
+      "action": "ec2:DeleteSubnet",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:subnet/*"
+      ]
+    },
+    {
+      "action": "ec2:DeleteVpc",
+      "resources": [
+        "arn:aws:ec2:us-east-1:971671216490:vpc/*"
+      ]
+    },
+    {
+      "action": "ec2:DescribeVpcs",
+      "resources": [
+        "*"
+      ]
+    },
+    {
+      "action": "ec2:DescribeSubnets",
+      "resources": [
+        "*"
+      ]
+    },
+    {
+      "action": "ec2:DescribeSecurityGroups",
+      "resources": [
+        "*"
+      ]
+    },
+    {
+      "action": "ec2:DescribeInstances",
+      "resources": [
+        "*"
+      ]
+    },
+    {
+      "action": "rds:DescribeDBInstances",
+      "resources": [
+        "*"
+      ]
+    },
+    {
+      "action": "s3:ListAllMyBuckets",
+      "resources": [
+        "*"
+      ]
+    }
+  ],
+  "verification": {
+    "required": true
+  },
+  "recovery": {
+    "required": true
+  },
+  "rollback": {
+    "required": true
+  },
+  "leastPrivilege": {
+    "required": true
+  },
+  "approval": {
+    "required": true
+  },
+  "provenance": {
+    "generatedFrom": [
+      "cor-profile",
+      "execution-graph",
+      "provider-capability-registry"
+    ]
+  },
+  "lifecycle": {
+    "bootstrap": "temporary",
+    "execution": "ephemeral-or-scoped",
+    "retirement": "required"
+  }
+}
