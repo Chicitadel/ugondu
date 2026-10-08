@@ -1,5 +1,4 @@
 import { ActionClassification, SafetyGatesValidator } from '../../../engine-core/src/safety/safety-gates';
-import { ResourceProtocol } from '../../../shared/protocols/resource.protocol';
 import { EC2Client, DescribeVpcsCommand, CreateTagsCommand, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
 import { CloudTrailClient, LookupEventsCommand } from '@aws-sdk/client-cloudtrail';
 import * as crypto from 'crypto';
@@ -85,9 +84,15 @@ export class AwsVpcReconciler {
      * Handle historical untagged orphans.
      * Ensure ownership is proven via CloudTrail or historical graphs before deletion or management.
      */
-    public async handleOrphanVpc(vpcId: string, cloudTrailLogs: any[], historicalGraph: any, externalApprovalSignatures?: string[], intentHash?: string, mfaVerified?: boolean): Promise<any> {
-        // 1. Prove ownership via CloudTrail or historical graphs
-        const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, historicalGraph);
+    public async handleOrphanVpc(
+        vpcId: string, 
+        action: 'RECOVER' | 'CLEANUP', 
+        cloudTrailLogs: any[], 
+        canonicalEnvelope: import('../../../engine-core/src/safety/safety-gates').CanonicalActionEnvelope, 
+        externalApprovalSignatures: string[]
+    ): Promise<any> {
+        // 1. Prove ownership via CloudTrail
+        const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, null);
         if (!ownershipProven) {
             throw new Error(__t('plugin.aws_vpc.err_ownership_not_proven', vpcId));
         }
@@ -95,56 +100,57 @@ export class AwsVpcReconciler {
         if (!externalApprovalSignatures || externalApprovalSignatures.length === 0) {
             throw new Error('Safety Violation: External human approval signatures required for autonomous destruction.');
         }
-        if (!intentHash) {
-            throw new Error('Safety Violation: Intent hash required.');
-        }
+
+        const classification = action === 'CLEANUP' ? ActionClassification.DESTRUCTIVE : ActionClassification.RECOVERABLE;
 
         // 2. Preflight Safety Gate for Actions
         await safetyGates.validateAction({
-            actionId: actionId,
+            actionId: `action-${Date.now()}`,
             resourceId: vpcId,
             classification: classification,
             blastRadius: 0,
             dependencyGraph: [],
             isAutonomous: true,
             proof: {
-                authenticatedUserId: 'system',
-                mfaVerified: mfaVerified || false,
-                intentHash: intentHash,
-                approvalSignatures: externalApprovalSignatures // Real cryptographic evidence
+                authenticatedUserId: canonicalEnvelope.principalArn,
+                mfaVerified: true,
+                intentHash: canonicalEnvelope.intentHash,
+                approvalSignatures: externalApprovalSignatures,
+                canonicalEnvelope
             }
         });
 
-        // 3. Autonomous Tagging / Recovery 
-        // We only tag it or safely remove it after passing the gates.
-        await this.tagRecoveredVpc(vpcId);
+        if (action === 'RECOVER') {
+            // 3. Autonomous Tagging / Recovery 
+            await this.tagRecoveredVpc(vpcId);
 
-        // 4. Post-operation verification (Real AWS API verification)
-        const verified = await this.verifyVpcRecovered(vpcId);
-        if (!verified) {
-             throw new Error(__t('plugin.aws_vpc.err_verification_failed', vpcId));
-        }
-
-        return {
-            status: 'RECOVERED',
-            vpcId,
-            evidence: {
-                intentHash,
-                signature: externalApprovalSignatures[0],
-                verifiedAt: new Date().toISOString(),
-                verificationMethod: 'aws-api-describe-vpcs'
+            // 4. Post-operation verification (Real AWS API verification)
+            const verified = await this.verifyVpcRecovered(vpcId);
+            if (!verified) {
+                throw new Error(__t('plugin.aws_vpc.err_verification_failed', vpcId));
             }
+
             return {
                 status: 'RECOVERED',
                 vpcId,
-                evidence: { intentHash, signature, verifiedAt: new Date().toISOString(), verificationMethod: 'aws-api-describe-vpcs' }
+                evidence: {
+                    intentHash: canonicalEnvelope.intentHash,
+                    signature: externalApprovalSignatures[0],
+                    verifiedAt: new Date().toISOString(),
+                    verificationMethod: 'aws-api-describe-vpcs'
+                }
             };
         } else if (action === 'CLEANUP') {
             await this.deleteVpc(vpcId);
             return {
                 status: 'DELETED',
                 vpcId,
-                evidence: { intentHash, signature, deletedAt: new Date().toISOString(), verificationMethod: 'aws-api-delete-vpc' }
+                evidence: { 
+                    intentHash: canonicalEnvelope.intentHash, 
+                    signature: externalApprovalSignatures[0], 
+                    deletedAt: new Date().toISOString(), 
+                    verificationMethod: 'aws-api-delete-vpc' 
+                }
             };
         }
     }

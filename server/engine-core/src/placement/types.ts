@@ -33,34 +33,92 @@
  ******************************************************************************/
 
 export interface PlacementIntent {
-    id: string;
-    workloadId: string;
-    requiredCompliance: string[];
-    residencyRequirements: string[];
-    maxLatencyMs?: number;
-    maxCost?: number;
-    requiredCapacity?: number;
+    deploymentId: string;
+    geography: {
+        actorCountry?: string;
+        actorRegion?: string;
+        consumerCountries?: string[];
+        consumerRegions?: string[];
+        consumerDistribution?: Array<{ country: string; percentage?: number; }>;
+    };
+    residency: {
+        requiredCountries?: string[];
+        allowedCountries?: string[];
+        prohibitedCountries?: string[];
+        dataClassification?: string[];
+    };
+    performance: {
+        latencyTargetMs?: number;
+        optimizeFor?: 'LATENCY' | 'COST' | 'BALANCED';
+    };
+    availability: {
+        minimumAvailabilityZones?: number;
+        minimumRegions?: number;
+        faultDomainSeparation?: boolean;
+    };
+    disasterRecovery?: {
+        enabled: boolean;
+        rtoMinutes?: number;
+        rpoMinutes?: number;
+        preferredRecoveryRegions?: string[];
+    };
+    cost?: {
+        maximumMonthlyCost?: number;
+        currency?: string;
+    };
+    compliance?: {
+        frameworks?: string[];
+        sovereignRequirements?: string[];
+    };
+    userPreference?: {
+        preferredRegions?: string[];
+        excludedRegions?: string[];
+    };
 }
 
-export interface RegionDecision {
-    intentId: string;
-    selectedRegions: string[];
-    decisionTimestamp: string;
-    complianceValidations: Record<string, boolean>;
-    residencyValidations: Record<string, boolean>;
-    estimatedCost: number;
-    estimatedLatencyMs: number;
-}
+export type ResourceScope = 'REGIONAL' | 'GLOBAL' | 'ANCHOR_REGION';
 
-export interface RegionInfo {
-    id: string;
+export interface RegionCapability {
+    id: string; // e.g. af-south-1
+    country: string;
+    geography: string;
+    enabled: boolean;
+    optIn: boolean;
+    availabilityZones: number;
+    services: Record<string, boolean>; // e.g. { 'EC2': true, 'RDS': true }
+    databaseEngines: string[];
+    quota: Record<string, number>;
     compliance: string[];
     residency: string[];
     baseLatencyMs: number;
-    baseCost: number;
-    quota: number;
+    baseCostIndex: number;
 }
 
-export interface RegionDiscoveryProvider {
-    discoverAvailableRegions(): Promise<RegionInfo[]>;
+export interface RegionCapabilityRegistry {
+    discoverCapabilities(): Promise<RegionCapability[]>;
+}
+
+export interface PlacedResource {
+    type: string;
+    placement: string; // Region ID or 'GLOBAL'
+    reason: string;
+    scope: ResourceScope;
+}
+
+export interface ResourcePlacementGraph {
+    deployment: string;
+    primaryRegion: string;
+    secondaryRegions: string[];
+    resources: PlacedResource[];
+}
+
+export interface PlacementCertificate {
+    intentId: string;
+    provider: string;
+    decisionTimestamp: string;
+    hardConstraintsPassed: string[];
+    rejectedRegions: Array<{ region: string; reason: string }>;
+    graph: ResourcePlacementGraph;
+    decisionHash: string;
+    policyVersion: string;
 }

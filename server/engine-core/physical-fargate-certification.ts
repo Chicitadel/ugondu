@@ -64,7 +64,7 @@ async function runFargateCertification() {
 
         // Failure injection: deploy Revision 2 with intentionally invalid image digest
         console.log(__t('cert.fargate.deploying.rev2'));
-        const taskDefRes2 = await registry.getAction('container:task-definition:create')!.execute({ transactionId: txId + '-rev2', familyName: `${campaignId}-task`, image: `  + campaignId + @sha256:0000000000000000000000000000000000000000000000000000000000000000` });
+        const taskDefRes2 = await registry.getAction('container:task-definition:create')!.execute({ transactionId: txId + '-rev2', familyName: `${campaignId}-task`, image: `${campaignId}@sha256:0000000000000000000000000000000000000000000000000000000000000000` });
         const taskDefArn2 = taskDefRes2?.outputs?.taskDefinitionArn || taskDefRes2?.taskDefinitionArn;
         if (!taskDefArn2) throw new Error(__t('error.cert.fargate.missing_rev2_arn'));
 
@@ -93,7 +93,7 @@ async function runFargateCertification() {
 
         // Capture the exact deployment.transactionId and invoke urre.triggerRollback
         console.log(__t('cert.fargate.trigger_rollback', { txId: deployment2TxId }));
-        await urre.triggerRollback({ id: deployment2TxId });
+        await urre.triggerRollback({ id: deployment2TxId, targetEnvironment: 'production' } as any);
 
         // Wait for Revision 1 to stabilize
         console.log(__t('cert.fargate.polling.rev1_after_rollback'));
@@ -107,6 +107,13 @@ async function runFargateCertification() {
             p3++;
         }
         if (!reverted) throw new Error(__t('error.cert.fargate.revert_fail'));
+
+        console.log(__t('cert.fargate.cleanup'));
+        await registry.getAction('container:service:terminate')!.execute({ transactionId: txId, clusterName: globalClusterName, serviceName: `${campaignId}-svc` });
+        await registry.getAction('container:task-definition:terminate')!.execute({ transactionId: txId, taskDefinitionArn: taskDefArn1 });
+        await registry.getAction('container:task-definition:terminate')!.execute({ transactionId: txId, taskDefinitionArn: taskDefArn2 });
+        await registry.getAction('container:image:delete')!.execute({ transactionId: txId, repositoryName: campaignId, tag: `${campaignId}:cert-build` });
+        await registry.getAction('container:registry:terminate')!.execute({ transactionId: txId, repositoryName: campaignId });
 
         console.log(__t('cert.fargate.complete'));
     } catch (error: any) {

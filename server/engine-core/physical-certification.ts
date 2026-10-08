@@ -42,25 +42,27 @@ async function runCertification() {
         console.log(__t('cert.phase.creating_ec2'));
         const ec2Res = await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
         const ec2Id = ec2Res?.outputs?.instanceId || ec2Res?.instanceId;
+        const volumeId = ec2Res?.outputs?.rootVolumeId || ec2Res?.rootVolumeId || process.env.UGONDU_CERT_VOLUME_ID;
+        if (!volumeId) throw new Error(__t('error.cert.missing_volume_id'));
 
         console.log(__t('cert.phase.creating_ebs_snapshot'));
-        const snapRes = await registry.getAction('storage:ebs-snapshot:create')!.execute({ transactionId: txId, volumeId: 'vol-test-fallback' }); 
+        const snapRes = await registry.getAction('storage:ebs-snapshot:create')!.execute({ transactionId: txId, volumeId: volumeId }); 
         const snapId = snapRes?.outputs?.snapshotId || snapRes?.snapshotId;
 
         console.log(__t('cert.phase.creating_rds_subnet_group'));
-        const rdsSubnetGroupName = `ugondu-rds-subnet- + Date.now()`;
+        const rdsSubnetGroupName = `ugondu-rds-subnet-${Date.now()}`;
         await registry.getAction('database:rds-subnet-group:create')!.execute({ transactionId: txId, dbSubnetGroupName: rdsSubnetGroupName, subnetIds: [sub1Id, sub2Id] });
 
         console.log(__t('cert.phase.creating_rds'));
-        const rdsId = `ugondu-db- + Date.now()`;
+        const rdsId = `ugondu-db-${Date.now()}`;
         await registry.getAction('database:relational:create')!.execute({ transactionId: txId, rdsId, dbSubnetGroupName: rdsSubnetGroupName });
 
         console.log(__t('cert.phase.creating_rds_snapshot'));
-        const rdsSnapId = `ugondu-rds-snap- + Date.now()`;
+        const rdsSnapId = `ugondu-rds-snap-${Date.now()}`;
         await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId, rdsSnapshotId: rdsSnapId });
 
         console.log(__t('cert.phase.creating_s3'));
-        const bucketName = `ugondu-cor-bucket- + Date.now()`;
+        const bucketName = `ugondu-cor-bucket-${Date.now()}`;
         await registry.getAction('storage:s3:create')!.execute({ transactionId: txId, bucketName });
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
 

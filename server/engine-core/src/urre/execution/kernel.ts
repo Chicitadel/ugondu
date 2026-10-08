@@ -206,7 +206,7 @@ class ExecutionKernel {
       throw new Error(
         __t('messages.error.action_execution_failed', {
           actionType: action.type,
-          error: __t('messages.error.unknown_action_type', { actionType: action.type, allowed: [...KNOWN_ACTION_TYPES].join(', ') }),
+          error: __t('messages.error.unknown_action_type', { actionType: action.type, allowed: Array.from(KNOWN_ACTION_TYPES).join(', ') }),
         }),
       );
     }

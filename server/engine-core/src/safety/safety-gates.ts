@@ -39,6 +39,9 @@ import { ResourceClassification, ResourceOwnership } from '../../../shared/schem
 import { ResourceProtocol } from '../../../shared/protocols/resource.protocol';
 import * as crypto from 'crypto';
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 export enum ActionClassification {
   REVERSIBLE = 'REVERSIBLE',
   RECOVERABLE = 'RECOVERABLE',
@@ -46,11 +49,25 @@ export enum ActionClassification {
   IRREVERSIBLE = 'IRREVERSIBLE'
 }
 
+export interface CanonicalActionEnvelope {
+  principalArn: string;
+  accountId: string;
+  region: string;
+  resourceId: string;
+  action: string;
+  classification: string;
+  transactionId: string;
+  intentHash: string;
+  policyVersion: string;
+  expiration: number;
+}
+
 export interface SafetyProof {
   authenticatedUserId: string;
   mfaVerified: boolean;
   intentHash: string;
   approvalSignatures: string[];
+  canonicalEnvelope?: CanonicalActionEnvelope;
 }
 
 export interface ActionContext {
@@ -65,8 +82,14 @@ export interface ActionContext {
 
 export class SafetyGatesValidator {
   
-  // Simulated persistent locking mechanism
-  private static leaseLocks = new Map<string, { expiresAt: number }>();
+  private readonly stateDir: string;
+
+  constructor() {
+    this.stateDir = path.join(process.cwd(), '.governance', 'state', 'leases');
+    if (!fs.existsSync(this.stateDir)) {
+      fs.mkdirSync(this.stateDir, { recursive: true });
+    }
+  }
 
   /**
    * Evaluates the dependency graph to compute blast radius.
@@ -78,28 +101,44 @@ export class SafetyGatesValidator {
 
   /**
    * Attempts to acquire an exclusive safety lease for a high-risk operation.
-   * This guarantees deterministic execution and no race conditions during destruction.
+   * Uses file-system exclusive file creation (wx flag) to simulate atomic compare-and-swap.
    */
   public async acquireSafetyLease(actionId: string, resourceId: string): Promise<boolean> {
-    const lockKey = `lease:${resourceId}`;
+    const safeResourceId = resourceId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const lockFile = path.join(this.stateDir, `${safeResourceId}.lock`);
     const now = Date.now();
-    const existing = SafetyGatesValidator.leaseLocks.get(lockKey);
-    if (existing && existing.expiresAt > now) {
-      return false; // Lock already held
+
+    try {
+      // Clean up stale locks safely
+      if (fs.existsSync(lockFile)) {
+        const stats = fs.statSync(lockFile);
+        if (now - stats.mtimeMs > 30000) {
+          fs.unlinkSync(lockFile);
+        } else {
+          return false; // Lock held and fresh
+        }
+      }
+      
+      // Atomic write using wx (exclusive flag)
+      fs.writeFileSync(lockFile, JSON.stringify({ actionId, expiresAt: now + 30000 }), { flag: 'wx' });
+      return true;
+    } catch (err: any) {
+      if (err.code === 'EEXIST') {
+        return false; // Lock acquired by another process concurrently
+      }
+      throw err;
     }
-    // atomic simulated acquire
-    SafetyGatesValidator.leaseLocks.set(lockKey, { expiresAt: now + 30000 });
-    return true;
   }
 
-  private verifyApprovalSignature(intentHash: string, signaturePayload: string): boolean {
+  private verifyApprovalSignature(canonicalEnvelope: CanonicalActionEnvelope, signaturePayload: string): boolean {
     try {
       // Expecting signaturePayload to be JSON: { publicKey: string, signature: string }
       const { publicKey, signature } = JSON.parse(signaturePayload);
       if (!publicKey || !signature) return false;
       
+      const payloadString = JSON.stringify(canonicalEnvelope);
       const verify = crypto.createVerify('sha256');
-      verify.update(intentHash);
+      verify.update(payloadString);
       verify.end();
       return verify.verify(publicKey, signature, 'base64');
     } catch (e) {
@@ -117,13 +156,15 @@ export class SafetyGatesValidator {
       throw new Error(`Blast radius limit exceeded. Expected <= ${context.blastRadius}, got ${computedRadius}`);
     }
 
-    // Verify external cryptographic signatures
-    if (context.proof?.approvalSignatures) {
+    // Verify external cryptographic signatures using canonical envelope
+    if (context.proof?.approvalSignatures && context.proof.canonicalEnvelope) {
        for (const sigPayload of context.proof.approvalSignatures) {
-         if (!this.verifyApprovalSignature(context.proof.intentHash, sigPayload)) {
-           throw new Error('Security Violation: Invalid or self-generated cryptographic signature.');
+         if (!this.verifyApprovalSignature(context.proof.canonicalEnvelope, sigPayload)) {
+           throw new Error('Security Violation: Invalid or self-generated cryptographic signature against canonical envelope.');
          }
        }
+    } else if (context.proof?.approvalSignatures) {
+       throw new Error('Security Violation: Approval signatures present but no canonical envelope provided.');
     }
 
     // 2. Autonomous Deletion Governance
@@ -145,8 +186,8 @@ export class SafetyGatesValidator {
         break;
 
       case ActionClassification.RECOVERABLE:
-        if (!context.proof?.authenticatedUserId) {
-          throw new Error('Recoverable actions require authenticated user proof.');
+        if (!context.proof?.authenticatedUserId || context.proof.authenticatedUserId === 'system') {
+          throw new Error('Recoverable actions require authenticated canonical user proof, cannot be "system".');
         }
         break;
 

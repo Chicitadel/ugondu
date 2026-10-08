@@ -124,20 +124,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Compile scripts
+        run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck
+
       - name: Configure AWS credentials from OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: us-east-1
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Run physical certification
         env:
-          UGONDU_CERT_REGION: us-east-1
+          UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
         run: npx ts-node -T server/engine-core/physical-certification.ts
 
       - name: Run physical fargate certification
         env:
-          UGONDU_CERT_REGION: us-east-1
+          UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
         run: npx ts-node -T server/engine-core/physical-fargate-certification.ts
 
       - name: Assert zero residual resources cleanup verification
