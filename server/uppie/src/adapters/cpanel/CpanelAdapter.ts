@@ -100,7 +100,7 @@ export class CpanelAdapter implements IPolicyProviderAdapter {
   async discoverPolicies(context: AdapterContext): Promise<ProviderNativePolicy[]> { return model.discoverPolicies(await this.client(context)); }
   async discoverAssignments(context: AdapterContext): Promise<Record<string, string[]>> { return model.discoverAssignments(await this.client(context)); }
   async discoverIdentities(context: AdapterContext): Promise<Array<{ id: string; type: string; displayName: string }>> { return model.discoverIdentities(await this.client(context)); }
-  async discoverGroups(_context: AdapterContext): Promise<Array<{ id: string; displayName: string; members: string[] }>> { throw new Error('UNSUPPORTED: cPanel has no group concept'); }
+  async discoverGroups(_context: AdapterContext): Promise<Array<{ id: string; displayName: string; members: string[] }>> { return []; }
   async discoverRoles(context: AdapterContext): Promise<Array<{ id: string; displayName: string; policies: string[] }>> { return model.discoverRoles(await this.client(context)); }
 
   async discoverEffectiveAuthority(actor: string, resource: string, context: AdapterContext): Promise<EffectiveAuthorityResult> {

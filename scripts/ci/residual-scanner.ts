@@ -74,7 +74,7 @@ async function main() {
             process.exit(1);
         }
 
-        const nodes = tx.getNodes();
+        const nodes = tx.nodes;
         
         if (nodes.length === 0) {
             console.log(`[Residual Scanner] Ledger empty for ${transactionId}. ZERO_RESIDUAL.`);
@@ -83,8 +83,9 @@ async function main() {
 
         for (const node of nodes) {
             // Check based on action
-            const action = node.action;
-            const outputs = node.outputs || {};
+            const action = node.action.toLowerCase();
+            const outputs = node.output || {};
+            const params = node.params || {};
             
             try {
                 if (action.includes('vpc') && (outputs.vpcId || outputs.id)) {
@@ -104,27 +105,27 @@ async function main() {
                 } else if (action.includes('ebs-snapshot') && (outputs.snapshotId || outputs.id)) {
                     const r = await ec2Client.send(new DescribeSnapshotsCommand({ SnapshotIds: [outputs.snapshotId || outputs.id] })).catch(() => null);
                     if (r && r.Snapshots && r.Snapshots.length > 0) foundResiduals.push(outputs.snapshotId || outputs.id);
-                } else if (action.includes('rds-subnet-group') && node.payload?.dbSubnetGroupName) {
-                    const r = await rdsClient.send(new DescribeDBSubnetGroupsCommand({ DBSubnetGroupName: node.payload.dbSubnetGroupName })).catch(() => null);
-                    if (r && r.DBSubnetGroups && r.DBSubnetGroups.length > 0) foundResiduals.push(node.payload.dbSubnetGroupName);
-                } else if (action.includes('database:relational') && node.payload?.rdsId) {
-                    const r = await rdsClient.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: node.payload.rdsId })).catch(() => null);
-                    if (r && r.DBInstances && r.DBInstances.length > 0) foundResiduals.push(node.payload.rdsId);
-                } else if (action.includes('rds-snapshot') && node.payload?.rdsSnapshotId) {
-                    const r = await rdsClient.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: node.payload.rdsSnapshotId })).catch(() => null);
-                    if (r && r.DBSnapshots && r.DBSnapshots.length > 0) foundResiduals.push(node.payload.rdsSnapshotId);
-                } else if (action.includes('storage:s3:create') && node.payload?.bucketName) {
-                    const r = await s3Client.send(new HeadBucketCommand({ Bucket: node.payload.bucketName })).catch(() => null);
-                    if (r) foundResiduals.push(node.payload.bucketName);
-                } else if (action.includes('registry:create') && node.payload?.repositoryName) {
-                    const r = await ecrClient.send(new DescribeRepositoriesCommand({ repositoryNames: [node.payload.repositoryName] })).catch(() => null);
-                    if (r && r.repositories && r.repositories.length > 0) foundResiduals.push(node.payload.repositoryName);
+                } else if (action.includes('rds-subnet-group') && params.dbSubnetGroupName) {
+                    const r = await rdsClient.send(new DescribeDBSubnetGroupsCommand({ DBSubnetGroupName: params.dbSubnetGroupName })).catch(() => null);
+                    if (r && r.DBSubnetGroups && r.DBSubnetGroups.length > 0) foundResiduals.push(params.dbSubnetGroupName);
+                } else if (action.includes('database:relational') && params.rdsId) {
+                    const r = await rdsClient.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: params.rdsId })).catch(() => null);
+                    if (r && r.DBInstances && r.DBInstances.length > 0) foundResiduals.push(params.rdsId);
+                } else if (action.includes('rds-snapshot') && params.rdsSnapshotId) {
+                    const r = await rdsClient.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: params.rdsSnapshotId })).catch(() => null);
+                    if (r && r.DBSnapshots && r.DBSnapshots.length > 0) foundResiduals.push(params.rdsSnapshotId);
+                } else if (action.includes('storage:s3:create') && params.bucketName) {
+                    const r = await s3Client.send(new HeadBucketCommand({ Bucket: params.bucketName })).catch(() => null);
+                    if (r) foundResiduals.push(params.bucketName);
+                } else if (action.includes('registry:create') && params.repositoryName) {
+                    const r = await ecrClient.send(new DescribeRepositoriesCommand({ repositoryNames: [params.repositoryName] })).catch(() => null);
+                    if (r && r.repositories && r.repositories.length > 0) foundResiduals.push(params.repositoryName);
                 } else if (action.includes('task-definition:create') && (outputs.taskDefinitionArn || outputs.id)) {
                     const r = await ecsClient.send(new DescribeTaskDefinitionCommand({ taskDefinition: outputs.taskDefinitionArn || outputs.id })).catch(() => null);
                     if (r && r.taskDefinition && r.taskDefinition.status !== 'INACTIVE') foundResiduals.push(outputs.taskDefinitionArn || outputs.id);
-                } else if (action.includes('service:create') && node.payload?.clusterName && node.payload?.serviceName) {
-                    const r = await ecsClient.send(new DescribeServicesCommand({ cluster: node.payload.clusterName, services: [node.payload.serviceName] })).catch(() => null);
-                    if (r && r.services && r.services.length > 0 && r.services[0].status !== 'INACTIVE') foundResiduals.push(node.payload.serviceName);
+                } else if (action.includes('service:create') && params.clusterName && params.serviceName) {
+                    const r = await ecsClient.send(new DescribeServicesCommand({ cluster: params.clusterName, services: [params.serviceName] })).catch(() => null);
+                    if (r && r.services && r.services.length > 0 && r.services[0].status !== 'INACTIVE') foundResiduals.push(params.serviceName);
                 }
             } catch (err) {
                 console.warn(`[Residual Scanner] Could not scan resource for node ${node.id} (${action}):`, err);

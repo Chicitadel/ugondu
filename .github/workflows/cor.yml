@@ -125,7 +125,7 @@ jobs:
         run: npm ci
 
       - name: Compile scripts
-        run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck
+        run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck --target ES2022 --moduleResolution node --downlevelIteration
 
       - name: Configure AWS credentials from OIDC
         uses: aws-actions/configure-aws-credentials@v4
