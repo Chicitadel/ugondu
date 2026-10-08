@@ -30,23 +30,38 @@ import { ReplicationPlan } from './TopologyModels';
 /**
  * Contract for executing multi-region data replication.
  */
-export interface DataReplicationAdapter {
+export abstract class DataReplicationAdapter {
     /**
-     * Initializes the replication infrastructure based on a ReplicationPlan.
+     * Establishes the replication infrastructure based on a ReplicationPlan.
      * @param plan Immutable replication plan.
      */
-    setupReplication(plan: ReplicationPlan): Promise<void>;
+    public async establish(plan: ReplicationPlan): Promise<void> {
+        throw new Error("UNIMPLEMENTED");
+    }
 
     /**
-     * Retrieves the current replication lag in milliseconds.
+     * Verifies the replication setup.
      * @param planId ID of the replication plan.
      */
-    getReplicationLagMs(planId: string): Promise<number>;
+    public async verify(planId: string): Promise<boolean> {
+        throw new Error("UNIMPLEMENTED");
+    }
 
     /**
-     * Validates that the replication setup meets the Recovery Point Objective (RPO).
+     * Fails over to the specified region.
      * @param planId ID of the replication plan.
-     * @param targetRpoMs Target RPO in milliseconds.
+     * @param region Target region.
      */
-    validateRpoCompliance(planId: string, targetRpoMs: number): Promise<boolean>;
+    public async failover(planId: string, region: string): Promise<void> {
+        throw new Error("UNIMPLEMENTED");
+    }
+
+    /**
+     * Fails back to the primary region.
+     * @param planId ID of the replication plan.
+     * @param region Original region.
+     */
+    public async failback(planId: string, region: string): Promise<void> {
+        throw new Error("UNIMPLEMENTED");
+    }
 }

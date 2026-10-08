@@ -76,8 +76,11 @@ export class BackupRestoreCapability {
             const decrypted = await this.encryptionProvider.decrypt(encrypted, provenance);
             
             // To ensure certification only on verified restoration
-            // In a real scenario we'd do a deep equal or hash verification
-            const isValid = true; // Placeholder for actual validation
+            // Rigorous physical restoration verification contract
+            const crypto = require('crypto');
+            const originalHash = crypto.createHash('sha3-512').update(original).digest('hex');
+            const decryptedHash = crypto.createHash('sha3-512').update(decrypted).digest('hex');
+            const isValid = crypto.timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(decryptedHash, 'hex'));
 
             if (isValid) {
                 job.state = BackupState.CERTIFIED;
