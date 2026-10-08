@@ -252,8 +252,8 @@ describe(__t('uppie_qualification_tests_adap'), () => {
   // ─── UPPIE-Q-025 ──────────────────────────────────────────────────────────
   describe(__t('uppie_q_025_three_upgrade_prom'), () => {
     it('should return NOT_ENTITLED for a capability not in the edition', () => {
-      const resolveCap = (cap: string, edition: string) => edition === 'COMMUNITY' && cap === 'ENTERPRISE_CAP' ? 'NOT_ENTITLED' : 'OK';
-      expect(resolveCap('ENTERPRISE_CAP', 'COMMUNITY')).toBe('NOT_ENTITLED');
+      const resolveCap = (cap: string, edition: string) => edition === 'FREE' && cap === 'SOVEREIGN_CAP' ? 'NOT_ENTITLED' : 'OK';
+      expect(resolveCap('SOVEREIGN_CAP', 'FREE')).toBe('NOT_ENTITLED');
     });
 
     it('should return NOT_CONFIGURED for an entitled but unconfigured capability', () => {

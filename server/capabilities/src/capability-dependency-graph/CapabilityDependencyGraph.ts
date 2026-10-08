@@ -175,7 +175,7 @@ export class CapabilityDependencyGraph {
 
     // Governance tier dependencies
     graph.register('COMPLIANCE',    ['ADVANCED_AUDIT', 'RBAC']);
-    graph.register('PRIVATE_CLOUD', ['ENTERPRISE_SLA']);
+    graph.register('PRIVATE_CLOUD', ['SOVEREIGN_SLA']);
     graph.register('UPPIE_FULL',    ['UPPIE_BASIC', 'POLICY_ENGINE']);
 
     // Sovereign tier dependencies

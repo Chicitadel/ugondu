@@ -203,7 +203,7 @@ export async function executeGovernedRecovery(
         ir,
         policyVersion: '1.0.0',
         envelope: {
-            edition: 'enterprise',
+            edition: 'SOVEREIGN',
             allowedActions: pureIntent.authorizedActions,
             tenantId: 'default'
         },

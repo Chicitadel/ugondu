@@ -7,7 +7,7 @@
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
- * Classification : GOVERNMENT | ENTERPRISE | PUBLIC | INTERNAL
+ * Classification : GOVERNMENT | SOVEREIGN | PUBLIC | INTERNAL
  *
  * Governance:
  * - Corporate Governed
@@ -42,7 +42,7 @@ import { __t } from '@ugondu/shared';
 /**
  * @class SSRFBlockedError
  * @description Corporate Governed class implementation for SSRFBlockedError
- * @classification ENTERPRISE
+ * @classification SOVEREIGN
  */
 export class SSRFBlockedError extends Error {
     constructor(message: string) {
@@ -54,7 +54,7 @@ export class SSRFBlockedError extends Error {
 /**
  * @interface RequestInit
  * @description Corporate Governed interface implementation for RequestInit
- * @classification ENTERPRISE
+ * @classification SOVEREIGN
  */
 export interface RequestInit {
     headers?: Record<string, string>;

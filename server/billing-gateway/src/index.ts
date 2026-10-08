@@ -23,9 +23,10 @@ const IDENTITY_AUTHORITY_URL = process.env.IDENTITY_AUTHORITY_URL || 'https://id
 
 // [en] Commercial Edition Tier Definitions
 const EDITIONS = {
-    COMMUNITY: 'community',
+    FREE: 'free',
     PROFESSIONAL: 'professional',
-    ENTERPRISE: 'enterprise'
+    BUSINESS: 'business',
+    SOVEREIGN: 'sovereign'
 };
 
 app.get('/health', (req: Request, res: Response) => {
@@ -46,7 +47,7 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
 
         // Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix
         const record = tokenStore.verifyToken(token);
-        let edition = EDITIONS.COMMUNITY;
+        let edition = EDITIONS.FREE;
         let tenantId = 'tenant_unknown';
 
         if (record) {
@@ -57,7 +58,7 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
             try {
                 const identityRes = await axios.post(`${IDENTITY_AUTHORITY_URL}/verify`, { token });
                 tenantId = identityRes.data.tenantId || 'tenant_unknown';
-                edition = identityRes.data.subscriptionTier || EDITIONS.COMMUNITY;
+                edition = identityRes.data.subscriptionTier || EDITIONS.FREE;
                 
                 // Cache the token so we don't hit identity server again
                 tokenStore.registerToken(token, tenantId, edition);
@@ -68,10 +69,10 @@ app.post('/v1/authorize', requireServiceIdentity('billing-gateway'), async (req:
         }
 
         const capabilities = {
-            maxPlugins: edition === EDITIONS.COMMUNITY ? 1 : (edition === EDITIONS.PROFESSIONAL ? 5 : 999),
-            allowRollback: edition !== EDITIONS.COMMUNITY,
-            allowAtomic: edition !== EDITIONS.COMMUNITY,
-            allowTelemetry: edition === EDITIONS.ENTERPRISE
+            maxPlugins: edition === EDITIONS.FREE ? 1 : (edition === EDITIONS.PROFESSIONAL ? 5 : (edition === EDITIONS.BUSINESS ? 50 : 999)),
+            allowRollback: edition !== EDITIONS.FREE,
+            allowAtomic: edition !== EDITIONS.FREE,
+            allowTelemetry: edition === EDITIONS.SOVEREIGN || edition === EDITIONS.BUSINESS
         };
         
         Logger.info(__t('billing_verified', tenantId, edition.toUpperCase()));

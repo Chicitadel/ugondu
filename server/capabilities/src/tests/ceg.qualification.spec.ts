@@ -121,7 +121,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
 
     it(__t('should_resolve_rollback_as_not'), () => {
       const manifest = createMockManifest({
-        edition: 'COMMUNITY',
+        edition: 'FREE',
         capabilities: [],
         featureStates: {}
       });
@@ -131,7 +131,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
     });
 
     it('should resolve SECURITY_KERNEL as CORE_ALWAYS_AVAILABLE for all editions', () => {
-      const editions: UgonduEdition[] = ['COMMUNITY', 'BUSINESS', 'PROFESSIONAL'];
+      const editions: UgonduEdition[] = ['FREE', 'BUSINESS', 'PROFESSIONAL'];
       for (const edition of editions) {
         const manifest = createMockManifest({ edition, capabilities: [] });
         const resolver = new EntitlementResolver(manifest);
@@ -319,7 +319,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
   // ─── CEG-Q-014 ────────────────────────────────────────────────────────────
   describe(__t('ceg_q_014_unauthorized_capabil'), () => {
     it(__t('should_return_403_when_client_'), () => {
-      const manifest = createMockManifest({ edition: 'COMMUNITY', capabilities: [] });
+      const manifest = createMockManifest({ edition: 'FREE', capabilities: [] });
       const resolver = new EntitlementResolver(manifest);
       
       const mockApiRequest = (capabilityId: string) => {
@@ -330,7 +330,7 @@ describe('CEG Qualification Gate — Entitlement (CEG-Q-001 to CEG-Q-015)', () =
         return { status: 200, body: { success: true } };
       };
       
-      const response = mockApiRequest('ENTERPRISE_FEATURE');
+      const response = mockApiRequest('SOVEREIGN_FEATURE');
       
       expect(response.status).toBe(403);
       expect(response.body.reason).toBe('NOT_ENTITLED');

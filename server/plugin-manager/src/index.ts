@@ -11,7 +11,7 @@ import { Logger } from '@ugondu/shared/logger';
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - Enterprise Security Architecture
+ * - SOVEREIGN Security Architecture
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen

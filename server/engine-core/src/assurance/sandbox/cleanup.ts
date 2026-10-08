@@ -3,7 +3,7 @@
  * Module         : Assurance
  * File           : cleanup.ts
  * Version        : 1.0.0
- * Author         : Enterprise Architecture Team
+ * Author         : SOVEREIGN Architecture Team
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01

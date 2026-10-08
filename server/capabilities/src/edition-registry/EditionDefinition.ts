@@ -25,16 +25,15 @@
  * Ugondu canonical edition hierarchy (5 tiers).
  * Aligned with Air Roofers platform standard AR-STD-PKG-005.
  *
- * NOTE: DEVELOPER tier from EAORCS maps to COMMUNITY in Ugondu
+ * NOTE: DEVELOPER tier from EAORCS maps to FREE in Ugondu
  * (Ugondu is delivery-focused, not IDE-focused).
  * OEM and MSP are commercial overlays — NOT ranked editions.
  * They MUST NOT appear in EDITION_RANK or capability inheritance.
  */
 export const UGONDU_EDITIONS = [
-  'COMMUNITY',
+  'FREE',
   'PROFESSIONAL',
   'BUSINESS',
-  'ENTERPRISE',
   'SOVEREIGN',
 ] as const;
 
@@ -46,11 +45,10 @@ export type UgonduEdition = typeof UGONDU_EDITIONS[number];
  * NEVER use these ranks to make authorization decisions (that is CEG/Mandatag territory).
  */
 export const EDITION_RANK: Record<UgonduEdition, number> = {
-  COMMUNITY:    1,
+  FREE:         1,
   PROFESSIONAL: 2,
   BUSINESS:     3,
-  ENTERPRISE:   4,
-  SOVEREIGN:    5,
+  SOVEREIGN:    4,
 };
 
 /** Check if edition A is at least as privileged as edition B. */
@@ -82,7 +80,7 @@ export interface EditionLimits {
 
 /** Server-enforced limits per edition. All limits are enforced server-side. */
 export const EDITION_LIMITS: Record<UgonduEdition, EditionLimits> = {
-  COMMUNITY: {
+  FREE: {
     maxWorkspaces:          1,
     maxEnvironments:        1,
     maxTargets:             3,
@@ -105,14 +103,6 @@ export const EDITION_LIMITS: Record<UgonduEdition, EditionLimits> = {
     maxDeploymentsPerMonth: null,
     maxFleetNodes:          50,
     maxAiRequestsPerMonth:  1000,
-  },
-  ENTERPRISE: {
-    maxWorkspaces:          null,
-    maxEnvironments:        null,
-    maxTargets:             null,
-    maxDeploymentsPerMonth: null,
-    maxFleetNodes:          null,
-    maxAiRequestsPerMonth:  null,
   },
   SOVEREIGN: {
     maxWorkspaces:          null,

@@ -43,7 +43,7 @@ import { __t } from '@ugondu/shared';
  */
 export interface ProvisioningContext {
     tenantId: string;
-    tier: 'standard' | 'enterprise';
+    tier: 'standard' | 'SOVEREIGN';
     region: string;
 }
 
