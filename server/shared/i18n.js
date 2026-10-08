@@ -226,3 +226,4 @@ function __t(key, ...args) {
     return `[${currentLocale}] ${formatted}`;
 }
 exports.t = __t;
+//# sourceMappingURL=i18n.js.map

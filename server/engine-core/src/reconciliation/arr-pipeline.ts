@@ -32,8 +32,8 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { safetyGates, SafetyGatesValidator, ActionClassification } from '../safety/safety-gates';
-import { ResourceClassification, ResourceOwnership } from '../../../shared/protocols/resource.protocol';
+import { SafetyGatesValidator, ActionClassification } from '../safety/safety-gates';
+import { ResourceClassification } from '../../../shared/protocols/resource.protocol';
 
 export interface ResourceState {
     id: string;
@@ -41,7 +41,7 @@ export interface ResourceState {
     provider: string;
     metadata: Record<string, any>;
     classification?: ResourceClassification;
-    ownership?: ResourceOwnership;
+    ownership?: string;
     isLocked: boolean;
     quotaConsumed: number;
 }
@@ -115,11 +115,11 @@ export class AutonomousResourceReconciler {
     private async classify(resources: ResourceState[]): Promise<ResourceState[]> {
         return resources.map(r => {
             let classification = '' as any; // ResourceClassification.UNCLASSIFIED;
-            if (r.metadata['isActive'] && r.ownership !== ResourceOwnership.UNKNOWN) {
+            if (r.metadata['isActive'] && r.ownership !== 'UNKNOWN') {
                 classification = '' as any; // ResourceClassification.OWNED_ACTIVE;
-            } else if (!r.metadata['isActive'] && r.ownership !== ResourceOwnership.UNKNOWN) {
+            } else if (!r.metadata['isActive'] && r.ownership !== 'UNKNOWN') {
                 classification = '' as any; // ResourceClassification.OWNED_ORPHAN;
-            } else if (r.metadata['isActive'] && r.ownership === ResourceOwnership.UNKNOWN) {
+            } else if (r.metadata['isActive'] && r.ownership === 'UNKNOWN') {
                 classification = '' as any; // ResourceClassification.UNOWNED_ACTIVE;
             } else {
                 classification = '' as any; // ResourceClassification.UNOWNED_ORPHAN;
