@@ -107,7 +107,7 @@ export class OfflineLicenseEvaluator {
 
       return verify.verify(manifest.issuerPublicKey, manifest.signature, 'base64');
     } catch (error) {
-      return false;
+      throw new Error('UNIMPLEMENTED')
     }
   }
 }
