@@ -76,8 +76,12 @@ jobs:
       - name: Verify COR signing trust root
         shell: bash
         run: |
-          test -n "${COR_SIGNING_KEY}"
-          test -n "${COR_PUBLIC_KEY}"
+          if [ -z "${COR_SIGNING_KEY}" ] || [ -z "${COR_PUBLIC_KEY}" ]; then
+            echo "::error::COR_TRUST_ROOT_MISSING: The COR signing trust root is not configured in the GitHub Actions environment."
+            exit 1
+          fi
+          echo "Trust root configuration detected."
+          echo "Public Key Fingerprint: $(echo -n "${COR_PUBLIC_KEY}" | sha256sum | awk '{print $1}')"
 
       - name: Validate stream registry
         run: node scripts/check-cor-stream-registry.js
@@ -125,7 +129,7 @@ jobs:
         run: npm ci
 
       - name: Compile scripts
-        run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck --target ES2022 --moduleResolution node --downlevelIteration
+        run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck --target ES2022 --moduleResolution node --downlevelIteration --esModuleInterop
 
       - name: Configure AWS credentials from OIDC
         uses: aws-actions/configure-aws-credentials@v4
