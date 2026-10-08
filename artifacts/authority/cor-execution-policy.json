@@ -17,13 +17,18 @@
       "Sid": "CORAuthority2",
       "Effect": "Allow",
       "Action": "ec2:CreateTags",
-      "Resource": [
-        "arn:aws:ec2:us-east-1:971671216490:vpc/*",
-        "arn:aws:ec2:us-east-1:971671216490:subnet/*",
-        "arn:aws:ec2:us-east-1:971671216490:security-group/*",
-        "arn:aws:ec2:us-east-1:971671216490:instance/*",
-        "arn:aws:ec2:us-east-1:971671216490:snapshot/*"
-      ]
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:vpc/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": "CreateVpc"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority3",
@@ -37,6 +42,23 @@
     {
       "Sid": "CORAuthority4",
       "Effect": "Allow",
+      "Action": "ec2:CreateTags",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:subnet/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": "CreateSubnet"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority5",
+      "Effect": "Allow",
       "Action": "ec2:CreateSecurityGroup",
       "Resource": [
         "arn:aws:ec2:us-east-1:971671216490:security-group/*",
@@ -44,178 +66,295 @@
       ]
     },
     {
-      "Sid": "CORAuthority5",
-      "Effect": "Allow",
-      "Action": "ec2:RunInstances",
-      "Resource": [
-        "arn:aws:ec2:us-east-1:971671216490:instance/*",
-        "arn:aws:ec2:us-east-1:971671216490:subnet/*",
-        "arn:aws:ec2:us-east-1:971671216490:network-interface/*",
-        "arn:aws:ec2:us-east-1:971671216490:volume/*",
-        "arn:aws:ec2:us-east-1:971671216490:security-group/*",
-        "arn:aws:ec2:us-east-1:971671216490:image/*"
-      ]
-    },
-    {
       "Sid": "CORAuthority6",
       "Effect": "Allow",
-      "Action": "ec2:CreateSnapshot",
-      "Resource": [
-        "arn:aws:ec2:us-east-1:971671216490:volume/*",
-        "arn:aws:ec2:us-east-1:971671216490:snapshot/*"
-      ]
+      "Action": "ec2:CreateTags",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:security-group/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": "CreateSecurityGroup"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority7",
       "Effect": "Allow",
-      "Action": "rds:CreateDBSubnetGroup",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*"
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:us-east-1:971671216490:image/*",
+        "arn:aws:ec2:us-east-1:971671216490:instance/*",
+        "arn:aws:ec2:us-east-1:971671216490:network-interface/*",
+        "arn:aws:ec2:us-east-1:971671216490:security-group/*",
+        "arn:aws:ec2:us-east-1:971671216490:subnet/*",
+        "arn:aws:ec2:us-east-1:971671216490:volume/*"
+      ]
     },
     {
       "Sid": "CORAuthority8",
       "Effect": "Allow",
-      "Action": "rds:AddTagsToResource",
+      "Action": "ec2:CreateTags",
       "Resource": [
-        "arn:aws:rds:us-east-1:971671216490:subgrp:*",
-        "arn:aws:rds:us-east-1:971671216490:db:*",
-        "arn:aws:rds:us-east-1:971671216490:snapshot:*"
-      ]
+        "arn:aws:ec2:us-east-1:971671216490:instance/*",
+        "arn:aws:ec2:us-east-1:971671216490:volume/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": "RunInstances"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority9",
       "Effect": "Allow",
-      "Action": "rds:CreateDBInstance",
+      "Action": "ec2:CreateSnapshot",
       "Resource": [
-        "arn:aws:rds:us-east-1:971671216490:db:*",
-        "arn:aws:rds:us-east-1:971671216490:subgrp:*",
-        "arn:aws:rds:us-east-1:971671216490:secgrp:*"
+        "arn:aws:ec2:us-east-1:971671216490:snapshot/*",
+        "arn:aws:ec2:us-east-1:971671216490:volume/*"
       ]
     },
     {
       "Sid": "CORAuthority10",
       "Effect": "Allow",
-      "Action": "rds:CreateDBSnapshot",
-      "Resource": [
-        "arn:aws:rds:us-east-1:971671216490:snapshot:*",
-        "arn:aws:rds:us-east-1:971671216490:db:*"
-      ]
+      "Action": "ec2:CreateTags",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:snapshot/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:CreateAction": "CreateSnapshot"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduCOR",
+            "UgonduTransactionId"
+          ]
+        }
+      }
     },
     {
       "Sid": "CORAuthority11",
       "Effect": "Allow",
-      "Action": "s3:CreateBucket",
-      "Resource": "arn:aws:s3:::*"
+      "Action": "rds:CreateDBSubnetGroup",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*"
     },
     {
       "Sid": "CORAuthority12",
       "Effect": "Allow",
-      "Action": "s3:PutBucketTagging",
-      "Resource": "arn:aws:s3:::*"
+      "Action": "rds:AddTagsToResource",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*"
     },
     {
       "Sid": "CORAuthority13",
       "Effect": "Allow",
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::*/*"
+      "Action": "rds:CreateDBInstance",
+      "Resource": [
+        "arn:aws:rds:us-east-1:971671216490:db:*",
+        "arn:aws:rds:us-east-1:971671216490:subgrp:*"
+      ]
     },
     {
       "Sid": "CORAuthority14",
       "Effect": "Allow",
-      "Action": "ec2:DeleteTags",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*"
+      "Action": "rds:AddTagsToResource",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:db:*"
     },
     {
       "Sid": "CORAuthority15",
       "Effect": "Allow",
-      "Action": "s3:DeleteObject",
-      "Resource": "arn:aws:s3:::*/*"
+      "Action": "rds:CreateDBSnapshot",
+      "Resource": [
+        "arn:aws:rds:us-east-1:971671216490:db:*",
+        "arn:aws:rds:us-east-1:971671216490:snapshot:*"
+      ]
     },
     {
       "Sid": "CORAuthority16",
       "Effect": "Allow",
-      "Action": "s3:DeleteBucket",
-      "Resource": "arn:aws:s3:::*"
+      "Action": "rds:AddTagsToResource",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:snapshot:*"
     },
     {
       "Sid": "CORAuthority17",
       "Effect": "Allow",
-      "Action": "rds:DeleteDBSnapshot",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:snapshot:*"
+      "Action": "s3:CreateBucket",
+      "Resource": "arn:aws:s3:::ugondu-cor-*"
     },
     {
       "Sid": "CORAuthority18",
       "Effect": "Allow",
-      "Action": "rds:DeleteDBInstance",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:db:*"
+      "Action": "s3:PutBucketTagging",
+      "Resource": "arn:aws:s3:::ugondu-cor-*"
     },
     {
       "Sid": "CORAuthority19",
       "Effect": "Allow",
-      "Action": "rds:DeleteDBSubnetGroup",
-      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*"
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::ugondu-cor-*/*"
     },
     {
       "Sid": "CORAuthority20",
       "Effect": "Allow",
-      "Action": "ec2:DeleteSnapshot",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:snapshot/*"
+      "Action": "ec2:CreateTags",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
     },
     {
       "Sid": "CORAuthority21",
       "Effect": "Allow",
-      "Action": "ec2:TerminateInstances",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*"
+      "Action": "ec2:DeleteTags",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
     },
     {
       "Sid": "CORAuthority22",
       "Effect": "Allow",
-      "Action": "ec2:DeleteSecurityGroup",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:security-group/*"
+      "Action": "s3:DeleteObject",
+      "Resource": "arn:aws:s3:::ugondu-cor-*/*"
     },
     {
       "Sid": "CORAuthority23",
       "Effect": "Allow",
-      "Action": "ec2:DeleteSubnet",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:subnet/*"
+      "Action": "s3:DeleteBucket",
+      "Resource": "arn:aws:s3:::ugondu-cor-*"
     },
     {
       "Sid": "CORAuthority24",
       "Effect": "Allow",
-      "Action": "ec2:DeleteVpc",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:vpc/*"
+      "Action": "rds:DeleteDBSnapshot",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:snapshot:*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
     },
     {
       "Sid": "CORAuthority25",
+      "Effect": "Allow",
+      "Action": "rds:DeleteDBInstance",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:db:*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority26",
+      "Effect": "Allow",
+      "Action": "rds:DeleteDBSubnetGroup",
+      "Resource": "arn:aws:rds:us-east-1:971671216490:subgrp:*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority27",
+      "Effect": "Allow",
+      "Action": "ec2:DeleteSnapshot",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:snapshot/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority28",
+      "Effect": "Allow",
+      "Action": "ec2:TerminateInstances",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:instance/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority29",
+      "Effect": "Allow",
+      "Action": "ec2:DeleteSecurityGroup",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:security-group/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority30",
+      "Effect": "Allow",
+      "Action": "ec2:DeleteSubnet",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:subnet/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority31",
+      "Effect": "Allow",
+      "Action": "ec2:DeleteVpc",
+      "Resource": "arn:aws:ec2:us-east-1:971671216490:vpc/*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/UgonduCOR": "*"
+        }
+      }
+    },
+    {
+      "Sid": "CORAuthority32",
       "Effect": "Allow",
       "Action": "ec2:DescribeVpcs",
       "Resource": "*"
     },
     {
-      "Sid": "CORAuthority26",
+      "Sid": "CORAuthority33",
       "Effect": "Allow",
       "Action": "ec2:DescribeSubnets",
       "Resource": "*"
     },
     {
-      "Sid": "CORAuthority27",
+      "Sid": "CORAuthority34",
       "Effect": "Allow",
       "Action": "ec2:DescribeSecurityGroups",
       "Resource": "*"
     },
     {
-      "Sid": "CORAuthority28",
+      "Sid": "CORAuthority35",
       "Effect": "Allow",
       "Action": "ec2:DescribeInstances",
       "Resource": "*"
     },
     {
-      "Sid": "CORAuthority29",
+      "Sid": "CORAuthority36",
       "Effect": "Allow",
       "Action": "rds:DescribeDBInstances",
       "Resource": "*"
     },
     {
-      "Sid": "CORAuthority30",
+      "Sid": "CORAuthority37",
       "Effect": "Allow",
       "Action": "s3:ListAllMyBuckets",
       "Resource": "*"

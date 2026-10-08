@@ -1,13 +1,13 @@
-import { writeFileSync, mkdirSync } from 'fs';
-import { dirname } from 'path';
-
 export interface AuthorityPermission {
-    action: string;
+    action: string | string[];
     resources: string[];
+    conditions?: Record<string, any>;
 }
 
 export interface CORAuthorityManifest {
     version: number;
+    generatorVersion: string;
+    mapVersion: string;
     manifest: string;
     provider: string;
     region: string;
@@ -38,76 +38,113 @@ const AWS_AUTHORITY_MAP: Record<string, AuthorityPermission[]> = {
     ],
     'network:vpc:create': [
         { action: 'ec2:CreateVpc', resources: ['arn:aws:ec2:*:*:vpc/*'] },
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:vpc/*'] }
+        { 
+            action: 'ec2:CreateTags', 
+            resources: ['arn:aws:ec2:*:*:vpc/*'], 
+            conditions: { 
+                "StringEquals": { "ec2:CreateAction": "CreateVpc" },
+                "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] }
+            } 
+        }
     ],
     'network:vpc:terminate': [
-        { action: 'ec2:DeleteVpc', resources: ['arn:aws:ec2:*:*:vpc/*'] }
+        { action: 'ec2:DeleteVpc', resources: ['arn:aws:ec2:*:*:vpc/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'network:subnet:create': [
         { action: 'ec2:CreateSubnet', resources: ['arn:aws:ec2:*:*:subnet/*', 'arn:aws:ec2:*:*:vpc/*'] },
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:subnet/*'] }
+        { 
+            action: 'ec2:CreateTags', 
+            resources: ['arn:aws:ec2:*:*:subnet/*'], 
+            conditions: { 
+                "StringEquals": { "ec2:CreateAction": "CreateSubnet" },
+                "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] }
+            } 
+        }
     ],
     'network:subnet:terminate': [
-        { action: 'ec2:DeleteSubnet', resources: ['arn:aws:ec2:*:*:subnet/*'] }
+        { action: 'ec2:DeleteSubnet', resources: ['arn:aws:ec2:*:*:subnet/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'network:security-group:create': [
         { action: 'ec2:CreateSecurityGroup', resources: ['arn:aws:ec2:*:*:security-group/*', 'arn:aws:ec2:*:*:vpc/*'] },
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:security-group/*'] }
+        { 
+            action: 'ec2:CreateTags', 
+            resources: ['arn:aws:ec2:*:*:security-group/*'], 
+            conditions: { 
+                "StringEquals": { "ec2:CreateAction": "CreateSecurityGroup" },
+                "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] }
+            } 
+        }
     ],
     'network:security-group:terminate': [
-        { action: 'ec2:DeleteSecurityGroup', resources: ['arn:aws:ec2:*:*:security-group/*'] }
+        { action: 'ec2:DeleteSecurityGroup', resources: ['arn:aws:ec2:*:*:security-group/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'compute:instance:create': [
         { action: 'ec2:RunInstances', resources: ['arn:aws:ec2:*:*:instance/*', 'arn:aws:ec2:*:*:subnet/*', 'arn:aws:ec2:*:*:network-interface/*', 'arn:aws:ec2:*:*:volume/*', 'arn:aws:ec2:*:*:security-group/*', 'arn:aws:ec2:*:*:image/*'] },
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:instance/*'] }
+        { 
+            action: 'ec2:CreateTags', 
+            resources: ['arn:aws:ec2:*:*:instance/*', 'arn:aws:ec2:*:*:volume/*'], 
+            conditions: { 
+                "StringEquals": { "ec2:CreateAction": "RunInstances" },
+                "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] }
+            } 
+        }
     ],
     'compute:instance:terminate': [
-        { action: 'ec2:TerminateInstances', resources: ['arn:aws:ec2:*:*:instance/*'] }
+        { action: 'ec2:TerminateInstances', resources: ['arn:aws:ec2:*:*:instance/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'storage:ebs-snapshot:create': [
         { action: 'ec2:CreateSnapshot', resources: ['arn:aws:ec2:*:*:volume/*', 'arn:aws:ec2:*:*:snapshot/*'] },
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:snapshot/*'] }
+        { 
+            action: 'ec2:CreateTags', 
+            resources: ['arn:aws:ec2:*:*:snapshot/*'], 
+            conditions: { 
+                "StringEquals": { "ec2:CreateAction": "CreateSnapshot" },
+                "ForAllValues:StringEquals": { "aws:TagKeys": ["UgonduCOR", "UgonduTransactionId"] }
+            } 
+        }
     ],
     'storage:ebs-snapshot:terminate': [
-        { action: 'ec2:DeleteSnapshot', resources: ['arn:aws:ec2:*:*:snapshot/*'] }
+        { action: 'ec2:DeleteSnapshot', resources: ['arn:aws:ec2:*:*:snapshot/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'database:rds-subnet-group:create': [
         { action: 'rds:CreateDBSubnetGroup', resources: ['arn:aws:rds:*:*:subgrp:*'] },
         { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:subgrp:*'] }
     ],
     'database:rds-subnet-group:terminate': [
-        { action: 'rds:DeleteDBSubnetGroup', resources: ['arn:aws:rds:*:*:subgrp:*'] }
+        { action: 'rds:DeleteDBSubnetGroup', resources: ['arn:aws:rds:*:*:subgrp:*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'database:relational:create': [
-        { action: 'rds:CreateDBInstance', resources: ['arn:aws:rds:*:*:db:*', 'arn:aws:rds:*:*:subgrp:*', 'arn:aws:rds:*:*:secgrp:*'] },
+        // Ensure dependent permissions are covered for RDS Create in a VPC.
+        // RDS doesn't use secgrp ARNs during creation in IAM, but it does require describe permissions.
+        { action: 'rds:CreateDBInstance', resources: ['arn:aws:rds:*:*:db:*', 'arn:aws:rds:*:*:subgrp:*'] },
         { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:db:*'] }
     ],
     'database:relational:terminate': [
-        { action: 'rds:DeleteDBInstance', resources: ['arn:aws:rds:*:*:db:*'] }
+        { action: 'rds:DeleteDBInstance', resources: ['arn:aws:rds:*:*:db:*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'database:rds-snapshot:create': [
         { action: 'rds:CreateDBSnapshot', resources: ['arn:aws:rds:*:*:snapshot:*', 'arn:aws:rds:*:*:db:*'] },
         { action: 'rds:AddTagsToResource', resources: ['arn:aws:rds:*:*:snapshot:*'] }
     ],
     'database:rds-snapshot:terminate': [
-        { action: 'rds:DeleteDBSnapshot', resources: ['arn:aws:rds:*:*:snapshot:*'] }
+        { action: 'rds:DeleteDBSnapshot', resources: ['arn:aws:rds:*:*:snapshot:*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'storage:s3:create': [
-        { action: 's3:CreateBucket', resources: ['arn:aws:s3:::*'] },
-        { action: 's3:PutBucketTagging', resources: ['arn:aws:s3:::*'] }
+        { action: 's3:CreateBucket', resources: ['arn:aws:s3:::ugondu-cor-*'] },
+        { action: 's3:PutBucketTagging', resources: ['arn:aws:s3:::ugondu-cor-*'] }
     ],
     'storage:s3:terminate': [
-        { action: 's3:DeleteBucket', resources: ['arn:aws:s3:::*'] }
+        { action: 's3:DeleteBucket', resources: ['arn:aws:s3:::ugondu-cor-*'] }
     ],
     'storage:object:put': [
-        { action: 's3:PutObject', resources: ['arn:aws:s3:::*/*'] }
+        { action: 's3:PutObject', resources: ['arn:aws:s3:::ugondu-cor-*/*'] }
     ],
     'storage:object:delete': [
-        { action: 's3:DeleteObject', resources: ['arn:aws:s3:::*/*'] }
+        { action: 's3:DeleteObject', resources: ['arn:aws:s3:::ugondu-cor-*/*'] }
     ],
     'drift:injection': [
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:instance/*'] },
-        { action: 'ec2:DeleteTags', resources: ['arn:aws:ec2:*:*:instance/*'] }
+        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:instance/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } },
+        { action: 'ec2:DeleteTags', resources: ['arn:aws:ec2:*:*:instance/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'drift:residual-scan': [
         { action: 'ec2:DescribeVpcs', resources: ['*'] },
@@ -157,7 +194,7 @@ export class CORAuthorityCalculator {
     }
 
     public generateAwsManifest(region: string, accountId: string, roleName: string): CORAuthorityManifest {
-        const permissionsMap = new Map<string, Set<string>>();
+        const statements: AuthorityPermission[] = [];
 
         for (const operation of PHYSICAL_COR_GRAPH) {
             const mappedAuths = AWS_AUTHORITY_MAP[operation];
@@ -167,36 +204,41 @@ export class CORAuthorityCalculator {
             }
 
             for (const auth of mappedAuths) {
-                if (!permissionsMap.has(auth.action)) {
-                    permissionsMap.set(auth.action, new Set());
-                }
-                const resourceSet = permissionsMap.get(auth.action)!;
-                for (let res of auth.resources) {
-                    // Contextualize ARNs with region and account id if possible
-                    res = res.replace('arn:aws:ec2:*:*', `arn:aws:ec2:${region}:${accountId}`);
-                    res = res.replace('arn:aws:rds:*:*', `arn:aws:rds:${region}:${accountId}`);
-                    res = res.replace('arn:aws:ssm:*:*', `arn:aws:ssm:${region}:${accountId}`);
-                    resourceSet.add(res);
-                }
+                // Apply contextual account and region bounds to ARNs
+                const contextualizedResources = auth.resources.map(res => {
+                    let r = res.replace('arn:aws:ec2:*:*', `arn:aws:ec2:${region}:${accountId}`);
+                    r = r.replace('arn:aws:rds:*:*', `arn:aws:rds:${region}:${accountId}`);
+                    r = r.replace('arn:aws:ssm:*:*', `arn:aws:ssm:${region}:${accountId}`);
+                    return r;
+                });
+
+                statements.push({
+                    action: auth.action,
+                    resources: contextualizedResources,
+                    conditions: auth.conditions
+                });
             }
         }
 
-        const permissions: AuthorityPermission[] = [];
-        for (const [action, resources] of permissionsMap.entries()) {
-            permissions.push({
-                action,
-                resources: Array.from(resources)
-            });
+        // De-duplicate statements based on signature (action + resources + conditions)
+        const uniqueStatements = new Map<string, AuthorityPermission>();
+        for (const s of statements) {
+            const key = JSON.stringify({ action: s.action, resources: s.resources.sort(), conditions: s.conditions });
+            if (!uniqueStatements.has(key)) {
+                uniqueStatements.set(key, s);
+            }
         }
 
         return {
-            version: 1,
-            manifest: 'ugondu-cor-authority',
+            version: 2,
+            generatorVersion: '1.2.0',
+            mapVersion: '1.2.0',
+            manifest: 'ugondu-cor-authority-v2',
             provider: 'aws',
             region,
-            corProfile: 'physical-fargate-v1',
+            corProfile: 'physical-fargate-v2',
             executionRole: { name: roleName },
-            permissions,
+            permissions: Array.from(uniqueStatements.values()),
             verification: { required: true },
             recovery: { required: true },
             rollback: { required: true },
@@ -214,56 +256,22 @@ export class CORAuthorityCalculator {
     }
 
     public exportToIAMPolicy(manifest: CORAuthorityManifest): object {
-        const statements = manifest.permissions.map((p, idx) => ({
-            Sid: `CORAuthority${idx}`,
-            Effect: 'Allow',
-            Action: p.action,
-            Resource: p.resources.length === 1 ? p.resources[0] : p.resources
-        }));
+        const statements = manifest.permissions.map((p, idx) => {
+            const stmt: any = {
+                Sid: `CORAuthority${idx}`,
+                Effect: 'Allow',
+                Action: p.action,
+                Resource: p.resources.length === 1 ? p.resources[0] : p.resources
+            };
+            if (p.conditions) {
+                stmt.Condition = p.conditions;
+            }
+            return stmt;
+        });
 
         return {
             Version: '2012-10-17',
             Statement: statements
         };
-    }
-
-    public dumpHumanReadable(manifest: CORAuthorityManifest): string {
-        const actionsCount = manifest.permissions.length;
-        const resourcesCount = manifest.permissions.reduce((acc, p) => acc + p.resources.length, 0);
-        
-        return `====================================================
- UGONDU COR AUTHORITY REQUEST
-====================================================
-
-Provider: ${manifest.provider.toUpperCase()}
-Region: ${manifest.region}
-Account: ${manifest.executionRole.name.includes(':') ? manifest.executionRole.name : '971671216490'}
-Role: ${manifest.executionRole.name}
-
-Purpose:
-Physical Certification of Ugondu AWS execution capability
-
-Authority:
-${actionsCount} actions
-${resourcesCount} resource scopes
-4 verification operations
-3 recovery operations
-
-Risk:
-HIGH
-
-Duration:
-COR execution only
-
-Credential model:
-GitHub OIDC → short-lived STS credentials
-
-Rollback:
-Supported
-
-Approval:
-REQUIRED
-
-====================================================`;
     }
 }
