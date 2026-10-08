@@ -261,7 +261,7 @@ export class KubernetesRbacAdapter implements IPolicyProviderAdapter {
   }
 
   async detectUnused(_context: AdapterContext, _thresholdDays: number): Promise<UsageObservation[]> {
-    return []; // NOT_OBSERVABLE
+    throw new Error('NOT_OBSERVABLE: Kubernetes RBAC does not provide usage history');
   }
 
   async findDependencies(policyId: string, _context: AdapterContext): Promise<DependencyReport> {

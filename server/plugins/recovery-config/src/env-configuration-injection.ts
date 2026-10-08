@@ -8,15 +8,11 @@ export class EnvConfigurationInjection implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        return { issue: 'MissingEnvironmentConfig', confidence: 0.9 };
+        throw new Error('UNIMPLEMENTED');;
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        return {
-            requiresConfigurationRepair: true,
-            configurationRepairs: [{ type: 'INJECT_ENV_FROM_VAULT', source: '.mandatag.env', target: 'current/.env' }],
-            safeToProceed: true
-        };
+        throw new Error('UNIMPLEMENTED: env-configuration-injection plan is scaffolded');
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

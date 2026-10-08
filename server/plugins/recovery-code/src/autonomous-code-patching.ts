@@ -8,15 +8,11 @@ export class AutonomousCodePatching implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        return { issue: 'HardcodedInfrastructurePaths', confidence: 0.95 };
+        throw new Error('UNIMPLEMENTED');;
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        return {
-            requiresCodePatching: true,
-            patches: [{ target: 'Bootstrap/env.php', strategy: 'INJECT_UNIVERSAL_DOCROOT' }],
-            safeToProceed: true
-        };
+        throw new Error('UNIMPLEMENTED: autonomous-code-patching plan is scaffolded');
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
