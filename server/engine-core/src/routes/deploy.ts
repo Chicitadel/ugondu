@@ -51,7 +51,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
 
     if (
       !repositoryUrl || !branch || !targetEnvironment || !token ||
-      !projectId || !workspaceId || !targetId || !agentId || !agentVersion
+      !projectId || !workspaceId || !targetId
     ) {
       res.status(400).json({ error: __t('msg_invalid_deploymentcontext_missing_requir') });
       return;
@@ -320,7 +320,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
 
     if (
       !repositoryUrl || !branch || !targetEnvironment || !token ||
-      !projectId || !workspaceId || !targetId || !agentId || !agentVersion
+      !projectId || !workspaceId || !targetId
     ) {
       res.status(400).json({ error: __t('msg_invalid_deploymentcontext_missing_requir') });
       return;
