@@ -19,7 +19,7 @@ import { __t } from '../i18n';
 export interface SovereignCryptographicLease {
     leaseId: string;
     customerOrg: string;
-    tier: 'ENTERPRISE_AIRGAP' | 'SOVEREIGN_GOVERNMENT';
+    tier: 'SOVEREIGN_AIRGAP' | 'SOVEREIGN_GOVERNMENT';
     issuedAt: number;
     expiresAt: number;
     maxNodes: number;

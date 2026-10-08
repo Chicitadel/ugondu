@@ -11,7 +11,7 @@ const dbPath = path.join(dataDir, 'billing.json');
 /**
  * @interface TenantInfo
  * @description Corporate Governed interface implementation for TenantInfo
- * @classification ENTERPRISE
+ * @classification SOVEREIGN
  */
 export interface TenantInfo {
     token: string;

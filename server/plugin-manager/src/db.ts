@@ -12,7 +12,7 @@ const dbPath = path.join(dataDir, 'plugins.json');
 /**
  * @interface TenantPluginLedger
  * @description Corporate Governed interface implementation for TenantPluginLedger
- * @classification ENTERPRISE
+ * @classification SOVEREIGN
  */
 export interface TenantPluginLedger {
     [tenantId: string]: string[]; // array of active plugin names

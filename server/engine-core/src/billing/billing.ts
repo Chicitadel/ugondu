@@ -72,7 +72,7 @@ export class CapabilityEntitlementGraph {
     const { aggregateId, payload } = event;
     const tier = payload["tier"] as string;
 
-    if (tier === "PREMIUM" || tier === "ENTERPRISE") {
+    if (tier === "PREMIUM" || tier === "SOVEREIGN") {
       this.setCapabilityState(aggregateId, "ACTIVE");
     }
   }

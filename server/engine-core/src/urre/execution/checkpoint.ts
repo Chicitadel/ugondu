@@ -39,10 +39,10 @@ import { ExecutionState } from '../model/state';
 
 /**
  * Deployment tier governs which storage backend is used for checkpoint persistence.
- * File-system storage is used for Community/Professional tiers.
- * Provider-backed storage is reserved for Enterprise/Sovereign tiers.
+ * File-system storage is used for FREE/Professional tiers.
+ * Provider-backed storage is reserved for SOVEREIGN/Sovereign tiers.
  */
-export type DeploymentTier = 'COMMUNITY' | 'PROFESSIONAL' | 'ENTERPRISE' | 'SOVEREIGN';
+export type DeploymentTier = 'FREE' | 'PROFESSIONAL' | 'SOVEREIGN' | 'SOVEREIGN';
 
 /**
  * @interface CheckpointStorageConfig
@@ -82,8 +82,8 @@ export interface PersistedCheckpoint {
 /**
  * @class CheckpointManager
  * @description Corporate Governed class responsible for persisting execution checkpoints.
- *              Supports file-system (Community/Professional) and provider-backed
- *              (Enterprise/Sovereign) storage backends.
+ *              Supports file-system (FREE/Professional) and provider-backed
+ *              (SOVEREIGN/Sovereign) storage backends.
  * @classification ENTERPRISE
  */
 export class CheckpointManager {
@@ -92,7 +92,7 @@ export class CheckpointManager {
   constructor(config?: CheckpointStorageConfig) {
     this.config = config ?? {
       storagePath: path.join(process.cwd(), '.urre', 'checkpoints'),
-      tier: 'COMMUNITY',
+      tier: 'FREE',
     };
   }
 
@@ -115,8 +115,8 @@ export class CheckpointManager {
    * Steps:
    *  1. Serialize payload to JSON.
    *  2. Compute SHA-256 integrity hash.
-   *  3. Route to filesystem (Community/Professional) or provider endpoint
-   *     (Enterprise/Sovereign).
+   *  3. Route to filesystem (FREE/Professional) or provider endpoint
+   *     (SOVEREIGN/Sovereign).
    *  4. Emit structured log on success.
    *  5. Throw localised error on failure.
    */
@@ -175,7 +175,7 @@ export class CheckpointManager {
   // ---------------------------------------------------------------------------
 
   private isProviderBacked(): boolean {
-    return this.config.tier === 'ENTERPRISE' || this.config.tier === 'SOVEREIGN';
+    return this.config.tier === 'SOVEREIGN' || this.config.tier === 'SOVEREIGN';
   }
 
   /**

@@ -22,9 +22,9 @@ declare var expect: any;
 
 describe(__t('ceg_qualification_gates_ceg_16'), () => {
   const baseManifest: CapabilityManifest = {
-    tenantId: 'tenant-enterprise',
+    tenantId: 'tenant-SOVEREIGN',
     subjectId: 'sub-1',
-    edition: 'ENTERPRISE',
+    edition: 'SOVEREIGN',
     entitlementVersion: 1,
     capabilities: ['MOVE_CROSS_CLOUD', 'AUTONOMOUS_L4', 'UPPIE_SIMULATE'],
     featureStates: {},
@@ -47,9 +47,9 @@ describe(__t('ceg_qualification_gates_ceg_16'), () => {
   });
 
   it(__t('ceg_19_23_tier_boundary_enforc'), () => {
-    const communityManifest: CapabilityManifest = { ...baseManifest, edition: 'COMMUNITY', capabilities: [] };
-    const communityResolver = new EntitlementResolver(communityManifest);
-    const res = communityResolver.resolve('MOVE_CROSS_CLOUD', true, true, true);
+    const FREEManifest: CapabilityManifest = { ...baseManifest, edition: 'FREE', capabilities: [] };
+    const FREEResolver = new EntitlementResolver(FREEManifest);
+    const res = FREEResolver.resolve('MOVE_CROSS_CLOUD', true, true, true);
     expect(res.result).toBe('NOT_ENTITLED');
   });
 

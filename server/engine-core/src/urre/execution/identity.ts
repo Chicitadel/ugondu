@@ -10,7 +10,7 @@
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
- * - Enterprise Governed
+ * - SOVEREIGN Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen

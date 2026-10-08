@@ -66,7 +66,7 @@ describe("Billing & Capability Entitlement Graph (CEG) Integration", () => {
     expect(ceg.getCapabilityState(customerId)).toBe("LOCKED");
 
     // 3. Action: Billing Gateway processes an upgrade and emits the event.
-    await billingGateway.upgradeSubscription(customerId, "ENTERPRISE");
+    await billingGateway.upgradeSubscription(customerId, "SOVEREIGN");
 
     // 4. Verification: CEG should have processed the event and activated the capability.
     const newState = ceg.getCapabilityState(customerId);

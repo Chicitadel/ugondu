@@ -11,7 +11,7 @@ describe('6G - UPM Execution Gate Adversarial & Bypass Tests', () => {
     }; };
 
     const stubEnvelope = {
-        edition: 'ENTERPRISE',
+        edition: 'SOVEREIGN',
         allowedActions: ['PROVISION_DATABASE'],
         tenantId: 't-123'
     };

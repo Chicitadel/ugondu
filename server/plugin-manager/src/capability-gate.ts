@@ -45,7 +45,7 @@ export interface PluginCapabilityMetadata {
   publisher:            string;
   version:              string;
   requiredCapabilities: string[];   // capabilities this plugin requires
-  minimumEdition:       string;     // e.g. 'ENTERPRISE'
+  minimumEdition:       string;     // e.g. 'SOVEREIGN'
   maximumEdition?:      string;     // optional upper bound
   dependencies:         string[];   // other plugin IDs this plugin requires
   securityClass:        'CORE' | 'EXTENDED' | 'MARKETPLACE';
@@ -73,8 +73,8 @@ export interface PluginCapabilityDecisionResult {
  * 2. All required capabilities are entitled
  * 3. All plugin dependencies are available
  *
- * INVARIANT: A plugin requiring ENTERPRISE capability MUST be BLOCK_NOT_ENTITLED
- *            for a COMMUNITY or PROFESSIONAL tenant.
+ * INVARIANT: A plugin requiring SOVEREIGN capability MUST be BLOCK_NOT_ENTITLED
+ *            for a FREE or PROFESSIONAL tenant.
  */
 export function evaluatePluginCapability(
   plugin:               PluginCapabilityMetadata,
@@ -86,7 +86,7 @@ export function evaluatePluginCapability(
   const evaluatedAt = new Date().toISOString();
 
   const EDITION_RANK: Record<string, number> = {
-    COMMUNITY: 1, PROFESSIONAL: 2, BUSINESS: 3, ENTERPRISE: 4, SOVEREIGN: 5,
+    FREE: 1, PROFESSIONAL: 2, BUSINESS: 3, SOVEREIGN: 4, SOVEREIGN: 5,
   };
   const tenantRank   = EDITION_RANK[tenantEdition] ?? 0;
   const requiredRank = EDITION_RANK[plugin.minimumEdition] ?? 0;
