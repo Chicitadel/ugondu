@@ -148,7 +148,17 @@ export class AwsNativeClient implements IAwsClient {
             InstanceType: type as any,
             MinCount: 1,
             MaxCount: 1,
-            NetworkInterfaces: subnetId ? [{ DeviceIndex: 0, SubnetId: subnetId }] : undefined
+            NetworkInterfaces: subnetId ? [{ DeviceIndex: 0, SubnetId: subnetId }] : undefined,
+            TagSpecifications: [
+                {
+                    ResourceType: 'instance',
+                    Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+                },
+                {
+                    ResourceType: 'volume',
+                    Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+                }
+            ]
         });
         const res = await this.ec2.send(cmd) as any;
         const instance = res.Instances?.[0];
@@ -198,7 +208,10 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async createVpc(cidr: string, name: string): Promise<string> {
-        const cmd = new CreateVpcCommand({ CidrBlock: cidr });
+        const cmd = new CreateVpcCommand({ 
+            CidrBlock: cidr,
+            TagSpecifications: [{ ResourceType: 'vpc', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+        });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Vpc || !res.Vpc.VpcId) throw new Error(__t('aws_vpc_creation_failed'));
         
@@ -236,14 +249,24 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async createSubnet(vpcId: string, cidr: string, az?: string): Promise<SubnetResult> {
-        const cmd = new CreateSubnetCommand({ VpcId: vpcId, CidrBlock: cidr, AvailabilityZone: az });
+        const cmd = new CreateSubnetCommand({ 
+            VpcId: vpcId, 
+            CidrBlock: cidr, 
+            AvailabilityZone: az,
+            TagSpecifications: [{ ResourceType: 'subnet', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+        });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Subnet || !res.Subnet.SubnetId) throw new Error(__t('aws_subnet_creation_failed'));
         return { id: res.Subnet.SubnetId, cidr: cidr };
     }
 
     public async createSecurityGroup(vpcId: string, name: string): Promise<string> {
-        const cmd = new CreateSecurityGroupCommand({ VpcId: vpcId, GroupName: name, Description: `Ugondu Managed SG ${name}` });
+        const cmd = new CreateSecurityGroupCommand({ 
+            VpcId: vpcId, 
+            GroupName: name, 
+            Description: `Ugondu Managed SG ${name}`,
+            TagSpecifications: [{ ResourceType: 'security-group', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+        });
         const res = await this.ec2.send(cmd) as any;
         if (!res.GroupId) throw new Error(__t('aws_security_group_creation_fa'));
         return res.GroupId;
@@ -257,7 +280,8 @@ export class AwsNativeClient implements IAwsClient {
         const cmd = new CreateDBSubnetGroupCommand({
             DBSubnetGroupName: name,
             DBSubnetGroupDescription: __t('ugondu_managed_db_subnet_group'),
-            SubnetIds: subnetIds
+            SubnetIds: subnetIds,
+            Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
         });
         const res = await this.rds.send(cmd);
         if (!res.DBSubnetGroup || !res.DBSubnetGroup.DBSubnetGroupName) throw new Error(__t('aws_db_subnet_group_creation_f'));
@@ -285,7 +309,8 @@ export class AwsNativeClient implements IAwsClient {
             MasterUsername: 'admin',
             MasterUserPassword: password,
             VpcSecurityGroupIds: securityGroupId ? [securityGroupId] : undefined,
-            DBSubnetGroupName: dbSubnetGroupName
+            DBSubnetGroupName: dbSubnetGroupName,
+            Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
         });
 
         const res = await this.rds.send(cmd);
@@ -350,12 +375,19 @@ export class AwsNativeClient implements IAwsClient {
         if (type === 'RDS_INSTANCE') {
             const { CreateDBSnapshotCommand } = require('@aws-sdk/client-rds');
             const snapId = `snap-${id}-${Date.now()}`;
-            const cmd = new CreateDBSnapshotCommand({ DBInstanceIdentifier: id, DBSnapshotIdentifier: snapId });
+            const cmd = new CreateDBSnapshotCommand({ 
+                DBInstanceIdentifier: id, 
+                DBSnapshotIdentifier: snapId,
+                Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }]
+            });
             await this.rds.send(cmd);
             return snapId;
         } else if (type === 'EBS_VOLUME') {
             const { CreateSnapshotCommand } = require('@aws-sdk/client-ec2');
-            const cmd = new CreateSnapshotCommand({ VolumeId: id });
+            const cmd = new CreateSnapshotCommand({ 
+                VolumeId: id,
+                TagSpecifications: [{ ResourceType: 'snapshot', Tags: [{ Key: 'UgonduCOR', Value: '1' }, { Key: 'UgonduTransactionId', Value: 'physical-cert' }] }]
+            });
             const res = await this.ec2.send(cmd) as any;
             if (!res.SnapshotId) throw new Error(__t('ebs_snapshot_creation_failed'));
             return res.SnapshotId;

@@ -1,4 +1,4 @@
-import { Logger } from '../../../../shared/logger';
+import { Logger } from '@ugondu/shared';
 
 describe('Credential Redaction Security', () => {
     it('must redact passwords and tokens from execution logs', () => {
