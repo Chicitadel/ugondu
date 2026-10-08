@@ -43,20 +43,19 @@ export class AwsVpcReconciler {
      * Handle historical untagged orphans.
      * Ensure ownership is proven via CloudTrail or historical graphs before deletion or management.
      */
-    public async handleOrphanVpc(vpcId: string, cloudTrailLogs: any[], historicalGraph: any): Promise<any> {
+    public async handleOrphanVpc(vpcId: string, cloudTrailLogs: any[], historicalGraph: any, externalApprovalSignatures?: string[], intentHash?: string, mfaVerified?: boolean): Promise<any> {
         // 1. Prove ownership via CloudTrail or historical graphs
         const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, historicalGraph);
         if (!ownershipProven) {
             throw new Error(`Safety Violation: Ownership not proven for VPC ${vpcId}. Cannot manage untagged orphan.`);
         }
 
-        // Generate cryptographic SafetyGate evidence
-        const intentPayload = JSON.stringify({ vpcId, action: 'cleanup-vpc', timestamp: Date.now() });
-        const intentHash = crypto.createHash('sha256').update(intentPayload).digest('hex');
-        
-        // Use a secure key for HMCA or Signature, defaulting to a secure string for this context if env not set
-        const secretKey = process.env.SAFETY_GATE_SECRET || 'fallback-secure-key-for-physical-cor';
-        const signature = crypto.createHmac('sha256', secretKey).update(intentHash).digest('hex');
+        if (!externalApprovalSignatures || externalApprovalSignatures.length === 0) {
+            throw new Error('Safety Violation: External human approval signatures required for autonomous destruction.');
+        }
+        if (!intentHash) {
+            throw new Error('Safety Violation: Intent hash required.');
+        }
 
         // 2. Preflight Safety Gate for Destructive/Irreversible Actions
         // Enforcing safety gate before executing any autonomous cleanup or deletion
@@ -69,9 +68,9 @@ export class AwsVpcReconciler {
             isAutonomous: true,
             proof: {
                 authenticatedUserId: 'system',
-                mfaVerified: true,
+                mfaVerified: mfaVerified || false,
                 intentHash: intentHash,
-                approvalSignatures: [signature] // Real cryptographic evidence
+                approvalSignatures: externalApprovalSignatures // Real cryptographic evidence
             }
         });
 
@@ -90,7 +89,7 @@ export class AwsVpcReconciler {
             vpcId,
             evidence: {
                 intentHash,
-                signature,
+                signature: externalApprovalSignatures[0],
                 verifiedAt: new Date().toISOString(),
                 verificationMethod: 'aws-api-describe-vpcs'
             }

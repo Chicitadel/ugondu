@@ -37,6 +37,7 @@
 import { ResourceClassification, ResourceOwnership } from '../../../shared/schemas/resource-classification.schema';
 // @ts-ignore
 import { ResourceProtocol } from '../../../shared/protocols/resource.protocol';
+import * as crypto from 'crypto';
 
 export enum ActionClassification {
   REVERSIBLE = 'REVERSIBLE',
@@ -64,6 +65,9 @@ export interface ActionContext {
 
 export class SafetyGatesValidator {
   
+  // Simulated persistent locking mechanism
+  private static leaseLocks = new Map<string, { expiresAt: number }>();
+
   /**
    * Evaluates the dependency graph to compute blast radius.
    * Ensures that we do not exceed safe topological boundaries.
@@ -77,8 +81,30 @@ export class SafetyGatesValidator {
    * This guarantees deterministic execution and no race conditions during destruction.
    */
   public async acquireSafetyLease(actionId: string, resourceId: string): Promise<boolean> {
-    // In production, interacts with a distributed locking protocol
-    return true; 
+    const lockKey = `lease:${resourceId}`;
+    const now = Date.now();
+    const existing = SafetyGatesValidator.leaseLocks.get(lockKey);
+    if (existing && existing.expiresAt > now) {
+      return false; // Lock already held
+    }
+    // atomic simulated acquire
+    SafetyGatesValidator.leaseLocks.set(lockKey, { expiresAt: now + 30000 });
+    return true;
+  }
+
+  private verifyApprovalSignature(intentHash: string, signaturePayload: string): boolean {
+    try {
+      // Expecting signaturePayload to be JSON: { publicKey: string, signature: string }
+      const { publicKey, signature } = JSON.parse(signaturePayload);
+      if (!publicKey || !signature) return false;
+      
+      const verify = crypto.createVerify('sha256');
+      verify.update(intentHash);
+      verify.end();
+      return verify.verify(publicKey, signature, 'base64');
+    } catch (e) {
+      return false;
+    }
   }
 
   /**
@@ -89,6 +115,15 @@ export class SafetyGatesValidator {
     const computedRadius = this.evaluateDependencyGraph(context.dependencyGraph);
     if (computedRadius > context.blastRadius) {
       throw new Error(`Blast radius limit exceeded. Expected <= ${context.blastRadius}, got ${computedRadius}`);
+    }
+
+    // Verify external cryptographic signatures
+    if (context.proof?.approvalSignatures) {
+       for (const sigPayload of context.proof.approvalSignatures) {
+         if (!this.verifyApprovalSignature(context.proof.intentHash, sigPayload)) {
+           throw new Error('Security Violation: Invalid or self-generated cryptographic signature.');
+         }
+       }
     }
 
     // 2. Autonomous Deletion Governance
@@ -145,3 +180,4 @@ export class SafetyGatesValidator {
     return true;
   }
 }
+
