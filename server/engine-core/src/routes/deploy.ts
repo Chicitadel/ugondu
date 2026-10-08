@@ -46,7 +46,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
   router.post('/resolve', async (req: Request, res: Response): Promise<void> => {
     const {
       repositoryUrl, branch, fileMap, targetEnvironment,
-      token, projectId, workspaceId, targetId, agentId, agentVersion,
+      token, projectId, workspaceId, targetId,
     } = req.body as Record<string, unknown>;
 
     if (
@@ -276,8 +276,6 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
         projectId,
         environmentId: targetEnvironment,
         targetId,
-        agentId,
-        agentVersion,
         executionId,
         nonce,
         artifactDigest,
@@ -315,7 +313,7 @@ export function createDeployRouter(keyState: KeyState, billingGatewayUrl: string
   router.post('/preview', async (req: Request, res: Response): Promise<void> => {
     const {
       repositoryUrl, branch, fileMap, targetEnvironment,
-      token, projectId, workspaceId, targetId, agentId, agentVersion,
+      token, projectId, workspaceId, targetId,
     } = req.body as Record<string, unknown>;
 
     if (

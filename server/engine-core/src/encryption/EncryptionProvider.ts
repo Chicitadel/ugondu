@@ -32,6 +32,8 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+import * as crypto from 'crypto';
+
 export interface ProvenanceContext {
     sourceId: string;
     timestamp: number;
@@ -58,17 +60,28 @@ export interface EncryptionProvider {
 }
 
 export class StrictEncryptionProvider implements EncryptionProvider {
+    private masterKey: Buffer;
+
+    constructor() {
+        this.masterKey = crypto.randomBytes(32);
+    }
+
     async encrypt(data: Buffer, provenance: ProvenanceContext): Promise<EncryptedData> {
         console.log(`[SEC-LOG] Data encrypted. Provenance: ${provenance.sourceId}. Strict AES-256-GCM applied. No keys exposed.`);
-        return {
-            cipherText: Buffer.from([]),
-            iv: Buffer.from([]),
-            authTag: Buffer.from([])
-        };
+        const iv = crypto.randomBytes(12);
+        const cipher = crypto.createCipheriv('aes-256-gcm', this.masterKey, iv);
+        let cipherText = cipher.update(data);
+        cipherText = Buffer.concat([cipherText, cipher.final()]);
+        const authTag = cipher.getAuthTag();
+        return { cipherText, iv, authTag };
     }
 
     async decrypt(encryptedData: EncryptedData, provenance: ProvenanceContext): Promise<Buffer> {
         console.log(`[SEC-LOG] Data decrypted. Provenance: ${provenance.sourceId}`);
-        return Buffer.from([]);
+        const decipher = crypto.createDecipheriv('aes-256-gcm', this.masterKey, encryptedData.iv);
+        decipher.setAuthTag(encryptedData.authTag);
+        let decrypted = decipher.update(encryptedData.cipherText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted;
     }
 }
