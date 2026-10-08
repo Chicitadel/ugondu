@@ -16,7 +16,7 @@ export class AwsPhysicalRepairExecutor {
 
         const region = process.env.UGONDU_CERT_REGION;
         if (!region) {
-            throw new Error("UGONDU_CERT_REGION is missing from the environment");
+            throw new Error(__t('error.cert.missing_region'));
         }
 
         for (const diag of plan.diagnoses) {
