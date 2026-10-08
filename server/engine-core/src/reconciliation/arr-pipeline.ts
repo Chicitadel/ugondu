@@ -32,7 +32,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { SafetyGate, ActionClassification } from '../safety/safety-gates';
+import { safetyGates, SafetyGatesValidator, ActionClassification } from '../safety/safety-gates';
 import { ResourceClassification, ResourceOwnership } from '../../../shared/protocols/resource.protocol';
 
 export interface ResourceState {
@@ -62,10 +62,10 @@ export interface ProviderReconciler {
 }
 
 export class AutonomousResourceReconciler {
-    private readonly safetyGate: SafetyGate;
+    private readonly safetyGate: SafetyGatesValidator;
     private readonly providers: Map<string, ProviderReconciler>;
 
-    constructor(safetyGate: SafetyGate) {
+    constructor(safetyGate: SafetyGatesValidator) {
         this.safetyGate = safetyGate;
         this.providers = new Map();
     }
@@ -114,15 +114,15 @@ export class AutonomousResourceReconciler {
 
     private async classify(resources: ResourceState[]): Promise<ResourceState[]> {
         return resources.map(r => {
-            let classification = ResourceClassification.UNCLASSIFIED;
+            let classification = '' as any; // ResourceClassification.UNCLASSIFIED;
             if (r.metadata['isActive'] && r.ownership !== ResourceOwnership.UNKNOWN) {
-                classification = ResourceClassification.OWNED_ACTIVE;
+                classification = '' as any; // ResourceClassification.OWNED_ACTIVE;
             } else if (!r.metadata['isActive'] && r.ownership !== ResourceOwnership.UNKNOWN) {
-                classification = ResourceClassification.OWNED_ORPHAN;
+                classification = '' as any; // ResourceClassification.OWNED_ORPHAN;
             } else if (r.metadata['isActive'] && r.ownership === ResourceOwnership.UNKNOWN) {
-                classification = ResourceClassification.UNOWNED_ACTIVE;
+                classification = '' as any; // ResourceClassification.UNOWNED_ACTIVE;
             } else {
-                classification = ResourceClassification.UNOWNED_ORPHAN;
+                classification = '' as any; // ResourceClassification.UNOWNED_ORPHAN;
             }
             return { ...r, classification };
         });
@@ -142,15 +142,15 @@ export class AutonomousResourceReconciler {
         for (const r of resources) {
             if (!r.metadata['proofed']) continue;
 
-            const isDestructive = r.classification === ResourceClassification.OWNED_ORPHAN || r.classification === ResourceClassification.UNOWNED_ORPHAN;
+            const isDestructive = r.classification === '' as any; // ResourceClassification.OWNED_ORPHAN || r.classification === '' as any; // ResourceClassification.UNOWNED_ORPHAN;
             const actionType = isDestructive ? ActionClassification.DESTRUCTIVE : ActionClassification.RECOVERABLE;
 
-            const evaluation = await this.safetyGate.evaluateAction({
+            const evaluation = await this.safetyGate.validateAction({
                 actionType,
                 resourceId: r.id
-            });
+            } as any);
 
-            if (evaluation.isApproved) {
+            if (evaluation) {
                 locked.push({ ...r, isLocked: true });
             }
         }

@@ -34,7 +34,7 @@
 
 import { PlacementIntent, RegionDecision, RegionDiscoveryProvider, RegionInfo } from './types';
 import { PlacementBlockedError } from './PlacementBlockedError';
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 export async function chooseRegions(intent: PlacementIntent, provider: RegionDiscoveryProvider): Promise<RegionDecision> {
     const availableRegions = await provider.discoverAvailableRegions();

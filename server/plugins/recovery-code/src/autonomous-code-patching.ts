@@ -16,7 +16,7 @@ export class AutonomousCodePatching implements RecoveryCapability {
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        if (!plan.requiresCodePatching) throw new Error('UNIMPLEMENTED')
+        if (!plan.requiresCodePatching) return true;
         
         let allPatchesSuccessful = true;
         

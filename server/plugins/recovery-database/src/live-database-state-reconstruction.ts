@@ -68,7 +68,7 @@ export class LiveDatabaseStateReconstruction implements RecoveryCapability {
     async execute(plan: any, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
         // COR-009: Do not fake success
         if (!plan.requiresDatabaseRepair) {
-            throw new Error('UNIMPLEMENTED')
+            return true;
         }
         
         const repairPlan = {
@@ -87,7 +87,7 @@ export class LiveDatabaseStateReconstruction implements RecoveryCapability {
         
         const dryRunResult = await adapter.dryRun(repairPlan as any, scope);
         if (!dryRunResult.safe) {
-            throw new Error('UNIMPLEMENTED')
+            return false;
         }
         
         const baselineFingerprint = await adapter.fingerprintRepository(scope);
@@ -101,7 +101,7 @@ export class LiveDatabaseStateReconstruction implements RecoveryCapability {
         
         if (!executionResult.success) {
             await adapter.rollback(executionResult.checkpointId);
-            throw new Error('UNIMPLEMENTED')
+            return false;
         }
         
         const verification = await adapter.verifyState(scope, { databaseRepaired: true });

@@ -86,7 +86,7 @@ export function evaluatePluginCapability(
   const evaluatedAt = new Date().toISOString();
 
   const EDITION_RANK: Record<string, number> = {
-    FREE: 1, PROFESSIONAL: 2, BUSINESS: 3, SOVEREIGN: 4, SOVEREIGN: 5,
+    FREE: 1, PROFESSIONAL: 2, BUSINESS: 3, SOVEREIGN: 4,
   };
   const tenantRank   = EDITION_RANK[tenantEdition] ?? 0;
   const requiredRank = EDITION_RANK[plugin.minimumEdition] ?? 0;

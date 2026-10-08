@@ -175,7 +175,8 @@ export class CheckpointManager {
   // ---------------------------------------------------------------------------
 
   private isProviderBacked(): boolean {
-    return this.config.tier === 'SOVEREIGN' || this.config.tier === 'SOVEREIGN';
+    const tier = this.config.tier as string;
+    return tier === 'SOVEREIGN' || tier === 'BUSINESS';
   }
 
   /**

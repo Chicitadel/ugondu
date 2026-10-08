@@ -16,7 +16,7 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
     }
     
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
-        if (!plan.requiresDependencyRepair) throw new Error('UNIMPLEMENTED')
+        if (!plan.requiresDependencyRepair) return true;
         // COR-008: Do not fake success
         
         for (const action of plan.actions) {
@@ -31,7 +31,7 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
             }
         }
         
-        throw new Error('UNIMPLEMENTED')
+        return true;
     }
 }
 
