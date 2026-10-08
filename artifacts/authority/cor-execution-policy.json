@@ -205,7 +205,7 @@
       "Sid": "CORAuthority20",
       "Effect": "Allow",
       "Action": "ec2:CreateTags",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:*/*",
+      "Resource": "*",
       "Condition": {
         "StringLike": {
           "aws:ResourceTag/UgonduCOR": "*"
@@ -216,7 +216,7 @@
       "Sid": "CORAuthority21",
       "Effect": "Allow",
       "Action": "ec2:DeleteTags",
-      "Resource": "arn:aws:ec2:us-east-1:971671216490:*/*",
+      "Resource": "*",
       "Condition": {
         "StringLike": {
           "aws:ResourceTag/UgonduCOR": "*"

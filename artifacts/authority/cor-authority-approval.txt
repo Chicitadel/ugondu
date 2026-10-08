@@ -13,7 +13,7 @@ Credential model: GitHub OIDC → short-lived STS credentials
 ====================================================
  CRYPTOGRAPHIC BINDING
 ====================================================
-Repository Commit: 1fc8885296da2cc4d020d3dab1243c3a183402e9
+Repository Commit: 8c8632f0bb60bfe8155eec9588672a7d6b5a9c06
 Generator Version: 1.2.0
 Map Version      : 1.2.0
 Account          : 971671216490
@@ -21,8 +21,8 @@ Region           : us-east-1
 Role Name        : UgonduCORRunner
 
 COR Graph Hash   : 2c1aa941173959e99680040713ba75c09508e90bec80e67717e3c5519e692ea2
-Manifest Hash    : 32abb41b6504742eafbc6b0d7bb20f6c2e64792038e0efa1edfa0c77cd4a24b4
-Execution Policy : e36b84044ea8dcd9037cb368ac3a2c64a3a392ce556ec9f235047d5b6ad55e4f
+Manifest Hash    : 9b324c490a9198b29818dff572c6b582d4667592397591e6e6f39eda26c0d1b8
+Execution Policy : 2e6c6f5b91d15b9ee8282a26247d4f777e2c31e0fa547daaaab4042ce8be0994
 
 This cryptographically binds the approved execution
 policy strictly to the exact COR execution graph.

@@ -143,8 +143,8 @@ const AWS_AUTHORITY_MAP: Record<string, AuthorityPermission[]> = {
         { action: 's3:DeleteObject', resources: ['arn:aws:s3:::ugondu-cor-*/*'] }
     ],
     'drift:injection': [
-        { action: 'ec2:CreateTags', resources: ['arn:aws:ec2:*:*:*/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } },
-        { action: 'ec2:DeleteTags', resources: ['arn:aws:ec2:*:*:*/*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
+        { action: 'ec2:CreateTags', resources: ['*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } },
+        { action: 'ec2:DeleteTags', resources: ['*'], conditions: { "StringLike": { "aws:ResourceTag/UgonduCOR": "*" } } }
     ],
     'drift:residual-scan': [
         { action: 'ec2:DescribeVpcs', resources: ['*'] },
