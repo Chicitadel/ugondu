@@ -61,11 +61,11 @@ export class RollbackExecutor {
 
     private async executeDnsFlip(): Promise<void> {
         // Implementation of DNS flip
-        return Promise.resolve();
+        throw new Error('Capability not implemented and fails closed by default.');
     }
 
     private async executeForwardRecovery(): Promise<void> {
         // Implementation of forward recovery logic
-        return Promise.resolve();
+        throw new Error('Capability not implemented and fails closed by default.');
     }
 }

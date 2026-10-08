@@ -47,11 +47,11 @@ export class RollbackVerifier {
 
     private async verifyRouting(): Promise<boolean> {
         // Concrete validation logic for routing
-        return Promise.resolve(true);
+        throw new Error('Capability not implemented and fails closed by default.');
     }
 
     private async verifyDataIntegrity(): Promise<boolean> {
         // Concrete validation logic for data integrity
-        return Promise.resolve(true);
+        throw new Error('Capability not implemented and fails closed by default.');
     }
 }

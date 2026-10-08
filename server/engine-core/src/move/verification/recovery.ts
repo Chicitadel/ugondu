@@ -43,10 +43,10 @@ export class RecoveryVerifier {
     }
 
     private async checkBackups(): Promise<boolean> {
-        return Promise.resolve(true);
+        throw new Error('Capability not implemented and fails closed by default.');
     }
 
     private async checkFailoverReady(): Promise<boolean> {
-        return Promise.resolve(true);
+        throw new Error('Capability not implemented and fails closed by default.');
     }
 }
