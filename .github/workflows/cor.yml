@@ -141,6 +141,5 @@ jobs:
         run: npx ts-node -T server/engine-core/physical-fargate-certification.ts
 
       - name: Assert zero residual resources cleanup verification
-        run: |
-          echo "Verifying zero residual resources cleanup..."
-          node -e "console.log('Zero residual resources cleanup verified.');"
+        run: npx ts-node -T scripts/ci/residual-scanner.ts
+
