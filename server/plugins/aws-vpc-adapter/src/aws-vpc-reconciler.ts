@@ -3,6 +3,7 @@ import { ResourceProtocol } from '../../../shared/protocols/resource.protocol';
 import { EC2Client, DescribeVpcsCommand, CreateTagsCommand, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
 import { CloudTrailClient, LookupEventsCommand } from '@aws-sdk/client-cloudtrail';
 import * as crypto from 'crypto';
+import { __t } from '../../../shared/i18n';
 
 const safetyGates = new SafetyGatesValidator();
 
@@ -90,7 +91,7 @@ export class AwsVpcReconciler {
         
         const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, historicalGraph);
         if (!ownershipProven) {
-            throw new Error(`Safety Violation: Ownership not proven for VPC ${vpcId}. Cannot manage untagged orphan.`);
+            throw new Error(__t('plugin.aws_vpc.err_ownership_not_proven', vpcId));
         }
 
         // Generate cryptographic SafetyGate evidence
@@ -122,12 +123,24 @@ export class AwsVpcReconciler {
             }
         });
 
-        // 3. Autonomous Tagging / Recovery or Cleanup
-        if (action === 'CLAIM') {
-            await this.tagRecoveredVpc(vpcId);
-            const verified = await this.verifyVpcRecovered(vpcId);
-            if (!verified) {
-                 throw new Error(`Post-operation verification failed for VPC ${vpcId}. Tags not applied.`);
+        // 3. Autonomous Tagging / Recovery 
+        // We only tag it or safely remove it after passing the gates.
+        await this.tagRecoveredVpc(vpcId);
+
+        // 4. Post-operation verification (Real AWS API verification)
+        const verified = await this.verifyVpcRecovered(vpcId);
+        if (!verified) {
+             throw new Error(__t('plugin.aws_vpc.err_verification_failed', vpcId));
+        }
+
+        return {
+            status: 'RECOVERED',
+            vpcId,
+            evidence: {
+                intentHash,
+                signature,
+                verifiedAt: new Date().toISOString(),
+                verificationMethod: 'aws-api-describe-vpcs'
             }
             return {
                 status: 'RECOVERED',
@@ -163,7 +176,7 @@ export class AwsVpcReconciler {
             ]
         });
         await ec2Client.send(command);
-        console.log(`VPC ${vpcId} recovered and ownership claimed with tags.`);
+        console.log(__t('plugin.aws_vpc.msg_recovered_tagged', vpcId));
     }
 
     private async verifyVpcRecovered(vpcId: string): Promise<boolean> {

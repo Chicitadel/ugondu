@@ -1,6 +1,7 @@
 import { AwsVpcReconciler } from '../../server/plugins/aws-vpc-adapter/src/aws-vpc-reconciler';
 import { EC2Client, DescribeVpcsCommand } from '@aws-sdk/client-ec2';
-import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
+import { CloudTrailClient, LookupEventsCommand } from '@aws-sdk/client-cloudtrail';
+import { __t } from '../../server/shared/i18n';
 
 if (!process.env.AWS_REGION) {
     throw new Error('Safety Violation: AWS_REGION must be explicitly specified in the environment.');
@@ -14,13 +15,7 @@ const stsClient = new STSClient({ region: process.env.AWS_REGION });
  * Handles execution of untagged orphan VPC workflows.
  */
 async function runVpcOrphanReconciliation() {
-    console.log('Initiating AWS VPC Orphan Reconciliation Stream...');
-    
-    // Verify STS identity before execution
-    const identityCommand = new GetCallerIdentityCommand({});
-    const identity = await stsClient.send(identityCommand);
-    console.log(`Authenticated as STS Identity: ${identity.Arn} (Account: ${identity.Account})`);
-
+    console.log(__t('scripts.aws_vpc.msg_initiating_stream'));
     const reconciler = new AwsVpcReconciler();
 
     // Fetch real untagged VPCs from AWS
@@ -30,7 +25,7 @@ async function runVpcOrphanReconciliation() {
     // Identify orphan VPCs (those without tags or without expected managed tags)
     const orphanVpcs = (vpcsResponse.Vpcs || []).filter(vpc => !vpc.Tags || vpc.Tags.length === 0);
 
-    console.log(`Found ${orphanVpcs.length} real untagged orphan VPC(s).`);
+    console.log(__t('scripts.aws_vpc.msg_found_orphans', orphanVpcs.length));
 
     // We will still pass historical graph if any exists from some external graph DB
     const historicalGraph = { nodes: orphanVpcs.map(v => v.VpcId) };
@@ -39,16 +34,16 @@ async function runVpcOrphanReconciliation() {
         if (!vpc.VpcId) continue;
         const vpcId = vpc.VpcId;
         try {
-            console.log(`Evaluating orphan VPC: ${vpcId}`);
+            console.log(__t('scripts.aws_vpc.msg_evaluating_orphan', vpcId));
 
             // Here we determine the action. For demo, we default to CLAIM.
             // Distinguish CLAIM from CLEANUP
             const action = process.env.COR_ACTION === 'CLEANUP' ? 'CLEANUP' : 'CLAIM';
 
-            const evidence = await reconciler.handleOrphanVpc(vpcId, action, historicalGraph);
-            console.log(`Successfully handled VPC: ${vpcId} with action ${action}. Evidence:`, JSON.stringify(evidence, null, 2));
+            const evidence = await reconciler.handleOrphanVpc(vpcId, cloudTrailLogs, historicalGraph);
+            console.log(__t('scripts.aws_vpc.msg_successfully_handled', vpcId), JSON.stringify(evidence, null, 2));
         } catch (error: any) {
-            console.error(`Reconciliation aborted for ${vpcId}: ${error.message}`);
+            console.error(__t('scripts.aws_vpc.msg_reconciliation_aborted', vpcId, error.message));
         }
     }
 }
