@@ -8,26 +8,11 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
     }
     
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        const hasComposer = twin.application.manifests && twin.application.manifests.includes('composer.json');
-        if (!hasComposer) {
-            return { issue: 'NoIssue', requiresComposerInstall: false, confidence: 1.0 };
-        }
-        
-        return { issue: 'ComposerIntegrityLost', requiresComposerInstall: true, confidence: 0.95 };
+        throw new Error('UNIMPLEMENTED: Composer diagnosis is scaffolded');
     }
     
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        if (!diagnosis.requiresComposerInstall) {
-            return { requiresDependencyRepair: false, actions: [], safeToProceed: true };
-        }
-        
-        return {
-            requiresDependencyRepair: true,
-            actions: [
-                { type: 'COMPOSER_INSTALL' }
-            ],
-            safeToProceed: true
-        };
+        throw new Error('UNIMPLEMENTED: Composer plan is scaffolded');
     }
     
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

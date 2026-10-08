@@ -8,24 +8,11 @@ export class ZddTopologyRepair implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        return {
-            issue: 'ZddTopologyFracture',
-            confidence: 1.0,
-            affectedBackups: twin.resourceGraphEdges?.filter(e => e.target.endsWith('_bkup')) || []
-        };
+        throw new Error('UNIMPLEMENTED: ZDD diagnose is scaffolded');
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        return {
-            requiresInfrastructureRepair: true,
-            infrastructureRepairs: [
-                { type: 'REMOVE_DUMMY_DOCROOTS' },
-                { type: 'RESTORE_BKUP_DIRECTORIES' },
-                { type: 'REBUILD_SYMLINK_CHAIN', chain: ['public_html', 'current', 'releases/latest'] }
-            ],
-            safeToProceed: true,
-            destructiveDeleteBlocked: false
-        };
+        throw new Error('UNIMPLEMENTED: ZDD plan is scaffolded');
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

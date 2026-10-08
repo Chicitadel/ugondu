@@ -45,42 +45,42 @@ export class OktaScimAdapter implements IScimAdapter {
   public async createUser(user: IScimUser): Promise<IScimUser> {
     const parsedUser: IScimUser = ScimUserSchema.parse(user);
     Logger.info(__t("okta.scim.creating_user", { id: parsedUser.id }));
-    return Promise.resolve(parsedUser);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async updateUser(id: string, user: Partial<IScimUser>): Promise<IScimUser> {
     Logger.info(__t("okta.scim.updating_user", { id }));
-    return Promise.resolve({ id, userName: user.userName ?? "unknown", active: user.active ?? true } as IScimUser);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async deleteUser(id: string): Promise<void> {
     Logger.info(__t("okta.scim.deleting_user", { id }));
-    return Promise.resolve();
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async getUser(id: string): Promise<IScimUser | null> {
     Logger.info(__t("okta.scim.getting_user", { id }));
-    return Promise.resolve({ id, userName: "mock-user", active: true } as IScimUser);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async createGroup(group: IScimGroup): Promise<IScimGroup> {
     const parsedGroup: IScimGroup = ScimGroupSchema.parse(group);
     Logger.info(__t("okta.scim.creating_group", { id: parsedGroup.id }));
-    return Promise.resolve(parsedGroup);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async updateGroup(id: string, group: Partial<IScimGroup>): Promise<IScimGroup> {
     Logger.info(__t("okta.scim.updating_group", { id }));
-    return Promise.resolve({ id, displayName: group.displayName ?? "unknown" } as IScimGroup);
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async deleteGroup(id: string): Promise<void> {
     Logger.info(__t("okta.scim.deleting_group", { id }));
-    return Promise.resolve();
+    throw new Error('UNIMPLEMENTED');
   }
 
   public async getGroup(id: string): Promise<IScimGroup | null> {
     Logger.info(__t("okta.scim.getting_group", { id }));
-    return Promise.resolve({ id, displayName: "mock-group" } as IScimGroup);
+    throw new Error('UNIMPLEMENTED');
   }
 }

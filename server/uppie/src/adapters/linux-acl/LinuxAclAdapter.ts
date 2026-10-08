@@ -124,7 +124,7 @@ export class LinuxAclAdapter implements IPolicyProviderAdapter {
   }
 
   async discoverRoles(_context: AdapterContext): Promise<Array<{ id: string; displayName: string; policies: string[] }>> {
-    return []; // UNSUPPORTED: POSIX ACL has no role concept
+    throw new Error('UNSUPPORTED: POSIX ACL has no role concept');
   }
 
   private async effective(actor: string, resource: string): Promise<string> {
@@ -290,7 +290,7 @@ export class LinuxAclAdapter implements IPolicyProviderAdapter {
   }
 
   async detectUnused(_context: AdapterContext, _thresholdDays: number): Promise<UsageObservation[]> {
-    return []; // NOT_OBSERVABLE
+    throw new Error('NOT_OBSERVABLE: Kernel keeps no per-ACL access history');
   }
 
   async findDependencies(policyId: string, _context: AdapterContext): Promise<DependencyReport> {

@@ -26,23 +26,7 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        if (!diagnosis.missingPaths || diagnosis.missingPaths.length === 0) {
-            return { requiresRepositoryClone: false, safeToProceed: true };
-        }
-
-        const repositories = diagnosis.missingPaths.map((path: string) => {
-            // Resolve via DependencyScanner/SourceResolver dynamically
-            return {
-                path: path,
-                reference: `source_repo_for_path_${path.replace(/[^a-zA-Z0-9]/g, '_')}`
-            };
-        });
-
-        return {
-            requiresRepositoryClone: true,
-            repositories: repositories,
-            safeToProceed: true
-        };
+        throw new Error('UNIMPLEMENTED: Path repository plan is scaffolded');
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

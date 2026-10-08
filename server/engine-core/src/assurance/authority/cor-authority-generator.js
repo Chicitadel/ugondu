@@ -165,7 +165,7 @@ var CORAuthorityCalculator = /** @class */ (function () {
         return { provider: 'aws', operations: PHYSICAL_COR_GRAPH };
     };
     CORAuthorityCalculator.prototype.calculateAuthorityGap = function (available, required) {
-        return { hasGap: true, missingPermissions: [] }; // Mock for now
+        throw new Error('UNIMPLEMENTED: calculateAuthorityGap is not fully implemented');
     };
     CORAuthorityCalculator.prototype.generateLeastPrivilegeBundle = function (target, plan) {
         // Wrapper mapping to AWS logic
