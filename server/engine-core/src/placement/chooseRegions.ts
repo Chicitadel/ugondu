@@ -32,18 +32,13 @@
  * All Rights Reserved.
  ******************************************************************************/
 
-import { PlacementIntent, RegionDecision } from './types';
+import { PlacementIntent, RegionDecision, RegionDiscoveryProvider, RegionInfo } from './types';
 import { PlacementBlockedError } from './PlacementBlockedError';
 
-// Strictly governed known regions to prevent silent region invention
-const KNOWN_REGIONS = [
-    { id: 'us-east-1', compliance: ['SOC 2', 'ISO 27001'], residency: ['US'], baseLatencyMs: 10, baseCost: 100, quota: 1000 },
-    { id: 'eu-central-1', compliance: ['GDPR', 'ISO 27001'], residency: ['EU'], baseLatencyMs: 20, baseCost: 120, quota: 800 },
-    { id: 'ap-northeast-1', compliance: ['SOC 2'], residency: ['JP'], baseLatencyMs: 50, baseCost: 110, quota: 500 }
-];
+export async function chooseRegions(intent: PlacementIntent, provider: RegionDiscoveryProvider): Promise<RegionDecision> {
+    const availableRegions = await provider.discoverAvailableRegions();
 
-export function chooseRegions(intent: PlacementIntent): RegionDecision {
-    const validRegions = KNOWN_REGIONS.filter(region => {
+    const validRegions = availableRegions.filter(region => {
         if (intent.residencyRequirements.length > 0) {
             const hasResidency = intent.residencyRequirements.every(req => region.residency.includes(req));
             if (!hasResidency) return false;
