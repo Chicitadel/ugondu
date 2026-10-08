@@ -85,27 +85,19 @@ export class AwsVpcReconciler {
      * Handle historical untagged orphans.
      * Ensure ownership is proven via CloudTrail or historical graphs before deletion or management.
      */
-    public async handleOrphanVpc(vpcId: string, action: 'CLAIM' | 'CLEANUP', historicalGraph: any): Promise<any> {
-        // 1. Prove ownership via paginated CloudTrail Provider or historical graphs
-        const cloudTrailLogs = await this.evidenceProvider.getOwnershipEvidence(vpcId);
-        
+    public async handleOrphanVpc(vpcId: string, cloudTrailLogs: any[], historicalGraph: any, externalApprovalSignatures?: string[], intentHash?: string, mfaVerified?: boolean): Promise<any> {
+        // 1. Prove ownership via CloudTrail or historical graphs
         const ownershipProven = this.proveOwnership(vpcId, cloudTrailLogs, historicalGraph);
         if (!ownershipProven) {
             throw new Error(__t('plugin.aws_vpc.err_ownership_not_proven', vpcId));
         }
 
-        // Generate cryptographic SafetyGate evidence
-        const actionId = action === 'CLEANUP' ? 'delete-vpc' : 'claim-vpc';
-        const classification = action === 'CLEANUP' ? ActionClassification.DESTRUCTIVE : (ActionClassification as any).MODIFICATION || ActionClassification.DESTRUCTIVE;
-        
-        const intentPayload = JSON.stringify({ vpcId, action: actionId, timestamp: Date.now() });
-        const intentHash = crypto.createHash('sha256').update(intentPayload).digest('hex');
-        
-        const secretKey = process.env.SAFETY_GATE_SECRET;
-        if (!secretKey) {
-            throw new Error('SAFETY_GATE_SECRET is required to generate approval signatures.');
+        if (!externalApprovalSignatures || externalApprovalSignatures.length === 0) {
+            throw new Error('Safety Violation: External human approval signatures required for autonomous destruction.');
         }
-        const signature = crypto.createHmac('sha256', secretKey).update(intentHash).digest('hex');
+        if (!intentHash) {
+            throw new Error('Safety Violation: Intent hash required.');
+        }
 
         // 2. Preflight Safety Gate for Actions
         await safetyGates.validateAction({
@@ -117,9 +109,9 @@ export class AwsVpcReconciler {
             isAutonomous: true,
             proof: {
                 authenticatedUserId: 'system',
-                mfaVerified: true,
+                mfaVerified: mfaVerified || false,
                 intentHash: intentHash,
-                approvalSignatures: [signature] // Real cryptographic evidence
+                approvalSignatures: externalApprovalSignatures // Real cryptographic evidence
             }
         });
 
@@ -138,7 +130,7 @@ export class AwsVpcReconciler {
             vpcId,
             evidence: {
                 intentHash,
-                signature,
+                signature: externalApprovalSignatures[0],
                 verifiedAt: new Date().toISOString(),
                 verificationMethod: 'aws-api-describe-vpcs'
             }
