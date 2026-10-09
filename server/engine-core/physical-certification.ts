@@ -62,7 +62,7 @@ async function runCertification() {
         await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId, rdsSnapshotId: rdsSnapId });
 
         console.log(__t('cert.phase.creating_s3'));
-        const bucketName = `ugondu-cor-bucket-${Date.now()}`;
+        const bucketName = `ugondu-cor-bucket-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('storage:s3:create')!.execute({ transactionId: txId, bucketName });
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
 

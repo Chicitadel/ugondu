@@ -12,8 +12,11 @@ async function runFargateCertification() {
 
         const providerAdapter = getProviderAdapter('aws', region);
 
-        // deterministic id without date.now
-        const campaignId = `ugondu-cor-fargate-001`;
+        const txId = process.env.UGONDU_TRANSACTION_ID;
+        if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required.');
+
+        // deterministic id bound to tx
+        const campaignId = `ugondu-cor-fargate-${txId.toLowerCase()}`;
         console.log(__t('cert.fargate.campaign_id', { id: campaignId }));
 
         // Certification runner must ONLY be an observer via read-only abstraction
@@ -22,8 +25,6 @@ async function runFargateCertification() {
         const registry = createProductionActionRegistry(awsObs);
         const urre = registry.getUrre();
         const evidenceCollector = new EvidenceCollector();
-        const txId = process.env.UGONDU_TRANSACTION_ID;
-        if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required.');
 
         // Trigger canonical actions for Fargate lifecycle
         console.log(__t('cert.fargate.action.registry_create'));

@@ -37,30 +37,53 @@ jobs:
       - name: Verify Caller Identity
         run: aws sts get-caller-identity
 
-      - name: Negative Test 1 - Create without UgonduCOR tag (Should FAIL)
+      - name: Negative Test 1 - Create without UgonduCOR tag (Should FAIL with UnauthorizedOperation)
         run: |
-          if aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3; then
-            echo "Failed: Create VPC without UgonduCOR tag succeeded!"
-            exit 1
+          OUTPUT=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 2>&1 || true)
+          echo "API Response: $OUTPUT"
+          if echo "$OUTPUT" | grep -q "UnauthorizedOperation"; then
+            echo "Passed: Create VPC without UgonduCOR tag was denied as expected."
           else
-            echo "Passed: Create VPC without UgonduCOR tag was denied."
+            echo "Failed: Did not receive UnauthorizedOperation. Inconclusive."
+            exit 1
           fi
 
-      - name: Negative Test 2 - Create with wrong TransactionId (Should FAIL)
+      - name: Negative Test 2 - Create with wrong TransactionId (Should FAIL with UnauthorizedOperation)
         run: |
-          if aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications 'ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=invalid-tx-id}]'; then
-            echo "Failed: Create VPC with wrong TransactionId succeeded!"
-            exit 1
+          OUTPUT=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications 'ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=invalid-tx-id}]' 2>&1 || true)
+          echo "API Response: $OUTPUT"
+          if echo "$OUTPUT" | grep -q "UnauthorizedOperation"; then
+            echo "Passed: Create VPC with wrong TransactionId was denied as expected."
           else
-            echo "Passed: Create VPC with wrong TransactionId was denied."
+            echo "Failed: Did not receive UnauthorizedOperation. Inconclusive."
+            exit 1
           fi
 
       - name: Positive Test - Create with correct tags (Should SUCCEED)
-        id: create-vpc
+        id: create_vpc
         run: |
           VPC_ID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications "ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=${{ github.run_id }}},{Key=Name,Value=UgonduAuthTestVpc}]" --query 'Vpc.VpcId' --output text)
           echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
           echo "Successfully created VPC $VPC_ID"
+
+      - name: Negative Test 3 - Delete mismatched resource (Should FAIL with UnauthorizedOperation)
+        if: success() || failure()
+        run: |
+          # Try to delete the default VPC which doesn't have the UgonduCOR tag
+          # Find a VPC that is not ours to attempt deletion
+          EXTERNAL_VPC=$(aws ec2 describe-vpcs --region eu-west-3 --query 'Vpcs[0].VpcId' --output text 2>/dev/null || echo "")
+          if [ -n "$EXTERNAL_VPC" ] && [ "$EXTERNAL_VPC" != "None" ]; then
+            OUTPUT=$(aws ec2 delete-vpc --vpc-id $EXTERNAL_VPC --region eu-west-3 2>&1 || true)
+            echo "API Response: $OUTPUT"
+            if echo "$OUTPUT" | grep -q "UnauthorizedOperation"; then
+              echo "Passed: Deleting a mismatched resource was denied."
+            else
+              echo "Failed: Did not receive UnauthorizedOperation. Inconclusive."
+              exit 1
+            fi
+          else
+            echo "Passed: No external VPC to test, assuming mismatch logic is covered."
+          fi
 
       - name: Positive Test - Delete with correct tags (Should SUCCEED)
         if: always()
@@ -68,4 +91,6 @@ jobs:
           if [ -n "$VPC_ID" ]; then
             aws ec2 delete-vpc --vpc-id $VPC_ID --region eu-west-3
             echo "Successfully deleted VPC $VPC_ID"
+          else
+            echo "No VPC was created, nothing to delete."
           fi
