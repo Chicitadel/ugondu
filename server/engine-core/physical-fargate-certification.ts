@@ -9,8 +9,6 @@ async function runFargateCertification() {
         
         const region = process.env.UGONDU_CERT_REGION;
         if (!region) throw new Error(__t('error.cert.missing_region'));
-        const creds = process.env.UGONDU_CERT_RDS_CREDENTIAL_REF;
-        if (!creds) throw new Error(__t('error.cert.missing_creds'));
 
         const providerAdapter = getProviderAdapter('aws', region);
 
@@ -24,7 +22,8 @@ async function runFargateCertification() {
         const registry = createProductionActionRegistry(awsObs);
         const urre = registry.getUrre();
         const evidenceCollector = new EvidenceCollector();
-        const txId = process.env.UGONDU_TRANSACTION_ID || `tx-fargate-${campaignId}`;
+        const txId = process.env.UGONDU_TRANSACTION_ID;
+        if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required.');
 
         // Trigger canonical actions for Fargate lifecycle
         console.log(__t('cert.fargate.action.registry_create'));
@@ -63,12 +62,12 @@ async function runFargateCertification() {
 
         // Failure injection: deploy Revision 2 with intentionally invalid image digest
         console.log(__t('cert.fargate.deploying.rev2'));
-        const taskDefRes2 = await registry.getAction('container:task-definition:create')!.execute({ transactionId: txId + '-rev2', familyName: `${campaignId}-task`, image: `${campaignId}@sha256:0000000000000000000000000000000000000000000000000000000000000000` });
+        const taskDefRes2 = await registry.getAction('container:task-definition:create')!.execute({ transactionId: txId, familyName: `${campaignId}-task`, image: `${campaignId}@sha256:0000000000000000000000000000000000000000000000000000000000000000` });
         const taskDefArn2 = taskDefRes2?.outputs?.taskDefinitionArn || taskDefRes2?.taskDefinitionArn;
         if (!taskDefArn2) throw new Error(__t('error.cert.fargate.missing_rev2_arn'));
 
         console.log(__t('cert.fargate.action.deploy_rev2'));
-        const deployment2TxId = txId + '-rev2';
+        const deployment2TxId = txId;
         await registry.getAction('orchestration:container:deploy')!.execute({ transactionId: deployment2TxId, clusterName: globalClusterName, serviceName: `${campaignId}-svc`, taskDefinitionArn: taskDefArn2 });
         
         // Load the actual durably saved TX
@@ -116,8 +115,7 @@ async function runFargateCertification() {
         console.log(__t('cert.fargate.cleanup'));
         try {
             // URRE rollback will clean up everything correctly tracked in the ledger
-            const { TransactionStore } = require('./src/urre/transaction/transaction-store');
-            const mainTxId = process.env.UGONDU_TRANSACTION_ID || `tx-fargate-ugondu-cor-fargate-001`;
+            const mainTxId = txId;
             
             // Re-resolve registry and urre in case it crashed before initializing
             const providerAdapter = getProviderAdapter('aws', process.env.UGONDU_CERT_REGION!);
@@ -132,8 +130,7 @@ async function runFargateCertification() {
 
         const providerAdapter = getProviderAdapter('aws', process.env.UGONDU_CERT_REGION!);
         const residualScanner = providerAdapter.getResidualScanner();
-        
-        const leaked = await residualScanner.scanForLeakedResources({ transactionId: process.env.UGONDU_TRANSACTION_ID || `tx-fargate-ugondu-cor-fargate-001` });
+        const leaked = await residualScanner.scanForLeakedResources({ transactionId: txId });
         
         if (leaked) {
             console.error(__t('error.cert.residual_scan_failed'));

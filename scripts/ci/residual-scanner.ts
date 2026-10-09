@@ -77,8 +77,8 @@ async function main() {
         const nodes = tx.nodes;
         
         if (nodes.length === 0) {
-            console.log(`[Residual Scanner] Ledger empty for ${transactionId}. ZERO_RESIDUAL.`);
-            process.exit(0);
+            console.error(`[Residual Scanner] SCAN_INCOMPLETE: Ledger empty for ${transactionId}. Expected evidence of resources.`);
+            process.exit(1);
         }
 
         for (const node of nodes) {
@@ -89,42 +89,42 @@ async function main() {
             
             try {
                 if (action.includes('vpc') && (outputs.vpcId || outputs.id)) {
-                    const r = await ec2Client.send(new DescribeVpcsCommand({ VpcIds: [outputs.vpcId || outputs.id] })).catch(() => null);
+                    const r = await ec2Client.send(new DescribeVpcsCommand({ VpcIds: [outputs.vpcId || outputs.id] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.Vpcs && r.Vpcs.length > 0) foundResiduals.push(outputs.vpcId || outputs.id);
                 } else if (action.includes('subnet') && !action.includes('group') && (outputs.subnetId || outputs.id)) {
-                    const r = await ec2Client.send(new DescribeSubnetsCommand({ SubnetIds: [outputs.subnetId || outputs.id] })).catch(() => null);
+                    const r = await ec2Client.send(new DescribeSubnetsCommand({ SubnetIds: [outputs.subnetId || outputs.id] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.Subnets && r.Subnets.length > 0) foundResiduals.push(outputs.subnetId || outputs.id);
                 } else if (action.includes('security-group') && (outputs.groupId || outputs.id)) {
-                    const r = await ec2Client.send(new DescribeSecurityGroupsCommand({ GroupIds: [outputs.groupId || outputs.id] })).catch(() => null);
+                    const r = await ec2Client.send(new DescribeSecurityGroupsCommand({ GroupIds: [outputs.groupId || outputs.id] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.SecurityGroups && r.SecurityGroups.length > 0) foundResiduals.push(outputs.groupId || outputs.id);
                 } else if (action.includes('instance:create') && (outputs.instanceId || outputs.id)) {
-                    const r = await ec2Client.send(new DescribeInstancesCommand({ InstanceIds: [outputs.instanceId || outputs.id] })).catch(() => null);
+                    const r = await ec2Client.send(new DescribeInstancesCommand({ InstanceIds: [outputs.instanceId || outputs.id] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.Reservations && r.Reservations.some(res => res.Instances?.some(i => i.State?.Name !== 'terminated'))) {
                         foundResiduals.push(outputs.instanceId || outputs.id);
                     }
                 } else if (action.includes('ebs-snapshot') && (outputs.snapshotId || outputs.id)) {
-                    const r = await ec2Client.send(new DescribeSnapshotsCommand({ SnapshotIds: [outputs.snapshotId || outputs.id] })).catch(() => null);
+                    const r = await ec2Client.send(new DescribeSnapshotsCommand({ SnapshotIds: [outputs.snapshotId || outputs.id] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.Snapshots && r.Snapshots.length > 0) foundResiduals.push(outputs.snapshotId || outputs.id);
                 } else if (action.includes('rds-subnet-group') && params.dbSubnetGroupName) {
-                    const r = await rdsClient.send(new DescribeDBSubnetGroupsCommand({ DBSubnetGroupName: params.dbSubnetGroupName })).catch(() => null);
+                    const r = await rdsClient.send(new DescribeDBSubnetGroupsCommand({ DBSubnetGroupName: params.dbSubnetGroupName })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.DBSubnetGroups && r.DBSubnetGroups.length > 0) foundResiduals.push(params.dbSubnetGroupName);
                 } else if (action.includes('database:relational') && params.rdsId) {
-                    const r = await rdsClient.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: params.rdsId })).catch(() => null);
+                    const r = await rdsClient.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: params.rdsId })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.DBInstances && r.DBInstances.length > 0) foundResiduals.push(params.rdsId);
                 } else if (action.includes('rds-snapshot') && params.rdsSnapshotId) {
-                    const r = await rdsClient.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: params.rdsSnapshotId })).catch(() => null);
+                    const r = await rdsClient.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: params.rdsSnapshotId })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.DBSnapshots && r.DBSnapshots.length > 0) foundResiduals.push(params.rdsSnapshotId);
                 } else if (action.includes('storage:s3:create') && params.bucketName) {
-                    const r = await s3Client.send(new HeadBucketCommand({ Bucket: params.bucketName })).catch(() => null);
+                    const r = await s3Client.send(new HeadBucketCommand({ Bucket: params.bucketName })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r) foundResiduals.push(params.bucketName);
                 } else if (action.includes('registry:create') && params.repositoryName) {
-                    const r = await ecrClient.send(new DescribeRepositoriesCommand({ repositoryNames: [params.repositoryName] })).catch(() => null);
+                    const r = await ecrClient.send(new DescribeRepositoriesCommand({ repositoryNames: [params.repositoryName] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.repositories && r.repositories.length > 0) foundResiduals.push(params.repositoryName);
                 } else if (action.includes('task-definition:create') && (outputs.taskDefinitionArn || outputs.id)) {
-                    const r = await ecsClient.send(new DescribeTaskDefinitionCommand({ taskDefinition: outputs.taskDefinitionArn || outputs.id })).catch(() => null);
+                    const r = await ecsClient.send(new DescribeTaskDefinitionCommand({ taskDefinition: outputs.taskDefinitionArn || outputs.id })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.taskDefinition && r.taskDefinition.status !== 'INACTIVE') foundResiduals.push(outputs.taskDefinitionArn || outputs.id);
                 } else if (action.includes('service:create') && params.clusterName && params.serviceName) {
-                    const r = await ecsClient.send(new DescribeServicesCommand({ cluster: params.clusterName, services: [params.serviceName] })).catch(() => null);
+                    const r = await ecsClient.send(new DescribeServicesCommand({ cluster: params.clusterName, services: [params.serviceName] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.services && r.services.length > 0 && r.services[0].status !== 'INACTIVE') foundResiduals.push(params.serviceName);
                 }
             } catch (err) {

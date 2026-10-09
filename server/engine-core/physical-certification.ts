@@ -18,7 +18,8 @@ async function runCertification() {
     const evidenceCollector = new EvidenceCollector();
     const urre = registry.getUrre();
     
-    const txId = process.env.UGONDU_TRANSACTION_ID || `tx-UGONDU-COR-${new Date().toISOString().slice(0, 10)}-001`;
+    const txId = process.env.UGONDU_TRANSACTION_ID;
+    if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required by the IAM policy.');
 
     const amiId = await providerAdapter.resolveDefaultAmi();
 
