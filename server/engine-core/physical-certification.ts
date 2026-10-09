@@ -50,15 +50,15 @@ async function runCertification() {
         const snapId = snapRes?.outputs?.snapshotId || snapRes?.snapshotId;
 
         console.log(__t('cert.phase.creating_rds_subnet_group'));
-        const rdsSubnetGroupName = `ugondu-rds-subnet-${Date.now()}`;
+        const rdsSubnetGroupName = `ugondu-rds-subnet-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('database:rds-subnet-group:create')!.execute({ transactionId: txId, dbSubnetGroupName: rdsSubnetGroupName, subnetIds: [sub1Id, sub2Id] });
 
         console.log(__t('cert.phase.creating_rds'));
-        const rdsId = `ugondu-db-${Date.now()}`;
+        const rdsId = `ugondu-db-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('database:relational:create')!.execute({ transactionId: txId, rdsId, dbSubnetGroupName: rdsSubnetGroupName });
 
         console.log(__t('cert.phase.creating_rds_snapshot'));
-        const rdsSnapId = `ugondu-rds-snap-${Date.now()}`;
+        const rdsSnapId = `ugondu-rds-snap-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId, rdsSnapshotId: rdsSnapId });
 
         console.log(__t('cert.phase.creating_s3'));
