@@ -18,8 +18,7 @@ async function runCertification() {
     const evidenceCollector = new EvidenceCollector();
     const urre = registry.getUrre();
     
-    // STRICTLY read-only / observation client via adapter
-    const txId = `tx-${campaignId}`;
+    const txId = process.env.UGONDU_TRANSACTION_ID || `tx-UGONDU-COR-${new Date().toISOString().slice(0, 10)}-001`;
 
     const amiId = await providerAdapter.resolveDefaultAmi();
 

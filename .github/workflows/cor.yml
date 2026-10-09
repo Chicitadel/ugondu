@@ -141,17 +141,24 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: ${{ github.run_id }}
+          inline-session-policy: '{"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "*", "Resource": "*"}]}'
 
       - name: Run physical certification
         env:
           UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_TRANSACTION_ID: ${{ github.run_id }}
         run: npx ts-node -T server/engine-core/physical-certification.ts
 
       - name: Run physical fargate certification
         env:
           UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_TRANSACTION_ID: ${{ github.run_id }}
         run: npx ts-node -T server/engine-core/physical-fargate-certification.ts
 
       - name: Assert zero residual resources cleanup verification
+        env:
+          UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_TRANSACTION_ID: ${{ github.run_id }}
         run: npx ts-node -T scripts/ci/residual-scanner.ts
 

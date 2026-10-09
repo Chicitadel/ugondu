@@ -24,8 +24,7 @@ async function runFargateCertification() {
         const registry = createProductionActionRegistry(awsObs);
         const urre = registry.getUrre();
         const evidenceCollector = new EvidenceCollector();
-        
-        const txId = `tx-fargate-${campaignId}`;
+        const txId = process.env.UGONDU_TRANSACTION_ID || `tx-fargate-${campaignId}`;
 
         // Trigger canonical actions for Fargate lifecycle
         console.log(__t('cert.fargate.action.registry_create'));
@@ -118,8 +117,7 @@ async function runFargateCertification() {
         try {
             // URRE rollback will clean up everything correctly tracked in the ledger
             const { TransactionStore } = require('./src/urre/transaction/transaction-store');
-            const store = new TransactionStore();
-            const mainTxId = `tx-fargate-ugondu-cor-fargate-001`; 
+            const mainTxId = process.env.UGONDU_TRANSACTION_ID || `tx-fargate-ugondu-cor-fargate-001`;
             
             // Re-resolve registry and urre in case it crashed before initializing
             const providerAdapter = getProviderAdapter('aws', process.env.UGONDU_CERT_REGION!);
@@ -135,8 +133,7 @@ async function runFargateCertification() {
         const providerAdapter = getProviderAdapter('aws', process.env.UGONDU_CERT_REGION!);
         const residualScanner = providerAdapter.getResidualScanner();
         
-        // This is a minimal scanner check here, but the CI residual-scanner.ts will do the deep scan
-        const leaked = await residualScanner.scanForLeakedResources({ transactionId: `tx-fargate-ugondu-cor-fargate-001` });
+        const leaked = await residualScanner.scanForLeakedResources({ transactionId: process.env.UGONDU_TRANSACTION_ID || `tx-fargate-ugondu-cor-fargate-001` });
         
         if (leaked) {
             console.error(__t('error.cert.residual_scan_failed'));
