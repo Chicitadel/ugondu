@@ -1,0 +1,71 @@
+name: Negative Auth Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Base OIDC Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_OIDC_BASE }}
+          aws-region: eu-west-3
+
+      - name: Assume Tagged Execution Session
+        shell: bash
+        env:
+          EXECUTION_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME_EXECUTION }}
+          TX_ID: ${{ github.run_id }}
+        run: |
+          CREDS=$(aws sts assume-role \
+            --role-arn "$EXECUTION_ROLE_ARN" \
+            --role-session-name "$TX_ID" \
+            --tags "Key=UgonduTransactionId,Value=$TX_ID" \
+            --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+            --output text)
+          read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< "$CREDS"
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
+
+      - name: Verify Caller Identity
+        run: aws sts get-caller-identity
+
+      - name: Negative Test 1 - Create without UgonduCOR tag (Should FAIL)
+        run: |
+          if aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3; then
+            echo "Failed: Create VPC without UgonduCOR tag succeeded!"
+            exit 1
+          else
+            echo "Passed: Create VPC without UgonduCOR tag was denied."
+          fi
+
+      - name: Negative Test 2 - Create with wrong TransactionId (Should FAIL)
+        run: |
+          if aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications 'ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=invalid-tx-id}]'; then
+            echo "Failed: Create VPC with wrong TransactionId succeeded!"
+            exit 1
+          else
+            echo "Passed: Create VPC with wrong TransactionId was denied."
+          fi
+
+      - name: Positive Test - Create with correct tags (Should SUCCEED)
+        id: create-vpc
+        run: |
+          VPC_ID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications "ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=${{ github.run_id }}},{Key=Name,Value=UgonduAuthTestVpc}]" --query 'Vpc.VpcId' --output text)
+          echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
+          echo "Successfully created VPC $VPC_ID"
+
+      - name: Positive Test - Delete with correct tags (Should SUCCEED)
+        if: always()
+        run: |
+          if [ -n "$VPC_ID" ]; then
+            aws ec2 delete-vpc --vpc-id $VPC_ID --region eu-west-3
+            echo "Successfully deleted VPC $VPC_ID"
+          fi
