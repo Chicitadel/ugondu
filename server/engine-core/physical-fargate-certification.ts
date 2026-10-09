@@ -4,6 +4,9 @@ import { EvidenceCollector } from './src/evidence/evidence-engine';
 import { getProviderAdapter } from './src/assurance/provider/certification-provider-factory';
 
 async function runFargateCertification() {
+    const txId = process.env.UGONDU_TRANSACTION_ID;
+    if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required.');
+
     try {
         console.log(__t('cert.fargate.start'));
         
@@ -11,9 +14,6 @@ async function runFargateCertification() {
         if (!region) throw new Error(__t('error.cert.missing_region'));
 
         const providerAdapter = getProviderAdapter('aws', region);
-
-        const txId = process.env.UGONDU_TRANSACTION_ID;
-        if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required.');
 
         // deterministic id bound to tx
         const campaignId = `ugondu-cor-fargate-${txId.toLowerCase()}`;

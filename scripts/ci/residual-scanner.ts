@@ -126,8 +126,11 @@ async function main() {
                 } else if (action.includes('service:create') && params.clusterName && params.serviceName) {
                     const r = await ecsClient.send(new DescribeServicesCommand({ cluster: params.clusterName, services: [params.serviceName] })).catch(err => { if (err.name === 'NotFoundException' || err.name === 'ResourceNotFoundException' || err.message.includes('NotFound') || err.message.includes('does not exist')) { return null; } throw err; });
                     if (r && r.services && r.services.length > 0 && r.services[0].status !== 'INACTIVE') foundResiduals.push(params.serviceName);
+                } else {
+                    console.warn(`[Residual Scanner] Unsupported resource type for node ${node.id}`);
+                    classification = ResidualClassification.SCAN_INCOMPLETE;
                 }
-            } else { console.warn([Residual Scanner] Unsupported resource type  for node \); classification = ResidualClassification.SCAN_INCOMPLETE; } catch (err) {
+            } catch (err) {
                 console.warn(`[Residual Scanner] Could not scan resource for node ${node.id} (${action}):`, err);
                 classification = ResidualClassification.SCAN_INCOMPLETE;
             }
