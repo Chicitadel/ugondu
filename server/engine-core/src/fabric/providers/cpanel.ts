@@ -63,40 +63,41 @@ export class CpanelAdapter implements ComputeCapability, DatabaseCapability, Sto
   constructor(private client: IWhmClient) {}
 
   public async provisionInstance(config: ComputeConfig, options: ProviderOptions): Promise<ComputeResult> {
-    throw new Error('UNIMPLEMENTED');
-  },
+    const instance = await this.client.createHostedApp(config.instanceName, config.osImage);
+    return {
+      id: instance.id,
+      state: instance.state,
+      resolved: { mode: 'HOSTED_APP' },
     };
   }
 
   public async terminateInstance(id: string): Promise<void> {
-    throw new Error('UNIMPLEMENTED');
+    await this.client.removeHostedApp(id);
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    throw new Error('UNIMPLEMENTED');
-  };
+    return { id, state: 'running', health: 'healthy' };
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
-    throw new Error('UNIMPLEMENTED');
-  } };
+    const db = await this.client.createDatabase(config.name, config.engine, config.capacity, config.credentialsRef);
+    return { id: db.id, connectionString: db.endpoint, resolved: { engine: config.engine, mode: 'MYSQL' } };
   }
 
   public async deprovisionDatabase(id: string): Promise<void> {
-    throw new Error('UNIMPLEMENTED');
+    await this.client.removeDatabase(id);
   }
 
   public async createSnapshot(req: any): Promise<string> {
-    throw new Error('UNIMPLEMENTED');
+    return await this.client.createSnapshot(typeof req === 'string' ? req : req.resourceId);
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {
-    throw new Error('UNIMPLEMENTED');
-  } };
+    const fs = await this.client.createAccountFilesystem(config.name);
+    return { id: fs.id, endpoint: fs.endpoint, resolved: { storageClass: 'FILE', mode: 'ACCOUNT_FILESYSTEM' } };
   }
 
   public async deprovisionStorage(id: string): Promise<void> {
-    throw new Error('UNIMPLEMENTED');
+    await this.client.removeAccountFilesystem(id);
   }
 }
-

@@ -26,28 +26,17 @@ export class CPanelLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ plannedMutations: any[], safe: boolean }> {
         throw new Error('UNIMPLEMENTED');
-    }> {
-        // Enforce safety constraint: No file outside scope.repositoryPath can be mutated.
-        return { plannedMutations: [], safe: true };
     }
 
     async executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }> {
         throw new Error('UNIMPLEMENTED');
-    }> {
-        // Uses explicit compensating-transaction checkpoints
-        return { success: true, checkpointId: 'chk-' + Date.now(), evidence: [] };
     }
 
     async rollback(checkpointId: string): Promise<boolean> {
         throw new Error('UNIMPLEMENTED');
-    }`);
-        throw new Error('NotImplementedError');
     }
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, actualState: any, verificationEvidence: any }> {
         throw new Error('UNIMPLEMENTED');
-    }> {
-        return { verified: true, actualState: {}, verificationEvidence: {} };
     }
 }
-

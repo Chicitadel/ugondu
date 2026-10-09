@@ -40,14 +40,10 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async dryRun(plan: RepairPlan, scope: RecoveryScope): Promise<{ plannedMutations: any[], safe: boolean }> {
         throw new Error('UNIMPLEMENTED');
-    }> {
-        return { plannedMutations: [], safe: true };
     }
 
     async executeAtomicRecovery(plan: RepairPlan, scope: RecoveryScope): Promise<{ success: boolean, checkpointId: string, evidence: any[] }> {
         throw new Error('UNIMPLEMENTED');
-    }> {
-        throw new Error(__t('mutation_disabled_lr_01_throug'));
     }
 
     async rollback(checkpointId: string): Promise<boolean> {
@@ -56,8 +52,5 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
 
     async verifyState(scope: RecoveryScope, expectedState: any): Promise<{ verified: boolean, actualState: any, verificationEvidence: any }> {
         throw new Error('UNIMPLEMENTED');
-    }> {
-        return { verified: true, actualState: {}, verificationEvidence: {} };
     }
 }
-
