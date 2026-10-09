@@ -64,6 +64,16 @@ async function runCertification() {
         console.log(__t('cert.phase.creating_s3'));
         const bucketName = `ugondu-cor-bucket-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('storage:s3:create')!.execute({ transactionId: txId, bucketName });
+        
+        console.log('Verifying S3 bucket tags to ensure remediation requirement 2...');
+        const s3Client = awsObs.s3;
+        const tagResponse = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => { if (err.name === 'NoSuchTagSet') return { TagSet: [] }; throw err; });
+        const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');
+        const hasTx = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduTransactionId' && t.Value === txId);
+        if (!hasCOR || !hasTx) {
+            throw new Error(`S3 bucket ${bucketName} missing required ownership tags after creation.`);
+        }
+
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
 
         // DEISE Drift Injection and Test
