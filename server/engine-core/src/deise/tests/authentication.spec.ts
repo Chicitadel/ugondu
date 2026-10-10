@@ -29,7 +29,7 @@ describe('Authentication Onboarding & Credentials', () => {
     });
 
     it(__t('should_detect_and_block_accoun'), () => {
-        const expectedAccount = '123456789012';
+        const expectedAccount = '000000000000';
         const authenticatedAccount = '987654321098';
         const checkMismatch = (expected: string, actual: string) => {
             if (expected !== actual) throw new Error(__t('target_account_mismatch'));

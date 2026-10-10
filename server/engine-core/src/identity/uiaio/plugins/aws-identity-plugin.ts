@@ -7,8 +7,8 @@ export class AwsIdentityPlugin implements IdentityProviderPlugin {
         // Simulating the AWS STS GetCallerIdentity API
         // In reality, this would use the AWS SDK authenticated with the bootstrap credential
         return {
-            accountId: '123456789012',
-            principalArn: 'arn:aws:iam::123456789012:user/bootstrap-user',
+            accountId: '000000000000',
+            principalArn: 'arn:aws:iam::000000000000:user/bootstrap-user',
             provider: 'aws'
         };
     }
@@ -39,7 +39,7 @@ export class AwsIdentityPlugin implements IdentityProviderPlugin {
         // 3. Attach standard COR permissions
         
         const roleName = 'UgonduCORRunner';
-        const accountId = '123456789012';
+        const accountId = '000000000000';
         
         const trustPolicy = {
             Version: '2012-10-17',
