@@ -1,0 +1,5 @@
+\server\engine-core\src\assurance\tests\verify.qualification.spec.ts lines=34
+\server\engine-core\src\fabric\tests\fabric.qualification.spec.ts lines=29
+\server\engine-core\src\intent\tests\intent.qualification.spec.ts lines=52
+\server\engine-core\src\urre\tests\rollback.spec.ts lines=126
+\server\tests\e2e\billing_ceg_integration.spec.ts lines=168

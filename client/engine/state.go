@@ -43,11 +43,13 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"ugondu/client/i18n"
 )
 
 var (
-	ErrStateNotFound = errors.New("state file not found")
-	ErrStateCorrupt  = errors.New("state file is corrupt")
+	ErrStateNotFound = errors.New(i18n.T("state_file_not_found"))
+	ErrStateCorrupt  = errors.New(i18n.T("state_file_is_corrupt"))
 )
 
 type StepState struct {
@@ -121,7 +123,7 @@ func (s *ExecutionState) ComputeHash() (string, error) {
 func GetTransactionsDir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("failed to resolve user home directory: %w", err)
+		return "", fmt.Errorf(i18n.T("failed_to_resolve_user_home"), err)
 	}
 	return filepath.Join(home, ".ugondu", "transactions"), nil
 }
@@ -129,7 +131,7 @@ func GetTransactionsDir() (string, error) {
 // GetTransactionDir returns ~/.ugondu/transactions/<txId>
 func GetTransactionDir(txId string) (string, error) {
 	if strings.Contains(txId, "..") || strings.Contains(txId, "/") || strings.Contains(txId, "\\") {
-		return "", fmt.Errorf("invalid transactionId contains path separators: %s", txId)
+		return "", fmt.Errorf(i18n.T("invalid_transactionid_contains_path_separators"), txId)
 	}
 	baseDir, err := GetTransactionsDir()
 	if err != nil {
@@ -192,7 +194,7 @@ func LoadState(txId string) (*ExecutionState, error) {
 // SaveState performs an atomic state write with directory mode 0700 and file mode 0600.
 func SaveState(state *ExecutionState) error {
 	if state == nil || state.TransactionId == "" {
-		return fmt.Errorf("cannot save state: execution state or transaction ID is nil/empty")
+		return fmt.Errorf(i18n.T("cannot_save_state_execution_state"))
 	}
 
 	state.StateSequence++
@@ -200,7 +202,7 @@ func SaveState(state *ExecutionState) error {
 	state.UpdatedAt = time.Now().Unix()
 	hash, err := state.ComputeHash()
 	if err != nil {
-		return fmt.Errorf("failed to compute state hash: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_compute_state_hash"), err)
 	}
 	state.StateHash = hash
 
@@ -210,13 +212,13 @@ func SaveState(state *ExecutionState) error {
 	}
 
 	if err := os.MkdirAll(txDir, 0700); err != nil {
-		return fmt.Errorf("failed to create transaction directory %s: %w", txDir, err)
+		return fmt.Errorf(i18n.T("failed_to_create_transaction_directory"), txDir, err)
 	}
 	_ = os.Chmod(txDir, 0700)
 
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to serialize execution state: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_serialize_execution_state"), err)
 	}
 
 	tmpPath := filepath.Join(txDir, "state.json.tmp")
@@ -224,24 +226,24 @@ func SaveState(state *ExecutionState) error {
 
 	file, err := os.OpenFile(tmpPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return fmt.Errorf("failed to open temp state file: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_open_temp_state"), err)
 	}
 
 	if _, err := file.Write(data); err != nil {
 		_ = file.Close()
 		_ = os.Remove(tmpPath)
-		return fmt.Errorf("failed to write temp state file: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_write_temp_state"), err)
 	}
 
 	if err := file.Sync(); err != nil {
 		_ = file.Close()
 		_ = os.Remove(tmpPath)
-		return fmt.Errorf("failed to sync temp state file: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_sync_temp_state"), err)
 	}
 
 	if err := file.Close(); err != nil {
 		_ = os.Remove(tmpPath)
-		return fmt.Errorf("failed to close temp state file: %w", err)
+		return fmt.Errorf(i18n.T("failed_to_close_temp_state"), err)
 	}
 
 	_ = os.Chmod(tmpPath, 0600)
@@ -252,7 +254,7 @@ func SaveState(state *ExecutionState) error {
 		_ = os.Remove(finalPath)
 		if fallbackErr := os.Rename(tmpPath, finalPath); fallbackErr != nil {
 			_ = os.Remove(tmpPath)
-			return fmt.Errorf("atomic rename failed for state file: %w", fallbackErr)
+			return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), fallbackErr)
 		}
 	}
 

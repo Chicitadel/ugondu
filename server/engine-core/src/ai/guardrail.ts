@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface AiProposedPlan
+ * @description Corporate Governed interface implementation for AiProposedPlan
+ * @classification ENTERPRISE
+ */
 export interface AiProposedPlan {
     proposedByModel: string;
     targetEnvironment: string;
@@ -21,12 +26,22 @@ export interface AiProposedPlan {
     reasoning: string;
 }
 
+/**
+ * @interface GuardrailValidationResult
+ * @description Corporate Governed interface implementation for GuardrailValidationResult
+ * @classification ENTERPRISE
+ */
 export interface GuardrailValidationResult {
     passed: boolean;
     violations: string[];
     sanitizedPlan?: AiProposedPlan;
 }
 
+/**
+ * @class AiDeliveryGuardrail
+ * @description Corporate Governed class implementation for AiDeliveryGuardrail
+ * @classification ENTERPRISE
+ */
 export class AiDeliveryGuardrail {
     private static readonly FORBIDDEN_ACTIONS = new Set([
         'SHELL_EXEC',

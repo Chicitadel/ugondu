@@ -1,0 +1,247 @@
+server/billing-gateway/src/db.ts:23:// Flat-file persistence engine (Zero-stub)
+server/billing-gateway/src/index.ts:47:        // Zero-Stub: Verify the token securely from the SQLite DB rather than guessing by prefix
+server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts:48: * @interface HsmSimulationConfig
+server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts:49: * @description Corporate Governed interface implementation for HsmSimulationConfig
+server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts:52:export interface HsmSimulationConfig {
+server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts:63:  private hsmConfig: HsmSimulationConfig;
+server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts:65:  constructor(hsmConfig?: HsmSimulationConfig) {
+server/engine-core/COR_PHYSICAL_EVIDENCE/P0_AWS_IDENTITY_VERIFY.md:29:The identity bootstrap architecture has been successfully remediated. OS Keystore (keytar) integration and native IAM simulation preflight verify safe local storage and robust least-privilege orchestration.
+server/engine-core/COR_PHYSICAL_EVIDENCE/PHYSICAL_AWS_CERTIFICATION.md:44:| P0-PHYS-15 | Actual URRE rollback | BLOCKED | URREngine currently implements only stub responses |
+server/engine-core/COR_PHYSICAL_EVIDENCE/PHYSICAL_AWS_CERTIFICATION.md:122:   - `URREngine` (in `urre-engine.ts`) implements basic interface typing but operates as a stub (`evaluateRollbackSequence('rb-fail-id')`). It does not actually traverse a failed transaction DAG and invoke provider teardown commands.
+server/engine-core/COR_PHYSICAL_EVIDENCE/PHYSICAL_AWS_CERTIFICATION.md:132:The project possesses valid Release Integrity (COR-1), Distribution Provenance (COR-2), and Provider Simulation (COR-3). However, the actual orchestration engines (URRE, DEISE, Transaction Engine) and the physical AWS client wrapper lack the completeness required to safely execute and recover from a real multi-tier AWS deployment.
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT.md:30:| 10 | Credentials stored using claimed OS keystore | **FAIL** | **MAJOR REGRESSION:** The `keytar` OS keystore implementation from `aws-identity-bootstrap.ts` was completely deleted during the `CredentialIntakeOrchestrator` refactoring. The `credentials-cli.ts` contains only a commented-out stub `// await CredentialStore.save(...)`. |
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT.md:41:- **FAIL - Missing Permission Handling:** If the deployment identity lacks `iam:SimulatePrincipalPolicy`, the implementation (`AwsAuthorizationPreflight:40`) throws a hard fatal `Error('Authorization preflight failed due to missing simulate policy permissions...')`. It **does not** degrade gracefully to report `AUTHORIZATION SIMULATION UNAVAILABLE`. 
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT.md:65:- **Finding:** Massive introduction of `any` types in snapshot signatures across simulation mocks and provider interfaces to bypass strict TypeScript checks.
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT.md:82:3. Restoration of strict TypeScript type-safety (removal of `any`) and resolution of all compiler/syntax errors in the simulation and provider adapters.
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT_REMEDIATED.md:30:| 10 | Credentials stored using claimed OS keystore | **FAIL** | **MAJOR REGRESSION:** The `keytar` OS keystore implementation from `aws-identity-bootstrap.ts` was completely deleted during the `CredentialIntakeOrchestrator` refactoring. The `credentials-cli.ts` contains only a commented-out stub `// await CredentialStore.save(...)`. |
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT_REMEDIATED.md:41:- **FAIL - Missing Permission Handling:** If the deployment identity lacks `iam:SimulatePrincipalPolicy`, the implementation (`AwsAuthorizationPreflight:40`) throws a hard fatal `Error('Authorization preflight failed due to missing simulate policy permissions...')`. It **does not** degrade gracefully to report `AUTHORIZATION SIMULATION UNAVAILABLE`. 
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT_REMEDIATED.md:65:- **Finding:** Massive introduction of `any` types in snapshot signatures across simulation mocks and provider interfaces to bypass strict TypeScript checks.
+server/engine-core/COR_PHYSICAL_EVIDENCE/UGONDU_P0_FOUNDATION_AUDIT_REMEDIATED.md:82:3. Restoration of strict TypeScript type-safety (removal of `any`) and resolution of all compiler/syntax errors in the simulation and provider adapters.
+server/engine-core/build_result.txt:18:src/assurance/probes/synthetic.ts(36,63): error TS2304: Cannot find name '__t'.
+server/engine-core/build_result.txt:41:src/doctor/simulation/security-impact.ts(27,38): error TS2304: Cannot find name '__t'.
+server/engine-core/build_result.txt:42:src/doctor/simulation/security-impact.ts(27,80): error TS2304: Cannot find name '__t'.
+server/engine-core/build_result.txt:51:  Type 'SimulationAwsClient' is missing the following properties from type 'IAwsClient': createFargateRoles, createEcsCluster, registerTaskDefinition, createEcsService, and 2 more.
+server/engine-core/jest.setup.ts:3:jest.mock('@ugondu/shared', () => {
+server/engine-core/physical-certification.ts:9:    console.log(__t('cert.fargate.start'));
+server/engine-core/physical-certification.ts:27:        console.log(__t('cert.phase.creating_vpc'));
+server/engine-core/physical-certification.ts:32:        console.log(__t('cert.phase.creating_subnets'));
+server/engine-core/physical-certification.ts:38:        console.log(__t('cert.phase.creating_sg'));
+server/engine-core/physical-certification.ts:42:        console.log(__t('cert.phase.creating_ec2'));
+server/engine-core/physical-certification.ts:46:        console.log(__t('cert.phase.creating_ebs_snapshot'));
+server/engine-core/physical-certification.ts:50:        console.log(__t('cert.phase.creating_rds_subnet_group'));
+server/engine-core/physical-certification.ts:54:        console.log(__t('cert.phase.creating_rds'));
+server/engine-core/physical-certification.ts:58:        console.log(__t('cert.phase.creating_rds_snapshot'));
+server/engine-core/physical-certification.ts:62:        console.log(__t('cert.phase.creating_s3'));
+server/engine-core/physical-certification.ts:68:        console.log(__t('cert.phase.injecting_faults'));
+server/engine-core/physical-certification.ts:73:        console.log(__t('cert.phase.diagnosis_repair'));
+server/engine-core/physical-certification.ts:88:        console.log(__t('cert.diagnoses.found', { count: plan.diagnoses.length }));
+server/engine-core/physical-certification.ts:90:            console.log(__t('cert.phase.repairing_drift'));
+server/engine-core/physical-certification.ts:94:        console.log(__t('cert.phase.urre_fault_injection'));
+server/engine-core/physical-certification.ts:112:        console.log(__t('cert.phase.cleanup'));
+server/engine-core/physical-certification.ts:128:        console.log(__t('cert.phase.residual_scan'));
+server/engine-core/physical-certification.ts:138:        else console.log(__t('cert.residual_scan.clean'));
+server/engine-core/physical-certification.ts:140:        console.log(__t('cert.run.complete'));
+server/engine-core/physical-fargate-certification.ts:8:        console.log(__t('cert.fargate.start'));
+server/engine-core/physical-fargate-certification.ts:19:        console.log(__t('cert.fargate.campaign_id', { id: campaignId }));
+server/engine-core/physical-fargate-certification.ts:31:        console.log(__t('cert.fargate.action.registry_create'));
+server/engine-core/physical-fargate-certification.ts:34:        console.log(__t('cert.fargate.action.image_build'));
+server/engine-core/physical-fargate-certification.ts:37:        console.log(__t('cert.fargate.action.image_push'));
+server/engine-core/physical-fargate-certification.ts:42:        console.log(__t('cert.fargate.action.taskdef_create1'));
+server/engine-core/physical-fargate-certification.ts:47:        console.log(__t('cert.fargate.action.service_create'));
+server/engine-core/physical-fargate-certification.ts:54:        console.log(__t('cert.fargate.polling.rev1'));
+server/engine-core/physical-fargate-certification.ts:66:        console.log(__t('cert.fargate.deploying.rev2'));
+server/engine-core/physical-fargate-certification.ts:71:        console.log(__t('cert.fargate.action.deploy_rev2'));
+server/engine-core/physical-fargate-certification.ts:82:        console.log(__t('cert.fargate.polling.rev2_fail'));
+server/engine-core/physical-fargate-certification.ts:95:        console.log(__t('cert.fargate.trigger_rollback', { txId: deployment2TxId }));
+server/engine-core/physical-fargate-certification.ts:99:        console.log(__t('cert.fargate.polling.rev1_after_rollback'));
+server/engine-core/physical-fargate-certification.ts:111:        console.log(__t('cert.fargate.complete'));
+server/engine-core/src/ai/cost.ts:63:                // Multi-cluster / sovereign disaster recovery simulation
+server/engine-core/src/architecture/cost/estimator.ts:54:        // Calculate based on component heuristic to avoid static mocking
+server/engine-core/src/assurance/probes/synthetic.ts:4: * File           : synthetic.ts
+server/engine-core/src/assurance/probes/synthetic.ts:33:export class SyntheticProbe {
+server/engine-core/src/autonomy/state_machine.ts:17:import { SimulationResult } from '../simulation/simulator';
+server/engine-core/src/autonomy/state_machine.ts:118:        simulation: SimulationResult,
+server/engine-core/src/autonomy/state_machine.ts:123:        const rollbackAvailable = context.rollbackAvailable ?? simulation.rollbackAvailable;
+server/engine-core/src/autonomy/state_machine.ts:169:                if (simulation.riskCategory === 'LOW') {
+server/engine-core/src/autonomy/state_machine.ts:176:                if (['LOW', 'MEDIUM'].includes(simulation.riskCategory) && rollbackAvailable) {
+server/engine-core/src/autonomy/state_machine.ts:184:                if (simulation.policyViolations.length === 0 && simulation.riskCategory !== 'CRITICAL' && rollbackAvailable) {
+server/engine-core/src/autonomy/state_machine.ts:193:                if (simulation.policyViolations.length > 0) {
+server/engine-core/src/autonomy/state_machine.ts:196:                if (simulation.riskCategory === 'CRITICAL') {
+server/engine-core/src/autopilot/policy/simulation.ts:4: * File           : simulation.ts
+server/engine-core/src/cli/credentials-cli.ts:16:        console.log(`\nUGONDU CREDENTIAL IMPORT`);
+server/engine-core/src/cli/credentials-cli.ts:17:        console.log(`────────────────────────────────────────`);
+server/engine-core/src/cli/credentials-cli.ts:18:        console.log(`Input: ${filePath}`);
+server/engine-core/src/cli/credentials-cli.ts:24:            console.log(`Provider detected: ${result.normalized.provider.toUpperCase()}`);
+server/engine-core/src/cli/credentials-cli.ts:25:            console.log(`\nAuthentication: ✓ SUCCESS`);
+server/engine-core/src/cli/credentials-cli.ts:26:            console.log(`Caller: ${result.identity.principal}`);
+server/engine-core/src/cli/credentials-cli.ts:27:            console.log(`Account: ${result.identity.accountId}`);
+server/engine-core/src/cli/credentials-cli.ts:29:            console.log(`\nAuthorization: ✓ Ugondu capability preflight`);
+server/engine-core/src/cli/credentials-cli.ts:30:            if (result.authResults._simulation_unavailable) {
+server/engine-core/src/cli/credentials-cli.ts:31:                console.log('  ⚠ AUTHORIZATION SIMULATION UNAVAILABLE (Missing iam:SimulatePrincipalPolicy)');
+server/engine-core/src/cli/credentials-cli.ts:34:                    console.log(`  ${allowed ? '✓' : '✗'} ${cap}`);
+server/engine-core/src/cli/credentials-cli.ts:38:            console.log(`\nCredential status: READY\n`);
+server/engine-core/src/cli/credentials-cli.ts:43:            console.log(`✓ Credentials stored securely in OS Keystore.`);
+server/engine-core/src/crypto/key-loader.ts:73:        if (envKey && envKey !== '<placeholder>') {
+server/engine-core/src/deise/engine/adapters/cpanel/cpanel-live-adapter.ts:34:        return 'sha256:fingerprint-placeholder';
+server/engine-core/src/deise/engine/adapters/cpanel/cpanel-live-adapter.ts:54:        console.log(`Rolling back checkpoint ${checkpointId}`);
+server/engine-core/src/deise/engine/adapters/directadmin/directadmin-live-adapter.ts:30:        console.log('[Adapter] Fetching Domain Information...');
+server/engine-core/src/deise/engine/adapters/directadmin/directadmin-live-adapter.ts:35:        console.log('[Adapter] Fetching Subdomain Information...');
+server/engine-core/src/deise/engine/adapters/directadmin/directadmin-live-adapter.ts:40:        console.log('[Adapter] Fetching DNS Records...');
+server/engine-core/src/doctor/remediation/generator.ts:97:      roleId:        `${ctx.actor}-role`,  // placeholder: UPPIE resolves actual roleId
+server/engine-core/src/doctor/remediation/generator.ts:115:    approver:          'platform-admin',   // placeholder: resolved from tenant policy
+server/engine-core/src/doctor/simulation/blast-radius.ts:34:export class BlastRadiusSimulation {
+server/engine-core/src/doctor/simulation/data-impact.ts:3: * Module         : Doctor / Simulation
+server/engine-core/src/doctor/simulation/dependency-impact.ts:3: * Module         : Doctor / Simulation
+server/engine-core/src/doctor/simulation/security-impact.ts:3: * Module         : Doctor / Simulation
+server/engine-core/src/identity/credential-intake/providers/aws/aws-authorization.ts:44:            Logger.warn(__t('authorization_simulation_unava'));
+server/engine-core/src/identity/credential-intake/providers/aws/aws-authorization.ts:45:            return { _simulation_unavailable: true };
+server/engine-core/src/intent/index.ts:4:export * from './simulation/simulator';
+server/engine-core/src/intent/simulation/simulator.ts:3: * Module         : Server / Engine Core / Intent / Simulation
+server/engine-core/src/intent/simulation/simulator.ts:27: * @interface SimulationContext
+server/engine-core/src/intent/simulation/simulator.ts:28: * @description Corporate Governed interface implementation for SimulationContext
+server/engine-core/src/intent/simulation/simulator.ts:31:export interface SimulationContext {
+server/engine-core/src/intent/simulation/simulator.ts:47:    public async simulate(intent: DecomposedIntent, context: SimulationContext): Promise<ArchitectureIR> {
+server/engine-core/src/intent/simulation/simulator.ts:48:        Logger.info(__t('messages.intent.starting_simulation', { tenantId: context.tenantId }));
+server/engine-core/src/intent/simulation/simulator.ts:53:        // Base deterministic prefix for all nodes in this simulation
+server/engine-core/src/intent/simulation/simulator.ts:143:        Logger.info(__t('messages.intent.simulation_complete', { nodes: nodes.length, edges: edges.length }));
+server/engine-core/src/intent/simulation/simulator.ts:148:    private evaluateComplianceBoundaries(intent: DecomposedIntent, context: SimulationContext) {
+server/engine-core/src/intent/simulation/simulator.ts:152:            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: __t('msg_vpc_peering_unavailable_for_private_data') }));
+server/engine-core/src/intent/simulation/simulator.ts:156:            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: __t('msg_auto_scaling_unavailable_for_scaling_int') }));
+server/engine-core/src/intent/simulation/simulator.ts:160:            throw new Error(__t('messages.error.intent_simulation_rejected', { reason: __t('msg_multi_zone_unavailable_for_redundancy_re') }));
+server/engine-core/src/passport/compiler/passport-compiler.ts:108:  policySimulationDigest:    string;
+server/engine-core/src/passport/compiler/passport-compiler.ts:131:    policySimulationDigest:   context.policySimulationDigest,
+server/engine-core/src/passport/model/authority-evidence.ts:38: * - Simulation proof
+server/engine-core/src/passport/model/authority-evidence.ts:49:  policySimulationDigest:    string;   // SHA-256 of PolicySimulationResult
+server/engine-core/src/passport/model/passport.ts:64: * - `authorityEvidence`: UPPIE authority binding (grants, revocations, simulations, approvals)
+server/engine-core/src/simulation/simulator.ts:3: * Module         : Server / Engine Core / Simulation
+server/engine-core/src/simulation/simulator.ts:6: * Author         : Simulation & Risk Scoring Authority
+server/engine-core/src/simulation/simulator.ts:18: * @interface SimulationResult
+server/engine-core/src/simulation/simulator.ts:19: * @description Corporate Governed interface implementation for SimulationResult
+server/engine-core/src/simulation/simulator.ts:22:export interface SimulationResult {
+server/engine-core/src/simulation/simulator.ts:38:    public static simulateExecution(dag: ExecutionGraphDAG, targetEnvironment: string): SimulationResult {
+server/engine-core/src/simulation/simulator.ts:72:        let riskCategory: SimulationResult['riskCategory'] = 'LOW';
+server/engine-core/src/tenant/lifecycle/deactivation.ts:49:        console.log(`Deactivating tenant ${tenantId}, graceful: ${graceful}`);
+server/engine-core/src/tenant/lifecycle/provisioning.ts:60:        console.log(`Provisioning tenant ${context.tenantId} at tier ${context.tier}`);
+server/engine-core/src/tenant/lifecycle/quarantine.ts:49:        console.log(`Quarantining tenant ${tenantId} at threat level ${threatLevel}`);
+server/engine-core/src/tenant/lifecycle/suspension.ts:52:        console.log(`Suspending tenant ${tenantId} for reason: ${reason}`);
+server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts:63:    return Promise.resolve({ id, userName: "mock-user", active: true } as IScimUser);
+server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts:84:    return Promise.resolve({ id, displayName: "mock-group" } as IScimGroup);
+server/engine-core/src/tenant/scim/OktaScimAdapter.ts:63:    return Promise.resolve({ id, userName: "mock-user", active: true } as IScimUser);
+server/engine-core/src/tenant/scim/OktaScimAdapter.ts:84:    return Promise.resolve({ id, displayName: "mock-group" } as IScimGroup);
+server/engine-core/src/ucaas/workflow.ts:67: * Workflow execution engine stub for UCAAS command bundles.
+server/engine-core/src/ucaas/workflow.ts:80:    console.log(`Starting execution for bundle: ${bundle.id}`);
+server/engine-core/src/ucaas/workflow.ts:101:        console.log(`Executing step: ${step.stepId} (Action: ${action.name})`);
+server/engine-core/src/ucaas/workflow.ts:116:    console.log(`Bundle ${bundle.id} execution completed successfully.`);
+server/engine-core/src/ucaas/workflow.ts:127:    console.log(`Resuming workflow ${workflowExecutionId} with approval ${approvalId}`);
+server/engine-core/src/ucaas/workflow.ts:133:        console.log(`Rehydrating state for workflow ${workflowExecutionId}...`);
+server/engine-core/urre-crash-resume.ts:18:        console.log('[URRE-CRASH] Process A executing CREATE_VPC_CRASH...');
+server/engine-core/urre-crash-resume.ts:21:        console.log(`[URRE-CRASH] Process A VPC Created: ${vpcId}`);
+server/engine-core/urre-crash-resume.ts:30:        console.log('[URRE-CRASH] Process B executing CREATE_SUBNET_REAL...');
+server/engine-core/urre-crash-resume.ts:45:    console.log(__t('process_a_starting_transaction'));
+server/engine-core/urre-crash-resume.ts:49:                console.log('[URRE-CRASH] Fault Injector: CRASHING PROCESS A intentionally after VPC SUCCESS.');
+server/engine-core/urre-crash-resume.ts:61:    console.log(__t('process_a_submitting_transacti'));
+server/engine-core/urre-crash-resume.ts:70:    console.log(__t('process_b_resuming_transaction'));
+server/engine-core/urre-crash-resume.ts:85:    console.log(`PROCESS B: Loaded VPC ID ${vpcId} from state. Will skip recreation.`);
+server/engine-core/urre-crash-resume.ts:87:    console.log(__t('process_b_resuming_transaction'));
+server/engine-core/urre-crash-resume.ts:95:    console.log(__t('process_b_success_cleaning_up_'));
+server/engine-core/urre-crash-resume.ts:102:    console.log(__t('process_b_cleanup_done'));
+server/engine-core/urre-crash-resume.ts:117:    console.log(__t('process_c_executing_transactio'));
+server/engine-core/urre-crash-resume.ts:124:    console.log(__t('process_c_idempotency_proven'));
+server/engine-core/urre-crash-resume.ts:139:    console.log(`Process A exited with code ${p1.status} (expected 1 for crash)`);
+server/engine-core/urre-crash-resume.ts:146:    console.log(`Process B exited with code ${p2.status}`);
+server/engine-core/urre-crash-resume.ts:152:    console.log(`Process C exited with code ${p3.status}`);
+server/shared/logger.js:26:            console.log(JSON.stringify({ level: 'INFO', timestamp: new Date().toISOString(), message, context }));
+server/shared/logger.ts:24:            console.log(JSON.stringify({ level: 'INFO', timestamp: new Date().toISOString(), message, context }));
+server/uppie/src/UppieService.ts:47:import { PolicySimulationEngine }             from './core/policy-simulation/PolicySimulationEngine';
+server/uppie/src/UppieService.ts:48:import type { PolicySimulationReport }        from './core/policy-simulation/PolicySimulationEngine';
+server/uppie/src/UppieService.ts:142:   * Delegates to PolicySimulationEngine.simulate().
+server/uppie/src/UppieService.ts:147:  ): Promise<PolicySimulationReport> {
+server/uppie/src/UppieService.ts:149:    const engine  = new PolicySimulationEngine(adapter);
+server/uppie/src/adapters/IPolicyProviderAdapter.ts:242: * @interface PolicySimulationResult
+server/uppie/src/adapters/IPolicyProviderAdapter.ts:243: * @description Corporate Governed interface implementation for PolicySimulationResult
+server/uppie/src/adapters/IPolicyProviderAdapter.ts:246:export interface PolicySimulationResult {
+server/uppie/src/adapters/IPolicyProviderAdapter.ts:250:  confidence: import('../types/index').SimulationConfidence;
+server/uppie/src/adapters/IPolicyProviderAdapter.ts:272:  simulate(proposedRules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult>;
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:28:  ObservationWindow, UsageObservation, PolicySimulationResult,
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:37:/** IAM simulation requests are bounded; larger action sets are split into batches. */
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:38:const SIMULATION_BATCH = 50;
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:43:  for (let i = 0; i < actions.length; i += SIMULATION_BATCH) out.push(...(await run(actions.slice(i, i + SIMULATION_BATCH))));
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:51: * as NEEDS_SIMULATION.
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:66:      state: hasWildcard(action) || !decision ? 'NEEDS_SIMULATION' : decision === 'allowed' ? 'GRANTED' : 'DENIED',
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:70:  return { actorId: actor, resourceId: resource, evaluatedAt: new Date().toISOString(), permissions, evaluationMethod: permissions.some((p) => p.state === 'NEEDS_SIMULATION') ? 'PARTIAL_MODEL' : 'PROVIDER_API' };
+server/uppie/src/adapters/aws-iam/AwsIamAnalysis.ts:88:export async function simulateRules(client: AwsIamClient, rules: AuthorizationRule[]): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/aws-iam/AwsIamClient.ts:85:const toDocument = (raw: unknown): AwsPolicyDocument => {
+server/uppie/src/adapters/aws-iam/AwsIamClient.ts:146:      return { ...summary(Policy), description: Policy.Description, document: toDocument(PolicyVersion.Document) };
+server/uppie/src/adapters/aws-iam/AwsIamPolicyAdapter.ts:37:  RetirementPlan, RetirementResult, RestoreResult, PolicySimulationResult,
+server/uppie/src/adapters/aws-iam/AwsIamPolicyAdapter.ts:67: * - Effective authority, evaluation and simulation use the IAM policy simulator; wildcard actions cannot be simulated.
+server/uppie/src/adapters/aws-iam/AwsIamPolicyAdapter.ts:116:  async simulate(proposedRules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts:37:  RetirementPlan, RetirementResult, RestoreResult, PolicySimulationResult,
+server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts:69: * - Azure offers no simulation API and no usage API: simulation and effective authority are model-based (MEDIUM
+server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts:137:  async simulate(proposedRules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/azure-rbac/AzureRbacModel.ts:33:  AdapterContext, ConflictReport, DependencyReport, PolicyConflict, PolicySimulationResult, ProviderNativePolicy, ReconciliationPlan,
+server/uppie/src/adapters/azure-rbac/AzureRbacModel.ts:128: * `unchanged`. Deny rules cannot be realised in Azure RBAC and are reported unchanged. Azure has no simulation API, so
+server/uppie/src/adapters/azure-rbac/AzureRbacModel.ts:131:export async function simulateRules(client: AzureRbacClient, rules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/azure-rbac/AzureRbacModel.ts:153:  } as PolicySimulationResult;
+server/uppie/src/adapters/cpanel/CpanelAdapter.ts:37:  RetirementPlan, RetirementResult, RestoreResult, PolicySimulationResult,
+server/uppie/src/adapters/cpanel/CpanelAdapter.ts:118:  async simulate(proposedRules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/cpanel/CpanelModel.ts:33:  ConflictReport, DependencyReport, PolicyConflict, PolicySimulationResult, ProviderNativePolicy, ReconciliationPlan,
+server/uppie/src/adapters/cpanel/CpanelModel.ts:116:export async function simulateRules(client: WhmClient, rules: AuthorizationRule[]): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts:37:  RetirementPlan, RetirementResult, RestoreResult, PolicySimulationResult,
+server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts:67: * - Simulation uses the Policy Troubleshooter (allow, deny, conditions and group membership included). Effective
+server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts:151:  async simulate(proposedRules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/gcp-iam/GcpIamModel.ts:33:  AdapterContext, ConflictReport, DependencyReport, PolicyConflict, PolicySimulationResult, ProviderNativePolicy, ReconciliationPlan,
+server/uppie/src/adapters/gcp-iam/GcpIamModel.ts:122:export async function simulateRules(client: GcpIamClient, rules: AuthorizationRule[], context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/gcp-iam/GcpIamModel.ts:143:  } as PolicySimulationResult;
+server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts:36:  RetirementPlan, RetirementResult, RestoreResult, PolicySimulationResult,
+server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts:161:  async simulate(proposedRules: AuthorizationRule[], _context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts:38:  RetirementPlan, RetirementResult, RestoreResult, PolicySimulationResult,
+server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts:163:  async simulate(_rules: AuthorizationRule[], _context: AdapterContext): Promise<PolicySimulationResult> {
+server/uppie/src/core/policy-evaluation-engine/EffectiveAuthorityCalculator.ts:30:import type { EffectiveAuthorityResult, EffectivePermission, SimulationConfidence } from '../../types/index';
+server/uppie/src/core/policy-evaluation-engine/EffectiveAuthorityCalculator.ts:96:  private deriveConfidence(result: EffectiveAuthorityResult): SimulationConfidence {
+server/uppie/src/core/policy-evaluation-engine/EffectiveAuthorityCalculator.ts:117:  confidence: SimulationConfidence;
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:3: * Module         : UPPIE — Policy Simulation Engine
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:4: * File           : PolicySimulationEngine.ts
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:37:  PolicySimulationResult,
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:41:export type SimulationDecision = 'APPROVED' | 'REJECTED' | 'APPROVED_WITH_WARNING';
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:44: * @interface SimulationValidationError
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:45: * @description Corporate Governed interface implementation for SimulationValidationError
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:48:export interface SimulationValidationError {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:54: * @interface PolicySimulationReport
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:55: * @description Corporate Governed interface implementation for PolicySimulationReport
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:58:export interface PolicySimulationReport {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:59:  decision:          SimulationDecision;
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:60:  validationErrors:  SimulationValidationError[];
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:61:  providerResult?:   PolicySimulationResult;
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:63:  simulationDigest:  string;
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:68: * PolicySimulationEngine — simulates the effect of proposed authorization rules
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:78: * 4. The simulation digest binds the result to AuthorityEvidence.
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:84:export class PolicySimulationEngine {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:96:  ): Promise<PolicySimulationReport> {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:102:      const report: PolicySimulationReport = {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:105:        simulationDigest: this.computeDigest({ decision: 'REJECTED', validationErrors, simulatedAt }),
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:111:    // Phase 2: Provider simulation (if adapter declares simulate as supported)
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:112:    let providerResult: PolicySimulationResult | undefined;
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:119:    const report: PolicySimulationReport = {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:123:      simulationDigest: this.computeDigest({ decision, providerResult, simulatedAt }),
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:133:  private validateRules(rules: AuthorizationRule[]): SimulationValidationError[] {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:134:    const errors: SimulationValidationError[] = [];
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:153:      // Invariant 3: DENY rules on adapters that do not support simulation
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:169:  private resolveDecision(result?: PolicySimulationResult): SimulationDecision {
+server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts:171:      // No provider simulation available — approved conservatively
+server/uppie/src/core/policy-simulation/index.ts:1:export { PolicySimulationEngine } from './PolicySimulationEngine';
+server/uppie/src/core/policy-simulation/index.ts:3:  SimulationDecision,
+server/uppie/src/core/policy-simulation/index.ts:4:  SimulationValidationError,
+server/uppie/src/core/policy-simulation/index.ts:5:  PolicySimulationReport,
+server/uppie/src/core/policy-simulation/index.ts:6:} from './PolicySimulationEngine';
+server/uppie/src/index.ts:36:  PolicySimulationResult,
+server/uppie/src/index.ts:66:// Policy Simulation Engine (Stream E)
+server/uppie/src/index.ts:67:export { PolicySimulationEngine } from './core/policy-simulation/PolicySimulationEngine';
+server/uppie/src/index.ts:69:  SimulationDecision,
+server/uppie/src/index.ts:70:  SimulationValidationError,
+server/uppie/src/index.ts:71:  PolicySimulationReport,
+server/uppie/src/index.ts:72:} from './core/policy-simulation/PolicySimulationEngine';
+server/uppie/src/types/effective-authority.ts:36:  | 'NEEDS_SIMULATION';
+server/uppie/src/types/effective-authority.ts:38:export type SimulationConfidence =
+server/uppie/src/types/effective-authority.ts:53:  confidence:    SimulationConfidence;
+server/uppie/src/types/index.ts:69:  SimulationConfidence,
+server/uppie/src/types/policy-retirement-certificate.ts:63:  simulationDigest:        string;    // SHA-256 of simulation result

@@ -1,0 +1,34 @@
+====================================================
+ UGONDU COR AUTHORITY REQUEST
+====================================================
+
+Provider: AWS
+Region: us-east-1
+Account: 971671216490
+Role: UgonduCORRunner
+
+Purpose:
+Physical Certification of Ugondu AWS execution capability
+
+Authority:
+31 actions
+48 resource scopes
+4 verification operations
+3 recovery operations
+
+Risk:
+HIGH
+
+Duration:
+COR execution only
+
+Credential model:
+GitHub OIDC → short-lived STS credentials
+
+Rollback:
+Supported
+
+Approval:
+REQUIRED
+
+====================================================

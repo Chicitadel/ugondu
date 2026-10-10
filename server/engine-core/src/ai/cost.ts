@@ -14,12 +14,22 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface ModelRoutingDecision
+ * @description Corporate Governed interface implementation for ModelRoutingDecision
+ * @classification ENTERPRISE
+ */
 export interface ModelRoutingDecision {
     selectedModel: 'local-fast' | 'cloud-standard' | 'cloud-reasoning';
     estimatedCostUsd: number;
     reason: string;
 }
 
+/**
+ * @interface InfrastructureCostComparison
+ * @description Corporate Governed interface implementation for InfrastructureCostComparison
+ * @classification ENTERPRISE
+ */
 export interface InfrastructureCostComparison {
     currentMonthlyUsd: number;
     proposedMonthlyUsd: number;
@@ -27,6 +37,11 @@ export interface InfrastructureCostComparison {
     percentageSavings: number;
 }
 
+/**
+ * @class ModelCascadeCostEngine
+ * @description Corporate Governed class implementation for ModelCascadeCostEngine
+ * @classification ENTERPRISE
+ */
 export class ModelCascadeCostEngine {
     public static selectOptimalModel(taskComplexity: 'SIMPLE' | 'INTERMEDIATE' | 'COMPLEX'): ModelRoutingDecision {
         switch (taskComplexity) {
@@ -35,24 +50,24 @@ export class ModelCascadeCostEngine {
                 return {
                     selectedModel: 'local-fast',
                     estimatedCostUsd: 0.0001,
-                    reason: 'LOCAL_FAST_FOR_HEURISTIC_PARSING'
+                    reason: __t('ui.responses.local_fast_for_heuristic_parsing')
                 };
             case 'INTERMEDIATE':
                 // Single-service standard deployment planning
                 return {
                     selectedModel: 'cloud-standard',
                     estimatedCostUsd: 0.002,
-                    reason: 'STANDARD_MODEL_FOR_STANDARD_TOPOLOGY'
+                    reason: __t('ui.responses.standard_model_for_standard_topology')
                 };
             case 'COMPLEX':
                 // Multi-cluster / sovereign disaster recovery simulation
                 return {
                     selectedModel: 'cloud-reasoning',
                     estimatedCostUsd: 0.015,
-                    reason: 'HIGH_REASONING_FOR_MULTI_GRAPH_CHAOS_DR'
+                    reason: __t('ui.responses.high_reasoning_for_multi_graph_chaos_dr')
                 };
             default:
-                throw new Error(__t('invalid_ctx'));
+                throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
     }
 

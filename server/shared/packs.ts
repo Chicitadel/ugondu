@@ -23,6 +23,9 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from './i18n';
+
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -93,7 +96,7 @@ export function computePackManifestPayload(pack: Partial<LanguagePack>): string 
 export function signLanguagePackManifest(pack: Partial<LanguagePack>, privateKeyPem?: string): string {
     const payload = computePackManifestPayload(pack);
     const pem = privateKeyPem || process.env.UGONDU_LANGPACK_PRIVATE_KEY;
-    if (!pem) throw new Error('UGONDU_LANGPACK_PRIVATE_KEY is required for language-pack signing');
+    if (!pem) throw new Error(__t('messages.error.ugondu_langpack_private_key_is_required_for_l'));
     const privKey = crypto.createPrivateKey(pem);
     return crypto.sign(null, Buffer.from(payload, 'utf8'), privKey).toString('base64');
 }
@@ -106,7 +109,7 @@ export function verifyLanguagePackSignature(pack: LanguagePack, publicKeyPem?: s
             ? crypto.createPublicKey(publicKeyPem)
             : (() => {
                 const key = globalTrustRegistry.getActiveKeyByPurpose('language-pack');
-                if (!key) throw new Error('No active language-pack key found');
+                if (!key) throw new Error(__t('messages.error.no_active_language_pack_key_found'));
                 return globalTrustRegistry.getPublicKeyObject(key.keyId);
             })();
 
@@ -119,28 +122,28 @@ export function verifyLanguagePackSignature(pack: LanguagePack, publicKeyPem?: s
 
 export function validateLanguagePackIntegrity(pack: LanguagePack, publicKeyPem?: string): { valid: boolean; error?: string } {
     if (!pack.packId || !pack.locale || !pack.version) {
-        return { valid: false, error: 'Incomplete pack manifest' };
+        return { valid: false, error: __t('ui.responses.incomplete_pack_manifest') };
     }
 
     if (pack.schemaVersion !== '1') {
-        return { valid: false, error: `Unsupported schema version: ${pack.schemaVersion}` };
+        return { valid: false, error: __t('messages.error.unsupported_schema_version', { schemaVersion: pack.schemaVersion }) };
     }
 
     // 1. Digest check over tokens
     const calculatedDigest = computePackArtifactDigest(pack.tokens || {});
     if (calculatedDigest !== pack.artifactDigest) {
-        return { valid: false, error: `Digest mismatch: expected ${pack.artifactDigest}, got ${calculatedDigest}` };
+        return { valid: false, error: __t('messages.error.digest_mismatch', { expected: pack.artifactDigest, got: calculatedDigest }) };
     }
 
     // 2. ED25519 signature check over complete canonical manifest
     if (!verifyLanguagePackSignature(pack, publicKeyPem)) {
-        return { valid: false, error: 'Cryptographic signature verification failed' };
+        return { valid: false, error: __t('ui.responses.cryptographic_signature_verification_failed') };
     }
 
     // 3. Completeness check on critical security tokens
     for (const key of CriticalTokens) {
         if (!pack.tokens || !pack.tokens[key]) {
-            return { valid: false, error: `Critical security token missing: ${key}` };
+            return { valid: false, error: __t('messages.error.critical_token_missing', { key }) };
         }
     }
 

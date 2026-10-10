@@ -1,3 +1,4 @@
+import { Logger } from '@ugondu/shared/logger';
 import express, { Request, Response } from 'express';
 import { __t } from '@ugondu/shared';
 
@@ -106,7 +107,7 @@ app.post('/v1/repository/resolve', (req: Request, res: Response): any => {
         credentialEnvKey
     };
 
-    console.log(__t('repo_resolved', repositoryUrl, provider.toUpperCase()));
+    Logger.info(__t('repo_resolved', repositoryUrl, provider.toUpperCase()));
 
     return res.status(200).json({
         metadata,
@@ -128,6 +129,6 @@ app.get('/v1/repository/providers', (req: Request, res: Response): any => {
 
 const PORT = process.env.PORT || 4005;
 app.listen(PORT, () => {
-    console.log(__t('listening_port', 'Repository Adapter', PORT));
-    console.log(__t('repo_supported'));
+    Logger.info(__t('listening_port', __t('repository_adapter'), PORT));
+    Logger.info(__t('repo_supported'));
 });

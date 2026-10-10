@@ -1,0 +1,13 @@
+{
+  "checkpointId": "cp_200",
+  "payload": {
+    "checkpointId": "cp_200",
+    "state": "COMMITTED",
+    "data": {
+      "status": "STABLE"
+    },
+    "timestamp": 1791119443199
+  },
+  "sha256": "69b6dcd8e8afda1f08a1b25a8ca7f11d4ef32e54b70caf1b03a24c770e585036",
+  "persistedAt": 1791119443201
+}

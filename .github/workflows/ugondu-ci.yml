@@ -1,0 +1,43 @@
+name: Ugondu CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run I18N String Audit
+        run: node scripts/i18n_audit.js
+
+      - name: Run Stub / Placeholder Scan
+        run: node scripts/stub_scan.js
+
+      - name: Run Architecture Depth Scan
+        run: node scripts/depth_scan.js
+
+      - name: Run Import Scan
+        run: node scripts/import_scan.js
+
+      - name: Type check all packages
+        run: npm exec --workspaces -- tsc --noEmit
+
+      - name: Run tests
+        run: npm run test --workspaces --if-present

@@ -1,0 +1,30 @@
+name: ControlPlaneResourceLinkageDrift
+id: LR-0001
+classification: PROTECTED_PRODUCTION_RECOVERY
+
+environment:
+  platform: DirectAdmin
+  operating_system: Linux
+  hosting_model: Shared Hosting
+  access_contract: SSH_Discovery_First
+
+observed_problem:
+  description: Control-plane and application resource linkage divergence across a 33-component federation.
+  symptoms:
+    - Control plane declares 33 independent subdomains pointing to physical docroots
+    - Physical discovery reveals 29 docroots are entirely MISSING from the filesystem
+    - Physical discovery reveals only 4 docroots are INTACT
+    - HTTP Routing successfully resolves to physical paths when paths actually exist
+    
+context:
+  migration_history: cPanel to DirectAdmin
+  known_changes: IP change occurred, federation directory structure fractured
+  
+actual_cause:
+  description: Control Plane migration successfully ported VirtualHost records, but failed to port or recreate 29 physical repository paths on disk.
+  
+recovery_objective:
+  - Establish true resource relationship graph via SSH Adapter
+  - Diagnose exact missing paths
+  - Authorize ResourceLinkageRepair capability to safely recreate missing physical directories without overwriting the 4 intact docroots
+  - Safely synchronize application state into restored docroots

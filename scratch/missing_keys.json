@@ -1,0 +1,716 @@
+{
+  "total": 98,
+  "recovered": 13,
+  "unresolved": [
+    "messages.error.manifest_schema_invalid",
+    "messages.error.manifest_expired",
+    "messages.error.fips_validation_failed",
+    "ui.responses.authorization_insufficient_for_operation_on_t",
+    "messages.error.invalid_config",
+    "messages.error.invalid_vhosts_count",
+    "messages.error.invalid_db_size",
+    "messages.error.invalid_oidc_client_id",
+    "messages.error.invalid_oidc_client_secret",
+    "messages.error.invalid_oidc_issuer_url",
+    "messages.error.invalid_oidc_redirect_url",
+    "messages.error.invalid_saml_entity_id",
+    "messages.error.invalid_saml_sso_url",
+    "messages.error.invalid_saml_cert",
+    "messages.error.missing_oidc_token",
+    "messages.error.missing_saml_assertion",
+    "entraid.scim.creating_user",
+    "entraid.scim.updating_user",
+    "entraid.scim.deleting_user",
+    "entraid.scim.getting_user",
+    "entraid.scim.creating_group",
+    "entraid.scim.updating_group",
+    "entraid.scim.deleting_group",
+    "entraid.scim.getting_group",
+    "okta.scim.creating_user",
+    "okta.scim.updating_user",
+    "okta.scim.deleting_user",
+    "okta.scim.getting_user",
+    "okta.scim.creating_group",
+    "okta.scim.updating_group",
+    "okta.scim.deleting_group",
+    "okta.scim.getting_group",
+    "messages.error.checkpoint_save_failed",
+    "messages.system.checkpoint_saved",
+    "messages.error.action_execution_failed",
+    "messages.system.action_executed",
+    "messages.error.invalid_deployment_context",
+    "messages.error.invalid_rollback_event",
+    "ui.responses.plugin_requires_edition_tenant_has",
+    "ui.responses.plugin_requires_capabilities_not_entitled",
+    "ui.responses.plugin_depends_on_missing_plugins",
+    "azure.rbac.attach_failed",
+    "azure.rbac.detach_failed",
+    "azure.rbac.update_failed",
+    "azure.rbac.clone_failed",
+    "azure.rbac.retire_failed",
+    "azure.rbac.restore_failed",
+    "cpanel.attach.fail",
+    "cpanel.attach.err",
+    "cpanel.detach.fail",
+    "cpanel.detach.err",
+    "cpanel.update.fail",
+    "cpanel.update.err",
+    "cpanel.clone.read",
+    "cpanel.clone.write",
+    "cpanel.clone.err",
+    "cpanel.retire.fail",
+    "cpanel.retire.err",
+    "cpanel.restore.unsupported",
+    "gcp.iam.attach_error",
+    "gcp.iam.detach_error",
+    "gcp.iam.update_error",
+    "gcp.iam.clone_error",
+    "gcp.iam.retire_error",
+    "gcp.iam.restore_error",
+    "uppie.adapter.k8s.attach_error",
+    "uppie.adapter.k8s.detach_error",
+    "uppie.adapter.k8s.update_error",
+    "uppie.adapter.k8s.clone_error",
+    "uppie.adapter.k8s.reconcile_error",
+    "uppie.adapter.k8s.retire_error",
+    "uppie.adapter.k8s.restore_no_reference",
+    "uppie.adapter.k8s.restore_error",
+    "linux_acl.attach.no_entries",
+    "linux_acl.attach.failed",
+    "linux_acl.detach.failed",
+    "linux_acl.update.failed",
+    "linux_acl.clone.failed",
+    "linux_acl.retire.failed",
+    "linux_acl.restore.failed",
+    "messages.warning.wildcard_action_and_resource",
+    "messages.warning.wildcard_action",
+    "messages.warning.wildcard_resource",
+    "ui.responses.wildcard_resource_scope_is_forbidden",
+    "ui.responses.deny_rule_submitted_to_adapter_which"
+  ],
+  "recoveredMap": {
+    "ui.responses.same_kind_from_different_sources_with_differe": "Same kind '${evidence[i].kind}' from different sources with different hashes",
+    "messages.system.provisioning_aws_ec2_ecs_lambda_with_config": "Provisioning AWS EC2/ECS/Lambda with config:",
+    "messages.system.terminating_aws_compute_resources": "Terminating AWS compute resources:",
+    "messages.system.provisioning_aws_rds_dynamodb_with_config": "Provisioning AWS RDS/DynamoDB with config:",
+    "messages.system.provisioning_cpanel_hosting_account_with_conf": "Provisioning cPanel hosting account with config:",
+    "messages.system.terminating_cpanel_compute_resources": "Terminating cPanel compute resources:",
+    "messages.system.provisioning_cpanel_mysql_database_with_confi": "Provisioning cPanel MySQL Database with config:",
+    "messages.system.provisioning_kubernetes_deployments_pods_with": "Provisioning Kubernetes Deployments/Pods with config:",
+    "messages.system.terminating_kubernetes_compute_resources": "Terminating Kubernetes compute resources:",
+    "messages.system.provisioning_kubernetes_statefulsets_for_db_w": "Provisioning Kubernetes StatefulSets for DB with config:",
+    "messages.system.provisioning_linux_vps_with_config": "Provisioning Linux VPS with config:",
+    "messages.system.terminating_linux_compute_resources": "Terminating Linux compute resources:",
+    "messages.system.provisioning_linux_mysql_postgresql_with_conf": "Provisioning Linux MySQL/PostgreSQL with config:"
+  },
+  "sites": {
+    "messages.error.manifest_schema_invalid": [
+      {
+        "file": "server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts",
+        "line": 75
+      }
+    ],
+    "messages.error.manifest_expired": [
+      {
+        "file": "server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts",
+        "line": 81
+      }
+    ],
+    "messages.error.fips_validation_failed": [
+      {
+        "file": "server/capabilities/src/sovereign/OfflineLicenseEvaluator.ts",
+        "line": 86
+      }
+    ],
+    "ui.responses.same_kind_from_different_sources_with_differe": [
+      {
+        "file": "server/engine-core/src/doctor/rca/contradiction_detector.ts",
+        "line": 68
+      }
+    ],
+    "ui.responses.authorization_insufficient_for_operation_on_t": [
+      {
+        "file": "server/engine-core/src/doctor/remediation/generator.ts",
+        "line": 119
+      }
+    ],
+    "messages.system.provisioning_aws_ec2_ecs_lambda_with_config": [
+      {
+        "file": "server/engine-core/src/fabric/providers/aws/index.ts",
+        "line": 41
+      }
+    ],
+    "messages.system.terminating_aws_compute_resources": [
+      {
+        "file": "server/engine-core/src/fabric/providers/aws/index.ts",
+        "line": 45
+      }
+    ],
+    "messages.system.provisioning_aws_rds_dynamodb_with_config": [
+      {
+        "file": "server/engine-core/src/fabric/providers/aws/index.ts",
+        "line": 57
+      }
+    ],
+    "messages.system.provisioning_cpanel_hosting_account_with_conf": [
+      {
+        "file": "server/engine-core/src/fabric/providers/cpanel/index.ts",
+        "line": 41
+      }
+    ],
+    "messages.system.terminating_cpanel_compute_resources": [
+      {
+        "file": "server/engine-core/src/fabric/providers/cpanel/index.ts",
+        "line": 45
+      }
+    ],
+    "messages.system.provisioning_cpanel_mysql_database_with_confi": [
+      {
+        "file": "server/engine-core/src/fabric/providers/cpanel/index.ts",
+        "line": 57
+      }
+    ],
+    "messages.system.provisioning_kubernetes_deployments_pods_with": [
+      {
+        "file": "server/engine-core/src/fabric/providers/kubernetes/index.ts",
+        "line": 41
+      }
+    ],
+    "messages.system.terminating_kubernetes_compute_resources": [
+      {
+        "file": "server/engine-core/src/fabric/providers/kubernetes/index.ts",
+        "line": 45
+      }
+    ],
+    "messages.system.provisioning_kubernetes_statefulsets_for_db_w": [
+      {
+        "file": "server/engine-core/src/fabric/providers/kubernetes/index.ts",
+        "line": 57
+      }
+    ],
+    "messages.system.provisioning_linux_vps_with_config": [
+      {
+        "file": "server/engine-core/src/fabric/providers/linux/index.ts",
+        "line": 41
+      }
+    ],
+    "messages.system.terminating_linux_compute_resources": [
+      {
+        "file": "server/engine-core/src/fabric/providers/linux/index.ts",
+        "line": 45
+      }
+    ],
+    "messages.system.provisioning_linux_mysql_postgresql_with_conf": [
+      {
+        "file": "server/engine-core/src/fabric/providers/linux/index.ts",
+        "line": 57
+      }
+    ],
+    "messages.error.invalid_config": [
+      {
+        "file": "server/engine-core/src/move/TranslationMap.ts",
+        "line": 89
+      }
+    ],
+    "messages.error.invalid_vhosts_count": [
+      {
+        "file": "server/engine-core/src/move/TranslationMap.ts",
+        "line": 102
+      }
+    ],
+    "messages.error.invalid_db_size": [
+      {
+        "file": "server/engine-core/src/move/TranslationMap.ts",
+        "line": 126
+      }
+    ],
+    "messages.error.invalid_oidc_client_id": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 35
+      }
+    ],
+    "messages.error.invalid_oidc_client_secret": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 36
+      }
+    ],
+    "messages.error.invalid_oidc_issuer_url": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 37
+      }
+    ],
+    "messages.error.invalid_oidc_redirect_url": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 38
+      }
+    ],
+    "messages.error.invalid_saml_entity_id": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 44
+      }
+    ],
+    "messages.error.invalid_saml_sso_url": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 45
+      }
+    ],
+    "messages.error.invalid_saml_cert": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 46
+      }
+    ],
+    "messages.error.missing_oidc_token": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 87
+      }
+    ],
+    "messages.error.missing_saml_assertion": [
+      {
+        "file": "server/engine-core/src/tenant/identity.ts",
+        "line": 118
+      }
+    ],
+    "entraid.scim.creating_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 46
+      }
+    ],
+    "entraid.scim.updating_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 51
+      }
+    ],
+    "entraid.scim.deleting_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 56
+      }
+    ],
+    "entraid.scim.getting_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 61
+      }
+    ],
+    "entraid.scim.creating_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 67
+      }
+    ],
+    "entraid.scim.updating_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 72
+      }
+    ],
+    "entraid.scim.deleting_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 77
+      }
+    ],
+    "entraid.scim.getting_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/EntraIdScimAdapter.ts",
+        "line": 82
+      }
+    ],
+    "okta.scim.creating_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 46
+      }
+    ],
+    "okta.scim.updating_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 51
+      }
+    ],
+    "okta.scim.deleting_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 56
+      }
+    ],
+    "okta.scim.getting_user": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 61
+      }
+    ],
+    "okta.scim.creating_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 67
+      }
+    ],
+    "okta.scim.updating_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 72
+      }
+    ],
+    "okta.scim.deleting_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 77
+      }
+    ],
+    "okta.scim.getting_group": [
+      {
+        "file": "server/engine-core/src/tenant/scim/OktaScimAdapter.ts",
+        "line": 82
+      }
+    ],
+    "messages.error.checkpoint_save_failed": [
+      {
+        "file": "server/engine-core/src/urre/execution/checkpoint.ts",
+        "line": 130
+      },
+      {
+        "file": "server/engine-core/src/urre/execution/checkpoint.ts",
+        "line": 157
+      },
+      {
+        "file": "server/engine-core/src/urre/execution/checkpoint.ts",
+        "line": 203
+      }
+    ],
+    "messages.system.checkpoint_saved": [
+      {
+        "file": "server/engine-core/src/urre/execution/checkpoint.ts",
+        "line": 165
+      }
+    ],
+    "messages.error.action_execution_failed": [
+      {
+        "file": "server/engine-core/src/urre/execution/kernel.ts",
+        "line": 166
+      },
+      {
+        "file": "server/engine-core/src/urre/execution/kernel.ts",
+        "line": 204
+      }
+    ],
+    "messages.system.action_executed": [
+      {
+        "file": "server/engine-core/src/urre/execution/kernel.ts",
+        "line": 187
+      }
+    ],
+    "messages.error.invalid_deployment_context": [
+      {
+        "file": "server/engine-core/src/urre/tests/rollback.spec.ts",
+        "line": 62
+      },
+      {
+        "file": "server/engine-core/src/urre/tests/rollback.spec.ts",
+        "line": 107
+      }
+    ],
+    "messages.error.invalid_rollback_event": [
+      {
+        "file": "server/engine-core/src/urre/tests/rollback.spec.ts",
+        "line": 74
+      },
+      {
+        "file": "server/engine-core/src/urre/tests/rollback.spec.ts",
+        "line": 123
+      }
+    ],
+    "ui.responses.plugin_requires_edition_tenant_has": [
+      {
+        "file": "server/plugin-manager/src/capability-gate.ts",
+        "line": 99
+      }
+    ],
+    "ui.responses.plugin_requires_capabilities_not_entitled": [
+      {
+        "file": "server/plugin-manager/src/capability-gate.ts",
+        "line": 112
+      }
+    ],
+    "ui.responses.plugin_depends_on_missing_plugins": [
+      {
+        "file": "server/plugin-manager/src/capability-gate.ts",
+        "line": 125
+      }
+    ],
+    "azure.rbac.attach_failed": [
+      {
+        "file": "server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts",
+        "line": 217
+      }
+    ],
+    "azure.rbac.detach_failed": [
+      {
+        "file": "server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts",
+        "line": 227
+      }
+    ],
+    "azure.rbac.update_failed": [
+      {
+        "file": "server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts",
+        "line": 244
+      }
+    ],
+    "azure.rbac.clone_failed": [
+      {
+        "file": "server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts",
+        "line": 258
+      }
+    ],
+    "azure.rbac.retire_failed": [
+      {
+        "file": "server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts",
+        "line": 314
+      }
+    ],
+    "azure.rbac.restore_failed": [
+      {
+        "file": "server/uppie/src/adapters/azure-rbac/AzureRbacAdapter.ts",
+        "line": 327
+      }
+    ],
+    "cpanel.attach.fail": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 198
+      }
+    ],
+    "cpanel.attach.err": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 201
+      }
+    ],
+    "cpanel.detach.fail": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 209
+      }
+    ],
+    "cpanel.detach.err": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 212
+      }
+    ],
+    "cpanel.update.fail": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 223
+      }
+    ],
+    "cpanel.update.err": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 226
+      }
+    ],
+    "cpanel.clone.read": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 234
+      }
+    ],
+    "cpanel.clone.write": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 236
+      }
+    ],
+    "cpanel.clone.err": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 239
+      }
+    ],
+    "cpanel.retire.fail": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 301
+      }
+    ],
+    "cpanel.retire.err": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 304
+      }
+    ],
+    "cpanel.restore.unsupported": [
+      {
+        "file": "server/uppie/src/adapters/cpanel/CpanelAdapter.ts",
+        "line": 309
+      }
+    ],
+    "gcp.iam.attach_error": [
+      {
+        "file": "server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts",
+        "line": 215
+      }
+    ],
+    "gcp.iam.detach_error": [
+      {
+        "file": "server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts",
+        "line": 227
+      }
+    ],
+    "gcp.iam.update_error": [
+      {
+        "file": "server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts",
+        "line": 241
+      }
+    ],
+    "gcp.iam.clone_error": [
+      {
+        "file": "server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts",
+        "line": 254
+      }
+    ],
+    "gcp.iam.retire_error": [
+      {
+        "file": "server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts",
+        "line": 311
+      }
+    ],
+    "gcp.iam.restore_error": [
+      {
+        "file": "server/uppie/src/adapters/gcp-iam/GcpIamAdapter.ts",
+        "line": 324
+      }
+    ],
+    "uppie.adapter.k8s.attach_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 212
+      }
+    ],
+    "uppie.adapter.k8s.detach_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 224
+      }
+    ],
+    "uppie.adapter.k8s.update_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 239
+      }
+    ],
+    "uppie.adapter.k8s.clone_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 258
+      }
+    ],
+    "uppie.adapter.k8s.reconcile_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 313
+      }
+    ],
+    "uppie.adapter.k8s.retire_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 324
+      }
+    ],
+    "uppie.adapter.k8s.restore_no_reference": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 333
+      }
+    ],
+    "uppie.adapter.k8s.restore_error": [
+      {
+        "file": "server/uppie/src/adapters/kubernetes-rbac/KubernetesRbacAdapter.ts",
+        "line": 339
+      }
+    ],
+    "linux_acl.attach.no_entries": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 199
+      }
+    ],
+    "linux_acl.attach.failed": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 205
+      }
+    ],
+    "linux_acl.detach.failed": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 215
+      }
+    ],
+    "linux_acl.update.failed": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 234
+      }
+    ],
+    "linux_acl.clone.failed": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 244
+      }
+    ],
+    "linux_acl.retire.failed": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 299
+      }
+    ],
+    "linux_acl.restore.failed": [
+      {
+        "file": "server/uppie/src/adapters/linux-acl/LinuxAclAdapter.ts",
+        "line": 311
+      }
+    ],
+    "messages.warning.wildcard_action_and_resource": [
+      {
+        "file": "server/uppie/src/core/analyzer/ExcessivePermissionAnalyzer.ts",
+        "line": 90
+      }
+    ],
+    "messages.warning.wildcard_action": [
+      {
+        "file": "server/uppie/src/core/analyzer/ExcessivePermissionAnalyzer.ts",
+        "line": 93
+      }
+    ],
+    "messages.warning.wildcard_resource": [
+      {
+        "file": "server/uppie/src/core/analyzer/ExcessivePermissionAnalyzer.ts",
+        "line": 96
+      }
+    ],
+    "ui.responses.wildcard_resource_scope_is_forbidden": [
+      {
+        "file": "server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts",
+        "line": 141
+      }
+    ],
+    "ui.responses.deny_rule_submitted_to_adapter_which": [
+      {
+        "file": "server/uppie/src/core/policy-simulation/PolicySimulationEngine.ts",
+        "line": 162
+      }
+    ]
+  }
+}

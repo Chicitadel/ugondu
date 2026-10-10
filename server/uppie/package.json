@@ -1,0 +1,32 @@
+{
+  "name": "@ugondu/uppie",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Universal Policy & Permission Intelligence Engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "optionalDependencies": {
+    "@aws-sdk/client-iam": "^3.1146.0",
+    "@azure/arm-authorization": "^9.0.0",
+    "@azure/identity": "^4.13.3",
+    "@google-cloud/iam": "^3.1.1",
+    "@google-cloud/policytroubleshooter": "^5.1.1",
+    "@google-cloud/resource-manager": "^7.1.1",
+    "@kubernetes/client-node": "~0.22.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.2"
+  }
+}

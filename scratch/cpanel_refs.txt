@@ -1,0 +1,26 @@
+server\engine-core\src\architecture\model\candidate.ts:72: provider: string;         // 'linux-vps' | 'cpanel' | 'aws' | 'kubernetes'
+server\engine-core\src\architecture\verticals\vertical-c-cpanel.ts:48: provider: 'cpanel',
+server\engine-core\src\architecture\verticals\vertical-c-cpanel.ts:51: { id: crypto.randomUUID(), type: 'compute', name: 'cpanel-quota-sync', provider: 'cpanel', config: {} },
+server\engine-core\src\architecture\verticals\vertical-c-cpanel.ts:52: { id: crypto.randomUUID(), type: 'database', name: 'cpanel-mysql', provider: 'cpanel', config: {} },
+server\engine-core\src\architecture\verticals\vertical-c-cpanel.ts:53: { id: crypto.randomUUID(), type: 'tls', name: 'cpanel-ssl', provider: 'cpanel', config: {} },
+server\engine-core\src\architecture\verticals\vertical-c-cpanel.ts:54: { id: crypto.randomUUID(), type: 'dns', name: 'cpanel-dns-zone', provider: 'cpanel', config: {} },
+server\engine-core\src\architecture\verticals\vertical-c-cpanel.ts:55: { id: crypto.randomUUID(), type: 'backup', name: 'cpanel-backup-api', provider: 'cpanel', config: {} }
+server\engine-core\src\fabric\capabilities\identity.ts:52: generateMinimumAuthority(
+server\engine-core\src\fabric\providers\cpanel\index.ts:42: return { status: 'provisioned', provider: 'cpanel', type: 'compute' };
+server\engine-core\src\fabric\providers\cpanel\index.ts:58: return { status: 'provisioned', provider: 'cpanel', type: 'database' };
+server\engine-core\src\graph\knowledge.ts:43: this.addRelationship('cpanel', 'SYNC_ENVIRONMENT', 'requires');
+server\engine-core\src\graph\knowledge.ts:44: this.addRelationship('cpanel', 'quota-sync', 'optimized-for');
+server\engine-core\src\graph\knowledge.ts:45: this.addRelationship('cpanel', 'atomic', 'conflicts-with');
+server\engine-core\src\routes\deploy.ts:78: targetEnvironment === 'cpanel' || targetEnvironment === 'directadmin'
+server\engine-core\src\simulation\simulator.ts:67: if (targetEnvironment === 'baremetal' || targetEnvironment === 'cpanel') {
+server\engine-core\src\targets\fabric.ts:20: export type TargetEnvironmentType = 'cpanel' | 'directadmin' | 'ssh' | 'docker' | 'kubernetes' | 'cloud' | 'baremetal';
+server\engine-core\src\targets\fabric.ts:61: case 'cpanel':
+server\engine-core\src\tenant\policy\baseline.ts:28: allowedProviders: ['AWS_IAM', 'AZURE_RBAC', 'GCP_IAM', 'KUBERNETES_RBAC', 'LINUX_ACL', 'CPANEL']
+server\engine-core\src\twin\model\shared-types.ts:92: panel: 'cpanel' | 'plesk' | 'directadmin' | 'unknown';
+server\shared\discovery.ts:73: panel: 'cpanel' | 'plesk' | 'directadmin' | 'unknown';
+server\uppie\src\adapters\adapter-defaults.ts:28: import { CpanelAdapter }         from './cpanel/CpanelAdapter';
+server\uppie\src\adapters\adapter-defaults.ts:45: new CpanelAdapter(),
+server\uppie\src\adapters\IPolicyProviderAdapter.ts:47: | 'CPANEL'
+scratch\add_missing_keys.js:109: const P = { aws: 'AWS', cpanel: 'cPanel', kubernetes: 'Kubernetes', linux: 'Linux' };
+scratch\fix_callsites.js:7: ['uppie/src/adapters/cpanel/CpanelAdapter.ts', /__t\('(cpanel\.[a-z]+\.err)',\s*'Error: \{0\}',\s*e\.message\)/g, "__t('$1', { message: e.message })"],
+scratch\fix_callsites.js:8: ['uppie/src/adapters/cpanel/CpanelAdapter.ts', /__t\('(cpanel\.[a-z]+\.(?:fail|read|write|unsupported))',\s*'[^']*'\)/g, "__t('$1')"],

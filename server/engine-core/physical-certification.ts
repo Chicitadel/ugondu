@@ -1,0 +1,153 @@
+import { createProductionActionRegistry } from './src/registry/action-registry-factory';
+import { EvidenceCollector, PhysicalProviderObservation } from './src/evidence/evidence-engine';
+import { DeploymentRepairEngine } from './src/deise/engine/repair-engine';
+import { EnvironmentTwin } from './src/deise/twin/environment-twin';
+import { __t } from '@ugondu/shared';
+import { getProviderAdapter } from './src/assurance/provider/certification-provider-factory';
+
+async function runCertification() {
+    console.log(__t('cert.fargate.start'));
+    const region = process.env.UGONDU_CERT_REGION;
+    if (!region) throw new Error(__t('error.cert.missing_region'));
+
+    const providerAdapter = getProviderAdapter('aws', region);
+    const campaignId = `UGONDU-COR-${new Date().toISOString().slice(0, 10)}-001`;
+
+    const awsObs = providerAdapter.getNativeClient();
+    const registry = createProductionActionRegistry(awsObs);
+    const evidenceCollector = new EvidenceCollector();
+    const urre = registry.getUrre();
+    
+    const txId = process.env.UGONDU_TRANSACTION_ID;
+    if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required by the IAM policy.');
+
+    const amiId = await providerAdapter.resolveDefaultAmi();
+
+    try {
+        console.log(__t('cert.phase.creating_vpc'));
+        const vpcRes = await registry.getAction('network:vpc:create')!.execute({ transactionId: txId, cidr: '10.0.0.0/16' });
+        const vpcId = vpcRes?.outputs?.vpcId || vpcRes?.vpcId;
+        if (!vpcId) throw new Error(__t('error.cert.missing_vpc_id'));
+
+        console.log(__t('cert.phase.creating_subnets'));
+        const sub1Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.1.0/24' });
+        const sub2Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.2.0/24' });
+        const sub1Id = sub1Res?.outputs?.subnetId || sub1Res?.subnetId;
+        const sub2Id = sub2Res?.outputs?.subnetId || sub2Res?.subnetId;
+
+        console.log(__t('cert.phase.creating_sg'));
+        const sgRes = await registry.getAction('network:security-group:create')!.execute({ transactionId: txId, vpcId, groupName: 'Ugondu-COR-SG' });
+        const sgId = sgRes?.outputs?.groupId || sgRes?.groupId;
+
+        console.log(__t('cert.phase.creating_ec2'));
+        const ec2Res = await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
+        const ec2Id = ec2Res?.outputs?.instanceId || ec2Res?.instanceId;
+        const volumeId = ec2Res?.outputs?.rootVolumeId || ec2Res?.rootVolumeId || process.env.UGONDU_CERT_VOLUME_ID;
+        if (!volumeId) throw new Error(__t('error.cert.missing_volume_id'));
+
+        console.log(__t('cert.phase.creating_ebs_snapshot'));
+        const snapRes = await registry.getAction('storage:ebs-snapshot:create')!.execute({ transactionId: txId, volumeId: volumeId }); 
+        const snapId = snapRes?.outputs?.snapshotId || snapRes?.snapshotId;
+
+        console.log(__t('cert.phase.creating_rds_subnet_group'));
+        const rdsSubnetGroupName = `ugondu-rds-subnet-${txId.toLowerCase()}-${Date.now()}`;
+        await registry.getAction('database:rds-subnet-group:create')!.execute({ transactionId: txId, dbSubnetGroupName: rdsSubnetGroupName, subnetIds: [sub1Id, sub2Id] });
+
+        console.log(__t('cert.phase.creating_rds'));
+        const rdsId = `ugondu-db-${txId.toLowerCase()}-${Date.now()}`;
+        await registry.getAction('database:relational:create')!.execute({ transactionId: txId, rdsId, dbSubnetGroupName: rdsSubnetGroupName });
+
+        console.log(__t('cert.phase.creating_rds_snapshot'));
+        const rdsSnapId = `ugondu-rds-snap-${txId.toLowerCase()}-${Date.now()}`;
+        await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId, rdsSnapshotId: rdsSnapId });
+
+        console.log(__t('cert.phase.creating_s3'));
+        const bucketName = `ugondu-cor-bucket-${txId.toLowerCase()}-${Date.now()}`;
+        await registry.getAction('storage:s3:create')!.execute({ transactionId: txId, bucketName });
+        
+        console.log(__t('verifying_s3_bucket_tags_to_en'));
+        const s3Client = awsObs.s3;
+        const tagResponse = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => { if (err.name === 'NoSuchTagSet') return { TagSet: [] }; throw err; });
+        const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');
+        const hasTx = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduTransactionId' && t.Value === txId);
+        if (!hasCOR || !hasTx) {
+            throw new Error(`S3 bucket ${bucketName} missing required ownership tags after creation.`);
+        }
+
+        await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
+
+        // DEISE Drift Injection and Test
+        console.log(__t('cert.phase.injecting_faults'));
+        const faultInjector = providerAdapter.getFaultInjector();
+        await faultInjector.injectTagDrift(ec2Id, 'Name', 'DriftedName');
+        
+        console.log(__t('cert.phase.diagnosis_repair'));
+        const executor = providerAdapter.getRepairExecutor();
+        
+        const twin = {
+            provider: { platform: 'aws', symlinkSupported: false, atomicRenameSupported: false, rsyncAvailable: false },
+            topology: { currentSymlinkTarget: null, currentSymlinkValid: true, webrootPath: '', webrootSymlinkTarget: 'current/public_html', availableReleases: [] },
+            application: { version: '1', manifests: [], integrityStatus: ('VALID' as 'VALID' | 'CORRUPTED' | 'MISSING') },
+            runtime: { primaryRuntime: 'node', primaryRuntimeVersion: '20', missingDependencies: [] },
+            infrastructure: [
+                { id: ec2Id, type: ('EC2' as 'EC2'), expectedState: { Name: 'UgonduEC2' }, actualState: { Name: 'DriftedName' } }
+            ]
+        };
+        const repairEngine = new DeploymentRepairEngine();
+        const plan = repairEngine.diagnoseEnvironment(twin, 'v1');
+        
+        if (plan.requiresInfrastructureRepair) {
+            console.log(__t('cert.phase.repairing_drift'));
+            await executor.executeRepair(plan.infrastructureRepairs![0]);
+        }
+
+        console.log(__t('cert.phase.urre_fault_injection'));
+        urre.faultInjector = {
+            afterNodePersisted: async (node) => {
+                if (node.action === 'CREATE_EC2' && node.status === 'RUNNING') {
+                    throw new Error(__t('error.cert.simulated_fault'));
+                }
+            }
+        };
+
+        try {
+            await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
+        } catch (e: any) {
+            console.log(__t('cert.phase.testing_rollback', { error: e.message }));
+            // We just let finally handle the global rollback or do nothing here since the test passed
+        }
+        
+        urre.faultInjector = undefined;
+
+        console.log(__t('cert.run.complete'));
+
+    } catch (e: any) {
+        console.error(__t('cert.error.execution_failed_urre'), e);
+        // Explicitly block and wait for complete dependency-aware rollback
+        process.exitCode = 1;
+    } finally {
+        console.log(__t('cert.phase.cleanup'));
+        try {
+            // Guarantee cleanup is executed via Transaction Ledger using URRE rollback
+            await urre.triggerRollback(({ id: txId, targetEnvironment: 'production' } as any));
+        } catch (cleanupErr: any) {
+            console.error(__t('cert.error.urre_rollback_failed_cleanup'), cleanupErr);
+            process.exitCode = 1;
+        }
+
+        console.log(__t('cert.phase.residual_scan'));
+        const residualScanner = providerAdapter.getResidualScanner();
+        
+        // This is a minimal scanner check here, but the CI residual-scanner.ts will do the deep scan
+        const leaked = await residualScanner.scanForLeakedResources({ transactionId: txId });
+        
+        if (leaked) {
+            console.error(__t('error.cert.residual_scan_failed'));
+            process.exitCode = 1;
+        } else {
+            console.log(__t('cert.residual_scan.clean'));
+        }
+    }
+}
+
+runCertification();

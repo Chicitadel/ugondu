@@ -1,0 +1,12 @@
+[
+    { "gate": "COR-4.1", "requirement": "Physical VPC creation", "evidenceRequired": ["targetId", "waitUntilVpcAvailable"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.SUB", "requirement": "Physical Subnet creation", "evidenceRequired": ["targetId", "CreateSubnetCommand"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.EC2", "requirement": "Physical EC2 launch", "evidenceRequired": ["targetId", "waitUntilInstanceRunning"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.CRED", "requirement": "Secure Credential Resolution", "evidenceRequired": ["targetId", "UgonduCredentialStore"], "forbiddenEvidence": ["simulation", "password123"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.RDS", "requirement": "Physical RDS Database", "evidenceRequired": ["targetId", "waitUntilDBInstanceAvailable"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.S3", "requirement": "Physical S3 Bucket", "evidenceRequired": ["targetId", "waitUntilBucketExists"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.SNAP", "requirement": "Physical Snapshot Lifecycle", "evidenceRequired": ["targetId", "CreateImageCommand"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-4.URRE.RESUME", "requirement": "Cross-process transaction resume", "evidenceRequired": ["targetId", "deserialize"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-5.DEISE", "requirement": "Physical DEISE repair", "evidenceRequired": ["targetId", "Repair", "mutationObserved"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" },
+    { "gate": "COR-7.6", "requirement": "Fargate Task Definition Registration", "evidenceRequired": ["targetId", "RegisterTaskDefinition"], "forbiddenEvidence": ["simulation"], "status": "NOT_PROVEN" }
+]

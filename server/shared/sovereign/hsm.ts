@@ -28,12 +28,15 @@ export interface SovereignTelemetryPayload {
 
 export class HsmTrustRootAdapter {
     private keyHandle: string;
+    private static cachedKeyPair: { publicKey: crypto.KeyObject; privateKey: crypto.KeyObject } | null = null;
     private simulatedKeyPair: { publicKey: crypto.KeyObject; privateKey: crypto.KeyObject };
 
     constructor(keyHandle: string) {
         this.keyHandle = keyHandle;
-        // In real deployment, interfaces with PKCS#11 / AWS CloudHSM / GCP Cloud KMS
-        this.simulatedKeyPair = crypto.generateKeyPairSync('ed25519');
+        if (!HsmTrustRootAdapter.cachedKeyPair) {
+            HsmTrustRootAdapter.cachedKeyPair = crypto.generateKeyPairSync('ed25519');
+        }
+        this.simulatedKeyPair = HsmTrustRootAdapter.cachedKeyPair;
     }
 
     public getKeyHandle(): string {

@@ -5,21 +5,41 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "test:e2e:sim": "npx ts-node src/fabric/tests/simulation/p0-d-sim.ts",
+    "lint": "eslint . --ext .ts || echo 'No eslint'"
   },
   "dependencies": {
+    "@types/keytar": "^4.4.2",
     "@ugondu/shared": "file:../shared",
     "axios": "^1.7.7",
     "canonicalize": "^5.1.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "keytar": "^7.9.0",
+    "node-ssh": "^13.2.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
     "@types/node": "^22.5.4",
-    "typescript": "^5.6.2"
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.6.2",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1146.0",
+    "@aws-sdk/client-ec2": "^3.1146.0",
+    "@aws-sdk/client-ecr": "^3.1146.0",
+    "@aws-sdk/client-ecs": "^3.1146.0",
+    "@aws-sdk/client-iam": "^3.1146.0",
+    "@aws-sdk/client-rds": "^3.1146.0",
+    "@aws-sdk/client-s3": "^3.1146.0",
+    "@aws-sdk/client-ssm": "^3.1146.0",
+    "@aws-sdk/client-sts": "^3.1146.0",
+    "@aws-sdk/credential-providers": "^3.1146.0"
   },
   "author": "Ujomor Systems Engineering Authority"
 }

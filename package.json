@@ -11,7 +11,10 @@
     "server/billing-gateway",
     "server/plugin-manager",
     "server/event-bus",
-    "server/repository-adapter"
+    "server/repository-adapter",
+    "server/uppie",
+    "server/capabilities",
+    "server/tests"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
@@ -29,5 +32,15 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudtrail": "^3.1147.0",
+    "@aws-sdk/client-ec2": "^3.1147.0",
+    "@vitalets/google-translate-api": "^9.2.1",
+    "uuid": "^14.0.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/uuid": "^11.0.0"
   }
 }

@@ -38,12 +38,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
+	
 	"path/filepath"
 	"strings"
 	"time"
 
 	"ugondu/client/engine"
+	"ugondu/client/engine/adapters"
 	"ugondu/client/i18n"
 )
 
@@ -155,7 +156,7 @@ func FindLatestTransactionId() (string, error) {
 	}
 	entries, err := os.ReadDir(txBaseDir)
 	if err != nil {
-		return "", fmt.Errorf("unable to read transactions directory: %w", err)
+		return "", fmt.Errorf(i18n.T("unable_to_read_transactions_directory"), err)
 	}
 
 	var latestTxId string
@@ -187,7 +188,7 @@ func FindLatestTransactionId() (string, error) {
 	}
 
 	if latestTxId == "" {
-		return "", fmt.Errorf("no transactions found in %s", txBaseDir)
+		return "", fmt.Errorf(i18n.T("no_transactions_found_in"), txBaseDir)
 	}
 
 	return latestTxId, nil
@@ -260,7 +261,7 @@ func ParseAndRun(args []string) {
 		i18n.SetLocaleWithSource(loc, src)
 	}
 
-	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help"}
+	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help", "auth", "repair"}
 
 	if len(cleanedArgs) < 1 {
 		fmt.Println(i18n.T("err_no_command"))
@@ -299,7 +300,7 @@ func ParseAndRun(args []string) {
 	}
 	targetEnv := os.Getenv("UGONDU_TARGET_ENV")
 	if targetEnv == "" {
-		targetEnv = "cpanel"
+		targetEnv = "auto"
 	}
 
 	force := false
@@ -436,28 +437,40 @@ func ParseAndRun(args []string) {
 		fmt.Println(i18n.T("cli_title"))
 	case "help":
 		PrintHelp()
+	case "repair":
+		HandleRepairCommand(cleanedArgs[1:])
+	case "auth":
+		if len(cleanedArgs) < 2 {
+			fmt.Println(i18n.T("auth_usage"))
+			os.Exit(1)
+		}
+		subcmd := cleanedArgs[1]
+		if subcmd == "login" {
+			engine.Authenticate()
+		} else if subcmd == "status" {
+			engine.AuthStatus()
+		} else if subcmd == "logout" {
+			engine.Logout()
+		}
+
 	}
 }
 
 // Helpers for git
 func getGitRemoteUrl() string {
-	out, err := runGit("config", "--get", "remote.origin.url")
+	adapter := adapters.NewGitAdapter()
+	out, err := adapter.GetRemoteURL(".")
 	if err != nil {
-		return "local-repo"
+		return i18n.T("local-repo")
 	}
 	return strings.TrimSpace(out)
 }
 
 func getGitBranch() string {
-	out, err := runGit("rev-parse", "--abbrev-ref", "HEAD")
+	adapter := adapters.NewGitAdapter()
+	out, err := adapter.GetBranch(".")
 	if err != nil {
-		return "main"
+		return i18n.T("main")
 	}
 	return strings.TrimSpace(out)
-}
-
-func runGit(args ...string) (string, error) {
-	cmd := exec.Command("git", args...)
-	out, err := cmd.Output()
-	return string(out), err
 }

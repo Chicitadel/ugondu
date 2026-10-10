@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import axios from 'axios';
 import { __t, NetworkDestinationPolicy } from '@ugondu/shared';
 import { eventStore } from './db';
+import { Logger } from '@ugondu/shared/logger';
 
 const app = express();
 app.use(express.json());
@@ -17,23 +18,23 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
         return res.status(400).json({ error: __t('event_req') });
     }
 
-    console.log(__t('dispatching') + ` ${event}`);
+    Logger.info(__t('dispatching') + ` ${event}`);
     
     // Read from persistent datastore
     const subs = eventStore.getSubscribers(event);
-    console.log(__t('notified', subs.length, event));
+    Logger.info(__t('notified', subs.length, event));
 
     // Real webhook dispatch
     for (const webhookUrl of subs) {
         if (!NetworkDestinationPolicy.isAllowed(webhookUrl)) {
-            console.error(__t('delivery_failed', webhookUrl, 'SSRF policy rejection'));
+            Logger.error(__t('delivery_failed', webhookUrl, __t('messages.error.ssrf_policy_rejection')));
             continue;
         }
         try {
             await axios.post(webhookUrl, { event, payload }, { timeout: 5000 });
-            console.log(__t('delivered', webhookUrl));
+            Logger.info(__t('delivered', webhookUrl));
         } catch (error: any) {
-            console.error(__t('delivery_failed', webhookUrl, error.message));
+            Logger.error(__t('delivery_failed', webhookUrl, error.message));
         }
     }
 
@@ -49,11 +50,17 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
     // Write to persistent datastore
     eventStore.addSubscriber(event, webhookUrl);
 
-    console.log(__t('new_sub', event, webhookUrl));
+    Logger.info(__t('new_sub', event, webhookUrl));
     return res.status(201).json({ message: __t('subscribed') });
+});
+
+app.use((err: any, req: Request, res: Response, next: express.NextFunction) => {
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: err.message });
 });
 
 const PORT = process.env.PORT || 4004;
 app.listen(PORT, () => {
-    console.log(__t('listening', 'Ugondu Event Bus', PORT));
+    Logger.info(__t('listening', __t('ugondu_event_bus'), PORT));
 });
+
+export * from './events/entitlement-events';

@@ -33,6 +33,8 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
+	"github.com/ugondu/client/i18n"
 	"errors"
 	"fmt"
 	"os"
@@ -41,13 +43,13 @@ import (
 )
 
 var (
-	ErrPathTraversal = errors.New("ERR_PATH_TRAVERSAL_ATTEMPT")
-	ErrAbsolutePath  = errors.New("ERR_ABSOLUTE_PATH_ATTEMPT")
-	ErrUNCPath       = errors.New("ERR_UNC_PATH_ATTEMPT")
-	ErrNTFSStream    = errors.New("ERR_NTFS_STREAM_ATTEMPT")
-	ErrDeviceName    = errors.New("ERR_DEVICE_NAME_ATTEMPT")
-	ErrSymlinkEscape = errors.New("ERR_SYMLINK_ESCAPE")
-	ErrEscapeBaseDir = errors.New("ERR_ESCAPE_BASE_DIR")
+	ErrPathTraversal = errors.New(i18n.T("ERR_PATH_TRAVERSAL_ATTEMPT"))
+	ErrAbsolutePath  = errors.New(i18n.T("ERR_ABSOLUTE_PATH_ATTEMPT"))
+	ErrUNCPath       = errors.New(i18n.T("ERR_UNC_PATH_ATTEMPT"))
+	ErrNTFSStream    = errors.New(i18n.T("ERR_NTFS_STREAM_ATTEMPT"))
+	ErrDeviceName    = errors.New(i18n.T("ERR_DEVICE_NAME_ATTEMPT"))
+	ErrSymlinkEscape = errors.New(i18n.T("ERR_SYMLINK_ESCAPE"))
+	ErrEscapeBaseDir = errors.New(i18n.T("ERR_ESCAPE_BASE_DIR"))
 )
 
 type SafePathResolver struct{}
@@ -77,7 +79,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 
 	cleanBase, err := filepath.Abs(filepath.Clean(baseDir))
 	if err != nil {
-		return "", fmt.Errorf("ERR_BASE_DIR_RESOLUTION: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_base_dir_resolution_w"), err)
 	}
 
 	target := filepath.Join(cleanBase, targetRelPath)
@@ -89,7 +91,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 			return "", ErrSymlinkEscape
 		}
 	} else if !os.IsNotExist(err) {
-		return "", fmt.Errorf("ERR_SYMLINK_EVALUATION: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_symlink_evaluation_w"), err)
 	}
 
 	if !strings.HasPrefix(target, cleanBase+string(filepath.Separator)) && target != cleanBase {

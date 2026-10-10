@@ -95,34 +95,86 @@ func TestVerifyCryptographicBindings(t *testing.T) {
 	stateBadPlan := *state
 	stateBadPlan.PlanHash = "tampered_plan_hash"
 	if err := VerifyCryptographicBindings(&stateBadPlan, env); err == nil {
-		t.Errorf("Expected PlanHash mismatch error, got nil")
+		t.Errorf(i18n.T("expected_planhash_mismatch_err"))
 	}
 
 	// Case 3: TenantId mismatch
 	stateBadTenant := *state
 	stateBadTenant.TenantId = "tenant_attacker"
 	if err := VerifyCryptographicBindings(&stateBadTenant, env); err == nil {
-		t.Errorf("Expected TenantId mismatch error, got nil")
+		t.Errorf(i18n.T("expected_tenantid_mismatch_err"))
 	}
 
 	// Case 4: ProjectId mismatch
 	stateBadProj := *state
 	stateBadProj.ProjectId = "project_tampered"
 	if err := VerifyCryptographicBindings(&stateBadProj, env); err == nil {
-		t.Errorf("Expected ProjectId mismatch error, got nil")
+		t.Errorf(i18n.T("expected_projectid_mismatch_er"))
 	}
 
 	// Case 5: EnvironmentId mismatch
 	stateBadEnv := *state
 	stateBadEnv.EnvironmentId = "kubernetes"
 	if err := VerifyCryptographicBindings(&stateBadEnv, env); err == nil {
-		t.Errorf("Expected EnvironmentId mismatch error, got nil")
+		t.Errorf(i18n.T("expected_environmentid_mismatc"))
 	}
 
 	// Case 6: PolicyHash mismatch
 	stateBadPolicy := *state
 	stateBadPolicy.PolicyHash = "policy_bypass"
 	if err := VerifyCryptographicBindings(&stateBadPolicy, env); err == nil {
-		t.Errorf("Expected PolicyHash mismatch error, got nil")
+		t.Errorf(i18n.T("expected_policyhash_mismatch_e"))
+	}
+}
+func TestSignatureEnforcedDirectCall(t *testing.T) {
+	// Generate dummy key
+	pub, priv, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		t.Fatalf("failed to generate key: %v", err)
+	}
+
+	pubKeyBytes, _ := x509.MarshalPKIXPublicKey(pub)
+	pubKeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  i18n.T("public_key"),
+		Bytes: pubKeyBytes,
+	})
+
+	validEnv := &ExecutionEnvelope{
+		TransactionId: "txn-direct-test",
+		PlanHash:      "dummyhash",
+		CanonicalEnvelope: "{\"transactionId\":\"txn-direct-test\"}",
+	}
+	validSig := ed25519.Sign(priv, []byte(validEnv.CanonicalEnvelope))
+	validEnv.Signature = base64.StdEncoding.EncodeToString(validSig)
+
+	steps := []map[string]interface{}{}
+
+	// Test 1: Missing env var
+	os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
+	logs, err := ExecuteRecipe(validEnv, steps)
+	if err == nil {
+		t.Errorf(i18n.T("expected_error_due_to_missing_"))
+	}
+	if len(logs) > 0 {
+		t.Errorf("Expected logs to be empty, got %v", logs)
+	}
+
+	// Test 2: Tampered signature
+	os.Setenv("UGONDU_RECIPE_PUBLIC_KEY", string(pubKeyPem))
+	defer os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
+
+	tamperedEnv := &ExecutionEnvelope{
+		TransactionId: "txn-direct-test",
+		PlanHash:      "dummyhash",
+		CanonicalEnvelope: "{\"transactionId\":\"txn-direct-test\"}",
+		Signature:     base64.StdEncoding.EncodeToString([]byte("bad_signature")),
+	}
+
+	logs, err = ExecuteRecipe(tamperedEnv, steps)
+	if err == nil {
+		t.Errorf(i18n.T("expected_error_due_to_invalid_"))
+	}
+	if len(logs) > 0 {
+		t.Errorf("Expected logs to be empty, got %v", logs)
 	}
 }

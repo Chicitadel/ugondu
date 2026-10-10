@@ -1,0 +1,101 @@
+# =============================================================================
+# Ugondu Platform - Cryptographic Release & CI/CD Pipeline
+# Air Roofers Ltd - Ujomor Systems Engineering Authority
+# Classification: COMMERCIAL | INTERNAL
+#
+# Triggered on: pushed tags (v*)
+# =============================================================================
+
+name: Ugondu Cryptographic Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write # Required for keyless Cosign and SLSA Provenance
+
+jobs:
+  release:
+    name: Build, Package & Release
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Install Syft (SBOM generation)
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Install Cosign (Cryptographic signing)
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.3'
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Execute GoReleaser
+        id: goreleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: v1.25.1
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          # Keyless Cosign is prioritized; otherwise fallback to injected keys:
+          COSIGN_EXPERIMENTAL: "true"
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+
+      
+      - name: Download Simulation Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: simulation-evidence
+          path: evidence/
+
+      - name: Upload Evidence to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} evidence/COR_SIMULATION_EVIDENCE.json evidence/COR_SIMULATION_LOG.txt evidence/COR_SIMULATION_SHA256.txt
+
+      - name: Generate subject for provenance
+        id: hash
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+          checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select(.type=="Checksum") | .path')
+          echo "hashes=$(cat $checksum_file | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+  slsa-provenance:
+    name: Generate SLSA Provenance
+    needs: release
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: "${{ needs.release.outputs.hashes }}"
+      upload-assets: true

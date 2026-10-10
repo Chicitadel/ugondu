@@ -1,0 +1,127 @@
+name: Negative Auth Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Base OIDC Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_OIDC_BASE }}
+          aws-region: eu-west-3
+
+      - name: Create Foreign Fixture (using Base Role)
+        id: foreign_fixture
+        run: |
+          FOREIGN_VPC=$(aws ec2 create-vpc --cidr-block 10.1.0.0/16 --region eu-west-3 --tag-specifications "ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=foreign-tx-123},{Key=Name,Value=UgonduForeignFixture}]" --query 'Vpc.VpcId' --output text)
+          echo "FOREIGN_VPC=$FOREIGN_VPC" >> $GITHUB_ENV
+          echo "Created foreign fixture $FOREIGN_VPC"
+
+      - name: Assume Tagged Execution Session
+        shell: bash
+        env:
+          EXECUTION_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME_EXECUTION }}
+          TX_ID: ${{ github.run_id }}
+        run: |
+          CREDS=$(aws sts assume-role \
+            --role-arn "$EXECUTION_ROLE_ARN" \
+            --role-session-name "$TX_ID" \
+            --tags "Key=UgonduTransactionId,Value=$TX_ID" \
+            --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+            --output text)
+          read -r EXEC_AWS_ACCESS_KEY_ID EXEC_AWS_SECRET_ACCESS_KEY EXEC_AWS_SESSION_TOKEN <<< "$CREDS"
+          echo "EXEC_AWS_ACCESS_KEY_ID=$EXEC_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "EXEC_AWS_SECRET_ACCESS_KEY=$EXEC_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+          echo "EXEC_AWS_SESSION_TOKEN=$EXEC_AWS_SESSION_TOKEN" >> $GITHUB_ENV
+
+      - name: Negative Test 1 - Create without UgonduCOR tag (Should FAIL)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.EXEC_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.EXEC_AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.EXEC_AWS_SESSION_TOKEN }}
+        run: |
+          OUTPUT=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 2>&1 || true)
+          if echo "$OUTPUT" | grep -q "UnauthorizedOperation"; then
+            echo "Passed: Create without UgonduCOR tag denied."
+          else
+            echo "Failed: Did not receive UnauthorizedOperation. Got: $OUTPUT"
+            exit 1
+          fi
+
+      - name: Negative Test 2 - Create with wrong TransactionId (Should FAIL)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.EXEC_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.EXEC_AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.EXEC_AWS_SESSION_TOKEN }}
+        run: |
+          OUTPUT=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications 'ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=invalid-tx-id}]' 2>&1 || true)
+          if echo "$OUTPUT" | grep -q "UnauthorizedOperation"; then
+            echo "Passed: Create with wrong TransactionId denied."
+          else
+            echo "Failed: Did not receive UnauthorizedOperation. Got: $OUTPUT"
+            exit 1
+          fi
+
+      - name: Positive Test - Create with correct tags (Should SUCCEED)
+        id: create_vpc
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.EXEC_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.EXEC_AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.EXEC_AWS_SESSION_TOKEN }}
+        run: |
+          VPC_ID=$(aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region eu-west-3 --tag-specifications "ResourceType=vpc,Tags=[{Key=UgonduCOR,Value=true},{Key=UgonduTransactionId,Value=${{ github.run_id }}},{Key=Name,Value=UgonduAuthTestVpc}]" --query 'Vpc.VpcId' --output text)
+          echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
+          echo "Successfully created test VPC $VPC_ID"
+
+      - name: Negative Test 3 - Delete mismatched resource (Should FAIL)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.EXEC_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.EXEC_AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.EXEC_AWS_SESSION_TOKEN }}
+        run: |
+          if [ -z "$FOREIGN_VPC" ]; then
+            echo "Failed: Foreign VPC fixture is missing!"
+            exit 1
+          fi
+          OUTPUT=$(aws ec2 delete-vpc --vpc-id $FOREIGN_VPC --region eu-west-3 2>&1 || true)
+          if echo "$OUTPUT" | grep -q "UnauthorizedOperation"; then
+            echo "Passed: Deleting a mismatched resource was denied."
+          else
+            echo "Failed: Did not receive UnauthorizedOperation. Got: $OUTPUT"
+            exit 1
+          fi
+
+      - name: Positive Test - Delete with correct tags (Should SUCCEED)
+        if: always()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.EXEC_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.EXEC_AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.EXEC_AWS_SESSION_TOKEN }}
+        run: |
+          if [ -n "$VPC_ID" ]; then
+            aws ec2 delete-vpc --vpc-id $VPC_ID --region eu-west-3
+            echo "Successfully deleted test VPC $VPC_ID"
+          fi
+
+      - name: Confirm Foreign Fixture Still Exists (using Base Role)
+        if: always()
+        run: |
+          if [ -n "$FOREIGN_VPC" ]; then
+            aws ec2 describe-vpcs --vpc-ids $FOREIGN_VPC --region eu-west-3 > /dev/null
+            echo "Verified foreign fixture $FOREIGN_VPC still exists."
+          fi
+
+      - name: Cleanup Foreign Fixture (using Base Role)
+        if: always()
+        run: |
+          if [ -n "$FOREIGN_VPC" ]; then
+            aws ec2 delete-vpc --vpc-id $FOREIGN_VPC --region eu-west-3
+            echo "Cleaned up foreign fixture $FOREIGN_VPC"
+          fi

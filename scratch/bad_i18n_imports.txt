@@ -1,0 +1,11 @@
+\server\capabilities\src\tests\ceg.qualification.spec.ts -> ../../../../shared/i18n
+\server\engine-core\src\crypto\key-loader.ts -> ../../../../shared/i18n
+\server\engine-core\src\fabric\engine\NodeHandlers.ts -> ../../../../../shared/i18n
+\server\engine-core\src\fabric\engine\PlanGraph.ts -> ../../../../../shared/i18n
+\server\engine-core\src\fabric\provisioner.ts -> ../../../../shared/i18n
+\server\engine-core\src\fabric\provisioning-engine.ts -> ../../../../shared/i18n
+\server\engine-core\src\fabric\registry.ts -> ../../../../shared/i18n
+\server\engine-core\src\twin\model\resource-state.ts -> ../../../shared/i18n
+\server\engine-core\src\fabric-controller.ts -> ../../../../shared/i18n
+\server\shared\packs.ts -> ../../../../shared/i18n
+\server\shared\safepath.ts -> ../../../../shared/i18n

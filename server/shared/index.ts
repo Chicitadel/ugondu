@@ -40,9 +40,12 @@ export * from './trust_registry';
 export * from './marketplace/registry';
 export * from './protocols/oap';
 export * from './protocols/certification';
-export * from './enterprise/rbac';
-export * from './enterprise/policy';
-export * from './sovereign/lease';
-export * from './sovereign/hsm';
 export * from './safepath';
-
+export * from './urre-journal';
+export * from './urre-recovery';
+export * from './urre-preflight';
+export * from './discovery';
+export * from './environment-twin';
+export * from './capability-model';
+export * from './outcome-pack';
+export * from './logger';

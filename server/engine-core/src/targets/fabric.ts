@@ -19,6 +19,11 @@ import { DockerTargetAdapter } from './docker';
 
 export type TargetEnvironmentType = 'cpanel' | 'directadmin' | 'ssh' | 'docker' | 'kubernetes' | 'cloud' | 'baremetal';
 
+/**
+ * @interface TargetDescriptor
+ * @description Corporate Governed interface implementation for TargetDescriptor
+ * @classification ENTERPRISE
+ */
 export interface TargetDescriptor {
     targetId: string;
     environmentType: TargetEnvironmentType;
@@ -27,6 +32,11 @@ export interface TargetDescriptor {
     capabilities: string[];
 }
 
+/**
+ * @class TargetFabric
+ * @description Corporate Governed class implementation for TargetFabric
+ * @classification ENTERPRISE
+ */
 export class TargetFabric {
     private registeredTargets: Map<string, TargetDescriptor> = new Map();
 
@@ -44,7 +54,7 @@ export class TargetFabric {
             throw new Error(__t('error_key_not_found'));
         }
         if (target.status !== 'ONLINE') {
-            throw new Error(__t('blocked'));
+            throw new Error(__t('msg_deployment_blocked_by_billing_gateway_li'));
         }
 
         switch (target.environmentType) {

@@ -24,35 +24,38 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
-'use strict';
+// @ts-ignore
+import { __t } from './i18n';
+
+__t('use_strict');
 
 import * as path from 'path';
 
 export class SafePathResolver {
     public static resolve(baseDir: string, userInput: string): string {
         if (!userInput || typeof userInput !== 'string') {
-            throw new Error('PATH_EMPTY_OR_INVALID');
+            throw new Error(__t('messages.error.path_empty_or_invalid'));
         }
 
         // Null byte injection check
         if (userInput.includes('\0')) {
-            throw new Error('NULL_BYTE_INJECTION');
+            throw new Error(__t('messages.error.null_byte_injection'));
         }
 
         // Windows Alternate Data Streams (ADS)
         if (userInput.includes(':') && !/^[a-zA-Z]:[/\\]/.test(userInput)) {
-            throw new Error('WINDOWS_ADS_DETECTED');
+            throw new Error(__t('messages.error.windows_ads_detected'));
         }
 
         // UNC paths (Universal Naming Convention)
         if (userInput.startsWith('\\\\') || userInput.startsWith('//')) {
-            throw new Error('UNC_PATH_DETECTED');
+            throw new Error(__t('messages.error.unc_path_detected'));
         }
 
         // Windows reserved device names
         const devMatch = userInput.match(/(?:^|[\\/])(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.[^\\/]*)?(?:$|[\\/])/i);
         if (devMatch) {
-            throw new Error('WINDOWS_RESERVED_DEVICE_NAME');
+            throw new Error(__t('messages.error.windows_reserved_device_name'));
         }
 
         // Normalization and boundary traversal check
@@ -61,7 +64,7 @@ export class SafePathResolver {
         const rel = path.relative(baseDir, resolved);
 
         if (rel.startsWith('..') || path.isAbsolute(rel)) {
-            throw new Error('PATH_TRAVERSAL_DETECTED');
+            throw new Error(__t('messages.error.path_traversal_detected'));
         }
 
         return resolved;

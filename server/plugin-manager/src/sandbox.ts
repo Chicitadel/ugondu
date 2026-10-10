@@ -10,7 +10,7 @@
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - Enterprise Security Architecture
+ * - SOVEREIGN Security Architecture
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,6 +35,7 @@ import { execFile } from 'child_process';
 import util from 'util';
 import path from 'path';
 import fs from 'fs';
+import { __t } from '@ugondu/shared';
 
 const execFileAsync = util.promisify(execFile);
 
@@ -59,7 +60,7 @@ export async function executePluginSandbox(pluginPath: string, payload: any): Pr
     const scriptPath = path.join(pluginPath, 'index.js');
     
     if (!fs.existsSync(scriptPath)) {
-        throw new Error(`Plugin entrypoint not found at ${scriptPath}`);
+        throw new Error(__t('err_plugin_entrypoint_not_found'));
     }
 
     try {
@@ -88,26 +89,26 @@ export async function executePluginSandbox(pluginPath: string, payload: any): Pr
         });
 
         if (Buffer.byteLength(stdout, 'utf-8') > MAX_STDOUT_BYTES) {
-            throw new Error(`Plugin stdout exceeded maximum allowed limit of ${MAX_STDOUT_BYTES} bytes`);
+            throw new Error(__t('messages.error.plugin_stdout_exceeded_maximum_allowed_limit_', { 'MAX_STDOUT_BYTES': MAX_STDOUT_BYTES }));
         }
 
         const steps = JSON.parse(stdout);
         
         if (!Array.isArray(steps)) {
-            throw new Error('Plugin did not return an array of steps');
+            throw new Error(__t('messages.error.plugin_did_not_return_an_array_of_steps'));
         }
         
         for (const step of steps) {
             if (!ALLOWED_ACTIONS.has(step.action)) {
-                throw new Error(`REJECT: Action ${step.action} is not in the closed typed-action registry`);
+                throw new Error(__t('err_plugin_action_rejected'));
             }
         }
         
         return steps;
     } catch (err: any) {
         if (err.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' || (err.message && err.message.includes('maxBuffer'))) {
-            throw new Error(`Sandbox execution failed: Plugin stdout exceeded maximum limit of ${MAX_STDOUT_BYTES} bytes (resource exhaustion prevention)`);
+            throw new Error(__t('messages.error.sandbox_execution_failed_plugin_stdout_exceed', { 'MAX_STDOUT_BYTES': MAX_STDOUT_BYTES }));
         }
-        throw new Error(`Sandbox execution failed: ${err.message}`);
+        throw new Error(__t('messages.error.sandbox_execution_failed', { 'err_message': err.message }));
     }
 }

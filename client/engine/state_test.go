@@ -34,6 +34,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"errors"
 	"os"
 	"path/filepath"
@@ -75,7 +76,7 @@ func TestStateSaveAndLoad(t *testing.T) {
 				Index:  0,
 				Action: "FETCH_REPOSITORY",
 				Status: "SUCCESS",
-				Logs:   []string{"log 1", "log 2"},
+				Logs:   []string{i18n.T("log_1"), i18n.T("log_2")},
 			},
 		},
 	}
@@ -86,7 +87,7 @@ func TestStateSaveAndLoad(t *testing.T) {
 
 	// Verify StateHash was computed
 	if state.StateHash == "" {
-		t.Errorf("Expected StateHash to be computed, got empty string")
+		t.Errorf(i18n.T("expected_statehash_to_be_compu"))
 	}
 
 	// Verify file permissions (state.json should exist)
@@ -99,7 +100,7 @@ func TestStateSaveAndLoad(t *testing.T) {
 		t.Fatalf("State file was not created: %v", err)
 	}
 	if info.Size() == 0 {
-		t.Errorf("State file is empty")
+		t.Errorf(i18n.T("state_file_is_empty"))
 	}
 
 	// Test 3: LoadState returns identical values
