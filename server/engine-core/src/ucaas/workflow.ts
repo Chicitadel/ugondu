@@ -132,7 +132,7 @@ export class WorkflowEngine {
         }
         // Verify authorization via Governance API before resuming
         Logger.info(`Rehydrating state for workflow ${workflowExecutionId}...`);
-        return WorkflowStatus.SUCCESS;
+        return WorkflowStatus.COMPLETED;
     } catch (error: any) {
         Logger.error(`Workflow resumption failed for ${workflowExecutionId}:`, error.message);
         return WorkflowStatus.FAILED;
