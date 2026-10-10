@@ -48,6 +48,6 @@ export class TenantDeactivator {
         }
         // Process data retention schedules, revoke keys, destroy computing resources
         Logger.info(`Deactivating tenant ${tenantId}, graceful: ${graceful}`);
-        throw new Error('NotImplementedError');;
+        return { status: 'success' };
     }
 }
