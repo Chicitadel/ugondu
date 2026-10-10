@@ -64,9 +64,9 @@ export class WebRecoveryAuthorityCalculator implements AuthorityCalculator<WebRe
 
     public validateBundle(bundle: AuthorityBundle): AuthorityValidationResult {
         const errors: string[] = [];
-        if (!bundle.manifest) errors.push('Missing manifest ID');
+        if (!bundle.manifest) errors.push(__t('missing_manifest_id'));
         if (bundle.permissions.some(p => p.resource === '*')) {
-            errors.push('Wildcard domain mutation is prohibited. Must bind strictly to tenant domain.');
+            errors.push(__t('wildcard_domain_mutation_is_pr'));
         }
 
         return {

@@ -26,7 +26,7 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: Path repository plan is scaffolded');
+        throw new Error(__t('unimplemented_path_repository_'));
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

@@ -46,10 +46,10 @@ export class DistributedPlanner {
         recoveryObjective: RecoveryObjective
     ): Readonly<ReplicationPlan> {
         if (primary.role !== 'PRIMARY') {
-            throw new Error('Source region must be designated as PRIMARY.');
+            throw new Error(__t('source_region_must_be_designat'));
         }
         if (secondary.role !== 'SECONDARY') {
-            throw new Error('Target region must be designated as SECONDARY.');
+            throw new Error(__t('target_region_must_be_designat'));
         }
 
         // Determine replication mode based on RPO
@@ -78,7 +78,7 @@ export class DistributedPlanner {
         recoveryObjective: RecoveryObjective
     ): Readonly<FailoverPlan> {
         if (primary.id === secondary.id) {
-            throw new Error('Primary and secondary regions must be geographically distinct.');
+            throw new Error(__t('primary_and_secondary_regions_'));
         }
 
         // Evaluate if auto-failover can be safely enabled within RTO budgets

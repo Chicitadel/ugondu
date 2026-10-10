@@ -12,7 +12,7 @@ export class AutonomousCodePatching implements RecoveryCapability {
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: autonomous-code-patching plan is scaffolded');
+        throw new Error(__t('unimplemented_autonomous_code_'));
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

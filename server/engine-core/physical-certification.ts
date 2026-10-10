@@ -65,7 +65,7 @@ async function runCertification() {
         const bucketName = `ugondu-cor-bucket-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('storage:s3:create')!.execute({ transactionId: txId, bucketName });
         
-        console.log('Verifying S3 bucket tags to ensure remediation requirement 2...');
+        console.log(__t('verifying_s3_bucket_tags_to_en'));
         const s3Client = awsObs.s3;
         const tagResponse = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => { if (err.name === 'NoSuchTagSet') return { TagSet: [] }; throw err; });
         const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');

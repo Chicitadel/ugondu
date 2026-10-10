@@ -1,4 +1,4 @@
-"use strict";
+__t('use_strict');
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CORAuthorityCalculator = void 0;
 // Statically maps abstract operations to AWS-specific execution policies
@@ -165,7 +165,7 @@ var CORAuthorityCalculator = /** @class */ (function () {
         return { provider: 'aws', operations: PHYSICAL_COR_GRAPH };
     };
     CORAuthorityCalculator.prototype.calculateAuthorityGap = function (available, required) {
-        throw new Error('UNIMPLEMENTED: calculateAuthorityGap is not fully implemented');
+        throw new Error(__t('unimplemented_calculateauthori'));
     };
     CORAuthorityCalculator.prototype.generateLeastPrivilegeBundle = function (target, plan) {
         // Wrapper mapping to AWS logic

@@ -99,7 +99,7 @@ export class AwsVpcReconciler {
         }
 
         if (!externalApprovalSignatures || externalApprovalSignatures.length === 0) {
-            throw new Error('Safety Violation: External human approval signatures required for autonomous destruction.');
+            throw new Error(__t('safety_violation_external_huma'));
         }
 
         const classification = action === 'CLEANUP' ? ActionClassification.DESTRUCTIVE : ActionClassification.RECOVERABLE;

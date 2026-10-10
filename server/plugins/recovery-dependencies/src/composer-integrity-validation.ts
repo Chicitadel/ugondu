@@ -8,11 +8,11 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
     }
     
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: Composer diagnosis is scaffolded');
+        throw new Error(__t('unimplemented_composer_diagnos'));
     }
     
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: Composer plan is scaffolded');
+        throw new Error(__t('unimplemented_composer_plan_is'));
     }
     
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
@@ -26,7 +26,7 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
                 } else if (typeof adapter.executeAction === 'function') {
                     await adapter.executeAction('COMPOSER_INSTALL', { workingDirectory: scope.repositoryPath });
                 } else {
-                    throw new Error('Adapter does not support executeComposerInstall abstraction');
+                    throw new Error(__t('adapter_does_not_support_execu'));
                 }
             }
         }

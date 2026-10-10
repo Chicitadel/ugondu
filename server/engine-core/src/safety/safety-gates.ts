@@ -124,11 +124,11 @@ export class SafetyGatesValidator {
    */
   public async acquireSafetyLease(actionId: string, resourceId: string, canonicalEnvelope?: CanonicalActionEnvelope): Promise<boolean> {
     if (!this.leaseProvider) {
-      throw new Error('Safety Violation: A DistributedSafetyLeaseProvider must be configured for distributed exclusive locks.');
+      throw new Error(__t('safety_violation_a_distributed'));
     }
     
     if (!canonicalEnvelope) {
-        throw new Error('Safety Violation: Canonical envelope required for lease acquisition.');
+        throw new Error(__t('safety_violation_canonical_env'));
     }
 
     const request = {
@@ -177,11 +177,11 @@ export class SafetyGatesValidator {
     if (context.proof?.approvalSignatures && context.proof.canonicalEnvelope) {
        for (const sigPayload of context.proof.approvalSignatures) {
          if (!this.verifyApprovalSignature(context.proof.canonicalEnvelope, sigPayload)) {
-           throw new Error('Security Violation: Invalid or self-generated cryptographic signature against canonical envelope.');
+           throw new Error(__t('security_violation_invalid_or_'));
          }
        }
     } else if (context.proof?.approvalSignatures) {
-       throw new Error('Security Violation: Approval signatures present but no canonical envelope provided.');
+       throw new Error(__t('security_violation_approval_si'));
     }
 
     // 2. Autonomous Deletion Governance
@@ -191,7 +191,7 @@ export class SafetyGatesValidator {
         context.classification === ActionClassification.IRREVERSIBLE
       ) {
         if (!context.proof || !context.proof.approvalSignatures || context.proof.approvalSignatures.length === 0) {
-          throw new Error('Governance Violation: Autonomous deletion NEVER permitted for unproven resources without explicit human approval signatures.');
+          throw new Error(__t('governance_violation_autonomou'));
         }
       }
     }
@@ -204,24 +204,24 @@ export class SafetyGatesValidator {
 
       case ActionClassification.RECOVERABLE:
         if (!context.proof?.authenticatedUserId || context.proof.authenticatedUserId === 'system') {
-          throw new Error('Recoverable actions require authenticated canonical user proof, cannot be "system".');
+          throw new Error(__t('recoverable_actions_require_au'));
         }
         break;
 
       case ActionClassification.DESTRUCTIVE:
         if (!context.proof?.mfaVerified) {
-          throw new Error('Destructive actions require MFA verification.');
+          throw new Error(__t('destructive_actions_require_mf'));
         }
         break;
 
       case ActionClassification.IRREVERSIBLE:
         if (!context.proof?.mfaVerified || context.proof.approvalSignatures.length < 2) {
-          throw new Error('Irreversible actions require MFA verification and multiple multi-party approval signatures.');
+          throw new Error(__t('irreversible_actions_require_m'));
         }
         break;
       
       default:
-        throw new Error('Unknown or unclassified action.');
+        throw new Error(__t('unknown_or_unclassified_action'));
     }
 
     // 4. Lease Acquisition for DESTRUCTIVE / IRREVERSIBLE
@@ -231,7 +231,7 @@ export class SafetyGatesValidator {
     ) {
       const leaseAcquired = await this.acquireSafetyLease(context.actionId, context.resourceId, context.proof?.canonicalEnvelope);
       if (!leaseAcquired) {
-        throw new Error('Security Violation: Failed to acquire exclusive safety lease for high-risk operation.');
+        throw new Error(__t('security_violation_failed_to_a'));
       }
     }
 

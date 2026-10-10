@@ -24,7 +24,7 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
         }
     });
 
-    test('requires the real production PathRepositoryReconstruction capability', () => {
+    test(__t('requires_the_real_production_p'), () => {
         const capability =
             GlobalCapabilityRegistry.getCapability(
                 'PathRepositoryReconstruction'
@@ -34,7 +34,7 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
 
         if (!capability) {
             throw new Error(
-                'COR BLOCKED: PathRepositoryReconstruction is not registered as a production capability.'
+                __t('cor_blocked_pathrepositoryreco')
             );
         }
 
@@ -43,7 +43,7 @@ describe('COR Qualification: Model Independence & Agent Equivalence', () => {
         );
     });
 
-    test('canonicalizes CLI and AI source metadata to identical governed intent', () => {
+    test(__t('canonicalizes_cli_and_ai_sourc'), () => {
         const common = {
             capabilityId: 'PathRepositoryReconstruction',
             target: 'localhost',

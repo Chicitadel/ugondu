@@ -468,8 +468,8 @@ export class SshLiveAdapter implements LiveEnvironmentAdapterContract {
         try {
             const out = this.execRemote(this.getTarget(scope), 'stat', ['-c', '%F', targetPath]).toLowerCase();
             if (out.includes('directory')) return 'DIRECTORY';
-            if (out.includes('symbolic link')) return 'SYMLINK';
-            if (out.includes('regular file') || out.includes('regular empty file')) return 'FILE';
+            if (out.includes(__t('symbolic_link'))) return 'SYMLINK';
+            if (out.includes(__t('regular_file')) || out.includes(__t('regular_empty_file'))) return 'FILE';
             return 'FILE';
         } catch {
             return 'ABSENT';

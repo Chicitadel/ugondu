@@ -94,7 +94,7 @@ export class LiveDatabaseStateReconstruction implements RecoveryCapability {
         const hasDrifted = await adapter.checkDrift(scope, baselineFingerprint);
         
         if (hasDrifted) {
-            throw new Error('Environment drift detected before atomic database repair');
+            throw new Error(__t('environment_drift_detected_bef'));
         }
         
         const executionResult = await adapter.executeAtomicRecovery(repairPlan as any, scope);

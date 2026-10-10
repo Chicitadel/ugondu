@@ -120,7 +120,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
                 responseData += chunk;
                 if (responseData.length > MAX_BYTES) {
                     req.destroy();
-                    reject(new Error('Response size exceeded limit'));
+                    reject(new Error(__t('response_size_exceeded_limit')));
                 }
             });
             res.on('end', () => {

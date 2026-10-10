@@ -8,11 +8,11 @@ export class ZddTopologyRepair implements RecoveryCapability {
     }
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: ZDD diagnose is scaffolded');
+        throw new Error(__t('unimplemented_zdd_diagnose_is_'));
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: ZDD plan is scaffolded');
+        throw new Error(__t('unimplemented_zdd_plan_is_scaf'));
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
@@ -27,7 +27,7 @@ export class ZddTopologyRepair implements RecoveryCapability {
                 } else if (typeof adapter.executeAction === 'function') {
                     await adapter.executeAction('REMOVE_DIRECTORY', { target: `${scope.repositoryPath}/public_html` });
                 } else {
-                    throw new Error('Adapter does not support removeDirectory abstraction');
+                    throw new Error(__t('adapter_does_not_support_remov'));
                 }
             } else if (repair.type === 'RESTORE_BKUP_DIRECTORIES') {
                 if (typeof adapter.renameDirectory === 'function') {
@@ -35,7 +35,7 @@ export class ZddTopologyRepair implements RecoveryCapability {
                 } else if (typeof adapter.executeAction === 'function') {
                     await adapter.executeAction('RENAME_DIRECTORY', { source: `${scope.repositoryPath}/public_html_bkup`, target: `${scope.repositoryPath}/public_html` });
                 } else {
-                    throw new Error('Adapter does not support renameDirectory abstraction');
+                    throw new Error(__t('adapter_does_not_support_renam'));
                 }
             } else if (repair.type === 'REBUILD_SYMLINK_CHAIN') {
                 if (typeof adapter.createSymlink === 'function') {
@@ -48,7 +48,7 @@ export class ZddTopologyRepair implements RecoveryCapability {
                     await adapter.executeAction('SYMLINK', { target: `${scope.repositoryPath}/${repair.chain[1]}`, link: `${scope.repositoryPath}/${repair.chain[0]}` });
                     await adapter.executeAction('SYMLINK', { target: `${scope.repositoryPath}/${repair.chain[2]}`, link: `${scope.repositoryPath}/${repair.chain[1]}` });
                 } else {
-                    throw new Error('Adapter does not support createSymlink abstraction');
+                    throw new Error(__t('adapter_does_not_support_creat'));
                 }
             }
         }

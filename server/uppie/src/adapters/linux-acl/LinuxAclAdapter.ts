@@ -124,7 +124,7 @@ export class LinuxAclAdapter implements IPolicyProviderAdapter {
   }
 
   async discoverRoles(_context: AdapterContext): Promise<Array<{ id: string; displayName: string; policies: string[] }>> {
-    throw new Error('UNSUPPORTED: POSIX ACL has no role concept');
+    throw new Error(__t('unsupported_posix_acl_has_no_r'));
   }
 
   private async effective(actor: string, resource: string): Promise<string> {

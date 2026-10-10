@@ -40,34 +40,34 @@ export class DirectAdminAdapter implements ComputeCapability, DatabaseCapability
   constructor(private client: IDirectAdminClient) {}
 
   public async provisionInstance(config: ComputeConfig, options: ProviderOptions): Promise<ComputeResult> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async terminateInstance(id: string): Promise<void> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async provisionDatabase(config: DatabaseConfig, options: ProviderOptions): Promise<DatabaseResult> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async deprovisionDatabase(id: string): Promise<void> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async createSnapshot(req: any): Promise<string> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async deprovisionStorage(id: string): Promise<void> {
-    throw new Error('Capability not implemented and fails closed by default.');
+    throw new Error(__t('capability_not_implemented_and'));
   }
 }

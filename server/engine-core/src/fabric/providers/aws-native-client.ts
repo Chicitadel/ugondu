@@ -405,7 +405,7 @@ export class AwsNativeClient implements IAwsClient {
             if (e.name === 'NoSuchTagSet' || e.name === 'NoSuchTagSetError' || e.name === 'NoSuchTagSetException') {
                 throw new Error(`Refusing to delete S3 bucket ${id}: missing ownership tags`);
             }
-            if (e.message && e.message.includes('missing ownership tags')) {
+            if (e.message && e.message.includes(__t('missing_ownership_tags'))) {
                 throw e;
             }
         }

@@ -59,9 +59,9 @@ export class RecoveryOrchestrator implements RecoveryContract {
 
     async requestApproval(plan: RepairPlan, analysis: BlastRadiusAnalysis, auth?: any): Promise<boolean> {
         if (!analysis.isSafe) throw new Error(__t('cannot_approve_an_unsafe_plan'));
-        if (!auth) throw new Error('Unconditional approval disabled: missing explicit authorization constraint.');
+        if (!auth) throw new Error(__t('unconditional_approval_disable'));
         if (auth.decision.status !== 'ALLOW' && auth.decision.status !== 'ALLOW_WITH_CONDITIONS') {
-            throw new Error('Authorization denied.');
+            throw new Error(__t('authorization_denied'));
         }
         return true;
     }

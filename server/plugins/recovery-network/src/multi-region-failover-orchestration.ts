@@ -92,7 +92,7 @@ export class MultiRegionFailoverOrchestration implements RecoveryCapability {
         const hasDrifted = await adapter.checkDrift(scope, baselineFingerprint);
         
         if (hasDrifted) {
-            throw new Error('Environment drift detected before failover orchestration');
+            throw new Error(__t('environment_drift_detected_bef'));
         }
         
         const executionResult = await adapter.executeAtomicRecovery(repairPlan as any, scope);

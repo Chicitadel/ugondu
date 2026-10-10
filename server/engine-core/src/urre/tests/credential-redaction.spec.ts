@@ -1,7 +1,7 @@
 import { Logger } from '@ugondu/shared';
 
-describe('Credential Redaction Security', () => {
-    it('must redact passwords and tokens from execution logs', () => {
+describe(__t('credential_redaction_security'), () => {
+    it(__t('must_redact_passwords_and_toke'), () => {
         const sensitiveContext = {
             request: {
                 username: 'admin',
@@ -24,7 +24,7 @@ describe('Credential Redaction Security', () => {
         process.env.NODE_ENV = 'development';
 
         try {
-            Logger.info('Authenticating to provider', sensitiveContext);
+            Logger.info(__t('authenticating_to_provider'), sensitiveContext);
         } finally {
             console.log = originalConsoleLog;
             process.env.NODE_ENV = originalNodeEnv;

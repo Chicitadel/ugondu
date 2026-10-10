@@ -21,23 +21,23 @@ export class FrontendValidation implements RecoveryCapability {
                     return {
                         issue: 'MissingApplicationConfiguration',
                         confidence: 1.0,
-                        details: 'Application execution succeeded but crashed due to missing .env file or DB credentials.'
+                        details: __t('application_execution_succeede')
                     };
                 }
                 return {
                     issue: 'ApplicationInternalError',
                     confidence: 0.8,
-                    details: 'Server returned 500. Could be missing storage permissions, broken bootstrap cache, or vendor issues.'
+                    details: __t('server_returned_500_could_be_m')
                 };
             }
 
-            return { issue: null, confidence: 1.0, details: 'Frontend HTTP validation succeeded.' };
+            return { issue: null, confidence: 1.0, details: __t('frontend_http_validation_succe') };
             
         } catch (error) {
             return {
                 issue: 'RoutingFailure',
                 confidence: 1.0,
-                details: 'Frontend HTTP validation failed. DNS or WebServer configuration is detached.'
+                details: __t('frontend_http_validation_faile')
             };
         }
     }

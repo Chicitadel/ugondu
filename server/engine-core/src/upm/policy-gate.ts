@@ -114,9 +114,9 @@ export class UpmExecutionGate {
                 status: 'DENY',
                 evidence: {
                     policyId: 'UPM-CAPABILITY-001',
-                    requirement: 'Edition Capability Envelope must authorize all required node operations',
+                    requirement: __t('edition_capability_envelope_mu'),
                     targetCapability: missing.join(', '),
-                    observedState: 'Capability or operation not present in edition allowedActions',
+                    observedState: __t('capability_or_operation_not_pr'),
                     affectedIrNodes: context.ir.nodes.filter(n => missing.includes((n as any).operation || n.provider)).map(n => n.id),
                     riskLevel: 'HIGH',
                     remediation: 'Upgrade edition or modify intent to use authorized capabilities/operations.'

@@ -74,14 +74,14 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
 
     const validRegions = availableRegions.filter(region => {
         if (!region.enabled) {
-            rejectedRegions.push({ region: region.id, reason: 'Region not enabled in account' });
+            rejectedRegions.push({ region: region.id, reason: __t('region_not_enabled_in_account') });
             return false;
         }
 
         if (intent.residency?.requiredCountries && intent.residency.requiredCountries.length > 0) {
             const hasResidency = intent.residency.requiredCountries.every(req => region.residency.includes(req));
             if (!hasResidency) {
-                rejectedRegions.push({ region: region.id, reason: 'Failed residency constraints' });
+                rejectedRegions.push({ region: region.id, reason: __t('failed_residency_constraints') });
                 return false;
             }
         }
@@ -89,7 +89,7 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
         if (intent.compliance?.frameworks && intent.compliance.frameworks.length > 0) {
             const hasCompliance = intent.compliance.frameworks.every(req => region.compliance.includes(req));
             if (!hasCompliance) {
-                rejectedRegions.push({ region: region.id, reason: 'Failed compliance constraints' });
+                rejectedRegions.push({ region: region.id, reason: __t('failed_compliance_constraints') });
                 return false;
             }
         }
@@ -105,7 +105,7 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
         }
 
         if (intent.availability?.minimumAvailabilityZones !== undefined && region.availabilityZones < intent.availability.minimumAvailabilityZones) {
-            rejectedRegions.push({ region: region.id, reason: 'Insufficient Availability Zones' });
+            rejectedRegions.push({ region: region.id, reason: __t('insufficient_availability_zone') });
             return false;
         }
 
@@ -166,24 +166,24 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
 
     // Resource Graph Construction
     const resources: PlacedResource[] = [];
-    resources.push({ type: 'COMPUTE', placement: primaryRegion.id, reason: 'Primary compute', scope: 'REGIONAL' });
+    resources.push({ type: 'COMPUTE', placement: primaryRegion.id, reason: __t('primary_compute'), scope: 'REGIONAL' });
     if (requiredServices.includes('RDS')) {
-        resources.push({ type: 'DATABASE', placement: primaryRegion.id, reason: 'Application data proximity', scope: 'REGIONAL' });
+        resources.push({ type: 'DATABASE', placement: primaryRegion.id, reason: __t('application_data_proximity'), scope: 'REGIONAL' });
         if (intent.disasterRecovery?.enabled && secondaryRegions.length > 0) {
-            resources.push({ type: 'DATABASE_REPLICA', placement: secondaryRegions[0], reason: 'Disaster recovery target', scope: 'REGIONAL' });
+            resources.push({ type: 'DATABASE_REPLICA', placement: secondaryRegions[0], reason: __t('disaster_recovery_target'), scope: 'REGIONAL' });
         }
     }
     
     if (requiredServices.includes('CLOUDFRONT')) {
-        resources.push({ type: 'CLOUDFRONT', placement: 'GLOBAL', reason: 'Global edge distribution', scope: 'GLOBAL' });
+        resources.push({ type: 'CLOUDFRONT', placement: 'GLOBAL', reason: __t('global_edge_distribution'), scope: 'GLOBAL' });
         // Use anchor resolver instead of hardcoded 'us-east-1'
         const acmAnchor = registry.resolveAnchorRegion('ACM_CLOUDFRONT');
-        resources.push({ type: 'ACM_CLOUDFRONT', placement: acmAnchor, reason: 'PROVIDER ANCHOR REQUIREMENT', scope: 'ANCHOR_REGION' });
-        resources.push({ type: 'ACM_ORIGIN', placement: primaryRegion.id, reason: 'Regional origin TLS', scope: 'REGIONAL' });
+        resources.push({ type: 'ACM_CLOUDFRONT', placement: acmAnchor, reason: __t('provider_anchor_requirement'), scope: 'ANCHOR_REGION' });
+        resources.push({ type: 'ACM_ORIGIN', placement: primaryRegion.id, reason: __t('regional_origin_tls'), scope: 'REGIONAL' });
     }
     
     if (requiredServices.includes('ROUTE53')) {
-        resources.push({ type: 'ROUTE53', placement: 'GLOBAL', reason: 'PROVIDER GLOBAL SERVICE', scope: 'GLOBAL' });
+        resources.push({ type: 'ROUTE53', placement: 'GLOBAL', reason: __t('provider_global_service'), scope: 'GLOBAL' });
     }
 
     const graph = {
@@ -200,7 +200,7 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
         intentId: intent.deploymentId,
         provider: 'AWS',
         decisionTimestamp: new Date().toISOString(),
-        hardConstraintsPassed: ['Residency', 'Compliance', 'Latency', 'Service Availability', 'Capacity', 'Minimum Regions', 'Geographic Separation'],
+        hardConstraintsPassed: ['Residency', 'Compliance', 'Latency', __t('service_availability'), 'Capacity', __t('minimum_regions'), __t('geographic_separation')],
         rejectedRegions,
         graph,
         decisionHash,

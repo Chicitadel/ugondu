@@ -45,7 +45,7 @@ export class MigrationManager {
 
     public async safelyMigrate(steps: MigrationStep[]): Promise<void> {
         if (await this.provider.isReadOnly()) {
-            throw new Error("Cannot apply migrations: Database is in read-only mode.");
+            throw new Error(__t('cannot_apply_migrations_databa'));
         }
 
         for (const step of steps) {

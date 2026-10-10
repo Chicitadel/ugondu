@@ -25,7 +25,7 @@ export class AwsIdentityPlugin implements IdentityProviderPlugin {
         return [
             {
                 type: 'github_oidc',
-                description: 'GitHub Actions OIDC Federation',
+                description: __t('github_actions_oidc_federation'),
                 issuerUrl: 'https://token.actions.githubusercontent.com',
                 audience: 'sts.amazonaws.com'
             }

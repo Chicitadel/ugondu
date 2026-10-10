@@ -234,7 +234,7 @@ export async function safeFetch(url: string, options: any = {}): Promise<any> {
                 data += chunk; 
                 if (data.length > MAX_BYTES) {
                     req.destroy();
-                    reject(new Error('Response size exceeded limit'));
+                    reject(new Error(__t('response_size_exceeded_limit')));
                 }
             });
             res.on('end', () => {

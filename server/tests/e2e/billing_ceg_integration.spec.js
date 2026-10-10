@@ -1,4 +1,4 @@
-"use strict";
+__t('use_strict');
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests

@@ -1,4 +1,4 @@
-'use strict';
+__t('use_strict');
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Shared

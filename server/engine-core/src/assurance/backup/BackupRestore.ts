@@ -86,7 +86,7 @@ export class BackupRestoreCapability {
                 job.state = BackupState.CERTIFIED;
                 console.log(`[INFO] Backup ${job.id} verified and CERTIFIED.`);
             } else {
-                throw new Error("Verification failed: Integrity mismatch.");
+                throw new Error(__t('verification_failed_integrity_'));
             }
         } catch (e) {
             await this.rollback(job);

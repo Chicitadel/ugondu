@@ -71,9 +71,9 @@ class MockOrchestrator {
     }
 
     public async executeAtomically(plan: any, adapter: any, scope: any): Promise<any> {
-        if (plan.failQuota) throw new Error('Quota Exceeded');
-        if (plan.failRollback) throw new Error('Rollback Failed');
-        if (plan.foreignResource) throw new Error('Foreign Resource Refusal');
+        if (plan.failQuota) throw new Error(__t('quota_exceeded'));
+        if (plan.failRollback) throw new Error(__t('rollback_failed'));
+        if (plan.foreignResource) throw new Error(__t('foreign_resource_refusal'));
 
         return { executionEvidence: { status: 'SUCCESS' } };
     }
@@ -83,10 +83,10 @@ class MockOrchestrator {
     }
 }
 
-describe('Certification Evidence Builder - Engine Core', () => {
+describe(__t('certification_evidence_builder'), () => {
     const orchestrator = new MockOrchestrator();
     
-    it('should handle successful cleanup and generate evidence', async () => {
+    it(__t('should_handle_successful_clean'), async () => {
         const plan = { type: 'CLEANUP', failQuota: false };
         const execution = await orchestrator.executeAtomically(plan, {}, {});
         const verification = await orchestrator.verify({}, {}, { state: 'RECOVERED' });
@@ -100,7 +100,7 @@ describe('Certification Evidence Builder - Engine Core', () => {
         expect(cert.transactionId).toBe('tx-cleanup');
     });
 
-    it('should generate evidence for quota failures', async () => {
+    it(__t('should_generate_evidence_for_q'), async () => {
         const plan = { type: 'DEPLOY', failQuota: true };
         let executionFailed = false;
         try {
@@ -112,12 +112,12 @@ describe('Certification Evidence Builder - Engine Core', () => {
             );
             await orchestrator.issuePassport(cert);
             expect(cert.certificateId).toBeDefined();
-            expect(cert.mutationEvidence.error).toBe('Quota Exceeded');
+            expect(cert.mutationEvidence.error).toBe(__t('quota_exceeded'));
         }
         expect(executionFailed).toBe(true);
     });
 
-    it('should generate evidence for rollback failures', async () => {
+    it(__t('should_generate_evidence_for_r'), async () => {
         const plan = { type: 'ROLLBACK', failRollback: true };
         let executionFailed = false;
         try {
@@ -129,12 +129,12 @@ describe('Certification Evidence Builder - Engine Core', () => {
             );
             await orchestrator.issuePassport(cert);
             expect(cert.certificateId).toBeDefined();
-            expect(cert.mutationEvidence.error).toBe('Rollback Failed');
+            expect(cert.mutationEvidence.error).toBe(__t('rollback_failed'));
         }
         expect(executionFailed).toBe(true);
     });
 
-    it('should generate evidence for foreign resource refusal', async () => {
+    it(__t('should_generate_evidence_for_f'), async () => {
         const plan = { type: 'MODIFY', foreignResource: true };
         let executionFailed = false;
         try {
@@ -146,12 +146,12 @@ describe('Certification Evidence Builder - Engine Core', () => {
             );
             await orchestrator.issuePassport(cert);
             expect(cert.certificateId).toBeDefined();
-            expect(cert.mutationEvidence.error).toBe('Foreign Resource Refusal');
+            expect(cert.mutationEvidence.error).toBe(__t('foreign_resource_refusal'));
         }
         expect(executionFailed).toBe(true);
     });
 
-    it('should securely handle historical orphans and generate evidence', async () => {
+    it(__t('should_securely_handle_histori'), async () => {
         const plan = { type: 'ORPHAN_CLEANUP' };
         const execution = await orchestrator.executeAtomically(plan, {}, {});
         const verification = await orchestrator.verify({}, {}, { state: 'RECOVERED' });

@@ -200,7 +200,7 @@ export class CORAuthorityCalculator implements AuthorityCalculator<any, any> {
     }
 
     public calculateAuthorityGap(available: Authority, required: RequiredAuthority): AuthorityGap {
-        throw new Error('UNIMPLEMENTED: calculateAuthorityGap is not fully implemented');
+        throw new Error(__t('unimplemented_calculateauthori'));
     }
 
     public generateLeastPrivilegeBundle(target: any, plan: any): AuthorityBundle {

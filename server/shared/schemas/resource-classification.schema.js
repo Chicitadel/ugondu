@@ -1,4 +1,4 @@
-"use strict";
+__t('use_strict');
 /******************************************************************************
  * Project        : UAIGOS
  * Module         : Resource Classification Schema

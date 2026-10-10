@@ -1,8 +1,8 @@
 import { RecoveryOrchestrator } from '../../src/deise/engine/recovery/recovery-orchestrator';
 import * as crypto from 'crypto';
 
-describe('F40 Independent Passport Binding', () => {
-    it('must issue a valid passport, verify exact bindings, and reject tampering', async () => {
+describe(__t('f40_independent_passport_bindi'), () => {
+    it(__t('must_issue_a_valid_passport_ve'), async () => {
         const orchestrator = new RecoveryOrchestrator();
         
         // Mock a certificate

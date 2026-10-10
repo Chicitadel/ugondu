@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 
 describe('Authentication Onboarding & Credentials', () => {
     
-    it('should support credential intake without hardcoding secrets', () => {
+    it(__t('should_support_credential_inta'), () => {
         const connection = {
             id: 'aws-prod',
             provider: 'aws',
@@ -15,7 +15,7 @@ describe('Authentication Onboarding & Credentials', () => {
         expect((connection.authentication as any).secret_value).toBeUndefined();
     });
 
-    it('should redact credentials from evidence logs', () => {
+    it(__t('should_redact_credentials_from'), () => {
         const rawLog = 'AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE';
         const scanAndRedact = (log: string) => log.replace(/AKIA[0-9A-Z]{16}/g, 'REDACTED');
         const safeLog = scanAndRedact(rawLog);
@@ -23,39 +23,39 @@ describe('Authentication Onboarding & Credentials', () => {
         expect(safeLog).toContain('REDACTED');
     });
 
-    it('should perform credential validation before execution', () => {
+    it(__t('should_perform_credential_vali'), () => {
         const isValid = true; 
         expect(isValid).toBe(true);
     });
 
-    it('should detect and block account identity mismatch', () => {
+    it(__t('should_detect_and_block_accoun'), () => {
         const expectedAccount = '123456789012';
         const authenticatedAccount = '987654321098';
         const checkMismatch = (expected: string, actual: string) => {
-            if (expected !== actual) throw new Error('TARGET ACCOUNT MISMATCH');
+            if (expected !== actual) throw new Error(__t('target_account_mismatch'));
         };
-        expect(() => checkMismatch(expectedAccount, authenticatedAccount)).toThrow('TARGET ACCOUNT MISMATCH');
+        expect(() => checkMismatch(expectedAccount, authenticatedAccount)).toThrow(__t('target_account_mismatch'));
     });
 
-    it('should block execution on permission failure', () => {
+    it(__t('should_block_execution_on_perm'), () => {
         const preflightPermissions = (hasPerm: boolean) => {
             if (!hasPerm) throw new Error('INSUFFICIENT_PERMISSION');
         };
         expect(() => preflightPermissions(false)).toThrow('INSUFFICIENT_PERMISSION');
     });
 
-    it('should handle credential expiry', () => {
+    it(__t('should_handle_credential_expir'), () => {
         const connection = { expires_at: new Date(Date.now() - 1000).toISOString() };
         const isExpired = new Date(connection.expires_at).getTime() < Date.now();
         expect(isExpired).toBe(true);
     });
 
-    it('should validate OIDC configuration safely', () => {
+    it(__t('should_validate_oidc_configura'), () => {
         const oidcConfig = { roleToAssume: 'arn:aws:iam::123:role/CORRole' };
         expect(oidcConfig.roleToAssume).toMatch(/^arn:aws:iam::[0-9]+:role\//);
     });
 
-    it('should trigger secret scanning pre-COR execution', () => {
+    it(__t('should_trigger_secret_scanning'), () => {
         const journal = { evidence: 'SecretAccessKey=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' };
         const detectSecrets = (obj: any) => {
             return JSON.stringify(obj).includes('SecretAccessKey=');
@@ -63,7 +63,7 @@ describe('Authentication Onboarding & Credentials', () => {
         expect(detectSecrets(journal)).toBe(true);
     });
 
-    it('should support multi-account selection without global leakage', () => {
+    it(__t('should_support_multi_account_s'), () => {
         const connections = [
             { id: 'aws-dev', account_id: '111' },
             { id: 'aws-prod', account_id: '222' }

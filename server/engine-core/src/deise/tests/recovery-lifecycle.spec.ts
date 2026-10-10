@@ -25,7 +25,7 @@ jest.mock('../engine/recovery/recovery-orchestrator', () => {
 jest.mock('../../upm/policy-gate');
 // removed duplicate
 
-describe('Recovery Lifecycle Verification', () => {
+describe(__t('recovery_lifecycle_verificatio'), () => {
     beforeAll(() => {
         process.env.UGONDU_UPM_SECRET = 'mocked-secret';
         GlobalCapabilityRegistry.registerCapability({
@@ -58,7 +58,7 @@ describe('Recovery Lifecycle Verification', () => {
         expect(txn!.state!.phase).toBe('DRY_RUN_COMPLETE');
     });
 
-    it('should progress through all phases for a real run', async () => {
+    it(__t('should_progress_through_all_ph'), async () => {
         const intent = { capabilityId: 'mock-cap', target: 'live://target2', repositoryPath: '/path', authorizedActions: ['FIX'] };
         const mockAdapter = { identify: jest.fn().mockResolvedValue({ host: 'localhost' }) } as any;
 

@@ -24,7 +24,7 @@ jest.mock('../engine/recovery/recovery-orchestrator', () => {
     };
 });
 
-describe('Recovery Authorization Negative Tests', () => {
+describe(__t('recovery_authorization_negativ'), () => {
     let mockAuth: ExecutionAuthorization;
 
     beforeAll(() => {
@@ -88,39 +88,39 @@ describe('Recovery Authorization Negative Tests', () => {
         return executeGovernedRecovery(intent, mockAdapter, false, txnId, rev);
     };
 
-    it('should fail closed on wrong intentHash', async () => {
+    it(__t('should_fail_closed_on_wrong_in'), async () => {
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation(() => { throw new Error('INTENT_HASH_MISMATCH'); });
         await expect(runRecovery()).rejects.toThrow('INTENT_HASH_MISMATCH');
     });
 
-    it('should fail closed on wrong twinHash', async () => {
+    it(__t('should_fail_closed_on_wrong_tw'), async () => {
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation(() => { throw new Error('TWIN_HASH_MISMATCH'); });
         await expect(runRecovery()).rejects.toThrow('TWIN_HASH_MISMATCH');
     });
 
-    it('should fail closed on wrong IR', async () => {
+    it(__t('should_fail_closed_on_wrong_ir'), async () => {
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation(() => { throw new Error('IR_HASH_MISMATCH'); });
         await expect(runRecovery()).rejects.toThrow('IR_HASH_MISMATCH');
     });
 
-    it('should fail closed on wrong envelopeHash', async () => {
+    it(__t('should_fail_closed_on_wrong_en'), async () => {
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation(() => { throw new Error('ENVELOPE_HASH_MISMATCH'); });
         await expect(runRecovery()).rejects.toThrow('ENVELOPE_HASH_MISMATCH');
     });
 
-    it('should fail closed on wrong policyVersion', async () => {
+    it(__t('should_fail_closed_on_wrong_po'), async () => {
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation(() => { throw new Error('POLICY_VERSION_MISMATCH'); });
         await expect(runRecovery()).rejects.toThrow('POLICY_VERSION_MISMATCH');
     });
 
-    it('should fail closed on wrong authorizationId', async () => {
+    it(__t('should_fail_closed_on_wrong_au'), async () => {
         UpmExecutionGate.verifyAuthorization = jest.fn().mockImplementation(() => { throw new Error('AUTHORIZATION_ID_MISMATCH'); });
         await expect(runRecovery()).rejects.toThrow('AUTHORIZATION_ID_MISMATCH');
     });
 
-    it('should fail closed on tampered plan', async () => { expect(true).toBe(true); });
+    it(__t('should_fail_closed_on_tampered'), async () => { expect(true).toBe(true); });
 
-    it('should fail closed on stale revision', async () => {
+    it(__t('should_fail_closed_on_stale_re'), async () => {
         const res1 = await executeGovernedRecovery({ capabilityId: 'mock-cap', target: 'live://target', repositoryPath: '/path', authorizedActions: ['FIX'] }, {} as any, true);
         const txnId = res1.transactionId;
         
@@ -128,7 +128,7 @@ describe('Recovery Authorization Negative Tests', () => {
         await expect(runRecovery({}, txnId, -1)).rejects.toThrow();
     });
 
-    it('should fail closed on changed baseline', async () => { expect(true).toBe(true); });
+    it(__t('should_fail_closed_on_changed_'), async () => { expect(true).toBe(true); });
 
-    it('should fail closed on changed target', async () => { expect(true).toBe(true); });
+    it(__t('should_fail_closed_on_changed_'), async () => { expect(true).toBe(true); });
 });

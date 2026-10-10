@@ -12,7 +12,7 @@ export class EnvConfigurationInjection implements RecoveryCapability {
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        throw new Error('UNIMPLEMENTED: env-configuration-injection plan is scaffolded');
+        throw new Error(__t('unimplemented_env_configuratio'));
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {

@@ -135,7 +135,7 @@ func TestSignatureEnforcedDirectCall(t *testing.T) {
 
 	pubKeyBytes, _ := x509.MarshalPKIXPublicKey(pub)
 	pubKeyPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+		Type:  i18n.T("public_key"),
 		Bytes: pubKeyBytes,
 	})
 

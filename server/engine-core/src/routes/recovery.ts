@@ -375,7 +375,7 @@ recoveryRouter.post(
             ) {
                 return res.status(400).json({
                     status: 'FAILED',
-                    message: 'capability and target are required'
+                    message: __t('capability_and_target_are_requ')
                 });
             }
 
@@ -384,7 +384,7 @@ recoveryRouter.post(
             if (typeof repositoryPath !== 'string' || !repositoryPath) {
                 return res.status(400).json({
                     status: 'FAILED',
-                    message: 'repositoryPath is required'
+                    message: __t('repositorypath_is_required')
                 });
             }
 
@@ -407,7 +407,7 @@ recoveryRouter.post(
         } catch (error: any) {
             return res.status(500).json({
                 status: 'FAILED',
-                message: error?.message || 'Recovery failed'
+                message: error?.message || __t('recovery_failed')
             });
         }
     }

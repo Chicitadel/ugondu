@@ -60,14 +60,14 @@ export class FailoverCoordinator {
     }
 
     private async stopTraffic(nodeId: string): Promise<void> {
-        throw new Error('Capability not implemented and fails closed by default.');
+        throw new Error(__t('capability_not_implemented_and'));
     }
 
     private async routeTraffic(nodeId: string): Promise<void> {
-        throw new Error('Capability not implemented and fails closed by default.');
+        throw new Error(__t('capability_not_implemented_and'));
     }
 
     private async haltFailoverAndAlert(reason: string): Promise<void> {
-        throw new Error('Capability not implemented and fails closed by default.');
+        throw new Error(__t('capability_not_implemented_and'));
     }
 }
