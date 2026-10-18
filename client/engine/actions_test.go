@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : actions_test.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,7 +35,9 @@ package engine
 
 import (
 	"testing"
+
 	"ugondu/client/engine/adapters"
+	"ugondu/client/i18n"
 )
 
 func TestActionsRegistry(t *testing.T) {
@@ -51,6 +53,10 @@ func TestActionsRegistry(t *testing.T) {
 		"UPSELL_NOTICE",
 		"NODE_INSTALL",
 		"COMPOSER_INSTALL",
+		"COPY_FILE",
+		"CREATE_DIRECTORY",
+		"SYMLINK",
+		"SERVICE_RESTART",
 	}
 
 	for _, act := range expectedActions {
@@ -127,4 +133,3 @@ func TestServiceAdapterNameValidation(t *testing.T) {
 		t.Errorf(i18n.T("expected_error_for_service_nam"))
 	}
 }
-

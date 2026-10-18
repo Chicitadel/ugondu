@@ -3,13 +3,14 @@
  * Module         : Server / Shared / Language Packs
  * File           : packs.ts
  * Version        : 2.3.0
- * Author         : Server & Cryptography Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-01, LP-05, LP-08)
  * - Cryptographic Supply-Chain Assurance (OWASP ASVS 5.0 V9.1 / V9.2)
  * - Zero String Hardcoding
@@ -120,13 +121,68 @@ export function verifyLanguagePackSignature(pack: LanguagePack, publicKeyPem?: s
     }
 }
 
-export function validateLanguagePackIntegrity(pack: LanguagePack, publicKeyPem?: string): { valid: boolean; error?: string } {
+function parseSemverBound(ver: string, isMax: boolean): [number, number, number] | null {
+    const cleaned = String(ver || '').trim().replace(/^v/i, '');
+    if (!cleaned) return null;
+    const parts = cleaned.split('.');
+    if (parts.length < 1 || parts.length > 3) return null;
+    const nums: [number, number, number] = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+        const part = parts[i];
+        if (part === undefined || part === 'x' || part === 'X' || part === '*') {
+            nums[i] = isMax ? Number.MAX_SAFE_INTEGER : 0;
+        } else {
+            if (!/^\d+$/.test(part)) return null;
+            const parsed = Number.parseInt(part, 10);
+            if (Number.isNaN(parsed) || parsed < 0) return null;
+            nums[i] = parsed;
+        }
+    }
+    return nums;
+}
+
+function compareSemver(a: [number, number, number], b: [number, number, number]): number {
+    for (let i = 0; i < 3; i++) {
+        if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
+    }
+    return 0;
+}
+
+export function validateLanguagePackIntegrity(
+    pack: LanguagePack,
+    publicKeyPem?: string,
+    coreVersion: string = process.env.UGONDU_CORE_VERSION || '1.1.0'
+): { valid: boolean; error?: string } {
     if (!pack.packId || !pack.locale || !pack.version) {
         return { valid: false, error: __t('ui.responses.incomplete_pack_manifest') };
     }
 
     if (pack.schemaVersion !== '1') {
         return { valid: false, error: __t('messages.error.unsupported_schema_version', { schemaVersion: pack.schemaVersion }) };
+    }
+
+    // Semver compatibility enforcement (COR-020: minCoreVersion .. maxCoreVersion)
+    const activeCoreTuple = parseSemverBound(coreVersion, false);
+    if (!activeCoreTuple) {
+        return { valid: false, error: __t('incompatible_version') };
+    }
+    if (pack.minCoreVersion) {
+        const minTuple = parseSemverBound(pack.minCoreVersion, false);
+        if (!minTuple || compareSemver(activeCoreTuple, minTuple) < 0) {
+            return {
+                valid: false,
+                error: `${__t('incompatible_version')}: core ${coreVersion} is below minCoreVersion ${pack.minCoreVersion}`
+            };
+        }
+    }
+    if (pack.maxCoreVersion) {
+        const maxTuple = parseSemverBound(pack.maxCoreVersion, true);
+        if (!maxTuple || compareSemver(activeCoreTuple, maxTuple) > 0) {
+            return {
+                valid: false,
+                error: `${__t('incompatible_version')}: core ${coreVersion} exceeds maxCoreVersion ${pack.maxCoreVersion}`
+            };
+        }
     }
 
     // 1. Digest check over tokens

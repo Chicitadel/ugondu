@@ -3,13 +3,14 @@
  * Module         : client/cmd
  * File           : locale_cmd.go
  * Version        : 2.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-26 to LP-36)
  * - Dedicated CLI Locale Management
  * - Zero String Hardcoding Law
@@ -33,8 +34,8 @@ import (
 	"ugondu/client/i18n"
 )
 
-// RunLocaleCommand dispatches all `ugondu locale ...` subcommands
-func RunLocaleCommand(args []string) {
+// RunLocaleCommandWithCode dispatches `ugondu locale ...` subcommands and returns an exit code.
+func RunLocaleCommandWithCode(args []string) int {
 	subcommand := "current"
 	if len(args) > 0 {
 		subcommand = args[0]
@@ -43,42 +44,57 @@ func RunLocaleCommand(args []string) {
 	switch subcommand {
 	case "current":
 		handleLocaleCurrent()
+		return ExitSuccess
 	case "detect":
 		handleLocaleDetect()
+		return ExitSuccess
 	case "list":
 		handleLocaleList()
+		return ExitSuccess
 	case "available":
 		handleLocaleAvailable()
+		return ExitSuccess
 	case "use":
 		target := ""
 		if len(args) > 1 {
 			target = args[1]
 		}
-		handleLocaleUse(target)
+		return handleLocaleUseCode(target)
 	case "install":
 		if len(args) < 2 {
 			fmt.Println(i18n.T("locale_prompt_install", "<locale>", "<locale>", "<locale>"))
-			os.Exit(1)
+			return ExitInvalidInput
 		}
-		handleLocaleInstall(args[1])
+		return handleLocaleInstallCode(args[1])
 	case "remove":
 		if len(args) < 2 {
 			fmt.Println(i18n.T("locale_not_installed", ""))
-			os.Exit(1)
+			return ExitInvalidInput
 		}
-		handleLocaleRemove(args[1])
+		return handleLocaleRemoveCode(args[1])
 	case "verify":
 		target := i18n.GetLocale()
 		if len(args) > 1 {
 			target = args[1]
 		}
-		handleLocaleVerify(target)
+		return handleLocaleVerifyCode(target)
 	case "reset":
 		handleLocaleReset()
+		return ExitSuccess
 	case "doctor":
 		handleLocaleDoctor()
+		return ExitSuccess
 	default:
 		handleLocaleCurrent()
+		return ExitSuccess
+	}
+}
+
+// RunLocaleCommand dispatches all `ugondu locale ...` subcommands
+func RunLocaleCommand(args []string) {
+	code := RunLocaleCommandWithCode(args)
+	if code != ExitSuccess {
+		os.Exit(code)
 	}
 }
 
@@ -168,13 +184,13 @@ func handleLocaleAvailable() {
 	fmt.Println(i18n.T("status_border"))
 }
 
-func handleLocaleUse(target string) {
+func handleLocaleUseCode(target string) int {
 	if target == "--system" || target == "" {
 		_ = i18n.ClearUserPreference()
 		detected := i18n.DetectEnvironmentLocale()
 		i18n.SetLocaleWithSource(detected.Normalized, i18n.SourceOSDetection)
 		fmt.Println(i18n.T("locale_use_system", detected.Normalized))
-		return
+		return ExitSuccess
 	}
 
 	norm := i18n.NormalizeLocale(target)
@@ -190,38 +206,41 @@ func handleLocaleUse(target string) {
 	if !found {
 		fmt.Println(i18n.T("locale_not_installed", target))
 		fmt.Println(i18n.T("locale_prompt_install", target, target, target))
-		os.Exit(1)
+		return ExitPreconditionFailed
 	}
 
 	_ = i18n.SetUserPreference(norm)
 	i18n.SetLocale(norm)
 	fmt.Println(i18n.T("locale_use_success", norm))
+	return ExitSuccess
 }
 
-func handleLocaleInstall(target string) {
+func handleLocaleInstallCode(target string) int {
 	pack, err := i18n.InstallPack(target)
 	if err != nil {
 		fmt.Println(i18n.T("locale_install_failed", err))
-		os.Exit(1)
+		return ExitOperationFailed
 	}
 	fmt.Println(i18n.T("locale_install_success", pack.Locale, pack.Version))
+	return ExitSuccess
 }
 
-func handleLocaleRemove(target string) {
+func handleLocaleRemoveCode(target string) int {
 	norm := i18n.NormalizeLocale(target)
 	if norm == "en-US" {
 		fmt.Println(i18n.T("locale_remove_bootstrap", norm))
-		os.Exit(1)
+		return ExitPreconditionFailed
 	}
 
 	if err := i18n.RemovePack(target); err != nil {
 		fmt.Println(i18n.T("locale_remove_failed", err))
-		os.Exit(1)
+		return ExitOperationFailed
 	}
 	fmt.Println(i18n.T("locale_remove_success", norm))
+	return ExitSuccess
 }
 
-func handleLocaleVerify(target string) {
+func handleLocaleVerifyCode(target string) int {
 	norm := i18n.NormalizeLocale(target)
 	fmt.Println(i18n.T("locale_verify_header", norm))
 
@@ -236,15 +255,16 @@ func handleLocaleVerify(target string) {
 
 	if pack == nil {
 		fmt.Println(i18n.T("locale_verify_fail", norm, i18n.T("pack_not_installed")))
-		os.Exit(1)
+		return ExitPreconditionFailed
 	}
 
 	if err := pack.ValidateIntegrity("1.2.0"); err != nil {
 		fmt.Println(i18n.T("locale_verify_fail", norm, err))
-		os.Exit(1)
+		return ExitPreconditionFailed
 	}
 
 	fmt.Println(i18n.T("locale_verify_pass", norm))
+	return ExitSuccess
 }
 
 func handleLocaleReset() {

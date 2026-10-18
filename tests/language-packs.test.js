@@ -62,10 +62,13 @@ async function runLanguagePackTests() {
 
     const packsDir = path.resolve(__dirname, '../packs');
 
-    // Test 1: Validate authentic language packs across all standard languages
+    // Test 1: Validate authentic language packs across all 12 supported languages
     console.log('[Test 1] Authentic Language Pack Validation');
     try {
-        const expectedLocales = ['en-US', 'fr-FR', 'de-DE', 'es-ES', 'it-IT', 'ar-SA'];
+        const expectedLocales = [
+            'en-US', 'fr-FR', 'de-DE', 'es-ES', 'it-IT', 'ar-SA',
+            'hi-IN', 'ja-JP', 'ko-KR', 'pt-BR', 'ru-RU', 'zh-CN'
+        ];
         for (const loc of expectedLocales) {
             const packFile = path.join(packsDir, `ugondu-lang-${loc}.upl.json`);
             assert.ok(fs.existsSync(packFile), `Language pack file must exist: ${packFile}`);
@@ -171,6 +174,9 @@ async function runLanguagePackTests() {
         const locDe = registry.resolveLocale('de;q=0.9,en;q=0.5');
         assert.strictEqual(locDe, 'de-DE', `Expected de-DE prefix match from Accept-Language, got ${locDe}`);
 
+        const locZh = registry.resolveLocale('zh-CN,zh;q=0.9');
+        assert.strictEqual(locZh, 'zh-CN', `Expected zh-CN match from Accept-Language, got ${locZh}`);
+
         // 2. Tenant policy precedence over Accept-Language
         const locTenant = registry.resolveLocale('fr-FR,fr;q=0.9', 'de-DE');
         assert.strictEqual(locTenant, 'de-DE', `Tenant default must override Accept-Language, got ${locTenant}`);
@@ -180,7 +186,7 @@ async function runLanguagePackTests() {
         assert.strictEqual(locUser, 'it-IT', `User preference must override tenant and header, got ${locUser}`);
 
         // 4. Fallback to en-US for uninstalled locale
-        const locFallback = registry.resolveLocale('zh-CN,zh;q=0.9');
+        const locFallback = registry.resolveLocale('nl-NL,nl;q=0.9');
         assert.strictEqual(locFallback, 'en-US', `Uninstalled locale must fall back to en-US, got ${locFallback}`);
 
         // 5. Express Middleware Execution Test

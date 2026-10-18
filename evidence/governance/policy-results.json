@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "evaluatedAt": "2026-10-18T17:54:25.534Z",
+  "commitHash": "161d283c7efff10a518d4d2652c3562fa7e69cab",
+  "status": "PASS",
+  "policies": [
+    {
+      "policyId": "COR-014",
+      "name": "Capability & Repository Matrix Alignment",
+      "status": "PASS"
+    },
+    {
+      "policyId": "AIR_ROOFERS_GUIDE_5_1",
+      "name": "Max 500 Lines Per Source/Script File",
+      "status": "PASS"
+    },
+    {
+      "policyId": "SEC-CAP-001",
+      "name": "Federated Capability Enforcement",
+      "status": "PASS"
+    },
+    {
+      "policyId": "UPPIE-GATE-001",
+      "name": "Cryptographic ExecutionAuthorization Seal",
+      "status": "PASS"
+    },
+    {
+      "policyId": "DEISE-INV-001",
+      "name": "Do No Harm Topology Drift Guard",
+      "status": "PASS"
+    }
+  ]
+}

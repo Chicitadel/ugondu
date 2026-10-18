@@ -1,15 +1,17 @@
 /******************************************************************************
- * Project        : Ugondu
- * Module         : Client Engine
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/engine
  * File           : actions_extended.go
  * Version        : 3.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -26,8 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
 package engine
@@ -35,6 +36,7 @@ package engine
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -60,21 +62,23 @@ type CopyFilePayload struct {
 
 func ValidateCopyFilePayload(payload map[string]interface{}) (*CopyFilePayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
+		return nil, errors.New(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	src, ok1 := payload["source"].(string)
 	dst, ok2 := payload["destination"].(string)
 	if !ok1 || !ok2 || strings.TrimSpace(src) == "" || strings.TrimSpace(dst) == "" {
-		return nil, fmt.Errorf(i18n.T("ERR_INVALID_COPY_FILE_PAYLOAD"))
+		return nil, errors.New(i18n.T("ERR_INVALID_COPY_FILE_PAYLOAD"))
 	}
 	return &CopyFilePayload{Source: src, Destination: dst}, nil
 }
 
 type CopyFileAction struct{}
+
 func (a *CopyFileAction) ValidatePreflight(payload map[string]interface{}) error {
 	_, err := ValidateCopyFilePayload(payload)
 	return err
 }
+
 func (a *CopyFileAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	p, err := ValidateCopyFilePayload(payload)
 	if err != nil {
@@ -82,9 +86,9 @@ func (a *CopyFileAction) Execute(env *ExecutionEnvelope, payload map[string]inte
 	}
 	err = copyFile(p.Source, p.Destination, 0644)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("msg_err_copy_failed_w"), err)
+		return nil, errors.New(i18n.T("msg_err_copy_failed_w", err))
 	}
-	return []string{fmt.Sprintf(i18n.T("copied_to"), p.Source, p.Destination)}, nil
+	return []string{i18n.T("copied_to", p.Source, p.Destination)}, nil
 }
 
 // CREATE_DIRECTORY
@@ -94,20 +98,22 @@ type CreateDirectoryPayload struct {
 
 func ValidateCreateDirectoryPayload(payload map[string]interface{}) (*CreateDirectoryPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
+		return nil, errors.New(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	path, ok := payload["path"].(string)
 	if !ok || strings.TrimSpace(path) == "" {
-		return nil, fmt.Errorf(i18n.T("ERR_INVALID_CREATE_DIRECTORY_PAYLOAD"))
+		return nil, errors.New(i18n.T("ERR_INVALID_CREATE_DIRECTORY_PAYLOAD"))
 	}
 	return &CreateDirectoryPayload{Path: path}, nil
 }
 
 type CreateDirectoryAction struct{}
+
 func (a *CreateDirectoryAction) ValidatePreflight(payload map[string]interface{}) error {
 	_, err := ValidateCreateDirectoryPayload(payload)
 	return err
 }
+
 func (a *CreateDirectoryAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	p, err := ValidateCreateDirectoryPayload(payload)
 	if err != nil {
@@ -115,9 +121,9 @@ func (a *CreateDirectoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 	}
 	err = os.MkdirAll(p.Path, 0755)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("msg_err_mkdir_failed_w"), err)
+		return nil, errors.New(i18n.T("msg_err_mkdir_failed_w", err))
 	}
-	return []string{fmt.Sprintf(i18n.T("created_directory"), p.Path)}, nil
+	return []string{i18n.T("created_directory", p.Path)}, nil
 }
 
 // SYMLINK
@@ -128,21 +134,23 @@ type SymlinkPayload struct {
 
 func ValidateSymlinkPayload(payload map[string]interface{}) (*SymlinkPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
+		return nil, errors.New(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	target, ok1 := payload["target"].(string)
 	link, ok2 := payload["link"].(string)
 	if !ok1 || !ok2 || strings.TrimSpace(target) == "" || strings.TrimSpace(link) == "" {
-		return nil, fmt.Errorf(i18n.T("ERR_INVALID_SYMLINK_PAYLOAD"))
+		return nil, errors.New(i18n.T("ERR_INVALID_SYMLINK_PAYLOAD"))
 	}
 	return &SymlinkPayload{Target: target, Link: link}, nil
 }
 
 type SymlinkAction struct{}
+
 func (a *SymlinkAction) ValidatePreflight(payload map[string]interface{}) error {
 	_, err := ValidateSymlinkPayload(payload)
 	return err
 }
+
 func (a *SymlinkAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	p, err := ValidateSymlinkPayload(payload)
 	if err != nil {
@@ -150,9 +158,9 @@ func (a *SymlinkAction) Execute(env *ExecutionEnvelope, payload map[string]inter
 	}
 	err = AtomicSymlink(p.Target, p.Link)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("msg_err_symlink_failed_w"), err)
+		return nil, errors.New(i18n.T("msg_err_symlink_failed_w", err))
 	}
-	return []string{fmt.Sprintf(i18n.T("created_symlink"), p.Link, p.Target)}, nil
+	return []string{i18n.T("created_symlink", p.Link, p.Target)}, nil
 }
 
 // SERVICE_RESTART
@@ -162,20 +170,22 @@ type ServiceRestartPayload struct {
 
 func ValidateServiceRestartPayload(payload map[string]interface{}) (*ServiceRestartPayload, error) {
 	if payload == nil {
-		return nil, fmt.Errorf(i18n.T("ERR_PAYLOAD_REQUIRED"))
+		return nil, errors.New(i18n.T("ERR_PAYLOAD_REQUIRED"))
 	}
 	name, ok := payload["serviceName"].(string)
 	if !ok || strings.TrimSpace(name) == "" {
-		return nil, fmt.Errorf(i18n.T("ERR_INVALID_SERVICE_RESTART_PAYLOAD"))
+		return nil, errors.New(i18n.T("ERR_INVALID_SERVICE_RESTART_PAYLOAD"))
 	}
 	return &ServiceRestartPayload{ServiceName: name}, nil
 }
 
 type ServiceRestartAction struct{}
+
 func (a *ServiceRestartAction) ValidatePreflight(payload map[string]interface{}) error {
 	_, err := ValidateServiceRestartPayload(payload)
 	return err
 }
+
 func (a *ServiceRestartAction) Execute(env *ExecutionEnvelope, payload map[string]interface{}) ([]string, error) {
 	p, err := ValidateServiceRestartPayload(payload)
 	if err != nil {
@@ -184,9 +194,9 @@ func (a *ServiceRestartAction) Execute(env *ExecutionEnvelope, payload map[strin
 	adapter := adapters.NewServiceRestartAdapter()
 	err = adapter.Restart(p.ServiceName)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("msg_err_service_restart_failed_w"), err)
+		return nil, errors.New(i18n.T("msg_err_service_restart_failed_w", err))
 	}
-	return []string{fmt.Sprintf(i18n.T("restarted_service"), p.ServiceName)}, nil
+	return []string{i18n.T("restarted_service", p.ServiceName)}, nil
 }
 
 // COMPOSER_INSTALL
@@ -201,10 +211,10 @@ func (a *ComposerInstallAction) Execute(env *ExecutionEnvelope, payload map[stri
 	var logs []string
 	p, err := ValidateComposerInstallPayload(payload)
 	if err != nil {
-		return logs, fmt.Errorf(i18n.T("msg_composer_install_validation_failure_w"), err)
+		return logs, errors.New(i18n.T("msg_composer_install_validation_failure_w", err))
 	}
 
-	fmt.Printf("     -> %s\n", i18n.T("composer_install_running", p.Command, p.WorkingDirectory))
+	fmt.Println(i18n.T("composer_install_running", p.Command, p.WorkingDirectory))
 
 	cmdName := "composer"
 	args := []string{p.Command}
@@ -239,9 +249,9 @@ func (a *ComposerInstallAction) Execute(env *ExecutionEnvelope, payload map[stri
 	}
 
 	if runErr != nil {
-		return logs, fmt.Errorf(i18n.T("composer_failed_n"), strings.Join(args, " "), runErr, outputStr)
+		return logs, errors.New(i18n.T("composer_failed_n", strings.Join(args, " "), runErr, outputStr))
 	}
 
-	logs = append(logs, fmt.Sprintf(i18n.T("successfully_executed_composer_in"), strings.Join(args, " "), p.WorkingDirectory))
+	logs = append(logs, i18n.T("successfully_executed_composer_in", strings.Join(args, " "), p.WorkingDirectory))
 	return logs, nil
 }

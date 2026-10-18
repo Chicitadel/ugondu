@@ -1,0 +1,33 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "@airroofers/ugondu-platform",
+      "digest": {
+        "sha256": "00f2d7598806536e01b590caca3ae54bbc5cc9779df0ddd924ee252c10f65354"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://ugondu.airroofers.eu/release/v1",
+      "externalParameters": {
+        "repository": "Chicitadel/ugondu",
+        "ref": "phase4/production-hardening",
+        "commitHash": "161d283c7efff10a518d4d2652c3562fa7e69cab",
+        "treeHash": "1ef96c862195764a1cf886a6223c95ea874ae887"
+      }
+    },
+    "runDetails": {
+      "builder": {
+        "id": "https://ugondu.airroofers.eu/builders/cor-release-runner"
+      },
+      "metadata": {
+        "invocationId": "inv-161d283c7eff",
+        "startedOn": "2026-10-18T17:54:25.534Z",
+        "finishedOn": "2026-10-18T17:54:25.534Z"
+      }
+    }
+  }
+}

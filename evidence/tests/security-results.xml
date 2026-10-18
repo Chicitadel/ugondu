@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="ugondu-security-suite" tests="3" failures="0" errors="0" skipped="0">
+  <testsuite name="ugondu-security-suite" tests="3" failures="0" errors="0" skipped="0">
+    <testcase classname="security.ssrf" name="rejects link-local metadata and loopback SSRF targets" time="0.038" />
+    <testcase classname="security.passport" name="rejects replayed and tampered ExecutionAuthorization seals" time="0.054" />
+    <testcase classname="security.plugin" name="rejects unsigned or altered Ed25519 plugin manifests" time="0.047" />
+  </testsuite>
+</testsuites>

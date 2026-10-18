@@ -2,53 +2,123 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Engine Core — Key Manager Bootstrap
  * File           : key-manager.ts
- * Version        : 1.0.0
+ * Version        : 3.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU / Ujomor Engineering
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
+ * - Modularization Enforced
  *
  * Standards:
  * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Signatures:
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { generateKeyPairSync, createHash } from 'crypto';
-import fs from 'fs';
 import path from 'path';
-import { KeyLoader, KeyState } from '../crypto/key-loader';
+import { globalTrustRegistry } from '@ugondu/shared';
+import {
+  KeyLoader,
+  KeyState,
+  KeyLoadError,
+  FORBIDDEN_INSECURE_KEY_LITERALS,
+  isForbiddenKeyLiteral,
+  isManagedKeyReference,
+} from '../encryption/key-loader';
+
+export {
+  KeyLoader,
+  KeyState,
+  KeyLoadError,
+  FORBIDDEN_INSECURE_KEY_LITERALS,
+  isForbiddenKeyLiteral,
+  isManagedKeyReference,
+};
 
 export const KEYS_DIR = process.env['KEYS_DIR'] ?? path.resolve(__dirname, '../../keys');
-const PRIV_KEY_PATH = path.join(KEYS_DIR, 'ed25519_private.pem');
-const PUB_KEY_PATH  = path.join(KEYS_DIR, 'ed25519_public.pem');
-const KEY_ID_PATH   = path.join(KEYS_DIR, 'key_id.txt');
+
+function syncRecipeKeyToTrustRegistry(state: KeyState): void {
+  try {
+    const privPem = state.privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
+    globalTrustRegistry.registerKey({
+      keyId: state.keyId,
+      algorithm: 'ed25519',
+      status: 'ACTIVE',
+      purpose: 'recipe',
+      publicKey: state.publicKeyPem.trim(),
+      privateKey: privPem.trim(),
+    });
+  } catch {
+    // Non-fatal if trust registry registration encounters an isolated test mock
+  }
+}
 
 /**
- * Load keys from disk, or generate a new Ed25519 keypair and persist it.
- * In production, key generation is forbidden — load MUST succeed.
+ * Generates an ephemeral in-memory Ed25519 keypair without writing any private key material to disk.
  */
-export function loadOrGeneratePersistentKeys(): KeyState {
+export function generateEphemeralMemoryKeys(): KeyState {
+  const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+  const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
+  const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
+  const state: KeyState = {
+    privateKey,
+    publicKey,
+    keyId,
+    publicKeyPem: pubPem,
+    source: 'EPHEMERAL_MEMORY',
+    ephemeral: true,
+  };
+  syncRecipeKeyToTrustRegistry(state);
+  return state;
+}
+
+/**
+ * Loads managed or environment-provided Ed25519 signing keys, failing closed in production
+ * or when an insecure literal is supplied.
+ * In non-production, generates ephemeral in-memory Ed25519 keys ONLY when
+ * `NODE_ENV === 'test'` or `UGONDU_DEV_EPHEMERAL_KEYS === 'true'` without persisting private keys to disk.
+ */
+export function loadOrGeneratePersistentKeys(
+  env?: NodeJS.ProcessEnv,
+  secretStore?: Record<string, string>
+): KeyState {
+  const currentEnv = env ?? process.env;
+  const nodeEnv = (currentEnv['NODE_ENV'] ?? 'development').trim().toLowerCase();
+
   try {
-    return new KeyLoader().load();
+    const loaded = new KeyLoader(currentEnv, secretStore).load();
+    syncRecipeKeyToTrustRegistry(loaded);
+    return loaded;
   } catch (err) {
-    if (process.env['NODE_ENV'] === 'production') throw err;
-    if (!fs.existsSync(KEYS_DIR)) fs.mkdirSync(KEYS_DIR, { recursive: true });
-    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
-    const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
-    const pubPem  = publicKey.export({ type: 'spki', format: 'pem' }) as string;
-    const keyId   = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
-    fs.writeFileSync(PRIV_KEY_PATH, privPem, { encoding: 'utf-8', mode: 0o600 });
-    try { fs.chmodSync(PRIV_KEY_PATH, 0o600); } catch { /* non-fatal on Windows */ }
-    fs.writeFileSync(PUB_KEY_PATH, pubPem, { encoding: 'utf-8' });
-    fs.writeFileSync(KEY_ID_PATH, keyId, { encoding: 'utf-8' });
-    return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
+    if (err instanceof KeyLoadError && err.code !== 'NO_KEY_CONFIGURED') {
+      throw err;
+    }
+
+    if (nodeEnv === 'production') {
+      throw err;
+    }
+
+    const allowEphemeral =
+      nodeEnv === 'test' || currentEnv['UGONDU_DEV_EPHEMERAL_KEYS'] === 'true';
+
+    if (!allowEphemeral) {
+      throw err;
+    }
+
+    return generateEphemeralMemoryKeys();
   }
 }

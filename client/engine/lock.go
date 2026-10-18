@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : lock.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen

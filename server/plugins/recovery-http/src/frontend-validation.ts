@@ -1,3 +1,37 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Plugins / Recovery HTTP
+ * File           : frontend-validation.ts
+ * Version        : 1.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-29
+ * Last Modified  : 2026-10-18
+ * Classification : COMMERCIAL | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
+import { __t } from '@ugondu/shared';
 import { RecoveryCapability } from '../../../engine-core/src/deise/engine/recovery/capabilities/recovery-capability';
 import { EnvironmentTwin } from '../../../engine-core/src/deise/twin/environment-twin';
 import { RecoveryScope } from '../../../engine-core/src/deise/engine/recovery/live-environment-adapter-contract';
@@ -11,7 +45,7 @@ export class FrontendValidation implements RecoveryCapability {
         // COR-011: Universal frontend validator
         const domain = scope.resourceIdentifiers[0] || 'localhost';
         const targetUrl = `https://${domain}`;
-        
+
         try {
             const response = await fetch(targetUrl);
             const body = await response.text();
@@ -32,7 +66,7 @@ export class FrontendValidation implements RecoveryCapability {
             }
 
             return { issue: null, confidence: 1.0, details: __t('frontend_http_validation_succe') };
-            
+
         } catch (error) {
             return {
                 issue: 'RoutingFailure',
@@ -61,7 +95,7 @@ export class FrontendValidation implements RecoveryCapability {
         if (!plan.requiresConfigurationRepair) {
             return true;
         }
-        
+
         // Execute configuration repairs
         for (const repair of plan.configurationRepairs || []) {
             try {
@@ -96,4 +130,3 @@ export class FrontendValidation implements RecoveryCapability {
         return false;
     }
 }
-

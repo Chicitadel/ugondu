@@ -1,16 +1,16 @@
-import { __t } from '@ugondu/shared';
 /******************************************************************************
  * Project        : Ugondu Platform
  * Module         : Provider Fabric - Linux Adapter
  * File           : linux.ts
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-03
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -20,8 +20,9 @@ import { __t } from '@ugondu/shared';
  * All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import type { ProviderCapabilities } from '../contract/ProviderContract';
-import type { ComputeCapability, ComputeConfig, ComputeResult, ComputeStatus, ProviderOptions, ResolvedValues } from '../capabilities/compute';
+import type { ComputeCapability, ComputeConfig, ComputeResult, ComputeStatus, ProviderOptions } from '../capabilities/compute';
 import type { NetworkCapability, NetworkConfig, NetworkResult, SubnetResult } from '../capabilities/network';
 import type { StorageCapability, StorageConfig, StorageResult } from '../capabilities/storage';
 
@@ -56,6 +57,7 @@ export interface ILinuxClient {
   checkCapacity(cpuCores: number, memoryMb: number): Promise<boolean>;
   runProcess(name: string, image: string, mode: string): Promise<{ id: string; state: 'running' | 'failed' }>;
   stopProcess(id: string): Promise<void>;
+  getInstanceStatus?(id: string): Promise<ComputeStatus>;
 
   configureNetwork(name: string, cidr: string, mode: string): Promise<{ id: string }>;
   removeNetwork(id: string): Promise<void>;
@@ -65,7 +67,16 @@ export interface ILinuxClient {
   removeDirectory(id: string): Promise<void>;
 }
 
+interface RegisteredLinuxInstance {
+  id: string;
+  state: 'provisioning' | 'running' | 'failed' | 'terminated';
+  health: 'healthy' | 'unhealthy' | 'unknown';
+  verifiedAt: number;
+}
+
 export class LinuxAdapter implements ComputeCapability, NetworkCapability, StorageCapability {
+  private readonly instanceRegistry = new Map<string, RegisteredLinuxInstance>();
+
   constructor(private client: ILinuxClient) {}
 
   public async provisionInstance(config: ComputeConfig, options: ProviderOptions): Promise<ComputeResult> {
@@ -75,6 +86,13 @@ export class LinuxAdapter implements ComputeCapability, NetworkCapability, Stora
     }
     const mode = options.mode ?? 'SYSTEMD';
     const instance = await this.client.runProcess(config.instanceName, config.osImage, mode);
+    const health = instance.state === 'running' ? 'healthy' : 'unhealthy';
+    this.instanceRegistry.set(instance.id, {
+      id: instance.id,
+      state: instance.state,
+      health,
+      verifiedAt: Date.now(),
+    });
     return {
       id: instance.id,
       state: instance.state,
@@ -84,10 +102,53 @@ export class LinuxAdapter implements ComputeCapability, NetworkCapability, Stora
 
   public async terminateInstance(id: string): Promise<void> {
     await this.client.stopProcess(id);
+    this.instanceRegistry.delete(id);
   }
 
   public async getInstanceStatus(id: string): Promise<ComputeStatus> {
-    return { id, state: 'running', health: 'healthy' };
+    if (!id || typeof id !== 'string') {
+      return {
+        id: String(id ?? ''),
+        state: 'unknown' as ComputeStatus['state'],
+        health: 'unverified' as ComputeStatus['health'],
+      };
+    }
+
+    if (typeof this.client.getInstanceStatus === 'function') {
+      try {
+        const probed = await this.client.getInstanceStatus(id);
+        if (probed && probed.state) {
+          this.instanceRegistry.set(id, {
+            id,
+            state: probed.state,
+            health: probed.health,
+            verifiedAt: Date.now(),
+          });
+          return probed;
+        }
+      } catch {
+        return {
+          id,
+          state: 'unknown' as ComputeStatus['state'],
+          health: 'unverified' as ComputeStatus['health'],
+        };
+      }
+    }
+
+    const registered = this.instanceRegistry.get(id);
+    if (!registered) {
+      return {
+        id,
+        state: 'unknown' as ComputeStatus['state'],
+        health: 'unverified' as ComputeStatus['health'],
+      };
+    }
+
+    return {
+      id: registered.id,
+      state: registered.state,
+      health: registered.health,
+    };
   }
 
   public async createVirtualNetwork(config: NetworkConfig, options: ProviderOptions): Promise<NetworkResult> {
@@ -105,7 +166,7 @@ export class LinuxAdapter implements ComputeCapability, NetworkCapability, Stora
     return { id: subnet.id, cidr: cidr };
   }
 
-  public async provisionStorage(config: StorageConfig, options: ProviderOptions): Promise<StorageResult> {
+  public async provisionStorage(config: StorageConfig, _options: ProviderOptions): Promise<StorageResult> {
     const dir = await this.client.createDirectory(config.name);
     return { id: dir.id, endpoint: dir.endpoint, resolved: { storageClass: 'FILE', mode: 'DIRECTORY' } };
   }

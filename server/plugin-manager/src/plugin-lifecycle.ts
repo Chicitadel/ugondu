@@ -1,5 +1,3 @@
-// @ts-ignore
-import { __t } from '../../shared/i18n';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Plugin Manager — Plugin Lifecycle
@@ -8,11 +6,11 @@ import { __t } from '../../shared/i18n';
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -22,6 +20,8 @@ import { __t } from '../../shared/i18n';
  *
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
+
+import './preload';
 
 /**
  * Plugin deactivation lifecycle states.
@@ -49,7 +49,7 @@ const DEACTIVATION_TRANSITIONS: Partial<Record<PluginLifecycleState, PluginLifec
 
 /**
  * @interface PluginLifecycleRecord
- * @description Corporate Governed interface implementation for PluginLifecycleRecord
+ * @description Corporate Policy Governed interface implementation for PluginLifecycleRecord
  * @classification ENTERPRISE
  */
 export interface PluginLifecycleRecord {
@@ -63,7 +63,7 @@ export interface PluginLifecycleRecord {
 
 /**
  * @class PluginLifecycle
- * @description Corporate Governed class implementation for PluginLifecycle
+ * @description Corporate Policy Governed class implementation for PluginLifecycle
  * @classification ENTERPRISE
  */
 export class PluginLifecycle {

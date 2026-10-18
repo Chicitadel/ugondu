@@ -3,13 +3,14 @@
  * Module         : Server / Shared / Localization Engine
  * File           : i18n.ts
  * Version        : 2.1.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard
  * - Zero String Hardcoding Law (Tokenized Dictionaries)
  * - Dynamic [lang] Drop-in Locale Architecture
@@ -46,6 +47,7 @@ export function getLocalesDirectories(): string[] {
         path.resolve(__dirname, '../locales'),
         path.resolve(__dirname, '../../locales'),
         path.resolve(__dirname, '../../../locales'),
+        path.resolve(__dirname, 'locales'),
         path.resolve(process.cwd(), 'server/shared/locales')
     ].filter(Boolean) as string[];
 
@@ -157,14 +159,13 @@ export function getLocale(): string {
 }
 
 /**
- * Tokenized dictionary lookup with [lang] token prefix per Air Roofers Global Localization Standard.
- * Supports printf-style format verbs (%s, %d, %v) and named parameters ({param}).
+ * Tokenized dictionary lookup per Air Roofers Global Localization Standard.
+ * Supports printf-style format verbs (%s, %d, %v) and named parameters ({param}, %{param}, {{param}}).
  *
  * Rules:
  * 1. Resolves token in active locale dictionary.
  * 2. Falls back to base 'en' dictionary if key is missing in active locale.
  * 3. Falls back to token name if missing in all dictionaries (zero crash guarantee).
- * 4. Injects mandatory active language token prefix [lang].
  */
 export function __t(key: string, ...args: any[]): string {
     const dict = dictionaries[currentLocale] || {};
@@ -180,11 +181,12 @@ export function __t(key: string, ...args: any[]): string {
 
     let formatted = template;
 
-    // Support object parameters: {paramName}
+    // Support object parameters: {paramName}, %{paramName}, {{paramName}}
     if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null && !Array.isArray(args[0])) {
         const params = args[0];
-        formatted = formatted.replace(/\{(\w+)\}/g, (_, varName) => {
-            return params[varName] !== undefined ? String(params[varName]) : `{${varName}}`;
+        formatted = formatted.replace(/\{\{(\w+)\}\}|%\{(\w+)\}|\{(\w+)\}/g, (match, p1, p2, p3) => {
+            const varName = p1 || p2 || p3;
+            return params[varName] !== undefined ? String(params[varName]) : match;
         });
     } else if (args.length > 0) {
         // Support positional format verbs: %s, %d, %v
@@ -197,7 +199,7 @@ export function __t(key: string, ...args: any[]): string {
         });
     }
 
-    return `[${currentLocale}] ${formatted}`;
+    return formatted;
 }
 
 export const t = __t;

@@ -3,13 +3,14 @@
  * Module         : Server / Engine Core / Discovery
  * File           : sandbox.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -41,13 +42,13 @@ import { __t } from '@ugondu/shared';
  */
 export class CommandSandbox {
   private allowedCommands: Set<string> = new Set([
-    __t('uname_a'),
+    'uname -a',
     'cat /etc/os-release',
     'uptime',
-    __t('df_h'),
-    __t('free_m'),
-    __t('ps_ef'),
-    __t('netstat_tuln')
+    'df -h',
+    'free -m',
+    'ps -ef',
+    'netstat -tuln'
   ]);
 
   /**
@@ -63,7 +64,7 @@ export class CommandSandbox {
     try {
       return require('child_process').execSync(command).toString();
     } catch (e: any) {
-      return `Execution failed: ${e.message}`;
+      return __t('exec_failed', e.message);
     }
   }
 

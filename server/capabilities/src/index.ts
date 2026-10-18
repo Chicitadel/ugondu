@@ -10,12 +10,14 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-export type { UgonduEdition } from './edition-registry/EditionDefinition';
+export type { UgonduEdition, EditionLimits } from './edition-registry/EditionDefinition';
 export {
+  CANONICAL_UGONDU_EDITIONS,
   UGONDU_EDITIONS,
   EDITION_RANK,
   EDITION_LIMITS,
   meetsEditionRequirement,
+  normalizeEdition,
   parseEdition,
 } from './edition-registry/EditionDefinition';
 
@@ -42,3 +44,6 @@ export { CapabilityStateMachine } from './capability-lifecycle/CapabilityStateMa
 // Capability Dependency Graph
 export { CapabilityDependencyGraph } from './capability-dependency-graph/CapabilityDependencyGraph';
 export type { DeactivationValidationResult, DeactivationReport } from './capability-dependency-graph/CapabilityDependencyGraph';
+
+// Agent-Neutral Capability Contract, 4D Authorization & Graphical/CLI Parity
+export * from './agent-neutral/index';

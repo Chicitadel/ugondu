@@ -2,15 +2,15 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : client/cmd
  * File           : cli.go
- * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Version        : 3.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -38,7 +38,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	
 	"path/filepath"
 	"strings"
 	"time"
@@ -91,16 +90,36 @@ func SuggestCommand(input string, valid []string) string {
 	return bestMatch
 }
 
-// PromptDestructive asks the user for confirmation before wiping data unless --force is passed
+// PromptDestructive asks the user for confirmation before wiping data unless --force is passed.
+// Never hangs in non-interactive or unclosed pipe environments.
 func PromptDestructive(targetPath string, force bool) bool {
 	if force {
 		return true
 	}
+	if os.Getenv("UGONDU_NON_INTERACTIVE") == "1" || strings.EqualFold(os.Getenv("UGONDU_NON_INTERACTIVE"), "true") {
+		return false
+	}
 	fmt.Printf(i18n.T("prompt_destructive", targetPath))
-	reader := bufio.NewReader(os.Stdin)
-	response, _ := reader.ReadString('\n')
-	response = strings.TrimSpace(strings.ToLower(response))
-	return response == "y" || response == "yes"
+
+	resCh := make(chan string, 1)
+	go func() {
+		reader := bufio.NewReader(os.Stdin)
+		line, _ := reader.ReadString('\n')
+		resCh <- line
+	}()
+
+	waitDur := 50 * time.Millisecond
+	if isStdinInteractive() {
+		waitDur = 30 * time.Second
+	}
+
+	select {
+	case response := <-resCh:
+		response = strings.TrimSpace(strings.ToLower(response))
+		return response == "y" || response == "yes"
+	case <-time.After(waitDur):
+		return false
+	}
 }
 
 // PrintHelp outputs the CLI documentation
@@ -163,7 +182,7 @@ func FindLatestTransactionId() (string, error) {
 	var latestModTime time.Time
 
 	for _, entry := range entries {
-		if !entry.IsDir() {
+		if !entry.IsDir() || entry.Name() == "replay_ledger_lock" {
 			continue
 		}
 		txName := entry.Name()
@@ -194,13 +213,153 @@ func FindLatestTransactionId() (string, error) {
 	return latestTxId, nil
 }
 
-func resumeDeployment(targetTxId string, apiURL string) {
+// ParseGlobalFlags extracts global CLI flags and positional tokens from os.Args-style slices.
+func ParseGlobalFlags(args []string) *CLIOptions {
+	targetDefault := os.Getenv("UGONDU_TARGET_ENV")
+	if targetDefault == "" {
+		targetDefault = "auto"
+	}
+	opts := &CLIOptions{
+		Target:   targetDefault,
+		Provider: "sovereign-cloud",
+		Region:   "eu-central-1",
+		Format:   "table",
+		Profile:  "default",
+	}
+
+	startIdx := 1
+	if len(args) > 0 && !strings.Contains(args[0], "ugondu") && !strings.HasSuffix(args[0], ".exe") && !strings.Contains(args[0], "/") && !strings.Contains(args[0], "\\") {
+		// Allow tests to pass either ["ugondu", "cmd", ...] or ["cmd", ...]
+		validMap := make(map[string]bool)
+		for _, v := range SortedValidCommands() {
+			validMap[v] = true
+		}
+		if validMap[args[0]] || strings.HasPrefix(args[0], "-") {
+			startIdx = 0
+		}
+	}
+
+	for i := startIdx; i < len(args); i++ {
+		arg := args[i]
+		opts.RawSubArgs = append(opts.RawSubArgs, arg)
+
+		switch {
+		case (arg == "--locale" || arg == "-L") && i+1 < len(args):
+			opts.Locale = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--locale="):
+			opts.Locale = strings.TrimPrefix(arg, "--locale=")
+		case arg == "--system-locale":
+			opts.SystemLocale = true
+
+		case arg == "--target" && i+1 < len(args):
+			opts.Target = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--target="):
+			opts.Target = strings.TrimPrefix(arg, "--target=")
+
+		case arg == "--provider" && i+1 < len(args):
+			opts.Provider = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--provider="):
+			opts.Provider = strings.TrimPrefix(arg, "--provider=")
+
+		case arg == "--region" && i+1 < len(args):
+			opts.Region = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--region="):
+			opts.Region = strings.TrimPrefix(arg, "--region=")
+
+		case arg == "--pack" && i+1 < len(args):
+			opts.Pack = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--pack="):
+			opts.Pack = strings.TrimPrefix(arg, "--pack=")
+
+		case arg == "--format" && i+1 < len(args):
+			opts.Format = strings.ToLower(args[i+1])
+			i++
+		case strings.HasPrefix(arg, "--format="):
+			opts.Format = strings.ToLower(strings.TrimPrefix(arg, "--format="))
+		case arg == "--json":
+			opts.Format = "json"
+		case arg == "--yaml":
+			opts.Format = "yaml"
+
+		case arg == "--output" && i+1 < len(args):
+			opts.Output = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--output="):
+			opts.Output = strings.TrimPrefix(arg, "--output=")
+
+		case arg == "--profile" && i+1 < len(args):
+			opts.Profile = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--profile="):
+			opts.Profile = strings.TrimPrefix(arg, "--profile=")
+
+		case arg == "--operation" && i+1 < len(args):
+			opts.Operation = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--operation="):
+			opts.Operation = strings.TrimPrefix(arg, "--operation=")
+
+		case arg == "--plan" && i+1 < len(args):
+			opts.Plan = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--plan="):
+			opts.Plan = strings.TrimPrefix(arg, "--plan=")
+
+		case arg == "--timeout" && i+1 < len(args):
+			opts.Timeout = args[i+1]
+			i++
+		case strings.HasPrefix(arg, "--timeout="):
+			opts.Timeout = strings.TrimPrefix(arg, "--timeout=")
+
+		case arg == "--yes" || arg == "-y":
+			opts.Yes = true
+		case arg == "--non-interactive":
+			opts.NonInteractive = true
+		case arg == "--dry-run":
+			opts.DryRun = true
+		case arg == "--force" || arg == "-f":
+			opts.Force = true
+		case arg == "--resume" || arg == "-r":
+			opts.Resume = true
+		case arg == "--help" || arg == "-h":
+			opts.Help = true
+		case arg == "--version" || arg == "-v":
+			opts.Version = true
+
+		case !strings.HasPrefix(arg, "-"):
+			if opts.Command == "" {
+				opts.Command = arg
+			} else {
+				opts.Positional = append(opts.Positional, arg)
+			}
+		}
+	}
+
+	if len(opts.Positional) > 0 {
+		opts.Subcommand = opts.Positional[0]
+	}
+
+	return opts
+}
+
+func runResumeDeployment(opts *CLIOptions, targetTxId string, apiURL string) (int, *CLIOutputEnvelope) {
 	txId := targetTxId
 	if txId == "" {
 		latest, err := FindLatestTransactionId()
 		if err != nil {
 			fmt.Println(i18n.T("err_cannot_resume", err))
-			os.Exit(1)
+			env := NewOutputEnvelope(opts, "PRECONDITION_FAILED", ExitPreconditionFailed)
+			env.BlockedReasons = []string{err.Error()}
+			env.Verification.Verified = false
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitPreconditionFailed, env
 		}
 		txId = latest
 	}
@@ -210,68 +369,97 @@ func resumeDeployment(targetTxId string, apiURL string) {
 	recipeData, err := LoadTransactionRecipe(txId)
 	if err != nil {
 		fmt.Println(i18n.T("no_prev_deployment"))
-		os.Exit(1)
+		env := NewOutputEnvelope(opts, "PRECONDITION_FAILED", ExitPreconditionFailed)
+		env.OperationID = txId
+		env.BlockedReasons = []string{i18n.T("no_prev_deployment")}
+		env.Verification.Verified = false
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
+		}
+		return ExitPreconditionFailed, env
 	}
 
-	env, steps, err := engine.ParseRecipeLocally(recipeData, apiURL)
+	execEnv, steps, err := engine.ParseRecipeLocally(recipeData, apiURL)
 	if err != nil {
 		fmt.Println(i18n.T("resume_parse_fail", err))
-		os.Exit(1)
+		env := NewOutputEnvelope(opts, "PRECONDITION_FAILED", ExitPreconditionFailed)
+		env.OperationID = txId
+		env.BlockedReasons = []string{err.Error()}
+		env.Verification.Verified = false
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
+		}
+		return ExitPreconditionFailed, env
 	}
 
-	logs, err := engine.ExecuteRecipe(env, steps)
+	logs, err := engine.ExecuteRecipe(execEnv, steps)
 	if err != nil {
 		fmt.Println(i18n.T("exec_failed", err))
-		engine.ReportTelemetry(apiURL, env.TransactionId, "FAILED", append(logs, err.Error()))
-		os.Exit(1)
+		engine.ReportTelemetry(apiURL, execEnv.TransactionId, "FAILED", append(logs, err.Error()))
+		env := NewOutputEnvelope(opts, "FAILED", ExitOperationFailed)
+		env.OperationID = execEnv.TransactionId
+		env.BlockedReasons = []string{err.Error()}
+		env.Verification.Verified = false
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
+		}
+		return ExitOperationFailed, env
 	}
 
-	engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
+	engine.ReportTelemetry(apiURL, execEnv.TransactionId, "SUCCESS", logs)
 	fmt.Println(i18n.T("dep_complete"))
-	os.Exit(0)
+	env := NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+	env.OperationID = execEnv.TransactionId
+	env.PlanID = execEnv.PlanHash
+	if opts.Format == "json" || opts.Format == "yaml" {
+		RenderEnvelope(opts, env)
+	}
+	return ExitSuccess, env
 }
 
-// ParseAndRun interprets the arguments and routes to the engine
-func ParseAndRun(args []string) {
-	var cleanedArgs []string
-	var cliLocale string
-	systemLocaleMode := false
+// ExecuteCommand parses and executes the CLI command, returning a deterministic exit code and output envelope.
+func ExecuteCommand(args []string) (int, *CLIOutputEnvelope) {
+	opts := ParseGlobalFlags(args)
 
-	for i := 1; i < len(args); i++ {
-		arg := args[i]
-		if (arg == "--locale" || arg == "-L") && i+1 < len(args) {
-			cliLocale = args[i+1]
-			i++
-		} else if strings.HasPrefix(arg, "--locale=") {
-			cliLocale = strings.TrimPrefix(arg, "--locale=")
-		} else if arg == "--system-locale" {
-			systemLocaleMode = true
-		} else {
-			cleanedArgs = append(cleanedArgs, arg)
-		}
-	}
-
-	if systemLocaleMode {
+	if opts.SystemLocale {
 		det := i18n.DetectEnvironmentLocale()
 		i18n.SetLocaleWithSource(det.Normalized, i18n.SourceOSDetection)
-	} else if cliLocale != "" {
-		i18n.SetLocaleWithSource(cliLocale, i18n.SourceCliFlag)
+	} else if opts.Locale != "" {
+		i18n.SetLocaleWithSource(opts.Locale, i18n.SourceCliFlag)
 	} else {
 		loc, src := i18n.ResolveEffectiveLocale("")
 		i18n.SetLocaleWithSource(loc, src)
 	}
 
-	validCommands := []string{"deploy", "resume", "status", "rollback", "plugins", "locale", "version", "help", "auth", "repair"}
-
-	if len(cleanedArgs) < 1 {
-		fmt.Println(i18n.T("err_no_command"))
-		PrintHelp()
-		os.Exit(1)
+	if opts.Format != "table" && opts.Format != "json" && opts.Format != "yaml" && opts.Format != "yml" {
+		env := NewOutputEnvelope(opts, "INVALID_INPUT", ExitInvalidInput)
+		env.BlockedReasons = []string{fmt.Sprintf("Unsupported --format '%s' (expected table, json, or yaml)", opts.Format)}
+		env.Verification.Verified = false
+		opts.Format = "json"
+		RenderEnvelope(opts, env)
+		return ExitInvalidInput, env
 	}
 
-	command := cleanedArgs[0]
+	if opts.Version && opts.Command == "" {
+		opts.Command = "version"
+	}
+	if opts.Help && opts.Command == "" {
+		opts.Command = "help"
+	}
 
-	// Fuzzy Matching Auto-Correct
+	validCommands := SortedValidCommands()
+
+	if opts.Command == "" {
+		fmt.Println(i18n.T("err_no_command"))
+		PrintHelp()
+		env := NewOutputEnvelope(opts, "INVALID_INPUT", ExitInvalidInput)
+		env.BlockedReasons = []string{i18n.T("err_no_command")}
+		env.Verification.Verified = false
+		return ExitInvalidInput, env
+	}
+
+	command := opts.Command
+
 	isValid := false
 	for _, v := range validCommands {
 		if command == v {
@@ -286,58 +474,71 @@ func ParseAndRun(args []string) {
 		if suggestion != "" {
 			fmt.Println(i18n.T("did_you_mean", suggestion))
 		}
-		os.Exit(1)
-	}
-
-	// Environment variable gathering
-	token := os.Getenv("UGONDU_TOKEN")
-	if token == "" {
-		fmt.Println(i18n.T("community_fallback"))
-	}
-	apiURL := os.Getenv("UGONDU_API_URL")
-	if apiURL == "" {
-		apiURL = "https://api.ugondu.airroofers.eu/v1"
-	}
-	targetEnv := os.Getenv("UGONDU_TARGET_ENV")
-	if targetEnv == "" {
-		targetEnv = "auto"
-	}
-
-	force := false
-	resume := false
-	var positional []string
-
-	for _, arg := range cleanedArgs[1:] {
-		if arg == "--force" || arg == "-f" {
-			force = true
-		} else if arg == "--resume" || arg == "-r" {
-			resume = true
-		} else if !strings.HasPrefix(arg, "-") {
-			positional = append(positional, arg)
+		env := NewOutputEnvelope(opts, "INVALID_INPUT", ExitInvalidInput)
+		env.BlockedReasons = []string{i18n.T("err_unknown_cmd", command)}
+		env.Verification.Verified = false
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
 		}
+		return ExitInvalidInput, env
 	}
+
+	if opts.Help && command != "help" {
+		PrintHelp()
+		env := NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+		return ExitSuccess, env
+	}
+
+	token := os.Getenv("UGONDU_TOKEN")
+	apiURL := engine.ResolveAPIURL()
+	targetEnv := opts.Target
 
 	var targetTxId string
-	if len(positional) > 0 {
-		targetTxId = positional[0]
+	if len(opts.Positional) > 0 {
+		targetTxId = opts.Positional[0]
+	} else if opts.Operation != "" {
+		targetTxId = opts.Operation
 	}
 
 	switch command {
 	case "deploy":
-		if resume {
-			resumeDeployment(targetTxId, apiURL)
-			return
+		if token == "" && opts.Format == "table" {
+			fmt.Println(i18n.T("community_fallback"))
+		}
+		if opts.Resume {
+			return runResumeDeployment(opts, targetTxId, apiURL)
+		}
+
+		// Approval / non-interactive gate before mutating deployment
+		if ok, blockedEnv := RequireApprovalOrConfirm(opts, "public_html", "DEPLOY_MUTATION"); !ok {
+			if opts.Format == "json" || opts.Format == "yaml" || opts.NonInteractive {
+				RenderEnvelope(opts, blockedEnv)
+			} else {
+				fmt.Println(i18n.T("aborting"))
+			}
+			return ExitApprovalRequired, blockedEnv
+		}
+
+		if opts.DryRun {
+			env := NewOutputEnvelope(opts, "DRY_RUN_VERIFIED", ExitSuccess)
+			env.Actions = []CLIActionRecord{
+				{ActionID: "dry-run-fetch", Type: "FETCH_REPOSITORY", Target: targetEnv, Status: "DRY_RUN", Reversible: true},
+				{ActionID: "dry-run-sync", Type: "SYNC_ENVIRONMENT", Target: targetEnv, Status: "DRY_RUN", Reversible: true},
+			}
+			env.Message = "Dry-run deployment preflight verified"
+			RenderEnvelope(opts, env)
+			return ExitSuccess, env
 		}
 
 		if _, err := os.Stat(".git"); os.IsNotExist(err) {
 			fmt.Println(i18n.T("err_not_repo"))
-			os.Exit(1)
-		}
-
-		// Simple destructive prompt test for demo
-		if !PromptDestructive("public_html", force) {
-			fmt.Println(i18n.T("aborting"))
-			os.Exit(0)
+			env := NewOutputEnvelope(opts, "PRECONDITION_FAILED", ExitPreconditionFailed)
+			env.BlockedReasons = []string{i18n.T("err_not_repo")}
+			env.Verification.Verified = false
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitPreconditionFailed, env
 		}
 
 		ctx := &engine.DeploymentContext{
@@ -348,43 +549,67 @@ func ParseAndRun(args []string) {
 			FileMap:           make(map[string]string),
 		}
 
-		fmt.Println("💡")
 		fmt.Println(i18n.T("repo_info", ctx.RepositoryUrl, ctx.Branch, ctx.TargetEnvironment))
-		fmt.Println("💡")
 
-		env, steps, rawRecipe, err := engine.FetchExecutionRecipe(apiURL, ctx)
+		execEnv, steps, rawRecipe, err := engine.FetchExecutionRecipe(apiURL, ctx)
 		if err != nil {
-			fmt.Printf("%v\n", err)
-			os.Exit(1)
+			fmt.Println(err.Error())
+			env := NewOutputEnvelope(opts, "FAILED", ExitOperationFailed)
+			env.BlockedReasons = []string{err.Error()}
+			env.Verification.Verified = false
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitOperationFailed, env
 		}
 
-		// Save recipe under ~/.ugondu/transactions/<txId>/recipe.json for future resume
-		if err := SaveTransactionRecipe(env.TransactionId, rawRecipe); err != nil {
+		if err := SaveTransactionRecipe(execEnv.TransactionId, rawRecipe); err != nil {
 			fmt.Println(i18n.T("warn_persist_recipe", err))
 		}
 
-		fmt.Println(i18n.T("recipe_resolved", env.TransactionId, env.Edition, i18n.T("strategy_atomic_or_quota")))
+		fmt.Println(i18n.T("recipe_resolved", execEnv.TransactionId, execEnv.Edition, i18n.T("strategy_atomic_or_quota")))
 
-		logs, err := engine.ExecuteRecipe(env, steps)
+		logs, err := engine.ExecuteRecipe(execEnv, steps)
 		if err != nil {
 			fmt.Println(i18n.T("exec_failed", err))
-			engine.ReportTelemetry(apiURL, env.TransactionId, "FAILED", append(logs, err.Error()))
-			os.Exit(1)
+			engine.ReportTelemetry(apiURL, execEnv.TransactionId, "FAILED", append(logs, err.Error()))
+			env := NewOutputEnvelope(opts, "FAILED", ExitOperationFailed)
+			env.OperationID = execEnv.TransactionId
+			env.BlockedReasons = []string{err.Error()}
+			env.Verification.Verified = false
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitOperationFailed, env
 		}
 
-		engine.ReportTelemetry(apiURL, env.TransactionId, "SUCCESS", logs)
+		engine.ReportTelemetry(apiURL, execEnv.TransactionId, "SUCCESS", logs)
 		fmt.Println(i18n.T("dep_complete"))
+		env := NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+		env.OperationID = execEnv.TransactionId
+		env.PlanID = execEnv.PlanHash
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
+		}
+		return ExitSuccess, env
 
 	case "resume":
-		resumeDeployment(targetTxId, apiURL)
+		return runResumeDeployment(opts, targetTxId, apiURL)
 
 	case "status":
 		txId := targetTxId
 		if txId == "" {
 			latest, err := FindLatestTransactionId()
 			if err != nil {
+				if opts.Format == "json" || opts.Format == "yaml" {
+					env := NewOutputEnvelope(opts, "PRECONDITION_FAILED", ExitPreconditionFailed)
+					env.BlockedReasons = []string{err.Error()}
+					env.Verification.Verified = false
+					RenderEnvelope(opts, env)
+					return ExitPreconditionFailed, env
+				}
 				fmt.Println(i18n.T("err_no_tx_found", err))
-				os.Exit(1)
+				return ExitPreconditionFailed, nil
 			}
 			txId = latest
 		}
@@ -393,13 +618,37 @@ func ParseAndRun(args []string) {
 		if err != nil {
 			if errors.Is(err, engine.ErrStateNotFound) {
 				fmt.Println(i18n.T("err_tx_state_not_found", txId))
-				os.Exit(1)
 			} else if errors.Is(err, engine.ErrStateCorrupt) {
 				fmt.Println(i18n.T("err_tx_state_corrupt", txId))
-				os.Exit(1)
+			} else {
+				fmt.Println(i18n.T("err_tx_state_load", txId, err))
 			}
-			fmt.Println(i18n.T("err_tx_state_load", txId, err))
-			os.Exit(1)
+			env := NewOutputEnvelope(opts, "PRECONDITION_FAILED", ExitPreconditionFailed)
+			env.OperationID = txId
+			env.BlockedReasons = []string{err.Error()}
+			env.Verification.Verified = false
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitPreconditionFailed, env
+		}
+
+		if opts.Format == "json" || opts.Format == "yaml" {
+			env := NewOutputEnvelope(opts, state.Status, ExitSuccess)
+			env.OperationID = state.TransactionId
+			env.PlanID = state.PlanHash
+			env.Data = state
+			for _, s := range state.Steps {
+				env.Actions = append(env.Actions, CLIActionRecord{
+					ActionID:   fmt.Sprintf("step-%d", s.Index+1),
+					Type:       s.Action,
+					Target:     state.EnvironmentId,
+					Status:     s.Status,
+					Reversible: true,
+				})
+			}
+			RenderEnvelope(opts, env)
+			return ExitSuccess, env
 		}
 
 		fmt.Println(i18n.T("status_border"))
@@ -426,34 +675,145 @@ func ParseAndRun(args []string) {
 			}
 		}
 		fmt.Println(i18n.T("status_border"))
+		env := NewOutputEnvelope(opts, state.Status, ExitSuccess)
+		env.OperationID = state.TransactionId
+		return ExitSuccess, env
+
+	case "plan":
+		return HandlePlanCommand(opts)
+
+	case "cancel":
+		return HandleCancelCommand(opts)
 
 	case "rollback":
-		fmt.Println(i18n.T("upsell_notice", i18n.T("upsell_rollback")))
+		return HandleRollbackCommand(opts)
+
+	case "doctor":
+		return HandleDoctorCommand(opts)
+
+	case "config":
+		return HandleConfigCommand(opts)
+
+	case "providers", "provider":
+		return HandleProviderCommand(opts)
+
+	case "models":
+		return HandleModelsCommand(opts)
+
 	case "plugins":
-		fmt.Println(i18n.T("upsell_notice", i18n.T("upsell_plugins")))
+		return HandlePluginsCommand(opts)
+
+	case "capability":
+		return HandleCapabilityCommand(opts)
+
+	case "environment":
+		return HandleEnvironmentCommand(opts)
+
+	case "identity":
+		return HandleIdentityCommand(opts)
+
+	case "policy":
+		return HandlePolicyCommand(opts)
+
+	case "access":
+		return HandleAccessCommand(opts)
+
+	case "operation":
+		return HandleOperationCommand(opts)
+
+	case "evidence":
+		return HandleEvidenceCommand(opts)
+
 	case "locale":
-		RunLocaleCommand(positional)
+		code := RunLocaleCommandWithCode(opts.Positional)
+		env := NewOutputEnvelope(opts, "VERIFIED", code)
+		if code != ExitSuccess {
+			env.Status = "FAILED"
+			env.Verification.Verified = false
+		}
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
+		}
+		return code, env
+
 	case "version":
+		if opts.Format == "json" || opts.Format == "yaml" {
+			env := NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+			env.Data = map[string]string{"version": "3.0.0", "title": i18n.T("cli_title")}
+			env.Message = i18n.T("cli_title")
+			RenderEnvelope(opts, env)
+			return ExitSuccess, env
+		}
 		fmt.Println(i18n.T("cli_title"))
+		return ExitSuccess, NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+
 	case "help":
 		PrintHelp()
-	case "repair":
-		HandleRepairCommand(cleanedArgs[1:])
-	case "auth":
-		if len(cleanedArgs) < 2 {
-			fmt.Println(i18n.T("auth_usage"))
-			os.Exit(1)
-		}
-		subcmd := cleanedArgs[1]
-		if subcmd == "login" {
-			engine.Authenticate()
-		} else if subcmd == "status" {
-			engine.AuthStatus()
-		} else if subcmd == "logout" {
-			engine.Logout()
-		}
+		return ExitSuccess, NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
 
+	case "repair":
+		var repairArgs []string
+		repairArgs = append(repairArgs, opts.Positional...)
+		if opts.Target != "" {
+			repairArgs = append(repairArgs, "--target", opts.Target)
+		}
+		if opts.DryRun {
+			repairArgs = append(repairArgs, "--dry-run")
+		}
+		code := RunRepairCommand(repairArgs)
+		status := "VERIFIED"
+		if code != ExitSuccess {
+			status = "FAILED"
+		}
+		env := NewOutputEnvelope(opts, status, code)
+		if opts.Format == "json" || opts.Format == "yaml" {
+			RenderEnvelope(opts, env)
+		}
+		return code, env
+
+	case "auth":
+		if len(opts.Positional) < 1 {
+			fmt.Println(i18n.T("auth_usage"))
+			env := NewOutputEnvelope(opts, "INVALID_INPUT", ExitInvalidInput)
+			env.BlockedReasons = []string{i18n.T("auth_usage")}
+			env.Verification.Verified = false
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitInvalidInput, env
+		}
+		subcmd := opts.Positional[0]
+		switch subcmd {
+		case "login":
+			engine.Authenticate()
+			return ExitSuccess, NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+		case "status", "whoami":
+			engine.AuthStatus()
+			env := NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitSuccess, env
+		case "logout":
+			engine.Logout()
+			env := NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+			if opts.Format == "json" || opts.Format == "yaml" {
+				RenderEnvelope(opts, env)
+			}
+			return ExitSuccess, env
+		default:
+			fmt.Println(i18n.T("auth_usage"))
+			return ExitInvalidInput, NewOutputEnvelope(opts, "INVALID_INPUT", ExitInvalidInput)
+		}
 	}
+
+	return ExitSuccess, NewOutputEnvelope(opts, "VERIFIED", ExitSuccess)
+}
+
+// ParseAndRun interprets the arguments, routes to the engine, and exits with a deterministic exit code.
+func ParseAndRun(args []string) {
+	code, _ := ExecuteCommand(args)
+	os.Exit(code)
 }
 
 // Helpers for git

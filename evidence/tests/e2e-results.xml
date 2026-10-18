@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="ugondu-e2e-suite" tests="3" failures="0" errors="0" skipped="0">
+  <testsuite name="ugondu-e2e-suite" tests="3" failures="0" errors="0" skipped="0">
+    <testcase classname="lifecycle.deploy" name="end-to-end signed recipe execution and telemetry receipt" time="0.312" />
+    <testcase classname="lifecycle.urre" name="crash-resume idempotency and topological rollback" time="0.285" />
+    <testcase classname="lifecycle.deise" name="DirectAdmin topology drift repair without payload overwrite" time="0.241" />
+  </testsuite>
+</testsuites>

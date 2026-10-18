@@ -1,4 +1,5 @@
 const __t = (str: string, p?: any) => {
+  if (str === 'mail_only') return 'Mail Only';
   if (['fileman', 'mysql', 'cron', 'ftpaccts', 'webmail', 'default', 'disabled', 'ugondu_taken', 'ugondu_copy', 'ugondu_everything', 'ugondu_idle'].includes(str)) return str;
   return '[en] ' + str;
 };

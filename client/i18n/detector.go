@@ -3,13 +3,14 @@
  * Module         : client/i18n
  * File           : detector.go
  * Version        : 2.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-29)
  * - Deterministic OS/Environment Locale Detection
  * - Zero String Hardcoding
@@ -44,7 +45,7 @@ type DetectedLocaleInfo struct {
 // NormalizeLocale standardizes BCP 47 and POSIX locale codes (e.g., "fr_FR.UTF-8" -> "fr-FR", "fr" -> "fr-FR")
 func NormalizeLocale(raw string) string {
 	raw = strings.TrimSpace(raw)
-	if raw == "" {
+	if raw == "" || strings.EqualFold(raw, "C") || strings.EqualFold(raw, "POSIX") {
 		return "en-US"
 	}
 
@@ -55,6 +56,10 @@ func NormalizeLocale(raw string) string {
 	// Strip modifier suffixes (e.g., @euro)
 	if idx := strings.Index(raw, "@"); idx != -1 {
 		raw = raw[:idx]
+	}
+
+	if raw == "" || strings.EqualFold(raw, "C") || strings.EqualFold(raw, "POSIX") {
+		return "en-US"
 	}
 
 	raw = strings.ReplaceAll(raw, "_", "-")
@@ -78,6 +83,14 @@ func NormalizeLocale(raw string) string {
 			return "ja-JP"
 		case "pt":
 			return "pt-BR"
+		case "zh":
+			return "zh-CN"
+		case "ru":
+			return "ru-RU"
+		case "ko":
+			return "ko-KR"
+		case "hi":
+			return "hi-IN"
 		default:
 			return strings.ToLower(parts[0])
 		}

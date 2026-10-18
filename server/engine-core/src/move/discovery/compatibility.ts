@@ -3,13 +3,14 @@
  * Module         : Move
  * File           : compatibility.ts
  * Version        : 1.0.0
- * Author         : Architecture Team
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,8 +32,17 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import { MigrationBlocker } from '../model/migration-blocker';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  evaluatePortabilityMigration,
+  type PortabilityMigrationReceipt,
+  type UniversalProjectModel,
+} from '../portability';
+import type { ExtendedEnvironmentTwin } from '../../twin/model/schema';
+
+export { evaluatePortabilityMigration };
 
 /**
  * @interface ArchitectureIR
@@ -58,7 +68,10 @@ export class CompatibilityAnalyzer {
       blockers.push({
         blockerId: uuidv4(),
         severity: 'CRITICAL',
-        description: `Version mismatch: source (${source.version}) vs target (${target.version})`,
+        description: __t('messages.error.version_mismatch', {
+          source: source.version,
+          target: target.version,
+        }),
         component: __t('core_architecture'),
       });
     }
@@ -68,12 +81,20 @@ export class CompatibilityAnalyzer {
         blockers.push({
           blockerId: uuidv4(),
           severity: 'HIGH',
-          description: `Missing extension on target: ${ext}`,
+          description: __t('messages.error.missing_extension_on_target', { ext }),
           component: `Extension:${ext}`,
         });
       }
     }
 
     return blockers;
+  }
+
+  public analyzePortability(
+    sourceTwin: ExtendedEnvironmentTwin,
+    targetTwin: ExtendedEnvironmentTwin,
+    projectModel?: Partial<UniversalProjectModel>
+  ): PortabilityMigrationReceipt {
+    return evaluatePortabilityMigration(sourceTwin, targetTwin, projectModel);
   }
 }

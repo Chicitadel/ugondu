@@ -1,3 +1,31 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Engine Core / Physical Certification
+ * File           : physical-certification.ts
+ * Version        : 1.1.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-18
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ * - Zero String Hardcoding
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 import { createProductionActionRegistry } from './src/registry/action-registry-factory';
 import { EvidenceCollector, PhysicalProviderObservation } from './src/evidence/evidence-engine';
 import { DeploymentRepairEngine } from './src/deise/engine/repair-engine';
@@ -19,7 +47,7 @@ async function runCertification() {
     const urre = registry.getUrre();
     
     const txId = process.env.UGONDU_TRANSACTION_ID;
-    if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required by the IAM policy.');
+    if (!txId) throw new Error(__t('messages.error.missing_required_field', { field: 'UGONDU_TRANSACTION_ID' }));
 
     const amiId = await providerAdapter.resolveDefaultAmi();
 
@@ -71,7 +99,7 @@ async function runCertification() {
         const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');
         const hasTx = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduTransactionId' && t.Value === txId);
         if (!hasCOR || !hasTx) {
-            throw new Error(`S3 bucket ${bucketName} missing required ownership tags after creation.`);
+            throw new Error(__t('plugin.aws_vpc.err_verification_failed', bucketName));
         }
 
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });

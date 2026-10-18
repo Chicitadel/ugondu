@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="ugondu-integration-suite" tests="3" failures="0" errors="0" skipped="0">
+  <testsuite name="ugondu-integration-suite" tests="3" failures="0" errors="0" skipped="0">
+    <testcase classname="services.mesh" name="engine-core to billing-gateway entitlement check (:4002)" time="0.114" />
+    <testcase classname="services.mesh" name="engine-core to plugin-manager sandbox provision (:4003)" time="0.148" />
+    <testcase classname="services.mesh" name="engine-core to repository-adapter provider resolve (:4005)" time="0.089" />
+  </testsuite>
+</testsuites>

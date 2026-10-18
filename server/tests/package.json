@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "typecheck": "tsc --noEmit",
-    "build": "echo no build needed"
+    "lint": "tsc --noEmit",
+    "build": "tsc --noEmit"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

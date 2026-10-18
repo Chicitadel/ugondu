@@ -3,13 +3,14 @@
  * Module         : move/planner
  * File           : planner.ts
  * Version        : 1.0.0
- * Author         : Elite Ugondu Move Engineer
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
@@ -35,6 +36,14 @@
 import { GraphBuilder } from './graph-builder';
 import { DependencyOrder } from './dependency-order';
 import { StrategySelector, MigrationStrategy } from './strategy-selector';
+import {
+  evaluatePortabilityMigration,
+  type PortabilityMigrationReceipt,
+  type UniversalProjectModel,
+} from '../portability';
+import type { ExtendedEnvironmentTwin } from '../../twin/model/schema';
+
+export { evaluatePortabilityMigration };
 
 /**
  * @interface MigrationTask
@@ -70,5 +79,13 @@ export class MigrationPlanner {
 
         const order = DependencyOrder.topologicalSort(this.graphBuilder);
         return { order, strategies };
+    }
+
+    planPortabilityMigration(
+        sourceTwin: ExtendedEnvironmentTwin,
+        targetTwin: ExtendedEnvironmentTwin,
+        projectModel?: Partial<UniversalProjectModel>
+    ): PortabilityMigrationReceipt {
+        return evaluatePortabilityMigration(sourceTwin, targetTwin, projectModel);
     }
 }

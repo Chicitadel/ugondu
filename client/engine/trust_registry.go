@@ -3,13 +3,14 @@
  * Module         : Client Engine
  * File           : trust_registry.go
  * Version        : 3.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced

@@ -3,13 +3,14 @@
  * Module         : client/i18n
  * File           : pack.go
  * Version        : 2.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-01)
  * - Cryptographic Supply-Chain Assurance (ED25519 Signed Packs)
  * - Zero String Hardcoding Law (Canonical Token Schemas)
@@ -38,13 +39,71 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	
+	"strings"
 )
 
-// LanguagePackAuthorityPublicKey is the trusted ED25519 public key for verifying signed packs
+// DefaultTrustedPublicKeyHex is the default hex-encoded 32-byte Ed25519 public key for language pack verification.
+const DefaultTrustedPublicKeyHex = "88ec883683513ecc6f697965fd7e2310b014b65d43a635a319d3a3e03911b9be"
+
+// TrustedPublicKeyHex holds the active hex-encoded Ed25519 public key; overridable via UGONDU_PACK_PUBLIC_KEY_HEX.
+var TrustedPublicKeyHex = DefaultTrustedPublicKeyHex
+
+// LanguagePackAuthorityPublicKey is the trusted ED25519 public key PEM for verifying signed packs.
 const LanguagePackAuthorityPublicKey = `-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAUz8IM99c7+M2Bwg9bWR9BSVRI/J6L5LGu3kZ2q9701M=
+MCowBQYDK2VwAyEAiOyINoNRPsxvaXll/X4jELAUtl1DpjWjGdOj4DkRub4=
 -----END PUBLIC KEY-----`
+
+// ResolveTrustedPublicKeyHex returns the effective hex-encoded public key from UGONDU_PACK_PUBLIC_KEY_HEX or TrustedPublicKeyHex.
+func ResolveTrustedPublicKeyHex() string {
+	if envHex := strings.TrimSpace(os.Getenv("UGONDU_PACK_PUBLIC_KEY_HEX")); envHex != "" {
+		return envHex
+	}
+	if trimmed := strings.TrimSpace(TrustedPublicKeyHex); trimmed != "" {
+		return trimmed
+	}
+	return DefaultTrustedPublicKeyHex
+}
+
+// ResolveTrustedPublicKey resolves the Ed25519 public key for pack verification, honoring UGONDU_PACK_PUBLIC_KEY_HEX.
+func ResolveTrustedPublicKey() (ed25519.PublicKey, error) {
+	if envHex := strings.TrimSpace(os.Getenv("UGONDU_PACK_PUBLIC_KEY_HEX")); envHex != "" {
+		raw, err := hex.DecodeString(envHex)
+		if err != nil {
+			return nil, fmt.Errorf(T("failed_to_parse_authority_public"), err)
+		}
+		if len(raw) != ed25519.PublicKeySize {
+			return nil, errors.New(T("authority_key_is_not_ed25519"))
+		}
+		return ed25519.PublicKey(raw), nil
+	}
+
+	if trimmed := strings.TrimSpace(TrustedPublicKeyHex); trimmed != "" && trimmed != DefaultTrustedPublicKeyHex {
+		raw, err := hex.DecodeString(trimmed)
+		if err != nil {
+			return nil, fmt.Errorf(T("failed_to_parse_authority_public"), err)
+		}
+		if len(raw) != ed25519.PublicKeySize {
+			return nil, errors.New(T("authority_key_is_not_ed25519"))
+		}
+		return ed25519.PublicKey(raw), nil
+	}
+
+	block, _ := pem.Decode([]byte(LanguagePackAuthorityPublicKey))
+	if block == nil {
+		return nil, errors.New(T("failed_to_decode_authority_public"))
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf(T("failed_to_parse_authority_public"), err)
+	}
+
+	edPub, ok := pub.(ed25519.PublicKey)
+	if !ok {
+		return nil, errors.New(T("authority_key_is_not_ed25519"))
+	}
+	return edPub, nil
+}
 
 // TokenClassification categorizes token sensitivity per LP-14
 type TokenClassification string
@@ -78,16 +137,16 @@ type LanguagePack struct {
 
 // CriticalTokenRegistry maps security and destructive action tokens requiring 100% completeness
 var CriticalTokenRegistry = map[string]TokenClassification{
-	"err_not_repo":               ClassSecurity,
-	"auth_missing":               ClassSecurity,
-	"plugin_sig_invalid":         ClassSecurity,
-	"path_traversal_err":         ClassSecurity,
-	"locked_error":               ClassSecurity,
-	"prompt_destructive":         ClassDestructive,
-	"aborting":                   ClassDestructive,
-	"exec_failed":                ClassOperational,
-	"dep_complete":               ClassOperational,
-	"persistence_failure_error":  ClassOperational,
+	"err_not_repo":              ClassSecurity,
+	"auth_missing":              ClassSecurity,
+	"plugin_sig_invalid":        ClassSecurity,
+	"path_traversal_err":        ClassSecurity,
+	"locked_error":              ClassSecurity,
+	"prompt_destructive":        ClassDestructive,
+	"aborting":                  ClassDestructive,
+	"exec_failed":               ClassOperational,
+	"dep_complete":              ClassOperational,
+	"persistence_failure_error": ClassOperational,
 }
 
 // ComputeArtifactDigest generates a canonical SHA-256 digest of tokens
@@ -108,25 +167,61 @@ func ComputeArtifactDigest(tokens map[string]string) string {
 	return fmt.Sprintf("sha256:%s", hex.EncodeToString(hash[:]))
 }
 
-// VerifySignature cryptographically validates the pack using the embedded ED25519 authority key
+// canonicalPackManifest defines the alphabetical RFC 8785 canonical manifest structure
+type canonicalPackManifest struct {
+	ArtifactDigest  string `json:"artifactDigest"`
+	Direction       string `json:"direction"`
+	FallbackLocale  string `json:"fallbackLocale"`
+	Language        string `json:"language"`
+	Locale          string `json:"locale"`
+	MaxCoreVersion  string `json:"maxCoreVersion"`
+	MinCoreVersion  string `json:"minCoreVersion"`
+	PackId          string `json:"packId"`
+	PlatformVersion string `json:"platformVersion"`
+	Publisher       string `json:"publisher"`
+	Region          string `json:"region"`
+	SchemaVersion   string `json:"schemaVersion"`
+	Version         string `json:"version"`
+}
+
+// ComputeCanonicalManifestPayload generates the canonical JSON payload matching server/shared/packs.ts
+func (p *LanguagePack) ComputeCanonicalManifestPayload() []byte {
+	dir := p.Direction
+	if dir == "" {
+		dir = "ltr"
+	}
+	schema := p.SchemaVersion
+	if schema == "" {
+		schema = "1"
+	}
+	cm := canonicalPackManifest{
+		ArtifactDigest:  p.ArtifactDigest,
+		Direction:       dir,
+		FallbackLocale:  p.FallbackLocale,
+		Language:        p.Language,
+		Locale:          p.Locale,
+		MaxCoreVersion:  p.MaxCoreVersion,
+		MinCoreVersion:  p.MinCoreVersion,
+		PackId:          p.PackId,
+		PlatformVersion: p.PlatformVersion,
+		Publisher:       p.Publisher,
+		Region:          p.Region,
+		SchemaVersion:   schema,
+		Version:         p.Version,
+	}
+	b, _ := json.Marshal(cm)
+	return b
+}
+
+// VerifySignature cryptographically validates the pack using the resolved ED25519 authority key
 func (p *LanguagePack) VerifySignature() error {
 	if p.Signature == "" {
 		return errors.New(T("unsigned_language_pack"))
 	}
 
-	block, _ := pem.Decode([]byte(LanguagePackAuthorityPublicKey))
-	if block == nil {
-		return errors.New(T("failed_to_decode_authority_public"))
-	}
-
-	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	edPub, err := ResolveTrustedPublicKey()
 	if err != nil {
-		return fmt.Errorf(T("failed_to_parse_authority_public"), err)
-	}
-
-	edPub, ok := pub.(ed25519.PublicKey)
-	if !ok {
-		return errors.New(T("authority_key_is_not_ed25519"))
+		return err
 	}
 
 	sigBytes, err := base64.StdEncoding.DecodeString(p.Signature)
@@ -134,13 +229,19 @@ func (p *LanguagePack) VerifySignature() error {
 		return fmt.Errorf(T("malformed_signature_base64"), err)
 	}
 
-	// Canonical payload: packId:locale:version:artifactDigest
-	payload := fmt.Sprintf("%s:%s:%s:%s", p.PackId, p.Locale, p.Version, p.ArtifactDigest)
-	if !ed25519.Verify(edPub, []byte(payload), sigBytes) {
-		return errors.New(T("cryptographic_signature_verification_failed"))
+	// 1. Canonical JSON manifest payload (RFC 8785 / server/shared/packs.ts parity)
+	canonicalPayload := p.ComputeCanonicalManifestPayload()
+	if ed25519.Verify(edPub, canonicalPayload, sigBytes) {
+		return nil
 	}
 
-	return nil
+	// 2. Compact payload: packId:locale:version:artifactDigest
+	compactPayload := fmt.Sprintf("%s:%s:%s:%s", p.PackId, p.Locale, p.Version, p.ArtifactDigest)
+	if ed25519.Verify(edPub, []byte(compactPayload), sigBytes) {
+		return nil
+	}
+
+	return errors.New(T("cryptographic_signature_verification_failed"))
 }
 
 // ValidateIntegrity performs digest verification, signature check, schema check, and token completeness

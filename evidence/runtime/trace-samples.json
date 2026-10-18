@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "capturedAt": "2026-10-18T17:54:25.534Z",
+  "traces": [
+    {
+      "traceId": "4277aa8a64b7128511826c04426ccd32",
+      "transactionId": "tx-161d283c",
+      "spans": [
+        {
+          "service": "engine-core",
+          "operation": "POST /v1/deploy/resolve",
+          "status": "OK",
+          "durationMs": 42
+        },
+        {
+          "service": "billing-gateway",
+          "operation": "VERIFY_ENTITLEMENT",
+          "status": "OK",
+          "durationMs": 9
+        },
+        {
+          "service": "repository-adapter",
+          "operation": "POST /v1/repository/resolve",
+          "status": "OK",
+          "durationMs": 6
+        },
+        {
+          "service": "uppie",
+          "operation": "EVALUATE_ARCHITECTURE_IR",
+          "status": "OK",
+          "durationMs": 11
+        }
+      ]
+    }
+  ]
+}

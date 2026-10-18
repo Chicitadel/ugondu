@@ -61,6 +61,27 @@ export interface RequestInit {
     timeout?: number;
 }
 
+function isTrustedInternalServiceOrigin(targetUrl: URL): boolean {
+    const trustedUrls = [
+        process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1',
+        process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1',
+        process.env.EVENT_BUS_URL || 'http://localhost:4004/v1',
+        process.env.REPOSITORY_ADAPTER_URL || 'http://localhost:4005/v1',
+        process.env.ENGINE_CORE_URL || 'http://localhost:4001/v1',
+    ];
+    for (const candidate of trustedUrls) {
+        try {
+            const parsed = new URL(candidate);
+            if (parsed.origin === targetUrl.origin) {
+                return true;
+            }
+        } catch {
+            // ignore malformed candidate
+        }
+    }
+    return false;
+}
+
 async function request(method: string, urlStr: string, body?: unknown, options?: RequestInit, redirects = 0): Promise<string> {
     if (redirects > 3) {
         throw new Error(__t('messages.error.too_many_redirects'));
@@ -82,7 +103,7 @@ async function request(method: string, urlStr: string, body?: unknown, options?:
         throw new Error(__t('messages.error.dns_lookup_failed_for', { 'hostname': hostname, 'err_message': err.message }));
     }
 
-    if (isPrivateOrLocal(resolvedIp)) {
+    if (isPrivateOrLocal(resolvedIp) && !isTrustedInternalServiceOrigin(parsedUrl)) {
         throw new SSRFBlockedError(__t('err_ssrf_blocked') || __t('ssrf_blocked'));
     }
 

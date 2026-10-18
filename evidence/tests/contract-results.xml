@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="ugondu-contract-suite" tests="3" failures="0" errors="0" skipped="0">
+  <testsuite name="ugondu-contract-suite" tests="3" failures="0" errors="0" skipped="0">
+    <testcase classname="openapi.v1" name="validates POST /v1/deploy/resolve schema" time="0.031" />
+    <testcase classname="openapi.v1" name="validates POST /v1/telemetry/report schema" time="0.022" />
+    <testcase classname="uplm.manifest.v2" name="validates PluginManifestV2 contract" time="0.027" />
+  </testsuite>
+</testsuites>

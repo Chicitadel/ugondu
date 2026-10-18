@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "checkedAt": "2026-10-18T17:54:25.534Z",
+  "services": [
+    {
+      "service": "engine-core",
+      "port": 4001,
+      "endpoint": "/health",
+      "status": "READY"
+    },
+    {
+      "service": "billing-gateway",
+      "port": 4002,
+      "endpoint": "/health",
+      "status": "READY"
+    },
+    {
+      "service": "plugin-manager",
+      "port": 4003,
+      "endpoint": "/health",
+      "status": "READY"
+    },
+    {
+      "service": "event-bus",
+      "port": 4004,
+      "endpoint": "/health",
+      "status": "READY"
+    },
+    {
+      "service": "repository-adapter",
+      "port": 4005,
+      "endpoint": "/health",
+      "status": "READY"
+    }
+  ]
+}

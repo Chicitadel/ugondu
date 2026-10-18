@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "jest --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
     "@ugondu/shared": "file:../shared",
@@ -25,5 +26,5 @@
     "@types/jest": "^29.5.12",
     "ts-jest": "^29.1.2"
   },
-  "author": "Ujomor Systems Engineering Authority"
+  "author": "Ujomor Systems Engineering & Governance Authority"
 }

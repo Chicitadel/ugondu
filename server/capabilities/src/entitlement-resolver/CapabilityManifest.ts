@@ -53,7 +53,7 @@ export interface CapabilityManifest {
 export const CapabilityManifestSchema = z.object({
   tenantId:           z.string(),
   subjectId:          z.string(),
-  edition:            z.enum(['FREE', 'PROFESSIONAL', 'BUSINESS', 'SOVEREIGN']),
+  edition:            z.enum(['FREE', 'COMMUNITY', 'PROFESSIONAL', 'BUSINESS', 'ENTERPRISE', 'SOVEREIGN']),
   entitlementVersion: z.number().int().positive(),
   capabilities:       z.array(z.string()),
   featureStates:      z.record(z.string(), z.string()),

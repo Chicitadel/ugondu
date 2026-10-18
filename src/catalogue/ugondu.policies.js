@@ -1,16 +1,16 @@
 /******************************************************************************
- * Project        : [PROJECT_NAME]
- * Module         : [MODULE_NAME]
- * File           : ugondu.policies.js
- * Version        : [VERSION]
- * Author         : [AUTHOR_NAME]
- * Organization   : [ORGANIZATION]
- * Created Date   : [YYYY-MM-DD]
- * Last Modified  : [YYYY-MM-DD]
- * Classification : GOVERNMENT | ENTERPRISE | PUBLIC | INTERNAL
+ * Project        : Ugondu Universal Deployment Intelligence Platform
+ * Module         : Commercial Policy Catalogue
+ * File           : src/catalogue/ugondu.policies.js
+ * Version        : 4.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : AIR ROOFERS (Societe par actions simplifiee, RCS Paris 943 432 534)
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-18
+ * Classification : ENTERPRISE | PLATFORM POLICY AUTHORITY
  *
  * Governance:
- * - AI Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -20,7 +20,7 @@
  * - ISO 27001
  * - SOC 2
  * - OWASP ASVS
- * - NIST
+ * - NIST SP 800-53
  *
  * Signatures:
  * - Architecture Authority
@@ -28,35 +28,72 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) [YEAR] [ORGANIZATION]
- * All Rights Reserved.
- ******************************************************************************/
-/******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System (UAIGOS)
- * Module         : Policy Catalogue
- * File           : src/catalogue/ugondu.policies.js
- * Version        : 1.0.0
- * Author         : Ignatus Chika Ujomor | Founder & System Architect
- * Organization   : AIR ROOFERS (Societe par actions simplifiee, RCS Paris 943 432 534)
- * Created Date   : 2026-10-01
- * Classification : ENTERPRISE | PLATFORM POLICY AUTHORITY
- *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  ******************************************************************************/
 
 'use strict';
 
-module.exports = {
+const fs = require('fs');
+const path = require('path');
 
-  // Product Identity
-  product:     'ugondu',
-  displayName: 'UGONDU',
-  fullName:    'Universal Autonomous AI Governance Operating System',
-  version:     '1.0.0',
-  publisher:   'AIR ROOFERS',
+function resolveProductIdentity() {
+  const workspaceRoot = path.resolve(__dirname, '../..');
+  const registryPath = path.join(workspaceRoot, '.governance', 'standards', 'product-registry.json');
+  const workspaceSlug = path.basename(workspaceRoot).toLowerCase();
+
+  const rawRegistry = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+  const products = Array.isArray(rawRegistry.products) ? rawRegistry.products : [];
+  const targetId = (process.env.PRODUCT_ID || rawRegistry.activeProductId || workspaceSlug).toLowerCase();
+
+  const entry = products.find((item) => {
+    const candidates = [
+      item.id,
+      item.slug,
+      item.productId,
+      item.code,
+      item.metadata && item.metadata.repositoryPath
+        ? path.basename(item.metadata.repositoryPath)
+        : undefined
+    ]
+      .filter(Boolean)
+      .map((val) => String(val).toLowerCase());
+    return candidates.includes(targetId) || candidates.includes(workspaceSlug);
+  });
+
+  if (!entry) {
+    throw new Error(`Unable to resolve product identity from governance registry at ${registryPath}`);
+  }
+
+  const slug = String(entry.slug || entry.id || entry.productId).toLowerCase();
+  const displayName = String(entry.code || entry.productId).toUpperCase();
+  const fullName = String(entry.fullName || entry.name);
+  const version = String(entry.version || rawRegistry.version || '1.0.0');
+  const publisher = String(entry.publisher || rawRegistry.organization || 'AIR ROOFERS');
+  const repoPath = (entry.metadata && entry.metadata.repositoryPath) || `products/${slug}`;
+  const docsRoot = (entry.metadata && entry.metadata.docsRoot) || `${repoPath}/docs/commercial`;
+
+  return {
+    product: slug,
+    displayName,
+    fullName,
+    version,
+    publisher,
+    docsRoot
+  };
+}
+
+const identity = resolveProductIdentity();
+
+module.exports = {
+  // Dynamically Resolved Product Identity
+  product:     identity.product,
+  displayName: identity.displayName,
+  fullName:    identity.fullName,
+  version:     identity.version,
+  publisher:   identity.publisher,
 
   // Source Root (workspace-relative)
-  docsRoot: 'products/ugondu/docs/commercial',
+  docsRoot: identity.docsRoot,
 
   // Policy Entries
   policies: [
@@ -132,4 +169,3 @@ module.exports = {
     }
   ]
 };
-

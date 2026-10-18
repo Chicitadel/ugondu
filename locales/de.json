@@ -212,5 +212,9 @@
   "err_plugin_entrypoint_not_found": "Plugin-Aktivierung fehlgeschlagen: Plugin-Einstiegspunkt nicht gefunden.",
   "err_plugin_action_rejected": "Plugin abgelehnt: Aktion ist nicht im geschlossenen typisierten Aktionsregister.",
   "err_urre_context_id_mismatch": "Ausführung blockiert: Kontext-ID-Konflikt in ExecutionEnvelope.",
-  "err_fatal_already_executed": "Fatal: Dieses Rezept wurde bereits erfolgreich ausgeführt."
+  "err_fatal_already_executed": "Fatal: Dieses Rezept wurde bereits erfolgreich ausgeführt.",
+  "error.cert.missing_volume_id": "Fehlende Volume-ID",
+  "cert.fargate.cleanup": "Bereinigung der Fargate-Zertifizierungsressourcen...",
+  "cors_policy_violation": "Verstoß gegen die CORS-Richtlinie",
+  "unimplemented_autonomous_code_": "NICHT IMPLEMENTIERT: Plan für autonomes Code-Patching ist als Gerüst angelegt"
 }

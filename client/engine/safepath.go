@@ -1,15 +1,17 @@
 /******************************************************************************
- * Project        : Ugondu
- * Module         : Client Engine
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/engine
  * File           : safepath.go
  * Version        : 3.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -26,20 +28,19 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
 package engine
 
 import (
-	"ugondu/client/i18n"
-	"github.com/ugondu/client/i18n"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"ugondu/client/i18n"
 )
 
 var (
@@ -67,7 +68,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 	if strings.Contains(targetRelPath, ":") {
 		return "", ErrNTFSStream
 	}
-	
+
 	// Windows Device Names
 	upper := strings.ToUpper(filepath.Base(targetRelPath))
 	devices := []string{"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}
@@ -83,7 +84,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 	}
 
 	target := filepath.Join(cleanBase, targetRelPath)
-	
+
 	// Prevent symlink escapes if the target already exists and is evaluated
 	evalTarget, err := filepath.EvalSymlinks(target)
 	if err == nil {

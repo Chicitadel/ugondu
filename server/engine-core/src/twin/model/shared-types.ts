@@ -2,15 +2,51 @@
  * Project        : Ugondu
  * Module         : Server / Engine Core / Twin
  * File           : shared-types.ts
- * Version        : 1.0.0
- * Author         : Air Roofers Engineering
+ * Version        : 1.1.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
  *
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
+
+export type CapabilityAvailabilityState =
+  | 'AVAILABLE'
+  | 'UNAVAILABLE'
+  | 'ACCOUNT_SCOPED'
+  | 'UNSUPPORTED'
+  | 'UNKNOWN';
+
+export interface DirectAdminCapabilityReport {
+  php: CapabilityAvailabilityState;
+  phpVersion: string;
+  domains: CapabilityAvailabilityState;
+  subdomains: CapabilityAvailabilityState;
+  database: CapabilityAvailabilityState;
+  dnsManagement: CapabilityAvailabilityState;
+  tls: CapabilityAvailabilityState;
+  ftp: CapabilityAvailabilityState;
+  filesystem: CapabilityAvailabilityState;
+  kubernetes: CapabilityAvailabilityState;
+  rootAccess: CapabilityAvailabilityState;
+  docker: CapabilityAvailabilityState;
+  ssh: CapabilityAvailabilityState;
+  nodejs: CapabilityAvailabilityState;
+  cron: CapabilityAvailabilityState;
+  redis: CapabilityAvailabilityState;
+  resourceLimits: CapabilityAvailabilityState;
+  systemd: CapabilityAvailabilityState;
+  privateNetworking: CapabilityAvailabilityState;
+}
 
 export interface ApplicationDiscovery {
   language: string;
@@ -91,12 +127,15 @@ export interface KubernetesDiscovery {
 export interface HostingPanelDiscovery {
   panel: 'cpanel' | 'plesk' | 'directadmin' | 'unknown';
   domains: string[];
+  subdomains?: string[];
   applications: string[];
   databases: string[];
   sslCertificates: Array<{ domain: string; expiresAt: number }>;
   dnsZones: string[];
   cronJobs: string[];
   diskUsageMb: number;
+  phpVersion?: string;
+  capabilities?: DirectAdminCapabilityReport;
 }
 
 export type KnowledgeState =

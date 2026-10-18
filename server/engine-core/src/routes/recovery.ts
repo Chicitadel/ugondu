@@ -1,3 +1,28 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Delivery Operating System
+ * Module         : Engine Core — Recovery Route
+ * File           : recovery.ts
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Created Date   : 2026-10-02
+ * Last Modified  : 2026-10-18
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ ******************************************************************************/
+
+import { __t } from '@ugondu/shared';
 import { RepairPlan } from '../deise/engine/repair-engine';
 import express, { Router } from 'express';
 import canonicalize from 'canonicalize';
@@ -87,7 +112,6 @@ function assertConditionalAuthorization(auth: any): void {
         return;
     }
 
-    // Per P0-21, we explicitly fail on ALLOW_WITH_CONDITIONS as the condition evaluator does not exist
     throw new Error('CONDITIONAL_AUTHORIZATION_REQUIRES_EXPLICIT_CONDITION_HANDLER');
 }
 
@@ -167,7 +191,7 @@ export async function executeGovernedRecovery(
             throw new Error('RECOVERY_PLAN_MISSING');
         }
         planHash = sha256(plan);
-        
+
         txn = TransactionAuthority.update(txn.id, txn.revision, {
             plan,
             planHash,
@@ -412,13 +436,3 @@ recoveryRouter.post(
         }
     }
 );
-
-
-
-
-
-
-
-
-
-

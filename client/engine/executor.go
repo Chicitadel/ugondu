@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : executor.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,11 +34,9 @@
 package engine
 
 import (
-	"github.com/ugondu/client/i18n"
 	"bytes"
-	"io"
-	"net/http"
 	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
@@ -47,8 +45,11 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"ugondu/client/i18n"
@@ -60,39 +61,321 @@ type DeploymentContext struct {
 	FileMap           map[string]string `json:"fileMap"`
 	TargetEnvironment string            `json:"targetEnvironment"`
 	Token             string            `json:"token"`
+	PassportId        string            `json:"passportId,omitempty"`
+	CorrelationId     string            `json:"correlationId,omitempty"`
+	Traceparent       string            `json:"traceparent,omitempty"`
 }
 
 type ExecutionEnvelope struct {
-	ProtocolVersion string                 `json:"protocolVersion"`
-	Version         string                 `json:"version"` // Keep for compat
-	Issuer          string                 `json:"issuer"`
-	KeyId           string                 `json:"keyId"`
-	TransactionId   string                 `json:"transactionId"`
-	ExecutionId     string                 `json:"executionId"`
-	Nonce           string                 `json:"nonce"`
-	TenantId        string                 `json:"tenantId"`
-	ProjectId       string                 `json:"projectId"`
-	EnvironmentId   string                 `json:"environmentId"`
-	WorkspaceId     string                 `json:"workspaceId"`
-	TargetId        string                 `json:"targetId"`
-	IssuedAt        int64                  `json:"issuedAt"`
-	ExpiresAt       int64                  `json:"expiresAt"`
-	Edition         string                 `json:"edition"`
-	AgentId         string                 `json:"agentId"`
-	AgentVersion    string                 `json:"agentVersion"`
-	AgentMinVersion string                 `json:"agentMinVersion"`
-	PlanHash        string                 `json:"planHash"`
-	PolicyHash      string                 `json:"policyHash"`
-	ArtifactDigest  string                 `json:"artifactDigest"`
-	Capabilities    map[string]interface{} `json:"capabilities"`
-	Signature       string                 `json:"signature"`
-	CanonicalEnvelope string               `json:"-"`
+	ProtocolVersion   string                 `json:"protocolVersion"`
+	Version           string                 `json:"version"` // Keep for compat
+	Issuer            string                 `json:"issuer"`
+	KeyId             string                 `json:"keyId"`
+	TransactionId     string                 `json:"transactionId"`
+	ExecutionId       string                 `json:"executionId"`
+	Nonce             string                 `json:"nonce"`
+	TenantId          string                 `json:"tenantId"`
+	ProjectId         string                 `json:"projectId"`
+	EnvironmentId     string                 `json:"environmentId"`
+	WorkspaceId       string                 `json:"workspaceId"`
+	TargetId          string                 `json:"targetId"`
+	IssuedAt          int64                  `json:"issuedAt"`
+	ExpiresAt         int64                  `json:"expiresAt"`
+	Edition           string                 `json:"edition"`
+	AgentId           string                 `json:"agentId"`
+	AgentVersion      string                 `json:"agentVersion"`
+	AgentMinVersion   string                 `json:"agentMinVersion"`
+	PlanHash          string                 `json:"planHash"`
+	PolicyHash        string                 `json:"policyHash"`
+	ArtifactDigest    string                 `json:"artifactDigest"`
+	Capabilities      map[string]interface{} `json:"capabilities"`
+	Signature         string                 `json:"signature"`
+	CanonicalEnvelope string                 `json:"-"`
 }
 
 type ExecutionRecipe struct {
 	CanonicalEnvelope string `json:"canonicalEnvelope"`
 	CanonicalSteps    string `json:"canonicalSteps"`
 	Signature         string `json:"signature"`
+}
+
+func randomHex(numBytes int) string {
+	b := make([]byte, numBytes)
+	if _, err := rand.Read(b); err != nil {
+		now := fmt.Sprintf("%032x", time.Now().UnixNano())
+		if len(now) >= numBytes*2 {
+			return now[:numBytes*2]
+		}
+		return strings.Repeat("a", numBytes*2)
+	}
+	return hex.EncodeToString(b)
+}
+
+// ResolvePassportId determines the X-Ugondu-Passport-Id header from context, environment, or active auth session.
+func ResolvePassportId(ctx *DeploymentContext) string {
+	if ctx != nil && strings.TrimSpace(ctx.PassportId) != "" {
+		return strings.TrimSpace(ctx.PassportId)
+	}
+	if envPassport := strings.TrimSpace(os.Getenv("UGONDU_PASSPORT_ID")); envPassport != "" {
+		return envPassport
+	}
+	if authCtx, err := LoadAuthContext(); err == nil && authCtx != nil {
+		if strings.TrimSpace(authCtx.PassportID) != "" {
+			return strings.TrimSpace(authCtx.PassportID)
+		}
+		if strings.TrimSpace(authCtx.Envelope.PassportID) != "" {
+			return strings.TrimSpace(authCtx.Envelope.PassportID)
+		}
+		if strings.TrimSpace(authCtx.Envelope.TenantID) != "" {
+			return "passport-" + strings.TrimSpace(authCtx.Envelope.TenantID)
+		}
+	}
+	return "passport-local-unauthenticated"
+}
+
+// ResolveTraceparent returns a W3C Trace Context v0 header (00-traceId-spanId-01).
+func ResolveTraceparent(ctx *DeploymentContext) string {
+	if ctx != nil && strings.TrimSpace(ctx.Traceparent) != "" {
+		return strings.TrimSpace(ctx.Traceparent)
+	}
+	if envTrace := strings.TrimSpace(os.Getenv("TRACEPARENT")); envTrace != "" {
+		return envTrace
+	}
+	return fmt.Sprintf("00-%s-%s-01", randomHex(16), randomHex(8))
+}
+
+// ResolveCorrelationId resolves or generates an X-Correlation-Id header value.
+func ResolveCorrelationId(ctx *DeploymentContext) string {
+	if ctx != nil && strings.TrimSpace(ctx.CorrelationId) != "" {
+		return strings.TrimSpace(ctx.CorrelationId)
+	}
+	if envCorr := strings.TrimSpace(os.Getenv("UGONDU_CORRELATION_ID")); envCorr != "" {
+		return envCorr
+	}
+	if envCorr := strings.TrimSpace(os.Getenv("X_CORRELATION_ID")); envCorr != "" {
+		return envCorr
+	}
+	return randomHex(16)
+}
+
+func attachGovernanceHeaders(req *http.Request, ctx *DeploymentContext) {
+	if req == nil {
+		return
+	}
+	req.Header.Set("X-Ugondu-Passport-Id", ResolvePassportId(ctx))
+	req.Header.Set("traceparent", ResolveTraceparent(ctx))
+	req.Header.Set("X-Correlation-Id", ResolveCorrelationId(ctx))
+
+	token := ""
+	if ctx != nil && strings.TrimSpace(ctx.Token) != "" {
+		token = strings.TrimSpace(ctx.Token)
+	} else if envTok := strings.TrimSpace(os.Getenv("UGONDU_TOKEN")); envTok != "" {
+		token = envTok
+	} else if authCtx, err := LoadAuthContext(); err == nil && authCtx != nil && strings.TrimSpace(authCtx.AccessToken) != "" {
+		token = strings.TrimSpace(authCtx.AccessToken)
+	}
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+}
+
+// extractCapabilitySet normalizes a capability scope value into a string set.
+func extractCapabilitySet(raw interface{}) (map[string]bool, bool) {
+	if raw == nil {
+		return nil, false
+	}
+	set := make(map[string]bool)
+	switch v := raw.(type) {
+	case []string:
+		for _, item := range v {
+			trimmed := strings.TrimSpace(item)
+			if trimmed != "" {
+				set[trimmed] = true
+			}
+		}
+		return set, true
+	case []interface{}:
+		for _, item := range v {
+			if s, ok := item.(string); ok {
+				trimmed := strings.TrimSpace(s)
+				if trimmed != "" {
+					set[trimmed] = true
+				}
+			}
+		}
+		return set, true
+	case map[string]bool:
+		for k, allowed := range v {
+			if allowed {
+				set[strings.TrimSpace(k)] = true
+			}
+		}
+		return set, true
+	case map[string]interface{}:
+		for k, val := range v {
+			switch b := val.(type) {
+			case bool:
+				if b {
+					set[strings.TrimSpace(k)] = true
+				}
+			case string:
+				if strings.TrimSpace(b) != "" {
+					set[strings.TrimSpace(k)] = true
+				}
+			default:
+				if val != nil {
+					set[strings.TrimSpace(k)] = true
+				}
+			}
+		}
+		return set, true
+	case string:
+		for _, part := range strings.Split(v, ",") {
+			trimmed := strings.TrimSpace(part)
+			if trimmed != "" {
+				set[trimmed] = true
+			}
+		}
+		return set, true
+	default:
+		return nil, false
+	}
+}
+
+func intersectCapabilitySets(a, b map[string]bool) map[string]bool {
+	if a["*"] {
+		out := make(map[string]bool, len(b))
+		for k, v := range b {
+			if v {
+				out[k] = true
+			}
+		}
+		return out
+	}
+	if b["*"] {
+		out := make(map[string]bool, len(a))
+		for k, v := range a {
+			if v {
+				out[k] = true
+			}
+		}
+		return out
+	}
+	out := make(map[string]bool)
+	for k, v := range a {
+		if v && b[k] {
+			out[k] = true
+		}
+	}
+	return out
+}
+
+// ComputeCapabilityIntersection computes (server ∩ tenant ∩ target ∩ agent ∩ action) from the envelope capabilities map.
+func ComputeCapabilityIntersection(caps map[string]interface{}) (map[string]bool, bool) {
+	if len(caps) == 0 {
+		return nil, false
+	}
+
+	scopeAliases := [][]string{
+		{"server", "serverCapabilities"},
+		{"tenant", "tenantCapabilities"},
+		{"target", "targetCapabilities"},
+		{"agent", "agentCapabilities"},
+		{"action", "actionCapabilities", "allowed", "granted", "allowedActions"},
+	}
+
+	var currentIntersection map[string]bool
+	hasScopes := false
+
+	for _, group := range scopeAliases {
+		for _, key := range group {
+			if raw, exists := caps[key]; exists {
+				scopeSet, ok := extractCapabilitySet(raw)
+				if !ok {
+					scopeSet = make(map[string]bool)
+				}
+				if !hasScopes {
+					currentIntersection = scopeSet
+					hasScopes = true
+				} else {
+					currentIntersection = intersectCapabilitySets(currentIntersection, scopeSet)
+				}
+				break
+			}
+		}
+	}
+
+	return currentIntersection, hasScopes
+}
+
+// ValidateCapabilityIntersection enforces fail-closed capability intersection (server ∩ tenant ∩ target ∩ agent ∩ action).
+func ValidateCapabilityIntersection(env *ExecutionEnvelope, steps []map[string]interface{}) error {
+	if env == nil {
+		return fmt.Errorf("%s", i18n.T("invalid_envelope_format"))
+	}
+
+	effectiveCaps, hasScopes := ComputeCapabilityIntersection(env.Capabilities)
+
+	if env.Capabilities != nil {
+		if rawReq, exists := env.Capabilities["required"]; exists {
+			reqSet, ok := extractCapabilitySet(rawReq)
+			if !ok {
+				return fmt.Errorf("%s", i18n.T("err_capability_intersection_denied"))
+			}
+			if len(reqSet) > 0 && !hasScopes {
+				return fmt.Errorf("%s", i18n.T("err_capability_intersection_denied"))
+			}
+			for reqCap := range reqSet {
+				if !effectiveCaps[reqCap] && !effectiveCaps["*"] {
+					return fmt.Errorf("%s: %s", i18n.T("err_capability_intersection_denied"), reqCap)
+				}
+			}
+		}
+	}
+
+	for i, step := range steps {
+		action, _ := step["action"].(string)
+
+		// Check explicit step capability requirement if present
+		var stepRequiredCaps []string
+		if sc, ok := step["capability"].(string); ok && strings.TrimSpace(sc) != "" {
+			stepRequiredCaps = append(stepRequiredCaps, strings.TrimSpace(sc))
+		}
+		if rc, ok := step["requiredCapability"].(string); ok && strings.TrimSpace(rc) != "" {
+			stepRequiredCaps = append(stepRequiredCaps, strings.TrimSpace(rc))
+		}
+		if rawStepCaps, exists := step["capabilities"]; exists {
+			if sSet, ok := extractCapabilitySet(rawStepCaps); ok {
+				for c := range sSet {
+					stepRequiredCaps = append(stepRequiredCaps, c)
+				}
+			}
+		}
+
+		for _, reqCap := range stepRequiredCaps {
+			if !hasScopes || (!effectiveCaps[reqCap] && !effectiveCaps["*"]) {
+				return fmt.Errorf("%s: step %d (%s) requires %s", i18n.T("err_capability_intersection_denied"), i, action, reqCap)
+			}
+		}
+
+		// When envelope defines capability scopes, every step action (or its mapped capability) must be in the intersection
+		if hasScopes && action != "" {
+			granted := effectiveCaps[action] || effectiveCaps["*"]
+			if !granted {
+				for _, reqCap := range stepRequiredCaps {
+					if effectiveCaps[reqCap] {
+						granted = true
+						break
+					}
+				}
+			}
+			if !granted {
+				return fmt.Errorf("%s: step %d action %s not granted in (server ∩ tenant ∩ target ∩ agent ∩ action)", i18n.T("err_capability_intersection_denied"), i, action)
+			}
+		}
+	}
+
+	return nil
 }
 
 // GetKeyCachePath returns the file path for caching public key: ~/.ugondu/keys/<keyId>.pub
@@ -164,7 +447,15 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 		return nil, nil, nil, fmt.Errorf(i18n.T("failed_to_serialize_deployment_context"), err)
 	}
 
-	resp, err := http.Post(apiURL+"/deploy/resolve", "application/json", bytes.NewBuffer(payload))
+	req, err := http.NewRequest("POST", apiURL+"/deploy/resolve", bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf(i18n.T("cannot_reach_governance_server_at"), apiURL, err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	attachGovernanceHeaders(req, ctx)
+
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf(i18n.T("cannot_reach_governance_server_at"), apiURL, err)
 	}
@@ -189,7 +480,13 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 	}
 
 	// Fetch Keys and cache them locally
-	keysResp, err := http.Get(apiURL + "/keys")
+	keysReq, err := http.NewRequest("GET", apiURL+"/keys", nil)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf(i18n.T("failed_to_fetch_public_keys"), err)
+	}
+	attachGovernanceHeaders(keysReq, ctx)
+
+	keysResp, err := httpClient.Do(keysReq)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf(i18n.T("failed_to_fetch_public_keys"), err)
 	}
@@ -225,6 +522,10 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 	var env ExecutionEnvelope
 	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &env); err != nil {
 		return nil, nil, nil, fmt.Errorf(i18n.T("invalid_envelope_format"))
+	}
+	env.CanonicalEnvelope = recipe.CanonicalEnvelope
+	if env.Signature == "" {
+		env.Signature = recipe.Signature
 	}
 
 	// Verify Expiry
@@ -269,7 +570,13 @@ func ParseRecipeLocally(body []byte, apiURL string) (*ExecutionEnvelope, []map[s
 		if apiURL == "" {
 			return nil, nil, fmt.Errorf(i18n.T("public_key_not_found_in"), partialEnv.KeyId)
 		}
-		keysResp, err := http.Get(apiURL + "/keys")
+		keysReq, reqErr := http.NewRequest("GET", apiURL+"/keys", nil)
+		if reqErr != nil {
+			return nil, nil, fmt.Errorf(i18n.T("public_key_not_found_in"), partialEnv.KeyId, apiURL, reqErr)
+		}
+		attachGovernanceHeaders(keysReq, nil)
+		httpClient := &http.Client{Timeout: 30 * time.Second}
+		keysResp, err := httpClient.Do(keysReq)
 		if err != nil {
 			return nil, nil, fmt.Errorf(i18n.T("public_key_not_found_in"), partialEnv.KeyId, apiURL, err)
 		}
@@ -307,6 +614,9 @@ func ParseRecipeLocally(body []byte, apiURL string) (*ExecutionEnvelope, []map[s
 		return nil, nil, fmt.Errorf(i18n.T("invalid_envelope_format"))
 	}
 	env.CanonicalEnvelope = recipe.CanonicalEnvelope
+	if env.Signature == "" {
+		env.Signature = recipe.Signature
+	}
 
 	// Verify Plan Hash
 	hash := sha256.Sum256([]byte(recipe.CanonicalSteps))
@@ -352,10 +662,15 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 
 	// Step 0 — Cryptographic Pre-Admission (MUST precede all other checks)
 	pubKeyPem := os.Getenv("UGONDU_RECIPE_PUBLIC_KEY")
+	if pubKeyPem == "" && env != nil && env.KeyId != "" {
+		if cachedPem, err := LoadCachedPublicKey(env.KeyId); err == nil && cachedPem != "" {
+			pubKeyPem = cachedPem
+		}
+	}
 	if pubKeyPem == "" {
 		return logs, fmt.Errorf("%s", i18n.T("err_missing_public_key"))
 	}
-	if env.Signature == "" || env.CanonicalEnvelope == "" {
+	if env == nil || env.Signature == "" || env.CanonicalEnvelope == "" {
 		return logs, fmt.Errorf("%s", i18n.T("err_signature_invalid"))
 	}
 	if err := verifySignature(env.CanonicalEnvelope, env.Signature, pubKeyPem); err != nil {
@@ -367,11 +682,9 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 		return logs, fmt.Errorf(i18n.T("msg_err_replay_validation_failed_w"), err)
 	}
 
-	// 2. Validate Capability Intersection
-	if env.Capabilities != nil {
-		if val, ok := env.Capabilities["required"]; ok {
-			_ = val // Capability intersection logic "server ∩ tenant ∩ target ∩ agent ∩ action"
-		}
+	// 2. Validate Capability Intersection (server ∩ tenant ∩ target ∩ agent ∩ action)
+	if err := ValidateCapabilityIntersection(env, steps); err != nil {
+		return logs, err
 	}
 
 	// 3. Validate Preflight on complete recipe before step 1
@@ -396,7 +709,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 		_ = ReleaseTransactionLock(lock)
 	}()
 
-	// 2. Load or initialize state machine
+	// 5. Load or initialize state machine
 	state, err := LoadState(env.TransactionId)
 	if err != nil {
 		if errors.Is(err, ErrStateNotFound) {
@@ -495,4 +808,3 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 
 	return logs, nil
 }
-

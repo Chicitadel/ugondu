@@ -3,14 +3,14 @@
  * Module         : Safety Gates Validator
  * File           : safety-gates.ts
  * Version        : 1.0.0
- * Author         : AI Governed
+ * Author         : Corporate Policy Governed
  * Organization   : UAIGOS
  * Created Date   : 2026-10-08
  * Last Modified  : 2026-10-08
  * Classification : ENTERPRISE
  *
  * Governance:
- * - AI Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen

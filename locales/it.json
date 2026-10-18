@@ -212,5 +212,9 @@
   "err_plugin_entrypoint_not_found": "Attivazione del plugin fallita: Punto di ingresso del plugin non trovato.",
   "err_plugin_action_rejected": "Plugin rifiutato: L'azione non è nel registro chiuso delle azioni tipizzate.",
   "err_urre_context_id_mismatch": "Esecuzione bloccata: Mancata corrispondenza dell'ID di contesto in ExecutionEnvelope.",
-  "err_fatal_already_executed": "Fatale: Questa ricetta è già stata eseguita con successo."
+  "err_fatal_already_executed": "Fatale: Questa ricetta è già stata eseguita con successo.",
+  "error.cert.missing_volume_id": "ID volume mancante",
+  "cert.fargate.cleanup": "Pulizia delle risorse di certificazione Fargate...",
+  "cors_policy_violation": "Violazione della politica CORS",
+  "unimplemented_autonomous_code_": "NON IMPLEMENTATO: il piano di patching autonomo del codice è predisposto"
 }

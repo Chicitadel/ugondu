@@ -2,15 +2,15 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Tests / Integration & Security
  * File           : plugin-manager.test.js
- * Version        : 1.1.0
- * Author         : Ignatus Chika UJOMOR <Chicitadel@users.noreply.github.com>
+ * Version        : 1.2.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-29
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
- * - Enterprise Security Architecture
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -33,6 +33,10 @@
 
 'use strict';
 
+if (typeof global.__t !== 'function') {
+    global.__t = (key) => `[en] ${key}`;
+}
+
 const assert = require('assert');
 const http = require('http');
 const fs = require('fs');
@@ -40,20 +44,39 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { signServiceIdentity, globalTrustRegistry } = require('../server/shared/dist/identity');
 const { generateKeyPairSync } = require('crypto');
+
 const serviceTestKeys = generateKeyPairSync('ed25519');
 const serviceTestPrivateKey = serviceTestKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
 const serviceTestPublicKey = serviceTestKeys.publicKey.export({ type: 'spki', format: 'pem' }).toString();
 const SERVICE_TEST_KEY_ID = 'key_service_test_v1';
-globalTrustRegistry.registerKey({ keyId: SERVICE_TEST_KEY_ID, algorithm: 'ed25519', status: 'ACTIVE', purpose: 'service-identity', publicKey: serviceTestPublicKey });
+globalTrustRegistry.registerKey({
+    keyId: SERVICE_TEST_KEY_ID,
+    algorithm: 'ed25519',
+    status: 'ACTIVE',
+    purpose: 'service-identity',
+    publicKey: serviceTestPublicKey
+});
 
-function get(port, path, extraHeaders = {}) {
+const tamperedPluginDir = path.resolve(__dirname, '../plugins/tampered-test-plugin');
+function cleanupTamperedFixture() {
+    try {
+        if (fs.existsSync(tamperedPluginDir)) {
+            fs.rmSync(tamperedPluginDir, { recursive: true, force: true });
+        }
+    } catch {
+        // Ignore cleanup errors on exit
+    }
+}
+process.on('exit', cleanupTamperedFixture);
+
+function get(port, urlPath, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
         const token = signServiceIdentity('test-suite', 'plugin-manager', 'execute', serviceTestPrivateKey, SERVICE_TEST_KEY_ID);
         const headers = {
             'Authorization': `Bearer ${token}`,
             ...extraHeaders
         };
-        const options = { hostname: 'localhost', port, path, method: 'GET', headers };
+        const options = { hostname: 'localhost', port, path: urlPath, method: 'GET', headers };
         const req = http.request(options, (res) => {
             let body = '';
             res.on('data', chunk => body += chunk);
@@ -67,7 +90,7 @@ function get(port, path, extraHeaders = {}) {
     });
 }
 
-function post(port, path, body, extraHeaders = {}) {
+function post(port, urlPath, body, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
         const token = signServiceIdentity('test-suite', 'plugin-manager', 'execute', serviceTestPrivateKey, SERVICE_TEST_KEY_ID);
         const data = JSON.stringify(body);
@@ -80,7 +103,7 @@ function post(port, path, body, extraHeaders = {}) {
         const options = {
             hostname: 'localhost',
             port,
-            path,
+            path: urlPath,
             method: 'POST',
             headers
         };
@@ -124,17 +147,19 @@ function waitForServer(port, retries = 30, interval = 200) {
     });
 }
 
-const PLUGIN_PORT = parseInt(process.env.PLUGIN_PORT || '4003');
+const DEFAULT_PLUGIN_PORT = parseInt(process.env.PLUGIN_PORT || '4003', 10);
+let PLUGIN_PORT = DEFAULT_PLUGIN_PORT;
 let passed = 0;
 let failed = 0;
 let serverProcess = null;
 
 async function runTests() {
+    cleanupTamperedFixture();
+
     console.log('[en] ══════════════════════════════════════════════════════');
     console.log('[en] Ugondu Integration & Security Test Suite — Plugin Manager');
     console.log('[en] ══════════════════════════════════════════════════════');
 
-    // Auto-start server if not already running
     let serverStartedByUs = false;
     try {
         await new Promise((resolve, reject) => {
@@ -147,21 +172,19 @@ async function runTests() {
         });
         console.log(`[en] Connected to existing Plugin Manager on port ${PLUGIN_PORT}`);
     } catch {
-        console.log(`[en] Spawning Plugin Manager process on port ${PLUGIN_PORT}...`);
-        const serverDir = path.resolve(__dirname, '../server/plugin-manager');
-        serverProcess = spawn('node', ['dist/index.js'], {
-            cwd: serverDir,
-            env: {
-                ...process.env,
-                PORT: PLUGIN_PORT.toString(),
-                UGONDU_SERVICE_TEST_PUBKEY: serviceTestPublicKey,
-                UGONDU_SERVICE_TEST_KEY_ID: SERVICE_TEST_KEY_ID
-            },
-            stdio: 'pipe'
+        console.log('[en] Starting Plugin Manager in-process on ephemeral port...');
+        process.env.UGONDU_SERVICE_TEST_PUBKEY = serviceTestPublicKey;
+        process.env.UGONDU_SERVICE_TEST_KEY_ID = SERVICE_TEST_KEY_ID;
+        const { app } = require('../server/plugin-manager/dist/index.js');
+        await new Promise((resolve, reject) => {
+            serverProcess = app.listen(0, '127.0.0.1', () => {
+                PLUGIN_PORT = serverProcess.address().port;
+                serverStartedByUs = true;
+                resolve();
+            });
+            serverProcess.on('error', reject);
         });
-        serverStartedByUs = true;
-        await waitForServer(PLUGIN_PORT);
-        console.log(`[en] Plugin Manager spawned and healthy on port ${PLUGIN_PORT}`);
+        console.log(`[en] Plugin Manager started in-process and healthy on port ${PLUGIN_PORT}`);
     }
 
     try {
@@ -244,21 +267,19 @@ async function runTests() {
             failed++;
         }
 
-        // [en] Test 6: Tenant activation authorizes execution
+        // [en] Test 6: Tenant activation authorizes execution and returns execution receipt
         try {
-            // Activate plugin for tenant
             const act = await post(PLUGIN_PORT, '/v1/plugins/ugondu-plugin-node/activate', {
                 tenantId: 'tenant-test-authorized'
             });
             assert.strictEqual(act.status, 200, 'Expected 200 for activation');
 
-            // Execute plugin as activated tenant
             const execRes = await post(PLUGIN_PORT, '/v1/plugins/ugondu-plugin-node/execute', {
                 tenantId: 'tenant-test-authorized',
                 payload: { packageManager: 'npm' }
             });
-            // Should pass authorization check (200 if docker running, 500 docker sandbox err if docker not running, but NOT 403)
-            assert.notStrictEqual(execRes.status, 403, 'Should not return 403 after activation');
+            assert.strictEqual(execRes.status, 200, `Expected 200 after activation, got ${execRes.status}`);
+            assert.ok(execRes.body.receipt && execRes.body.receipt.receiptHash, 'Expected signed/hashed execution receipt');
             console.log(`[en] ✓ PASS: Tenant activation successfully authorizes plugin execution (HTTP ${execRes.status})`);
             passed++;
         } catch (e) {
@@ -267,7 +288,6 @@ async function runTests() {
         }
 
         // [en] Test 7: Tampered cryptographic signature rejected with 403 INVALID_PLUGIN_SIGNATURE
-        const tamperedPluginDir = path.resolve(__dirname, '../plugins/tampered-test-plugin');
         try {
             if (!fs.existsSync(tamperedPluginDir)) {
                 fs.mkdirSync(tamperedPluginDir, { recursive: true });
@@ -293,14 +313,13 @@ async function runTests() {
             console.error('[en] ✗ FAIL: Cryptographic signature test —', e.message);
             failed++;
         } finally {
-            if (fs.existsSync(tamperedPluginDir)) {
-                fs.rmSync(tamperedPluginDir, { recursive: true, force: true });
-            }
+            cleanupTamperedFixture();
         }
 
     } finally {
-        if (serverStartedByUs && serverProcess) {
-            serverProcess.kill();
+        cleanupTamperedFixture();
+        if (serverStartedByUs && serverProcess && typeof serverProcess.close === 'function') {
+            serverProcess.close();
         }
     }
 
@@ -312,7 +331,8 @@ async function runTests() {
 }
 
 runTests().catch(err => {
+    cleanupTamperedFixture();
     console.error('[en] Fatal test suite error:', err);
-    if (serverProcess) serverProcess.kill();
+    if (serverProcess && typeof serverProcess.close === 'function') serverProcess.close();
     process.exit(1);
 });

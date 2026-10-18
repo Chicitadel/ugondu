@@ -3,13 +3,14 @@
  * Module         : client/i18n
  * File           : resolver.go
  * Version        : 2.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-03 & LP-30)
  * - 8-Tier Locale Resolution Precedence Engine
  * - Zero String Hardcoding
@@ -36,7 +37,7 @@ import (
 const (
 	SourceCliFlag           = "cli_locale_flag"
 	SourceEnvVar            = "UGONDU_LOCALE environment variable"
-	SourceUserPreference     = "persistent_user_preference"
+	SourceUserPreference    = "persistent_user_preference"
 	SourceTenantPolicy      = "tenant_organization_policy"
 	SourceProjectPolicy     = "project_policy"
 	SourceOSDetection       = "OS / environment detection"
@@ -55,6 +56,9 @@ type GlobalUgonduConfig struct {
 }
 
 func getConfigFilePath() (string, error) {
+	if envCfg := strings.TrimSpace(os.Getenv("UGONDU_CONFIG_PATH")); envCfg != "" {
+		return envCfg, nil
+	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err

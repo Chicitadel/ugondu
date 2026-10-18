@@ -3,14 +3,15 @@
  * Module         : client/engine/adapters
  * File           : service_adapter.go
  * Version        : 1.2.0
- * Author         : Air Roofers
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
-  * - Security Reviewed
+ * - Corporate Policy Governed
+ * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced

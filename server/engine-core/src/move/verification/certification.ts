@@ -3,13 +3,14 @@
  * Module         : move/verification
  * File           : certification.ts
  * Version        : 1.0.0
- * Author         : Air Roofers Engineering
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -100,7 +101,7 @@ export class CertificationAuthority {
 
             return evidenceHashes;
         } catch (error: any) {
-            throw new Error(`Failed to compile microservices compliance evidence: ${error.message}`);
+            throw new Error(__t('messages.error.failed_to_compile_compliance_evidence', { message: error.message }));
         }
     }
 

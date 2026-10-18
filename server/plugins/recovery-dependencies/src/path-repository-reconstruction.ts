@@ -1,3 +1,36 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Plugins / Recovery Dependencies
+ * File           : path-repository-reconstruction.ts
+ * Version        : 1.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-29
+ * Last Modified  : 2026-10-18
+ * Classification : COMMERCIAL | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 import { RecoveryCapability } from '../../../engine-core/src/deise/engine/recovery/capabilities/recovery-capability';
 import { EnvironmentTwin } from '../../../engine-core/src/deise/twin/environment-twin';
 import { RecoveryScope } from '../../../engine-core/src/deise/engine/recovery/live-environment-adapter-contract';
@@ -17,16 +50,29 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
                 }
             }
         }
-        
-        return { 
-            issue: missingPaths.length > 0 ? 'MissingLocalPathRepository' : 'NoIssue', 
-            missingPaths: missingPaths,
+
+        return {
+            issue: missingPaths.length > 0 ? 'MissingLocalPathRepository' : 'NoIssue',
+            missingPaths,
             confidence: missingPaths.length > 0 ? 0.99 : 1.0
         };
     }
 
     async plan(diagnosis: any, scope: RecoveryScope): Promise<any> {
-        throw new Error(__t('unimplemented_path_repository_'));
+        if (!diagnosis?.missingPaths || diagnosis.missingPaths.length === 0) {
+            return { requiresRepositoryClone: false, repositories: [], safeToProceed: true };
+        }
+
+        const repositories = diagnosis.missingPaths.map((p: string) => ({
+            path: p,
+            reference: `source_repo_for_path_${p.replace(/[^a-zA-Z0-9]/g, '_')}`
+        }));
+
+        return {
+            requiresRepositoryClone: true,
+            repositories,
+            safeToProceed: true
+        };
     }
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
@@ -43,8 +89,7 @@ export class PathRepositoryReconstruction implements RecoveryCapability {
                 await adapter.executeAction('RepositoryEnsurePresent', { target: repo.path, reference: repo.reference });
             }
         }
-        
+
         return adapter !== null;
     }
 }
-

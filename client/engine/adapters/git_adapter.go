@@ -3,14 +3,15 @@
  * Module         : client/engine/adapters
  * File           : git_adapter.go
  * Version        : 1.2.0
- * Author         : Air Roofers
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-01
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
-  * - Security Reviewed
+ * - Corporate Policy Governed
+ * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -37,12 +38,15 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
 	"ugondu/client/i18n"
 )
+
+var validBranchPattern = regexp.MustCompile(`^[a-zA-Z0-9._/-]+$`)
 
 type GitAdapter struct {
 	BinaryPath string
@@ -67,9 +71,20 @@ func (a *GitAdapter) resolveGitBinary() string {
 	return "/usr/bin/git"
 }
 
+func validateBranchName(branch string) error {
+	trimmed := strings.TrimSpace(branch)
+	if trimmed == "" || strings.Contains(trimmed, "..") || strings.HasPrefix(trimmed, "-") || !validBranchPattern.MatchString(trimmed) {
+		return fmt.Errorf(i18n.T("invalid_branch_name"), branch)
+	}
+	return nil
+}
+
 func (a *GitAdapter) Pull(repoURL, branch, workDir, credentialFile string) error {
 	if !strings.HasPrefix(repoURL, "https://") && !strings.HasPrefix(repoURL, "git@") {
 		return fmt.Errorf(i18n.T("invalid_repo_url_scheme"), repoURL)
+	}
+	if err := validateBranchName(branch); err != nil {
+		return err
 	}
 
 	args := []string{"pull", repoURL, branch}
@@ -100,6 +115,9 @@ func (a *GitAdapter) Pull(repoURL, branch, workDir, credentialFile string) error
 func (a *GitAdapter) Clone(repoURL, branch, targetDir string) error {
 	if !strings.HasPrefix(repoURL, "https://") && !strings.HasPrefix(repoURL, "git@") {
 		return fmt.Errorf(i18n.T("invalid_repo_url_scheme"), repoURL)
+	}
+	if err := validateBranchName(branch); err != nil {
+		return err
 	}
 
 	args := []string{"clone", "-b", branch, repoURL, targetDir}
@@ -136,4 +154,3 @@ func (a *GitAdapter) GetBranch(workDir string) (string, error) {
 	out, err := cmd.Output()
 	return string(out), err
 }
-

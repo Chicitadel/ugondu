@@ -76,3 +76,6 @@ export { UppieService } from './UppieService';
 
 // Default adapter registration
 export { registerDefaultAdapters } from './adapters/adapter-defaults';
+
+// Universal Policy Lifecycle Manager (UPLM) Engine & AWS COR V9 Adapter
+export * from './uplm/index';

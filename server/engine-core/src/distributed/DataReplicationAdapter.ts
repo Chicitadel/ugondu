@@ -9,7 +9,7 @@
  * Classification : ENTERPRISE
  * 
  * Governance:
- * - AI Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen

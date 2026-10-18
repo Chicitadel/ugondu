@@ -1,15 +1,17 @@
 /******************************************************************************
- * Project        : Ugondu
- * Module         : Client Engine
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/engine
  * File           : archive.go
  * Version        : 3.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -26,39 +28,39 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
 package engine
 
 import (
-	"github.com/ugondu/client/i18n"
 	"archive/zip"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	"ugondu/client/i18n"
 )
 
 var (
-	ErrZipSlip            = errors.New(i18n.T("ERR_ZIP_SLIP_DETECTED"))
-	ErrSymlinkRejection   = errors.New(i18n.T("ERR_SYMLINK_REJECTED"))
-	ErrCompressionRatio   = errors.New(i18n.T("ERR_COMPRESSION_RATIO_EXCEEDED"))
-	ErrMaxFilesExceeded   = errors.New(i18n.T("ERR_MAX_FILES_EXCEEDED"))
-	ErrMaxExpandedSize    = errors.New(i18n.T("ERR_MAX_EXPANDED_SIZE_EXCEEDED"))
+	ErrZipSlip          = errors.New(i18n.T("ERR_ZIP_SLIP_DETECTED"))
+	ErrSymlinkRejection = errors.New(i18n.T("ERR_SYMLINK_REJECTED"))
+	ErrCompressionRatio = errors.New(i18n.T("ERR_COMPRESSION_RATIO_EXCEEDED"))
+	ErrMaxFilesExceeded = errors.New(i18n.T("ERR_MAX_FILES_EXCEEDED"))
+	ErrMaxExpandedSize  = errors.New(i18n.T("ERR_MAX_EXPANDED_SIZE_EXCEEDED"))
 )
 
 const (
-	MaxFiles         = 10000
-	MaxExpandedSize  = 1024 * 1024 * 1024 // 1GB
-	MaxRatio         = 100
+	MaxFiles        = 10000
+	MaxExpandedSize = 1024 * 1024 * 1024 // 1GB
+	MaxRatio        = 100
 )
 
 func ExtractArchiveSafe(archivePath, targetDir string) error {
 	resolver := &SafePathResolver{}
-	
+
 	r, err := zip.OpenReader(archivePath)
 	if err != nil {
 		return fmt.Errorf(i18n.T("msg_err_zip_open_w"), err)
@@ -115,7 +117,7 @@ func extractFile(f *zip.File, dest string) error {
 	defer rc.Close()
 
 	os.MkdirAll(filepath.Dir(dest), 0755)
-	
+
 	out, err := os.OpenFile(dest, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 	if err != nil {
 		return fmt.Errorf(i18n.T("msg_err_file_create_w"), err)

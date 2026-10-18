@@ -1,5 +1,3 @@
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Billing Gateway — Entitlement Event Processor
@@ -8,11 +6,11 @@ import { __t } from '../../../shared/i18n';
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -23,100 +21,130 @@ import { __t } from '../../../shared/i18n';
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-import { EntitlementEventSchema, isNewerThanCurrentVersion } from '../../../event-bus/src/events/entitlement-events';
-import type { EntitlementEvent } from '../../../event-bus/src/events/entitlement-events';
+import { __t } from '@ugondu/shared';
 
-/**
- * EntitlementEventProcessor — validates and routes Mandatag entitlement events.
- *
- * CRITICAL INVARIANTS:
- * 1. AeroBill (billing) webhook events MUST NEVER emit CAPABILITY_ACTIVATED.
- *    Only Mandatag-signed entitlement events activate capabilities.
- *    Payment confirmation alone does NOT activate any feature.
- *
- * 2. Signature must be verified before any state change.
- *    Invalid signatures → event dropped + security alert.
- *
- * 3. Out-of-order events are rejected:
- *    entitlementVersion + sequence ordering enforced.
- *    Old delayed events MUST NOT override newer state.
- *
- * 4. Events are idempotent: same eventId processed twice → second is dropped.
- */
+export type EntitlementEventType =
+  | 'SUBSCRIPTION_CHANGED'
+  | 'ENTITLEMENT_SUSPENDED'
+  | 'ENTITLEMENT_RESTORED'
+  | 'CAPABILITY_ACTIVATED'
+  | 'CAPABILITY_DEACTIVATED'
+  | 'EDITION_UPGRADED'
+  | 'EDITION_DOWNGRADED'
+  | 'ENTITLEMENT_EXPIRED'
+  | 'ENTITLEMENT_REVOKED'
+  | 'PLUGIN_ACTIVATED'
+  | 'PLUGIN_DEACTIVATED';
+
+export interface EntitlementEvent {
+  eventId: string;
+  eventType: EntitlementEventType;
+  tenantId: string;
+  subjectId: string;
+  entitlementVersion: number;
+  sequence: number;
+  effectiveAt: string;
+  issuedAt: string;
+  payload: Record<string, unknown>;
+  signature: string;
+  signatureKeyId: string;
+}
+
+const VALID_EVENT_TYPES = new Set<string>([
+  'SUBSCRIPTION_CHANGED',
+  'ENTITLEMENT_SUSPENDED',
+  'ENTITLEMENT_RESTORED',
+  'CAPABILITY_ACTIVATED',
+  'CAPABILITY_DEACTIVATED',
+  'EDITION_UPGRADED',
+  'EDITION_DOWNGRADED',
+  'ENTITLEMENT_EXPIRED',
+  'ENTITLEMENT_REVOKED',
+  'PLUGIN_ACTIVATED',
+  'PLUGIN_DEACTIVATED',
+]);
+
+function validateEntitlementEvent(raw: unknown): { success: true; data: EntitlementEvent } | { success: false } {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { success: false };
+  const r = raw as Record<string, unknown>;
+  if (typeof r.eventId !== 'string' || r.eventId.length === 0) return { success: false };
+  if (typeof r.eventType !== 'string' || !VALID_EVENT_TYPES.has(r.eventType)) return { success: false };
+  if (typeof r.tenantId !== 'string' || r.tenantId.length === 0) return { success: false };
+  if (typeof r.subjectId !== 'string') return { success: false };
+  if (typeof r.entitlementVersion !== 'number' || !Number.isInteger(r.entitlementVersion) || r.entitlementVersion <= 0) {
+    return { success: false };
+  }
+  if (typeof r.sequence !== 'number' || !Number.isInteger(r.sequence) || r.sequence < 0) {
+    return { success: false };
+  }
+  if (typeof r.effectiveAt !== 'string' || Number.isNaN(Date.parse(r.effectiveAt))) return { success: false };
+  if (typeof r.issuedAt !== 'string' || Number.isNaN(Date.parse(r.issuedAt))) return { success: false };
+  if (!r.payload || typeof r.payload !== 'object' || Array.isArray(r.payload)) return { success: false };
+  if (typeof r.signature !== 'string' || r.signature.length === 0) return { success: false };
+  if (typeof r.signatureKeyId !== 'string' || r.signatureKeyId.length === 0) return { success: false };
+  return { success: true, data: r as unknown as EntitlementEvent };
+}
+
+export function isNewerThanCurrentVersion(
+  event: EntitlementEvent,
+  currentVersion: number,
+  currentSeq: number
+): boolean {
+  if (event.entitlementVersion > currentVersion) return true;
+  if (event.entitlementVersion === currentVersion && event.sequence > currentSeq) return true;
+  return false;
+}
+
 export class EntitlementEventProcessor {
-  /** Set of already-processed eventIds — prevents duplicate processing. */
   private readonly processedEvents = new Set<string>();
-
-  /** Per-tenant current entitlement version tracking. */
   private readonly tenantVersions = new Map<string, { version: number; seq: number }>();
 
   constructor(
-    private readonly verifySignature:         (event: EntitlementEvent) => boolean,
-    private readonly onCapabilityActivated:   (tenantId: string, capabilityId: string) => void,
+    private readonly verifySignature: (event: EntitlementEvent) => boolean,
+    private readonly onCapabilityActivated: (tenantId: string, capabilityId: string) => void,
     private readonly onCapabilityDeactivated: (tenantId: string, capabilityId: string) => void,
-    private readonly onEditionChanged:        (tenantId: string, from: string, to: string) => void,
-    private readonly onSecurityAlert:         (reason: string, eventId: string) => void
+    private readonly onEditionChanged: (tenantId: string, from: string, to: string) => void,
+    private readonly onSecurityAlert: (reason: string, eventId: string) => void
   ) {}
 
-  /**
-   * Process an incoming Mandatag entitlement event.
-   * Returns true if the event was processed. Returns false if dropped.
-   */
   process(raw: unknown): boolean {
-    // Schema validation
-    const parseResult = EntitlementEventSchema.safeParse(raw);
+    const parseResult = validateEntitlementEvent(raw);
     if (!parseResult.success) {
       this.onSecurityAlert(__t('messages.error.entitlement_event_failed_schema'), String(raw));
       return false;
     }
-    const event = parseResult.data as unknown as EntitlementEvent;
+    const event = parseResult.data;
 
-    // Idempotency: drop already-processed events
     if (this.processedEvents.has(event.eventId)) {
       return false;
     }
 
-    // Signature verification (Ed25519 from Mandatag)
     if (!this.verifySignature(event)) {
       this.onSecurityAlert(__t('messages.error.entitlement_signature_failed'), event.eventId);
       return false;
     }
 
-    // Version ordering: reject out-of-sequence events
     const current = this.tenantVersions.get(event.tenantId);
     if (current && !isNewerThanCurrentVersion(event, current.version, current.seq)) {
-      return false;  // old/delayed event — silently drop
+      return false;
     }
 
-    // Mark as processed
     this.processedEvents.add(event.eventId);
     this.tenantVersions.set(event.tenantId, {
       version: event.entitlementVersion,
-      seq:     event.sequence,
+      seq: event.sequence,
     });
 
     this.route(event);
     return true;
   }
 
-  /**
-   * AeroBill payment webhook handler.
-   * INVARIANT: Payment webhooks NEVER emit CAPABILITY_ACTIVATED.
-   * They trigger a Mandatag refresh request only.
-   */
-  onAeroBillPaymentConfirmed(
-    _tenantId:  string,
-    _invoiceId: string
-  ): void {
+  onAeroBillPaymentConfirmed(_tenantId: string, _invoiceId: string): void {
     // Payment confirmed — trigger Mandatag manifest refresh only.
-    // DO NOT activate any capability here.
-    // Activation happens only when Mandatag issues a signed entitlement event.
-    // This boundary is enforced at the code level — do not move capability
-    // activation logic into this method.
   }
 
   private route(event: EntitlementEvent): void {
-    const p = event.payload as unknown as Record<string, unknown>;
+    const p = event.payload as Record<string, unknown>;
     switch (event.eventType) {
       case 'CAPABILITY_ACTIVATED':
         this.onCapabilityActivated(event.tenantId, String(p['capabilityId'] ?? ''));

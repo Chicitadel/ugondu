@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : universal_os.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,11 +35,12 @@ package engine
 
 import (
 	"fmt"
-	"ugondu/client/i18n"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
+
+	"ugondu/client/i18n"
 )
 
 // CopyDir recursively copies a directory tree, replacing `rsync -avz --exclude .git`.
@@ -119,18 +120,18 @@ func AtomicSymlink(target string, symlinkPath string) error {
 	tempPath := symlinkPath + ".next"
 	// Remove stale .next if exists from a previous interrupted attempt
 	os.Remove(tempPath)
-	
+
 	// Create new link at temp path
 	if err := os.Symlink(target, tempPath); err != nil {
 		return fmt.Errorf(i18n.T("failed_to_create_temp_symlink"), err)
 	}
-	
+
 	// Atomic rename (POSIX-atomic on Linux/macOS, best-effort on Windows)
 	if err := os.Rename(tempPath, symlinkPath); err != nil {
 		os.Remove(tempPath) // clean up on failure
 		return fmt.Errorf(i18n.T("failed_to_atomically_promote_symlink"), err)
 	}
-	
+
 	return nil
 }
 

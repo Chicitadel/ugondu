@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "evaluatedAt": "2026-10-18T17:54:25.534Z",
+  "awsAccountId": "971671216490",
+  "awsRegion": "eu-west-3",
+  "executionRoleArn": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+  "splitManagedPolicies": [
+    "UgonduCOR_V9_Part1_NetworkAndVPC",
+    "UgonduCOR_V9_Part2_ComputeAndSnapshots",
+    "UgonduCOR_V9_Part3_RDSAndStorage",
+    "UgonduCOR_V9_Part4_ContainersAndFargate",
+    "UgonduCOR_V9_Part5_ReadDiscoveryAndTelemetry"
+  ],
+  "abacConditionsEnforced": {
+    "requestTagUgonduCOR": "true",
+    "transactionIdBinding": "${aws:PrincipalTag/UgonduTransactionId}",
+    "requestedRegion": "eu-west-3"
+  },
+  "zeroResidualsVerified": true,
+  "status": "PASS"
+}

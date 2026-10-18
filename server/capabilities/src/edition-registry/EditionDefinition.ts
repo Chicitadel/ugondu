@@ -30,10 +30,20 @@
  * OEM and MSP are commercial overlays — NOT ranked editions.
  * They MUST NOT appear in EDITION_RANK or capability inheritance.
  */
-export const UGONDU_EDITIONS = [
-  'FREE',
+export const CANONICAL_UGONDU_EDITIONS = [
+  'COMMUNITY',
   'PROFESSIONAL',
   'BUSINESS',
+  'ENTERPRISE',
+  'SOVEREIGN',
+] as const;
+
+export const UGONDU_EDITIONS = [
+  'FREE',
+  'COMMUNITY',
+  'PROFESSIONAL',
+  'BUSINESS',
+  'ENTERPRISE',
   'SOVEREIGN',
 ] as const;
 
@@ -42,14 +52,24 @@ export type UgonduEdition = typeof UGONDU_EDITIONS[number];
 /**
  * Edition ranks for capability inheritance.
  * Higher rank = superset of all lower ranks.
+ * FREE is maintained as a backward-compatible alias for COMMUNITY (rank 1).
  * NEVER use these ranks to make authorization decisions (that is CEG/Mandatag territory).
  */
 export const EDITION_RANK: Record<UgonduEdition, number> = {
   FREE:         1,
+  COMMUNITY:    1,
   PROFESSIONAL: 2,
   BUSINESS:     3,
-  SOVEREIGN:    4,
+  ENTERPRISE:   4,
+  SOVEREIGN:    5,
 };
+
+/** Normalize legacy edition aliases (e.g., FREE -> COMMUNITY) where canonical tier names are needed. */
+export function normalizeEdition(value: string): UgonduEdition | undefined {
+  const upper = value.trim().toUpperCase();
+  if (upper === 'FREE') return 'COMMUNITY';
+  return UGONDU_EDITIONS.find((e) => e === upper);
+}
 
 /** Check if edition A is at least as privileged as edition B. */
 export function meetsEditionRequirement(
@@ -78,16 +98,19 @@ export interface EditionLimits {
   maxAiRequestsPerMonth:  number | null;
 }
 
+const COMMUNITY_LIMITS: EditionLimits = {
+  maxWorkspaces:          1,
+  maxEnvironments:        1,
+  maxTargets:             3,
+  maxDeploymentsPerMonth: 10,
+  maxFleetNodes:          0,
+  maxAiRequestsPerMonth:  0,
+};
+
 /** Server-enforced limits per edition. All limits are enforced server-side. */
 export const EDITION_LIMITS: Record<UgonduEdition, EditionLimits> = {
-  FREE: {
-    maxWorkspaces:          1,
-    maxEnvironments:        1,
-    maxTargets:             3,
-    maxDeploymentsPerMonth: 10,
-    maxFleetNodes:          0,
-    maxAiRequestsPerMonth:  0,
-  },
+  FREE: COMMUNITY_LIMITS,
+  COMMUNITY: COMMUNITY_LIMITS,
   PROFESSIONAL: {
     maxWorkspaces:          5,
     maxEnvironments:        10,
@@ -103,6 +126,14 @@ export const EDITION_LIMITS: Record<UgonduEdition, EditionLimits> = {
     maxDeploymentsPerMonth: null,
     maxFleetNodes:          50,
     maxAiRequestsPerMonth:  1000,
+  },
+  ENTERPRISE: {
+    maxWorkspaces:          250,
+    maxEnvironments:        2500,
+    maxTargets:             null,
+    maxDeploymentsPerMonth: null,
+    maxFleetNodes:          500,
+    maxAiRequestsPerMonth:  10000,
   },
   SOVEREIGN: {
     maxWorkspaces:          null,

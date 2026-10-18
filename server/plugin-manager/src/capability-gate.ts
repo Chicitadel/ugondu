@@ -6,11 +6,11 @@
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -21,8 +21,8 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-// @ts-ignore
-import { __t } from '../../shared/i18n';
+import './preload';
+import { __t } from '@ugondu/shared';
 
 /**
  * Plugin capability decision — the result of evaluating whether a plugin
@@ -37,7 +37,7 @@ export type PluginCapabilityDecision =
 
 /**
  * @interface PluginCapabilityMetadata
- * @description Corporate Governed interface implementation for PluginCapabilityMetadata
+ * @description Corporate Policy Governed interface implementation for PluginCapabilityMetadata
  * @classification ENTERPRISE
  */
 export interface PluginCapabilityMetadata {
@@ -54,7 +54,7 @@ export interface PluginCapabilityMetadata {
 
 /**
  * @interface PluginCapabilityDecisionResult
- * @description Corporate Governed interface implementation for PluginCapabilityDecisionResult
+ * @description Corporate Policy Governed interface implementation for PluginCapabilityDecisionResult
  * @classification ENTERPRISE
  */
 export interface PluginCapabilityDecisionResult {

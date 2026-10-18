@@ -1,3 +1,31 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Engine Core / Physical Fargate Certification
+ * File           : physical-fargate-certification.ts
+ * Version        : 1.1.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-18
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ * - Zero String Hardcoding
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+
 import { __t } from '@ugondu/shared';
 import { createProductionActionRegistry } from './src/registry/action-registry-factory';
 import { EvidenceCollector } from './src/evidence/evidence-engine';
@@ -5,7 +33,7 @@ import { getProviderAdapter } from './src/assurance/provider/certification-provi
 
 async function runFargateCertification() {
     const txId = process.env.UGONDU_TRANSACTION_ID;
-    if (!txId) throw new Error('UGONDU_TRANSACTION_ID is strictly required.');
+    if (!txId) throw new Error(__t('messages.error.missing_required_field', { field: 'UGONDU_TRANSACTION_ID' }));
 
     try {
         console.log(__t('cert.fargate.start'));

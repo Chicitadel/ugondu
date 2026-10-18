@@ -1,166 +1,211 @@
-# Ugondu — Universal Deployment Intelligence Platform
+<!--
+/******************************************************************************
+ * Project        : Ugondu — Universal Delivery Operating System
+ * Module         : Repository Root Documentation (COR-014)
+ * File           : README.md
+ * Version        : 2.4.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-09-29
+ * Last Modified  : 2026-10-18
+ * Classification : PUBLIC | COMMERCIAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS 5.0
+ * - NIST SP 800-53
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ ******************************************************************************/
+-->
 
-> **Air Roofers Commercial Product** | Ujomor Systems Engineering Authority
+# Ugondu — Universal Delivery Operating System
 
-Ugondu is a **thin-client / server deployment intelligence platform** that replaces legacy shell deployment scripts with a governed, commercial-grade, edition-based software delivery platform. It is the successor to `smart_deploy.sh`.
+> **Air Roofers Commercial Product** | Ujomor Systems Engineering & Governance Authority
+
+Ugondu is a **governed thin-client / microservice control-plane delivery operating system** that unifies application deployment, infrastructure orchestration, environment twin drift analysis (**DEISE**), durable execution recovery (**URRE**), and universal plugin lifecycle management (**UPLM**).
 
 ---
 
-## Commercial Editions
+## Commercial Edition Hierarchy (AR-STD-PKG-005)
 
-| Feature | Community | Professional | Enterprise |
-|---|:---:|:---:|:---:|
-| Git provider support (GitHub, GitLab, Bitbucket, Gitea, Gogs, Azure DevOps, AWS CodeCommit) | ✅ | ✅ | ✅ |
-| `quota-sync` deployment strategy | ✅ | ✅ | ✅ |
-| Plugin support (1 plugin) | ✅ | — | — |
-| Plugin support (up to 5 plugins) | — | ✅ | — |
-| Unlimited plugins | — | — | ✅ |
-| Atomic symlink deployments | ❌ | ✅ | ✅ |
-| Release rollbacks | ❌ | ✅ | ✅ |
-| Plugin Manager Sandbox | limited | ✅ | ✅ |
-| Execution telemetry & audit ledger | ❌ | — | ✅ |
-| SLA & priority support | — | — | ✅ |
+Ugondu enforces the canonical 5-tier Air Roofers commercial edition hierarchy via cryptographically signed `CapabilityManifest` and `ExecutionAuthorization` envelopes issued by the control plane (`ugondu.airroofers.eu`) in coordination with **Mandatag** (`license.airroofers.eu`) and **AeroBill** (`billing.airroofers.eu`).
 
-> Token prefix: `ugp_` = Professional, `uge_` = Enterprise, no prefix = Community
+> **Note:** Entitlement is resolved strictly via cryptographically signed JWT/JWS passports and `CapabilityManifest` envelopes—never via client-side string prefixes or local heuristics.
+
+| Capability Domain | Community (1) | Professional (2) | Business (3) | Enterprise (4) | Sovereign (5) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Repository Providers** (9 universal providers) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Deployment Strategies** (`quota-sync`) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Atomic Symlink & Zero-Downtime (`atomic`, `zdd`)** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Active UPLM Plugin Quota** | 1 | 5 | 25 | Unlimited | Unlimited |
+| **DEISE Environment Twin & Basic Repair** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Dependency, Runtime, Docker & TLS Repair** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Live DB Reconstruction, Cloud IAM/Linkage & IaC Drift** | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Kubernetes, VMware, Proxmox & Multi-Node HA** | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **AI Inference Gateway & Intent Simulation** | Advisory | Standard | Fleet | Autonomous Policy | Air-Gapped / Sovereign |
+| **Air-Gapped Recovery, Sovereign Vaults & Fault Domains** | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
-## Architecture
+## System Architecture & Service Port Topology
 
-```
-┌─────────────────────────────────────────────────────┐
-│                  Thin Client (Go)                   │  ← runs on your server
-│  ugondu deploy → POST /v1/deploy/resolve            │
-└───────────────────────┬─────────────────────────────┘
-                        │  HTTPS (signed recipe)
-┌───────────────────────▼─────────────────────────────┐
-│              Engine Core (Node.js :4001)            │  ← Governance Server
-│  - Computes DAG of execution steps                  │
-│  - Enforces edition capabilities                    │
-│  - Signs canonical execution recipes with Ed25519                    │
-└──────┬──────────────────────────────────────────────┘
-       │                          │
-┌──────▼──────┐            ┌──────▼──────┐
-│  Billing    │            │  Repository │
-│  Gateway    │            │  Adapter    │
-│  :4002      │            │  :4005      │
-└─────────────┘            └─────────────┘
-       │
-┌──────▼──────┐    ┌─────────────┐
-│  Plugin     │    │  Event Bus  │
-│  Manager    │    │  :4004      │
-│  :4003      │    └─────────────┘
-└─────────────┘
+```text
+┌────────────────────────────────────────────────────────────────────────────┐
+│                        Thin Client CLI (Go Binary)                         │
+│   ugondu deploy | resume | status | rollback | repair | plugin | locale    │
+└─────────────────────────────────────┬──────────────────────────────────────┘
+                                      │ HTTPS / Bearer Passport + Signed Recipe
+┌─────────────────────────────────────▼──────────────────────────────────────┐
+│                     Engine Core (Node.js :4001)                            │
+│  - Intent Compiler, ArchitectureIR DAG & UPPIE Policy Gate                 │
+│  - URRE Durable State Machine & DEISE Environment Twin Drift Analyzer      │
+│  - AI Inference Gateway & Ed25519 / HMAC-SHA256 Execution Sealing          │
+└──────┬──────────────────┬────────────────────┬──────────────────────┬──────┘
+       │                  │                    │                      │
+┌──────▼──────┐    ┌──────▼──────┐      ┌──────▼──────┐        ┌──────▼──────┐
+│  Billing    │    │  Plugin     │      │  Event Bus  │        │ Repository  │
+│  Gateway    │    │  Manager    │      │  Broker     │        │ Adapter     │
+│  :4002      │    │  :4003      │      │  :4004      │        │ :4005       │
+└─────────────┘    └─────────────┘      └─────────────┘        └─────────────┘
 ```
 
-## Quick Start
+| Service | Port | Responsibility | Health Endpoint |
+|---|---:|---|---|
+| `engine-core` | `4001` | Intent compilation, DAG computation, UPPIE policy evaluation, URRE orchestration, DEISE drift repair, AI Inference Gateway, Ed25519 recipe signing | `GET /health`, `GET /liveness` |
+| `billing-gateway` | `4002` | Mandatag entitlement verification, edition resolution, quota enforcement | `GET /health` |
+| `plugin-manager` | `4003` | UPLM lifecycle state machine, Ed25519 manifest verification, rootless container sandbox execution | `GET /health` |
+| `event-bus` | `4004` | Isolated pub/sub telemetry, audit ledger routing, asynchronous event fan-out | `GET /health` |
+| `repository-adapter` | `4005` | Universal Git/SCM provider detection, URL normalization, ref discovery, webhook & deployment binding | `GET /health` |
 
-### Prerequisites
+---
 
-- Docker & Docker Compose
-- A token from [identity.airroofers.eu](https://identity.airroofers.eu)
+## Repository Provider Capability Matrix (`COR-014`)
 
-### 1. Configure environment
+Every provider entry in the runtime `repository-adapter` (`:4005`) is tracked across seven canonical operations (`detect`, `authenticate`, `metadata`, `refs`, `fetch`, `webhook`, `deployment`) with explicit lifecycle verification status (`implemented`, `tested`, `supported`):
+
+| Provider ID | URL / Host Pattern | Credential Env Var | `detect` | `authenticate` | `metadata` | `refs` | `fetch` | `webhook` | `deployment` |
+|---|---|---|---|---|---|---|---|---|---|
+| `github` | `github.com` | `UGONDU_GITHUB_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `gitlab` | `gitlab.com`, `/gitlab/` | `UGONDU_GITLAB_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `bitbucket` | `bitbucket.org` | `UGONDU_BITBUCKET_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `gitea` | `gitea.*` | `UGONDU_GITEA_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `gogs` | `gogs.*` | `UGONDU_GOGS_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `azure-devops` | `dev.azure.com`, `visualstudio.com` | `UGONDU_AZURE_DEVOPS_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `aws-codecommit` | `codecommit`, `amazonaws.com/v1/repos` | `AWS_SECRET_ACCESS_KEY` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `generic-https` | `https://*` | `UGONDU_GIT_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `unsupported` (N/A) | `supported` / `tested` / `implemented` |
+| `generic-ssh` | `git@*`, `ssh://*` | `UGONDU_SSH_KEY_PATH` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `unsupported` (N/A) | `supported` / `tested` / `implemented` |
+
+---
+
+## AI Inference Gateway & Agentless Capability Parity
+
+Ugondu includes a governed **AI Inference Gateway** inside `engine-core` supporting multi-provider routing (OpenAI, Anthropic, Google Vertex/Gemini, AWS Bedrock, Azure OpenAI, Mistral, Cohere, and Sovereign Local/vLLM endpoints) with strict schema validation, token budgeting, circuit breaking, and zero-trust redaction.
+
+Under the **Agentless Capability Parity Invariant** and **Execution Path Equivalence Invariant**:
+1. Every commercially released executable capability is 100% invocable by a human operator through the canonical CLI and UI without requiring an external LLM.
+2. Both manual CLI/UI requests and AI-assisted intents converge on the exact same `Intent -> ArchitectureIR -> UPPIE Policy Gate -> ExecutionAuthorization -> URRE Execution -> Independent Verification -> Evidence Passport` pipeline.
+
+---
+
+## Universal Plugin Lifecycle Management (UPLM) & CLI Commands
+
+UPLM governs the entire lifecycle of delivery, target-adapter, and recovery plugins (`DISCOVERED -> VERIFIED -> INSTALLED -> ACTIVATED -> EXECUTING -> SUSPENDED -> ROLLED_BACK -> UNINSTALLED`).
 
 ```bash
-cp .env.example .env
-# Configure server-side signing/trust settings and IDENTITY_AUTHORITY_URL; signing private keys remain server-side.
+# Authenticate via OIDC / PKCE loopback flow
+ugondu auth login
+ugondu auth status
+ugondu auth logout
+
+# Core deployment & durable transaction lifecycle
+ugondu deploy [--force]
+ugondu resume [<transaction-id>]
+ugondu status [<transaction-id>]
+ugondu rollback [<transaction-id>]
+
+# DEISE environment twin diagnosis & structural repair
+ugondu repair diagnose
+ugondu repair plan
+ugondu repair execute [--dry-run]
+
+# UPLM governed plugin lifecycle
+ugondu plugins
+ugondu plugin list
+ugondu plugin verify <plugin-id>
+ugondu plugin install <plugin-id>
+ugondu plugin update <plugin-id>
+ugondu plugin remove <plugin-id>
 ```
 
-### 2. Start the governance server
-
-```bash
-docker compose up -d
-```
-
-### 3. Deploy from your project directory
-
-```bash
-# Set your license token
-export UGONDU_TOKEN=ugp_your_professional_token
-
-# Run the thin client
-ugondu deploy
-```
+**Bundled & Governed Plugins:**
+- `ugondu-plugin-node` — Node.js (`npm`, `yarn`, `pnpm`, `bun`) dependency resolution and deterministic build
+- `ugondu-plugin-composer` — PHP Composer dependency resolution and autoloader optimization
+- `aws-vpc-adapter` — AWS VPC, Subnet, IGW, RouteTable, SecurityGroup, EC2, RDS, S3, and ECS Fargate physical adapter
+- `recovery-code`, `recovery-config`, `recovery-database`, `recovery-dependencies`, `recovery-http`, `recovery-network`, `recovery-zdd` — DEISE domain recovery plugins
 
 ---
 
-## Supported Repository Providers
+## 12-Locale Signed Language Pack Architecture
 
-| Provider | URL Pattern | Token Env |
-|---|---|---|
-| GitHub | `github.com` | `UGONDU_GITHUB_TOKEN` |
-| GitLab (cloud + self-hosted) | `gitlab.com`, `/gitlab/` | `UGONDU_GITLAB_TOKEN` |
-| Bitbucket | `bitbucket.org` | `UGONDU_BITBUCKET_TOKEN` |
-| Gitea | `gitea.*` | `UGONDU_GITEA_TOKEN` |
-| Gogs | `gogs.*` | `UGONDU_GOGS_TOKEN` |
-| Azure DevOps | `dev.azure.com`, `visualstudio.com` | `UGONDU_AZURE_DEVOPS_TOKEN` |
-| AWS CodeCommit | `amazonaws.com/v1/repos` | `AWS_SECRET_ACCESS_KEY` |
-| Generic HTTPS | any HTTPS URL | `UGONDU_GIT_TOKEN` |
-| Generic SSH | `git@*`, `ssh://` | `UGONDU_SSH_KEY_PATH` |
-
----
-
-## Language Packs
-
-Ugondu supports installable, signed language packs without rebuilding the core client. Locale selection is reversible and can use explicit user preference, environment configuration, tenant/project policy, or detected OS locale.
+Ugondu ships with 100% parity across **12 canonical locales** (`en`, `fr`, `es`, `de`, `it`, `pt`, `ru`, `zh`, `ja`, `ko`, `ar`, `hi`) across both the Go thin client (`client/locales/*.json`) and the Node.js control plane (`locales/*.json`, `server/shared/locales/`).
 
 ```bash
 ugondu locale current
 ugondu locale detect
 ugondu locale select
-ugondu locale use en-US
-ugondu locale install fr-FR
+ugondu locale use fr-FR
+ugondu locale install de-DE
 ugondu locale update
 ugondu locale reset
 ugondu locale doctor
 ```
 
-A one-time override is also available:
-
+One-time execution overrides:
 ```bash
-ugondu --locale en-US deploy
-UGONDU_LOCALE=en-US ugondu deploy
+ugondu --locale es-ES deploy
+UGONDU_LOCALE=ja-JP ugondu status
 ```
-
-Language packs contain presentation/localization content only. Proprietary server-side planning, governance, licensing, AI, execution logic, credentials, and private keys remain server-side.
-
-## Plugins
-
-Plugins are admitted through the governed plugin lifecycle. Third-party plugins must have a validated manifest, compatible action/capability declarations, provenance/signature verification, and execution isolation. The thin client never receives unrestricted plugin execution logic.
-
-**Bundled plugins:**
-- `ugondu-plugin-node` — npm/yarn/pnpm/bun dependency resolution and build
-- `ugondu-plugin-composer` — PHP Composer dependency resolution
-
-**Plugin lifecycle:**
-```bash
-ugondu plugin list
-ugondu plugin verify <plugin>
-ugondu plugin install <plugin>
-ugondu plugin update <plugin>
-ugondu plugin remove <plugin>
-```
-
-Plugin installation is subject to manifest, signature, capability, entitlement, and sandbox policy.
 
 ---
 
-## Services
+## Documentation Index
 
-| Service | Port | Description |
-|---|---|---|
-| engine-core | 4001 | DAG computation and recipe signing |
-| billing-gateway | 4002 | License and edition authority |
-| plugin-manager | 4003 | Sandboxed plugin executor |
-| event-bus | 4004 | Isolated pub/sub message router |
-| repository-adapter | 4005 | Universal provider detection |
+### Developer & Operator Guides (`docs/guides/`)
+1. [Contributor Guide](docs/guides/01-contributor-guide.md)
+2. [Architecture Guide](docs/guides/02-architecture-guide.md)
+3. [Local Development Guide](docs/guides/03-local-development-guide.md)
+4. [Configuration Guide](docs/guides/04-configuration-guide.md)
+5. [AI Provider Onboarding Guide](docs/guides/05-ai-provider-onboarding-guide.md)
+6. [Repository Provider Guide](docs/guides/06-repository-provider-guide.md)
+7. [Plugin Developer Guide](docs/guides/07-plugin-developer-guide.md)
+8. [Target Adapter Guide](docs/guides/08-target-adapter-guide.md)
+9. [CLI Reference Guide](docs/guides/09-cli-guide.md)
+10. [Cross-Platform Guide](docs/guides/10-cross-platform-guide.md)
+11. [AWS Operations Guide](docs/guides/11-aws-operations-guide.md)
+12. [Security Incident Guide](docs/guides/12-security-incident-guide.md)
+13. [Release & Certification Guide](docs/guides/13-release-guide.md)
+14. [Operator Runbook](docs/guides/14-operator-runbook.md)
 
----
-
-## Governance
-
-Ugondu is governed under the Air Roofers UAIGOS framework. All architecture decisions are frozen in `.governance/state/frozen.decisions.yaml`.
+### UPLM Phase 0 Architecture & Baseline (`docs/uplm/`)
+- [UPLM Repository Discovery](docs/uplm/UPLM_REPOSITORY_DISCOVERY.md)
+- [UPLM Component Mapping](docs/uplm/UPLM_COMPONENT_MAPPING.md)
+- [UPLM Architecture Decision Records](docs/uplm/UPLM_ADR.md)
+- [UPLM Operational & AWS COR V9 Baseline](docs/uplm/UPLM_BASELINE.md)
 
 ---
 

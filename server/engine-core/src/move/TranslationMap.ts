@@ -10,6 +10,7 @@
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Corporate Governed
  * - Security Reviewed
  * - Architecture Controlled
@@ -30,6 +31,8 @@
 import { z } from "zod";
 
 import { __t } from "@ugondu/shared";
+
+export * from './portability';
 
 export const CPanelConfigSchema = z.object({
   apache: z.object({
