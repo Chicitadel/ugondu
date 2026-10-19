@@ -142,6 +142,37 @@ async function runCorRemediationTests() {
         assert.ok(fs.existsSync(path.join(ROOT, 'evidence/signatures/evidence-manifest.sig')));
     });
 
+    // Re-audit F1: CI must run on the release-candidate branch
+    check('REAUDIT-F1', 'ci.yml triggers cover phase*/** and stabilization/** branches and pull requests', () => {
+        const ci = fs.readFileSync(path.join(ROOT, '.github/workflows/ci.yml'), 'utf8');
+        const onBlock = ci.slice(ci.indexOf('on:'), ci.indexOf('env:'));
+        assert.ok(onBlock.includes("'phase*/**'"), 'push/PR triggers must include phase*/**');
+        assert.ok((onBlock.match(/'phase\*\/\*\*'/g) || []).length >= 2, 'both push and pull_request must include phase*/**');
+    });
+
+    // Re-audit F2: documentation must not advertise static AWS keys for CodeCommit
+    check('REAUDIT-F2', 'README and guides document IAM role / OIDC for aws-codecommit, not a static secret key', () => {
+        for (const f of ['README.md', 'docs/guides/04-configuration-guide.md', 'docs/guides/06-repository-provider-guide.md']) {
+            const c = fs.readFileSync(path.join(ROOT, f), 'utf8');
+            assert.ok(!/\| `?AWS_SECRET_ACCESS_KEY`? \|/.test(c), `${f} lists AWS_SECRET_ACCESS_KEY as the credential`);
+            assert.ok(c.includes('AWS_ROLE_ARN'), `${f} must document AWS_ROLE_ARN`);
+        }
+    });
+
+    // Re-audit F4: one canonical health contract in public documentation
+    check('REAUDIT-F4', 'Public docs reference only /health, /health/live, /health/ready, /v1/metadata', () => {
+        const c = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+        assert.ok(!c.includes('/liveness'), 'README must not reference /liveness');
+        assert.ok(c.includes('/health/ready') && c.includes('/v1/metadata'));
+    });
+
+    // Re-audit F3: pack digests recomputed from canonical bytes, never trusted as metadata
+    check('REAUDIT-F3', 'AWS COR policy pack template and pack digests recompute from canonical bytes', () => {
+        const { execFileSync } = require('child_process');
+        execFileSync(process.execPath, [path.join(ROOT, 'scripts/governance/verify-policy-pack-digests.mjs')], { stdio: 'pipe' });
+    });
+
+
     console.log('══════════════════════════════════════════════════════════════');
     console.log(` COR Remediation Audit Results: ${passed} passed, ${failed} failed `);
     console.log('══════════════════════════════════════════════════════════════');

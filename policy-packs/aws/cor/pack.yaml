@@ -26,7 +26,7 @@ metadata:
 provenance:
   source: Ugondu_CORExecutionRole_Policy_V9_Candidate(2).json
   trustedRelease: true
-  packDigestSha256: "e8a1b5c349d27f8091a4c6e5b7d8f90123456789abcdef0123456789abcdef01"
+  packDigestSha256: "d685c9428b9041aa3ecd162dc9ed610f5c58df96e20f90524303ae14ae5d9e4c"
   signatureAlgorithm: Ed25519
   signingKeyId: ugondu-uplm-pack-signing-key-v1
 provider:

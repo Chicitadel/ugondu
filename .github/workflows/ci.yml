@@ -21,9 +21,9 @@ name: Ugondu CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop, 'release/**']
+    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**']
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**']
   workflow_dispatch:
 
 env:

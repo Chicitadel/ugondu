@@ -27,7 +27,7 @@
     "test:security": "node tests/security-regression.test.js && node tests/ssrf-execution.test.js && node tests/passport-cryptography.test.js",
     "test:compatibility": "node tests/language-packs.test.js && node tests/provider-compilation.test.js",
     "test:aws": "node scripts/run-cor-gates.js",
-    "governance:validate": "node scripts/verify-release-integrity.js && node scripts/governance/validate-repository.mjs && node scripts/governance/validate-capability-registry.mjs && node scripts/governance/validate-test-coverage.mjs",
+    "governance:validate": "node scripts/verify-release-integrity.js && node scripts/governance/validate-repository.mjs && node scripts/governance/validate-capability-registry.mjs && node scripts/governance/validate-test-coverage.mjs && node scripts/governance/verify-policy-pack-digests.mjs",
     "start:engine": "cd server/engine-core && node dist/index.js",
     "start:billing": "cd server/billing-gateway && node dist/index.js",
     "start:plugins": "cd server/plugin-manager && node dist/index.js",

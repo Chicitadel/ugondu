@@ -86,11 +86,11 @@ Ugondu enforces the canonical 5-tier Air Roofers commercial edition hierarchy vi
 
 | Service | Port | Responsibility | Health Endpoint |
 |---|---:|---|---|
-| `engine-core` | `4001` | Intent compilation, DAG computation, UPPIE policy evaluation, URRE orchestration, DEISE drift repair, AI Inference Gateway, Ed25519 recipe signing | `GET /health`, `GET /liveness` |
-| `billing-gateway` | `4002` | Mandatag entitlement verification, edition resolution, quota enforcement | `GET /health` |
-| `plugin-manager` | `4003` | UPLM lifecycle state machine, Ed25519 manifest verification, rootless container sandbox execution | `GET /health` |
-| `event-bus` | `4004` | Isolated pub/sub telemetry, audit ledger routing, asynchronous event fan-out | `GET /health` |
-| `repository-adapter` | `4005` | Universal Git/SCM provider detection, URL normalization, ref discovery, webhook & deployment binding | `GET /health` |
+| `engine-core` | `4001` | Intent compilation, DAG computation, UPPIE policy evaluation, URRE orchestration, DEISE drift repair, AI Inference Gateway, Ed25519 recipe signing | `GET /health`, `GET /health/live`, `GET /health/ready`, `GET /v1/metadata` |
+| `billing-gateway` | `4002` | Mandatag entitlement verification, edition resolution, quota enforcement | `GET /health`, `GET /health/live`, `GET /health/ready`, `GET /v1/metadata` |
+| `plugin-manager` | `4003` | UPLM lifecycle state machine, Ed25519 manifest verification, rootless container sandbox execution | `GET /health`, `GET /health/live`, `GET /health/ready`, `GET /v1/metadata` |
+| `event-bus` | `4004` | Isolated pub/sub telemetry, audit ledger routing, asynchronous event fan-out | `GET /health`, `GET /health/live`, `GET /health/ready`, `GET /v1/metadata` |
+| `repository-adapter` | `4005` | Universal Git/SCM provider detection, URL normalization, ref discovery, webhook & deployment binding | `GET /health`, `GET /health/live`, `GET /health/ready`, `GET /v1/metadata` |
 
 ---
 
@@ -106,7 +106,7 @@ Every provider entry in the runtime `repository-adapter` (`:4005`) is tracked ac
 | `gitea` | `gitea.*` | `UGONDU_GITEA_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
 | `gogs` | `gogs.*` | `UGONDU_GOGS_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
 | `azure-devops` | `dev.azure.com`, `visualstudio.com` | `UGONDU_AZURE_DEVOPS_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `aws-codecommit` | `codecommit`, `amazonaws.com/v1/repos` | `AWS_SECRET_ACCESS_KEY` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
+| `aws-codecommit` | `codecommit`, `amazonaws.com/v1/repos` | `AWS_ROLE_ARN` + `AWS_REGION` (OIDC via `AWS_WEB_IDENTITY_TOKEN_FILE`, or STS session); bare static `AWS_SECRET_ACCESS_KEY` is rejected | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
 | `generic-https` | `https://*` | `UGONDU_GIT_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `unsupported` (N/A) | `supported` / `tested` / `implemented` |
 | `generic-ssh` | `git@*`, `ssh://*` | `UGONDU_SSH_KEY_PATH` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `unsupported` (N/A) | `supported` / `tested` / `implemented` |
 
@@ -210,3 +210,20 @@ UGONDU_LOCALE=ja-JP ugondu status
 ---
 
 *Copyright © 2026 Air Roofers Ltd. All Rights Reserved.*
+
+
+---
+
+## Qualification Status
+
+Status vocabulary is deliberate. `implemented` means code exists; `tested` means unit/contract tests pass in CI against local doubles; `qualified` means the capability passed a live, evidence-backed run in the named environment. Only `qualified` entries may be described as supported in customer-facing material.
+
+| Platform / target | Status | Evidence still required before `qualified` |
+|---|---|---|
+| Go client — Linux amd64/arm64, macOS amd64/arm64, Windows amd64 | `tested` (build + unit matrix in CI) | Native end-to-end deployment per OS |
+| AWS (IAM, EC2/VPC, RDS, S3, ECR, ECS/Fargate) | `implemented` | Live isolated-account run, IAM policy simulation, failure injection, rollback/cleanup |
+| Docker/OCI, Kubernetes | `implemented` | Live engine/cluster conformance, upgrade and recovery tests |
+| cPanel / DirectAdmin | `tested` (discovery, honest `UNKNOWN` capabilities) | Real hosted-account deployment and rollback |
+| Azure, GCP, OCI, IBM Cloud | `unavailable` | Provider adapters and capability qualification |
+
+Migration between targets may legitimately return `BLOCKED` when a required target capability is missing; Ugondu never emulates a missing capability silently.

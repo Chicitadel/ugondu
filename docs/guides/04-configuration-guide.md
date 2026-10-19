@@ -85,7 +85,7 @@ Ugondu enforces a strict, deterministic configuration precedence hierarchy acros
 | Gitea | `UGONDU_GITEA_TOKEN` |
 | Gogs | `UGONDU_GOGS_TOKEN` |
 | Azure DevOps | `UGONDU_AZURE_DEVOPS_TOKEN` |
-| AWS CodeCommit | `AWS_SECRET_ACCESS_KEY` (with `AWS_ACCESS_KEY_ID` / `AWS_SESSION_TOKEN`) |
+| AWS CodeCommit | `AWS_ROLE_ARN` + `AWS_REGION` (OIDC via `AWS_WEB_IDENTITY_TOKEN_FILE`, or STS session); bare static `AWS_SECRET_ACCESS_KEY` is rejected |
 | Generic HTTPS | `UGONDU_GIT_TOKEN` |
 | Generic SSH | `UGONDU_SSH_KEY_PATH` |
 
