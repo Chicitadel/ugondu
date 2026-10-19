@@ -2,13 +2,13 @@
   "schemaVersion": "1.0.0",
   "algorithm": "Ed25519",
   "keySource": "ephemeral-ed25519",
-  "manifestSha256": "beb5650ea78bd62d97736025cff917e7bc308ded63ab89da9cbdba5bb6fcdda9",
-  "publicKeySpkiDerBase64": "MCowBQYDK2VwAyEAYfe2N79Wt5W6gf8uQsYJuW16xUxKk4HVYtH67Fv595E=",
+  "manifestSha256": "8aee0307e5005936db95631670694765dddb625368230296ee5796bac1e11a32",
+  "publicKeySpkiDerBase64": "MCowBQYDK2VwAyEAh5lKc28+rSwjkXdU3PMIGcBsKrOdLWXbLWt2D4fVVGk=",
   "publicKeyJwk": {
     "crv": "Ed25519",
-    "x": "Yfe2N79Wt5W6gf8uQsYJuW16xUxKk4HVYtH67Fv595E",
+    "x": "h5lKc28-rSwjkXdU3PMIGcBsKrOdLWXbLWt2D4fVVGk",
     "kty": "OKP"
   },
-  "signatureBase64": "sr91cb/5JYmAilsdo6+bwdz/4Uv7JZWiFEyso2YdAos+FzvjltdHTyl/tXj8nspz6hP+EbOJcohD/5vtFhvGCQ==",
-  "signedAt": "2026-10-18T17:54:25.534Z"
+  "signatureBase64": "F/WSIzzeufoVLUvoFi3M/fsx11SuXwv2A7XfHe+ZjgwliHCipOe4Hz/wG6yb83yeBRxgpw2DmgLMZGUatPafCg==",
+  "signedAt": "2026-10-19T22:28:58.848Z"
 }
