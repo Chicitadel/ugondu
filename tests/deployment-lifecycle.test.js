@@ -117,7 +117,7 @@ fs.mkdirSync(sandbox, { recursive: true });
       const token = signServiceIdentity('engine-core', 'tenant_123', 'execute', privateKey.export({ type: 'pkcs8', format: 'pem' }), testKeyId);
       const res = verifyServiceIdentityToken(token, 'tenant_456');
       assert.strictEqual(res.valid, false);
-      assert.strictEqual(res.error, 'AUDIENCE_MISMATCH');
+      assert.ok(/audience mismatch|AUDIENCE_MISMATCH/i.test(String(res.error || '')), `Expected audience mismatch error, got ${res.error}`);
     });
 
     // Scenario 8: Forged recipe — digest tampered

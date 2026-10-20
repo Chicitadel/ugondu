@@ -31,11 +31,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
 const REGION = process.env.AWS_REGION || 'eu-west-3';
 const EXPECTED_ACCOUNT = '971671216490';
-const DEFAULT_CSV = 'C:\\Users\\Professional\\Downloads\\UgonduPhysicalTest_accessKeys.csv';
-
-if (!process.env.UGONDU_AWS_TEST_CREDENTIALS_CSV && fs.existsSync(DEFAULT_CSV)) {
-  process.env.UGONDU_AWS_TEST_CREDENTIALS_CSV = DEFAULT_CSV;
-}
 
 export function executeAwsPhysicalConformance(region = REGION) {
   const startedAt = new Date().toISOString();

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "algorithm": "Ed25519",
   "keyId": "key_evidence_v2",
-  "keySource": "managed-trust-anchor",
+  "keySource": "managed-secret-injected",
   "manifestSha256": "f900d3e9e84fbb99faa133892b68facdd935755349494efb0e086359626c1587",
   "publicKeySpkiDerBase64": "MCowBQYDK2VwAyEASTXsXrxPXn8ErpZmpTe7bSUvZPQLCpN26ReA/5XqLs8=",
   "publicKeyJwk": {

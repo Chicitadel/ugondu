@@ -4,7 +4,16 @@
  * Module         : AWS Conformance / Credential Bootstrap
  * File           : aws-env.mjs
  * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd
+ * Created Date   : 2026-10-20
+ * Last Modified  : 2026-10-20
  * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Secrets never printed, logged, persisted, or committed
  *
  * Uses the AWS CLI default credential provider chain. Credentials must be
  * supplied by OIDC/STS, an approved profile/SSO session, or an instance/task

@@ -74,12 +74,22 @@ jobs:
         run: npm run test --workspaces --if-present
       
       - name: Run COR remediation regression suite
+        env:
+          UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+          UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
         run: node tests/cor-remediation.test.js
 
       - name: Verify externally pinned AWS policy-pack signature
         env:
           UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+          UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
         run: node scripts/governance/verify-policy-pack-digests.mjs
+
+      - name: Verify externally pinned release evidence bundle
+        env:
+          UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+          UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
+        run: node scripts/release/verify-evidence-bundle.mjs --verify
 
       - name: Release integrity
         run: npm run verify:release-integrity --if-present

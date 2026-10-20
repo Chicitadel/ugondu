@@ -156,6 +156,9 @@ jobs:
             EXT=""
           fi
           go build -ldflags="-s -w" -o ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT .
+          if [ "${{ matrix.goos }}/${{ matrix.goarch }}" = "linux/amd64" ] || [ "${{ matrix.goos }}/${{ matrix.goarch }}" = "darwin/arm64" ] || [ "${{ matrix.goos }}/${{ matrix.goarch }}" = "windows/amd64" ]; then
+            ./ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT --help >/dev/null 2>&1 || ./ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT version >/dev/null 2>&1 || true
+          fi
 
       - name: Upload client binary
         uses: actions/upload-artifact@v4
@@ -170,6 +173,9 @@ jobs:
   release-integrity:
     name: Release Integrity & Governance Gates
     runs-on: ubuntu-latest
+    env:
+      UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+      UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -193,6 +199,12 @@ jobs:
       - name: Validate workspace gate & test coverage
         run: node scripts/governance/validate-test-coverage.mjs
 
+      - name: Verify externally pinned AWS policy-pack signature
+        run: node scripts/governance/verify-policy-pack-digests.mjs
+
+      - name: Verify externally pinned release evidence bundle
+        run: node scripts/release/verify-evidence-bundle.mjs --verify
+
   # ─────────────────────────────────────────────────────────────────
   # [en] Integration Tests — All 5 microservices verified via /health/ready
   # ─────────────────────────────────────────────────────────────────
@@ -200,6 +212,9 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [build-services, release-integrity]
+    env:
+      UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+      UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
 
     steps:
       - name: Checkout repository

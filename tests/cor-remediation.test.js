@@ -169,7 +169,11 @@ async function runCorRemediationTests() {
     // Re-audit F3: pack digests recomputed from canonical bytes, never trusted as metadata
     check('REAUDIT-F3', 'AWS COR policy pack template and pack digests recompute from canonical bytes', () => {
         const { execFileSync } = require('child_process');
-        execFileSync(process.execPath, [path.join(ROOT, 'scripts/governance/verify-policy-pack-digests.mjs')], { stdio: 'pipe' });
+        const pubPem = process.env.UGONDU_PACK_PUBLIC_KEY || fs.readFileSync(path.join(ROOT, 'config/trust/uplm_pack_authority.pub.pem'), 'utf8');
+        execFileSync(process.execPath, [path.join(ROOT, 'scripts/governance/verify-policy-pack-digests.mjs')], {
+            stdio: 'pipe',
+            env: { ...process.env, UGONDU_PACK_PUBLIC_KEY: pubPem }
+        });
     });
 
     // Re-audit F5: Managed evidence key custody anchored to key_evidence_v2
@@ -181,7 +185,7 @@ async function runCorRemediationTests() {
         const sig = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
         assert.strictEqual(sig.algorithm, 'Ed25519');
         assert.strictEqual(sig.keyId, 'key_evidence_v2');
-        assert.strictEqual(sig.keySource, 'managed-trust-anchor');
+        assert.strictEqual(sig.keySource, 'managed-secret-injected');
         assert.notStrictEqual(sig.keySource, 'ephemeral-ed25519');
     });
 
