@@ -31,8 +31,8 @@ services:
   # ────────────────────────────────────────────────────
   billing-gateway:
     build:
-      context: ./server/billing-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/billing-gateway/Dockerfile
     container_name: ugondu-billing-gateway
     restart: unless-stopped
     networks:
@@ -93,17 +93,17 @@ services:
   # ────────────────────────────────────────────────────
   plugin-manager:
     build:
-      context: ./server/plugin-manager
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/plugin-manager/Dockerfile
     container_name: ugondu-plugin-manager
     restart: unless-stopped
     networks:
       - ugondu-internal
     volumes:
-      - ./plugins:/app/plugins:ro    # [en] Plugin directory mounted read-only
+      - ./plugins:/usr/src/app/plugins:ro    # [en] Plugin directory mounted read-only
     environment:
       - PORT=4003
-      - PLUGINS_DIR=/app/plugins
+      - PLUGINS_DIR=/usr/src/app/plugins
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:4003/health/ready"]
@@ -121,8 +121,8 @@ services:
   # ────────────────────────────────────────────────────
   repository-adapter:
     build:
-      context: ./server/repository-adapter
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/repository-adapter/Dockerfile
     container_name: ugondu-repository-adapter
     restart: unless-stopped
     networks:
@@ -146,8 +146,8 @@ services:
   # ────────────────────────────────────────────────────
   event-bus:
     build:
-      context: ./server/event-bus
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/event-bus/Dockerfile
     container_name: ugondu-event-bus
     restart: unless-stopped
     networks:
