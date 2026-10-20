@@ -35,6 +35,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY tsconfig*.json ./
 COPY .governance/ ./.governance/
+COPY config/ ./config/
 COPY server/ ./server/
 
 RUN npm ci
@@ -48,6 +49,7 @@ ENV NODE_ENV=production
 
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node .governance/ ./.governance/
+COPY --chown=node:node config/ ./config/
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /usr/src/app/server ./server
 

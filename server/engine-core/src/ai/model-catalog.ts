@@ -74,7 +74,9 @@ export class ModelCatalog {
     public static resolveDefaultCatalogPath(): string {
         const candidates = [
             process.env['UGONDU_MODEL_CATALOG_PATH'],
+            '/usr/src/app/config/model-catalog.json',
             path.resolve(process.cwd(), 'config/model-catalog.json'),
+            path.resolve(__dirname, '../../../config/model-catalog.json'),
             path.resolve(__dirname, '../../../../config/model-catalog.json'),
             path.resolve(__dirname, '../../../../../config/model-catalog.json'),
         ].filter(Boolean) as string[];

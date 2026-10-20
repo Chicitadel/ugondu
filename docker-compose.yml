@@ -72,6 +72,7 @@ services:
     environment:
       - PORT=4001
       - GOVERNANCE_ROOT=/usr/src/app/.governance
+      - UGONDU_MODEL_CATALOG_PATH=/usr/src/app/config/model-catalog.json
       - BILLING_GATEWAY_URL=http://billing-gateway:4002/v1
       - UGONDU_RECIPE_PRIVATE_KEY=${UGONDU_RECIPE_PRIVATE_KEY:-}
       - UGONDU_KEY_REF=${UGONDU_KEY_REF:-}
