@@ -70,6 +70,14 @@ jobs:
 
       - name: Workspace tests
         run: npm run test --workspaces --if-present
+      
+      - name: Run COR remediation regression suite
+        run: node tests/cor-remediation.test.js
+
+      - name: Verify externally pinned AWS policy-pack signature
+        env:
+          UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+        run: node scripts/governance/verify-policy-pack-digests.mjs
 
       - name: Release integrity
         run: npm run verify:release-integrity --if-present
