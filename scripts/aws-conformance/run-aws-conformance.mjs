@@ -150,7 +150,11 @@ export function executeAwsPhysicalConformance(region = REGION) {
     status: 'PASS'
   };
 
-  const outPath = path.join(ROOT, 'evidence/tests/aws-conformance-results.json');
+  const evidenceInputDir = process.env.UGONDU_EVIDENCE_INPUT_DIR;
+  if (!evidenceInputDir) {
+    throw new Error('UGONDU_EVIDENCE_INPUT_DIR is required; write live AWS results to the isolated qualification evidence workspace, not a tracked fixture.');
+  }
+  const outPath = path.join(path.resolve(evidenceInputDir), 'tests/aws-conformance-results.json');
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2) + '\n', 'utf8');
   console.log(`[en] ✓ Emitted live AWS conformance evidence: ${path.relative(ROOT, outPath)}`);
