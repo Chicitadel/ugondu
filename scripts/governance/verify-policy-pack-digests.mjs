@@ -42,20 +42,10 @@ const sigFile = path.join(packDir, 'pack.sig');
 const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 
 export function resolvePackPublicKey() {
-  if (process.env.UGONDU_PACK_PUBLIC_KEY) {
-    return crypto.createPublicKey(process.env.UGONDU_PACK_PUBLIC_KEY);
-  }
-  const candidates = [
-    path.join(ROOT, 'server/shared/keys/uplm_pack_public.pem'),
-    path.join(ROOT, 'config/trust/uplm_pack_authority.pub.pem'),
-    path.join(ROOT, 'server/shared/keys/evidence_public.pem')
-  ];
-  for (const cand of candidates) {
-    if (fs.existsSync(cand)) {
-      return crypto.createPublicKey(fs.readFileSync(cand, 'utf8'));
-    }
-  }
-  return null;
+  // Trust roots must be pinned by the operator/CI environment, not selected
+  // from the same repository tree as the pack being verified.
+  if (!process.env.UGONDU_PACK_PUBLIC_KEY) return null;
+  return crypto.createPublicKey(process.env.UGONDU_PACK_PUBLIC_KEY);
 }
 
 export function resolvePackPrivateKey() {
@@ -109,6 +99,9 @@ export function verifyPolicyPack(yamlText, baseDir) {
       const sigData = JSON.parse(fs.readFileSync(currentSigFile, 'utf8'));
       if (sigData.algorithm !== 'Ed25519') {
         problems.push(`unsupported signature algorithm in pack.sig: ${sigData.algorithm}`);
+      }
+      if (sigData.signingKeyId !== 'ugondu-uplm-pack-signing-key-v1') {
+        problems.push(`untrusted or unexpected signingKeyId in pack.sig: ${sigData.signingKeyId}`);
       }
       if (sigData.packDigestSha256 !== packDigest) {
         problems.push(`pack.sig digest mismatch: sig has ${sigData.packDigestSha256}, actual is ${packDigest}`);
