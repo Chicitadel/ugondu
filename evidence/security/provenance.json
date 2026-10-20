@@ -4,7 +4,7 @@
     {
       "name": "@airroofers/ugondu-platform",
       "digest": {
-        "sha256": "b14a12a329162e0889b36309a5ceb67e3cb25f9d5425c95c67466f6baf834839"
+        "sha256": "145ae97f4d8317e4ae7465e5677ab6f29d15e2ef7019587ddd84067c7a8d2c6f"
       }
     }
   ],
@@ -15,8 +15,8 @@
       "externalParameters": {
         "repository": "Chicitadel/ugondu",
         "ref": "phase4/production-hardening",
-        "commitHash": "b391a67c8ebb8874d679ab4343e3ec742d47bb05",
-        "treeHash": "1391620f39dcf036659cf96ddfb0bb4d7013ea1f"
+        "commitHash": "5822ec47a9f4b9f67d609d2d2693429280881fd7",
+        "treeHash": "52089291665e1507a7d1a524d0eee9162fabfefd"
       }
     },
     "runDetails": {
@@ -24,9 +24,9 @@
         "id": "https://ugondu.airroofers.eu/builders/cor-release-runner"
       },
       "metadata": {
-        "invocationId": "inv-b391a67c8ebb",
-        "startedOn": "2026-10-19T22:28:58.848Z",
-        "finishedOn": "2026-10-19T22:28:58.848Z"
+        "invocationId": "inv-5822ec47a9f4",
+        "startedOn": "2026-10-20T00:03:19.418Z",
+        "finishedOn": "2026-10-20T00:03:19.418Z"
       }
     }
   }

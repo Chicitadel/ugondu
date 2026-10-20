@@ -1,10 +1,10 @@
 {
   "schemaVersion": "1.0.0",
-  "capturedAt": "2026-10-19T22:28:58.848Z",
+  "capturedAt": "2026-10-20T00:03:19.418Z",
   "traces": [
     {
-      "traceId": "71b0cce4152dd0d838037c376034fd69",
-      "transactionId": "tx-b391a67c",
+      "traceId": "06e58c0253a6ecf107b883cea57b02e5",
+      "transactionId": "tx-5822ec47",
       "spans": [
         {
           "service": "engine-core",

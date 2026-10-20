@@ -42,13 +42,13 @@ export class GenericGitAdapter extends BaseRepositoryAdapter {
     protected readonly defaultTokenEnvKey = 'UGONDU_GIT_TOKEN';
 
     public readonly capabilities: ProviderCapabilityMatrix = {
-        detect: 'supported',
-        authenticate: 'supported',
-        metadata: 'supported',
-        refs: 'supported',
-        fetch: 'supported',
+        detect: 'tested',
+        authenticate: 'tested',
+        metadata: 'tested',
+        refs: 'tested',
+        fetch: 'tested',
         webhook: 'unavailable',
-        deployment: 'supported'
+        deployment: 'implemented'
     };
 
     public canHandle(input: URL): boolean {

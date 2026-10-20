@@ -59,13 +59,13 @@ export class AwsCodeCommitAdapter extends BaseRepositoryAdapter {
     protected readonly defaultTokenEnvKey = 'AWS_ROLE_ARN';
 
     public readonly capabilities: ProviderCapabilityMatrix = {
-        detect: 'supported',
-        authenticate: 'supported',
-        metadata: 'supported',
-        refs: 'supported',
-        fetch: 'supported',
-        webhook: 'supported',
-        deployment: 'supported'
+        detect: 'tested',
+        authenticate: 'tested',
+        metadata: 'tested',
+        refs: 'tested',
+        fetch: 'tested',
+        webhook: 'implemented',
+        deployment: 'implemented'
     };
 
     public canHandle(input: URL): boolean {

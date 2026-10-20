@@ -96,19 +96,19 @@ Ugondu enforces the canonical 5-tier Air Roofers commercial edition hierarchy vi
 
 ## Repository Provider Capability Matrix (`COR-014`)
 
-Every provider entry in the runtime `repository-adapter` (`:4005`) is tracked across seven canonical operations (`detect`, `authenticate`, `metadata`, `refs`, `fetch`, `webhook`, `deployment`) with explicit lifecycle verification status (`implemented`, `tested`, `supported`):
+Every provider entry in the runtime `repository-adapter` (`:4005`) is tracked across seven canonical operations (`detect`, `authenticate`, `metadata`, `refs`, `fetch`, `webhook`, `deployment`) with truthful lifecycle status (`tested` for test-verified operations, `implemented` for coded handler definitions, and `supported` reserved strictly for live-certified provider environments):
 
 | Provider ID | URL / Host Pattern | Credential Env Var | `detect` | `authenticate` | `metadata` | `refs` | `fetch` | `webhook` | `deployment` |
 |---|---|---|---|---|---|---|---|---|---|
-| `github` | `github.com` | `UGONDU_GITHUB_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `gitlab` | `gitlab.com`, `/gitlab/` | `UGONDU_GITLAB_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `bitbucket` | `bitbucket.org` | `UGONDU_BITBUCKET_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `gitea` | `gitea.*` | `UGONDU_GITEA_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `gogs` | `gogs.*` | `UGONDU_GOGS_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `azure-devops` | `dev.azure.com`, `visualstudio.com` | `UGONDU_AZURE_DEVOPS_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `aws-codecommit` | `codecommit`, `amazonaws.com/v1/repos` | `AWS_ROLE_ARN` + `AWS_REGION` (OIDC via `AWS_WEB_IDENTITY_TOKEN_FILE`, or STS session); bare static `AWS_SECRET_ACCESS_KEY` is rejected | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` |
-| `generic-https` | `https://*` | `UGONDU_GIT_TOKEN` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `unsupported` (N/A) | `supported` / `tested` / `implemented` |
-| `generic-ssh` | `git@*`, `ssh://*` | `UGONDU_SSH_KEY_PATH` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `supported` / `tested` / `implemented` | `unsupported` (N/A) | `supported` / `tested` / `implemented` |
+| `github` | `github.com` | `UGONDU_GITHUB_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `gitlab` | `gitlab.com`, `/gitlab/` | `UGONDU_GITLAB_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `bitbucket` | `bitbucket.org` | `UGONDU_BITBUCKET_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `gitea` | `gitea.*` | `UGONDU_GITEA_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `gogs` | `gogs.*` | `UGONDU_GOGS_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `azure-devops` | `dev.azure.com`, `visualstudio.com` | `UGONDU_AZURE_DEVOPS_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `aws-codecommit` | `codecommit`, `amazonaws.com/v1/repos` | `AWS_ROLE_ARN` + `AWS_REGION` (OIDC via `AWS_WEB_IDENTITY_TOKEN_FILE`, or STS session); bare static `AWS_SECRET_ACCESS_KEY` is rejected | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |
+| `generic-https` | `https://*` | `UGONDU_GIT_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `unavailable` | `implemented` |
+| `generic-ssh` | `git@*`, `ssh://*` | `UGONDU_SSH_KEY_PATH` | `tested` | `tested` | `tested` | `tested` | `tested` | `unavailable` | `implemented` |
 
 ---
 

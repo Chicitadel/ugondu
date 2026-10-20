@@ -99,15 +99,16 @@ function buildJUnitXml(suiteName, testCases) {
 }
 
 function resolveEd25519KeyPair() {
-  if (process.env.UGONDU_EVIDENCE_PRIVATE_KEY) {
-    const privateKey = crypto.createPrivateKey(process.env.UGONDU_EVIDENCE_PRIVATE_KEY);
-    const publicKey = process.env.UGONDU_EVIDENCE_PUBLIC_KEY
-      ? crypto.createPublicKey(process.env.UGONDU_EVIDENCE_PUBLIC_KEY)
-      : crypto.createPublicKey(privateKey);
-    return { privateKey, publicKey, keySource: 'environment' };
+  const pubPath = path.join(ROOT, 'server/shared/keys/evidence_public.pem');
+  const privPath = path.join(ROOT, 'server/shared/keys/evidence_private.pem');
+  const pubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY || (fs.existsSync(pubPath) ? fs.readFileSync(pubPath, 'utf8') : null);
+  const privPem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY || (fs.existsSync(privPath) ? fs.readFileSync(privPath, 'utf8') : null);
+  if (!privPem) {
+    throw new Error('Managed evidence signing key required (UGONDU_EVIDENCE_PRIVATE_KEY or server/shared/keys/evidence_private.pem)');
   }
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
-  return { privateKey, publicKey, keySource: 'ephemeral-ed25519' };
+  const privateKey = crypto.createPrivateKey(privPem);
+  const publicKey = pubPem ? crypto.createPublicKey(pubPem) : crypto.createPublicKey(privateKey);
+  return { privateKey, publicKey, keyId: 'key_evidence_v2', keySource: 'managed-trust-anchor' };
 }
 
 export function generateEvidenceBundle(evidenceDir) {
@@ -356,7 +357,7 @@ export function generateEvidenceBundle(evidenceDir) {
   const manifestText = JSON.stringify(manifest, null, 2) + '\n';
   writeArtifact(evidenceDir, 'manifest.json', manifestText);
 
-  const { privateKey, publicKey, keySource } = resolveEd25519KeyPair();
+  const { privateKey, publicKey, keyId, keySource } = resolveEd25519KeyPair();
   const manifestBuffer = Buffer.from(manifestText, 'utf8');
   const signatureBuffer = crypto.sign(null, manifestBuffer, privateKey);
   const publicKeyJwk = publicKey.export({ format: 'jwk' });
@@ -365,6 +366,7 @@ export function generateEvidenceBundle(evidenceDir) {
   const sigEnvelope = {
     schemaVersion: '1.0.0',
     algorithm: 'Ed25519',
+    keyId,
     keySource,
     manifestSha256: sha256Buffer(manifestBuffer),
     publicKeySpkiDerBase64: publicKeyDerBase64,
@@ -422,9 +424,19 @@ export function verifyEvidenceBundle(evidenceDir) {
     throw new Error(`Secrets scan reported ${findingsCount} finding(s)`);
   }
 
-  const publicKey = process.env.UGONDU_EVIDENCE_PUBLIC_KEY
-    ? crypto.createPublicKey(process.env.UGONDU_EVIDENCE_PUBLIC_KEY)
-    : crypto.createPublicKey({ key: sigEnvelope.publicKeyJwk, format: 'jwk' });
+  if (sigEnvelope.keySource === 'ephemeral-ed25519') {
+    throw new Error('Forbidden ephemeral key source detected; evidence bundle must use managed key custody (key_evidence_v2)');
+  }
+  if (sigEnvelope.keyId !== 'key_evidence_v2') {
+    throw new Error(`Invalid keyId in evidence signature: expected key_evidence_v2, got ${sigEnvelope.keyId}`);
+  }
+
+  const pubPath = path.join(ROOT, 'server/shared/keys/evidence_public.pem');
+  const trustedPubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY || (fs.existsSync(pubPath) ? fs.readFileSync(pubPath, 'utf8') : null);
+  if (!trustedPubPem) {
+    throw new Error('Trusted evidence public key anchor missing at server/shared/keys/evidence_public.pem');
+  }
+  const publicKey = crypto.createPublicKey(trustedPubPem);
 
   const isValid = crypto.verify(
     null,
@@ -434,7 +446,7 @@ export function verifyEvidenceBundle(evidenceDir) {
   );
 
   if (!isValid) {
-    throw new Error('Ed25519 cryptographic signature verification FAILED for manifest.json');
+    throw new Error('Ed25519 cryptographic signature verification FAILED for manifest.json against trusted public key anchor');
   }
 
   return {

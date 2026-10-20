@@ -296,7 +296,7 @@ async function runTests() {
                 repositoryUrl: 'https://github.com/example/repo'
             });
             assert.strictEqual(metaRes.status, 200);
-            assert.strictEqual(metaRes.body.metadata.capabilities.fetch, 'supported');
+            assert.strictEqual(metaRes.body.metadata.capabilities.fetch, 'tested');
 
             const refsRes = await post(ADAPTER_PORT, '/v1/repository/refs', {
                 repositoryUrl: 'https://github.com/example/repo'

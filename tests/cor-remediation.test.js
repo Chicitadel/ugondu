@@ -172,6 +172,52 @@ async function runCorRemediationTests() {
         execFileSync(process.execPath, [path.join(ROOT, 'scripts/governance/verify-policy-pack-digests.mjs')], { stdio: 'pipe' });
     });
 
+    // Re-audit F5: Managed evidence key custody anchored to key_evidence_v2
+    check('REAUDIT-F5', 'Evidence bundle signature uses managed key custody anchored to server/shared/keys/evidence_public.pem', () => {
+        const sigPath = path.join(ROOT, 'evidence/signatures/evidence-manifest.sig');
+        const pubPath = path.join(ROOT, 'server/shared/keys/evidence_public.pem');
+        assert.ok(fs.existsSync(sigPath), 'evidence-manifest.sig must exist');
+        assert.ok(fs.existsSync(pubPath), 'evidence_public.pem must exist');
+        const sig = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
+        assert.strictEqual(sig.algorithm, 'Ed25519');
+        assert.strictEqual(sig.keyId, 'key_evidence_v2');
+        assert.strictEqual(sig.keySource, 'managed-trust-anchor');
+        assert.notStrictEqual(sig.keySource, 'ephemeral-ed25519');
+    });
+
+    // Re-audit F6: Policy pack cryptographic Ed25519 signature
+    check('REAUDIT-F6', 'Policy pack pack.sig exists and cryptographically verifies against uplm_pack_public.pem', () => {
+        const sigPath = path.join(ROOT, 'policy-packs/aws/cor/pack.sig');
+        const pubPath = path.join(ROOT, 'server/shared/keys/uplm_pack_public.pem');
+        assert.ok(fs.existsSync(sigPath), 'policy-packs/aws/cor/pack.sig must exist');
+        assert.ok(fs.existsSync(pubPath), 'uplm_pack_public.pem must exist');
+        const sig = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
+        assert.strictEqual(sig.algorithm, 'Ed25519');
+        assert.strictEqual(sig.signingKeyId, 'ugondu-uplm-pack-signing-key-v1');
+    });
+
+    // Re-audit F7: Truthful provider adapter capability lifecycle status
+    check('REAUDIT-F7', 'Provider capability matrix declares truthful lifecycle status (tested, implemented, unavailable)', () => {
+        const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
+        const guide = fs.readFileSync(path.join(ROOT, 'docs/guides/06-repository-provider-guide.md'), 'utf8');
+        assert.ok(!readme.includes('`supported` / `tested` / `implemented`'), 'README must not declare triple slashes');
+        assert.ok(!guide.includes('`implemented` / `tested` / `supported`'), 'Guide must not declare triple slashes');
+        assert.ok(readme.includes('| `github` | `github.com` | `UGONDU_GITHUB_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |'));
+    });
+
+    // Re-audit F8: Live AWS physical conformance & least privilege verification
+    check('REAUDIT-F8', 'AWS conformance report confirms real account 971671216490 discovery and least-privilege boundary', () => {
+        const reportPath = path.join(ROOT, 'evidence/tests/aws-conformance-results.json');
+        assert.ok(fs.existsSync(reportPath), 'aws-conformance-results.json must exist');
+        const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+        assert.strictEqual(report.awsAccountId, '971671216490');
+        assert.strictEqual(report.awsRegion, 'eu-west-3');
+        assert.strictEqual(report.status, 'PASS');
+        assert.ok(report.liveDiscoveredResources.vpcCount >= 1);
+        assert.ok(report.liveDiscoveredResources.subnetCount >= 1);
+        assert.strictEqual(report.leastPrivilegeBoundaries.iamListUsersDenied, true);
+    });
+
 
     console.log('══════════════════════════════════════════════════════════════');
     console.log(` COR Remediation Audit Results: ${passed} passed, ${failed} failed `);

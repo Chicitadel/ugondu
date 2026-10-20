@@ -2,31 +2,31 @@
   "schemaVersion": "1.0.0",
   "product": "@airroofers/ugondu-platform",
   "version": "1.0.0",
-  "generatedAt": "2026-10-19T22:28:58.848Z",
+  "generatedAt": "2026-10-20T00:03:19.418Z",
   "git": {
-    "commitHash": "b391a67c8ebb8874d679ab4343e3ec742d47bb05",
-    "treeHash": "1391620f39dcf036659cf96ddfb0bb4d7013ea1f",
+    "commitHash": "5822ec47a9f4b9f67d609d2d2693429280881fd7",
+    "treeHash": "52089291665e1507a7d1a524d0eee9162fabfefd",
     "branchName": "phase4/production-hardening"
   },
   "artifacts": {
     "source/commit.txt": {
-      "sha256": "270c3260b9a45536b2462a201fc1aa83c309c7750832b4f34b98a1d2baea59dc",
+      "sha256": "32de6803e1b753a83fe5b6b69e333c8c37a50fbb313bbdc1e879165ca276ebd7",
       "bytes": 167
     },
     "source/tracked-files.sha256": {
-      "sha256": "4b8d87285b521fcf126bf28980938f75a3a6fc98e56960e88f1c63cd485040ac",
+      "sha256": "88eed20b773318eea5cd2fa832818955b998d92224e3852b3e54c05572ab7fe4",
       "bytes": 520250
     },
     "governance/policy-results.json": {
-      "sha256": "dcc172b26f2a162036d888e437d69405caacddd82bb0ddb41eb169353474a8b9",
+      "sha256": "8bf8859c0a68beaa9d8698856c487cbbddfb588b33d29aec00453494dfd02f13",
       "bytes": 802
     },
     "governance/exception-register.json": {
-      "sha256": "0a9874f5062946c005abc660da68c47998e0597235fbea7f3c2fdcae515c7ce1",
+      "sha256": "7d4db52814ffd27875f755f578e92fd774af25fadc4a720c3a0eb2dd6ca8cd18",
       "bytes": 119
     },
     "governance/adr-index.json": {
-      "sha256": "877a7e4a7e5d78e2e7a00b293fc0abb26769949f65f4513708df2c57d78b7500",
+      "sha256": "aa0b73254be6d7c9831376b4a78aee38a4ddf18ee41e35ee9b17c40d02af746d",
       "bytes": 1948
     },
     "security/secrets-scan.sarif": {
@@ -34,15 +34,15 @@
       "bytes": 484
     },
     "security/dependency-scan.json": {
-      "sha256": "d48097ae7c785559c7481c8917152332b31dd20d53dd3a9c82d23ede48deb779",
+      "sha256": "d742f2abf5261f8501390ec4ce941bca99a9f1195d11856b93f787446329131a",
       "bytes": 210
     },
     "security/sbom.cdx.json": {
-      "sha256": "b0cf9e17fc4d58d83d9393aa8c2b4e743f3049d06f78497bfbe0c0a6e988c107",
+      "sha256": "ce446c7f63a385e70437d440f590acb59d5656430b736b4015a8aa498e29549d",
       "bytes": 1228
     },
     "security/provenance.json": {
-      "sha256": "3120a060de4676008baf217ccd136213aed3cb73ea2b8bd906f3cea3c617c695",
+      "sha256": "9e5f35b5cf9633fd43f7d42a72e080c9ebb2af442f9bac591fdc4af6477c7d2e",
       "bytes": 959
     },
     "tests/unit-results.xml": {
@@ -66,23 +66,23 @@
       "bytes": 606
     },
     "tests/compatibility-results.json": {
-      "sha256": "c8096d47e6d58551f80a49dccd5894961bc0b6827c1d6e3d6d30c627da5d5277",
+      "sha256": "3c25226485e616d3be5b0ae752e2543de46eec3f847f9fbe7f4addf25cf2dd32",
       "bytes": 583
     },
     "tests/aws-conformance-results.json": {
-      "sha256": "a837ac7dedb75bce56be7ae5b6e76edd485c436ea86c9bf108a003993db5a3af",
+      "sha256": "fbb96cdfd90e092d84613f57da29721a19172c857f6599a63007bf7c4d4bc069",
       "bytes": 703
     },
     "runtime/health-readiness.json": {
-      "sha256": "51ad168f3c19db5456ca529a99c468717647ff09913f9c2f80e76d12b07fe650",
+      "sha256": "d7c38773f20352556e948707ab969cf85e7729830f2090eb20d74470936aab34",
       "bytes": 696
     },
     "runtime/trace-samples.json": {
-      "sha256": "289bcc82c3044d20bb7ff904c38296a643b59a861e38bd6a413b72a833e6bfc3",
+      "sha256": "07c59dcbbb57a2030b3cdbbb23a58ea71a3a0e031340a66851219da2ddddbe85",
       "bytes": 864
     },
     "runtime/deployment-receipt.json": {
-      "sha256": "f47a2486427a6ac41f217aab8fde31b421870f41fd8e3311937e5ee15072ed0c",
+      "sha256": "db27315ef1b9c19a351c011667045f223b090ba1adb2680829d7ac5d50ab63d2",
       "bytes": 311
     }
   }
