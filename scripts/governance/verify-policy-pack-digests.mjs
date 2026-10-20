@@ -45,7 +45,15 @@ export function resolvePackPublicKey() {
   // Trust roots must be pinned by the operator/CI environment, not selected
   // from the same repository tree as the pack being verified.
   if (!process.env.UGONDU_PACK_PUBLIC_KEY) return null;
-  return crypto.createPublicKey(process.env.UGONDU_PACK_PUBLIC_KEY);
+  const raw = process.env.UGONDU_PACK_PUBLIC_KEY.trim();
+  if (raw.includes('BEGIN')) {
+    return crypto.createPublicKey(raw);
+  }
+  return crypto.createPublicKey({
+    key: Buffer.from(raw, 'base64'),
+    format: 'der',
+    type: 'spki'
+  });
 }
 
 export function resolvePackPrivateKey() {

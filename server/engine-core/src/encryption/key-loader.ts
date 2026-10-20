@@ -85,7 +85,8 @@ const SUPPORTED_KEY_REF_SCHEMES: ReadonlyArray<string> = Object.freeze([
     'secretless-registry://',
     'hsm://',
     'vault://',
-    'env://'
+    'env://',
+    'ephemeral://'
 ]);
 
 export function isForbiddenKeyLiteral(raw?: string | null): boolean {
@@ -207,6 +208,16 @@ export class KeyLoader {
             return this.secretVault.get(identifier)!;
         }
 
+        if (matchedScheme === 'ephemeral://') {
+            const candidate =
+                this.env['UGONDU_RECIPE_PRIVATE_KEY'] ||
+                this.env['UGONDU_PRIVATE_KEY'];
+            if (!candidate || !candidate.trim()) {
+                throw new KeyLoadError(__t('err_key_reference_unresolved'), 'KEY_REF_RESOLUTION_FAILED');
+            }
+            return candidate.trim();
+        }
+
         if (matchedScheme === 'env://') {
             const envVal = this.env[identifier];
             if (!envVal || !envVal.trim()) {
@@ -246,7 +257,20 @@ export class KeyLoader {
     ): KeyState {
         try {
             const normalizedPem = rawMaterial.replace(/\\n/g, '\n').trim();
-            const privateKey = createPrivateKey(normalizedPem);
+            let privateKey: KeyObject;
+            if (normalizedPem.includes('BEGIN')) {
+                privateKey = createPrivateKey(normalizedPem);
+            } else {
+                try {
+                    privateKey = createPrivateKey({
+                        key: Buffer.from(normalizedPem, 'base64'),
+                        format: 'der',
+                        type: 'pkcs8'
+                    });
+                } catch {
+                    privateKey = createPrivateKey(normalizedPem);
+                }
+            }
             const publicKey = createPublicKey(privateKey);
             const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
             const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
@@ -258,7 +282,7 @@ export class KeyLoader {
                 publicKeyPem: pubPem,
                 source,
                 ...(keyRef ? { keyRef } : {}),
-                ephemeral: false
+                ephemeral: keyRef?.startsWith('ephemeral://') || source === 'EPHEMERAL_MEMORY'
             };
         } catch {
             throw new KeyLoadError(

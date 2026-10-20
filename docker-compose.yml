@@ -17,8 +17,6 @@
 #  * - Modularization Enforced
 #  ******************************************************************************/
 
-version: "3.9"
-
 networks:
   ugondu-internal:
     driver: bridge
@@ -60,8 +58,8 @@ services:
   # ────────────────────────────────────────────────────
   engine-core:
     build:
-      context: ./server/engine-core
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/engine-core/Dockerfile
     container_name: ugondu-engine-core
     restart: unless-stopped
     networks:

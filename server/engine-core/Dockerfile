@@ -33,7 +33,8 @@ COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /usr/src/app/server ./server
 
 # Expose standard port
-EXPOSE 3000
+ENV PORT=4001
+EXPOSE 4001
 
 # Start engine core
 CMD ["npm", "run", "start:engine"]

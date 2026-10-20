@@ -139,14 +139,38 @@ export function validateEvidenceRecordSchema(record, expectedCommit, expectedTre
   }
 }
 
+function loadPublicKeyFlexible(raw) {
+  const str = String(raw).trim();
+  if (str.includes('BEGIN')) {
+    return crypto.createPublicKey(str);
+  }
+  return crypto.createPublicKey({
+    key: Buffer.from(str, 'base64'),
+    format: 'der',
+    type: 'spki'
+  });
+}
+
+function loadPrivateKeyFlexible(raw) {
+  const str = String(raw).trim();
+  if (str.includes('BEGIN')) {
+    return crypto.createPrivateKey(str);
+  }
+  return crypto.createPrivateKey({
+    key: Buffer.from(str, 'base64'),
+    format: 'der',
+    type: 'pkcs8'
+  });
+}
+
 function resolveEd25519KeyPair() {
   const pubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
   const privPem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY;
   if (!privPem || !pubPem) {
     throw new Error('Trusted evidence signing keys must be injected from managed CI secret/key custody (UGONDU_EVIDENCE_PRIVATE_KEY and UGONDU_EVIDENCE_PUBLIC_KEY); repository-local key fallback is forbidden');
   }
-  const privateKey = crypto.createPrivateKey(privPem);
-  const publicKey = crypto.createPublicKey(pubPem);
+  const privateKey = loadPrivateKeyFlexible(privPem);
+  const publicKey = loadPublicKeyFlexible(pubPem);
   const derivedPublicKey = crypto.createPublicKey(privateKey);
   const expectedDer = publicKey.export({ format: 'der', type: 'spki' });
   const derivedDer = derivedPublicKey.export({ format: 'der', type: 'spki' });
@@ -369,7 +393,7 @@ export function verifyEvidenceBundle(evidenceDir) {
   if (!trustedPubPem) {
     throw new Error('Independent evidence public trust anchor must be injected through UGONDU_EVIDENCE_PUBLIC_KEY; repository-local fallback is forbidden');
   }
-  const publicKey = crypto.createPublicKey(trustedPubPem);
+  const publicKey = loadPublicKeyFlexible(trustedPubPem);
   const expectedPubDerB64 = publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
   if (sigEnvelope.publicKeySpkiDerBase64 !== expectedPubDerB64) {
     throw new Error('Public key SPKI DER in signature envelope does not match external UGONDU_EVIDENCE_PUBLIC_KEY trust anchor');

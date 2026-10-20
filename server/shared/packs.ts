@@ -30,7 +30,24 @@ import { __t } from './i18n';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import canonicalize from 'canonicalize';
+function canonicalizeSafe(data: any): string {
+    try {
+        const mod = require('canonicalize');
+        const fn = mod && mod.default ? mod.default : mod;
+        if (typeof fn === 'function') {
+            const out = fn(data);
+            if (typeof out === 'string') return out;
+        }
+    } catch {}
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const sorted: Record<string, any> = {};
+        for (const k of Object.keys(data).sort()) {
+            sorted[k] = data[k];
+        }
+        return JSON.stringify(sorted);
+    }
+    return JSON.stringify(data);
+}
 import { globalTrustRegistry } from './trust_registry';
 
 export interface LanguagePack {
@@ -91,7 +108,7 @@ export function computePackManifestPayload(pack: Partial<LanguagePack>): string 
         schemaVersion: pack.schemaVersion || '1',
         version: pack.version || ''
     };
-    return (canonicalize as any)(canonicalManifest) || JSON.stringify(canonicalManifest);
+    return canonicalizeSafe(canonicalManifest);
 }
 
 export function signLanguagePackManifest(pack: Partial<LanguagePack>, privateKeyPem?: string): string {
