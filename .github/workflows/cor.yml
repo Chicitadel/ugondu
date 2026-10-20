@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - phase4/production-hardening
+      - 'phase4/**'
   pull_request:
     branches:
       - main
