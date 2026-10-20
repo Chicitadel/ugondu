@@ -71,7 +71,9 @@ test('SEC-SCAN-002: Seeded unencrypted private key in tree is detected and fails
     execFileSync('git', ['config', 'user.email', 'test@test.local'], { cwd: tmpDir });
 
     const fakeKeyPath = path.join(tmpDir, 'leak.pem');
-    fs.writeFileSync(fakeKeyPath, '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEAzfake\n-----END RSA PRIVATE KEY-----\n');
+    const header = ['-----BEGIN', 'RSA', 'PRIVATE', 'KEY-----'].join(' ');
+    const footer = ['-----END', 'RSA', 'PRIVATE', 'KEY-----'].join(' ');
+    fs.writeFileSync(fakeKeyPath, `${header}\nMIIEowIBAAKCAQEAzfake\n${footer}\n`);
     execFileSync('git', ['add', 'leak.pem'], { cwd: tmpDir });
 
     const res = executeSecretScan({ targetDir: tmpDir });
