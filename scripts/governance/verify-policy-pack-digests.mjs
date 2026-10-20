@@ -52,10 +52,8 @@ export function resolvePackPrivateKey() {
   if (process.env.UGONDU_PACK_PRIVATE_KEY) {
     return crypto.createPrivateKey(process.env.UGONDU_PACK_PRIVATE_KEY);
   }
-  const cand = path.join(ROOT, 'server/shared/keys/uplm_pack_private.pem');
-  if (fs.existsSync(cand)) {
-    return crypto.createPrivateKey(fs.readFileSync(cand, 'utf8'));
-  }
+  // Private signing material must be injected from managed key custody.
+  // Never sign release artifacts with a repository-local private key.
   return null;
 }
 
