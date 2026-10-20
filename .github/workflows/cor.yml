@@ -166,6 +166,7 @@ jobs:
       - name: Run fail-closed AWS read-only conformance probes
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_EVIDENCE_INPUT_DIR: .cor_evidence/raw
         run: node scripts/aws-conformance/run-aws-conformance.mjs
 
       - name: Run physical certification
