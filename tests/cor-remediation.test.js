@@ -246,8 +246,10 @@ async function runCorRemediationTests() {
         const evidence = fs.readFileSync(path.join(ROOT, 'scripts/release/verify-evidence-bundle.mjs'), 'utf8');
         const pack = fs.readFileSync(path.join(ROOT, 'scripts/governance/verify-policy-pack-digests.mjs'), 'utf8');
         assert.ok(evidence.includes('Independent evidence public trust anchor must be injected'));
+        assert.ok(!evidence.includes('fs.existsSync(pubPath)'), 'repository-local evidence key fallback is forbidden');
         assert.ok(pack.includes('Trust roots must be pinned by the operator/CI environment'));
         assert.ok(pack.includes('sigData.signingKeyId !=='), 'policy-pack signing key ID must be validated');
+        assert.ok(!pack.includes("path.join(ROOT, 'server/shared/keys/uplm_pack_private.pem')"), 'repository-local pack private-key fallback is forbidden');
     });
 
     console.log('══════════════════════════════════════════════════════════════');
