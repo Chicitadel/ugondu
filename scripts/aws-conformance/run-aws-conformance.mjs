@@ -93,11 +93,14 @@ export function executeAwsPhysicalConformance(region = REGION) {
   // Attempting unauthorized role assumption MUST fail with AccessDenied
   const assumeDenial = aws([
     'sts', 'assume-role',
-    '--role-arn', `arn:aws:iam://${accountId}:role/UgonduCORExecutionRole`,
+    '--role-arn', `arn:aws:iam::${accountId}:role/UgonduCORExecutionRole`,
     '--role-session-name', 'ugondu-conformance-check'
   ], region);
-  const assumeDenied = assumeDenial.status !== 0 && assumeDenial.stderr.includes('AccessDenied');
-  console.log(`[en] ✓ Role Assumption Boundary Verified: UgonduCORExecutionRole assumption fail-closed (${assumeDenied ? 'AccessDenied' : 'DENIED'})`);
+  const assumeDenied = assumeDenial.status !== 0 && /AccessDenied|Access Denied|not authorized/i.test(assumeDenial.stderr);
+  if (!assumeDenied) {
+    throw new Error('Least-privilege violation: assuming UgonduCORExecutionRole unexpectedly succeeded or failed for a reason other than an authorization denial');
+  }
+  console.log('[en] ✓ Role Assumption Boundary Verified: UgonduCORExecutionRole assumption denied by authorization policy');
 
   const completedAt = new Date().toISOString();
 
