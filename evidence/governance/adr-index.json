@@ -1,70 +1,17 @@
 {
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-10-20T00:16:57.185Z",
+  "updatedAt": "2026-10-20T12:49:56.751Z",
+  "count": 2,
   "records": [
     {
-      "id": "ADR-001",
-      "title": "Thin-Client / Server Architecture",
-      "status": "FROZEN",
-      "file": "docs/ARCHITECTURE.md"
-    },
-    {
-      "id": "ADR-002",
-      "title": "Edition Enforcement via Signed Recipes",
-      "status": "FROZEN",
-      "file": "docs/ARCHITECTURE.md"
-    },
-    {
-      "id": "ADR-003",
-      "title": "Microservice Isolation per Concern (4001-4005)",
-      "status": "FROZEN",
-      "file": "docs/ARCHITECTURE.md"
-    },
-    {
-      "id": "ADR-004",
-      "title": "quota-sync Default for cPanel/DirectAdmin",
-      "status": "FROZEN",
-      "file": "docs/ARCHITECTURE.md"
-    },
-    {
-      "id": "ADR-005",
-      "title": "Thin-Client Canonical Marketplace Distribution",
-      "status": "FROZEN",
-      "file": "docs/ARCHITECTURE.md"
-    },
-    {
-      "id": "ADR-006",
-      "title": "Intent-Driven Execution and UPM Gating Invariant",
+      "id": "ADR-0001",
+      "title": "Modular Microservices and COR Governance",
       "status": "ACCEPTED",
-      "file": "docs/ARCHITECTURE.md"
+      "file": "docs/adr/ADR-0001-modular-microservices-and-cor-governance.md"
     },
     {
       "id": "UPLM-ADR-001",
-      "title": "Server-Governed Plugin Admission & Zero Client Code Injection",
-      "status": "FROZEN",
-      "file": "docs/uplm/UPLM_ADR.md"
-    },
-    {
-      "id": "UPLM-ADR-002",
-      "title": "Unified URRE & DEISE Durable State Machine Integration",
-      "status": "FROZEN",
-      "file": "docs/uplm/UPLM_ADR.md"
-    },
-    {
-      "id": "UPLM-ADR-003",
-      "title": "Agentless Capability Parity & Execution Path Equivalence",
-      "status": "FROZEN",
-      "file": "docs/uplm/UPLM_ADR.md"
-    },
-    {
-      "id": "UPLM-ADR-004",
-      "title": "Five-Way Split AWS COR V9 Managed Policies with Transaction ABAC",
-      "status": "FROZEN",
-      "file": "docs/uplm/UPLM_ADR.md"
-    },
-    {
-      "id": "UPLM-ADR-005",
-      "title": "Ed25519 Signed Release Evidence Bundle",
+      "title": "Universal Plugin Lifecycle Management ADR",
       "status": "FROZEN",
       "file": "docs/uplm/UPLM_ADR.md"
     }

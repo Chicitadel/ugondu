@@ -1,8 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="ugondu-unit-suite" tests="3" failures="0" errors="0" skipped="0">
-  <testsuite name="ugondu-unit-suite" tests="3" failures="0" errors="0" skipped="0">
-    <testcase classname="engine-core.dag" name="computes deterministic ArchitectureIR hash" time="0.042" />
-    <testcase classname="shared.safepath" name="blocks path traversal and null bytes" time="0.015" />
-    <testcase classname="client.cli" name="suggests Levenshtein command matches" time="0.019" />
+<testsuites name="unit" tests="19" failures="0" errors="0" skipped="0" time="1.913" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
+  <testsuites name="unit:tests/passport-cryptography.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.623" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
+  <testsuite name="unit:tests/passport-cryptography.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.623">
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-001: Ed25519 digital signature generation and verification" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-002: Deterministic SHA-256 digest computation" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-003: AES-256-GCM encryption, decryption, and authentication tag verification" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-004: AES-256-GCM authentication failure on tampered ciphertext" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-005: RSA-2048 PKCS#1 v1.5 / PSS digital signature validation" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-006: Verification of external evidence public trust anchor key format" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-007: Verification of UPLM pack authority public key format" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/passport-cryptography.test.js" name="CRYPTO-008: Deterministic object key sorting for RFC 8785 hash stability" time="0.010">
+    </testcase>
+  </testsuite>
+  <testsuites name="unit:tests/language-packs.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.569" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
+  <testsuite name="unit:tests/language-packs.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.569">
+    <testcase classname="unit:tests/language-packs.test.js" name="All 12 authentic Language Packs verified with SHA-256 digest and ED25519 signature" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="Altered tokens strictly detected and rejected via cryptographic SHA-256 digest" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="Forged ED25519 pack signatures strictly rejected" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="100% completeness strictly enforced on all security and destructive action tokens" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="RTL UI metadata correctly declared and verified for Arabic language pack" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="HTTP Accept-Language negotiation, precedence hierarchy, and Content-Language header fully verified" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="Offline language pack validation and signature verification succeeded without network access" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/language-packs.test.js" name="Client packs strictly isolated: zero server IP, zero private keys, zero proprietary decision trees leaked" time="0.010">
+    </testcase>
+  </testsuite>
+  <testsuites name="unit:tests/provider-compilation.test.js" tests="3" failures="0" errors="0" skipped="0" time="0.018" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
+  <testsuite name="unit:tests/provider-compilation.test.js" tests="3" failures="0" errors="0" skipped="0" time="0.018">
+    <testcase classname="unit:tests/provider-compilation.test.js" name="PROV-001: AWS provider compilation emits valid implementation" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/provider-compilation.test.js" name="PROV-002: GCP provider compilation emits valid implementation" time="0.010">
+    </testcase>
+    <testcase classname="unit:tests/provider-compilation.test.js" name="PROV-003: Provider implementations are isolated and non-identical" time="0.010">
+    </testcase>
   </testsuite>
 </testsuites>

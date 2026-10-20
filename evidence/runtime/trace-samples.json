@@ -1,36 +1,20 @@
 {
   "schemaVersion": "1.0.0",
-  "capturedAt": "2026-10-20T00:16:57.185Z",
-  "traces": [
+  "evaluatedAt": "2026-10-20T12:50:57.149Z",
+  "executionId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
+  "commitHash": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
+  "treeHash": "76244e10696152ff63e3177cdd629b0199888deb",
+  "w3cTraceContext": true,
+  "traceparent": "00-a7dee65f1e0386280c748252fb1ea782-e05ce30a2ca0577f-01",
+  "responseTraceHeader": "00-a7dee65f1e0386280c748252fb1ea782-e05ce30a2ca0577f-01",
+  "spans": [
     {
-      "traceId": "690a787a6946e06617f3017f501a4e85",
-      "transactionId": "tx-d4144639",
-      "spans": [
-        {
-          "service": "engine-core",
-          "operation": "POST /v1/deploy/resolve",
-          "status": "OK",
-          "durationMs": 42
-        },
-        {
-          "service": "billing-gateway",
-          "operation": "VERIFY_ENTITLEMENT",
-          "status": "OK",
-          "durationMs": 9
-        },
-        {
-          "service": "repository-adapter",
-          "operation": "POST /v1/repository/resolve",
-          "status": "OK",
-          "durationMs": 6
-        },
-        {
-          "service": "uppie",
-          "operation": "EVALUATE_ARCHITECTURE_IR",
-          "status": "OK",
-          "durationMs": 11
-        }
-      ]
+      "traceId": "a7dee65f1e0386280c748252fb1ea782",
+      "spanId": "e05ce30a2ca0577f",
+      "service": "repository-adapter",
+      "operation": "GET /health/ready",
+      "httpStatus": 200,
+      "status": "OK"
     }
   ]
 }

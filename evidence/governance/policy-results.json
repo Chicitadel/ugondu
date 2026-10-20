@@ -1,33 +1,22 @@
 {
   "schemaVersion": "1.0.0",
-  "evaluatedAt": "2026-10-20T00:16:57.185Z",
-  "commitHash": "d414463904f3b011c44354123f515b4ec93c42ff",
-  "status": "PASS",
-  "policies": [
-    {
-      "policyId": "COR-014",
-      "name": "Capability & Repository Matrix Alignment",
-      "status": "PASS"
-    },
-    {
-      "policyId": "AIR_ROOFERS_GUIDE_5_1",
-      "name": "Max 500 Lines Per Source/Script File",
-      "status": "PASS"
-    },
-    {
-      "policyId": "SEC-CAP-001",
-      "name": "Federated Capability Enforcement",
-      "status": "PASS"
-    },
-    {
-      "policyId": "UPPIE-GATE-001",
-      "name": "Cryptographic ExecutionAuthorization Seal",
-      "status": "PASS"
-    },
-    {
-      "policyId": "DEISE-INV-001",
-      "name": "Do No Harm Topology Drift Guard",
-      "status": "PASS"
-    }
-  ]
+  "evaluatedAt": "2026-10-20T12:49:56.751Z",
+  "executionId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
+  "commitHash": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
+  "treeHash": "76244e10696152ff63e3177cdd629b0199888deb",
+  "policyPack": "policy-packs/aws/cor/pack.yaml",
+  "policyPackVerified": true,
+  "passedGates": [
+    "UG-COR-NO-STUBS-001",
+    "UG-COR-PORT-4001-4005",
+    "UG-COR-POLICY-PACK-SIG"
+  ],
+  "scriptsExecuted": [
+    "scripts/verify-release-integrity.js",
+    "scripts/governance/validate-repository.mjs",
+    "scripts/governance/validate-capability-registry.mjs",
+    "scripts/governance/validate-test-coverage.mjs",
+    "scripts/governance/verify-policy-pack-digests.mjs"
+  ],
+  "status": "PASS"
 }

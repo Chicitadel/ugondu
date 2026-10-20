@@ -1,10 +1,38 @@
 {
   "schemaVersion": "1.0.0",
-  "issuedAt": "2026-10-20T00:16:57.185Z",
-  "transactionId": "tx-d4144639",
-  "commitHash": "d414463904f3b011c44354123f515b4ec93c42ff",
-  "treeHash": "709a15c1bec833f6c450a62d935fc743e12f969d",
-  "urreState": "COMPLETED",
-  "deiseTwinIntegrity": "VALID",
-  "zeroResiduals": true
+  "evidenceId": "ev-37d936ca-7bf5-4c71-81b3-c38c352dcef6",
+  "executionId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
+  "gateId": "COR-PLATFORM-WINDOWS-AMD64",
+  "status": "PASS",
+  "source": {
+    "repository": "Chicitadel/ugondu",
+    "commit": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
+    "tree": "76244e10696152ff63e3177cdd629b0199888deb",
+    "workflowRunId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6"
+  },
+  "target": {
+    "os": "windows",
+    "architecture": "amd64",
+    "runtime": "node/v24.17.0",
+    "provider": "local-win32",
+    "mode": "headless-ci"
+  },
+  "startedAt": "2026-10-20T12:49:44.540Z",
+  "completedAt": "2026-10-20T12:50:57.152Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "scripts/release/collect-qualification-evidence.mjs"
+  ],
+  "exitCode": 0,
+  "rawLogSha256": "1df7bd260b4c20555a4b6eaf35faa76787f571d786a7afc8779f357f6f1c7048",
+  "artifacts": [
+    {
+      "path": "policy/policy-evaluation.json",
+      "sha256": "2fb25942fa75d6731eb73de5ded49662d76ee602d426b8a7d93fc42b4a61da13",
+      "sizeBytes": 754
+    }
+  ],
+  "limitations": [
+    "Host runtime verification executed on windows/amd64; other OS targets require native matrix runners."
+  ]
 }

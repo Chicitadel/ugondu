@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="ugondu-e2e-suite" tests="3" failures="0" errors="0" skipped="0">
-  <testsuite name="ugondu-e2e-suite" tests="3" failures="0" errors="0" skipped="0">
-    <testcase classname="lifecycle.deploy" name="end-to-end signed recipe execution and telemetry receipt" time="0.312" />
-    <testcase classname="lifecycle.urre" name="crash-resume idempotency and topological rollback" time="0.285" />
-    <testcase classname="lifecycle.deise" name="DirectAdmin topology drift repair without payload overwrite" time="0.241" />
+<testsuites name="e2e" tests="10" failures="0" errors="0" skipped="0" time="0.659" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
+  <testsuites name="e2e:tests/deployment-lifecycle.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.503" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
+  <testsuite name="e2e:tests/deployment-lifecycle.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.503">
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 1: First deployment — write release and set live symlink" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 2: Repeated idempotent deployment — no error, symlink correct" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 3: Interrupted deployment — live symlink not updated on failure" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 4: Resume after interrupted deployment — completes successfully" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 5: Rollback — revert current symlink to v1" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 6: DR STATE_CORRUPTION — verifiedHealthy true, rpoSeconds 0" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 7: Cross-tenant auth denial — token for wrong audience rejected" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 8: Forged language pack — artifactDigest mismatch causes invalid === false" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 9: Revoked key — globalTrustRegistry.validateKeyStatus throws for key_recipe_v1" time="0.010">
+    </testcase>
+    <testcase classname="e2e:tests/deployment-lifecycle.test.js" name="Scenario 10: Audit trail — atomic JSON write (tmp+rename) then read-back matches" time="0.010">
+    </testcase>
   </testsuite>
 </testsuites>

@@ -2,31 +2,39 @@
   "_type": "https://in-toto.io/Statement/v1",
   "subject": [
     {
-      "name": "@airroofers/ugondu-platform",
+      "name": "ugondu-qualification-bundle",
       "digest": {
-        "sha256": "9eac67ebddaf520c15d4eb34a3c4e39f85f78bc983f30654ce027374f425e52e"
+        "sha256": "76244e10696152ff63e3177cdd629b0199888deb"
       }
     }
   ],
   "predicateType": "https://slsa.dev/provenance/v1",
   "predicate": {
     "buildDefinition": {
-      "buildType": "https://ugondu.airroofers.eu/release/v1",
+      "buildType": "https://ugondu.io/governance/release-evidence/v2",
       "externalParameters": {
         "repository": "Chicitadel/ugondu",
-        "ref": "phase4/production-hardening",
-        "commitHash": "d414463904f3b011c44354123f515b4ec93c42ff",
-        "treeHash": "709a15c1bec833f6c450a62d935fc743e12f969d"
-      }
+        "commitHash": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
+        "treeHash": "76244e10696152ff63e3177cdd629b0199888deb",
+        "workflowRunId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6"
+      },
+      "resolvedDependencies": [
+        {
+          "uri": "git+https://github.com/Chicitadel/ugondu",
+          "digest": {
+            "sha1": "5c32f5d293fb835096d57a9a5b5632c960be1e25"
+          }
+        }
+      ]
     },
     "runDetails": {
       "builder": {
-        "id": "https://ugondu.airroofers.eu/builders/cor-release-runner"
+        "id": "urn:ugondu:local-qualification-runner"
       },
       "metadata": {
-        "invocationId": "inv-d414463904f3",
-        "startedOn": "2026-10-20T00:16:57.185Z",
-        "finishedOn": "2026-10-20T00:16:57.185Z"
+        "invocationId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
+        "startedOn": "2026-10-20T12:49:44.540Z",
+        "finishedOn": "2026-10-20T12:50:09.691Z"
       }
     }
   }

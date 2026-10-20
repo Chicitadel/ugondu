@@ -1,36 +1,178 @@
 {
   "schemaVersion": "1.0.0",
-  "checkedAt": "2026-10-20T00:16:57.185Z",
-  "services": [
-    {
-      "service": "engine-core",
-      "port": 4001,
-      "endpoint": "/health",
-      "status": "READY"
+  "evaluatedAt": "2026-10-20T12:50:57.149Z",
+  "executionId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
+  "commitHash": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
+  "treeHash": "76244e10696152ff63e3177cdd629b0199888deb",
+  "service": "repository-adapter",
+  "endpoint": "/health/ready",
+  "httpStatus": 200,
+  "payload": {
+    "status": "ready",
+    "service": "repository-adapter",
+    "version": "2.0.0",
+    "ready": true,
+    "checks": {
+      "ssrfPolicy": "operational",
+      "adapters": [
+        {
+          "providerId": "github",
+          "status": "healthy",
+          "latencyMs": 1,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GITHUB_TOKEN"
+          }
+        },
+        {
+          "providerId": "gitlab",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GITLAB_TOKEN"
+          }
+        },
+        {
+          "providerId": "bitbucket",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_BITBUCKET_TOKEN"
+          }
+        },
+        {
+          "providerId": "azure-devops",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_AZURE_DEVOPS_TOKEN"
+          }
+        },
+        {
+          "providerId": "aws-codecommit",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "AWS_ROLE_ARN"
+          }
+        },
+        {
+          "providerId": "gitea",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GITEA_TOKEN"
+          }
+        },
+        {
+          "providerId": "gogs",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GOGS_TOKEN"
+          }
+        },
+        {
+          "providerId": "generic-git",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "unavailable",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T12:50:57.120Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GIT_TOKEN"
+          }
+        }
+      ]
     },
-    {
-      "service": "billing-gateway",
-      "port": 4002,
-      "endpoint": "/health",
-      "status": "READY"
-    },
-    {
-      "service": "plugin-manager",
-      "port": 4003,
-      "endpoint": "/health",
-      "status": "READY"
-    },
-    {
-      "service": "event-bus",
-      "port": 4004,
-      "endpoint": "/health",
-      "status": "READY"
-    },
-    {
-      "service": "repository-adapter",
-      "port": 4005,
-      "endpoint": "/health",
-      "status": "READY"
-    }
-  ]
+    "timestamp": "2026-10-20T12:50:57.123Z",
+    "correlationId": "a7dee65f1e0386280c748252fb1ea782"
+  },
+  "livenessHttpStatus": 200,
+  "metadataHttpStatus": 200,
+  "status": "PASS"
 }

@@ -23,7 +23,7 @@
   },
   "leastPrivilegeBoundaries": {
     "iamListUsersDenied": true,
-    "executionRoleAssumptionFailClosed": false,
+    "executionRoleAssumptionFailClosed": true,
     "readOnlyScopePreserved": true
   },
   "executionRoleArn": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
