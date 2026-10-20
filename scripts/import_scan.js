@@ -28,5 +28,6 @@ function walk(dir) {
   }
 }
 ['server', 'client', 'packages'].forEach((r) => fs.existsSync(path.join(root, r)) && walk(path.join(root, r)));
-fs.writeFileSync(path.join(__dirname, 'import_scan.txt'), bad.join('\n') + `\nCHECKED ${checked} BROKEN ${bad.length} TS_IGNORE_DIRECTIVES ${ignored}\n`);
+fs.mkdirSync(path.join(root, 'scratch'), { recursive: true });
+fs.writeFileSync(path.join(root, 'scratch', 'import_scan.txt'), bad.join('\n') + `\nCHECKED ${checked} BROKEN ${bad.length} TS_IGNORE_DIRECTIVES ${ignored}\n`);
 console.log('checked', checked, 'broken', bad.length, 'ts-ignore', ignored);

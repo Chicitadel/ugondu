@@ -28,5 +28,6 @@ roots.forEach((r) => fs.existsSync(r) && walk(r));
 const rows = Object.entries(hits).sort((a, b) => b[1].length - a[1].length);
 const out = rows.map(([f, h]) => `${String(h.length).padStart(3)}  ${f}  ${[...new Set(h.map((x) => x.split('@')[0]))].join(',')}`);
 out.push(`FILES ${rows.length}  HITS ${rows.reduce((n, [, h]) => n + h.length, 0)}`);
-fs.writeFileSync(path.join(__dirname, 'depth_scan.txt'), out.join('\n'));
+fs.mkdirSync(path.join(__dirname, '..', 'scratch'), { recursive: true });
+fs.writeFileSync(path.join(__dirname, '..', 'scratch', 'depth_scan.txt'), out.join('\n'));
 console.log('depth scan done', rows.length);

@@ -25,6 +25,8 @@ jobs:
       NODE_VERSION: "20"
       COR_SIGNING_KEY: ${{ secrets.COR_SIGNING_KEY }}
       COR_PUBLIC_KEY: ${{ secrets.COR_PUBLIC_KEY }}
+      UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+      UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
 
     steps:
       - name: Checkout exact candidate
@@ -141,6 +143,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build workspaces
+        run: npm run build
 
       - name: Compile scripts
         run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck --target ES2022 --moduleResolution node --downlevelIteration --esModuleInterop

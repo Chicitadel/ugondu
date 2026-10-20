@@ -73,5 +73,6 @@ for (const u of used) {
 rep.push(`\nParam/placeholder mismatches: ${paramIssues}`);
 issues.slice(0, 20).forEach(i => rep.push(i));
 
+fs.mkdirSync(path.join(root, 'scratch'), { recursive: true });
 fs.writeFileSync(path.join(root, 'scratch', 'i18n_audit.log'), rep.join('\n'));
 console.log(rep.join('\n'));
