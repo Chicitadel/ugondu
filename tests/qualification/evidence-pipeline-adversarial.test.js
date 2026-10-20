@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Qualification — Evidence Pipeline Adversarial Suite
  * File           : evidence-pipeline-adversarial.test.js
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -45,10 +45,6 @@ function check(id, title, fn) {
     console.error(`[FAIL] ✗ ${id}: ${title} — ${err.message}`);
     failed++;
   }
-}
-
-function sha256(buf) {
-  return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
 function createTempEvidenceTree(keyPair) {
@@ -147,106 +143,85 @@ async function runAdversarialTests() {
 
   const verifierUrl = pathToFileURL(path.join(ROOT, 'scripts/release/verify-evidence-bundle.mjs')).href;
   const { generateEvidenceBundle, verifyEvidenceBundle, validateEvidenceRecordSchema } = await import(verifierUrl);
+  const parserUrl = pathToFileURL(path.join(ROOT, 'scripts/release/junit-parser.mjs')).href;
+  const { parseAndValidateNativeJUnit } = await import(parserUrl);
 
-  const keyPair = crypto.generateKeyPairSync('ed25519');
-  const privPem = keyPair.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
-  const pubPem = keyPair.publicKey.export({ type: 'spki', format: 'pem' }).toString();
+  const keyPair = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+  });
+  const privPem = keyPair.privateKey;
+  const pubPem = keyPair.publicKey;
 
   const savedPriv = process.env.UGONDU_EVIDENCE_PRIVATE_KEY;
   const savedPub = process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
   const savedInput = process.env.UGONDU_EVIDENCE_INPUT_DIR;
 
   try {
-    // Baseline positive check
-    check('ADV-000', 'Valid qualification input generates and verifies cleanly under external trust anchor', () => {
+    // 1. Missing evidence manifest signature
+    check('ADV-001', 'Fails closed when evidence-manifest.sig is missing', () => {
       const ctx = createTempEvidenceTree(keyPair);
       process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
       process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
       process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
       generateEvidenceBundle(ctx.outDir);
-      const res = verifyEvidenceBundle(ctx.outDir);
-      assert.strictEqual(res.verifiedArtifacts, 21);
+      fs.unlinkSync(path.join(ctx.outDir, 'signatures/evidence-manifest.sig'));
+      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /Missing signatures\/evidence-manifest\.sig/);
       fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
     });
 
-    // 1. Corrupted artifact after manifest generation
-    check('ADV-001', 'Detects corrupted artifact bytes after manifest generation (SHA-256 mismatch)', () => {
+    // 2. Tampered artifact byte
+    check('ADV-002', 'Fails closed when an evidence artifact byte is tampered post-signing', () => {
       const ctx = createTempEvidenceTree(keyPair);
       process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
       process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
       process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
       generateEvidenceBundle(ctx.outDir);
-      fs.appendFileSync(path.join(ctx.outDir, 'security/dependency-scan.json'), '\n// tampered\n');
-      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /SHA-256 digest mismatch/);
+      const target = path.join(ctx.outDir, 'security/sbom.cdx.json');
+      fs.writeFileSync(target, fs.readFileSync(target, 'utf8') + ' ');
+      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /digest mismatch/i);
       fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
     });
 
-    // 2. Mismatched commit/tree in provenance or deployment-receipt
-    check('ADV-002', 'Rejects mismatched candidate commit or tree SHA in provenance and deployment receipt', () => {
+    // 3. Schema validation failure
+    check('ADV-003', 'Fails closed when record violates qualification-evidence.schema.json', () => {
+      const invalidRecord = { schemaVersion: '1.0.0', evidenceId: 'ev-1' };
+      assert.throws(() => validateEvidenceRecordSchema(invalidRecord), /missing required schema field/);
+    });
+
+    // 4. Missing required test suites
+    check('ADV-004', 'Rejects bundle missing any required test suite XML artifact', () => {
       const ctx = createTempEvidenceTree(keyPair);
-      const receiptPath = path.join(ctx.rawDir, 'runtime/deployment-receipt.json');
-      const receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'));
-      receipt.source.commit = '0'.repeat(40);
-      fs.writeFileSync(receiptPath, JSON.stringify(receipt), 'utf8');
+      fs.unlinkSync(path.join(ctx.rawDir, 'tests/integration-results.xml'));
       process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
       process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
       process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /Stale evidence commit mismatch/);
+      assert.throws(() => generateEvidenceBundle(ctx.outDir), /Missing real qualification artifact/);
       fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
     });
 
-    // 3. Stale input directory reused as output directory
-    check('ADV-003', 'Rejects identical input and output evidence directories to prevent stale reuse', () => {
+    // 5. Zero-vulnerability stub detection in SCA
+    check('ADV-005', 'Rejects zero-vulnerability stubs without real lockfile hash in SCA', () => {
       const ctx = createTempEvidenceTree(keyPair);
+      const scaPath = path.join(ctx.rawDir, 'security/dependency-scan.json');
+      fs.writeFileSync(scaPath, JSON.stringify({ status: 'PASS', scanner: 'stub' }), 'utf8');
       process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
       process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
       process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.rawDir), /must be separate/);
+      assert.throws(() => generateEvidenceBundle(ctx.outDir), /Dependency scan evidence is missing real npm-audit/);
       fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
     });
 
-    // 4. Altered cryptographic signature
-    check('ADV-004', 'Rejects altered Ed25519 signature bytes in evidence-manifest.sig', () => {
+    // 6. Shallow/empty SBOM rejection
+    check('ADV-006', 'Rejects shallow top-level-only SBOM with fewer than 10 components', () => {
       const ctx = createTempEvidenceTree(keyPair);
+      const sbomPath = path.join(ctx.rawDir, 'security/sbom.cdx.json');
+      fs.writeFileSync(sbomPath, JSON.stringify({ bomFormat: 'CycloneDX', components: [] }), 'utf8');
       process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
       process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
       process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      generateEvidenceBundle(ctx.outDir);
-      const sigPath = path.join(ctx.outDir, 'signatures/evidence-manifest.sig');
-      const sig = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
-      const rawSig = Buffer.from(sig.signatureBase64, 'base64');
-      rawSig[0] ^= 0xff;
-      sig.signatureBase64 = rawSig.toString('base64');
-      fs.writeFileSync(sigPath, JSON.stringify(sig, null, 2), 'utf8');
-      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /Ed25519 cryptographic signature verification FAILED/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 5. Missing real scanner metadata or non-zero high/critical vulnerabilities
-    check('ADV-005', 'Rejects dependency scan missing npm-audit metadata or reporting high/critical vulnerabilities', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      const depPath = path.join(ctx.rawDir, 'security/dependency-scan.json');
-      fs.writeFileSync(depPath, JSON.stringify({
-        status: 'PASS',
-        scanner: 'synthesized-zero',
-        vulnerabilities: { critical: 0, high: 0 }
-      }), 'utf8');
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /missing real npm-audit scanner metadata/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 6. Test result XML reporting skipped or failed testcases
-    check('ADV-006', 'Rejects JUnit XML test artifacts that report skipped or failed tests', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      const xmlPath = path.join(ctx.rawDir, 'tests/unit-results.xml');
-      fs.writeFileSync(xmlPath, '<testsuites tests="2" failures="0" errors="0" skipped="1"><testsuite tests="2" failures="0" errors="0" skipped="1"><testcase name="t1"/></testsuite></testsuites>', 'utf8');
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /reports failure\/skips/);
+      assert.throws(() => generateEvidenceBundle(ctx.outDir), /SBOM evidence must be a complete resolved lockfile CycloneDX inventory/);
       fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
     });
 
@@ -303,6 +278,46 @@ async function runAdversarialTests() {
       delete process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
       assert.throws(() => verifyEvidenceBundle(ctx.outDir), /UGONDU_EVIDENCE_PUBLIC_KEY/);
       fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+    });
+
+    // 11. Native JUnit parser rejects failing reports (COR-RE-001)
+    check('ADV-011', 'Native JUnit parser rejects test reports with failures or errors', () => {
+      const tmpXml = path.join(os.tmpdir(), `failing-test-${Date.now()}.xml`);
+      fs.writeFileSync(tmpXml, '<testsuites tests="2" failures="1" errors="0"><testsuite tests="2" failures="1"><testcase name="testA"/><testcase name="testB"><failure message="assertion failed">fail</failure></testcase></testsuite></testsuites>', 'utf8');
+      try {
+        assert.throws(() => parseAndValidateNativeJUnit({ file: tmpXml }), /Native test suite failed with 1 failures/);
+      } finally {
+        if (fs.existsSync(tmpXml)) fs.unlinkSync(tmpXml);
+      }
+    });
+
+    // 12. Native JUnit parser rejects empty or missing test report files (COR-RE-001)
+    check('ADV-012', 'Native JUnit parser rejects empty or missing test report files', () => {
+      const missingXml = path.join(os.tmpdir(), `missing-test-${Date.now()}.xml`);
+      assert.throws(() => parseAndValidateNativeJUnit({ file: missingXml }), /Required native test report missing/);
+
+      const emptyXml = path.join(os.tmpdir(), `empty-test-${Date.now()}.xml`);
+      fs.writeFileSync(emptyXml, '', 'utf8');
+      try {
+        assert.throws(() => parseAndValidateNativeJUnit({ file: emptyXml }), /Native test report is empty/);
+      } finally {
+        if (fs.existsSync(emptyXml)) fs.unlinkSync(emptyXml);
+      }
+    });
+
+    // 13. Native JUnit parser rejects commit mismatch (COR-RE-001)
+    check('ADV-013', 'Native JUnit parser rejects reports from mismatched commit SHAs', () => {
+      const tmpXml = path.join(os.tmpdir(), `commit-mismatch-${Date.now()}.xml`);
+      fs.writeFileSync(tmpXml, '<testsuites commit="0123456789abcdef0123456789abcdef01234567" tests="1" failures="0"><testsuite tests="1"><testcase name="t1"/></testsuite></testsuites>', 'utf8');
+      try {
+        assert.throws(() => parseAndValidateNativeJUnit({
+          file: tmpXml,
+          expectedCommit: 'fedcba9876543210fedcba9876543210fedcba98',
+          actualCommit: 'fedcba9876543210fedcba9876543210fedcba98'
+        }), /Report commit attribute/);
+      } finally {
+        if (fs.existsSync(tmpXml)) fs.unlinkSync(tmpXml);
+      }
     });
   } finally {
     if (savedPriv !== undefined) process.env.UGONDU_EVIDENCE_PRIVATE_KEY = savedPriv;

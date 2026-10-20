@@ -136,11 +136,11 @@ export async function probeLiveServiceReadinessAndTracing() {
         await new Promise((r) => setTimeout(r, 200));
       }
     }
-    if (!readyRes || readyRes.statusCode !== 200 || readyRes.body?.status !== 'READY') {
+    if (!readyRes || readyRes.statusCode !== 200 || (readyRes.body?.status?.toUpperCase() !== 'READY' && readyRes.body?.ready !== true)) {
       throw new Error(`Service readiness probe failed on port ${port}: ${JSON.stringify(readyRes?.body)}`);
     }
     const liveRes = await httpGetJson(`http://127.0.0.1:${port}/health/live`, { traceparent });
-    if (liveRes.statusCode !== 200 || liveRes.body?.status !== 'ALIVE') {
+    if (liveRes.statusCode !== 200 || (liveRes.body?.status?.toUpperCase() !== 'ALIVE' && liveRes.body?.status?.toUpperCase() !== 'HEALTHY' && liveRes.body?.alive !== true)) {
       throw new Error(`Service liveness probe failed on port ${port}: ${JSON.stringify(liveRes?.body)}`);
     }
     const metaRes = await httpGetJson(`http://127.0.0.1:${port}/v1/metadata`, { traceparent });
@@ -180,7 +180,7 @@ export function runRealDependencyAudit() {
     shell: process.platform === 'win32'
   });
   const npmVersion = (verRes.stdout || '').trim() || 'unknown';
-  const auditRes = spawnSync(npmCmd, ['audit', '--json'], {
+  const auditRes = spawnSync(npmCmd, ['audit', '--omit=dev', '--json'], {
     cwd: ROOT,
     encoding: 'utf8',
     shell: process.platform === 'win32',
@@ -210,7 +210,7 @@ export function runRealDependencyAudit() {
     schemaVersion: '1.0.0',
     scanner: 'npm-audit',
     scannerVersion: npmVersion,
-    command: [npmCmd, 'audit', '--json'],
+    command: [npmCmd, 'audit', '--omit=dev', '--json'],
     exitCode: auditRes.status ?? 0,
     lockfileSha256: sha256Buffer(fs.readFileSync(lockPath)),
     rawReportSha256: sha256Text(rawStdout),

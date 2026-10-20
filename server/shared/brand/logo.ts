@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Shared / UI / Brand Components
  * File           : logo.ts
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -22,24 +22,32 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '../i18n';
+
 export interface UgonduLogoProps {
   variant?: 'full' | 'symbol';
   size?: 'compact' | 'normal' | 'large';
   decorative?: boolean;
   altText?: string;
+  altToken?: string;
+  locale?: string;
+  basePath?: string;
   className?: string;
+  responsiveClass?: string;
+  customStyle?: string;
+  loading?: 'lazy' | 'eager';
 }
 
-export const BRAND_ASSET_PATHS = {
+export const BRAND_RELATIVE_PATHS = {
   full: {
-    svg: '/assets/brand/web/ugondu-logo.svg',
-    png: '/assets/brand/web/ugondu-logo.png',
+    svg: 'web/ugondu-logo.svg',
+    png: 'web/ugondu-logo.png',
   },
   symbol: {
-    svg: '/assets/brand/web/ugondu-symbol.svg',
-    png: '/assets/brand/web/ugondu-symbol.png',
+    svg: 'web/ugondu-symbol.svg',
+    png: 'web/ugondu-symbol.png',
   },
-  favicon: '/assets/brand/web/favicon.ico',
+  favicon: 'web/favicon.ico',
 } as const;
 
 export const LOGO_DIMENSIONS = {
@@ -56,6 +64,30 @@ export const LOGO_DIMENSIONS = {
 } as const;
 
 /**
+ * Resolves a normalized absolute or CDN URL for a brand asset given a base path.
+ */
+export function resolveBrandAssetUrl(relPath: string, basePath?: string): string {
+  const defaultBase = typeof process !== 'undefined' && process.env && process.env['UGONDU_ASSET_BASE_URL']
+    ? process.env['UGONDU_ASSET_BASE_URL']
+    : '/assets/brand';
+  const base = (basePath !== undefined ? basePath : defaultBase).replace(/\/+$/, '');
+  const cleanRel = relPath.replace(/^\/+/, '');
+  return `${base}/${cleanRel}`;
+}
+
+export const BRAND_ASSET_PATHS = {
+  full: {
+    svg: resolveBrandAssetUrl(BRAND_RELATIVE_PATHS.full.svg),
+    png: resolveBrandAssetUrl(BRAND_RELATIVE_PATHS.full.png),
+  },
+  symbol: {
+    svg: resolveBrandAssetUrl(BRAND_RELATIVE_PATHS.symbol.svg),
+    png: resolveBrandAssetUrl(BRAND_RELATIVE_PATHS.symbol.png),
+  },
+  favicon: resolveBrandAssetUrl(BRAND_RELATIVE_PATHS.favicon),
+} as const;
+
+/**
  * Generates framework-agnostic accessible HTML markup for rendering
  * the Ugondu brand logo according to WCAG 2.1 AA standards.
  */
@@ -64,18 +96,37 @@ export function renderUgonduLogoHtml(props: UgonduLogoProps = {}): string {
   const size = props.size ?? 'normal';
   const decorative = props.decorative ?? false;
   const dims = LOGO_DIMENSIONS[variant][size];
-  const src = BRAND_ASSET_PATHS[variant].svg;
-  const fallbackSrc = BRAND_ASSET_PATHS[variant].png;
-  const alt = decorative ? '' : (props.altText ?? 'Ugondu');
+  const src = resolveBrandAssetUrl(BRAND_RELATIVE_PATHS[variant].svg, props.basePath);
+  const fallbackSrc = resolveBrandAssetUrl(BRAND_RELATIVE_PATHS[variant].png, props.basePath);
+
+  let alt = '';
+  if (!decorative) {
+    if (props.altText !== undefined) {
+      alt = props.altText;
+    } else {
+      const token = props.altToken ?? 'brand.logo_alt';
+      try {
+        const translated = __t(token, {}, props.locale);
+        alt = translated && translated !== token ? translated : 'Ugondu — Universal Delivery Operating System';
+      } catch {
+        alt = 'Ugondu — Universal Delivery Operating System';
+      }
+    }
+  }
+
   const ariaHidden = decorative ? ' aria-hidden="true"' : '';
-  const classAttr = props.className ? ` class="${escapeHtml(props.className)}"` : '';
+  const loadingAttr = props.loading ? ` loading="${props.loading}"` : '';
+  const classes = [props.className, props.responsiveClass].filter(Boolean).join(' ');
+  const classAttr = classes ? ` class="${escapeHtml(classes)}"` : '';
+  const styleAttr = props.customStyle
+    ? ` style="${escapeHtml(props.customStyle)}"`
+    : ' style="display:block;max-width:100%;height:auto;object-fit:contain;"';
 
   return (
     `<picture${classAttr}>` +
-    `<source srcset="${src}" type="image/svg+xml">` +
-    `<img src="${fallbackSrc}" width="${dims.width}" height="${dims.height}" ` +
-    `alt="${escapeHtml(alt)}"${ariaHidden} ` +
-    `style="display:block;max-width:100%;height:auto;object-fit:contain;" />` +
+    `<source srcset="${escapeHtml(src)}" type="image/svg+xml">` +
+    `<img src="${escapeHtml(fallbackSrc)}" width="${dims.width}" height="${dims.height}" ` +
+    `alt="${escapeHtml(alt)}"${ariaHidden}${loadingAttr}${styleAttr} />` +
     `</picture>`
   );
 }

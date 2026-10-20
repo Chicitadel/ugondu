@@ -3,7 +3,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Branding / Asset Integrity & Conformance Validator
  * File           : validate-assets.mjs
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -18,7 +18,7 @@
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
+ * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 (V12.1) / NIST SP 800-53
  *
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
@@ -35,13 +35,111 @@ const BRAND_DIR = path.join(ROOT, 'assets/brand');
 const MANIFEST_PATH = path.join(BRAND_DIR, 'manifest.json');
 const CHECKSUMS_PATH = path.join(BRAND_DIR, 'checksums.sha256');
 
+const METADATA_FILES = new Set(['manifest.json', 'checksums.sha256', 'README.md']);
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
 function block(msg) {
-  console.error(`[FAIL] Brand Asset Validation Error: ${msg}`);
-  process.exit(1);
+  throw new Error(`[FAIL] Brand Asset Validation Error: ${msg}`);
+}
+
+function normalizePosix(p) {
+  return p.replace(/\\/g, '/').replace(/^\/+/, '');
+}
+
+export function safeAssetPath(root, relPath) {
+  if (!relPath || typeof relPath !== 'string' || relPath.includes('\0')) {
+    block(`Invalid asset path: ${relPath}`);
+  }
+  if (path.isAbsolute(relPath)) {
+    block(`Absolute asset paths are prohibited: ${relPath}`);
+  }
+  const normalized = normalizePosix(path.normalize(relPath));
+  const resolved = path.resolve(root, normalized);
+  const rel = path.relative(root, resolved);
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
+    block(`Asset path escapes asset root directory: ${relPath}`);
+  }
+  return resolved;
 }
 
 function sha256Buffer(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+function extractLeafPaths(obj) {
+  const result = new Set();
+  function walk(curr) {
+    if (typeof curr === 'string') {
+      result.add(normalizePosix(curr));
+    } else if (curr && typeof curr === 'object') {
+      for (const val of Object.values(curr)) {
+        walk(val);
+      }
+    }
+  }
+  walk(obj);
+  return result;
+}
+
+function walkRegularFiles(dir, baseDir = dir) {
+  const files = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const ent of entries) {
+    const full = path.join(dir, ent.name);
+    if (ent.isDirectory()) {
+      files.push(...walkRegularFiles(full, baseDir));
+    } else if (ent.isFile()) {
+      const rel = normalizePosix(path.relative(baseDir, full));
+      if (!METADATA_FILES.has(rel) && !ent.name.startsWith('.')) {
+        files.push(rel);
+      }
+    }
+  }
+  return files;
+}
+
+function validatePng(absPath, relPath) {
+  const buf = fs.readFileSync(absPath);
+  if (buf.length < 24 || !buf.subarray(0, 8).equals(PNG_MAGIC)) {
+    block(`Invalid PNG header/magic bytes: ${relPath}`);
+  }
+  if (buf.toString('ascii', 12, 16) !== 'IHDR') {
+    block(`PNG missing initial IHDR chunk: ${relPath}`);
+  }
+  const width = buf.readUInt32BE(16);
+  const height = buf.readUInt32BE(20);
+  if (width === 0 || height === 0) {
+    block(`PNG invalid dimensions (${width}x${height}): ${relPath}`);
+  }
+}
+
+function validateSvg(absPath, relPath, approvedColors) {
+  const content = fs.readFileSync(absPath, 'utf8');
+  if (!content.startsWith('<svg') && !content.startsWith('<?xml')) {
+    block(`SVG does not start with valid markup: ${relPath}`);
+  }
+  if (!content.includes('</svg>')) {
+    block(`SVG missing closing tag: ${relPath}`);
+  }
+  if (/<script\b/i.test(content) || /javascript:/i.test(content)) {
+    block(`SVG contains prohibited script element or URI: ${relPath}`);
+  }
+  for (const color of approvedColors) {
+    if (!content.toLowerCase().includes(color.toLowerCase())) {
+      block(`SVG missing required brand color (${color}): ${relPath}`);
+    }
+  }
+}
+
+function validateIco(absPath, relPath) {
+  const buf = fs.readFileSync(absPath);
+  if (buf.length < 6 || buf.readUInt16LE(0) !== 0 || buf.readUInt16LE(2) !== 1) {
+    block(`Invalid ICO header: ${relPath}`);
+  }
+  const count = buf.readUInt16LE(4);
+  if (count < 4) {
+    block(`ICO file ${relPath} has fewer than 4 resolutions (${count})`);
+  }
 }
 
 export function validateBrandAssets() {
@@ -57,74 +155,87 @@ export function validateBrandAssets() {
     block('Invalid manifest schemaVersion or product');
   }
 
-  // 1. Verify all checksum entries
+  const approvedHex = manifest.approvedColors
+    ? Object.values(manifest.approvedColors).map((c) => c.hex)
+    : ['#02438d', '#f5ae04'];
+
+  // 1. Extract manifest asset paths
+  const manifestPaths = extractLeafPaths(manifest.assets);
+
+  // 2. Parse checksum file lines and check duplicates
   const checksumLines = fs
     .readFileSync(CHECKSUMS_PATH, 'utf8')
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter(Boolean);
 
-  if (checksumLines.length < 10) {
-    block(`Expected at least 10 checksum entries, found ${checksumLines.length}`);
-  }
-
+  const checksumMap = new Map();
   for (const line of checksumLines) {
     const parts = line.split(/\s+/);
     if (parts.length !== 2) block(`Malformed checksum line: ${line}`);
-    const [expectedSha, relPath] = parts;
-    const absPath = path.join(BRAND_DIR, relPath);
+    const [expectedSha, rawPath] = parts;
+    const rel = normalizePosix(rawPath);
+    if (checksumMap.has(rel)) {
+      block(`Duplicate checksum entry for path: ${rel}`);
+    }
+    checksumMap.set(rel, expectedSha);
+  }
+  const checksumPaths = new Set(checksumMap.keys());
+
+  // 3. Scan physical disk files
+  const diskFilesList = walkRegularFiles(BRAND_DIR);
+  const diskPaths = new Set(diskFilesList);
+
+  // 4. Exact 3-Way Set Equality Verification
+  const manifestDiffChecksum = [...manifestPaths].filter((p) => !checksumPaths.has(p));
+  const checksumDiffManifest = [...checksumPaths].filter((p) => !manifestPaths.has(p));
+  const diskDiffManifest = [...diskPaths].filter((p) => !manifestPaths.has(p));
+  const manifestDiffDisk = [...manifestPaths].filter((p) => !diskPaths.has(p));
+
+  if (manifestDiffChecksum.length > 0) {
+    block(`Assets declared in manifest but missing from checksums: ${manifestDiffChecksum.join(', ')}`);
+  }
+  if (checksumDiffManifest.length > 0) {
+    block(`Assets declared in checksums but missing from manifest: ${checksumDiffManifest.join(', ')}`);
+  }
+  if (diskDiffManifest.length > 0) {
+    block(`Untracked physical asset files on disk not in manifest: ${diskDiffManifest.join(', ')}`);
+  }
+  if (manifestDiffDisk.length > 0) {
+    block(`Manifest asset files missing on disk: ${manifestDiffDisk.join(', ')}`);
+  }
+
+  // 5. Verify cryptographic hashes and deep format decoding
+  for (const [relPath, expectedSha] of checksumMap.entries()) {
+    const absPath = safeAssetPath(BRAND_DIR, relPath);
     if (!fs.existsSync(absPath)) {
       block(`Declared brand asset missing on disk: ${relPath}`);
     }
-    const actualSha = sha256Buffer(fs.readFileSync(absPath));
+    const buf = fs.readFileSync(absPath);
+    const actualSha = sha256Buffer(buf);
     if (actualSha !== expectedSha) {
       block(`SHA-256 mismatch for ${relPath}: expected ${expectedSha}, got ${actualSha}`);
     }
-  }
 
-  // 2. Validate SVGs are well-formed XML and contain approved brand colors
-  const svgFiles = [
-    'web/ugondu-logo.svg',
-    'web/ugondu-symbol.svg',
-    'documentation/ugondu-logo.svg'
-  ];
-  for (const rel of svgFiles) {
-    const full = path.join(BRAND_DIR, rel);
-    if (!fs.existsSync(full)) block(`Required SVG missing: ${rel}`);
-    const content = fs.readFileSync(full, 'utf8');
-    if (!content.startsWith('<svg') && !content.startsWith('<?xml')) {
-      block(`SVG does not start with valid markup: ${rel}`);
-    }
-    if (!content.includes('</svg>')) {
-      block(`SVG missing closing tag: ${rel}`);
-    }
-    if (!content.includes('#02438d') || !content.includes('#f5ae04')) {
-      block(`SVG missing approved brand colors (#02438d, #f5ae04): ${rel}`);
-    }
-    if (/<script\b/i.test(content) || /javascript:/i.test(content)) {
-      block(`SVG contains prohibited script element or URI: ${rel}`);
+    const ext = path.extname(relPath).toLowerCase();
+    if (ext === '.png') {
+      validatePng(absPath, relPath);
+    } else if (ext === '.svg') {
+      validateSvg(absPath, relPath, approvedHex);
+    } else if (ext === '.ico') {
+      validateIco(absPath, relPath);
     }
   }
 
-  // 3. Validate ICO files
-  const icoFiles = ['web/favicon.ico', 'desktop/app-icon.ico'];
-  for (const rel of icoFiles) {
-    const full = path.join(BRAND_DIR, rel);
-    if (!fs.existsSync(full)) block(`Required ICO missing: ${rel}`);
-    const buf = fs.readFileSync(full);
-    if (buf.length < 6 || buf.readUInt16LE(0) !== 0 || buf.readUInt16LE(2) !== 1) {
-      block(`Invalid ICO header: ${rel}`);
-    }
-    const iconCount = buf.readUInt16LE(4);
-    if (iconCount < 4) {
-      block(`ICO file ${rel} has fewer than 4 resolutions (${iconCount})`);
-    }
-  }
-
-  console.log(`[PASS] Verified ${checksumLines.length} brand assets against manifest and checksums with zero defects.`);
-  return { status: 'PASS', assetCount: checksumLines.length };
+  console.log(`[PASS] Exact 3-way set equality confirmed: Manifest(${manifestPaths.size}) == Checksums(${checksumPaths.size}) == Disk(${diskPaths.size}). All hashes and formats verified.`);
+  return { status: 'PASS', assetCount: checksumPaths.size };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
-  validateBrandAssets();
+  try {
+    validateBrandAssets();
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
+  }
 }

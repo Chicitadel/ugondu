@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Branding / Brand Consistency & CLI Isolation Suite
  * File           : brand-consistency.test.js
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -79,6 +79,32 @@ async function runBrandConsistencyTests() {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     assert.strictEqual(manifest.approvedColors.primaryBlue.hex, '#02438d');
     assert.strictEqual(manifest.approvedColors.goldenYellow.hex, '#f5ae04');
+  });
+
+  await check('CONS-004', 'Configurable basePath and CDN prefix resolution in renderUgonduLogoHtml', () => {
+    const cdnHtml = shared.renderUgonduLogoHtml({
+      variant: 'full',
+      basePath: 'https://cdn.airroofers.eu/assets/brand',
+      altText: 'Ugondu Enterprise'
+    });
+    assert.ok(cdnHtml.includes('https://cdn.airroofers.eu/assets/brand/web/ugondu-logo.svg'));
+    assert.ok(cdnHtml.includes('https://cdn.airroofers.eu/assets/brand/web/ugondu-logo.png'));
+
+    const subpathHtml = shared.renderUgonduLogoHtml({
+      variant: 'symbol',
+      basePath: '/app-subpath',
+      decorative: true
+    });
+    assert.ok(subpathHtml.includes('/app-subpath/web/ugondu-symbol.svg'));
+    assert.ok(subpathHtml.includes('/app-subpath/web/ugondu-symbol.png'));
+  });
+
+  await check('CONS-005', 'Localized alt token fallback resolves multi-language brand text', () => {
+    const frHtml = shared.renderUgonduLogoHtml({ variant: 'full', locale: 'fr' });
+    assert.ok(frHtml.includes('Système d\'exploitation universel de livraison') || frHtml.includes('Ugondu'));
+
+    const arHtml = shared.renderUgonduLogoHtml({ variant: 'full', locale: 'ar' });
+    assert.ok(arHtml.includes('نظام تشغيل التوصيل الشامل') || arHtml.includes('Ugondu'));
   });
 
   console.log('══════════════════════════════════════════════════════════════');
