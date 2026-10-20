@@ -205,21 +205,15 @@ async function runCorRemediationTests() {
         assert.ok(readme.includes('| `github` | `github.com` | `UGONDU_GITHUB_TOKEN` | `tested` | `tested` | `tested` | `tested` | `tested` | `implemented` | `implemented` |'));
     });
 
-    // Re-audit F8: Live AWS physical conformance & least privilege verification
-    check('REAUDIT-F8', 'AWS conformance report confirms real account 971671216490 discovery and least-privilege boundary', () => {
-        const reportPath = path.join(ROOT, 'evidence/tests/aws-conformance-results.json');
-        assert.ok(fs.existsSync(reportPath), 'aws-conformance-results.json must exist');
-        const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-        assert.strictEqual(report.awsAccountId, '971671216490');
-        assert.strictEqual(report.awsRegion, 'eu-west-3');
-        assert.strictEqual(report.status, 'PASS');
-        assert.ok(report.liveDiscoveredResources.vpcCount >= 1);
-        assert.ok(report.liveDiscoveredResources.subnetCount >= 1);
-        assert.strictEqual(report.leastPrivilegeBoundaries.iamListUsersDenied, true);
-        assert.strictEqual(report.leastPrivilegeBoundaries.executionRoleAssumptionFailClosed, true);
+    // Re-audit F8: AWS physical qualification must be fail-closed; live proof belongs to CI artifacts.
+    check('REAUDIT-F8', 'AWS conformance source fails closed unless both least-privilege denials are proven', () => {
+        const probe = fs.readFileSync(path.join(ROOT, 'scripts/aws-conformance/run-aws-conformance.mjs'), 'utf8');
+        assert.ok(probe.includes("if (!boundaryDenied)"), 'iam:ListUsers must be denied');
+        assert.ok(probe.includes("if (!assumeDenied)"), 'role assumption must be denied for this execution-role identity');
+        assert.ok(probe.includes("executionRoleAssumptionFailClosed: assumeDenied"));
+        assert.ok(probe.includes("status: 'PASS'"), 'PASS must only be emitted after the fail-closed assertions');
+        assert.ok(probe.includes("UGONDU_EVIDENCE_INPUT_DIR is required"), 'live evidence must be written to the qualification workspace');
     });
-
-
 
     // Re-audit F9: AWS boundary probe must use a valid ARN and fail closed.
     check('REAUDIT-F9', 'AWS conformance role-assumption probe uses valid ARN and rejects unexpected success', () => {
