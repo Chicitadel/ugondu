@@ -83,251 +83,99 @@ function writeArtifact(baseDir, relPath, content) {
   fs.writeFileSync(fullPath, text, 'utf8');
 }
 
-function buildJUnitXml(suiteName, testCases) {
-  const rows = testCases
-    .map((tc) => `    <testcase classname="${tc.classname}" name="${tc.name}" time="${tc.time}" />`)
-    .join('\n');
-  return [
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    `<testsuites name="${suiteName}" tests="${testCases.length}" failures="0" errors="0" skipped="0">`,
-    `  <testsuite name="${suiteName}" tests="${testCases.length}" failures="0" errors="0" skipped="0">`,
-    rows,
-    '  </testsuite>',
-    '</testsuites>',
-    ''
-  ].join('\n');
-}
-
 function resolveEd25519KeyPair() {
-  const pubPath = path.join(ROOT, 'server/shared/keys/evidence_public.pem');
-  const privPath = path.join(ROOT, 'server/shared/keys/evidence_private.pem');
-  const pubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY || (fs.existsSync(pubPath) ? fs.readFileSync(pubPath, 'utf8') : null);
-  const privPem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY || (fs.existsSync(privPath) ? fs.readFileSync(privPath, 'utf8') : null);
-  if (!privPem) {
-    throw new Error('Managed evidence signing key required (UGONDU_EVIDENCE_PRIVATE_KEY or server/shared/keys/evidence_private.pem)');
+  const pubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
+  const privPem = process.env.UGONDU_EVIDENCE_PRIVATE_KEY;
+  if (!privPem || !pubPem) {
+    throw new Error('Trusted evidence signing keys must be injected from managed CI secret/key custody (UGONDU_EVIDENCE_PRIVATE_KEY and UGONDU_EVIDENCE_PUBLIC_KEY); repository-local key fallback is forbidden');
   }
   const privateKey = crypto.createPrivateKey(privPem);
-  const publicKey = pubPem ? crypto.createPublicKey(pubPem) : crypto.createPublicKey(privateKey);
-  return { privateKey, publicKey, keyId: 'key_evidence_v2', keySource: 'managed-trust-anchor' };
+  const publicKey = crypto.createPublicKey(pubPem);
+  const derivedPublicKey = crypto.createPublicKey(privateKey);
+  const expectedDer = publicKey.export({ format: 'der', type: 'spki' });
+  const derivedDer = derivedPublicKey.export({ format: 'der', type: 'spki' });
+  if (!expectedDer.equals(derivedDer)) {
+    throw new Error('Evidence private key does not match the independently supplied public trust anchor');
+  }
+  return { privateKey, publicKey, keyId: 'key_evidence_v2', keySource: 'managed-secret-injected' };
 }
 
 export function generateEvidenceBundle(evidenceDir) {
+  const inputDirValue = process.env.UGONDU_EVIDENCE_INPUT_DIR;
+  if (!inputDirValue) {
+    throw new Error('UGONDU_EVIDENCE_INPUT_DIR is required. Evidence generation no longer fabricates test, compatibility, AWS, health, trace, or deployment results; provide real outputs from the qualification pipeline.');
+  }
+  const inputDir = path.resolve(inputDirValue);
+  const outputDir = path.resolve(evidenceDir);
+  if (inputDir === outputDir) {
+    throw new Error('Evidence input and output directories must be separate to prevent stale outputs being reused as fresh evidence.');
+  }
+
+  const imported = new Map();
+  for (const rel of REQUIRED_ARTIFACTS) {
+    if (rel === 'source/commit.txt' || rel === 'source/tracked-files.sha256') continue;
+    const sourcePath = path.join(inputDir, rel);
+    if (!fs.existsSync(sourcePath) || !fs.statSync(sourcePath).isFile()) {
+      throw new Error(`Missing real qualification artifact in UGONDU_EVIDENCE_INPUT_DIR: ${rel}`);
+    }
+    imported.set(rel, fs.readFileSync(sourcePath));
+  }
+
+  // Validate critical qualification evidence before any bundle is emitted.
+  const awsReport = JSON.parse(imported.get('tests/aws-conformance-results.json').toString('utf8'));
+  if (awsReport.status !== 'PASS' ||
+      awsReport.awsAccountId !== '971671216490' ||
+      awsReport.awsRegion !== 'eu-west-3' ||
+      awsReport.leastPrivilegeBoundaries?.iamListUsersDenied !== true ||
+      awsReport.leastPrivilegeBoundaries?.executionRoleAssumptionFailClosed !== true) {
+    throw new Error('Live AWS conformance evidence is absent or failed a required least-privilege assertion; release evidence generation is blocked.');
+  }
+  const compatibility = JSON.parse(imported.get('tests/compatibility-results.json').toString('utf8'));
+  if (compatibility.status !== 'PASS' || !Array.isArray(compatibility.platformsVerified) ||
+      !Array.isArray(compatibility.repositoryProvidersVerified)) {
+    throw new Error('Compatibility evidence is missing a passing result or explicit platform/provider evidence.');
+  }
+  for (const rel of ['tests/unit-results.xml', 'tests/contract-results.xml', 'tests/integration-results.xml', 'tests/e2e-results.xml', 'tests/security-results.xml']) {
+    const xml = imported.get(rel).toString('utf8');
+    if (!/<testsuites\b/.test(xml) || !/<testcase\b/.test(xml) || /failures="[1-9]|errors="[1-9]|skipped="[1-9]/.test(xml)) {
+      throw new Error(`Test result artifact is missing actual test cases or reports failure/skips: ${rel}`);
+    }
+  }
+
   const commitHash = git(['rev-parse', 'HEAD']);
   const treeHash = git(['rev-parse', 'HEAD^{tree}']);
   const branchName = git(['rev-parse', '--abbrev-ref', 'HEAD']);
   const generatedAt = new Date().toISOString();
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-
   const trackedFiles = git(['ls-files']).split(/\r?\n/).filter((f) => Boolean(f) && !f.startsWith('evidence/')).sort();
   const trackedHashes = [];
   const secretFindings = [];
   const privateKeyRegex = new RegExp('-----BEGIN ' + '(?:RSA |EC |OPENSSH )?PRIVATE KEY-----');
-
   for (const rel of trackedFiles) {
     const abs = path.join(ROOT, rel);
     if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) continue;
     const buf = fs.readFileSync(abs);
     trackedHashes.push(`${sha256Buffer(buf)}  ${rel}`);
-    const sample = buf.toString('utf8');
-    if (privateKeyRegex.test(sample)) {
-      secretFindings.push({ file: rel, ruleId: 'SEC-001-PRIVATE-KEY' });
-    }
+    if (privateKeyRegex.test(buf.toString('utf8'))) secretFindings.push(rel);
+  }
+  if (secretFindings.length) {
+    throw new Error(`Private key material found in tracked files: ${secretFindings.join(', ')}`);
   }
 
-  writeArtifact(evidenceDir, 'source/commit.txt', `commit=${commitHash}\ntree=${treeHash}\nbranch=${branchName}\ngenerated_at=${generatedAt}\n`);
-  writeArtifact(evidenceDir, 'source/tracked-files.sha256', trackedHashes.join('\n') + '\n');
-
-  writeArtifact(evidenceDir, 'governance/policy-results.json', {
-    schemaVersion: '1.0.0', evaluatedAt: generatedAt, commitHash, status: 'PASS',
-    policies: [
-      { policyId: 'COR-014', name: 'Capability & Repository Matrix Alignment', status: 'PASS' },
-      { policyId: 'AIR_ROOFERS_GUIDE_5_1', name: 'Max 500 Lines Per Source/Script File', status: 'PASS' },
-      { policyId: 'SEC-CAP-001', name: 'Federated Capability Enforcement', status: 'PASS' },
-      { policyId: 'UPPIE-GATE-001', name: 'Cryptographic ExecutionAuthorization Seal', status: 'PASS' },
-      { policyId: 'DEISE-INV-001', name: 'Do No Harm Topology Drift Guard', status: 'PASS' }
-    ]
-  });
-
-  writeArtifact(evidenceDir, 'governance/exception-register.json', {
-    schemaVersion: '1.0.0', updatedAt: generatedAt, activeExceptions: 0, exceptions: []
-  });
-
-  writeArtifact(evidenceDir, 'governance/adr-index.json', {
-    schemaVersion: '1.0.0', updatedAt: generatedAt,
-    records: [
-      { id: 'ADR-001', title: 'Thin-Client / Server Architecture', status: 'FROZEN', file: 'docs/ARCHITECTURE.md' },
-      { id: 'ADR-002', title: 'Edition Enforcement via Signed Recipes', status: 'FROZEN', file: 'docs/ARCHITECTURE.md' },
-      { id: 'ADR-003', title: 'Microservice Isolation per Concern (4001-4005)', status: 'FROZEN', file: 'docs/ARCHITECTURE.md' },
-      { id: 'ADR-004', title: 'quota-sync Default for cPanel/DirectAdmin', status: 'FROZEN', file: 'docs/ARCHITECTURE.md' },
-      { id: 'ADR-005', title: 'Thin-Client Canonical Marketplace Distribution', status: 'FROZEN', file: 'docs/ARCHITECTURE.md' },
-      { id: 'ADR-006', title: 'Intent-Driven Execution and UPM Gating Invariant', status: 'ACCEPTED', file: 'docs/ARCHITECTURE.md' },
-      { id: 'UPLM-ADR-001', title: 'Server-Governed Plugin Admission & Zero Client Code Injection', status: 'FROZEN', file: 'docs/uplm/UPLM_ADR.md' },
-      { id: 'UPLM-ADR-002', title: 'Unified URRE & DEISE Durable State Machine Integration', status: 'FROZEN', file: 'docs/uplm/UPLM_ADR.md' },
-      { id: 'UPLM-ADR-003', title: 'Agentless Capability Parity & Execution Path Equivalence', status: 'FROZEN', file: 'docs/uplm/UPLM_ADR.md' },
-      { id: 'UPLM-ADR-004', title: 'Five-Way Split AWS COR V9 Managed Policies with Transaction ABAC', status: 'FROZEN', file: 'docs/uplm/UPLM_ADR.md' },
-      { id: 'UPLM-ADR-005', title: 'Ed25519 Signed Release Evidence Bundle', status: 'FROZEN', file: 'docs/uplm/UPLM_ADR.md' }
-    ]
-  });
-
-  writeArtifact(evidenceDir, 'security/secrets-scan.sarif', {
-    $schema: 'https://json.schemastore.org/sarif-2.1.0.json', version: '2.1.0',
-    runs: [{
-      tool: { driver: { name: 'UgonduReleaseSecretScanner', version: '1.0.0', rules: [{ id: 'SEC-001-PRIVATE-KEY', shortDescription: { text: 'No private keys in tracked files' } }] } },
-      results: secretFindings.map((f) => ({
-        ruleId: f.ruleId, level: 'error', message: { text: `Private key material detected in ${f.file}` },
-        locations: [{ physicalLocation: { artifactLocation: { uri: f.file } } }]
-      }))
-    }]
-  });
-
-  const deps = Object.entries(pkg.dependencies || {}).map(([name, version]) => ({
-    name, version: String(version).replace(/^[\^~]/, ''),
-    purl: `pkg:npm/${encodeURIComponent(name)}@${String(version).replace(/^[\^~]/, '')}`
-  }));
-
-  writeArtifact(evidenceDir, 'security/dependency-scan.json', {
-    schemaVersion: '1.0.0', scannedAt: generatedAt, status: 'PASS',
-    vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0 }, packagesScanned: deps.length
-  });
-
-  writeArtifact(evidenceDir, 'security/sbom.cdx.json', {
-    bomFormat: 'CycloneDX', specVersion: '1.5', serialNumber: `urn:uuid:${crypto.randomUUID()}`, version: 1,
-    metadata: { timestamp: generatedAt, component: { type: 'application', name: pkg.name, version: pkg.version } },
-    components: deps.map((d) => ({ type: 'library', name: d.name, version: d.version, purl: d.purl }))
-  });
-
-  writeArtifact(evidenceDir, 'security/provenance.json', {
-    _type: 'https://in-toto.io/Statement/v1', subject: [{ name: pkg.name, digest: { sha256: sha256Text(commitHash) } }],
-    predicateType: 'https://slsa.dev/provenance/v1',
-    predicate: {
-      buildDefinition: { buildType: 'https://ugondu.airroofers.eu/release/v1', externalParameters: { repository: 'Chicitadel/ugondu', ref: branchName, commitHash, treeHash } },
-      runDetails: { builder: { id: 'https://ugondu.airroofers.eu/builders/cor-release-runner' }, metadata: { invocationId: `inv-${commitHash.slice(0, 12)}`, startedOn: generatedAt, finishedOn: generatedAt } }
-    }
-  });
-
-  writeArtifact(
-    evidenceDir,
-    'tests/unit-results.xml',
-    buildJUnitXml('ugondu-unit-suite', [
-      { classname: 'engine-core.dag', name: 'computes deterministic ArchitectureIR hash', time: '0.042' },
-      { classname: 'shared.safepath', name: 'blocks path traversal and null bytes', time: '0.015' },
-      { classname: 'client.cli', name: 'suggests Levenshtein command matches', time: '0.019' }
-    ])
-  );
-
-  writeArtifact(
-    evidenceDir,
-    'tests/contract-results.xml',
-    buildJUnitXml('ugondu-contract-suite', [
-      { classname: 'openapi.v1', name: 'validates POST /v1/deploy/resolve schema', time: '0.031' },
-      { classname: 'openapi.v1', name: 'validates POST /v1/telemetry/report schema', time: '0.022' },
-      { classname: 'uplm.manifest.v2', name: 'validates PluginManifestV2 contract', time: '0.027' }
-    ])
-  );
-
-  writeArtifact(
-    evidenceDir,
-    'tests/integration-results.xml',
-    buildJUnitXml('ugondu-integration-suite', [
-      { classname: 'services.mesh', name: 'engine-core to billing-gateway entitlement check (:4002)', time: '0.114' },
-      { classname: 'services.mesh', name: 'engine-core to plugin-manager sandbox provision (:4003)', time: '0.148' },
-      { classname: 'services.mesh', name: 'engine-core to repository-adapter provider resolve (:4005)', time: '0.089' }
-    ])
-  );
-
-  writeArtifact(
-    evidenceDir,
-    'tests/e2e-results.xml',
-    buildJUnitXml('ugondu-e2e-suite', [
-      { classname: 'lifecycle.deploy', name: 'end-to-end signed recipe execution and telemetry receipt', time: '0.312' },
-      { classname: 'lifecycle.urre', name: 'crash-resume idempotency and topological rollback', time: '0.285' },
-      { classname: 'lifecycle.deise', name: 'DirectAdmin topology drift repair without payload overwrite', time: '0.241' }
-    ])
-  );
-
-  writeArtifact(
-    evidenceDir,
-    'tests/security-results.xml',
-    buildJUnitXml('ugondu-security-suite', [
-      { classname: 'security.ssrf', name: 'rejects link-local metadata and loopback SSRF targets', time: '0.038' },
-      { classname: 'security.passport', name: 'rejects replayed and tampered ExecutionAuthorization seals', time: '0.054' },
-      { classname: 'security.plugin', name: 'rejects unsigned or altered Ed25519 plugin manifests', time: '0.047' }
-    ])
-  );
-
-  writeArtifact(evidenceDir, 'tests/compatibility-results.json', {
-    schemaVersion: '1.0.0', evaluatedAt: generatedAt, status: 'PASS',
-    localesVerified: ['ar', 'de', 'en', 'es', 'fr', 'hi', 'it', 'ja', 'ko', 'pt', 'ru', 'zh'],
-    platformsVerified: ['linux/amd64', 'linux/arm64', 'darwin/amd64', 'darwin/arm64', 'windows/amd64', 'windows/arm64'],
-    repositoryProvidersVerified: ['github', 'gitlab', 'bitbucket', 'gitea', 'gogs', 'azure-devops', 'aws-codecommit', 'generic-https', 'generic-ssh']
-  });
-
-  const awsConfPath = path.join(evidenceDir, 'tests/aws-conformance-results.json');
-  const existingAws = fs.existsSync(awsConfPath) ? JSON.parse(fs.readFileSync(awsConfPath, 'utf8')) : {};
-  writeArtifact(evidenceDir, 'tests/aws-conformance-results.json', {
-    schemaVersion: '1.0.0', evaluatedAt: generatedAt, awsAccountId: '971671216490', awsRegion: 'eu-west-3',
-    callerIdentity: existingAws.callerIdentity || { arn: 'arn:aws:iam::971671216490:user/UgonduPhysicalTest', userId: 'AIDA6EPA6EFVGHOJEOYHL' },
-    liveDiscoveredResources: existingAws.liveDiscoveredResources || {
-      vpcCount: 1, primaryVpcId: 'vpc-07509a515ac463e0b', primaryVpcCidr: '172.31.0.0/16',
-      subnetCount: 3, subnetIds: ['subnet-0f32c79fd1e5159ff', 'subnet-0c3345e1275511421', 'subnet-060e1bb62c3e2349d'],
-      securityGroupCount: 1, primarySecurityGroupId: 'sg-0c35ac0a9f960d6e4', rdsInstanceCount: 0
-    },
-    leastPrivilegeBoundaries: existingAws.leastPrivilegeBoundaries || { iamListUsersDenied: true, executionRoleAssumptionFailClosed: false, readOnlyScopePreserved: true },
-    executionRoleArn: 'arn:aws:iam::971671216490:role/UgonduCORExecutionRole',
-    splitManagedPolicies: ['UgonduCOR_V9_Part1_NetworkAndVPC', 'UgonduCOR_V9_Part2_ComputeAndSnapshots', 'UgonduCOR_V9_Part3_RDSAndStorage', 'UgonduCOR_V9_Part4_ContainersAndFargate', 'UgonduCOR_V9_Part5_ReadDiscoveryAndTelemetry'],
-    abacConditionsEnforced: { requestTagUgonduCOR: 'true', transactionIdBinding: '${aws:PrincipalTag/UgonduTransactionId}', requestedRegion: 'eu-west-3' },
-    zeroResidualsVerified: true, status: 'PASS'
-  });
-
-  writeArtifact(evidenceDir, 'runtime/health-readiness.json', {
-    schemaVersion: '1.0.0',
-    checkedAt: generatedAt,
-    services: [
-      { service: 'engine-core', port: 4001, endpoint: '/health', status: 'READY' },
-      { service: 'billing-gateway', port: 4002, endpoint: '/health', status: 'READY' },
-      { service: 'plugin-manager', port: 4003, endpoint: '/health', status: 'READY' },
-      { service: 'event-bus', port: 4004, endpoint: '/health', status: 'READY' },
-      { service: 'repository-adapter', port: 4005, endpoint: '/health', status: 'READY' }
-    ]
-  });
-
-  writeArtifact(evidenceDir, 'runtime/trace-samples.json', {
-    schemaVersion: '1.0.0',
-    capturedAt: generatedAt,
-    traces: [
-      {
-        traceId: crypto.randomBytes(16).toString('hex'),
-        transactionId: `tx-${commitHash.slice(0, 8)}`,
-        spans: [
-          { service: 'engine-core', operation: 'POST /v1/deploy/resolve', status: 'OK', durationMs: 42 },
-          { service: 'billing-gateway', operation: 'VERIFY_ENTITLEMENT', status: 'OK', durationMs: 9 },
-          { service: 'repository-adapter', operation: 'POST /v1/repository/resolve', status: 'OK', durationMs: 6 },
-          { service: 'uppie', operation: 'EVALUATE_ARCHITECTURE_IR', status: 'OK', durationMs: 11 }
-        ]
-      }
-    ]
-  });
-
-  writeArtifact(evidenceDir, 'runtime/deployment-receipt.json', {
-    schemaVersion: '1.0.0',
-    issuedAt: generatedAt,
-    transactionId: `tx-${commitHash.slice(0, 8)}`,
-    commitHash,
-    treeHash,
-    urreState: 'COMPLETED',
-    deiseTwinIntegrity: 'VALID',
-    zeroResiduals: true
-  });
+  fs.mkdirSync(outputDir, { recursive: true });
+  writeArtifact(outputDir, 'source/commit.txt', `commit=${commitHash}\ntree=${treeHash}\nbranch=${branchName}\ngenerated_at=${generatedAt}\n`);
+  writeArtifact(outputDir, 'source/tracked-files.sha256', trackedHashes.join('\n') + '\n');
+  for (const [rel, buf] of imported) {
+    const target = path.join(outputDir, rel);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, buf);
+  }
 
   const artifactEntries = {};
   for (const rel of REQUIRED_ARTIFACTS) {
-    const buf = fs.readFileSync(path.join(evidenceDir, rel));
-    artifactEntries[rel] = {
-      sha256: sha256Buffer(buf),
-      bytes: buf.length
-    };
+    const buf = fs.readFileSync(path.join(outputDir, rel));
+    artifactEntries[rel] = { sha256: sha256Buffer(buf), bytes: buf.length };
   }
-
   const manifest = {
     schemaVersion: '1.0.0',
     product: '@airroofers/ugondu-platform',
@@ -336,17 +184,15 @@ export function generateEvidenceBundle(evidenceDir) {
     git: { commitHash, treeHash, branchName },
     artifacts: artifactEntries
   };
-
   const manifestText = JSON.stringify(manifest, null, 2) + '\n';
-  writeArtifact(evidenceDir, 'manifest.json', manifestText);
+  writeArtifact(outputDir, 'manifest.json', manifestText);
 
   const { privateKey, publicKey, keyId, keySource } = resolveEd25519KeyPair();
   const manifestBuffer = Buffer.from(manifestText, 'utf8');
   const signatureBuffer = crypto.sign(null, manifestBuffer, privateKey);
   const publicKeyJwk = publicKey.export({ format: 'jwk' });
   const publicKeyDerBase64 = publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
-
-  const sigEnvelope = {
+  writeArtifact(outputDir, 'signatures/evidence-manifest.sig', {
     schemaVersion: '1.0.0',
     algorithm: 'Ed25519',
     keyId,
@@ -356,9 +202,7 @@ export function generateEvidenceBundle(evidenceDir) {
     publicKeyJwk,
     signatureBase64: signatureBuffer.toString('base64'),
     signedAt: generatedAt
-  };
-
-  writeArtifact(evidenceDir, 'signatures/evidence-manifest.sig', sigEnvelope);
+  });
 }
 
 export function verifyEvidenceBundle(evidenceDir) {
@@ -407,17 +251,17 @@ export function verifyEvidenceBundle(evidenceDir) {
     throw new Error(`Secrets scan reported ${findingsCount} finding(s)`);
   }
 
-  if (sigEnvelope.keySource === 'ephemeral-ed25519') {
-    throw new Error('Forbidden ephemeral key source detected; evidence bundle must use managed key custody (key_evidence_v2)');
+  if (sigEnvelope.keySource !== 'managed-secret-injected') {
+    throw new Error('Evidence bundle was not signed using the required managed-secret-injected key source');
   }
   if (sigEnvelope.keyId !== 'key_evidence_v2') {
     throw new Error(`Invalid keyId in evidence signature: expected key_evidence_v2, got ${sigEnvelope.keyId}`);
   }
 
   const pubPath = path.join(ROOT, 'server/shared/keys/evidence_public.pem');
-  const trustedPubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY || (fs.existsSync(pubPath) ? fs.readFileSync(pubPath, 'utf8') : null);
+  const trustedPubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
   if (!trustedPubPem) {
-    throw new Error('Trusted evidence public key anchor missing at server/shared/keys/evidence_public.pem');
+    throw new Error('Independent evidence public trust anchor must be injected through UGONDU_EVIDENCE_PUBLIC_KEY; repository-local fallback is forbidden');
   }
   const publicKey = crypto.createPublicKey(trustedPubPem);
 
