@@ -1,87 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="security" tests="36" failures="0" errors="0" skipped="0" time="25.541" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuites name="security:tests/security-regression.test.js" tests="5" failures="0" errors="0" skipped="0" time="0.226" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="security:tests/security-regression.test.js" tests="5" failures="0" errors="0" skipped="0" time="0.226">
-    <testcase classname="security:tests/security-regression.test.js" name="SSRF &amp; metadata destination policy blocks loopback, private ranges, metadata IPs, and non-HTTP protocols" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/security-regression.test.js" name="SHELL_EXEC is completely eliminated across all protocols, Go registry, and sandbox definitions" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/security-regression.test.js" name="Plugin path canonicalization strictly confines file access within PLUGINS_DIR" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/security-regression.test.js" name="Execution state machine enforces atomic persistence, cryptographic plan bindings, and quarantine" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/security-regression.test.js" name="Transaction locking prevents race conditions and concurrent mutation collisions" time="0.010">
-    </testcase>
+<testsuites name="security" tests="47" failures="0" errors="0" skipped="0" time="29.583" commit="16f4d4c99026a3acbfdd92ce9a0649579ac40eb7">
+  <testsuite name="tests/security-regression.test.js" tests="6" failures="0" errors="0" skipped="0" time="0.621">
+    <testcase name="SEC-REG-001: SSRF &amp; Cloud Metadata Adversarial Tests" classname="test" time="0.164570" file="tests/security-regression.test.js"/>
+    <testcase name="SEC-REG-002: Action Protocol Immunity (SHELL_EXEC Total Elimination)" classname="test" time="0.003963" file="tests/security-regression.test.js"/>
+    <testcase name="SEC-REG-003: Path Traversal Defenses in Plugin Resolution" classname="test" time="0.000920" file="tests/security-regression.test.js"/>
+    <testcase name="SEC-REG-004: Cryptographic Key Identity &amp; Persistence Tests" classname="test" time="0.001320" file="tests/security-regression.test.js"/>
+    <testcase name="SEC-REG-005: State Machine Integrity &amp; Quarantine Invariants" classname="test" time="0.001474" file="tests/security-regression.test.js"/>
+    <testcase name="SEC-REG-006: Transaction Mutual Exclusion Locking Tests" classname="test" time="0.001038" file="tests/security-regression.test.js"/>
   </testsuite>
-  <testsuites name="security:tests/ssrf-execution.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.365" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="security:tests/ssrf-execution.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.365">
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 1: RFC1918 direct — URL-pattern rejection" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 2: Loopback direct — URL-pattern rejection" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 3: Cloud metadata direct — URL-pattern rejection" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 4: IPv4-mapped IPv6 — URL-pattern rejection" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 5: DNS resolution to loopback — async policy rejects" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 6: Redirect target — private IP async revalidation" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 7: Redirect target — loopback async revalidation" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 8: Redirect target — cloud metadata async revalidation" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 9: Scheme restriction — ftp file javascript rejected" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/ssrf-execution.test.js" name="Test 10: Public destination allowed — policy does not over-block" time="0.010">
-    </testcase>
+  <testsuite name="tests/ssrf-execution.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.935">
+    <testcase name="SSRF-001: RFC1918 direct — URL-pattern rejection" classname="test" time="0.005696" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-002: Loopback direct — URL-pattern rejection" classname="test" time="0.001056" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-003: Cloud metadata direct — URL-pattern rejection" classname="test" time="0.000747" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-004: IPv4-mapped IPv6 — URL-pattern rejection" classname="test" time="0.002515" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-005: DNS resolution to loopback — async policy rejects" classname="test" time="0.000955" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-006: Redirect target — private IP async revalidation" classname="test" time="0.000567" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-007: Redirect target — loopback async revalidation" classname="test" time="0.000596" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-008: Redirect target — cloud metadata async revalidation" classname="test" time="0.000596" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-009: Scheme restriction — ftp file javascript rejected" classname="test" time="0.001150" file="tests/ssrf-execution.test.js"/>
+    <testcase name="SSRF-010: Public destination allowed — policy does not over-block" classname="test" time="0.000953" file="tests/ssrf-execution.test.js"/>
   </testsuite>
-  <testsuites name="security:tests/passport-cryptography.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.239" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="security:tests/passport-cryptography.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.239">
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-001: Ed25519 digital signature generation and verification" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-002: Deterministic SHA-256 digest computation" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-003: AES-256-GCM encryption, decryption, and authentication tag verification" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-004: AES-256-GCM authentication failure on tampered ciphertext" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-005: RSA-2048 PKCS#1 v1.5 / PSS digital signature validation" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-006: Verification of external evidence public trust anchor key format" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-007: Verification of UPLM pack authority public key format" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/passport-cryptography.test.js" name="CRYPTO-008: Deterministic object key sorting for RFC 8785 hash stability" time="0.010">
-    </testcase>
+  <testsuite name="tests/passport-cryptography.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.472">
+    <testcase name="CRYPTO-001: Ed25519 digital signature generation and verification" classname="test" time="0.006730" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-002: Deterministic SHA-256 digest computation" classname="test" time="0.001103" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-003: AES-256-GCM encryption, decryption, and authentication tag verification" classname="test" time="0.002389" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-004: AES-256-GCM authentication failure on tampered ciphertext" classname="test" time="0.001797" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-005: RSA-2048 PKCS#1 v1.5 / PSS digital signature validation" classname="test" time="0.091212" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-006: Verification of external evidence public trust anchor key format" classname="test" time="0.002963" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-007: Verification of UPLM pack authority public key format" classname="test" time="0.001659" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-008: Deterministic object key sorting for RFC 8785 hash stability" classname="test" time="0.000760" file="tests/passport-cryptography.test.js"/>
   </testsuite>
-  <testsuites name="security:tests/qualification/evidence-pipeline-adversarial.test.js" tests="13" failures="0" errors="0" skipped="0" time="24.216" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="security:tests/qualification/evidence-pipeline-adversarial.test.js" tests="13" failures="0" errors="0" skipped="0" time="24.216">
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-001: Fails closed when evidence-manifest.sig is missing" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-002: Fails closed when an evidence artifact byte is tampered post-signing" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-003: Fails closed when record violates qualification-evidence.schema.json" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-004: Rejects bundle missing any required test suite XML artifact" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-005: Rejects zero-vulnerability stubs without real lockfile hash in SCA" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-006: Rejects shallow top-level-only SBOM with fewer than 10 components" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-007: Rejects synthesized fallback &quot;executed &lt;script&gt;&quot; JUnit testcase entries" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-008: Rejects compatibility evidence claiming multiple unexecuted OS/architecture targets" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-009: Rejects untrusted keyId or ephemeral keySource in evidence-manifest.sig" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-010: Fails closed when UGONDU_EVIDENCE_PUBLIC_KEY is absent (no repository-local fallback)" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-011: Native JUnit parser rejects test reports with failures or errors" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-012: Native JUnit parser rejects empty or missing test report files" time="0.010">
-    </testcase>
-    <testcase classname="security:tests/qualification/evidence-pipeline-adversarial.test.js" name="ADV-013: Native JUnit parser rejects reports from mismatched commit SHAs" time="0.010">
-    </testcase>
+  <testsuite name="tests/qualification/evidence-pipeline-adversarial.test.js" tests="19" failures="0" errors="0" skipped="0" time="19.667">
+    <testcase name="ADV-001: Fails closed when evidence-manifest.sig is missing" classname="test" time="4.652227" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-002: Fails closed when an evidence artifact byte is tampered post-signing" classname="test" time="3.948527" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-003: Fails closed when record violates qualification-evidence.schema.json" classname="test" time="0.001091" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-004: Rejects bundle missing any required test suite XML artifact" classname="test" time="0.183869" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-005: Rejects zero-vulnerability stubs without real lockfile hash in SCA" classname="test" time="0.565083" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-006: Rejects shallow top-level-only SBOM with fewer than 10 components" classname="test" time="0.478182" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-007: Rejects synthesized fallback &amp;quot;executed &lt;script>&amp;quot; JUnit testcase entries" classname="test" time="0.506304" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-008: Rejects compatibility evidence claiming multiple unexecuted OS/architecture targets" classname="test" time="0.437379" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-009: Rejects untrusted keyId or ephemeral keySource in evidence-manifest.sig" classname="test" time="4.084332" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-010: Fails closed when UGONDU_EVIDENCE_PUBLIC_KEY is absent" classname="test" time="4.149509" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-011: Native JUnit parser rejects test reports with failures or errors" classname="test" time="0.007070" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-012: Native JUnit parser rejects empty or missing test report files" classname="test" time="0.002826" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-013: Native JUnit parser rejects reports from mismatched commit SHAs" classname="test" time="0.004229" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-014: Native JUnit parser rejects DOCTYPE and ENTITY injection (anti-XXE)" classname="test" time="0.000561" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-015: Native JUnit parser rejects declared attribute counts inconsistent with testcase nodes" classname="test" time="0.000646" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-016: Native JUnit parser rejects duplicate testcase names within a suite" classname="test" time="0.000574" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-017: Native JUnit parser rejects reports with 0 test cases" classname="test" time="0.000688" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-018: Native JUnit parser rejects malformed or unclosed XML tag structures" classname="test" time="0.000620" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+    <testcase name="ADV-019: Adversarial runner detects test script failure even if stdout printed PASS-like text" classname="test" time="0.098573" file="tests/qualification/evidence-pipeline-adversarial.test.js"/>
+  </testsuite>
+  <testsuite name="tests/security/secret-scan.test.js" tests="4" failures="0" errors="0" skipped="0" time="7.888">
+    <testcase name="SEC-SCAN-001: Clean repository passes secret scan with 0 unapproved findings" classname="test" time="5.526931" file="tests/security/secret-scan.test.js"/>
+    <testcase name="SEC-SCAN-002: Seeded unencrypted private key in tree is detected and fails scan" classname="test" time="0.655272" file="tests/security/secret-scan.test.js"/>
+    <testcase name="SEC-SCAN-003: Seeded secret in deleted git commit history is detected and fails scan" classname="test" time="1.339605" file="tests/security/secret-scan.test.js"/>
+    <testcase name="SEC-SCAN-004: Valid non-expired allowlist entry suppresses intentional test fixture" classname="test" time="0.001127" file="tests/security/secret-scan.test.js"/>
   </testsuite>
 </testsuites>

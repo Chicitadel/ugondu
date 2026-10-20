@@ -38,6 +38,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 
 	"ugondu/client/i18n"
@@ -127,6 +128,9 @@ func AtomicSymlink(target string, symlinkPath string) error {
 	}
 
 	// Atomic rename (POSIX-atomic on Linux/macOS, best-effort on Windows)
+	if runtime.GOOS == "windows" {
+		_ = os.Remove(symlinkPath)
+	}
 	if err := os.Rename(tempPath, symlinkPath); err != nil {
 		os.Remove(tempPath) // clean up on failure
 		return fmt.Errorf(i18n.T("failed_to_atomically_promote_symlink"), err)

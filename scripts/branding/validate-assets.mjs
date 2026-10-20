@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /******************************************************************************
  * Project        : Ugondu — Universal Delivery Operating System
- * Module         : Branding / Asset Integrity & Conformance Validator
+ * Module         : Branding / Hardened Asset Integrity & Conformance Validator
  * File           : validate-assets.mjs
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -37,6 +37,7 @@ const CHECKSUMS_PATH = path.join(BRAND_DIR, 'checksums.sha256');
 
 const METADATA_FILES = new Set(['manifest.json', 'checksums.sha256', 'README.md']);
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const WINDOWS_RESERVED = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..*)?$/i;
 
 function block(msg) {
   throw new Error(`[FAIL] Brand Asset Validation Error: ${msg}`);
@@ -46,6 +47,10 @@ function normalizePosix(p) {
   return p.replace(/\\/g, '/').replace(/^\/+/, '');
 }
 
+/**
+ * Validates that an asset path does not escape the root, contains no illegal
+ * characters, and is not a symlink/junction.
+ */
 export function safeAssetPath(root, relPath) {
   if (!relPath || typeof relPath !== 'string' || relPath.includes('\0')) {
     block(`Invalid asset path: ${relPath}`);
@@ -53,12 +58,47 @@ export function safeAssetPath(root, relPath) {
   if (path.isAbsolute(relPath)) {
     block(`Absolute asset paths are prohibited: ${relPath}`);
   }
+  if (relPath.includes('\\')) {
+    block(`Backslashes are prohibited in asset path: ${relPath}`);
+  }
+
+  const segments = relPath.split('/');
+  for (const seg of segments) {
+    if (seg === '..' || seg === '.') {
+      block(`Asset path escapes asset root directory: ${relPath}`);
+    }
+    if (seg.endsWith(' ') || seg.endsWith('.')) {
+      block(`Trailing space/dot in filename prohibited: "${seg}" in ${relPath}`);
+    }
+    if (WINDOWS_RESERVED.test(seg)) {
+      block(`Windows reserved device name prohibited: "${seg}" in ${relPath}`);
+    }
+  }
+
   const normalized = normalizePosix(path.normalize(relPath));
   const resolved = path.resolve(root, normalized);
   const rel = path.relative(root, resolved);
+
   if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
     block(`Asset path escapes asset root directory: ${relPath}`);
   }
+
+  // Symlink and junction rejection via lstat
+  if (fs.existsSync(resolved)) {
+    const stat = fs.lstatSync(resolved);
+    if (stat.isSymbolicLink()) {
+      block(`Symbolic links and junctions are prohibited: ${relPath}`);
+    }
+    if (!stat.isFile()) {
+      block(`Asset path must refer to a regular file: ${relPath}`);
+    }
+    const real = fs.realpathSync(resolved);
+    const realRel = path.relative(fs.realpathSync(root), real);
+    if (realRel.startsWith('..') || path.isAbsolute(realRel)) {
+      block(`Symlink canonical target escapes root: ${relPath} -> ${real}`);
+    }
+  }
+
   return resolved;
 }
 
@@ -86,6 +126,10 @@ function walkRegularFiles(dir, baseDir = dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const ent of entries) {
     const full = path.join(dir, ent.name);
+    const stat = fs.lstatSync(full);
+    if (stat.isSymbolicLink()) {
+      block(`Symlink detected in brand directory: ${path.relative(baseDir, full)}`);
+    }
     if (ent.isDirectory()) {
       files.push(...walkRegularFiles(full, baseDir));
     } else if (ent.isFile()) {
@@ -111,19 +155,74 @@ function validatePng(absPath, relPath) {
   if (width === 0 || height === 0) {
     block(`PNG invalid dimensions (${width}x${height}): ${relPath}`);
   }
+  const bitDepth = buf.readUInt8(24);
+  const colorType = buf.readUInt8(25);
+  if (![0, 2, 3, 4, 6].includes(colorType)) {
+    block(`PNG invalid color type (${colorType}): ${relPath}`);
+  }
+  if (![1, 2, 4, 8, 16].includes(bitDepth)) {
+    block(`PNG invalid bit depth (${bitDepth}): ${relPath}`);
+  }
+
+  // Verify chunk sequence has IDAT and terminates with IEND
+  let offset = 8;
+  let hasIdat = false;
+  let hasIend = false;
+  while (offset + 12 <= buf.length) {
+    const chunkLen = buf.readUInt32BE(offset);
+    const chunkType = buf.toString('ascii', offset + 4, offset + 8);
+    if (chunkType === 'IDAT') hasIdat = true;
+    if (chunkType === 'IEND') {
+      hasIend = true;
+      break;
+    }
+    offset += 12 + chunkLen;
+  }
+  if (!hasIdat) block(`PNG missing IDAT image data chunk: ${relPath}`);
+  if (!hasIend) block(`PNG missing terminal IEND chunk: ${relPath}`);
 }
 
-function validateSvg(absPath, relPath, approvedColors) {
-  const content = fs.readFileSync(absPath, 'utf8');
+export function validateSvgContent(content, relPath, approvedColors = []) {
   if (!content.startsWith('<svg') && !content.startsWith('<?xml')) {
     block(`SVG does not start with valid markup: ${relPath}`);
   }
   if (!content.includes('</svg>')) {
     block(`SVG missing closing tag: ${relPath}`);
   }
+
+  // Anti-XXE
+  if (/<!DOCTYPE/i.test(content) || /<!ENTITY/i.test(content)) {
+    block(`SVG contains prohibited DOCTYPE or ENTITY definition: ${relPath}`);
+  }
+
+  // Anti-XSS / Injection
   if (/<script\b/i.test(content) || /javascript:/i.test(content)) {
     block(`SVG contains prohibited script element or URI: ${relPath}`);
   }
+  if (/\son[a-zA-Z]+\s*=/i.test(content)) {
+    block(`SVG contains inline event listener attribute: ${relPath}`);
+  }
+  if (/<foreignObject\b/i.test(content)) {
+    block(`SVG contains prohibited foreignObject element: ${relPath}`);
+  }
+  if (/(?:href|xlink:href)\s*=\s*(?:"|')(?:https?:|\/\/|data:)/i.test(content)) {
+    block(`SVG contains prohibited external or data URI link: ${relPath}`);
+  }
+
+  // Root SVG element inspection
+  const rootMatch = content.match(/<svg\b([^>]*)>/i);
+  if (!rootMatch) {
+    block(`SVG missing root <svg> tag: ${relPath}`);
+  }
+  const rootAttrs = rootMatch[1];
+  const hasViewBox = /viewBox\s*=/i.test(rootAttrs);
+  const hasWidth = /width\s*=/i.test(rootAttrs);
+  const hasHeight = /height\s*=/i.test(rootAttrs);
+  if (!hasViewBox && !(hasWidth && hasHeight)) {
+    block(`SVG root element must declare viewBox or width/height attributes: ${relPath}`);
+  }
+
+  // Color compliance
   for (const color of approvedColors) {
     if (!content.toLowerCase().includes(color.toLowerCase())) {
       block(`SVG missing required brand color (${color}): ${relPath}`);
@@ -139,6 +238,18 @@ function validateIco(absPath, relPath) {
   const count = buf.readUInt16LE(4);
   if (count < 4) {
     block(`ICO file ${relPath} has fewer than 4 resolutions (${count})`);
+  }
+
+  for (let i = 0; i < count; i++) {
+    const entryOffset = 6 + i * 16;
+    if (entryOffset + 16 > buf.length) {
+      block(`ICO entry directory out of bounds: ${relPath}`);
+    }
+    const byteSize = buf.readUInt32LE(entryOffset + 8);
+    const dataOffset = buf.readUInt32LE(entryOffset + 12);
+    if (dataOffset + byteSize > buf.length) {
+      block(`ICO image data out of bounds: ${relPath}`);
+    }
   }
 }
 
@@ -162,7 +273,17 @@ export function validateBrandAssets() {
   // 1. Extract manifest asset paths
   const manifestPaths = extractLeafPaths(manifest.assets);
 
-  // 2. Parse checksum file lines and check duplicates
+  // Check for case-colliding duplicates
+  const lowerMap = new Map();
+  for (const p of manifestPaths) {
+    const low = p.toLowerCase();
+    if (lowerMap.has(low)) {
+      block(`Case-colliding duplicate path in manifest: "${p}" and "${lowerMap.get(low)}"`);
+    }
+    lowerMap.set(low, p);
+  }
+
+  // 2. Parse checksum file lines
   const checksumLines = fs
     .readFileSync(CHECKSUMS_PATH, 'utf8')
     .split(/\r?\n/)
@@ -221,7 +342,7 @@ export function validateBrandAssets() {
     if (ext === '.png') {
       validatePng(absPath, relPath);
     } else if (ext === '.svg') {
-      validateSvg(absPath, relPath, approvedHex);
+      validateSvgContent(buf.toString('utf8'), relPath, approvedHex);
     } else if (ext === '.ico') {
       validateIco(absPath, relPath);
     }

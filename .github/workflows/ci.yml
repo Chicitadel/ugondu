@@ -35,7 +35,7 @@ permissions:
 
 env:
   NODE_VERSION: '20'
-  GO_VERSION: '1.22'
+  GO_VERSION: '1.24'
   REGISTRY: ghcr.io
   IMAGE_BASE: ${{ github.repository_owner }}/ugondu
 
@@ -68,7 +68,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@1d43b558a28a475868693a5581bf06cb059d64d1 # v4.2.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
@@ -200,7 +200,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@1d43b558a28a475868693a5581bf06cb059d64d1 # v4.2.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -240,7 +240,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@1d43b558a28a475868693a5581bf06cb059d64d1 # v4.2.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -354,7 +354,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@1d43b558a28a475868693a5581bf06cb059d64d1 # v4.2.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 

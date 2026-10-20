@@ -157,13 +157,33 @@ function resolveEd25519KeyPair() {
 }
 
 function validateImportedQualificationArtifacts(imported, commitHash, treeHash) {
+  const configPath = path.join(ROOT, 'config/qualification/aws-target.json');
+  if (!fs.existsSync(configPath)) {
+    throw new Error(`Governed AWS qualification target configuration missing at ${configPath}`);
+  }
+  const parsedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const tid = process.env.UGONDU_AWS_TARGET_ID;
+  const awsTarget = tid ? parsedConfig.targets.find((t) => t.id === tid) : parsedConfig.targets[0];
+  if (!awsTarget) {
+    throw new Error(`AWS qualification target not found (targetId=${tid})`);
+  }
+
   const awsReport = JSON.parse(imported.get('tests/aws-conformance-results.json').toString('utf8'));
   if (awsReport.status !== 'PASS' ||
-      awsReport.awsAccountId !== '971671216490' ||
-      awsReport.awsRegion !== 'eu-west-3' ||
+      awsReport.awsAccountId !== awsTarget.accountId ||
+      awsReport.awsRegion !== awsTarget.region ||
       awsReport.leastPrivilegeBoundaries?.iamListUsersDenied !== true ||
       awsReport.leastPrivilegeBoundaries?.executionRoleAssumptionFailClosed !== true) {
     throw new Error('Live AWS conformance evidence is absent or failed a required least-privilege assertion; release evidence generation is blocked.');
+  }
+
+  if (awsReport.evaluatedAt) {
+    const evaluatedTime = Date.parse(awsReport.evaluatedAt);
+    const maxAgeHours = Number(process.env.UGONDU_AWS_EVIDENCE_MAX_AGE_HOURS) || 24;
+    const ageMs = Date.now() - evaluatedTime;
+    if (Number.isNaN(evaluatedTime) || ageMs > maxAgeHours * 3600 * 1000) {
+      throw new Error(`AWS conformance evidence evaluatedAt (${awsReport.evaluatedAt}) exceeds maximum allowable age of ${maxAgeHours}h.`);
+    }
   }
 
   const depScan = JSON.parse(imported.get('security/dependency-scan.json').toString('utf8'));

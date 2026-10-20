@@ -3,23 +3,28 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : AWS Conformance / Role Assumption & Read-Only Capability Probe
  * File           : probe-access.mjs
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
  * Last Modified  : 2026-10-20
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
  * - Corporate Policy Governed
+ * - Security Reviewed
  * - Non-mutating: STS session creation and Describe/List/Get calls only
  * - Output is a capability matrix; no credential or session secret is printed
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Standards: ISO 27001, SOC 2, OWASP ASVS 5.0, NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 import { aws } from './aws-env.mjs';
+import { resolveAwsTarget } from './target-resolver.mjs';
 
-const REGION = process.env.AWS_REGION || 'eu-west-3';
+const target = resolveAwsTarget();
+const REGION = process.env.AWS_REGION || target.region;
 const short = (s) => (s || '').split('\n')[0].replace(/User: arn:aws:iam::\d+:/, 'User: ').slice(0, 170);
 const results = [];
 const record = (area, call, r) => {

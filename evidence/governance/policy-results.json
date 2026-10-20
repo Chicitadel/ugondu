@@ -1,22 +1,26 @@
 {
   "schemaVersion": "1.0.0",
-  "evaluatedAt": "2026-10-20T12:49:56.751Z",
-  "executionId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
-  "commitHash": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
-  "treeHash": "76244e10696152ff63e3177cdd629b0199888deb",
-  "policyPack": "policy-packs/aws/cor/pack.yaml",
-  "policyPackVerified": true,
-  "passedGates": [
-    "UG-COR-NO-STUBS-001",
-    "UG-COR-PORT-4001-4005",
-    "UG-COR-POLICY-PACK-SIG"
-  ],
+  "evaluatedAt": "2026-10-20T19:18:37.690Z",
+  "executionId": "exec-qual-1792523911037-3f44d572",
+  "commitHash": "16f4d4c99026a3acbfdd92ce9a0649579ac40eb7",
+  "treeHash": "f65e864f88d048d5115b30182726e721d7b9d2f0",
   "scriptsExecuted": [
-    "scripts/verify-release-integrity.js",
-    "scripts/governance/validate-repository.mjs",
-    "scripts/governance/validate-capability-registry.mjs",
-    "scripts/governance/validate-test-coverage.mjs",
-    "scripts/governance/verify-policy-pack-digests.mjs"
+    {
+      "script": "scripts/governance/validate-repository.mjs",
+      "durationSec": "6.320",
+      "exitCode": 0
+    },
+    {
+      "script": "scripts/branding/validate-assets.mjs",
+      "durationSec": "0.213",
+      "exitCode": 0
+    },
+    {
+      "script": "scripts/governance/verify-action-pins.mjs",
+      "durationSec": "0.115",
+      "exitCode": 0
+    }
   ],
+  "rawLogSha256": "9f2147a28c7892a0509426845a1ede95fd7713ba9cd6f22e85c6d65c51729d43",
   "status": "PASS"
 }

@@ -19,7 +19,15 @@ function getCommitHash() {
 async function main() {
     const calculator = new CORAuthorityCalculator();
     
-    const accountId = '971671216490';
+    const targetPath = join(__dirname, '../config/qualification/aws-target.json');
+    let accountId = process.env.UGONDU_AWS_ACCOUNT_ID || '';
+    if (!accountId) {
+        try {
+            const raw = require('fs').readFileSync(targetPath, 'utf8');
+            const targetConfig = JSON.parse(raw);
+            accountId = targetConfig.targets?.[0]?.accountId || '';
+        } catch {}
+    }
     const region = 'us-east-1';
     const roleName = 'UgonduCORRunner';
 
@@ -124,7 +132,7 @@ ${calculator.getGraph().map(op => {
 - **No \`AdministratorAccess\`**: Verified.
 - **No \`Action: "*"\`**: Verified.
 - **No \`Resource: "*"\` Overreach**: Verified. \`Resource: "*"\` is strictly limited to \`Describe*\` and \`List*\` operations which AWS explicitly requires (e.g., \`ec2:DescribeVpcs\`, \`s3:ListAllMyBuckets\`).
-- **Account & Region Bound**: All mutative operations are securely scoped down to Account \`971671216490\` and Region \`us-east-1\` or use deterministic names.
+- **Account & Region Bound**: All mutative operations are securely scoped down to Account \`${accountId}\` and Region \`us-east-1\` or use deterministic names.
 - **S3 Containment**: S3 operations (\`CreateBucket\`, \`DeleteBucket\`, \`PutObject\`, \`DeleteObject\`) are restricted exclusively to the \`ugondu-cor-*\` namespace.
 - **RDS Containment**: CreateDBInstance is correctly mapped to \`db:*\` and \`subgrp:*\`. EC2 Describe dependencies are present.
 - **EC2 Tagging & Destructive Containment**: \`CreateTags\` uses the \`ec2:CreateAction\` and \`aws:TagKeys\` conditions. \`TerminateInstances\` and \`DeleteVpc\` operations use the \`aws:ResourceTag/UgonduCOR\` condition, preventing accidental destruction of pre-existing un-tagged resources.

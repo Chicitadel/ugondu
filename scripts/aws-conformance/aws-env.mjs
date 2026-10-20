@@ -3,7 +3,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : AWS Conformance / Credential Bootstrap
  * File           : aws-env.mjs
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -19,16 +19,18 @@
  * supplied by OIDC/STS, an approved profile/SSO session, or an instance/task
  * role. This module never reads access-key CSV files or injects static keys.
  *
+ * Standards: ISO 27001, SOC 2, OWASP ASVS 5.0, NIST SP 800-53
+ *
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 import { spawnSync } from 'node:child_process';
 
 /** Preserve the caller's AWS credential chain; set only non-secret region options. */
-export function awsEnv(region = process.env.AWS_REGION || 'eu-west-3') {
+export function awsEnv(region) {
+  const targetRegion = region || process.env.AWS_REGION;
   return {
     ...process.env,
-    AWS_REGION: region,
-    AWS_DEFAULT_REGION: region,
+    ...(targetRegion ? { AWS_REGION: targetRegion, AWS_DEFAULT_REGION: targetRegion } : {}),
     AWS_PAGER: ''
   };
 }

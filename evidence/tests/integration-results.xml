@@ -1,199 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="integration" tests="86" failures="0" errors="0" skipped="0" time="16.345" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuites name="integration:tests/billing-gateway.test.js" tests="8" failures="0" errors="0" skipped="0" time="1.844" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/billing-gateway.test.js" tests="8" failures="0" errors="0" skipped="0" time="1.844">
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Health, liveness, readiness, metadata &amp; W3C traceparent verified" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Missing token returns 401" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Seeded active community token returns 200 with community capabilities" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Professional token resolves professional edition with full capabilities" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Enterprise token resolves enterprise edition with telemetry" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Unverified token returns 402 LICENSE_INVALID" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Suspended token returns 403 LICENSE_SUSPENDED" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/billing-gateway.test.js" name="Expired and revoked tokens return 403" time="0.010">
-    </testcase>
+<testsuites name="integration" tests="66" failures="0" errors="0" skipped="0" time="15.319" commit="16f4d4c99026a3acbfdd92ce9a0649579ac40eb7">
+  <testsuite name="tests/billing-gateway.test.js" tests="8" failures="0" errors="0" skipped="0" time="1.377">
+    <testcase name="BG-001: Health, live, ready, metadata endpoints &amp; W3C traceparent" classname="test" time="0.062028" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-002: Missing token returns 401" classname="test" time="0.049786" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-003: Seeded active community token returns 200 with community capabilities" classname="test" time="0.012329" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-004: Professional token resolves professional edition with full capabilities" classname="test" time="0.010110" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-005: Enterprise token resolves enterprise edition with telemetry" classname="test" time="0.010415" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-006: Unverified token returns 402 LICENSE_INVALID" classname="test" time="0.009478" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-007: Suspended token returns 403 LICENSE_SUSPENDED" classname="test" time="0.009908" file="tests/billing-gateway.test.js"/>
+    <testcase name="BG-008: Expired and revoked tokens return 403" classname="test" time="0.016316" file="tests/billing-gateway.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/engine-core.test.js" tests="6" failures="0" errors="0" skipped="0" time="1.730" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/engine-core.test.js" tests="6" failures="0" errors="0" skipped="0" time="1.730">
-    <testcase classname="integration:tests/engine-core.test.js" name="/health/live and /health/ready return 200 with zero static cor_level" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/engine-core.test.js" name="Missing fields returns 400" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/engine-core.test.js" name="Deterministic 200 signed recipe &amp; idempotent replay verified (TX: tx_4e771a2a98601f5d0ed5c0cd)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/engine-core.test.js" name="Unlicensed deployment request deterministically returns 402" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/engine-core.test.js" name="Telemetry endpoint accepts valid payload" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/engine-core.test.js" name="Telemetry endpoint rejects missing fields" time="0.010">
-    </testcase>
+  <testsuite name="tests/engine-core.test.js" tests="6" failures="0" errors="0" skipped="0" time="1.515">
+    <testcase name="ENG-001: /health/live and /health/ready return 200 with zero static cor_level" classname="test" time="0.061160" file="tests/engine-core.test.js"/>
+    <testcase name="ENG-002: Missing required fields returns 400" classname="test" time="0.035024" file="tests/engine-core.test.js"/>
+    <testcase name="ENG-003: Deterministic 200 signed recipe &amp; idempotent replay verified" classname="test" time="0.076665" file="tests/engine-core.test.js"/>
+    <testcase name="ENG-004: Unlicensed deployment request deterministically returns 402" classname="test" time="0.011557" file="tests/engine-core.test.js"/>
+    <testcase name="ENG-005: Telemetry endpoint accepts valid payload" classname="test" time="0.007146" file="tests/engine-core.test.js"/>
+    <testcase name="ENG-006: Telemetry endpoint rejects missing fields" classname="test" time="0.005813" file="tests/engine-core.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/plugin-manager.test.js" tests="7" failures="0" errors="0" skipped="0" time="1.770" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/plugin-manager.test.js" tests="7" failures="0" errors="0" skipped="0" time="1.770">
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Plugin listing returns 3 verified plugin(s)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Non-existent plugin execution returns 404" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Path traversal protection strictly enforced on execute (403 PATH_TRAVERSAL_DETECTED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Path traversal protection strictly enforced on activate (403 PATH_TRAVERSAL_DETECTED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Unauthorized tenant strictly rejected with 403 PLUGIN_NOT_AUTHORIZED" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Tenant activation successfully authorizes plugin execution (HTTP 200)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/plugin-manager.test.js" name="Cryptographic manifest signature strictly verified and forged signature rejected" time="0.010">
-    </testcase>
+  <testsuite name="tests/plugin-manager.test.js" tests="7" failures="0" errors="0" skipped="0" time="1.653">
+    <testcase name="PM-001: GET /v1/plugins returns verified plugins array" classname="test" time="0.730477" file="tests/plugin-manager.test.js"/>
+    <testcase name="PM-002: Execute non-existent plugin returns 404" classname="test" time="0.046276" file="tests/plugin-manager.test.js"/>
+    <testcase name="PM-003: Path traversal on execute returns 403 PATH_TRAVERSAL_DETECTED" classname="test" time="0.032375" file="tests/plugin-manager.test.js"/>
+    <testcase name="PM-004: Path traversal on activate returns 403 PATH_TRAVERSAL_DETECTED" classname="test" time="0.010242" file="tests/plugin-manager.test.js"/>
+    <testcase name="PM-005: Tenant plugin authorization — unauthorized tenant returns 403 PLUGIN_NOT_AUTHORIZED" classname="test" time="0.014931" file="tests/plugin-manager.test.js"/>
+    <testcase name="PM-006: Tenant activation authorizes execution and returns execution receipt" classname="test" time="0.270192" file="tests/plugin-manager.test.js"/>
+    <testcase name="PM-007: Tampered cryptographic signature rejected with 403 INVALID_PLUGIN_SIGNATURE" classname="test" time="0.016496" file="tests/plugin-manager.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/event-bus.test.js" tests="5" failures="0" errors="0" skipped="0" time="1.605" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/event-bus.test.js" tests="5" failures="0" errors="0" skipped="0" time="1.605">
-    <testcase classname="integration:tests/event-bus.test.js" name="Health, liveness, readiness, metadata &amp; W3C traceparent verified" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/event-bus.test.js" name="Envelope schema validation rejects malformed payload with 400" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/event-bus.test.js" name="Idempotency deduplication and payload secret redaction verified" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/event-bus.test.js" name="Tenant isolation and SSRF webhook guard verified" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/event-bus.test.js" name="Backpressure (429) and dead-letter queue verified" time="0.010">
-    </testcase>
+  <testsuite name="tests/event-bus.test.js" tests="5" failures="0" errors="0" skipped="0" time="1.544">
+    <testcase name="EB-001: Health, live, ready, metadata &amp; W3C traceparent" classname="test" time="0.049544" file="tests/event-bus.test.js"/>
+    <testcase name="EB-002: Envelope schema validation rejects malformed payload with 400" classname="test" time="0.035628" file="tests/event-bus.test.js"/>
+    <testcase name="EB-003: Idempotency deduplication and payload secret redaction verified" classname="test" time="0.010788" file="tests/event-bus.test.js"/>
+    <testcase name="EB-004: Tenant isolation and SSRF webhook guard verified" classname="test" time="0.008400" file="tests/event-bus.test.js"/>
+    <testcase name="EB-005: Backpressure (429) and dead-letter queue verified" classname="test" time="0.011668" file="tests/event-bus.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/repository-adapter.test.js" tests="26" failures="0" errors="0" skipped="0" time="6.254" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/repository-adapter.test.js" tests="26" failures="0" errors="0" skipped="0" time="6.254">
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://github.com/example/repo → github (UGONDU_GITHUB_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://gitlab.com/example/repo → gitlab (UGONDU_GITLAB_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://bitbucket.org/example/repo → bitbucket (UGONDU_BITBUCKET_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="git@github.com:example/repo.git → github (UGONDU_GITHUB_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="git@gitlab.com:example/repo.git → gitlab (UGONDU_GITLAB_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://dev.azure.com/org/project/_git/repo → azure-devops (UGONDU_AZURE_DEVOPS_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://git-codecommit.us-east-1.amazonaws.com/v1/repos/my-repo → aws-codecommit (AWS_ROLE_ARN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://mygitea.example.com/user/repo → gitea (UGONDU_GITEA_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://mygogs.example.com/user/repo → gogs (UGONDU_GOGS_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="https://example.com/repo.git → generic-https (UGONDU_GIT_TOKEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="git@git.example.com:team/repo.git → generic-ssh (UGONDU_SSH_KEY_PATH)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Verified SSH-to-HTTPS mapping for GitHub and preserved SSH for Generic-SSH" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://evil.com/github.com/org/repo&apos; (LOOKALIKE_URL_FORBIDDEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://github.com.evil.com/org/repo&apos; (LOOKALIKE_URL_FORBIDDEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;http://169.254.169.254/gitea/repo&apos; (SSRF_BLOCKED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://127.0.0.1/org/repo.git&apos; (SSRF_BLOCKED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://localhost/org/repo.git&apos; (SSRF_BLOCKED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://10.0.0.1/org/repo.git&apos; (SSRF_BLOCKED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://192.168.1.1/org/repo.git&apos; (SSRF_BLOCKED)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://user:pass@github.com/org/repo&apos; (EMBEDDED_CREDENTIALS_FORBIDDEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://github.com:8443/org/repo&apos; (UNEXPECTED_PORT_FORBIDDEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://github.com/org/../etc/passwd&apos; (PATH_TRAVERSAL_FORBIDDEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Rejected adversarial URL &apos;https://github.com/org/repo?token=secret&apos; (QUERY_OR_FRAGMENT_FORBIDDEN)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="AWS CodeCommit OIDC/IAM role credential validation &amp; static secret rejection" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="/health, /health/live, /health/ready, /v1/metadata &amp; traceparent verified" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/repository-adapter.test.js" name="Full capability contracts (/metadata, /refs, /fetch, /providers) verified" time="0.010">
-    </testcase>
+  <testsuite name="tests/repository-adapter.test.js" tests="6" failures="0" errors="0" skipped="0" time="6.565">
+    <testcase name="RA-001: URL resolution across 11 Git repository providers" classname="test" time="0.983628" file="tests/repository-adapter.test.js"/>
+    <testcase name="RA-002: Verified SSH URL normalization to HTTPS for GitHub vs preserved SSH for Generic-SSH" classname="test" time="0.006143" file="tests/repository-adapter.test.js"/>
+    <testcase name="RA-003: Adversarial lookalike URLs, SSRF, embedded credentials, custom ports, and traversal rejected" classname="test" time="0.024920" file="tests/repository-adapter.test.js"/>
+    <testcase name="RA-004: AWS CodeCommit OIDC/IAM role strategy vs static secret key rejection" classname="test" time="0.007380" file="tests/repository-adapter.test.js"/>
+    <testcase name="RA-005: Standardized /health, /health/live, /health/ready, /v1/metadata &amp; W3C traceparent" classname="test" time="0.009636" file="tests/repository-adapter.test.js"/>
+    <testcase name="RA-006: Full capability endpoints (/metadata, /refs, /fetch, /providers) &amp; missing URL 400" classname="test" time="0.014887" file="tests/repository-adapter.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/cor-remediation.test.js" tests="22" failures="0" errors="0" skipped="0" time="0.228" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/cor-remediation.test.js" tests="22" failures="0" errors="0" skipped="0" time="0.228">
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-001: Zero static test signing keys in CI workflows and production fail-closed key loader" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-002/003: Central product registry &amp; port alignment (4001-4005) with zero drift" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-005/013: Unified /health, /health/live, /health/ready contract without static cor_level" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-006/007: Repository adapter supports 8 providers with strict SSRF network destination policy" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-008: Centralized vendor-neutral AI model catalog and inference gateway" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-015: UG-COR-NO-STUBS-001 policy and governance validator active" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-017: Plugin manager enforces tenant authorization without &amp;&amp; false bypass and removes tampered fixtures" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-019: All 5 AWS COR V9 Split Managed Policies exist with 46 statements preserved 1:1" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-020: All 12 locales present in locales/, server/shared/locales/, and packs/ and client/locales removed" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="COR-021/022: All 14 guides and signed release evidence bundle present" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F1: ci.yml triggers cover phase*/** and stabilization/** branches and pull requests" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F2: README and guides document IAM role / OIDC for aws-codecommit, not a static secret key" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F4: Public docs reference only /health, /health/live, /health/ready, /v1/metadata" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F3: AWS COR policy pack template and pack digests recompute from canonical bytes" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F5: Evidence bundle signature uses managed key custody anchored to server/shared/keys/evidence_public.pem" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F6: Policy pack pack.sig exists and cryptographically verifies against uplm_pack_public.pem" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F7: Provider capability matrix declares truthful lifecycle status (tested, implemented, unavailable)" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F8: AWS conformance source fails closed unless both least-privilege denials are proven" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F9: AWS conformance role-assumption probe uses valid ARN and rejects unexpected success" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F10: AWS probe uses the default credential chain and evidence generation imports real qualification outputs" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F11: Evidence and policy-pack verification require externally injected trust anchors" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/cor-remediation.test.js" name="REAUDIT-F12: PR#5 qualification evidence schema, platform matrix, real npm-audit SCA, full lockfile SBOM, and adversarial/mode-parity suites exist" time="0.010">
-    </testcase>
+  <testsuite name="tests/cor-remediation.test.js" tests="22" failures="0" errors="0" skipped="0" time="0.541">
+    <testcase name="COR-001: Zero static test signing keys in CI workflows and production fail-closed key loader" classname="test" time="0.006209" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-002/003: Central product registry &amp; port alignment (4001-4005) with zero drift" classname="test" time="0.002042" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-005/013: Unified /health, /health/live, /health/ready contract without static cor_level" classname="test" time="0.001497" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-006/007: Repository adapter supports 8 providers with strict SSRF network destination policy" classname="test" time="0.001610" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-008: Centralized vendor-neutral AI model catalog and inference gateway" classname="test" time="0.002142" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-015: UG-COR-NO-STUBS-001 policy and governance validator active" classname="test" time="0.001535" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-017: Plugin manager enforces tenant authorization without &amp;&amp; false bypass and removes tampered fixtures" classname="test" time="0.002990" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-019: All 5 AWS COR V9 Split Managed Policies exist with 46 statements preserved 1:1" classname="test" time="0.002751" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-020: All 12 locales present in locales/, server/shared/locales/, and packs/ and client/locales removed" classname="test" time="0.006742" file="tests/cor-remediation.test.js"/>
+    <testcase name="COR-021/022: All 14 guides and signed release evidence bundle present" classname="test" time="0.002606" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F1: ci.yml triggers cover phase*/** and stabilization/** branches and pull requests" classname="test" time="0.001338" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F2: README and guides document IAM role / OIDC for aws-codecommit, not a static secret key" classname="test" time="0.002090" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F4: Public docs reference only /health, /health/live, /health/ready, /v1/metadata" classname="test" time="0.001129" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F3: AWS COR policy pack template and pack digests recompute from canonical bytes" classname="test" time="0.140980" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F5: Evidence bundle signature uses managed key custody anchored to server/shared/keys/evidence_public.pem" classname="test" time="0.001855" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F6: Policy pack pack.sig exists and cryptographically verifies against uplm_pack_public.pem" classname="test" time="0.001454" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F7: Provider capability matrix declares truthful lifecycle status (tested, implemented, unavailable)" classname="test" time="0.001417" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F8: AWS conformance source fails closed unless both least-privilege denials are proven" classname="test" time="0.000983" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F9: AWS conformance role-assumption probe uses valid ARN and rejects unexpected success" classname="test" time="0.000598" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F10: AWS probe uses the default credential chain and evidence generation imports real qualification outputs" classname="test" time="0.001226" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F11: Evidence and policy-pack verification require externally injected trust anchors" classname="test" time="0.001359" file="tests/cor-remediation.test.js"/>
+    <testcase name="REAUDIT-F12: PR#5 qualification evidence schema, platform matrix, real npm-audit SCA, full lockfile SBOM, and adversarial/mode-parity suites exist" classname="test" time="0.002465" file="tests/cor-remediation.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/ai-inference-gateway.test.js" tests="6" failures="0" errors="0" skipped="0" time="1.071" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/ai-inference-gateway.test.js" tests="6" failures="0" errors="0" skipped="0" time="1.071">
-    <testcase classname="integration:tests/ai-inference-gateway.test.js" name="Governance contract (.governance/platform/contracts/ai.js) validates config/model-catalog.json" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/ai-inference-gateway.test.js" name="Missing and expired credentials fail closed with CREDENTIALS_MISSING / CREDENTIALS_EXPIRED" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/ai-inference-gateway.test.js" name="Disabled models, disallowed regions, and disallowed data classifications rejected before egress" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/ai-inference-gateway.test.js" name="429/5xx triggers circuit-breaker accounting and routes only to policy-equivalent fallback" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/ai-inference-gateway.test.js" name="Tool-call allowlist, caller authorization, and JSON schema validation enforced" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/ai-inference-gateway.test.js" name="Concurrency quota, zero secret leakage, HTTP routes, and product identity protection verified" time="0.010">
-    </testcase>
+  <testsuite name="tests/ai-inference-gateway.test.js" tests="6" failures="0" errors="0" skipped="0" time="1.337">
+    <testcase name="AI-001: Governance contract validates config/model-catalog.json" classname="test" time="0.004875" file="tests/ai-inference-gateway.test.js"/>
+    <testcase name="AI-002: Missing and expired credentials fail closed with CREDENTIALS_MISSING / CREDENTIALS_EXPIRED" classname="test" time="0.020340" file="tests/ai-inference-gateway.test.js"/>
+    <testcase name="AI-003: Disabled models, disallowed regions, and disallowed data classifications rejected before egress" classname="test" time="0.002525" file="tests/ai-inference-gateway.test.js"/>
+    <testcase name="AI-004: 429/5xx triggers circuit-breaker accounting and routes only to policy-equivalent fallback" classname="test" time="0.003950" file="tests/ai-inference-gateway.test.js"/>
+    <testcase name="AI-005: Tool-call allowlist, caller authorization, and JSON schema validation enforced" classname="test" time="0.003347" file="tests/ai-inference-gateway.test.js"/>
+    <testcase name="AI-006: Concurrency quota, zero secret leakage, HTTP routes, and product identity protection verified" classname="test" time="0.139686" file="tests/ai-inference-gateway.test.js"/>
   </testsuite>
-  <testsuites name="integration:tests/qualification/shared-execution-and-mode-parity.test.js" tests="6" failures="0" errors="0" skipped="0" time="0.601" commit="5c32f5d293fb835096d57a9a5b5632c960be1e25">
-  <testsuite name="integration:tests/qualification/shared-execution-and-mode-parity.test.js" tests="6" failures="0" errors="0" skipped="0" time="0.601">
-    <testcase classname="integration:tests/qualification/shared-execution-and-mode-parity.test.js" name="MODE-001: UI, CLI, IDE, automation, and headless-ci modes share identical durable transaction lifecycle" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/qualification/shared-execution-and-mode-parity.test.js" name="MODE-002: Deterministic non-model workflow executes end-to-end when AI model credentials/providers are offline" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/qualification/shared-execution-and-mode-parity.test.js" name="MODE-003: Model-assisted plans are treated as untrusted input and cannot bypass policy or execute raw shell commands" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/qualification/shared-execution-and-mode-parity.test.js" name="MODE-004: Model-assisted plan with strictly allowed and granted capabilities passes guardrail validation" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/qualification/shared-execution-and-mode-parity.test.js" name="MODE-005: Out-of-bounds resource mutations and unapproved plans fail closed across all modes" time="0.010">
-    </testcase>
-    <testcase classname="integration:tests/qualification/shared-execution-and-mode-parity.test.js" name="MODE-006: All 12 supported locales and RTL metadata validate with zero placeholder drift" time="0.010">
-    </testcase>
+  <testsuite name="tests/qualification/shared-execution-and-mode-parity.test.js" tests="6" failures="0" errors="0" skipped="0" time="0.787">
+    <testcase name="MODE-001: UI, CLI, IDE, automation, and headless-ci modes share identical durable transaction lifecycle" classname="test" time="0.113580" file="tests/qualification/shared-execution-and-mode-parity.test.js"/>
+    <testcase name="MODE-002: Deterministic non-model workflow executes end-to-end when AI model credentials/providers are offline" classname="test" time="0.023981" file="tests/qualification/shared-execution-and-mode-parity.test.js"/>
+    <testcase name="MODE-003: Model-assisted plans are treated as untrusted input and cannot bypass policy or execute raw shell commands" classname="test" time="0.001066" file="tests/qualification/shared-execution-and-mode-parity.test.js"/>
+    <testcase name="MODE-004: Model-assisted plan with strictly allowed and granted capabilities passes guardrail validation" classname="test" time="0.001009" file="tests/qualification/shared-execution-and-mode-parity.test.js"/>
+    <testcase name="MODE-005: Out-of-bounds resource mutations and unapproved plans fail closed across all modes" classname="test" time="0.002228" file="tests/qualification/shared-execution-and-mode-parity.test.js"/>
+    <testcase name="MODE-006: All 12 supported locales and RTL metadata validate with zero placeholder drift" classname="test" time="0.019207" file="tests/qualification/shared-execution-and-mode-parity.test.js"/>
   </testsuite>
 </testsuites>

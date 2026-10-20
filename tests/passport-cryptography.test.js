@@ -28,20 +28,25 @@ const assert = require('assert');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const test = require('node:test');
 
 const ROOT = path.resolve(__dirname, '..');
 let passed = 0;
 let failed = 0;
 
 function check(id, title, fn) {
-  try {
-    fn();
-    console.log(`[PASS] ✓ ${id}: ${title}`);
-    passed++;
-  } catch (err) {
-    console.error(`[FAIL] ✗ ${id}: ${title} — ${err.message}`);
-    failed++;
-  }
+  const name = `${id}: ${title}`;
+  test(name, () => {
+    try {
+      fn();
+      console.log(`[PASS] ✓ ${name}`);
+      passed++;
+    } catch (err) {
+      console.error(`[FAIL] ✗ ${name} — ${err.message}`);
+      failed++;
+      throw err;
+    }
+  });
 }
 
 function runPassportCryptoTests() {

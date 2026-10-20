@@ -28,22 +28,24 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const test = require('node:test');
 
 const ROOT = path.resolve(__dirname, '../..');
 let passed = 0;
 let failed = 0;
 
 function check(id, title, fn) {
-  return Promise.resolve()
-    .then(() => fn())
-    .then(() => {
+  return test(`${id}: ${title}`, async () => {
+    try {
+      await fn();
       console.log(`[PASS] ✓ ${id}: ${title}`);
       passed++;
-    })
-    .catch((err) => {
+    } catch (err) {
       console.error(`[FAIL] ✗ ${id}: ${title} — ${err.message}`);
       failed++;
-    });
+      throw err;
+    }
+  });
 }
 
 async function runModeParitySuite() {

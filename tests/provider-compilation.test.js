@@ -25,6 +25,7 @@
 'use strict';
 
 const assert = require('assert');
+const test = require('node:test');
 
 function compileProvider(intent, provider) {
   if (provider === 'AWS') {
@@ -35,34 +36,26 @@ function compileProvider(intent, provider) {
   return null;
 }
 
-function runTests() {
-  console.log('══════════════════════════════════════════════════════════════');
-  console.log(' Ugondu Provider Compilation Qualification Suite              ');
-  console.log('══════════════════════════════════════════════════════════════');
-
+test('PROV-001: AWS provider compilation emits valid implementation', () => {
   const intent = 'compute instance';
-
   const awsResult = compileProvider(intent, 'AWS');
   assert.strictEqual(awsResult.type, 'AWS');
   assert.ok(awsResult.implementation.includes(intent), 'AWS result should contain intent');
   console.log('[PASS] ✓ PROV-001: AWS provider compilation emits valid implementation');
+});
 
+test('PROV-002: GCP provider compilation emits valid implementation', () => {
+  const intent = 'compute instance';
   const gcpResult = compileProvider(intent, 'GCP');
   assert.strictEqual(gcpResult.type, 'GCP');
   assert.ok(gcpResult.implementation.includes(intent), 'GCP result should contain intent');
   console.log('[PASS] ✓ PROV-002: GCP provider compilation emits valid implementation');
+});
 
+test('PROV-003: Provider implementations are isolated and non-identical', () => {
+  const intent = 'compute instance';
+  const awsResult = compileProvider(intent, 'AWS');
+  const gcpResult = compileProvider(intent, 'GCP');
   assert.notStrictEqual(awsResult.implementation, gcpResult.implementation, 'Implementations should be different');
   console.log('[PASS] ✓ PROV-003: Provider implementations are isolated and non-identical');
-
-  console.log('══════════════════════════════════════════════════════════════');
-  console.log(' Provider Compilation Results: 3 passed, 0 failed             ');
-  console.log('══════════════════════════════════════════════════════════════');
-}
-
-try {
-  runTests();
-} catch (e) {
-  console.error('[FAIL] Test failed:', e);
-  process.exit(1);
-}
+});

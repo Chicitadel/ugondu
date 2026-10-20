@@ -11,7 +11,7 @@
   "exitCode": 1,
   "lockfileSha256": "598b7b2603fe2acaacf00e38552c3d880506be8f385af1d8208dccb3a03e3c97",
   "rawReportSha256": "f8c099fe8d95fe7687e591a3f7075203bbd7a05ab93ea52a60149cb1dffb7e68",
-  "evaluatedAt": "2026-10-20T12:50:09.666Z",
+  "evaluatedAt": "2026-10-20T19:18:47.618Z",
   "vulnerabilities": {
     "critical": 0,
     "high": 0,

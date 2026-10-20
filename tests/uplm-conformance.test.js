@@ -32,6 +32,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const test = require('node:test');
 
 const capabilities = require('../server/capabilities/dist/index.js');
 const uppie = require('../server/uppie/dist/index.js');
@@ -40,14 +41,17 @@ let passed = 0;
 let failed = 0;
 
 async function check(name, fn) {
-  try {
-    await fn();
-    console.log(`[en] ✓ PASS: ${name}`);
-    passed++;
-  } catch (err) {
-    console.error(`[en] ✗ FAIL: ${name} — ${err && err.message ? err.message : String(err)}`);
-    failed++;
-  }
+  return test(name, async () => {
+    try {
+      await fn();
+      console.log(`[en] ✓ PASS: ${name}`);
+      passed++;
+    } catch (err) {
+      console.error(`[en] ✗ FAIL: ${name} — ${err && err.message ? err.message : String(err)}`);
+      failed++;
+      throw err;
+    }
+  });
 }
 
 function defaultEnv(overrides = {}) {

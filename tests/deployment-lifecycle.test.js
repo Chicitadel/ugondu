@@ -25,15 +25,20 @@ const {
   validateLanguagePackIntegrity, computePackArtifactDigest
 } = shared;
 const { DisasterRecoveryEngine } = require('../server/engine-core/dist/dr/chaos');
+const test = require('node:test');
 
 let passed = 0; let failed = 0;
 function report(n, desc, fn) {
-  try { fn(); console.log(`[PASS] Scenario ${n}: ${desc}`); passed++; }
-  catch(err) { console.error(`[FAIL] Scenario ${n}: ${desc} ->`, err.message); failed++; }
+  test(`Scenario ${n}: ${desc}`, () => {
+    try { fn(); console.log(`[PASS] Scenario ${n}: ${desc}`); passed++; }
+    catch(err) { console.error(`[FAIL] Scenario ${n}: ${desc} ->`, err.message); failed++; throw err; }
+  });
 }
-async function reportAsync(n, desc, fn) {
-  try { await fn(); console.log(`[PASS] Scenario ${n}: ${desc}`); passed++; }
-  catch(err) { console.error(`[FAIL] Scenario ${n}: ${desc} ->`, err.message); failed++; }
+function reportAsync(n, desc, fn) {
+  test(`Scenario ${n}: ${desc}`, async () => {
+    try { await fn(); console.log(`[PASS] Scenario ${n}: ${desc}`); passed++; }
+    catch(err) { console.error(`[FAIL] Scenario ${n}: ${desc} ->`, err.message); failed++; throw err; }
+  });
 }
 
 const sandbox = path.join(os.tmpdir(), `ugondu_lifecycle_${Date.now()}`);

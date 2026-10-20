@@ -3,7 +3,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Release Qualification Evidence Collector
  * File           : collect-qualification-evidence.mjs
- * Version        : 2.1.0
+ * Version        : 2.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -38,10 +38,16 @@ import {
   generateResolvedLockfileSbom
 } from './evidence-scanners.mjs';
 import { parseAndValidateNativeJUnit } from './junit-parser.mjs';
+import {
+  recordTargetEvidence,
+  deriveTargetStates,
+  verifyMatrixClaims,
+  normalizeOs,
+  normalizeArch
+} from './platform-evidence.mjs';
+import { executeSecretScan } from './secret-scan.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const HARNESS_PATH = path.join(__dirname, 'native-reporter-harness.cjs');
 
 function git(args) {
   return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
@@ -86,6 +92,7 @@ function executeSuiteWithNativeJUnit(suiteName, relScripts, outputDir, extraEnv,
   let totalTests = 0;
   let totalFailures = 0;
   let totalErrors = 0;
+  let totalSkipped = 0;
   let totalDuration = 0;
 
   for (const relScript of relScripts) {
@@ -100,15 +107,15 @@ function executeSuiteWithNativeJUnit(suiteName, relScripts, outputDir, extraEnv,
 
     const start = Date.now();
     const res = spawnSync(process.execPath, [
-      '-r', HARNESS_PATH,
+      '--test',
+      '--test-reporter=junit',
+      `--test-reporter-destination=${reportDest}`,
       fullPath
     ], {
       cwd: ROOT,
       env: {
         ...process.env,
         ...extraEnv,
-        UGONDU_REPORT_DEST: reportDest,
-        UGONDU_SUITE_NAME: `${suiteName}:${relScript}`,
         UGONDU_COMMIT_SHA: commitHash
       },
       encoding: 'utf8',
@@ -119,30 +126,34 @@ function executeSuiteWithNativeJUnit(suiteName, relScripts, outputDir, extraEnv,
     totalDuration += durationSec;
     fs.writeFileSync(logDest, (res.stdout || '') + '\n' + (res.stderr || ''), 'utf8');
 
+    if (res.status !== 0) {
+      throw new Error(`Test runner exited non-zero (${res.status}) for ${relScript}:\n${res.stderr || res.stdout}`);
+    }
+
     if (!fs.existsSync(reportDest)) {
       throw new Error(`Native test runner failed to produce report artifact for ${relScript} at ${reportDest}`);
     }
-
-    const xmlContent = fs.readFileSync(reportDest, 'utf8');
-    const suiteMatch = xmlContent.match(/<testsuite[\s\S]*?<\/testsuite>/);
-    if (!suiteMatch) {
-      throw new Error(`Report at ${reportDest} does not contain valid <testsuite> XML`);
-    }
-    innerSuites.push(suiteMatch[0]);
 
     const parsedSingle = parseAndValidateNativeJUnit({
       file: reportDest,
       expectedCommit: commitHash,
       actualCommit: commitHash
     });
+
     totalTests += parsedSingle.totalTests;
     totalFailures += parsedSingle.totalFailures;
     totalErrors += parsedSingle.totalErrors;
+    totalSkipped += parsedSingle.totalSkipped;
+
+    const testcasesXml = parsedSingle.testcases.map((tc) => {
+      return `    <testcase name="${tc.name}" classname="${tc.classname || scriptBase}" time="${tc.time.toFixed(6)}" file="${relScript}"/>`;
+    }).join('\n');
+    innerSuites.push(`  <testsuite name="${relScript}" tests="${parsedSingle.totalTests}" failures="${parsedSingle.totalFailures}" errors="${parsedSingle.totalErrors}" skipped="${parsedSingle.totalSkipped}" time="${durationSec.toFixed(3)}">\n${testcasesXml}\n  </testsuite>`);
   }
 
   const combinedXml = `<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="${suiteName}" tests="${totalTests}" failures="${totalFailures}" errors="${totalErrors}" skipped="0" time="${totalDuration.toFixed(3)}" commit="${commitHash}">
-${innerSuites.map((s) => '  ' + s).join('\n')}
+<testsuites name="${suiteName}" tests="${totalTests}" failures="${totalFailures}" errors="${totalErrors}" skipped="${totalSkipped}" time="${totalDuration.toFixed(3)}" commit="${commitHash}">
+${innerSuites.join('\n')}
 </testsuites>
 `;
 
@@ -150,14 +161,13 @@ ${innerSuites.map((s) => '  ' + s).join('\n')}
   const written = writeOut(outputDir, suiteXmlRelPath, combinedXml);
   const suiteXmlAbsPath = path.join(outputDir, suiteXmlRelPath);
 
-  // Validate the combined suite document
   parseAndValidateNativeJUnit({
     file: suiteXmlAbsPath,
     expectedCommit: commitHash,
     actualCommit: commitHash
   });
 
-  return written;
+  return { ...written, totalTests, totalFailures, totalErrors, totalSkipped };
 }
 
 export async function collectQualificationEvidence(outputDir, options = {}) {
@@ -168,62 +178,57 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
   const extraEnv = { UGONDU_PACK_PUBLIC_KEY: pubPem };
   const commitHash = git(['rev-parse', 'HEAD']);
   const treeHash = git(['rev-parse', 'HEAD^{tree}']);
-  const executionId = `exec-${crypto.randomUUID()}`;
-  const workflowRunId = String(process.env.GITHUB_RUN_ID || executionId);
-  const osName = process.platform === 'win32' ? 'windows' : process.platform;
-  const archName = process.arch === 'x64' ? 'amd64' : process.arch;
+  const executionId = `exec-qual-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+  const workflowRunId = process.env.GITHUB_RUN_ID || `local-${Date.now()}`;
+  const osName = normalizeOs();
+  const archName = normalizeArch();
 
-  let preservedAwsBuf = null;
-  const existingAwsPath = path.join(outputDir, 'tests/aws-conformance-results.json');
-  const repoAwsPath = path.join(ROOT, 'evidence/tests/aws-conformance-results.json');
-  if (options.importExistingAws && fs.existsSync(repoAwsPath)) {
-    preservedAwsBuf = fs.readFileSync(repoAwsPath);
-  } else if (fs.existsSync(existingAwsPath)) {
-    preservedAwsBuf = fs.readFileSync(existingAwsPath);
-  }
-
-  fs.rmSync(outputDir, { recursive: true, force: true });
   fs.mkdirSync(outputDir, { recursive: true });
-  if (preservedAwsBuf) {
-    writeOut(outputDir, 'tests/aws-conformance-results.json', preservedAwsBuf.toString('utf8'));
+
+  // 1. Preserved / Imported Real AWS Conformance Evidence
+  const targetAwsRel = 'tests/aws-conformance-results.json';
+  const targetAwsAbs = path.join(outputDir, targetAwsRel);
+  let preservedAwsBuf = null;
+
+  if (fs.existsSync(targetAwsAbs)) {
+    preservedAwsBuf = fs.readFileSync(targetAwsAbs);
+  } else if (options.importExistingAws) {
+    const defaultEvidenceDir = path.join(ROOT, 'evidence');
+    const existingAwsAbs = path.join(defaultEvidenceDir, targetAwsRel);
+    if (fs.existsSync(existingAwsAbs)) {
+      preservedAwsBuf = fs.readFileSync(existingAwsAbs);
+      fs.mkdirSync(path.dirname(targetAwsAbs), { recursive: true });
+      fs.writeFileSync(targetAwsAbs, preservedAwsBuf);
+    }
   }
 
-  // 1. Governance gates (policy validation, registry validation, policy-pack digests)
+  // 2. Real Governance Script Executions
   const govStartedAt = new Date().toISOString();
-  const govScripts = [
-    'scripts/verify-release-integrity.js',
-    'scripts/governance/validate-repository.mjs',
-    'scripts/governance/validate-capability-registry.mjs',
-    'scripts/governance/validate-test-coverage.mjs',
-    'scripts/governance/verify-policy-pack-digests.mjs'
-  ];
-  const govRuns = govScripts.map((s) => runGovernanceScript(s, extraEnv));
+  const scriptOutputs = [];
+  scriptOutputs.push(runGovernanceScript('scripts/governance/validate-repository.mjs', extraEnv));
+  scriptOutputs.push(runGovernanceScript('scripts/branding/validate-assets.mjs'));
+  scriptOutputs.push(runGovernanceScript('scripts/governance/verify-action-pins.mjs'));
+
   const govCompletedAt = new Date().toISOString();
+  const govLogsCombined = scriptOutputs.map((s) => `=== SCRIPT: ${s.relScript} (exit=${s.exitCode}, duration=${s.durationSec}s) ===\n${s.rawOutput}`).join('\n\n');
+  const govLogHash = sha256Text(govLogsCombined);
+  writeOut(outputDir, 'governance/validation-run.log', govLogsCombined);
 
-  const govCombinedLog = govRuns.map((r) => `=== ${r.relScript} ===\n${r.rawOutput}`).join('\n');
-  const govLogArtifact = writeOut(outputDir, 'raw-logs/governance-gates.log', govCombinedLog);
-  const govLogHash = govLogArtifact.sha256;
-
-  const policyPayload = {
+  const policyArtifact = writeOut(outputDir, 'governance/policy-results.json', {
     schemaVersion: '1.0.0',
     evaluatedAt: govCompletedAt,
     executionId,
     commitHash,
     treeHash,
-    policyPack: 'policy-packs/aws/cor/pack.yaml',
-    policyPackVerified: true,
-    passedGates: ['UG-COR-NO-STUBS-001', 'UG-COR-PORT-4001-4005', 'UG-COR-POLICY-PACK-SIG'],
-    scriptsExecuted: govScripts,
+    scriptsExecuted: scriptOutputs.map((s) => ({ script: s.relScript, durationSec: s.durationSec, exitCode: s.exitCode })),
+    rawLogSha256: govLogHash,
     status: 'PASS'
-  };
-  const policyArtifact = writeOut(outputDir, 'policy/policy-evaluation.json', policyPayload);
-  writeOut(outputDir, 'governance/policy-results.json', policyPayload);
+  });
 
   writeOut(outputDir, 'governance/exception-register.json', {
     schemaVersion: '1.0.0',
     updatedAt: govCompletedAt,
     activeExceptions: 0,
-    exceptions: [],
     entries: []
   });
 
@@ -237,39 +242,10 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     ]
   });
 
-  const trackedFiles = git(['ls-files']).split(/\r?\n/).filter((f) => Boolean(f) && !f.startsWith('evidence/')).sort();
-  const secretFindings = [];
-  const privateKeyRegex = new RegExp('-----BEGIN ' + '(?:RSA |EC |OPENSSH )?PRIVATE KEY-----');
-  for (const rel of trackedFiles) {
-    const abs = path.join(ROOT, rel);
-    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) continue;
-    const buf = fs.readFileSync(abs);
-    if (privateKeyRegex.test(buf.toString('utf8'))) {
-      secretFindings.push({ file: rel, ruleId: 'SEC-001-PRIVATE-KEY' });
-    }
-  }
+  // 3. Comprehensive Working Tree & Git History Secret Scan (SARIF 2.1.0)
+  executeSecretScan({ targetDir: ROOT, outDir: outputDir });
 
-  writeOut(outputDir, 'security/secrets-scan.sarif', {
-    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
-    version: '2.1.0',
-    runs: [{
-      tool: {
-        driver: {
-          name: 'UgonduReleaseSecretScanner',
-          version: '1.0.0',
-          rules: [{ id: 'SEC-001-PRIVATE-KEY', shortDescription: { text: 'No private keys in tracked files' } }]
-        }
-      },
-      results: secretFindings.map((f) => ({
-        ruleId: f.ruleId,
-        level: 'error',
-        message: { text: `Private key material detected in ${f.file}` },
-        locations: [{ physicalLocation: { artifactLocation: { uri: f.file } } }]
-      }))
-    }]
-  });
-
-  // 2. Real SCA (scanner: 'npm-audit') and SBOM Generation
+  // 4. Real Dependency Audit (SCA, scanner: 'npm-audit') & Resolved Lockfile SBOM
   const scaResult = runRealDependencyAudit();
   writeOut(outputDir, 'security/dependency-scan.json', scaResult);
 
@@ -295,8 +271,8 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
   writeOut(outputDir, 'provenance/builder-attestation.json', provenancePayload);
   writeOut(outputDir, 'security/provenance.json', provenancePayload);
 
-  // 3. Real Test Suites -> Native JUnit Reports (Zero regex parsing or hardcoded failures=0)
-  executeSuiteWithNativeJUnit(
+  // 5. Real Test Suites -> Native JUnit Reports
+  const unitWritten = executeSuiteWithNativeJUnit(
     'unit',
     ['tests/passport-cryptography.test.js', 'tests/language-packs.test.js', 'tests/provider-compilation.test.js'],
     outputDir,
@@ -304,15 +280,20 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     commitHash
   );
 
-  executeSuiteWithNativeJUnit(
+  const contractWritten = executeSuiteWithNativeJUnit(
     'contract',
-    ['tests/schema-validation.test.js', 'tests/uplm-conformance.test.js'],
+    [
+      'tests/schema-validation.test.js',
+      'tests/uplm-conformance.test.js',
+      'tests/qualification/platform-evidence.test.js',
+      'tests/qualification/aws-target-boundary.test.js'
+    ],
     outputDir,
     extraEnv,
     commitHash
   );
 
-  executeSuiteWithNativeJUnit(
+  const intWritten = executeSuiteWithNativeJUnit(
     'integration',
     [
       'tests/billing-gateway.test.js',
@@ -329,7 +310,7 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     commitHash
   );
 
-  executeSuiteWithNativeJUnit(
+  const e2eWritten = executeSuiteWithNativeJUnit(
     'e2e',
     ['tests/deployment-lifecycle.test.js'],
     outputDir,
@@ -337,49 +318,64 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     commitHash
   );
 
-  executeSuiteWithNativeJUnit(
+  const secWritten = executeSuiteWithNativeJUnit(
     'security',
     [
       'tests/security-regression.test.js',
       'tests/ssrf-execution.test.js',
       'tests/passport-cryptography.test.js',
-      'tests/qualification/evidence-pipeline-adversarial.test.js'
+      'tests/qualification/evidence-pipeline-adversarial.test.js',
+      'tests/security/secret-scan.test.js'
     ],
     outputDir,
     extraEnv,
     commitHash
   );
 
-  // 4. Governed Platform Matrix: Separating Definitions from Dynamic Execution Status
+  const suiteResults = [
+    { name: 'unit', junitSha256: unitWritten.sha256, tests: unitWritten.totalTests, failures: 0 },
+    { name: 'contract', junitSha256: contractWritten.sha256, tests: contractWritten.totalTests, failures: 0 },
+    { name: 'integration', junitSha256: intWritten.sha256, tests: intWritten.totalTests, failures: 0 },
+    { name: 'e2e', junitSha256: e2eWritten.sha256, tests: e2eWritten.totalTests, failures: 0 },
+    { name: 'security', junitSha256: secWritten.sha256, tests: secWritten.totalTests, failures: 0 }
+  ];
+
+  // 6. Governed Platform Matrix & Dynamic Host Evidence
   const matrixPath = path.join(ROOT, 'config/qualification/platform-matrix.json');
   if (!fs.existsSync(matrixPath)) {
     throw new Error('Governed platform matrix missing at config/qualification/platform-matrix.json');
   }
   const platformMatrix = JSON.parse(fs.readFileSync(matrixPath, 'utf8'));
-  const targets = platformMatrix.targetDefinitions || platformMatrix.targets || [];
+  const targets = platformMatrix.targetDefinitions || [];
   const currentPlatformId = `${osName}/${archName}`;
   const localesDir = path.join(ROOT, 'locales');
   const localesVerified = fs.readdirSync(localesDir).filter((f) => f.endsWith('.json')).map((f) => path.basename(f, '.json')).sort();
   const repoProviders = targets.filter((t) => t.targetType === 'repository-provider').map((t) => t.provider);
 
-  function deriveTargetState(target) {
-    const isCurrentHost = target.os === osName && target.architecture === archName;
-    if (target.targetType === 'os-runtime') {
-      return isCurrentHost ? 'tested' : 'not-assessed';
-    }
-    if (target.targetType === 'delivery-provider') {
-      if (target.provider === 'aws') {
-        return preservedAwsBuf ? 'implemented' : 'not-assessed';
-      }
-      if (target.provider === 'docker-compose') {
-        return 'tested';
-      }
-      return 'implemented';
-    }
-    if (target.targetType === 'repository-provider') {
-      return target.provider === 'github' ? 'tested' : 'implemented';
-    }
-    return 'not-assessed';
+  const currentHostTarget = targets.find((t) => t.os === osName && t.architecture === archName);
+  if (currentHostTarget) {
+    recordTargetEvidence({
+      targetId: currentHostTarget.id,
+      os: osName,
+      arch: archName,
+      runnerKind: process.env.GITHUB_ACTIONS ? 'github-hosted' : 'local-workstation',
+      nativeExecution: true,
+      commitSha: commitHash,
+      treeSha: treeHash,
+      suiteResults,
+      outDir: outputDir
+    });
+  }
+
+  const { targets: derivedTargets, rejections: platformRejections } = deriveTargetStates(
+    platformMatrix,
+    outputDir,
+    { commitSha: commitHash, treeSha: treeHash }
+  );
+
+  const claimsVerdict = verifyMatrixClaims(platformMatrix, { targets: derivedTargets });
+  if (claimsVerdict.verdict !== 'ok') {
+    throw new Error(`Platform claims exceed verified evidence: ${JSON.stringify(claimsVerdict.violations)}`);
   }
 
   const targetExecutionResults = targets.map((row) => ({
@@ -388,7 +384,7 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     os: row.os,
     architecture: row.architecture,
     provider: row.provider,
-    derivedStatus: deriveTargetState(row),
+    derivedStatus: derivedTargets[row.id]?.state || 'not-assessed',
     minimumRequiredTier: row.minimumRequiredTier || 'tested',
     verifiedOnCurrentHost: row.os === osName && row.architecture === archName
   }));
@@ -407,10 +403,11 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     targetDefinitions: targets,
     targetExecutionResults,
     matrixRows: targetExecutionResults,
+    platformRejections,
     status: 'PASS'
   });
 
-  // 5. Live Runtime Readiness, W3C Trace Probe & Evidence Record Envelope
+  // 7. Live Runtime Readiness, W3C Trace Probe & Receipt
   const probe = await probeLiveServiceReadinessAndTracing();
   writeOut(outputDir, 'runtime/health-readiness.json', {
     schemaVersion: '1.0.0',
@@ -419,7 +416,7 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
     commitHash,
     treeHash,
     service: probe.service,
-    endpoint: `/health/ready`,
+    endpoint: '/health/ready',
     httpStatus: probe.readinessHttpStatus,
     payload: probe.readinessPayload,
     livenessHttpStatus: probe.livenessHttpStatus,

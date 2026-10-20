@@ -1,14 +1,14 @@
 {
   "schemaVersion": "1.0.0",
-  "evidenceId": "ev-37d936ca-7bf5-4c71-81b3-c38c352dcef6",
-  "executionId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
+  "evidenceId": "ev-917a5692-6731-47c0-8160-c9900e9ae77e",
+  "executionId": "exec-qual-1792523911037-3f44d572",
   "gateId": "COR-PLATFORM-WINDOWS-AMD64",
   "status": "PASS",
   "source": {
     "repository": "Chicitadel/ugondu",
-    "commit": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
-    "tree": "76244e10696152ff63e3177cdd629b0199888deb",
-    "workflowRunId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6"
+    "commit": "16f4d4c99026a3acbfdd92ce9a0649579ac40eb7",
+    "tree": "f65e864f88d048d5115b30182726e721d7b9d2f0",
+    "workflowRunId": "local-1792523911038"
   },
   "target": {
     "os": "windows",
@@ -17,19 +17,19 @@
     "provider": "local-win32",
     "mode": "headless-ci"
   },
-  "startedAt": "2026-10-20T12:49:44.540Z",
-  "completedAt": "2026-10-20T12:50:57.152Z",
+  "startedAt": "2026-10-20T19:18:31.039Z",
+  "completedAt": "2026-10-20T19:19:38.698Z",
   "command": [
     "C:\\Program Files\\nodejs\\node.exe",
     "scripts/release/collect-qualification-evidence.mjs"
   ],
   "exitCode": 0,
-  "rawLogSha256": "1df7bd260b4c20555a4b6eaf35faa76787f571d786a7afc8779f357f6f1c7048",
+  "rawLogSha256": "9f2147a28c7892a0509426845a1ede95fd7713ba9cd6f22e85c6d65c51729d43",
   "artifacts": [
     {
-      "path": "policy/policy-evaluation.json",
-      "sha256": "2fb25942fa75d6731eb73de5ded49662d76ee602d426b8a7d93fc42b4a61da13",
-      "sizeBytes": 754
+      "path": "governance/policy-results.json",
+      "sha256": "3038829b257a88a71330d4e3c5f429132fe54a0a09630978d6d095975c26beaf",
+      "sizeBytes": 748
     }
   ],
   "limitations": [

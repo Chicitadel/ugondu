@@ -3,7 +3,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : AWS Physical Conformance & Live Boundary Verification
  * File           : run-aws-conformance.mjs
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -16,9 +16,11 @@
  * - Least Privilege Verified
  * - Zero Secrets Logged or Committed
  *
- * Executes live physical AWS API calls against account 971671216490 (eu-west-3),
+ * Executes live physical AWS API calls against the governed AWS qualification target,
  * asserting read discovery capabilities and verifying negative boundary denials.
  * Emits evidence/tests/aws-conformance-results.json.
+ *
+ * Standards: ISO 27001, SOC 2, OWASP ASVS 5.0, NIST SP 800-53
  *
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
@@ -26,13 +28,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { aws } from './aws-env.mjs';
+import { resolveAwsTarget } from './target-resolver.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
-const REGION = process.env.AWS_REGION || 'eu-west-3';
-const EXPECTED_ACCOUNT = '971671216490';
 
-export function executeAwsPhysicalConformance(region = REGION) {
+export function executeAwsPhysicalConformance(selectedRegion) {
+  const target = resolveAwsTarget();
+  const region = selectedRegion || process.env.AWS_REGION || target.region;
+  const expectedAccount = target.accountId;
   const startedAt = new Date().toISOString();
   console.log(`[en] Starting AWS Physical Conformance Verification (${region})...`);
 
@@ -48,8 +52,8 @@ export function executeAwsPhysicalConformance(region = REGION) {
   }
   console.log(`[en] ✓ AWS STS Verified: Account ${accountId}, Assumed Role ${principalArn}`);
 
-  if (accountId !== EXPECTED_ACCOUNT) {
-    throw new Error(`Unexpected AWS account ID: expected ${EXPECTED_ACCOUNT}, got ${accountId}`);
+  if (accountId !== expectedAccount) {
+    throw new Error(`Unexpected AWS account ID: expected ${expectedAccount}, got ${accountId}`);
   }
 
   // 2. EC2 VPC Discovery
@@ -80,7 +84,6 @@ export function executeAwsPhysicalConformance(region = REGION) {
   console.log(`[en] ✓ RDS DB Instances inventory reachable: ${dbInstances.length} active instances`);
 
   // 6. Negative Boundary Isolation Test (Least Privilege Enforcement)
-  // Attempting administrative IAM operations MUST fail with AccessDenied
   const iamDenial = aws(['iam', 'list-users'], region);
   const boundaryDenied = iamDenial.status !== 0 && iamDenial.stderr.includes('AccessDenied');
   if (!boundaryDenied) {
@@ -96,14 +99,15 @@ export function executeAwsPhysicalConformance(region = REGION) {
   ], region);
   const assumeDenied = assumeDenial.status !== 0 && /AccessDenied|Access Denied|not authorized/i.test(assumeDenial.stderr);
   if (!assumeDenied) {
-    throw new Error('Least-privilege violation: assuming UgonduCORExecutionRole unexpectedly succeeded or failed for a reason other than an authorization denial');
+    throw new Error('Least-privilege violation: assuming execution role unexpectedly succeeded or failed without authorization denial');
   }
-  console.log('[en] ✓ Role Assumption Boundary Verified: UgonduCORExecutionRole assumption denied by authorization policy');
+  console.log(`[en] ✓ Role Assumption Boundary Verified: ${target.executionRoleName} assumption denied by authorization policy`);
 
   const completedAt = new Date().toISOString();
 
   const report = {
     schemaVersion: '1.0.0',
+    targetId: target.id,
     evaluatedAt: completedAt,
     awsAccountId: accountId,
     awsRegion: region,
@@ -142,6 +146,7 @@ export function executeAwsPhysicalConformance(region = REGION) {
     resourceMutationPerformed: false,
     zeroResidualsVerified: null,
     residualCheck: { status: 'NOT_APPLICABLE', reason: 'This probe performs no resource mutations; cleanup/rollback qualification requires a separate isolated transaction test.' },
+    lifecycle: { status: 'not-assessed', reason: 'Full resource creation/destruction lifecycle qualification requires dedicated provisioning fixture' },
     status: 'PASS'
   };
 

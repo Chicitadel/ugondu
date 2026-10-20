@@ -4,7 +4,7 @@
     {
       "name": "ugondu-qualification-bundle",
       "digest": {
-        "sha256": "76244e10696152ff63e3177cdd629b0199888deb"
+        "sha256": "f65e864f88d048d5115b30182726e721d7b9d2f0"
       }
     }
   ],
@@ -14,15 +14,15 @@
       "buildType": "https://ugondu.io/governance/release-evidence/v2",
       "externalParameters": {
         "repository": "Chicitadel/ugondu",
-        "commitHash": "5c32f5d293fb835096d57a9a5b5632c960be1e25",
-        "treeHash": "76244e10696152ff63e3177cdd629b0199888deb",
-        "workflowRunId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6"
+        "commitHash": "16f4d4c99026a3acbfdd92ce9a0649579ac40eb7",
+        "treeHash": "f65e864f88d048d5115b30182726e721d7b9d2f0",
+        "workflowRunId": "local-1792523911038"
       },
       "resolvedDependencies": [
         {
           "uri": "git+https://github.com/Chicitadel/ugondu",
           "digest": {
-            "sha1": "5c32f5d293fb835096d57a9a5b5632c960be1e25"
+            "sha1": "16f4d4c99026a3acbfdd92ce9a0649579ac40eb7"
           }
         }
       ]
@@ -32,9 +32,9 @@
         "id": "urn:ugondu:local-qualification-runner"
       },
       "metadata": {
-        "invocationId": "exec-5aee9bd2-21c2-41b6-af12-ea6633a4b3d6",
-        "startedOn": "2026-10-20T12:49:44.540Z",
-        "finishedOn": "2026-10-20T12:50:09.691Z"
+        "invocationId": "exec-qual-1792523911037-3f44d572",
+        "startedOn": "2026-10-20T19:18:31.039Z",
+        "finishedOn": "2026-10-20T19:18:47.643Z"
       }
     }
   }

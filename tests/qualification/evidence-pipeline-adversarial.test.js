@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Qualification — Evidence Pipeline Adversarial Suite
  * File           : evidence-pipeline-adversarial.test.js
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -24,12 +24,13 @@
 
 'use strict';
 
+const test = require('node:test');
 const assert = require('assert');
 const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawnSync } = require('child_process');
 const { pathToFileURL } = require('url');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -37,14 +38,20 @@ let passed = 0;
 let failed = 0;
 
 function check(id, title, fn) {
-  try {
-    fn();
-    console.log(`[PASS] ✓ ${id}: ${title}`);
-    passed++;
-  } catch (err) {
-    console.error(`[FAIL] ✗ ${id}: ${title} — ${err.message}`);
-    failed++;
-  }
+  test(`${id}: ${title}`, async () => {
+    try {
+      const res = fn();
+      if (res && typeof res.then === 'function') {
+        await res;
+      }
+      console.log(`[PASS] ✓ ${id}: ${title}`);
+      passed++;
+    } catch (err) {
+      console.error(`[FAIL] ✗ ${id}: ${title} — ${err.message}`);
+      failed++;
+      throw err;
+    }
+  });
 }
 
 function createTempEvidenceTree(keyPair) {
@@ -85,11 +92,7 @@ function createTempEvidenceTree(keyPair) {
     subject: [{ name: 'server/engine-core/dist/index.js', digest: { sha256: 'c'.repeat(64) } }],
     predicate: {
       buildDefinition: {
-        externalParameters: {
-          repository: 'Chicitadel/ugondu',
-          commitHash,
-          treeHash
-        }
+        externalParameters: { repository: 'Chicitadel/ugondu', commitHash, treeHash }
       }
     }
   });
@@ -136,206 +139,263 @@ function createTempEvidenceTree(keyPair) {
   return { tmpDir, rawDir, outDir, commitHash, treeHash, keyPair };
 }
 
-async function runAdversarialTests() {
-  console.log('══════════════════════════════════════════════════════════════');
-  console.log(' Ugondu Evidence Pipeline Adversarial Qualification Suite     ');
-  console.log('══════════════════════════════════════════════════════════════');
+let verifierModule = null;
+let parserModule = null;
 
-  const verifierUrl = pathToFileURL(path.join(ROOT, 'scripts/release/verify-evidence-bundle.mjs')).href;
-  const { generateEvidenceBundle, verifyEvidenceBundle, validateEvidenceRecordSchema } = await import(verifierUrl);
-  const parserUrl = pathToFileURL(path.join(ROOT, 'scripts/release/junit-parser.mjs')).href;
-  const { parseAndValidateNativeJUnit } = await import(parserUrl);
-
-  const keyPair = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    publicKeyEncoding: { type: 'spki', format: 'pem' },
-    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-  });
-  const privPem = keyPair.privateKey;
-  const pubPem = keyPair.publicKey;
-
-  const savedPriv = process.env.UGONDU_EVIDENCE_PRIVATE_KEY;
-  const savedPub = process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
-  const savedInput = process.env.UGONDU_EVIDENCE_INPUT_DIR;
-
-  try {
-    // 1. Missing evidence manifest signature
-    check('ADV-001', 'Fails closed when evidence-manifest.sig is missing', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      generateEvidenceBundle(ctx.outDir);
-      fs.unlinkSync(path.join(ctx.outDir, 'signatures/evidence-manifest.sig'));
-      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /Missing signatures\/evidence-manifest\.sig/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 2. Tampered artifact byte
-    check('ADV-002', 'Fails closed when an evidence artifact byte is tampered post-signing', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      generateEvidenceBundle(ctx.outDir);
-      const target = path.join(ctx.outDir, 'security/sbom.cdx.json');
-      fs.writeFileSync(target, fs.readFileSync(target, 'utf8') + ' ');
-      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /digest mismatch/i);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 3. Schema validation failure
-    check('ADV-003', 'Fails closed when record violates qualification-evidence.schema.json', () => {
-      const invalidRecord = { schemaVersion: '1.0.0', evidenceId: 'ev-1' };
-      assert.throws(() => validateEvidenceRecordSchema(invalidRecord), /missing required schema field/);
-    });
-
-    // 4. Missing required test suites
-    check('ADV-004', 'Rejects bundle missing any required test suite XML artifact', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      fs.unlinkSync(path.join(ctx.rawDir, 'tests/integration-results.xml'));
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /Missing real qualification artifact/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 5. Zero-vulnerability stub detection in SCA
-    check('ADV-005', 'Rejects zero-vulnerability stubs without real lockfile hash in SCA', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      const scaPath = path.join(ctx.rawDir, 'security/dependency-scan.json');
-      fs.writeFileSync(scaPath, JSON.stringify({ status: 'PASS', scanner: 'stub' }), 'utf8');
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /Dependency scan evidence is missing real npm-audit/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 6. Shallow/empty SBOM rejection
-    check('ADV-006', 'Rejects shallow top-level-only SBOM with fewer than 10 components', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      const sbomPath = path.join(ctx.rawDir, 'security/sbom.cdx.json');
-      fs.writeFileSync(sbomPath, JSON.stringify({ bomFormat: 'CycloneDX', components: [] }), 'utf8');
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /SBOM evidence must be a complete resolved lockfile CycloneDX inventory/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 7. Synthesized fallback "executed <script>" testcase
-    check('ADV-007', 'Rejects synthesized fallback "executed <script>" JUnit testcase entries', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      const xmlPath = path.join(ctx.rawDir, 'tests/security-results.xml');
-      fs.writeFileSync(xmlPath, '<testsuites tests="1" failures="0" errors="0" skipped="0"><testsuite tests="1" failures="0" errors="0" skipped="0"><testcase classname="security" name="executed tests/cor-remediation.test.js" time="0.1"/></testsuite></testsuites>', 'utf8');
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /synthesized fallback testcase/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 8. Multi-platform overclaim in single-host compatibility evidence
-    check('ADV-008', 'Rejects compatibility evidence claiming multiple unexecuted OS/architecture targets', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      const compatPath = path.join(ctx.rawDir, 'tests/compatibility-results.json');
-      fs.writeFileSync(compatPath, JSON.stringify({
-        status: 'PASS',
-        platformsVerified: ['linux/amd64', 'darwin/arm64', 'windows/amd64'],
-        repositoryProvidersVerified: []
-      }), 'utf8');
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      assert.throws(() => generateEvidenceBundle(ctx.outDir), /claims unexecuted platforms/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 9. Untrusted keyId or keySource in signature envelope
-    check('ADV-009', 'Rejects untrusted keyId or ephemeral keySource in evidence-manifest.sig', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      generateEvidenceBundle(ctx.outDir);
-      const sigPath = path.join(ctx.outDir, 'signatures/evidence-manifest.sig');
-      const sig = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
-      sig.keyId = 'untrusted-key-v0';
-      fs.writeFileSync(sigPath, JSON.stringify(sig, null, 2), 'utf8');
-      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /Invalid keyId in evidence signature/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 10. Missing external UGONDU_EVIDENCE_PUBLIC_KEY trust anchor
-    check('ADV-010', 'Fails closed when UGONDU_EVIDENCE_PUBLIC_KEY is absent (no repository-local fallback)', () => {
-      const ctx = createTempEvidenceTree(keyPair);
-      process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
-      process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
-      process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
-      generateEvidenceBundle(ctx.outDir);
-      delete process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
-      assert.throws(() => verifyEvidenceBundle(ctx.outDir), /UGONDU_EVIDENCE_PUBLIC_KEY/);
-      fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
-    });
-
-    // 11. Native JUnit parser rejects failing reports (COR-RE-001)
-    check('ADV-011', 'Native JUnit parser rejects test reports with failures or errors', () => {
-      const tmpXml = path.join(os.tmpdir(), `failing-test-${Date.now()}.xml`);
-      fs.writeFileSync(tmpXml, '<testsuites tests="2" failures="1" errors="0"><testsuite tests="2" failures="1"><testcase name="testA"/><testcase name="testB"><failure message="assertion failed">fail</failure></testcase></testsuite></testsuites>', 'utf8');
-      try {
-        assert.throws(() => parseAndValidateNativeJUnit({ file: tmpXml }), /Native test suite failed with 1 failures/);
-      } finally {
-        if (fs.existsSync(tmpXml)) fs.unlinkSync(tmpXml);
-      }
-    });
-
-    // 12. Native JUnit parser rejects empty or missing test report files (COR-RE-001)
-    check('ADV-012', 'Native JUnit parser rejects empty or missing test report files', () => {
-      const missingXml = path.join(os.tmpdir(), `missing-test-${Date.now()}.xml`);
-      assert.throws(() => parseAndValidateNativeJUnit({ file: missingXml }), /Required native test report missing/);
-
-      const emptyXml = path.join(os.tmpdir(), `empty-test-${Date.now()}.xml`);
-      fs.writeFileSync(emptyXml, '', 'utf8');
-      try {
-        assert.throws(() => parseAndValidateNativeJUnit({ file: emptyXml }), /Native test report is empty/);
-      } finally {
-        if (fs.existsSync(emptyXml)) fs.unlinkSync(emptyXml);
-      }
-    });
-
-    // 13. Native JUnit parser rejects commit mismatch (COR-RE-001)
-    check('ADV-013', 'Native JUnit parser rejects reports from mismatched commit SHAs', () => {
-      const tmpXml = path.join(os.tmpdir(), `commit-mismatch-${Date.now()}.xml`);
-      fs.writeFileSync(tmpXml, '<testsuites commit="0123456789abcdef0123456789abcdef01234567" tests="1" failures="0"><testsuite tests="1"><testcase name="t1"/></testsuite></testsuites>', 'utf8');
-      try {
-        assert.throws(() => parseAndValidateNativeJUnit({
-          file: tmpXml,
-          expectedCommit: 'fedcba9876543210fedcba9876543210fedcba98',
-          actualCommit: 'fedcba9876543210fedcba9876543210fedcba98'
-        }), /Report commit attribute/);
-      } finally {
-        if (fs.existsSync(tmpXml)) fs.unlinkSync(tmpXml);
-      }
-    });
-  } finally {
-    if (savedPriv !== undefined) process.env.UGONDU_EVIDENCE_PRIVATE_KEY = savedPriv;
-    else delete process.env.UGONDU_EVIDENCE_PRIVATE_KEY;
-    if (savedPub !== undefined) process.env.UGONDU_EVIDENCE_PUBLIC_KEY = savedPub;
-    else delete process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
-    if (savedInput !== undefined) process.env.UGONDU_EVIDENCE_INPUT_DIR = savedInput;
-    else delete process.env.UGONDU_EVIDENCE_INPUT_DIR;
+async function getModules() {
+  if (!verifierModule) {
+    const verifierUrl = pathToFileURL(path.join(ROOT, 'scripts/release/verify-evidence-bundle.mjs')).href;
+    verifierModule = await import(verifierUrl);
   }
-
-  console.log('══════════════════════════════════════════════════════════════');
-  console.log(` Adversarial Evidence Results: ${passed} passed, ${failed} failed `);
-  console.log('══════════════════════════════════════════════════════════════');
-
-  if (failed > 0) process.exit(1);
+  if (!parserModule) {
+    const parserUrl = pathToFileURL(path.join(ROOT, 'scripts/release/junit-parser.mjs')).href;
+    parserModule = await import(parserUrl);
+  }
+  return { ...verifierModule, ...parserModule };
 }
 
-runAdversarialTests().catch((err) => {
-  console.error('Fatal adversarial suite error:', err);
-  process.exit(1);
+const keyPair = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+  publicKeyEncoding: { type: 'spki', format: 'pem' },
+  privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+});
+const privPem = keyPair.privateKey;
+const pubPem = keyPair.publicKey;
+
+check('ADV-001', 'Fails closed when evidence-manifest.sig is missing', async () => {
+  const { generateEvidenceBundle, verifyEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    generateEvidenceBundle(ctx.outDir);
+    fs.unlinkSync(path.join(ctx.outDir, 'signatures/evidence-manifest.sig'));
+    assert.throws(() => verifyEvidenceBundle(ctx.outDir), /Missing signatures\/evidence-manifest\.sig/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-002', 'Fails closed when an evidence artifact byte is tampered post-signing', async () => {
+  const { generateEvidenceBundle, verifyEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    generateEvidenceBundle(ctx.outDir);
+    const target = path.join(ctx.outDir, 'security/sbom.cdx.json');
+    fs.writeFileSync(target, fs.readFileSync(target, 'utf8') + ' ');
+    assert.throws(() => verifyEvidenceBundle(ctx.outDir), /digest mismatch/i);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-003', 'Fails closed when record violates qualification-evidence.schema.json', async () => {
+  const { validateEvidenceRecordSchema } = await getModules();
+  const invalidRecord = { schemaVersion: '1.0.0', evidenceId: 'ev-1' };
+  assert.throws(() => validateEvidenceRecordSchema(invalidRecord), /missing required schema field/);
+});
+
+check('ADV-004', 'Rejects bundle missing any required test suite XML artifact', async () => {
+  const { generateEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  fs.unlinkSync(path.join(ctx.rawDir, 'tests/integration-results.xml'));
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    assert.throws(() => generateEvidenceBundle(ctx.outDir), /Missing real qualification artifact/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-005', 'Rejects zero-vulnerability stubs without real lockfile hash in SCA', async () => {
+  const { generateEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  const scaPath = path.join(ctx.rawDir, 'security/dependency-scan.json');
+  fs.writeFileSync(scaPath, JSON.stringify({ status: 'PASS', scanner: 'stub' }), 'utf8');
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    assert.throws(() => generateEvidenceBundle(ctx.outDir), /Dependency scan evidence is missing real npm-audit/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-006', 'Rejects shallow top-level-only SBOM with fewer than 10 components', async () => {
+  const { generateEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  const sbomPath = path.join(ctx.rawDir, 'security/sbom.cdx.json');
+  fs.writeFileSync(sbomPath, JSON.stringify({ bomFormat: 'CycloneDX', components: [] }), 'utf8');
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    assert.throws(() => generateEvidenceBundle(ctx.outDir), /SBOM evidence must be a complete resolved lockfile CycloneDX inventory/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-007', 'Rejects synthesized fallback "executed <script>" JUnit testcase entries', async () => {
+  const { generateEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  const xmlPath = path.join(ctx.rawDir, 'tests/security-results.xml');
+  fs.writeFileSync(xmlPath, '<testsuites tests="1" failures="0" errors="0" skipped="0"><testsuite tests="1" failures="0" errors="0" skipped="0"><testcase classname="security" name="executed tests/cor-remediation.test.js" time="0.1"/></testsuite></testsuites>', 'utf8');
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    assert.throws(() => generateEvidenceBundle(ctx.outDir), /synthesized fallback testcase/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-008', 'Rejects compatibility evidence claiming multiple unexecuted OS/architecture targets', async () => {
+  const { generateEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  const compatPath = path.join(ctx.rawDir, 'tests/compatibility-results.json');
+  fs.writeFileSync(compatPath, JSON.stringify({
+    status: 'PASS',
+    platformsVerified: ['linux/amd64', 'darwin/arm64', 'windows/amd64'],
+    repositoryProvidersVerified: []
+  }), 'utf8');
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    assert.throws(() => generateEvidenceBundle(ctx.outDir), /claims unexecuted platforms/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-009', 'Rejects untrusted keyId or ephemeral keySource in evidence-manifest.sig', async () => {
+  const { generateEvidenceBundle, verifyEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    generateEvidenceBundle(ctx.outDir);
+    const sigPath = path.join(ctx.outDir, 'signatures/evidence-manifest.sig');
+    const sig = JSON.parse(fs.readFileSync(sigPath, 'utf8'));
+    sig.keyId = 'untrusted-key-v0';
+    fs.writeFileSync(sigPath, JSON.stringify(sig, null, 2), 'utf8');
+    assert.throws(() => verifyEvidenceBundle(ctx.outDir), /Invalid keyId in evidence signature/);
+  } finally {
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-010', 'Fails closed when UGONDU_EVIDENCE_PUBLIC_KEY is absent', async () => {
+  const { generateEvidenceBundle, verifyEvidenceBundle } = await getModules();
+  const ctx = createTempEvidenceTree(keyPair);
+  process.env.UGONDU_EVIDENCE_PRIVATE_KEY = privPem;
+  process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+  process.env.UGONDU_EVIDENCE_INPUT_DIR = ctx.rawDir;
+  try {
+    generateEvidenceBundle(ctx.outDir);
+    delete process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
+    assert.throws(() => verifyEvidenceBundle(ctx.outDir), /UGONDU_EVIDENCE_PUBLIC_KEY/);
+  } finally {
+    process.env.UGONDU_EVIDENCE_PUBLIC_KEY = pubPem;
+    fs.rmSync(ctx.tmpDir, { recursive: true, force: true });
+  }
+});
+
+check('ADV-011', 'Native JUnit parser rejects test reports with failures or errors', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const tmpXml = path.join(os.tmpdir(), `failing-test-${Date.now()}.xml`);
+  fs.writeFileSync(tmpXml, '<testsuites tests="2" failures="1" errors="0"><testsuite tests="2" failures="1"><testcase name="testA"/><testcase name="testB"><failure message="assertion failed">fail</failure></testcase></testsuite></testsuites>', 'utf8');
+  try {
+    assert.throws(() => parseAndValidateNativeJUnit({ file: tmpXml }), /failed with 1 failures/);
+  } finally {
+    if (fs.existsSync(tmpXml)) fs.unlinkSync(tmpXml);
+  }
+});
+
+check('ADV-012', 'Native JUnit parser rejects empty or missing test report files', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const missingXml = path.join(os.tmpdir(), `missing-test-${Date.now()}.xml`);
+  assert.throws(() => parseAndValidateNativeJUnit({ file: missingXml }), /Required native test report missing/);
+
+  const emptyXml = path.join(os.tmpdir(), `empty-test-${Date.now()}.xml`);
+  fs.writeFileSync(emptyXml, '', 'utf8');
+  try {
+    assert.throws(() => parseAndValidateNativeJUnit({ file: emptyXml }), /Native test report is empty/);
+  } finally {
+    if (fs.existsSync(emptyXml)) fs.unlinkSync(emptyXml);
+  }
+});
+
+check('ADV-013', 'Native JUnit parser rejects reports from mismatched commit SHAs', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const tmpXml = path.join(os.tmpdir(), `commit-mismatch-${Date.now()}.xml`);
+  fs.writeFileSync(tmpXml, '<testsuites commit="0123456789abcdef0123456789abcdef01234567" tests="1" failures="0"><testsuite tests="1"><testcase name="t1"/></testsuite></testsuites>', 'utf8');
+  try {
+    assert.throws(() => parseAndValidateNativeJUnit({
+      file: tmpXml,
+      expectedCommit: 'fedcba9876543210fedcba9876543210fedcba98',
+      actualCommit: 'fedcba9876543210fedcba9876543210fedcba98'
+    }), /Report commit attribute/);
+  } finally {
+    if (fs.existsSync(tmpXml)) fs.unlinkSync(tmpXml);
+  }
+});
+
+check('ADV-014', 'Native JUnit parser rejects DOCTYPE and ENTITY injection (anti-XXE)', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const xxeXml = `<?xml version="1.0"?>\n<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>\n<testsuites tests="1"><testcase name="&xxe;"/></testsuites>`;
+  assert.throws(() => parseAndValidateNativeJUnit({ xmlString: xxeXml }), /Security violation: XML contains prohibited DOCTYPE\/ENTITY/);
+});
+
+check('ADV-015', 'Native JUnit parser rejects declared attribute counts inconsistent with testcase nodes', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const mismatchXml = '<testsuites tests="5" failures="0"><testcase name="t1"/><testcase name="t2"/></testsuites>';
+  assert.throws(() => parseAndValidateNativeJUnit({ xmlString: mismatchXml }), /Attribute 'tests' \(5\) does not match actual <testcase> count \(2\)/);
+});
+
+check('ADV-016', 'Native JUnit parser rejects duplicate testcase names within a suite', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const dupXml = '<testsuites><testcase classname="pkg" name="duplicateTest"/><testcase classname="pkg" name="duplicateTest"/></testsuites>';
+  assert.throws(() => parseAndValidateNativeJUnit({ xmlString: dupXml }), /Duplicate testcase detected: "duplicateTest"/);
+});
+
+check('ADV-017', 'Native JUnit parser rejects reports with 0 test cases', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const zeroXml = '<testsuites tests="0" failures="0"></testsuites>';
+  assert.throws(() => parseAndValidateNativeJUnit({ xmlString: zeroXml }), /contains 0 test cases/);
+});
+
+check('ADV-018', 'Native JUnit parser rejects malformed or unclosed XML tag structures', async () => {
+  const { parseAndValidateNativeJUnit } = await getModules();
+  const unclosedXml = '<testsuites><testsuite><testcase name="t1"></testsuites>';
+  assert.throws(() => parseAndValidateNativeJUnit({ xmlString: unclosedXml }), /Mismatched tag/);
+});
+
+check('ADV-019', 'Adversarial runner detects test script failure even if stdout printed PASS-like text', () => {
+  const tmpScript = path.join(os.tmpdir(), `adversarial-fake-pass-${Date.now()}.js`);
+  fs.writeFileSync(tmpScript, `
+    console.log('[PASS] ✓ FAKE-001: Looks passed in stdout');
+    throw new Error('Real internal assertion failure after fake log');
+  `, 'utf8');
+  try {
+    const res = spawnSync(process.execPath, [tmpScript], { encoding: 'utf8' });
+    assert.notStrictEqual(res.status, 0, 'Process must exit with non-zero status on uncaught exception');
+  } finally {
+    if (fs.existsSync(tmpScript)) fs.unlinkSync(tmpScript);
+  }
+});
+
+test.after(() => {
+  console.log(`\nAdversarial Evidence Results: ${passed} passed, ${failed} failed`);
+  if (failed > 0) process.exitCode = 1;
 });
