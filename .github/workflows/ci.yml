@@ -2,11 +2,11 @@
 #  * Project        : Ugondu Platform
 #  * Module         : CI/CD Pipeline
 #  * File           : ci.yml
-#  * Version        : 1.1.0
+#  * Version        : 1.2.0
 #  * Author         : Ujomor Systems Engineering & Governance Authority
-#  * Organization   : Air Roofers Ltd / Ujomor Systems
+#  * Organization   : Air Roofers SASU / Ujomor Systems
 #  * Created Date   : 2026-10-18
-#  * Last Modified  : 2026-10-18
+#  * Last Modified  : 2026-10-20
 #  * Classification : COMMERCIAL | INTERNAL
 #  *
 #  * Governance:
@@ -21,10 +21,17 @@ name: Ugondu CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**']
+    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**', 'audit/**']
   pull_request:
-    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**']
+    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**', 'audit/**']
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   NODE_VERSION: '20'
@@ -40,6 +47,8 @@ jobs:
   build-services:
     name: Build Microservices & Workspaces (${{ matrix.service }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -106,6 +115,8 @@ jobs:
   build-client:
     name: Build Go Thin-Client (${{ matrix.os }} — ${{ matrix.goos }}/${{ matrix.goarch }})
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -176,6 +187,8 @@ jobs:
   release-integrity:
     name: Release Integrity & Governance Gates
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
       UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
@@ -214,6 +227,8 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [build-services, release-integrity]
     env:
       UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
@@ -307,6 +322,12 @@ jobs:
       - name: Run COR Remediation tests
         run: node tests/cor-remediation.test.js
 
+      - name: Run Evidence Pipeline Adversarial tests
+        run: node tests/qualification/evidence-pipeline-adversarial.test.js
+
+      - name: Run Shared Execution & Mode Parity tests
+        run: node tests/qualification/shared-execution-and-mode-parity.test.js
+
       - name: Run Language Packs tests
         run: node tests/language-packs.test.js
 
@@ -322,6 +343,8 @@ jobs:
   docker-validate:
     name: Validate Docker Images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [build-services]
     if: github.event_name != 'pull_request'
 

@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
 const crypto = require('crypto');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
@@ -79,36 +82,20 @@ async function run(context) {
     return receipt;
 }
 
-const fs = require('fs');
-const path = require('path');
-
 async function verifyObjective(context, observations, artifacts) {
-    const fs = require('fs');
-    const path = require('path');
     const targetPath = path.join(context.root, 'server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts');
-    
     if (!fs.existsSync(targetPath)) {
         throw new Error('COR_OBJECTIVE_TARGET_MISSING: server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts');
     }
-    
     const source = fs.readFileSync(targetPath, 'utf8');
-
-    if (!source.includes('approval')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
+    assert.ok(source.includes('async requestApproval('), 'COR_OBJECTIVE_NOT_PROVEN: recovery-orchestrator.ts must implement requestApproval');
+    assert.ok(source.includes('cannot_approve_an_unsafe_plan'), 'COR_OBJECTIVE_NOT_PROVEN: requestApproval must reject unsafe blast radius plans');
+    assert.ok(source.includes('unconditional_approval_disable'), 'COR_OBJECTIVE_NOT_PROVEN: requestApproval must require explicit authorization');
 
     artifacts.push('recovery-orchestrator.ts');
     observations.push('Verified F35 specific objective against server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts');
-    
-    // We add an assert function to bypass the cor-engine stub rejection without being a blind stub
-    function assertCheck() { return true; }
-    assertCheck();
-    
     return true;
 }
-;
-
 
 module.exports = {
     metadata,

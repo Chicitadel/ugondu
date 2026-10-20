@@ -3,11 +3,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Release Evidence Bundle Generator & Ed25519 Verifier (14.3)
  * File           : verify-evidence-bundle.mjs
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-20
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -29,7 +29,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import fs from 'node:fs';
@@ -64,6 +64,11 @@ const REQUIRED_ARTIFACTS = [
   'runtime/deployment-receipt.json'
 ];
 
+const VALID_EVIDENCE_STATUS = new Set(['PASS', 'FAIL', 'BLOCKED', 'UNQUALIFIED', 'NOT_COLLECTED']);
+const VALID_OS = new Set(['linux', 'darwin', 'windows', 'win32']);
+const VALID_ARCH = new Set(['amd64', 'x64', 'arm64']);
+const VALID_MODES = new Set(['human-ui', 'human-cli', 'ide', 'model-assisted', 'non-model', 'automation', 'headless-ci']);
+
 function git(args) {
   return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
 }
@@ -72,15 +77,66 @@ function sha256Buffer(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
-function sha256Text(text) {
-  return sha256Buffer(Buffer.from(text, 'utf8'));
-}
-
 function writeArtifact(baseDir, relPath, content) {
   const fullPath = path.join(baseDir, relPath);
   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   const text = typeof content === 'string' ? content : JSON.stringify(content, null, 2) + '\n';
   fs.writeFileSync(fullPath, text, 'utf8');
+}
+
+export function validateEvidenceRecordSchema(record, expectedCommit, expectedTree) {
+  const schemaPath = path.join(ROOT, 'schemas/qualification-evidence.schema.json');
+  if (!fs.existsSync(schemaPath)) {
+    throw new Error('Missing schemas/qualification-evidence.schema.json');
+  }
+  const requiredFields = [
+    'schemaVersion', 'evidenceId', 'executionId', 'gateId', 'status',
+    'source', 'target', 'startedAt', 'completedAt', 'command',
+    'exitCode', 'rawLogSha256', 'artifacts', 'limitations'
+  ];
+  for (const field of requiredFields) {
+    if (!(field in record)) {
+      throw new Error(`Evidence record missing required schema field: ${field}`);
+    }
+  }
+  if (record.schemaVersion !== '1.0.0') {
+    throw new Error(`Unsupported evidence schemaVersion: ${record.schemaVersion}`);
+  }
+  if (!VALID_EVIDENCE_STATUS.has(record.status) || record.status !== 'PASS') {
+    throw new Error(`Evidence record status must be PASS for release verification, got: ${record.status}`);
+  }
+  if (!/^COR-[A-Z0-9_-]+$/.test(String(record.gateId || ''))) {
+    throw new Error(`Invalid evidence gateId: ${record.gateId}`);
+  }
+  if (record.source?.repository !== 'Chicitadel/ugondu') {
+    throw new Error(`Invalid evidence source.repository: ${record.source?.repository}`);
+  }
+  if (!/^[0-9a-f]{40}$/.test(String(record.source?.commit || '')) || !/^[0-9a-f]{40}$/.test(String(record.source?.tree || ''))) {
+    throw new Error('Evidence source.commit and source.tree must be 40-char hex SHA-1 digests');
+  }
+  if (expectedCommit && record.source.commit !== expectedCommit) {
+    throw new Error(`Stale evidence commit mismatch: expected ${expectedCommit}, got ${record.source.commit}`);
+  }
+  if (expectedTree && record.source.tree !== expectedTree) {
+    throw new Error(`Stale evidence tree mismatch: expected ${expectedTree}, got ${record.source.tree}`);
+  }
+  if (!VALID_OS.has(record.target?.os) || !VALID_ARCH.has(record.target?.architecture) || !VALID_MODES.has(record.target?.mode)) {
+    throw new Error(`Invalid target descriptor in evidence record: ${JSON.stringify(record.target)}`);
+  }
+  const startedMs = Date.parse(record.startedAt);
+  const completedMs = Date.parse(record.completedAt);
+  if (!Number.isFinite(startedMs) || !Number.isFinite(completedMs) || completedMs < startedMs) {
+    throw new Error(`Inconsistent timestamps in evidence record: ${record.startedAt} -> ${record.completedAt}`);
+  }
+  if (!Array.isArray(record.command) || record.command.length === 0 || record.exitCode !== 0) {
+    throw new Error('Evidence record must have non-empty command array and exitCode === 0');
+  }
+  if (!/^[0-9a-f]{64}$/.test(String(record.rawLogSha256 || ''))) {
+    throw new Error('Evidence record rawLogSha256 must be a 64-char hex SHA-256 digest');
+  }
+  if (!Array.isArray(record.artifacts) || record.artifacts.length === 0) {
+    throw new Error('Evidence record artifacts array must be non-empty');
+  }
 }
 
 function resolveEd25519KeyPair() {
@@ -98,6 +154,55 @@ function resolveEd25519KeyPair() {
     throw new Error('Evidence private key does not match the independently supplied public trust anchor');
   }
   return { privateKey, publicKey, keyId: 'key_evidence_v2', keySource: 'managed-secret-injected' };
+}
+
+function validateImportedQualificationArtifacts(imported, commitHash, treeHash) {
+  const awsReport = JSON.parse(imported.get('tests/aws-conformance-results.json').toString('utf8'));
+  if (awsReport.status !== 'PASS' ||
+      awsReport.awsAccountId !== '971671216490' ||
+      awsReport.awsRegion !== 'eu-west-3' ||
+      awsReport.leastPrivilegeBoundaries?.iamListUsersDenied !== true ||
+      awsReport.leastPrivilegeBoundaries?.executionRoleAssumptionFailClosed !== true) {
+    throw new Error('Live AWS conformance evidence is absent or failed a required least-privilege assertion; release evidence generation is blocked.');
+  }
+
+  const depScan = JSON.parse(imported.get('security/dependency-scan.json').toString('utf8'));
+  if (depScan.status !== 'PASS' || depScan.scanner !== 'npm-audit' || !depScan.scannerVersion ||
+      !depScan.lockfileSha256 || !depScan.rawReportSha256 ||
+      depScan.vulnerabilities?.critical > 0 || depScan.vulnerabilities?.high > 0) {
+    throw new Error('Dependency scan evidence is missing real npm-audit scanner metadata or reports critical/high vulnerabilities.');
+  }
+
+  const sbom = JSON.parse(imported.get('security/sbom.cdx.json').toString('utf8'));
+  if (sbom.bomFormat !== 'CycloneDX' || !Array.isArray(sbom.components) || sbom.components.length < 10) {
+    throw new Error('SBOM evidence must be a complete resolved lockfile CycloneDX inventory (>= 10 components).');
+  }
+
+  const provenance = JSON.parse(imported.get('security/provenance.json').toString('utf8'));
+  const extParams = provenance.predicate?.buildDefinition?.externalParameters;
+  if (!Array.isArray(provenance.subject) || provenance.subject.length === 0 ||
+      extParams?.commitHash !== commitHash || extParams?.treeHash !== treeHash) {
+    throw new Error('Provenance attestation is missing subject digests or does not match the candidate commit/tree.');
+  }
+
+  const compatibility = JSON.parse(imported.get('tests/compatibility-results.json').toString('utf8'));
+  if (compatibility.status !== 'PASS' || !Array.isArray(compatibility.platformsVerified) ||
+      compatibility.platformsVerified.length !== 1 || !Array.isArray(compatibility.repositoryProvidersVerified)) {
+    throw new Error('Compatibility evidence is missing a passing result or claims unexecuted platforms.');
+  }
+
+  const receipt = JSON.parse(imported.get('runtime/deployment-receipt.json').toString('utf8'));
+  validateEvidenceRecordSchema(receipt, commitHash, treeHash);
+
+  for (const rel of ['tests/unit-results.xml', 'tests/contract-results.xml', 'tests/integration-results.xml', 'tests/e2e-results.xml', 'tests/security-results.xml']) {
+    const xml = imported.get(rel).toString('utf8');
+    if (!/<testsuites\b/.test(xml) || !/<testcase\b/.test(xml) || /failures="[1-9]|errors="[1-9]|skipped="[1-9]/.test(xml)) {
+      throw new Error(`Test result artifact is missing actual test cases or reports failure/skips: ${rel}`);
+    }
+    if (/name="executed\s+/i.test(xml)) {
+      throw new Error(`Test result artifact contains synthesized fallback testcase in ${rel}`);
+    }
+  }
 }
 
 export function generateEvidenceBundle(evidenceDir) {
@@ -121,30 +226,11 @@ export function generateEvidenceBundle(evidenceDir) {
     imported.set(rel, fs.readFileSync(sourcePath));
   }
 
-  // Validate critical qualification evidence before any bundle is emitted.
-  const awsReport = JSON.parse(imported.get('tests/aws-conformance-results.json').toString('utf8'));
-  if (awsReport.status !== 'PASS' ||
-      awsReport.awsAccountId !== '971671216490' ||
-      awsReport.awsRegion !== 'eu-west-3' ||
-      awsReport.leastPrivilegeBoundaries?.iamListUsersDenied !== true ||
-      awsReport.leastPrivilegeBoundaries?.executionRoleAssumptionFailClosed !== true) {
-    throw new Error('Live AWS conformance evidence is absent or failed a required least-privilege assertion; release evidence generation is blocked.');
-  }
-  const compatibility = JSON.parse(imported.get('tests/compatibility-results.json').toString('utf8'));
-  if (compatibility.status !== 'PASS' || !Array.isArray(compatibility.platformsVerified) ||
-      !Array.isArray(compatibility.repositoryProvidersVerified)) {
-    throw new Error('Compatibility evidence is missing a passing result or explicit platform/provider evidence.');
-  }
-  for (const rel of ['tests/unit-results.xml', 'tests/contract-results.xml', 'tests/integration-results.xml', 'tests/e2e-results.xml', 'tests/security-results.xml']) {
-    const xml = imported.get(rel).toString('utf8');
-    if (!/<testsuites\b/.test(xml) || !/<testcase\b/.test(xml) || /failures="[1-9]|errors="[1-9]|skipped="[1-9]/.test(xml)) {
-      throw new Error(`Test result artifact is missing actual test cases or reports failure/skips: ${rel}`);
-    }
-  }
-
   const commitHash = git(['rev-parse', 'HEAD']);
   const treeHash = git(['rev-parse', 'HEAD^{tree}']);
   const branchName = git(['rev-parse', '--abbrev-ref', 'HEAD']);
+  validateImportedQualificationArtifacts(imported, commitHash, treeHash);
+
   const generatedAt = new Date().toISOString();
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   const trackedFiles = git(['ls-files']).split(/\r?\n/).filter((f) => Boolean(f) && !f.startsWith('evidence/')).sort();
@@ -179,6 +265,7 @@ export function generateEvidenceBundle(evidenceDir) {
   const manifest = {
     schemaVersion: '1.0.0',
     product: '@airroofers/ugondu-platform',
+    organization: 'Air Roofers SASU',
     version: pkg.version,
     generatedAt,
     git: { commitHash, treeHash, branchName },
@@ -263,6 +350,10 @@ export function verifyEvidenceBundle(evidenceDir) {
     throw new Error('Independent evidence public trust anchor must be injected through UGONDU_EVIDENCE_PUBLIC_KEY; repository-local fallback is forbidden');
   }
   const publicKey = crypto.createPublicKey(trustedPubPem);
+  const expectedPubDerB64 = publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
+  if (sigEnvelope.publicKeySpkiDerBase64 !== expectedPubDerB64) {
+    throw new Error('Public key SPKI DER in signature envelope does not match external UGONDU_EVIDENCE_PUBLIC_KEY trust anchor');
+  }
 
   const isValid = crypto.verify(
     null,

@@ -54,7 +54,7 @@ export class LifecycleManager {
         if (allowedTransitions[this.state].includes(newState)) {
             this.state = newState;
         } else {
-            throw new Error(__t('messages.error.invalid_transition_from_to', { 'this_state': this.state, 'newState': newState }));
+            throw new Error(__t('messages.error.invalid_transition_from_to', { 'from': this.state, 'to': newState }));
         }
     }
 

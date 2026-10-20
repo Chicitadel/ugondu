@@ -5,7 +5,7 @@
  * File           : run-aws-conformance.mjs
  * Version        : 1.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
  * Last Modified  : 2026-10-20
  * Classification : ENTERPRISE | INTERNAL
@@ -20,7 +20,7 @@
  * asserting read discovery capabilities and verifying negative boundary denials.
  * Emits evidence/tests/aws-conformance-results.json.
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 import fs from 'node:fs';
 import path from 'node:path';

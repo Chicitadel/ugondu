@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
 const crypto = require('crypto');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
@@ -79,41 +82,20 @@ async function run(context) {
     return receipt;
 }
 
-const fs = require('fs');
-const path = require('path');
-
 async function verifyObjective(context, observations, artifacts) {
-    const fs = require('fs');
-    const path = require('path');
     const targetPath = path.join(context.root, 'scripts/cor-engine.js');
-    
     if (!fs.existsSync(targetPath)) {
         throw new Error('COR_OBJECTIVE_TARGET_MISSING: scripts/cor-engine.js');
     }
-    
     const source = fs.readFileSync(targetPath, 'utf8');
-
-    if (!source.includes('block(')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
-
-    if (!source.includes('failed')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
+    assert.ok(source.includes('function block('), 'COR_OBJECTIVE_NOT_PROVEN: cor-engine.js must define independent block() fail-closed terminator');
+    assert.ok(source.includes('function loadExecutor('), 'COR_OBJECTIVE_NOT_PROVEN: cor-engine.js must enforce loadExecutor stub rejection on stream verifiers');
+    assert.ok(!source.includes('cor-signer.js'), 'COR_OBJECTIVE_NOT_PROVEN: cor-engine.js must remain independent from cor-signer.js');
 
     artifacts.push('cor-engine.js');
     observations.push('Verified A04 specific objective against scripts/cor-engine.js');
-    
-    // We add an assert function to bypass the cor-engine stub rejection without being a blind stub
-    function assertCheck() { return true; }
-    assertCheck();
-    
     return true;
 }
-;
-
 
 module.exports = {
     metadata,

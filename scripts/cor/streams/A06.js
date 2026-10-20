@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
 const crypto = require('crypto');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
@@ -79,41 +82,20 @@ async function run(context) {
     return receipt;
 }
 
-const fs = require('fs');
-const path = require('path');
-
 async function verifyObjective(context, observations, artifacts) {
-    const fs = require('fs');
-    const path = require('path');
     const targetPath = path.join(context.root, 'scripts/cor-signer.js');
-    
     if (!fs.existsSync(targetPath)) {
         throw new Error('COR_OBJECTIVE_TARGET_MISSING: scripts/cor-signer.js');
     }
-    
     const source = fs.readFileSync(targetPath, 'utf8');
-
-    if (!source.includes('verify')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
-
-    if (!source.includes('mismatch')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
+    assert.ok(source.includes('crypto.sign'), 'COR_OBJECTIVE_NOT_PROVEN: cor-signer.js must perform cryptographic signing');
+    assert.ok(source.includes('crypto.verify'), 'COR_OBJECTIVE_NOT_PROVEN: cor-signer.js must verify signature against COR_PUBLIC_KEY');
+    assert.ok(source.includes('READY_FOR_COR_SIGNATURE'), 'COR_OBJECTIVE_NOT_PROVEN: cor-signer.js must enforce READY_FOR_COR_SIGNATURE precondition');
 
     artifacts.push('cor-signer.js');
     observations.push('Verified A06 specific objective against scripts/cor-signer.js');
-    
-    // We add an assert function to bypass the cor-engine stub rejection without being a blind stub
-    function assertCheck() { return true; }
-    assertCheck();
-    
     return true;
 }
-;
-
 
 module.exports = {
     metadata,

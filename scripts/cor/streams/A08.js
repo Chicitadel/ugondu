@@ -1,5 +1,8 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
 const crypto = require('crypto');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
@@ -79,36 +82,20 @@ async function run(context) {
     return receipt;
 }
 
-const fs = require('fs');
-const path = require('path');
-
 async function verifyObjective(context, observations, artifacts) {
-    const fs = require('fs');
-    const path = require('path');
     const targetPath = path.join(context.root, '.github/workflows/cor.yml');
-    
     if (!fs.existsSync(targetPath)) {
         throw new Error('COR_OBJECTIVE_TARGET_MISSING: .github/workflows/cor.yml');
     }
-    
     const source = fs.readFileSync(targetPath, 'utf8');
-
-    if (!source.includes('GITHUB_SHA')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
+    assert.ok(source.includes('GITHUB_SHA'), 'COR_OBJECTIVE_NOT_PROVEN: cor.yml must assert exact GITHUB_SHA checkout');
+    assert.ok(source.includes('scripts/cor-engine.js'), 'COR_OBJECTIVE_NOT_PROVEN: cor.yml must execute scripts/cor-engine.js');
+    assert.ok(source.includes('scripts/cor-finalize.js'), 'COR_OBJECTIVE_NOT_PROVEN: cor.yml must execute scripts/cor-finalize.js');
 
     artifacts.push('cor.yml');
     observations.push('Verified A08 specific objective against .github/workflows/cor.yml');
-    
-    // We add an assert function to bypass the cor-engine stub rejection without being a blind stub
-    function assertCheck() { return true; }
-    assertCheck();
-    
     return true;
 }
-;
-
 
 module.exports = {
     metadata,

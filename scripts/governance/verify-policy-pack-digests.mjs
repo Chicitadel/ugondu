@@ -5,7 +5,7 @@
  * File           : verify-policy-pack-digests.mjs
  * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
  * Last Modified  : 2026-10-20
  * Classification : ENTERPRISE | INTERNAL
@@ -23,9 +23,9 @@
  * Pack digest = SHA-256 over the sorted lines "<relative-path>:<sha256>" of every
  * templatePath referenced by pack.yaml (policies and roles), newline-joined.
  * Cryptographic provenance is verified via Ed25519 signature in pack.sig anchored
- * to server/shared/keys/uplm_pack_public.pem or config/trust/uplm_pack_authority.pub.pem.
+ * to externally injected UGONDU_PACK_PUBLIC_KEY.
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 import fs from 'node:fs';
 import path from 'node:path';

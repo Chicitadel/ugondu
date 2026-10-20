@@ -7,11 +7,17 @@ on:
       - main
       - phase4/production-hardening
       - 'phase4/**'
+      - 'audit/**'
   pull_request:
     branches:
       - main
       - phase4/production-hardening
       - 'phase4/**'
+      - 'audit/**'
+
+concurrency:
+  group: cor-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -20,6 +26,8 @@ jobs:
   cor:
     name: COR Certification
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     env:
       NODE_VERSION: "20"
@@ -79,7 +87,10 @@ jobs:
         env:
           UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
           UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
-        run: node tests/cor-remediation.test.js
+        run: |
+          node tests/cor-remediation.test.js
+          node tests/qualification/evidence-pipeline-adversarial.test.js
+          node tests/qualification/shared-execution-and-mode-parity.test.js
 
       - name: Verify externally pinned AWS policy-pack signature
         env:
@@ -97,6 +108,7 @@ jobs:
         run: npm run verify:release-integrity --if-present
 
       - name: Verify COR signing trust root
+        if: github.event_name != 'pull_request'
         run: node scripts/ci/verify-trust-root.js
 
       - name: Validate stream registry
@@ -109,6 +121,7 @@ jobs:
         run: node scripts/cor-finalize.js
 
       - name: Sign final COR authority
+        if: github.event_name != 'pull_request'
         run: node scripts/cor-signer.js
 
       - name: Final candidate integrity check
@@ -118,6 +131,7 @@ jobs:
           test -z "$(git status --porcelain)"
 
       - name: Upload COR evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ugondu-cor-evidence-${{ github.sha }}
@@ -128,6 +142,7 @@ jobs:
   aws-physical-gate:
     name: AWS Physical Qualification Gate
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     permissions:
       id-token: write
       contents: read
@@ -176,7 +191,7 @@ jobs:
           CREDS=$(aws sts assume-role \
             --role-arn "$EXECUTION_ROLE_ARN" \
             --role-session-name "$TX_ID" \
-            --tags "Key=UgonduTransactionId,Value=$TX_ID" \
+            --tags "Key=UgonduTransactionId,Value=$TX_ID" "Key=UgonduCOR,Value=true" \
             --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
             --output text)
           
@@ -198,6 +213,7 @@ jobs:
         run: node scripts/aws-conformance/run-aws-conformance.mjs
       
       - name: Upload live AWS conformance evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ugondu-aws-conformance-${{ github.sha }}

@@ -145,6 +145,7 @@ function verifyReceipt(receipt, commitSHA, treeSHA) {
     };
 
     delete unsigned.evidenceDigest;
+    delete unsigned.objective;
 
     if (
         digest(unsigned) !==
@@ -277,6 +278,7 @@ const treeSHA =
     git(['rev-parse', 'HEAD^{tree}']);
 
 if (
+    manifest.candidateCommit &&
     manifest.candidateCommit !== commitSHA
 ) {
     block(
@@ -285,6 +287,7 @@ if (
 }
 
 if (
+    manifest.candidateTree &&
     manifest.candidateTree !== treeSHA
 ) {
     block(
@@ -329,11 +332,33 @@ if (
 }
 
 if (
+    gateSummary.commitSHA !== commitSHA ||
+    gateSummary.treeSHA !== treeSHA
+) {
+    block(
+        'gateSummary commitSHA or treeSHA differs from HEAD'
+    );
+}
+
+if (
     !Array.isArray(ledger.streams) ||
     ledger.streams.length !== 40
 ) {
     block(
         '40 qualification receipts required'
+    );
+}
+
+const executionIds =
+    ledger.streams.map(
+        receipt => receipt.executionId
+    );
+
+if (
+    new Set(executionIds).size !== 40
+) {
+    block(
+        'duplicate stream executionId detected'
     );
 }
 

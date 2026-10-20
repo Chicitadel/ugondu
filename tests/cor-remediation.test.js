@@ -250,6 +250,20 @@ async function runCorRemediationTests() {
         assert.ok(!pack.includes("path.join(ROOT, 'server/shared/keys/uplm_pack_private.pem')"), 'repository-local pack private-key fallback is forbidden');
     });
 
+    // Re-audit PR#5: Qualification schema, platform matrix, exception register, ADR, and adversarial/mode-parity suites
+    check('REAUDIT-F12', 'PR#5 qualification evidence schema, platform matrix, real npm-audit SCA, full lockfile SBOM, and adversarial/mode-parity suites exist', () => {
+        assert.ok(fs.existsSync(path.join(ROOT, 'schemas/qualification-evidence.schema.json')), 'Missing qualification-evidence.schema.json');
+        assert.ok(fs.existsSync(path.join(ROOT, 'config/qualification/platform-matrix.json')), 'Missing platform-matrix.json');
+        assert.ok(fs.existsSync(path.join(ROOT, 'config/governance/exception-register.json')), 'Missing exception-register.json');
+        assert.ok(fs.existsSync(path.join(ROOT, 'docs/adr/ADR-0001-modular-microservices-and-cor-governance.md')), 'Missing ADR-0001');
+        assert.ok(fs.existsSync(path.join(ROOT, 'tests/qualification/evidence-pipeline-adversarial.test.js')), 'Missing evidence-pipeline-adversarial.test.js');
+        assert.ok(fs.existsSync(path.join(ROOT, 'tests/qualification/shared-execution-and-mode-parity.test.js')), 'Missing shared-execution-and-mode-parity.test.js');
+        const collector = fs.readFileSync(path.join(ROOT, 'scripts/release/collect-qualification-evidence.mjs'), 'utf8');
+        assert.ok(!collector.includes('name: `executed ${relScript}`'), 'Fallback executed <script> testcase synthesis is forbidden');
+        assert.ok(!collector.includes("path.join(ROOT, 'config/trust/uplm_pack_authority.pub.pem')"), 'Repository-local pack key fallback in collector is forbidden');
+        assert.ok(collector.includes("scanner: 'npm-audit'"), 'Collector must run real npm-audit dependency scan');
+    });
+
     console.log('══════════════════════════════════════════════════════════════');
     console.log(` COR Remediation Audit Results: ${passed} passed, ${failed} failed `);
     console.log('══════════════════════════════════════════════════════════════');
