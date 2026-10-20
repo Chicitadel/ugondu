@@ -394,6 +394,8 @@ jobs:
               sleep 1
             done
             echo "[TIMEOUT] Readiness probe failed: $url" >&2
+            echo "=== DOCKER COMPOSE LOGS ON FAILURE ==="
+            docker compose logs
             return 1
           }
 

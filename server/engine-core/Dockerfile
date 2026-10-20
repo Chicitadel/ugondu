@@ -25,16 +25,16 @@ WORKDIR /usr/src/app
 # Set production environment
 ENV NODE_ENV=production
 
-RUN mkdir -p /usr/src/app/server/data && chown -R node:node /usr/src/app/server/data
-
-# Switch to non-root user
-USER node
-
 # Copy necessary files from builder stage
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node .governance/ ./.governance/
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /usr/src/app/server ./server
+
+RUN mkdir -p /usr/src/app/server/data /usr/src/app/.ugondu && chown -R node:node /usr/src/app
+
+# Switch to non-root user
+USER node
 
 # Expose standard port
 ENV PORT=4001

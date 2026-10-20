@@ -46,12 +46,14 @@ FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb836
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
-USER node
-
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node .governance/ ./.governance/
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /usr/src/app/server ./server
+
+RUN mkdir -p /usr/src/app/server/data && chown -R node:node /usr/src/app
+
+USER node
 
 ENV PORT=4005
 EXPOSE 4005
