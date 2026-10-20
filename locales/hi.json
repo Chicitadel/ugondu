@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "स्नैपशॉट सत्यापन के लिए EBS वॉल्यूम पहचानकर्ता आवश्यक है।",
   "cert.fargate.cleanup": "अस्थायी Fargate प्रमाणन संसाधनों की सफ़ाई की जा रही है...",
   "cors_policy_violation": "प्लेटफ़ॉर्म CORS सुरक्षा नीति द्वारा ओरिजिन की अनुमति नहीं है।",
-  "unimplemented_autonomous_code_": "स्वायत्त कोड पैचिंग के लिए एक सत्यापित उपचार योजना आवश्यक है।"
+  "unimplemented_autonomous_code_": "स्वायत्त कोड पैचिंग के लिए एक सत्यापित उपचार योजना आवश्यक है।",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — यूनिवर्सल डिलीवरी ऑपरेटिंग सिस्टम",
+    "home": "होम",
+    "about_ugondu": "Ugondu के बारे में",
+    "open_dashboard": "डैशबोर्ड खोलें",
+    "back_to_ugondu": "Ugondu पर वापस जाएं"
+  }
 }

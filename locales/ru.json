@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "Отсутствует идентификатор тома (Volume ID)",
   "cert.fargate.cleanup": "Очистка ресурсов сертификации Fargate...",
   "cors_policy_violation": "Нарушение политики CORS",
-  "unimplemented_autonomous_code_": "НЕ РЕАЛИЗОВАНО: план автономного исправления кода подготовлен в виде каркаса"
+  "unimplemented_autonomous_code_": "НЕ РЕАЛИЗОВАНО: план автономного исправления кода подготовлен в виде каркаса",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Универсальная операционная система доставки",
+    "home": "Главная",
+    "about_ugondu": "О Ugondu",
+    "open_dashboard": "Открыть панель управления",
+    "back_to_ugondu": "Назад к Ugondu"
+  }
 }

@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "롤백 실패",
   "cert.error.foreign_resource_refusal": "외부 리소스 거부",
   "error.cert.missing_volume_id": "스냅샷 검증을 위해 EBS 볼륨 식별자가 필요합니다.",
-  "cert.fargate.cleanup": "임시 Fargate 인증 리소스를 정리하는 중..."
+  "cert.fargate.cleanup": "임시 Fargate 인증 리소스를 정리하는 중...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — 범용 배포 운영체제",
+    "home": "홈",
+    "about_ugondu": "Ugondu 정보",
+    "open_dashboard": "대시보드 열기",
+    "back_to_ugondu": "Ugondu로 돌아가기"
+  }
 }

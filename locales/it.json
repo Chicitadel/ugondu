@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "ID volume mancante",
   "cert.fargate.cleanup": "Pulizia delle risorse di certificazione Fargate...",
   "cors_policy_violation": "Violazione della politica CORS",
-  "unimplemented_autonomous_code_": "NON IMPLEMENTATO: il piano di patching autonomo del codice è predisposto"
+  "unimplemented_autonomous_code_": "NON IMPLEMENTATO: il piano di patching autonomo del codice è predisposto",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Sistema operativo universale di distribuzione",
+    "home": "Pagina iniziale",
+    "about_ugondu": "Informazioni su Ugondu",
+    "open_dashboard": "Apri dashboard",
+    "back_to_ugondu": "Torna a Ugondu"
+  }
 }

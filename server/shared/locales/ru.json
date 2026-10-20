@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "Ошибка отката",
   "cert.error.foreign_resource_refusal": "Отказ в доступе к чужому ресурсу",
   "error.cert.missing_volume_id": "Отсутствует идентификатор тома (Volume ID)",
-  "cert.fargate.cleanup": "Очистка ресурсов сертификации Fargate..."
+  "cert.fargate.cleanup": "Очистка ресурсов сертификации Fargate...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Универсальная операционная система доставки",
+    "home": "Главная",
+    "about_ugondu": "О Ugondu",
+    "open_dashboard": "Открыть панель управления",
+    "back_to_ugondu": "Назад к Ugondu"
+  }
 }

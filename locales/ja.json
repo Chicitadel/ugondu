@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "スナップショット検証には EBS ボリューム識別子が必要です。",
   "cert.fargate.cleanup": "一時的な Fargate 認定リソースをクリーンアップしています...",
   "cors_policy_violation": "このオリジンはプラットフォームの CORS セキュリティポリシーによって許可されていません。",
-  "unimplemented_autonomous_code_": "自律的なコードパッチ適用には、検証済みの修復計画が必要です。"
+  "unimplemented_autonomous_code_": "自律的なコードパッチ適用には、検証済みの修復計画が必要です。",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — ユニバーサルデリバリーオペレーティングシステム",
+    "home": "ホーム",
+    "about_ugondu": "Ugonduについて",
+    "open_dashboard": "ダッシュボードを開く",
+    "back_to_ugondu": "Ugonduに戻る"
+  }
 }

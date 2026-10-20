@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "ロールバック失敗",
   "cert.error.foreign_resource_refusal": "外部リソースの拒否",
   "error.cert.missing_volume_id": "スナップショット検証には EBS ボリューム識別子が必要です。",
-  "cert.fargate.cleanup": "一時的な Fargate 認定リソースをクリーンアップしています..."
+  "cert.fargate.cleanup": "一時的な Fargate 認定リソースをクリーンアップしています...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — ユニバーサルデリバリーオペレーティングシステム",
+    "home": "ホーム",
+    "about_ugondu": "Ugonduについて",
+    "open_dashboard": "ダッシュボードを開く",
+    "back_to_ugondu": "Ugonduに戻る"
+  }
 }

@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "Reversión fallida",
   "cert.error.foreign_resource_refusal": "Rechazo de recurso externo",
   "error.cert.missing_volume_id": "Falta el ID del volumen",
-  "cert.fargate.cleanup": "Limpiando recursos de certificación de Fargate..."
+  "cert.fargate.cleanup": "Limpiando recursos de certificación de Fargate...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Sistema operativo universal de entrega",
+    "home": "Inicio",
+    "about_ugondu": "Acerca de Ugondu",
+    "open_dashboard": "Abrir panel de control",
+    "back_to_ugondu": "Volver a Ugondu"
+  }
 }

@@ -35,7 +35,11 @@
 
 # Ugondu — Universal Delivery Operating System
 
-> **Air Roofers Commercial Product** | Ujomor Systems Engineering & Governance Authority
+<p align="center">
+  <img src="assets/brand/web/ugondu-logo.svg" alt="Ugondu — Universal Delivery Operating System" width="360" />
+</p>
+
+> **Air Roofers SASU Commercial Product** | Ujomor Systems Engineering & Governance Authority
 
 Ugondu is a **governed thin-client / microservice control-plane delivery operating system** that unifies application deployment, infrastructure orchestration, environment twin drift analysis (**DEISE**), durable execution recovery (**URRE**), and universal plugin lifecycle management (**UPLM**).
 

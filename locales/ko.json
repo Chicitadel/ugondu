@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "스냅샷 검증을 위해 EBS 볼륨 식별자가 필요합니다.",
   "cert.fargate.cleanup": "임시 Fargate 인증 리소스를 정리하는 중...",
   "cors_policy_violation": "플랫폼 CORS 보안 정책에 의해 허용되지 않는 출처(Origin)입니다.",
-  "unimplemented_autonomous_code_": "자율 코드 패치를 위해서는 검증된 복구 계획이 필요합니다."
+  "unimplemented_autonomous_code_": "자율 코드 패치를 위해서는 검증된 복구 계획이 필요합니다.",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — 범용 배포 운영체제",
+    "home": "홈",
+    "about_ugondu": "Ugondu 정보",
+    "open_dashboard": "대시보드 열기",
+    "back_to_ugondu": "Ugondu로 돌아가기"
+  }
 }

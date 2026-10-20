@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "回滚失败",
   "cert.error.foreign_resource_refusal": "拒绝外部资源",
   "error.cert.missing_volume_id": "快照验证需要 EBS 卷标识符。",
-  "cert.fargate.cleanup": "正在清理临时 Fargate 认证资源..."
+  "cert.fargate.cleanup": "正在清理临时 Fargate 认证资源...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — 通用交付操作系统",
+    "home": "首页",
+    "about_ugondu": "关于 Ugondu",
+    "open_dashboard": "打开控制面板",
+    "back_to_ugondu": "返回 Ugondu"
+  }
 }

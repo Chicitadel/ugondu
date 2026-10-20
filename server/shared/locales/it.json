@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "Rollback fallito",
   "cert.error.foreign_resource_refusal": "Rifiuto di risorsa esterna",
   "error.cert.missing_volume_id": "ID volume mancante",
-  "cert.fargate.cleanup": "Pulizia delle risorse di certificazione Fargate..."
+  "cert.fargate.cleanup": "Pulizia delle risorse di certificazione Fargate...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Sistema operativo universale di distribuzione",
+    "home": "Pagina iniziale",
+    "about_ugondu": "Informazioni su Ugondu",
+    "open_dashboard": "Apri dashboard",
+    "back_to_ugondu": "Torna a Ugondu"
+  }
 }

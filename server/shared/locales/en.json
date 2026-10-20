@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "Rollback Failed",
   "cert.error.foreign_resource_refusal": "Foreign Resource Refusal",
   "error.cert.missing_volume_id": "EBS volume identifier is required for snapshot verification.",
-  "cert.fargate.cleanup": "Cleaning up ephemeral Fargate certification resources..."
+  "cert.fargate.cleanup": "Cleaning up ephemeral Fargate certification resources...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Universal Delivery Operating System",
+    "home": "Home",
+    "about_ugondu": "About Ugondu",
+    "open_dashboard": "Open Dashboard",
+    "back_to_ugondu": "Back to Ugondu"
+  }
 }

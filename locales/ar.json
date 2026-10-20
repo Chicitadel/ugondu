@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "معرف وحدة تخزين EBS مطلوب للتحقق من اللقطة.",
   "cert.fargate.cleanup": "جارٍ تنظيف موارد شهادة Fargate المؤقتة...",
   "cors_policy_violation": "المصدر غير مسموح به بموجب سياسة أمان CORS الخاصة بالمنصة.",
-  "unimplemented_autonomous_code_": "يتطلب تصحيح الكود المستقل خطة معالجة موثقة."
+  "unimplemented_autonomous_code_": "يتطلب تصحيح الكود المستقل خطة معالجة موثقة.",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — نظام تشغيل التوصيل الشامل",
+    "home": "الرئيسية",
+    "about_ugondu": "حول Ugondu",
+    "open_dashboard": "فتح لوحة التحكم",
+    "back_to_ugondu": "العودة إلى Ugondu"
+  }
 }

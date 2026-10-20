@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "EBS volume identifier is required for snapshot verification.",
   "cert.fargate.cleanup": "Cleaning up ephemeral Fargate certification resources...",
   "cors_policy_violation": "Origin is not permitted by the platform CORS security policy.",
-  "unimplemented_autonomous_code_": "Autonomous code patching requires a verified remediation plan."
+  "unimplemented_autonomous_code_": "Autonomous code patching requires a verified remediation plan.",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Universal Delivery Operating System",
+    "home": "Home",
+    "about_ugondu": "About Ugondu",
+    "open_dashboard": "Open Dashboard",
+    "back_to_ugondu": "Back to Ugondu"
+  }
 }

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.schemastore.org/schema",
+  "schemaVersion": "1.0.0",
+  "product": "Ugondu",
+  "brandVersion": "1.0.0",
+  "organization": "Air Roofers SASU",
+  "approvedColors": {
+    "primaryBlue": {
+      "hex": "#02438d",
+      "rgb": [2, 67, 141],
+      "cmyk": [99, 52, 0, 45],
+      "pantoneRef": "PMS 287 C",
+      "usage": "Primary brand color, U-frame left glyph, wordmark typography"
+    },
+    "goldenYellow": {
+      "hex": "#f5ae04",
+      "rgb": [245, 174, 4],
+      "cmyk": [0, 29, 98, 4],
+      "pantoneRef": "PMS 1235 C",
+      "usage": "Growth arrow emblem, upward gradient highlight"
+    }
+  },
+  "assets": {
+    "source": {
+      "master": "source/ugondu-logo-master.png"
+    },
+    "primary": {
+      "source": "source/ugondu-logo-master.png",
+      "web": "web/ugondu-logo.svg",
+      "fallback": "web/ugondu-logo.png",
+      "documentation": "documentation/ugondu-logo.svg",
+      "documentationFallback": "documentation/ugondu-logo.png"
+    },
+    "symbol": {
+      "web": "web/ugondu-symbol.svg",
+      "fallback": "web/ugondu-symbol.png",
+      "favicon": "web/favicon.ico"
+    },
+    "desktop": {
+      "icon": "desktop/app-icon.png",
+      "windows": "desktop/app-icon.ico"
+    },
+    "mobile": {
+      "icon": "mobile/icon.png",
+      "icon192": "mobile/icon-192.png",
+      "icon512": "mobile/icon-512.png",
+      "splash": "mobile/splash-logo.png"
+    }
+  },
+  "rules": {
+    "preserveAspectRatio": true,
+    "allowBackgroundTransparency": true,
+    "allowUnapprovedRecoloring": false,
+    "allowMissingRequiredAssets": false,
+    "disallowHalosOrWhiteMattes": true,
+    "prohibitBannersInMachineReadableFormats": true
+  }
+}

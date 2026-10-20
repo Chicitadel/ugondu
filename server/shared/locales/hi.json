@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "रोलबैक विफल रहा",
   "cert.error.foreign_resource_refusal": "बाहरी संसाधन अस्वीकृति",
   "error.cert.missing_volume_id": "स्नैपशॉट सत्यापन के लिए EBS वॉल्यूम पहचानकर्ता आवश्यक है।",
-  "cert.fargate.cleanup": "अस्थायी Fargate प्रमाणन संसाधनों की सफ़ाई की जा रही है..."
+  "cert.fargate.cleanup": "अस्थायी Fargate प्रमाणन संसाधनों की सफ़ाई की जा रही है...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — यूनिवर्सल डिलीवरी ऑपरेटिंग सिस्टम",
+    "home": "होम",
+    "about_ugondu": "Ugondu के बारे में",
+    "open_dashboard": "डैशबोर्ड खोलें",
+    "back_to_ugondu": "Ugondu पर वापस जाएं"
+  }
 }

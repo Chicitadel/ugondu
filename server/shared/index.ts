@@ -54,3 +54,4 @@ export * from './environment-twin';
 export * from './capability-model';
 export * from './outcome-pack';
 export * from './logger';
+export * from './brand/logo';

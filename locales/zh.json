@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "快照验证需要提供 EBS 卷标识符。",
   "cert.fargate.cleanup": "正在清理临时 Fargate 认证资源...",
   "cors_policy_violation": "平台 CORS 安全策略不允许该来源 (Origin)。",
-  "unimplemented_autonomous_code_": "自主代码修补需要经过验证的修复计划。"
+  "unimplemented_autonomous_code_": "自主代码修补需要经过验证的修复计划。",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — 通用交付操作系统",
+    "home": "首页",
+    "about_ugondu": "关于 Ugondu",
+    "open_dashboard": "打开控制面板",
+    "back_to_ugondu": "返回 Ugondu"
+  }
 }

@@ -216,5 +216,13 @@
   "error.cert.missing_volume_id": "ID de volume ausente",
   "cert.fargate.cleanup": "Limpando recursos de certificação do Fargate...",
   "cors_policy_violation": "Violação da política de CORS",
-  "unimplemented_autonomous_code_": "NÃO IMPLEMENTADO: o plano de correção autônoma de código está estruturado"
+  "unimplemented_autonomous_code_": "NÃO IMPLEMENTADO: o plano de correção autônoma de código está estruturado",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — Sistema operacional universal de entrega",
+    "home": "Início",
+    "about_ugondu": "Sobre Ugondu",
+    "open_dashboard": "Abrir painel",
+    "back_to_ugondu": "Voltar para Ugondu"
+  }
 }

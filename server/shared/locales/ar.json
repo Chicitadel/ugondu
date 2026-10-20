@@ -1842,5 +1842,13 @@
   "cert.error.rollback_failed": "فشل التراجع",
   "cert.error.foreign_resource_refusal": "رفض المورد الخارجي",
   "error.cert.missing_volume_id": "معرّف وحدة تخزين EBS مطلوب للتحقق من اللقطة.",
-  "cert.fargate.cleanup": "جارٍ تنظيف موارد اعتماد Fargate المؤقتة..."
+  "cert.fargate.cleanup": "جارٍ تنظيف موارد اعتماد Fargate المؤقتة...",
+  "brand": {
+    "name": "Ugondu",
+    "logo_alt": "Ugondu — نظام تشغيل التوصيل الشامل",
+    "home": "الرئيسية",
+    "about_ugondu": "حول Ugondu",
+    "open_dashboard": "فتح لوحة التحكم",
+    "back_to_ugondu": "العودة إلى Ugondu"
+  }
 }
