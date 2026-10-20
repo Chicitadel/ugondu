@@ -216,8 +216,39 @@ async function runCorRemediationTests() {
         assert.ok(report.liveDiscoveredResources.vpcCount >= 1);
         assert.ok(report.liveDiscoveredResources.subnetCount >= 1);
         assert.strictEqual(report.leastPrivilegeBoundaries.iamListUsersDenied, true);
+        assert.strictEqual(report.leastPrivilegeBoundaries.executionRoleAssumptionFailClosed, true);
     });
 
+
+
+    // Re-audit F9: AWS boundary probe must use a valid ARN and fail closed.
+    check('REAUDIT-F9', 'AWS conformance role-assumption probe uses valid ARN and rejects unexpected success', () => {
+        const probe = fs.readFileSync(path.join(ROOT, 'scripts/aws-conformance/run-aws-conformance.mjs'), 'utf8');
+        assert.ok(probe.includes('`arn:aws:iam::${accountId}:role/UgonduCORExecutionRole`'), 'role ARN must use arn:partition:iam::account:role/name');
+        assert.ok(!probe.includes('arn:aws:iam://'), 'malformed IAM ARN is forbidden');
+        assert.ok(probe.includes('if (!assumeDenied)'), 'role-assumption probe must fail if authorization denial is not proven');
+    });
+
+    // Re-audit F10: no static CSV credentials or hard-coded platform evidence.
+    check('REAUDIT-F10', 'AWS probe uses the default credential chain and evidence generation imports real qualification outputs', () => {
+        const awsEnv = fs.readFileSync(path.join(ROOT, 'scripts/aws-conformance/aws-env.mjs'), 'utf8');
+        const awsProbe = fs.readFileSync(path.join(ROOT, 'scripts/aws-conformance/run-aws-conformance.mjs'), 'utf8');
+        const evidence = fs.readFileSync(path.join(ROOT, 'scripts/release/verify-evidence-bundle.mjs'), 'utf8');
+        assert.ok(!awsEnv.includes('UGONDU_AWS_TEST_CREDENTIALS_CSV'), 'static credential CSV input is forbidden');
+        assert.ok(!awsProbe.includes('UgonduPhysicalTest_accessKeys.csv'), 'machine-specific credential paths are forbidden');
+        assert.ok(evidence.includes('UGONDU_EVIDENCE_INPUT_DIR'), 'real qualification artifact input directory is required');
+        assert.ok(!evidence.includes('buildJUnitXml('), 'test evidence must not be fabricated from hard-coded JUnit cases');
+        assert.ok(!evidence.includes("platformsVerified: ['linux/amd64'"), 'platform qualification must not be hard-coded');
+    });
+
+    // Re-audit F11: independent trust roots must be externally pinned.
+    check('REAUDIT-F11', 'Evidence and policy-pack verification require externally injected trust anchors', () => {
+        const evidence = fs.readFileSync(path.join(ROOT, 'scripts/release/verify-evidence-bundle.mjs'), 'utf8');
+        const pack = fs.readFileSync(path.join(ROOT, 'scripts/governance/verify-policy-pack-digests.mjs'), 'utf8');
+        assert.ok(evidence.includes('Independent evidence public trust anchor must be injected'));
+        assert.ok(pack.includes('Trust roots must be pinned by the operator/CI environment'));
+        assert.ok(pack.includes('sigData.signingKeyId !=='), 'policy-pack signing key ID must be validated');
+    });
 
     console.log('══════════════════════════════════════════════════════════════');
     console.log(` COR Remediation Audit Results: ${passed} passed, ${failed} failed `);
