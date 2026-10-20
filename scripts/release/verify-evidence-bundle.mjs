@@ -258,7 +258,6 @@ export function verifyEvidenceBundle(evidenceDir) {
     throw new Error(`Invalid keyId in evidence signature: expected key_evidence_v2, got ${sigEnvelope.keyId}`);
   }
 
-  const pubPath = path.join(ROOT, 'server/shared/keys/evidence_public.pem');
   const trustedPubPem = process.env.UGONDU_EVIDENCE_PUBLIC_KEY;
   if (!trustedPubPem) {
     throw new Error('Independent evidence public trust anchor must be injected through UGONDU_EVIDENCE_PUBLIC_KEY; repository-local fallback is forbidden');
