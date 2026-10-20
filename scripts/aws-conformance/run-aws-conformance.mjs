@@ -48,7 +48,10 @@ export function executeAwsPhysicalConformance(region = REGION) {
   }
   const accountId = idRes.json.Account;
   const principalArn = idRes.json.Arn;
-  console.log(`[en] ✓ AWS STS Verified: Account ${accountId}, Principal ${principalArn}`);
+  if (typeof principalArn !== 'string' || !principalArn.includes(':assumed-role/')) {
+    throw new Error('AWS conformance requires an OIDC/STS assumed-role identity; IAM user or long-lived user-key sessions are not accepted.');
+  }
+  console.log(`[en] ✓ AWS STS Verified: Account ${accountId}, Assumed Role ${principalArn}`);
 
   if (accountId !== EXPECTED_ACCOUNT) {
     throw new Error(`Unexpected AWS account ID: expected ${EXPECTED_ACCOUNT}, got ${accountId}`);
@@ -140,7 +143,10 @@ export function executeAwsPhysicalConformance(region = REGION) {
       transactionIdBinding: '${aws:PrincipalTag/UgonduTransactionId}',
       requestedRegion: region
     },
-    zeroResidualsVerified: true,
+    qualificationScope: 'READ_ONLY_DISCOVERY_AND_NEGATIVE_BOUNDARY_PROBES',
+    resourceMutationPerformed: false,
+    zeroResidualsVerified: null,
+    residualCheck: { status: 'NOT_APPLICABLE', reason: 'This probe performs no resource mutations; cleanup/rollback qualification requires a separate isolated transaction test.' },
     status: 'PASS'
   };
 
