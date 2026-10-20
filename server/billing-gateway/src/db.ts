@@ -23,11 +23,27 @@ import path from 'path';
 import fs from 'fs';
 import { createHash } from 'crypto';
 
-const dataDir = path.resolve(__dirname, '../../data');
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+function resolveDataDir(): string {
+    const candidates = [
+        process.env.DATA_DIR,
+        path.resolve(__dirname, '../../data'),
+        path.join(require('os').tmpdir(), 'ugondu-data'),
+    ].filter(Boolean) as string[];
+
+    for (const dir of candidates) {
+        try {
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            return dir;
+        } catch {
+            // try next candidate
+        }
+    }
+    return require('os').tmpdir();
 }
 
+const dataDir = resolveDataDir();
 const dbPath = path.join(dataDir, 'billing.json');
 
 export type LicenseStatus = 'active' | 'expired' | 'revoked' | 'suspended' | 'invalid';
