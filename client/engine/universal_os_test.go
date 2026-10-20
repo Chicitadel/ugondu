@@ -37,6 +37,7 @@ import (
 	"ugondu/client/i18n"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
