@@ -24,8 +24,9 @@ function runTest(context) {
     const result = spawnSync(
         npmCommand,
         ['test', '--workspace', 'server/capabilities', '--', '--runInBand'],
-        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: false }
+        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' }
     );
+    return result;
 }
 
 async function run(context) {

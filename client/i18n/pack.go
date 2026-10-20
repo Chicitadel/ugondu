@@ -27,6 +27,7 @@
 package i18n
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/sha256"
 	"crypto/x509"
@@ -162,7 +163,11 @@ func ComputeArtifactDigest(tokens map[string]string) string {
 		ordered[k] = tokens[k]
 	}
 
-	data, _ := json.Marshal(ordered)
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	_ = enc.Encode(ordered)
+	data := bytes.TrimRight(buf.Bytes(), "\n")
 	hash := sha256.Sum256(data)
 	return fmt.Sprintf("sha256:%s", hex.EncodeToString(hash[:]))
 }

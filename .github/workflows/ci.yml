@@ -237,6 +237,9 @@ jobs:
       - name: Install workspace runtime dependencies
         run: npm ci
 
+      - name: Build all microservice workspaces
+        run: npm run build
+
       - name: Generate ephemeral Ed25519 signing keypair
         run: |
           node -e "

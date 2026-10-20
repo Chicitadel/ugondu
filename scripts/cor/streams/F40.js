@@ -21,14 +21,14 @@ const metadata = {
 async function run(context) {
     if (context.streamId !== STREAM_ID) throw new Error('STREAM_CONTEXT_MISMATCH');
 
-    const testFile = path.join(context.root, 'server', 'engine-core', 'tests', 'recovery', 'f40-passport.spec.ts');
+    const testFile = 'tests/recovery/f40-passport.spec.ts';
     
     // We will run Jest specifically for this harness.
     const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const result = spawnSync(
         npmCommand,
         ['test', '--workspace', 'server/engine-core', '--', testFile, '--runInBand'],
-        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: false }
+        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' }
     );
 
     if (result.error) {

@@ -53,7 +53,7 @@ async function run(context) {
     const result = spawnSync(
         npmCommand,
         ['test', '--workspace', 'server/engine-core', '--', '--runInBand'],
-        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: false }
+        { cwd: context.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' }
     );
 
     if (result.error) {

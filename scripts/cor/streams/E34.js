@@ -19,22 +19,22 @@ const metadata = {
 
 async function verifyObjective(context, observations, artifacts) {
     const p = path.join(context.root, 'client', 'locales');
-    if (!fs.existsSync(p)) {
-        throw new Error('E34_CLIENT_LOCALES_DIR_MISSING');
+    if (fs.existsSync(p)) {
+        throw new Error('E34_OBSOLETE_CLIENT_LOCALES_DIR_PRESENT');
     }
     
-    const enPath = path.join(p, 'en.json');
+    const enPath = path.join(context.root, 'locales', 'en.json');
     if (!fs.existsSync(enPath)) {
-        throw new Error('E34_CLIENT_LOCALES_EN_MISSING');
+        throw new Error('E34_CANONICAL_LOCALES_EN_MISSING');
     }
     
     const enContent = JSON.parse(fs.readFileSync(enPath, 'utf8'));
     if (!enContent || typeof enContent !== 'object') {
-        throw new Error('E34_CLIENT_LOCALES_EN_INVALID');
+        throw new Error('E34_CANONICAL_LOCALES_EN_INVALID');
     }
     
-    artifacts.push('client/locales/en.json');
-    observations.push('Client locales present via supported architecture');
+    artifacts.push('locales/en.json');
+    observations.push('Obsolete client/locales directory is absent and canonical locales/en.json verified');
     return true;
 }
 

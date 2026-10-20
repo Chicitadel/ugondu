@@ -59,11 +59,11 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 	if strings.Contains(targetRelPath, "..") {
 		return "", ErrPathTraversal
 	}
+	if strings.HasPrefix(targetRelPath, "\\\\") || strings.HasPrefix(targetRelPath, "//") {
+		return "", ErrUNCPath
+	}
 	if filepath.IsAbs(targetRelPath) || strings.HasPrefix(targetRelPath, "/") || strings.HasPrefix(targetRelPath, "\\") {
 		return "", ErrAbsolutePath
-	}
-	if strings.HasPrefix(targetRelPath, "\\\\") {
-		return "", ErrUNCPath
 	}
 	if strings.Contains(targetRelPath, ":") {
 		return "", ErrNTFSStream
