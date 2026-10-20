@@ -227,3 +227,14 @@ Status vocabulary is deliberate. `implemented` means code exists; `tested` means
 | Azure, GCP, OCI, IBM Cloud | `unavailable` | Provider adapters and capability qualification |
 
 Migration between targets may legitimately return `BLOCKED` when a required target capability is missing; Ugondu never emulates a missing capability silently.
+
+
+## COR release-evidence trust and qualification requirements
+
+Release evidence generation is fail-closed and does not synthesize passing JUnit, platform, health, trace, deployment, or AWS results. Before generating a release bundle, the qualification pipeline must populate a separate directory and set `UGONDU_EVIDENCE_INPUT_DIR` to that directory. Required test and runtime artifacts must originate from actual executed checks.
+
+The evidence signer requires `UGONDU_EVIDENCE_PRIVATE_KEY` from managed secret/key custody and `UGONDU_EVIDENCE_PUBLIC_KEY` as an independently approved trust anchor. Do not commit private keys or treat a public key copied from the same untrusted candidate tree as independent trust.
+
+The AWS policy-pack verification gate requires `UGONDU_PACK_PUBLIC_KEY` to be configured as a GitHub Actions variable from the independently approved UPLM signing authority. Missing or mismatched trust configuration must fail the gate. The AWS read-only probe requires an assumed-role identity and writes its result into the qualification evidence workspace; it is not a substitute for resource-creation, rollback, cleanup, restart-recovery, or full platform qualification.
+
+Platform/provider labels must reflect captured test results. A build artifact or hard-coded compatibility list is not sufficient to claim a platform is qualified.
