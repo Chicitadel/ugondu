@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 # Copy root configurations
 COPY package*.json ./
 COPY tsconfig*.json ./
+COPY .governance/ ./.governance/
 
 # Copy all workspaces
 COPY server/ ./server/
@@ -31,6 +32,7 @@ USER node
 
 # Copy necessary files from builder stage
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node .governance/ ./.governance/
 COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /usr/src/app/server ./server
 

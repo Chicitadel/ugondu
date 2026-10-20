@@ -152,7 +152,7 @@ function resolveWorkspaceRoot(customRoot?: string): string {
     }
   }
 
-  const startDirs = [process.cwd(), __dirname];
+  const startDirs = ['/usr/src/app', process.cwd(), __dirname];
   for (const startDir of startDirs) {
     let current = path.resolve(startDir);
     for (let depth = 0; depth < 10; depth++) {

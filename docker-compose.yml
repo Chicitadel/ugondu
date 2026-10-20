@@ -39,6 +39,7 @@ services:
       - ugondu-internal
     environment:
       - PORT=4002
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
       - IDENTITY_AUTHORITY_URL=${IDENTITY_AUTHORITY_URL:-https://identity.airroofers.eu/api/v1}
       - BILLING_AUTHORITY_URL=${BILLING_AUTHORITY_URL:-https://billing.airroofers.eu/api/v1}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
@@ -70,6 +71,7 @@ services:
       - "4001:4001"
     environment:
       - PORT=4001
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
       - BILLING_GATEWAY_URL=http://billing-gateway:4002/v1
       - UGONDU_RECIPE_PRIVATE_KEY=${UGONDU_RECIPE_PRIVATE_KEY:-}
       - UGONDU_KEY_REF=${UGONDU_KEY_REF:-}
@@ -105,6 +107,7 @@ services:
       - ./plugins:/usr/src/app/plugins:ro    # [en] Plugin directory mounted read-only
     environment:
       - PORT=4003
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
       - PLUGINS_DIR=/usr/src/app/plugins
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
@@ -132,6 +135,7 @@ services:
       - ugondu-internal
     environment:
       - PORT=4005
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4005/health/ready"]
@@ -158,6 +162,7 @@ services:
       - ugondu-internal
     environment:
       - PORT=4004
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4004/health/ready"]
