@@ -37,10 +37,18 @@ const { test, before, after } = require('node:test');
 
 const { signServiceIdentity, globalTrustRegistry } = require('../server/shared/dist/identity');
 
-const serviceTestKeys = generateKeyPairSync('ed25519');
-const serviceTestPrivateKey = serviceTestKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
-const serviceTestPublicKey = serviceTestKeys.publicKey.export({ type: 'spki', format: 'pem' }).toString();
-const SERVICE_TEST_KEY_ID = 'key_service_test_v1';
+let serviceTestPrivateKey = process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY;
+let serviceTestPublicKey = process.env.UGONDU_SERVICE_TEST_PUBKEY;
+const SERVICE_TEST_KEY_ID = process.env.UGONDU_SERVICE_TEST_KEY_ID || 'key_service_test_v1';
+
+if (!serviceTestPrivateKey || !serviceTestPublicKey) {
+  const serviceTestKeys = generateKeyPairSync('ed25519');
+  serviceTestPrivateKey = serviceTestKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+  serviceTestPublicKey = serviceTestKeys.publicKey.export({ type: 'spki', format: 'pem' }).toString();
+  process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY = serviceTestPrivateKey;
+  process.env.UGONDU_SERVICE_TEST_PUBKEY = serviceTestPublicKey;
+}
+
 globalTrustRegistry.registerKey({
   keyId: SERVICE_TEST_KEY_ID,
   algorithm: 'ed25519',

@@ -25,8 +25,8 @@ RUN npm ci --only=production --frozen-lockfile && \
 
 COPY --from=builder /app/dist ./dist
 
-# [en] Copy plugins directory so the manager can discover them at runtime
-COPY --chown=ugondu:ugondu plugins /app/plugins
+# [en] Ensure plugins directory exists for runtime discovery and volume mounts
+RUN mkdir -p /app/plugins && chown ugondu:ugondu /app/plugins
 
 USER ugondu
 ENV PORT=4003
