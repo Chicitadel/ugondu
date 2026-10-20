@@ -1,8 +1,31 @@
 {
   "schemaVersion": "1.0.0",
-  "evaluatedAt": "2026-10-20T00:03:19.418Z",
+  "evaluatedAt": "2026-10-20T00:16:57.185Z",
   "awsAccountId": "971671216490",
   "awsRegion": "eu-west-3",
+  "callerIdentity": {
+    "arn": "arn:aws:iam::971671216490:user/UgonduPhysicalTest",
+    "userId": "AIDA6EPA6EFVGHOJEOYHL"
+  },
+  "liveDiscoveredResources": {
+    "vpcCount": 1,
+    "primaryVpcId": "vpc-07509a515ac463e0b",
+    "primaryVpcCidr": "172.31.0.0/16",
+    "subnetCount": 3,
+    "subnetIds": [
+      "subnet-0f32c79fd1e5159ff",
+      "subnet-0c3345e1275511421",
+      "subnet-060e1bb62c3e2349d"
+    ],
+    "securityGroupCount": 1,
+    "primarySecurityGroupId": "sg-0c35ac0a9f960d6e4",
+    "rdsInstanceCount": 0
+  },
+  "leastPrivilegeBoundaries": {
+    "iamListUsersDenied": true,
+    "executionRoleAssumptionFailClosed": false,
+    "readOnlyScopePreserved": true
+  },
   "executionRoleArn": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
   "splitManagedPolicies": [
     "UgonduCOR_V9_Part1_NetworkAndVPC",
