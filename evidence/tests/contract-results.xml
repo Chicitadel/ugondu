@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="contract" tests="42" failures="0" errors="0" skipped="0" time="2.683" commit="16f4d4c99026a3acbfdd92ce9a0649579ac40eb7">
-  <testsuite name="tests/schema-validation.test.js" tests="4" failures="0" errors="0" skipped="0" time="0.340">
-    <testcase name="SCHEMA-001: Schema Discovery &amp; Syntax Validation" classname="test" time="0.013920" file="tests/schema-validation.test.js"/>
-    <testcase name="SCHEMA-002: ExecutionEnvelope Schema Invariants" classname="test" time="0.002907" file="tests/schema-validation.test.js"/>
-    <testcase name="SCHEMA-003: Closed-World Actions &amp; Total SHELL_EXEC Purge" classname="test" time="0.001402" file="tests/schema-validation.test.js"/>
-    <testcase name="SCHEMA-004: Canonical Error Taxonomy Verification" classname="test" time="0.003583" file="tests/schema-validation.test.js"/>
+<testsuites name="contract" tests="42" failures="0" errors="0" skipped="0" time="2.618" commit="50ca98b6dd3672ef473b425d74e66e60e163470d">
+  <testsuite name="tests/schema-validation.test.js" tests="4" failures="0" errors="0" skipped="0" time="0.453">
+    <testcase name="SCHEMA-001: Schema Discovery &amp; Syntax Validation" classname="test" time="0.015104" file="tests/schema-validation.test.js"/>
+    <testcase name="SCHEMA-002: ExecutionEnvelope Schema Invariants" classname="test" time="0.002455" file="tests/schema-validation.test.js"/>
+    <testcase name="SCHEMA-003: Closed-World Actions &amp; Total SHELL_EXEC Purge" classname="test" time="0.001033" file="tests/schema-validation.test.js"/>
+    <testcase name="SCHEMA-004: Canonical Error Taxonomy Verification" classname="test" time="0.003518" file="tests/schema-validation.test.js"/>
   </testsuite>
-  <testsuite name="tests/uplm-conformance.test.js" tests="17" failures="0" errors="0" skipped="0" time="1.199">
-    <testcase name="AWS COR V9 Pack: 5 split managed policies preserve all 46 statements and Sids 1:1" classname="test" time="0.012848" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-01: CLI bootstrap works without any model runtime and yields same planHash as agent invocation" classname="test" time="0.024102" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-02: Supported agent discovers bootstrap capability and gets identical schema" classname="test" time="0.000897" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-03: Invalid credentials distinguished from valid credentials lacking provider permission" classname="test" time="0.004132" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-04: Wrong account/tenant/project blocks mutation" classname="test" time="0.006422" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-05: Read-only authority yields complete inspection report with zero writes" classname="test" time="0.011523" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-06: Missing provider permission yields exact authority-gap plan; Ugondu never self-grants" classname="test" time="0.012420" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-07: Valid approved bootstrap path applies only approved scoped changes and verifies postconditions" classname="test" time="0.024639" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-08: Denied or expired approval blocks mutation" classname="test" time="0.025562" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-09: Restart after approval resumes the same durable operation ID and state history" classname="test" time="0.037862" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-10 &amp; AN-11: Equivalent CLI/API/Agent/UI requests use the same 4D authorization policy and cannot bypass guards" classname="test" time="0.004492" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-12: Uninstall preserves unknown, adopted, shared, and externally used resources" classname="test" time="0.011545" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-13: Secrets never appear in logs, operation state, reports, or tool results" classname="test" time="0.000608" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-14: Unsupported provider/surface combinations are explicitly disclosed" classname="test" time="0.000643" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-15: Growth Marketing and UPLM remain independently operable with zero runtime coupling" classname="test" time="0.000760" file="tests/uplm-conformance.test.js"/>
-    <testcase name="AN-16: Documentation includes offline/manual path and threat model for environments without agent integration" classname="test" time="0.000958" file="tests/uplm-conformance.test.js"/>
-    <testcase name="PARITY-01..14: All 7 GUI Views, 10 Wizard Stages, CLI Commands, Expert Mode Hash Invalidation, and Outcome Unknown Guards pass" classname="test" time="0.001330" file="tests/uplm-conformance.test.js"/>
+  <testsuite name="tests/uplm-conformance.test.js" tests="17" failures="0" errors="0" skipped="0" time="1.260">
+    <testcase name="AWS COR V9 Pack: 5 split managed policies preserve all 46 statements and Sids 1:1" classname="test" time="0.015445" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-01: CLI bootstrap works without any model runtime and yields same planHash as agent invocation" classname="test" time="0.027002" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-02: Supported agent discovers bootstrap capability and gets identical schema" classname="test" time="0.001632" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-03: Invalid credentials distinguished from valid credentials lacking provider permission" classname="test" time="0.005662" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-04: Wrong account/tenant/project blocks mutation" classname="test" time="0.007110" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-05: Read-only authority yields complete inspection report with zero writes" classname="test" time="0.008955" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-06: Missing provider permission yields exact authority-gap plan; Ugondu never self-grants" classname="test" time="0.010177" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-07: Valid approved bootstrap path applies only approved scoped changes and verifies postconditions" classname="test" time="0.025854" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-08: Denied or expired approval blocks mutation" classname="test" time="0.010085" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-09: Restart after approval resumes the same durable operation ID and state history" classname="test" time="0.024583" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-10 &amp; AN-11: Equivalent CLI/API/Agent/UI requests use the same 4D authorization policy and cannot bypass guards" classname="test" time="0.002393" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-12: Uninstall preserves unknown, adopted, shared, and externally used resources" classname="test" time="0.009928" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-13: Secrets never appear in logs, operation state, reports, or tool results" classname="test" time="0.000636" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-14: Unsupported provider/surface combinations are explicitly disclosed" classname="test" time="0.000719" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-15: Growth Marketing and UPLM remain independently operable with zero runtime coupling" classname="test" time="0.000841" file="tests/uplm-conformance.test.js"/>
+    <testcase name="AN-16: Documentation includes offline/manual path and threat model for environments without agent integration" classname="test" time="0.000882" file="tests/uplm-conformance.test.js"/>
+    <testcase name="PARITY-01..14: All 7 GUI Views, 10 Wizard Stages, CLI Commands, Expert Mode Hash Invalidation, and Outcome Unknown Guards pass" classname="test" time="0.000939" file="tests/uplm-conformance.test.js"/>
   </testsuite>
-  <testsuite name="tests/qualification/platform-evidence.test.js" tests="14" failures="0" errors="0" skipped="0" time="0.443">
-    <testcase name="no evidence => every target not-assessed, supported claims flagged" classname="test" time="0.022224" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="native evidence on the host target is tested, never auto-qualified" classname="test" time="0.007452" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="recorded runner identity comes from the process, not the caller" classname="test" time="0.002414" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="cross-built evidence can never be tested" classname="test" time="0.007747" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="recording a native claim from a non-matching runner is refused" classname="test" time="0.001964" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="forged native evidence from a foreign runner for another target is rejected (cross-run)" classname="test" time="0.005033" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="evidence whose target os/arch differs from the matrix target is rejected" classname="test" time="0.005422" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="stale commit or tree is rejected" classname="test" time="0.011233" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="tampered evidenceSha256 and post-hoc edited content are rejected" classname="test" time="0.013675" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="duplicate and unknown targets are rejected" classname="test" time="0.010068" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="native run with failures, missing JUnit digest or zero tests stays built" classname="test" time="0.014817" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="qualified is unreachable without an independent verifier, even with an attestation field" classname="test" time="0.006031" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="supported claim without evidence is flagged; experimental/unsupported are not" classname="test" time="0.001722" file="tests/qualification/platform-evidence.test.js"/>
-    <testcase name="governed matrix: every target has a truthful claim and non-host supported claims are absent" classname="test" time="0.001263" file="tests/qualification/platform-evidence.test.js"/>
+  <testsuite name="tests/qualification/platform-evidence.test.js" tests="14" failures="0" errors="0" skipped="0" time="0.480">
+    <testcase name="no evidence => every target not-assessed, supported claims flagged" classname="test" time="0.022323" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="native evidence on the host target is tested, never auto-qualified" classname="test" time="0.007966" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="recorded runner identity comes from the process, not the caller" classname="test" time="0.002971" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="cross-built evidence can never be tested" classname="test" time="0.006425" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="recording a native claim from a non-matching runner is refused" classname="test" time="0.001884" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="forged native evidence from a foreign runner for another target is rejected (cross-run)" classname="test" time="0.004539" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="evidence whose target os/arch differs from the matrix target is rejected" classname="test" time="0.004934" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="stale commit or tree is rejected" classname="test" time="0.007993" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="tampered evidenceSha256 and post-hoc edited content are rejected" classname="test" time="0.011011" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="duplicate and unknown targets are rejected" classname="test" time="0.009303" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="native run with failures, missing JUnit digest or zero tests stays built" classname="test" time="0.015297" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="qualified is unreachable without an independent verifier, even with an attestation field" classname="test" time="0.006169" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="supported claim without evidence is flagged; experimental/unsupported are not" classname="test" time="0.001962" file="tests/qualification/platform-evidence.test.js"/>
+    <testcase name="governed matrix: every target has a truthful claim and non-host supported claims are absent" classname="test" time="0.001413" file="tests/qualification/platform-evidence.test.js"/>
   </testsuite>
-  <testsuite name="tests/qualification/aws-target-boundary.test.js" tests="7" failures="0" errors="0" skipped="0" time="0.701">
-    <testcase name="AWS-TGT-001: Valid target configuration loads and resolves successfully" classname="test" time="0.020099" file="tests/qualification/aws-target-boundary.test.js"/>
-    <testcase name="AWS-TGT-002: Configuration parser rejects invalid non-12-digit accountId" classname="test" time="0.008889" file="tests/qualification/aws-target-boundary.test.js"/>
-    <testcase name="AWS-TGT-003: Configuration parser rejects invalid region format" classname="test" time="0.004927" file="tests/qualification/aws-target-boundary.test.js"/>
-    <testcase name="AWS-TGT-004: Target resolver throws when non-existent targetId is requested" classname="test" time="0.001308" file="tests/qualification/aws-target-boundary.test.js"/>
-    <testcase name="AWS-TGT-005: Target resolver throws when multiple targets exist and no selector provided" classname="test" time="0.003703" file="tests/qualification/aws-target-boundary.test.js"/>
-    <testcase name="AWS-TGT-006: Stale evaluatedAt (>24 hours) is rejected by evidence verifier" classname="test" time="0.019768" file="tests/qualification/aws-target-boundary.test.js"/>
-    <testcase name="AWS-TGT-007: Governance assertion: zero 12-digit account literals in scripts/" classname="test" time="0.078106" file="tests/qualification/aws-target-boundary.test.js"/>
+  <testsuite name="tests/qualification/aws-target-boundary.test.js" tests="7" failures="0" errors="0" skipped="0" time="0.425">
+    <testcase name="AWS-TGT-001: Valid target configuration loads and resolves successfully" classname="test" time="0.013450" file="tests/qualification/aws-target-boundary.test.js"/>
+    <testcase name="AWS-TGT-002: Configuration parser rejects invalid non-12-digit accountId" classname="test" time="0.004811" file="tests/qualification/aws-target-boundary.test.js"/>
+    <testcase name="AWS-TGT-003: Configuration parser rejects invalid region format" classname="test" time="0.004320" file="tests/qualification/aws-target-boundary.test.js"/>
+    <testcase name="AWS-TGT-004: Target resolver throws when non-existent targetId is requested" classname="test" time="0.001053" file="tests/qualification/aws-target-boundary.test.js"/>
+    <testcase name="AWS-TGT-005: Target resolver throws when multiple targets exist and no selector provided" classname="test" time="0.004621" file="tests/qualification/aws-target-boundary.test.js"/>
+    <testcase name="AWS-TGT-006: Stale evaluatedAt (>24 hours) is rejected by evidence verifier" classname="test" time="0.013814" file="tests/qualification/aws-target-boundary.test.js"/>
+    <testcase name="AWS-TGT-007: Governance assertion: zero 12-digit account literals in scripts/" classname="test" time="0.052783" file="tests/qualification/aws-target-boundary.test.js"/>
   </testsuite>
 </testsuites>

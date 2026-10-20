@@ -1,9 +1,9 @@
 {
   "schemaVersion": "1.0.0",
-  "evaluatedAt": "2026-10-20T19:19:38.695Z",
-  "executionId": "exec-qual-1792523911037-3f44d572",
-  "commitHash": "16f4d4c99026a3acbfdd92ce9a0649579ac40eb7",
-  "treeHash": "f65e864f88d048d5115b30182726e721d7b9d2f0",
+  "evaluatedAt": "2026-10-20T19:30:36.907Z",
+  "executionId": "exec-qual-1792524571571-724432c4",
+  "commitHash": "50ca98b6dd3672ef473b425d74e66e60e163470d",
+  "treeHash": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3",
   "service": "repository-adapter",
   "endpoint": "/health/ready",
   "httpStatus": 200,
@@ -28,7 +28,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.874Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_GITHUB_TOKEN"
@@ -47,7 +47,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.874Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_GITLAB_TOKEN"
@@ -66,7 +66,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.874Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_BITBUCKET_TOKEN"
@@ -85,7 +85,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.874Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_AZURE_DEVOPS_TOKEN"
@@ -104,7 +104,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.874Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "AWS_ROLE_ARN"
@@ -113,7 +113,7 @@
         {
           "providerId": "gitea",
           "status": "healthy",
-          "latencyMs": 0,
+          "latencyMs": 1,
           "capabilities": {
             "detect": "tested",
             "authenticate": "tested",
@@ -123,7 +123,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.875Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_GITEA_TOKEN"
@@ -142,7 +142,7 @@
             "webhook": "implemented",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.875Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_GOGS_TOKEN"
@@ -161,7 +161,7 @@
             "webhook": "unavailable",
             "deployment": "implemented"
           },
-          "checkedAt": "2026-10-20T19:19:38.676Z",
+          "checkedAt": "2026-10-20T19:30:36.875Z",
           "details": {
             "ssrfPolicyEnforced": true,
             "credentialKey": "UGONDU_GIT_TOKEN"
@@ -169,8 +169,8 @@
         }
       ]
     },
-    "timestamp": "2026-10-20T19:19:38.677Z",
-    "correlationId": "27b62d3cad6bbf1f6a540fb38049da78"
+    "timestamp": "2026-10-20T19:30:36.877Z",
+    "correlationId": "aee1f9d5a5a7017f44cfecd4d3fc237e"
   },
   "livenessHttpStatus": 200,
   "metadataHttpStatus": 200,

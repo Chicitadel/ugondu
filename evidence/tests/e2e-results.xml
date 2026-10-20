@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="e2e" tests="10" failures="0" errors="0" skipped="0" time="0.783" commit="16f4d4c99026a3acbfdd92ce9a0649579ac40eb7">
-  <testsuite name="tests/deployment-lifecycle.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.783">
-    <testcase name="Scenario 1: First deployment — write release and set live symlink" classname="test" time="0.007945" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 2: Repeated idempotent deployment — no error, symlink correct" classname="test" time="0.004324" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 3: Interrupted deployment — live symlink not updated on failure" classname="test" time="0.002422" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 4: Resume after interrupted deployment — completes successfully" classname="test" time="0.005227" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 5: Rollback — revert current symlink to v1" classname="test" time="0.004278" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 6: DR STATE_CORRUPTION — verifiedHealthy true, rpoSeconds 0" classname="test" time="0.047511" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 7: Cross-tenant auth denial — token for wrong audience rejected" classname="test" time="0.009395" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 8: Forged language pack — artifactDigest mismatch causes invalid === false" classname="test" time="0.007971" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 9: Revoked key — globalTrustRegistry.validateKeyStatus throws for key_recipe_v1" classname="test" time="0.002347" file="tests/deployment-lifecycle.test.js"/>
-    <testcase name="Scenario 10: Audit trail — atomic JSON write (tmp+rename) then read-back matches" classname="test" time="0.010178" file="tests/deployment-lifecycle.test.js"/>
+<testsuites name="e2e" tests="10" failures="0" errors="0" skipped="0" time="0.712" commit="50ca98b6dd3672ef473b425d74e66e60e163470d">
+  <testsuite name="tests/deployment-lifecycle.test.js" tests="10" failures="0" errors="0" skipped="0" time="0.712">
+    <testcase name="Scenario 1: First deployment — write release and set live symlink" classname="test" time="0.006379" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 2: Repeated idempotent deployment — no error, symlink correct" classname="test" time="0.003821" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 3: Interrupted deployment — live symlink not updated on failure" classname="test" time="0.002189" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 4: Resume after interrupted deployment — completes successfully" classname="test" time="0.004592" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 5: Rollback — revert current symlink to v1" classname="test" time="0.004554" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 6: DR STATE_CORRUPTION — verifiedHealthy true, rpoSeconds 0" classname="test" time="0.009745" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 7: Cross-tenant auth denial — token for wrong audience rejected" classname="test" time="0.007171" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 8: Forged language pack — artifactDigest mismatch causes invalid === false" classname="test" time="0.001855" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 9: Revoked key — globalTrustRegistry.validateKeyStatus throws for key_recipe_v1" classname="test" time="0.001435" file="tests/deployment-lifecycle.test.js"/>
+    <testcase name="Scenario 10: Audit trail — atomic JSON write (tmp+rename) then read-back matches" classname="test" time="0.004675" file="tests/deployment-lifecycle.test.js"/>
   </testsuite>
 </testsuites>
