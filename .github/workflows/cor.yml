@@ -162,6 +162,11 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
           echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
           echo "Successfully hopped into Tagged Execution Session."
+      
+      - name: Run fail-closed AWS read-only conformance probes
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: node scripts/aws-conformance/run-aws-conformance.mjs
 
       - name: Run physical certification
         env:
