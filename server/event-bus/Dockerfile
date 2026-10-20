@@ -45,6 +45,8 @@ FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb836
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
+RUN mkdir -p /usr/src/app/server/data && chown -R node:node /usr/src/app/server/data
+
 USER node
 
 COPY --chown=node:node package*.json ./
@@ -54,7 +56,7 @@ COPY --chown=node:node --from=builder /usr/src/app/server ./server
 ENV PORT=4004
 EXPOSE 4004
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:4004/health/ready || exit 1
+HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:4004/health/ready || exit 1
 
 CMD ["npm", "run", "start:bus"]

@@ -54,7 +54,7 @@ COPY --chown=node:node --from=builder /usr/src/app/server ./server
 ENV PORT=4005
 EXPOSE 4005
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:4005/health/ready || exit 1
+HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:4005/health/ready || exit 1
 
 CMD ["npm", "run", "start:repo"]

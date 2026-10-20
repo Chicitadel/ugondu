@@ -43,10 +43,11 @@ services:
       - BILLING_AUTHORITY_URL=${BILLING_AUTHORITY_URL:-https://billing.airroofers.eu/api/v1}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4002/health/ready"]
-      interval: 30s
-      timeout: 5s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4002/health/ready"]
+      interval: 5s
+      timeout: 3s
       retries: 3
+      start_period: 2s
     logging:
       driver: "json-file"
       options:
@@ -78,10 +79,11 @@ services:
       billing-gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4001/health/ready"]
-      interval: 30s
-      timeout: 5s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4001/health/ready"]
+      interval: 5s
+      timeout: 3s
       retries: 3
+      start_period: 2s
     logging:
       driver: "json-file"
       options:
@@ -106,10 +108,11 @@ services:
       - PLUGINS_DIR=/usr/src/app/plugins
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4003/health/ready"]
-      interval: 30s
-      timeout: 5s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4003/health/ready"]
+      interval: 5s
+      timeout: 3s
       retries: 3
+      start_period: 2s
     logging:
       driver: "json-file"
       options:
@@ -131,10 +134,11 @@ services:
       - PORT=4005
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4005/health/ready"]
-      interval: 30s
-      timeout: 5s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4005/health/ready"]
+      interval: 5s
+      timeout: 3s
       retries: 3
+      start_period: 2s
     logging:
       driver: "json-file"
       options:
@@ -156,10 +160,11 @@ services:
       - PORT=4004
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4004/health/ready"]
-      interval: 30s
-      timeout: 5s
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4004/health/ready"]
+      interval: 5s
+      timeout: 3s
       retries: 3
+      start_period: 2s
     logging:
       driver: "json-file"
       options:

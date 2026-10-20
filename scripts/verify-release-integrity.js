@@ -99,7 +99,9 @@ const composePath = path.join(ROOT, 'docker-compose.yml');
 if (fs.existsSync(composePath)) {
   const composeContent = fs.readFileSync(composePath, 'utf8');
   for (const port of ['4001', '4002', '4003', '4004', '4005']) {
-    if (!composeContent.includes(`http://localhost:${port}/health/ready`)) {
+    const hasLocalhost = composeContent.includes(`http://localhost:${port}/health/ready`);
+    const hasLoopback = composeContent.includes(`http://127.0.0.1:${port}/health/ready`);
+    if (!hasLocalhost && !hasLoopback) {
       fail(`docker-compose.yml missing /health/ready probe for port ${port}`);
     }
   }
