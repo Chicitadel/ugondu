@@ -601,7 +601,7 @@ const PORT = process.env.PORT || 4002;
 export let serverInstance: any = null;
 
 if (require.main === module) {
-    serverInstance = app.listen(PORT, () => {
+    serverInstance = app.listen(Number(PORT), '0.0.0.0', () => {
         Logger.info(__t('listening_port', __t('billing_gateway'), PORT));
     });
 }

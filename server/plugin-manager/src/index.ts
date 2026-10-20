@@ -539,7 +539,7 @@ app.post('/v1/plugins/:pluginName/execute', requireServiceIdentity(SERVICE_NAME)
 
 if (require.main === module) {
     const PORT = process.env.PORT || 4003;
-    app.listen(PORT, () => {
+    app.listen(Number(PORT), '0.0.0.0', () => {
         Logger.info(__t('listening_port', __t('plugin_manager_sandbox'), PORT));
     });
 }

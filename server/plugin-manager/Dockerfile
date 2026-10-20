@@ -57,7 +57,7 @@ ENV PORT=4003
 ENV PLUGINS_DIR=/usr/src/app/plugins
 EXPOSE 4003
 
-HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 \
+HEALTHCHECK --interval=5s --timeout=3s --start-period=15s --retries=5 \
     CMD wget -qO- http://127.0.0.1:4003/health/ready || exit 1
 
 CMD ["npm", "run", "start:plugins"]

@@ -494,7 +494,7 @@ const PORT = process.env.PORT || 4004;
 export let serverInstance: any = null;
 
 if (require.main === module) {
-    serverInstance = app.listen(PORT, () => {
+    serverInstance = app.listen(Number(PORT), '0.0.0.0', () => {
         Logger.info(__t('listening', __t('ugondu_event_bus'), PORT));
     });
 }

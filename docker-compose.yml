@@ -46,8 +46,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4002/health/ready"]
       interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 2s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -82,8 +82,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4001/health/ready"]
       interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 2s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -111,8 +111,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4003/health/ready"]
       interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 2s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -137,8 +137,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4005/health/ready"]
       interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 2s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -163,8 +163,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4004/health/ready"]
       interval: 5s
       timeout: 3s
-      retries: 3
-      start_period: 2s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:

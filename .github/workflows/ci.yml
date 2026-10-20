@@ -397,7 +397,11 @@ jobs:
             return 1
           }
 
-          docker compose up -d
+          if ! docker compose up -d; then
+            echo "=== DOCKER COMPOSE LOGS ON FAILURE ==="
+            docker compose logs
+            exit 1
+          fi
           wait_http "http://127.0.0.1:4001/health/ready" 60
           for svc in billing-gateway engine-core plugin-manager event-bus repository-adapter; do
             docker compose exec -T "$svc" sh -c 'wget -qO- http://127.0.0.1:${PORT}/health/ready >/dev/null'

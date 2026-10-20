@@ -554,7 +554,7 @@ export const app = createRepositoryAdapterApp(defaultRegistry);
 
 if (require.main === module) {
     const PORT = process.env['PORT'] || 4005;
-    app.listen(PORT, () => {
+    app.listen(Number(PORT), '0.0.0.0', () => {
         Logger.info(__t('listening_port', __t('repository_adapter'), PORT));
         Logger.info(__t('repo_supported'));
     });

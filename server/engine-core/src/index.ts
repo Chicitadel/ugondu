@@ -261,7 +261,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 // ─── Server ──────────────────────────────────────────────────────────────────
 const PORT = process.env['PORT'] ?? 4001;
 if (process.env['UGONDU_DISABLE_AUTO_LISTEN'] !== 'true') {
-  app.listen(PORT, () => {
+  app.listen(Number(PORT), '0.0.0.0', () => {
     Logger.info(__t('listening', __t('ugondu_engine_core'), PORT));
   });
 }
