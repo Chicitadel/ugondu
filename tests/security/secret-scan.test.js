@@ -94,7 +94,8 @@ test('SEC-SCAN-003: Seeded secret in deleted git commit history is detected and 
 
     // Commit 1: add secret
     const secretFile = path.join(tmpDir, 'token.txt');
-    fs.writeFileSync(secretFile, 'ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n');
+    const token = ['ghp_', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'].join('');
+    fs.writeFileSync(secretFile, `${token}\n`);
     execFileSync('git', ['add', 'token.txt'], { cwd: tmpDir });
     execFileSync('git', ['commit', '-m', 'Add token'], { cwd: tmpDir });
 
