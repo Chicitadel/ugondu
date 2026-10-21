@@ -4,7 +4,7 @@
 - **Repository:** [Chicitadel/ugondu](https://github.com/Chicitadel/ugondu)
 - **Branch:** `cor/resume-checkpoint-hardening-2026-10-21`
 - **Baseline:** `phase4/production-hardening`, candidate before this remediation `be67628bd26abf18886e958e8467dbb8492d32bc`
-- **Audit candidate after remediation commits:** `9fe83e58ce7d97e16f78221b8b56e99c023ff8b1`
+- **Audit candidate after all branch commits:** `a623a458f5fa371bac26c16977da1787199404a5`
 - **Decision:** 🔴 **UNIVERSAL COR NOT CERTIFIED**
 - **Execution boundary:** source and test changes below are committed on this branch. They are not considered verified until the candidate's required CI jobs pass. No AWS physical deployment was attempted from this audit.
 
