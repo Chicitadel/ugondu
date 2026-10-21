@@ -3,7 +3,7 @@
  * Module         : Platform Operations
  * File           : RUNBOOKS.md
  * Version        : 1.0.0
- * Author         : Antigravity AI
+ * Author         : Ujomor Systems Engineering Authority
  * Organization   : Ujomor
  * Created Date   : 2026-07-17
  * Last Modified  : 2026-07-17

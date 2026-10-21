@@ -3,7 +3,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Release / Secret Detection & History Security Scanner
  * File           : secret-scan.mjs
- * Version        : 2.1.0
+ * Version        : 2.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
@@ -54,24 +54,55 @@ const SECRET_PATTERNS = [
 ];
 
 function sha256File(file) {
-  if (!fs.existsSync(file)) return null;
+  if (typeof file !== 'string' || !file || !fs.existsSync(file)) return null;
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-function loadAllowlist() {
-  if (!fs.existsSync(ALLOWLIST_PATH)) return [];
+export function loadAllowlist(customPath = ALLOWLIST_PATH) {
+  const filePath = customPath || ALLOWLIST_PATH;
+  if (!filePath || typeof filePath !== 'string' || !fs.existsSync(filePath)) return [];
+
+  let rawContent;
   try {
-    const raw = JSON.parse(fs.readFileSync(ALLOWLIST_PATH, 'utf8'));
-    const entries = Array.isArray(raw.entries) ? raw.entries : [];
-    const now = Date.now();
-    return entries.filter((e) => {
-      if (!e.expiryDate) return false;
-      const expiry = Date.parse(e.expiryDate);
-      return !Number.isNaN(expiry) && expiry > now;
-    });
-  } catch {
-    return [];
+    rawContent = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to read secret allowlist file at ${filePath}: ${err.message}`);
   }
+
+  let raw;
+  try {
+    raw = JSON.parse(rawContent);
+  } catch (err) {
+    throw new Error(`Malformed JSON in secret allowlist at ${filePath}: ${err.message}`);
+  }
+
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error(`Secret allowlist at ${filePath} must be a JSON object.`);
+  }
+
+  if (!Array.isArray(raw.entries)) {
+    throw new Error(`Secret allowlist at ${filePath} missing required 'entries' array.`);
+  }
+
+  for (let idx = 0; idx < raw.entries.length; idx++) {
+    const entry = raw.entries[idx];
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error(`Secret allowlist entry at index ${idx} is not an object.`);
+    }
+    if (!entry.expiryDate || typeof entry.expiryDate !== 'string') {
+      throw new Error(`Secret allowlist entry at index ${idx} missing required 'expiryDate' string.`);
+    }
+    const expiry = Date.parse(entry.expiryDate);
+    if (Number.isNaN(expiry)) {
+      throw new Error(`Secret allowlist entry at index ${idx} has invalid 'expiryDate': ${entry.expiryDate}`);
+    }
+  }
+
+  const now = Date.now();
+  return raw.entries.filter((e) => {
+    const expiry = Date.parse(e.expiryDate);
+    return expiry > now;
+  });
 }
 
 function isAllowlisted(finding, activeAllowlist) {
@@ -89,28 +120,31 @@ function isAllowlisted(finding, activeAllowlist) {
 /**
  * Native Git history secret scanner that streams every commit and tree state.
  */
-async function scanGitTreeAndHistory(targetDir) {
+async function scanGitTreeAndHistory(targetDir, allowlistPath) {
   const findings = [];
-  const activeAllowlist = loadAllowlist();
+  const candidateAllowlist = allowlistPath || path.join(targetDir, 'config/security/secret-allowlist.json');
+  const effectiveAllowlistPath = fs.existsSync(candidateAllowlist)
+    ? candidateAllowlist
+    : (targetDir === ROOT ? ALLOWLIST_PATH : candidateAllowlist);
+  const activeAllowlist = loadAllowlist(effectiveAllowlistPath);
 
   // 1. Scan working tree tracked files
   let trackedFiles = [];
   try {
     const trackedOutput = execFileSync('git', ['ls-files'], { cwd: targetDir, encoding: 'utf8' });
     trackedFiles = trackedOutput.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  } catch {
-    trackedFiles = [];
+  } catch (err) {
+    throw new Error(`Failed to enumerate tracked files via 'git ls-files' in ${targetDir}: ${err.message}`);
   }
 
   for (const rel of trackedFiles) {
     if (rel.includes('secret-allowlist.json') || rel.includes('gitleaks.toml')) continue;
     const full = path.join(targetDir, rel);
-    if (!fs.existsSync(full)) continue;
     let content;
     try {
       content = fs.readFileSync(full, 'utf8');
-    } catch {
-      continue;
+    } catch (err) {
+      throw new Error(`Failed to read tracked file '${rel}' in ${targetDir}: ${err.message}`);
     }
 
     const lines = content.split(/\r?\n/);
@@ -201,13 +235,25 @@ async function scanGitTreeAndHistory(targetDir) {
       reject(new Error(`Failed to spawn git log: ${err.message}`));
     });
 
-    proc.on('close', (code) => {
+    rl.on('error', (err) => {
+      reject(new Error(`Error reading git log stream: ${err.message}`));
+    });
+
+    proc.stdout.on('error', (err) => {
+      reject(new Error(`Error on git log stdout stream: ${err.message}`));
+    });
+
+    proc.on('close', (code, signal) => {
+      if (signal) {
+        reject(new Error(`git log terminated prematurely by signal ${signal}: ${stderr.trim()}`));
+        return;
+      }
       if (code !== 0) {
         if (stderr.includes('does not have any commits') || stderr.includes('fatal: your current branch')) {
           resolve();
           return;
         }
-        reject(new Error(`git log failed with exit code ${code}: ${stderr}`));
+        reject(new Error(`git log failed with exit code ${code}: ${stderr.trim()}`));
         return;
       }
       resolve();
@@ -229,7 +275,7 @@ function buildSarifDocument(findings) {
         tool: {
           driver: {
             name: 'UgonduSecretScanner',
-            version: '2.1.0',
+            version: '2.2.0',
             informationUri: 'https://ugondu.airroofers.com',
             rules: SECRET_PATTERNS.map((p) => ({
               id: p.id,
@@ -260,11 +306,11 @@ function buildSarifDocument(findings) {
 /**
  * Executes secret scanning over repository tree and history.
  */
-export async function executeSecretScan({ targetDir = ROOT, outDir } = {}) {
+export async function executeSecretScan({ targetDir = ROOT, allowlistPath, outDir } = {}) {
   const start = Date.now();
   console.log(`[en] Executing Comprehensive Secret Scan across Working Tree and Full Git History...`);
 
-  const { findings, commitCount } = await scanGitTreeAndHistory(targetDir);
+  const { findings, commitCount } = await scanGitTreeAndHistory(targetDir, allowlistPath);
   const sarif = buildSarifDocument(findings);
 
   const durationSec = ((Date.now() - start) / 1000).toFixed(3);
@@ -273,9 +319,9 @@ export async function executeSecretScan({ targetDir = ROOT, outDir } = {}) {
   const metadata = {
     schemaVersion: '1.0.0',
     scanner: 'UgonduSecretScanner',
-    scannerVersion: '2.1.0',
+    scannerVersion: '2.2.0',
     binarySha256: sha256File(__filename),
-    configSha256: sha256File(CONFIG_PATH),
+    configSha256: sha256File(allowlistPath) || sha256File(path.join(targetDir, 'config/security/gitleaks.toml')) || sha256File(CONFIG_PATH),
     scannedCommits: commitCount,
     findingsCount: findings.length,
     durationSec,

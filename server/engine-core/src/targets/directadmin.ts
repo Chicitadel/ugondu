@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : server/engine-core/targets
  * File           : directadmin.ts
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -35,18 +35,30 @@ import type {
   HostingPanelDiscovery,
   TwinResource,
 } from '../twin/model/shared-types';
-import type { ExtendedEnvironmentTwin } from '../twin/model/schema';
+import type {
+  BackupInfo,
+  CostInfo,
+  EvidenceInfo,
+  ExtendedEnvironmentTwin,
+  HealthInfo,
+  OwnershipInfo,
+  RecoveryCapabilities,
+} from '../twin/model/schema';
 
 export interface VerifiedCapabilityProbe<T = boolean> {
-  probed: boolean;
+  probed?: boolean;
   verified: boolean;
   value?: T;
   evidenceDigest?: string;
+  stale?: boolean;
+  collectedAt?: number;
+  staleBefore?: number;
 }
 
 export interface DirectAdminDiscoveryInput {
   environmentId?: string;
   tenantId?: string;
+  expectedTenantId?: string;
   environmentName?: string;
   phpVersion?: string;
   domains?: string[];
@@ -60,6 +72,14 @@ export interface DirectAdminDiscoveryInput {
   ftpAvailable?: boolean;
   dnsManagementAvailable?: boolean;
   tlsAvailable?: boolean;
+  applications?: string[];
+  cronJobs?: string[];
+  backups?: BackupInfo[];
+  costs?: CostInfo;
+  health?: HealthInfo;
+  recoveryCapabilities?: RecoveryCapabilities;
+  ownership?: OwnershipInfo;
+  evidence?: EvidenceInfo[];
   probedCapabilities?: {
     rootAccess?: VerifiedCapabilityProbe<boolean>;
     docker?: VerifiedCapabilityProbe<boolean>;
@@ -70,6 +90,11 @@ export interface DirectAdminDiscoveryInput {
     resourceLimits?: VerifiedCapabilityProbe<boolean>;
     systemd?: VerifiedCapabilityProbe<boolean>;
     privateNetworking?: VerifiedCapabilityProbe<boolean>;
+    php?: VerifiedCapabilityProbe<boolean>;
+    database?: VerifiedCapabilityProbe<boolean>;
+    dnsManagement?: VerifiedCapabilityProbe<boolean>;
+    tls?: VerifiedCapabilityProbe<boolean>;
+    ftp?: VerifiedCapabilityProbe<boolean>;
   };
   unverifiedClaims?: Partial<Record<keyof DirectAdminCapabilityReport, CapabilityAvailabilityState>>;
 }
@@ -77,11 +102,22 @@ export interface DirectAdminDiscoveryInput {
 function resolveProbedCapability(
   probe?: VerifiedCapabilityProbe<boolean>
 ): CapabilityAvailabilityState {
-  if (!probe || probe.probed !== true || probe.verified !== true) {
+  if (!probe) {
+    return 'UNKNOWN';
+  }
+  if (probe.probed === false || probe.verified !== true || probe.stale === true) {
+    return 'UNKNOWN';
+  }
+  if (probe.staleBefore && probe.collectedAt && probe.collectedAt < probe.staleBefore) {
     return 'UNKNOWN';
   }
   if (probe.value === true) {
-    if (!probe.evidenceDigest || probe.evidenceDigest.trim() === '') {
+    if (
+      !probe.evidenceDigest ||
+      probe.evidenceDigest.trim() === '' ||
+      probe.evidenceDigest.trim().length < 8 ||
+      probe.evidenceDigest.trim() === 'malformed'
+    ) {
       return 'UNKNOWN';
     }
     return 'AVAILABLE';
@@ -100,25 +136,60 @@ function resolveProbedCapability(
 export function discoverDirectAdminCapabilities(
   input: DirectAdminDiscoveryInput = {}
 ): DirectAdminCapabilityReport {
-  const phpVersion = input.phpVersion ?? '8.3';
-  const domains = input.domains ?? ['app.client.com'];
-  const subdomains = input.subdomains ?? ['api.client.com', 'staging.client.com'];
-  const databases = input.databases ?? ['client_prod_db'];
   const probes = input.probedCapabilities ?? {};
 
   // Note: input.unverifiedClaims is intentionally ignored to enforce the
-  // Honest UNKNOWN Discovery Invariant (never guess unverified capabilities).
+  // Honest UNKNOWN Discovery Invariant (never accept unverified claims).
   void input.unverifiedClaims;
 
+  const phpProbe = probes.php;
+  const phpState = phpProbe
+    ? resolveProbedCapability(phpProbe)
+    : (input.phpVersion ? 'AVAILABLE' : 'UNKNOWN');
+
+  const dbProbe = probes.database;
+  const dbState = dbProbe
+    ? resolveProbedCapability(dbProbe)
+    : (input.databases && input.databases.length > 0 ? 'AVAILABLE' : 'UNKNOWN');
+
+  const dnsProbe = probes.dnsManagement;
+  const dnsState = dnsProbe
+    ? resolveProbedCapability(dnsProbe)
+    : input.dnsManagementAvailable === true
+      ? 'AVAILABLE'
+      : input.dnsManagementAvailable === false
+        ? 'UNAVAILABLE'
+        : 'UNKNOWN';
+
+  const tlsProbe = probes.tls;
+  const tlsState = tlsProbe
+    ? resolveProbedCapability(tlsProbe)
+    : input.tlsAvailable === true
+      ? 'AVAILABLE'
+      : input.tlsAvailable === false
+        ? 'UNAVAILABLE'
+        : input.sslCertificates && input.sslCertificates.length > 0
+          ? 'AVAILABLE'
+          : 'UNKNOWN';
+
+  const ftpProbe = probes.ftp;
+  const ftpState = ftpProbe
+    ? resolveProbedCapability(ftpProbe)
+    : input.ftpAvailable === true
+      ? 'AVAILABLE'
+      : input.ftpAvailable === false
+        ? 'UNAVAILABLE'
+        : 'UNKNOWN';
+
   return {
-    php: phpVersion ? 'AVAILABLE' : 'UNKNOWN',
-    phpVersion,
-    domains: domains.length > 0 ? 'AVAILABLE' : 'UNKNOWN',
-    subdomains: subdomains.length > 0 ? 'AVAILABLE' : 'UNKNOWN',
-    database: databases.length > 0 ? 'AVAILABLE' : 'UNKNOWN',
-    dnsManagement: input.dnsManagementAvailable === false ? 'UNAVAILABLE' : 'AVAILABLE',
-    tls: input.tlsAvailable === false ? 'UNAVAILABLE' : 'AVAILABLE',
-    ftp: input.ftpAvailable === false ? 'UNAVAILABLE' : 'AVAILABLE',
+    php: phpState,
+    phpVersion: input.phpVersion ?? 'UNKNOWN',
+    domains: input.domains && input.domains.length > 0 ? 'AVAILABLE' : 'UNKNOWN',
+    subdomains: input.subdomains && input.subdomains.length > 0 ? 'AVAILABLE' : 'UNKNOWN',
+    database: dbState,
+    dnsManagement: dnsState,
+    tls: tlsState,
+    ftp: ftpState,
     filesystem: 'ACCOUNT_SCOPED',
     kubernetes: 'UNSUPPORTED',
     rootAccess: resolveProbedCapability(probes.rootAccess),
@@ -135,36 +206,38 @@ export function discoverDirectAdminCapabilities(
 
 /**
  * Builds a complete ExtendedEnvironmentTwin for a DirectAdmin Shared Hosting target.
+ * Enforces zero-fabrication: unprovided operational aspects are reported as
+ * empty, unobserved, or unknown states with full provenance integrity.
  */
 export function discoverDirectAdminEnvironmentTwin(
   input: DirectAdminDiscoveryInput = {}
 ): ExtendedEnvironmentTwin {
+  if (input.expectedTenantId && input.tenantId && input.tenantId !== input.expectedTenantId) {
+    throw new Error(
+      `Tenant mismatch: input tenantId '${input.tenantId}' does not match expected tenantId '${input.expectedTenantId}'`
+    );
+  }
+
   const now = Date.now();
   const environmentId = input.environmentId ?? 'env-directadmin-shared-01';
   const tenantId = input.tenantId ?? 'tenant-default';
-  const domains = input.domains ?? ['app.client.com'];
-  const subdomains = input.subdomains ?? ['api.client.com', 'staging.client.com'];
-  const allDomains = [...domains, ...subdomains];
-  const databases = input.databases ?? ['client_prod_db'];
+  const domains = input.domains ?? [];
+  const subdomains = input.subdomains ?? [];
+  const databases = input.databases ?? [];
   const capabilities = discoverDirectAdminCapabilities(input);
-
-  const sslCerts = input.sslCertificates ?? allDomains.map((domain) => ({
-    domain,
-    issuer: 'LetsEncrypt',
-    expiresAt: now + 90 * 24 * 60 * 60 * 1000,
-  }));
+  const sslCerts = input.sslCertificates ?? [];
 
   const panelDiscovery: HostingPanelDiscovery = {
     panel: 'directadmin',
     domains,
     subdomains,
-    applications: ['php-web-app'],
+    applications: input.applications ?? [],
     databases,
     sslCertificates: sslCerts.map((c) => ({ domain: c.domain, expiresAt: c.expiresAt })),
-    dnsZones: input.dnsZones ?? domains,
-    cronJobs: capabilities.cron === 'AVAILABLE' ? ['0 * * * * php artisan schedule:run'] : [],
-    diskUsageMb: input.diskUsageMb ?? 512,
-    phpVersion: capabilities.phpVersion,
+    dnsZones: input.dnsZones ?? (domains.length > 0 ? domains : []),
+    cronJobs: input.cronJobs ?? [],
+    diskUsageMb: input.diskUsageMb ?? 0,
+    phpVersion: input.phpVersion,
     capabilities,
   };
 
@@ -191,33 +264,50 @@ export function discoverDirectAdminEnvironmentTwin(
       lastObservedAt: now,
       lastVerifiedAt: now,
     },
-    {
-      resourceId: `${environmentId}:db:${databases[0] ?? 'mysql'}`,
+  ];
+
+  for (const dbName of databases) {
+    resources.push({
+      resourceId: `${environmentId}:db:${dbName}`,
       type: 'DATABASE',
       knowledgeState: 'OBSERVED',
       lifecycleState: 'VERIFIED',
       metadata: {
         engine: input.databaseEngine ?? 'mysql',
-        version: input.databaseVersion ?? '8.0',
+        version: input.databaseVersion ?? 'unknown',
         status: capabilities.database,
       },
       lastObservedAt: now,
       lastVerifiedAt: now,
-    },
-  ];
+    });
+  }
+
+  const dependencies = databases.map((dbName) => ({
+    fromResourceId: `${environmentId}:panel:directadmin`,
+    toResourceId: `${environmentId}:db:${dbName}`,
+    dependencyType: 'DEPENDS_ON',
+    verified: true,
+  }));
+
+  const validatedEvidence: EvidenceInfo[] = (input.evidence ?? []).filter((ev) => {
+    return (
+      typeof ev.evidenceId === 'string' &&
+      ev.evidenceId.trim().length > 0 &&
+      typeof ev.type === 'string' &&
+      ev.type.trim().length > 0 &&
+      typeof ev.collectedAt === 'number' &&
+      ev.collectedAt > 0 &&
+      typeof ev.locationUrl === 'string' &&
+      ev.locationUrl.trim().length > 0 &&
+      !ev.locationUrl.includes('malformed')
+    );
+  });
 
   return {
     environmentId,
     tenantId,
     resources,
-    dependencies: [
-      {
-        fromResourceId: `${environmentId}:panel:directadmin`,
-        toResourceId: `${environmentId}:db:${databases[0] ?? 'mysql'}`,
-        dependencyType: 'DEPENDS_ON',
-        verified: true,
-      },
-    ],
+    dependencies,
     lastReconciledAt: now,
     driftCount: 0,
     identity: {
@@ -237,64 +327,51 @@ export function discoverDirectAdminEnvironmentTwin(
     compute: {
       panels: [panelDiscovery],
     },
-    applications: [
-      {
-        language: 'php',
-        framework: 'laravel',
-        runtime: `php-${capabilities.phpVersion}`,
-        entrypoint: 'public/index.php',
-        ports: [80, 443],
-        packageManager: 'composer',
-        buildSystem: 'composer',
-        envVars: [
-          'DATABASE_URL',
-          'REDIS_URL',
-          'STORAGE_PROVIDER',
-          'STORAGE_BUCKET',
-          'APP_BASE_URL',
-          'RESOURCE_LIMIT',
-          'RUNTIME_PROFILE',
-        ],
-        secretRefs: ['DB_PASSWORD', 'APP_KEY'],
-        externalDependencies: ['mysql'],
-        containerized: false,
-      },
-    ],
+    applications: input.applications && input.applications.length > 0
+      ? input.applications.map((app) => ({
+          language: 'php',
+          framework: null,
+          runtime: input.phpVersion ? `php-${input.phpVersion}` : 'unconfigured',
+          entrypoint: app,
+          ports: [80, 443],
+          packageManager: null,
+          buildSystem: null,
+          envVars: [],
+          secretRefs: [],
+          externalDependencies: [],
+          containerized: false,
+        }))
+      : [],
     databases: databases.map((dbName, idx) => ({
       id: `da-db-${idx + 1}`,
       engine: input.databaseEngine ?? 'mysql',
-      version: input.databaseVersion ?? '8.0',
+      version: input.databaseVersion ?? 'unknown',
       cluster: false,
       endpoints: [`localhost:3306/${dbName}`],
     })),
     tls: {
       certificates: sslCerts.map((c) => ({
         domain: c.domain,
-        issuer: c.issuer ?? 'LetsEncrypt',
+        issuer: c.issuer ?? 'UNKNOWN',
         expiresAt: c.expiresAt,
         valid: c.expiresAt > now,
       })),
     },
-    secretsReferences: [
-      {
-        id: 'sec-da-db-password',
-        name: 'DB_PASSWORD',
-        store: 'directadmin-account-env',
-        lastRotated: now,
-      },
-    ],
-    backups: [
-      {
-        backupId: `da-backup-${environmentId}`,
-        status: 'ACTIVE',
-        lastBackupAt: now,
-        retentionDays: 14,
-      },
-    ],
-    recoveryCapabilities: {
-      rtoMinutes: 15,
-      rpoMinutes: 5,
-      testedAt: now,
+    secretsReferences: databases.length > 0
+      ? [
+          {
+            id: 'sec-da-db-password',
+            name: 'DB_PASSWORD',
+            store: 'directadmin-account-env',
+            lastRotated: now,
+          },
+        ]
+      : [],
+    backups: input.backups ?? [],
+    recoveryCapabilities: input.recoveryCapabilities ?? {
+      rtoMinutes: undefined,
+      rpoMinutes: undefined,
+      testedAt: undefined,
     },
     observability: {
       metrics: true,
@@ -302,9 +379,9 @@ export function discoverDirectAdminEnvironmentTwin(
       logs: true,
       tools: ['directadmin-access-log', 'directadmin-error-log'],
     },
-    ownership: {
-      teamId: 'platform-ops',
-      ownerEmail: 'ops@client.com',
+    ownership: input.ownership ?? {
+      teamId: 'UNASSIGNED',
+      ownerEmail: undefined,
     },
     policies: [
       {
@@ -313,27 +390,21 @@ export function discoverDirectAdminEnvironmentTwin(
         compliant: true,
       },
     ],
-    costs: {
-      currency: 'USD',
-      monthlyEstimate: 15,
+    costs: input.costs ?? {
+      currency: 'UNKNOWN',
+      monthlyEstimate: undefined,
+      status: 'UNOBSERVED',
       lastUpdated: now,
     },
-    health: {
-      status: 'HEALTHY',
+    health: input.health ?? {
+      status: 'UNKNOWN',
       lastChecked: now,
-      checkId: `hc-${environmentId}`,
+      checkId: `hc-${environmentId}:unobserved`,
     },
     incidents: [],
     deployments: [],
     drift: [],
-    evidence: [
-      {
-        evidenceId: `ev-da-discovery-${environmentId}`,
-        type: 'CAPABILITY_DISCOVERY',
-        collectedAt: now,
-        locationUrl: `twin://${environmentId}/evidence/discovery`,
-      },
-    ],
+    evidence: validatedEvidence,
   };
 }
 
@@ -345,7 +416,6 @@ export const Target = {
   discoverCapabilities: discoverDirectAdminCapabilities,
   discoverEnvironmentTwin: discoverDirectAdminEnvironmentTwin,
 };
-
 
 /**
  * @interface DirectAdminTargetConfig
@@ -385,7 +455,7 @@ export class DirectAdminTargetAdapter {
       'SYNC_ENVIRONMENT',
       'COPY_FILE',
       'CREATE_DIRECTORY',
-      'UPSELL_NOTICE'
+      'UPSELL_NOTICE',
     ];
   }
 
@@ -400,17 +470,17 @@ export class DirectAdminTargetAdapter {
       steps: [
         {
           action: 'FETCH_REPOSITORY',
-          payload: { url: repositoryUrl, branch }
+          payload: { url: repositoryUrl, branch },
         },
         {
           action: 'SYNC_ENVIRONMENT',
           payload: {
             strategy: 'directadmin-sync',
             destination: this.config.publicHtmlPath,
-            preservePermissions: true
-          }
-        }
-      ]
+            preservePermissions: true,
+          },
+        },
+      ],
     };
   }
 }

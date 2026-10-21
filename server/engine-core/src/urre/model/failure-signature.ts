@@ -3,8 +3,8 @@
  * Module         : engine-core/urre
  * File           : failure-signature.ts
  * Version        : 1.0.0
- * Author         : Antigravity AI
- * Organization   : Air Roofers
+ * Author         : Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-01
  * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE

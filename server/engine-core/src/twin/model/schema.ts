@@ -124,8 +124,8 @@ export interface BackupInfo {
  * @classification ENTERPRISE
  */
 export interface RecoveryCapabilities {
-  rtoMinutes: number;
-  rpoMinutes: number;
+  rtoMinutes?: number;
+  rpoMinutes?: number;
   testedAt?: number;
 }
 
@@ -148,7 +148,7 @@ export interface ObservabilityInfo {
  */
 export interface OwnershipInfo {
   teamId: string;
-  ownerEmail: string;
+  ownerEmail?: string;
   escalationPolicyId?: string;
 }
 
@@ -170,8 +170,9 @@ export interface PolicyInfo {
  */
 export interface CostInfo {
   currency: string;
-  monthlyEstimate: number;
+  monthlyEstimate?: number;
   lastUpdated: number;
+  status?: 'OBSERVED' | 'UNOBSERVED' | 'ESTIMATED' | string;
 }
 
 /**
@@ -180,7 +181,7 @@ export interface CostInfo {
  * @classification ENTERPRISE
  */
 export interface HealthInfo {
-  status: 'HEALTHY' | 'DEGRADED' | 'DOWN' | 'UNKNOWN';
+  status: 'HEALTHY' | 'DEGRADED' | 'DOWN' | 'UNKNOWN' | 'UNOBSERVED';
   lastChecked: number;
   checkId: string;
 }
