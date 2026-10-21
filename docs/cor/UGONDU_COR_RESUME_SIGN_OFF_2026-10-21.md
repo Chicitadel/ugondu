@@ -5,7 +5,8 @@
 - **Governing authority:** Ujomor Systems Engineering & Governance Authority
 - **Date:** 2026-10-21
 - **Branch:** `cor/resume-checkpoint-hardening-2026-10-21`
-- **Candidate SHA:** `a623a458f5fa371bac26c16977da1787199404a5`
+- **Source/test remediation candidate:** `9fe83e58ce7d97e16f78221b8b56e99c023ff8b1`  
+- **Current PR head:** documentation-only commits follow that source/test candidate; the exact current PR head must pass CI before sign-off.
 - **Audit:** [UGONDU_COR_RESUME_AUDIT_UNIVERSAL_PLATFORM_2026-10-21.md](./UGONDU_COR_RESUME_AUDIT_UNIVERSAL_PLATFORM_2026-10-21.md)
 - **Decision:** 🔴 **WITHHELD — UNIVERSAL COR NOT CERTIFIED**
 - **Signature:** Not issued.
