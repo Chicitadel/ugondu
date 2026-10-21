@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "Richtlinienabweichung erkannt: Abgleich kanonischer Richtlinienversionen und Rollenanhänge innerhalb der Autoritätsgrenze.",
     "state.authority_missing": "Bootstrap-Autorität fehlt oder ist unzureichend für Rolle {role}: Stopp vor Workload-Prüfungen.",
     "state.provider_unavailable": "Anbieter oder Netzwerk nicht verfügbar: Prüfpunkt im Kontinuitätsregister für sichere Wiederaufnahme gesichert.",
-    "state.ownership_ambiguous": "Eigentümerschaft oder Berechtigungen für {id} mehrdeutig: Destruktive oder widersprüchliche Änderung wird verweigert."
+    "state.ownership_ambiguous": "Eigentümerschaft oder Berechtigungen für {id} mehrdeutig: Destruktive oder widersprüchliche Änderung wird verweigert.",
+    "check.runner_delegation": "Prüfung der Runner-Delegation und Funktionstrennung: UgonduCORRunner strikt auf sts:AssumeRole, sts:TagSession und kanonische Richtlinienanhänge beschränkt",
+    "check.execution_trust": "Vertrauensprüfung der Ausführungsrolle: UgonduCORExecutionRole vertraut UgonduCORRunner mit den Sitzungs-Tags UgonduTransactionId und UgonduCOR",
+    "check.v9_attachments": "Prüfung der V9-Richtlinienanhänge: Alle 5 verwalteten Richtlinien UgonduCOR-V9-* auf UgonduCORExecutionRole verifiziert",
+    "check.region_consistency": "Regionskonsistenzprüfung: Alle Richtlinien-ARNs wurden ohne regionsübergreifende Abweichung mit der Zielregion {region} abgeglichen",
+    "error.runner_overprivileged": "Verstoß gegen die Funktionstrennung: Die Runner-Rolle {role} enthält direkte Infrastruktur-Workload-Berechtigungen, die ausschließlich zu UgonduCORExecutionRole gehören",
+    "error.region_drift": "Regionsbereichsabweichung in Richtlinie {policy} erkannt: Ressourcen-ARNs werden mit Zielregion {region} abgeglichen"
   },
   "deploy": {
     "pipeline.discover": "Projekttopologie und Fähigkeiten der Zielplattform werden ermittelt",

@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "检测到策略漂移：正在权限边界内协调规范策略版本与角色附加项。",
     "state.authority_missing": "角色 {role} 缺少引导权限或权限不足：在工作负载探测前停止。",
     "state.provider_unavailable": "提供商或网络不可用：检查点已保存在连续性账本中以供安全恢复。",
-    "state.ownership_ambiguous": "{id} 的所有权或权限不明确：拒绝执行破坏性或冲突性变更。"
+    "state.ownership_ambiguous": "{id} 的所有权或权限不明确：拒绝执行破坏性或冲突性变更。",
+    "check.runner_delegation": "运行器委派与职责分离检查：UgonduCORRunner 严格限定为 sts:AssumeRole、sts:TagSession 以及规范策略附加权限",
+    "check.execution_trust": "执行角色信任检查：UgonduCORExecutionRole 信任带有 UgonduTransactionId 和 UgonduCOR 会话标签的 UgonduCORRunner",
+    "check.v9_attachments": "V9 策略附加检查：已在 UgonduCORExecutionRole 上验证全部 5 项 UgonduCOR-V9-* 托管策略",
+    "check.region_consistency": "区域一致性检查：所有策略 ARN 已协调至目标区域 {region}，且无跨区域漂移",
+    "error.runner_overprivileged": "违反职责分离原则：运行器角色 {role} 包含仅应属于 UgonduCORExecutionRole 的直接基础设施工作负载权限",
+    "error.region_drift": "在策略 {policy} 中检测到区域范围漂移：正在将资源 ARN 协调至目标区域 {region}"
   },
   "deploy": {
     "pipeline.discover": "正在发现项目拓扑结构与目标平台能力",

@@ -90,8 +90,8 @@ describe('Agent-Neutral Capability Contract, 4D Authorization & CLI/GUI Parity S
         expect(desc!.id).toBe(capId);
         expect(desc!.version).toBe('1.0.0');
         expect(desc!.authZScopes.length).toBeGreaterThan(0);
-        expect(['R0', 'R1', 'R2', 'R3', 'R4']).toContain(desc!.riskClass);
-        expect(['READ', 'WRITE', 'DESTRUCTIVE']).toContain(desc!.operationClassification);
+        expect(desc!.riskClass).toMatch(/^(R0|R1|R2|R3|R4)$/);
+        expect(desc!.operationClassification).toMatch(/^(READ|WRITE|DESTRUCTIVE)$/);
         expect(desc!.auditRequirements.auditRequired).toBe(true);
         expect(desc!.auditRequirements.evidenceRequired).toBe(true);
         expect(desc!.auditRequirements.redactSecrets).toBe(true);

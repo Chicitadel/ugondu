@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "تم اكتشاف انحراف في السياسة: جاري تسوية إصدارات السياسات القانونية ومرفقات الأدوار ضمن حدود الصلاحية.",
     "state.authority_missing": "صلاحية التمهيد مفقودة أو غير كافية للدور {role}: التوقف قبل فحوصات حمل العمل.",
     "state.provider_unavailable": "المزود أو الشبكة غير متاحة: تم حفظ نقطة التحقق في سجل الاستمرارية للاستئناف الآمن.",
-    "state.ownership_ambiguous": "الملكية أو الأذونات غامضة للمعرف {id}: رفض التغيير المدمر أو المتعارض."
+    "state.ownership_ambiguous": "الملكية أو الأذونات غامضة للمعرف {id}: رفض التغيير المدمر أو المتعارض.",
+    "check.runner_delegation": "فحص تفويض المشغّل وفصل المهام: يقتصر UgonduCORRunner بصرامة على sts:AssumeRole وsts:TagSession وإرفاق السياسات القانونية",
+    "check.execution_trust": "فحص ثقة دور التنفيذ: يثق UgonduCORExecutionRole في UgonduCORRunner باستخدام وسوم الجلسة UgonduTransactionId وUgonduCOR",
+    "check.v9_attachments": "فحص إرفاق سياسات V9: تم التحقق من جميع السياسات المدارة الخمس UgonduCOR-V9-* على UgonduCORExecutionRole",
+    "check.region_consistency": "فحص اتساق المنطقة: تمت تسوية جميع معرفات ARN للسياسات مع المنطقة المستهدفة {region} دون أي انحراف عبر المناطق",
+    "error.runner_overprivileged": "انتهاك فصل المهام: يحتوي دور المشغّل {role} على أذونات مباشرة لحمل عمل البنية التحتية تنتمي حصرياً إلى UgonduCORExecutionRole",
+    "error.region_drift": "تم اكتشاف انحراف في نطاق المنطقة في السياسة {policy}: جاري تسوية معرفات ARN للموارد مع المنطقة المستهدفة {region}"
   },
   "deploy": {
     "pipeline.discover": "اكتشاف طوبولوجيا المشروع وقدرات المنصة المستهدفة",

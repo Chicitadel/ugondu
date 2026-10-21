@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "정책 드리프트 감지됨: 권한 경계 내에서 표준 정책 버전 및 역할 연결을 조정합니다.",
     "state.authority_missing": "역할 {role}에 대한 부트스트랩 권한이 누락되었거나 부족합니다: 워크로드 프로브 전에 중단합니다.",
     "state.provider_unavailable": "공급자 또는 네트워크를 사용할 수 없음: 안전한 재개를 위해 연속성 원장에 체크포인트가 보존되었습니다.",
-    "state.ownership_ambiguous": "{id}의 소유권 또는 권한이 모호함: 파괴적이거나 충돌하는 변경을 거부합니다."
+    "state.ownership_ambiguous": "{id}의 소유권 또는 권한이 모호함: 파괴적이거나 충돌하는 변경을 거부합니다.",
+    "check.runner_delegation": "러너 위임 및 직무 분리 검사: UgonduCORRunner가 sts:AssumeRole, sts:TagSession 및 표준 정책 연결로 엄격히 제한됨",
+    "check.execution_trust": "실행 역할 신뢰 검사: UgonduCORExecutionRole이 UgonduTransactionId 및 UgonduCOR 세션 태그와 함께 UgonduCORRunner를 신뢰함",
+    "check.v9_attachments": "V9 정책 연결 검사: UgonduCORExecutionRole에서 5개의 모든 UgonduCOR-V9-* 관리형 정책이 검증됨",
+    "check.region_consistency": "리전 일관성 검사: 모든 정책 ARN이 리전 간 드리프트 없이 대상 리전 {region}으로 조정됨",
+    "error.runner_overprivileged": "직무 분리 위반: 러너 역할 {role}에 UgonduCORExecutionRole에만 속해야 하는 직접 인프라 워크로드 권한이 포함되어 있습니다",
+    "error.region_drift": "정책 {policy}에서 리전 범위 드리프트 감지됨: 리소스 ARN을 대상 리전 {region}으로 조정합니다"
   },
   "deploy": {
     "pipeline.discover": "프로젝트 토폴로지 및 대상 플랫폼 기능 검색 중",

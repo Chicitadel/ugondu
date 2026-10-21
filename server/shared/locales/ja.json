@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "ポリシードリフトが検出されました：権限境界内で正規ポリシーのバージョンとロールのアタッチメントを調整しています。",
     "state.authority_missing": "ロール {role} のブートストラップ権限が不足または欠落しています：ワークロードプローブの前に停止します。",
     "state.provider_unavailable": "プロバイダーまたはネットワークが利用できません：安全な再開のため継続性台帳にチェックポイントを保持しました。",
-    "state.ownership_ambiguous": "{id} の所有権または権限が曖昧です：破壊的または競合する変更を拒否します。"
+    "state.ownership_ambiguous": "{id} の所有権または権限が曖昧です：破壊的または競合する変更を拒否します。",
+    "check.runner_delegation": "ランナー委任および職務分掌チェック：UgonduCORRunner は sts:AssumeRole、sts:TagSession、および正規ポリシーのアタッチに厳密に限定されています",
+    "check.execution_trust": "実行ロール信頼チェック：UgonduCORExecutionRole は UgonduTransactionId および UgonduCOR セッションタグを持つ UgonduCORRunner を信頼しています",
+    "check.v9_attachments": "V9 ポリシーアタッチメントチェック：UgonduCORExecutionRole 上で 5 つすべての UgonduCOR-V9-* 管理ポリシーが検証されました",
+    "check.region_consistency": "リージョン整合性チェック：すべてのポリシー ARN がリージョン間ドリフトなしでターゲットリージョン {region} に調整されました",
+    "error.runner_overprivileged": "職務分掌違反：ランナーロール {role} に、UgonduCORExecutionRole 専用であるべき直接的なインフラストラクチャワークロード権限が含まれています",
+    "error.region_drift": "ポリシー {policy} でリージョンスコープのドリフトが検出されました：リソース ARN をターゲットリージョン {region} に調整しています"
   },
   "deploy": {
     "pipeline.discover": "プロジェクトのトポロジとターゲットプラットフォームの機能を検出しています",

@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "Dérive de politique détectée : réconciliation des versions de politiques canoniques et des attachements de rôles dans la limite d'autorité.",
     "state.authority_missing": "Autorité d'amorçage manquante ou insuffisante pour le rôle {role} : arrêt avant les sondes de charge de travail.",
     "state.provider_unavailable": "Fournisseur ou réseau indisponible : point de contrôle conservé dans le registre de continuité pour une reprise sécurisée.",
-    "state.ownership_ambiguous": "Propriété ou permissions ambiguës pour {id} : refus de toute mutation destructive ou conflictuelle."
+    "state.ownership_ambiguous": "Propriété ou permissions ambiguës pour {id} : refus de toute mutation destructive ou conflictuelle.",
+    "check.runner_delegation": "Vérification de délégation du lanceur et de séparation des tâches : UgonduCORRunner limité strictement à sts:AssumeRole, sts:TagSession et à l'attachement des politiques canoniques",
+    "check.execution_trust": "Vérification d'approbation du rôle d'exécution : UgonduCORExecutionRole approuve UgonduCORRunner avec les balises de session UgonduTransactionId et UgonduCOR",
+    "check.v9_attachments": "Vérification de l'attachement des politiques V9 : les 5 politiques gérées UgonduCOR-V9-* ont été vérifiées sur UgonduCORExecutionRole",
+    "check.region_consistency": "Vérification de cohérence régionale : tous les ARN de politiques sont réconciliés vers la région cible {region} sans aucune dérive interrégionale",
+    "error.runner_overprivileged": "Violation de la séparation des tâches : le rôle de lanceur {role} contient des permissions directes de charge de travail d'infrastructure appartenant exclusivement à UgonduCORExecutionRole",
+    "error.region_drift": "Dérive de portée régionale détectée dans la politique {policy} : réconciliation des ARN de ressources vers la région cible {region}"
   },
   "deploy": {
     "pipeline.discover": "Découverte de la topologie du projet et des capacités de la plateforme cible",

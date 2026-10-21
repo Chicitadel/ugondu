@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "Desvio de política detectado: reconciliando versões de políticas canônicas e anexos de funções dentro do limite de autoridade.",
     "state.authority_missing": "Autoridade de inicialização ausente ou insuficiente para a função {role}: parada antes das sondagens de carga de trabalho.",
     "state.provider_unavailable": "Provedor ou rede indisponível: ponto de verificação preservado no registro de continuidade para retomada segura.",
-    "state.ownership_ambiguous": "Propriedade ou permissões ambíguas para {id}: recusando mutação destrutiva ou conflitante."
+    "state.ownership_ambiguous": "Propriedade ou permissões ambíguas para {id}: recusando mutação destrutiva ou conflitante.",
+    "check.runner_delegation": "Verificação de delegação do executor e segregação de funções: UgonduCORRunner restrito estritamente a sts:AssumeRole, sts:TagSession e anexação de políticas canônicas",
+    "check.execution_trust": "Verificação de confiança da função de execução: UgonduCORExecutionRole confia no UgonduCORRunner com as tags de sessão UgonduTransactionId e UgonduCOR",
+    "check.v9_attachments": "Verificação de anexos de políticas V9: todas as 5 políticas gerenciadas UgonduCOR-V9-* verificadas em UgonduCORExecutionRole",
+    "check.region_consistency": "Verificação de consistência regional: todos os ARNs de políticas reconciliados para a região de destino {region} com zero desvio entre regiões",
+    "error.runner_overprivileged": "Violação de segregação de funções: a função executora {role} contém permissões diretas de carga de trabalho de infraestrutura que pertencem exclusivamente a UgonduCORExecutionRole",
+    "error.region_drift": "Desvio de escopo regional detectado na política {policy}: reconciliando ARNs de recursos para a região de destino {region}"
   },
   "deploy": {
     "pipeline.discover": "Descobrindo a topologia do projeto e as capacidades da plataforma de destino",

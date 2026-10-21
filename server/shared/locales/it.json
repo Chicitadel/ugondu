@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "Rilevata deriva delle policy: riconciliazione delle versioni delle policy canoniche e dei collegamenti dei ruoli entro il perimetro di autorità.",
     "state.authority_missing": "Autorità di bootstrap mancante o insufficiente per il ruolo {role}: arresto prima delle sonde del carico di lavoro.",
     "state.provider_unavailable": "Provider o rete non disponibile: checkpoint preservato nel registro di continuità per una ripresa sicura.",
-    "state.ownership_ambiguous": "Proprietà o autorizzazioni ambigue per {id}: rifiuto di modifiche distruttive o in conflitto."
+    "state.ownership_ambiguous": "Proprietà o autorizzazioni ambigue per {id}: rifiuto di modifiche distruttive o in conflitto.",
+    "check.runner_delegation": "Controllo della delega del runner e della separazione dei compiti: UgonduCORRunner limitato rigorosamente a sts:AssumeRole, sts:TagSession e al collegamento delle policy canoniche",
+    "check.execution_trust": "Controllo di attendibilità del ruolo di esecuzione: UgonduCORExecutionRole considera attendibile UgonduCORRunner con i tag di sessione UgonduTransactionId e UgonduCOR",
+    "check.v9_attachments": "Controllo collegamento policy V9: tutte le 5 policy gestite UgonduCOR-V9-* sono state verificate su UgonduCORExecutionRole",
+    "check.region_consistency": "Controllo di coerenza regionale: tutti gli ARN delle policy sono stati riconciliati con la regione di destinazione {region} senza alcuna deriva tra regioni",
+    "error.runner_overprivileged": "Violazione della separazione dei compiti: il ruolo runner {role} contiene autorizzazioni dirette per il carico di lavoro dell'infrastruttura che appartengono esclusivamente a UgonduCORExecutionRole",
+    "error.region_drift": "Rilevata deriva dell'ambito regionale nella policy {policy}: riconciliazione degli ARN delle risorse con la regione di destinazione {region}"
   },
   "deploy": {
     "pipeline.discover": "Rilevamento della topologia del progetto e delle capacità della piattaforma di destinazione",

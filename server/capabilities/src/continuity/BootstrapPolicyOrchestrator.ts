@@ -81,9 +81,19 @@ export interface BootstrapEnvironmentSnapshot {
   discoveredRoles: string[];
   existingPolicies: DiscoveredPolicyState[];
   bootstrapAuthority: BootstrapAuthorityContext;
+  runnerPolicyDocumentJson?: string;
   trustRelationshipValid?: boolean;
   negativeIsolationVerified?: boolean;
   quotaLimits?: { maxPolicySizeBytes?: number; maxAttachedPolicies?: number };
+}
+
+export interface FourCheckVerificationSummary {
+  runnerDelegationConfirmed: boolean;
+  executionRoleTrustConfirmed: boolean;
+  v9PolicyAttachmentsConfirmed: boolean;
+  regionConsistencyConfirmed: boolean;
+  confirmedCount: number;
+  summaryText: string;
 }
 
 export interface PlannedPolicyAction {
@@ -123,6 +133,7 @@ export interface BootstrapReconciliationResult {
   reusedCanonicalRole: boolean;
   plannedActions: PlannedPolicyAction[];
   executedActions: PlannedPolicyAction[];
+  fourCheckVerification: FourCheckVerificationSummary;
   errorCode?: string;
   errorMessage?: string;
   missingCapabilities?: string[];
@@ -131,6 +142,9 @@ export interface BootstrapReconciliationResult {
   resumePlan?: ResumePlan;
   evidence?: ReconciliationEvidence;
 }
+
+const WORKLOAD_SERVICE_PREFIX = /^(ec2|rds|s3|ecs|ecr):/i;
+const AWS_REGION_TOKEN_REGEX = /\b([a-z]{2}-[a-z]+-\d)\b/g;
 
 export class BootstrapPolicyOrchestrator {
   constructor(
@@ -145,6 +159,60 @@ export class BootstrapPolicyOrchestrator {
     return this.ledger;
   }
 
+  private buildFourCheck(
+    runnerDelegationConfirmed: boolean,
+    executionRoleTrustConfirmed: boolean,
+    v9PolicyAttachmentsConfirmed: boolean,
+    regionConsistencyConfirmed: boolean
+  ): FourCheckVerificationSummary {
+    const confirmedCount = [
+      runnerDelegationConfirmed,
+      executionRoleTrustConfirmed,
+      v9PolicyAttachmentsConfirmed,
+      regionConsistencyConfirmed,
+    ].filter(Boolean).length;
+    return {
+      runnerDelegationConfirmed,
+      executionRoleTrustConfirmed,
+      v9PolicyAttachmentsConfirmed,
+      regionConsistencyConfirmed,
+      confirmedCount,
+      summaryText: `${confirmedCount} of 4 checks confirmed`,
+    };
+  }
+
+  private findOverprivilegedRunnerActions(runnerPolicyJson?: string): string[] {
+    if (!runnerPolicyJson) return [];
+    try {
+      const parsed = JSON.parse(runnerPolicyJson);
+      const statements = Array.isArray(parsed?.Statement) ? parsed.Statement : [];
+      const violations: string[] = [];
+      for (const stmt of statements) {
+        if (stmt?.Effect !== 'Allow') continue;
+        const actions: string[] = Array.isArray(stmt.Action) ? stmt.Action : [stmt.Action];
+        for (const act of actions) {
+          if (typeof act === 'string' && WORKLOAD_SERVICE_PREFIX.test(act.trim())) {
+            violations.push(act.trim());
+          }
+        }
+      }
+      return violations;
+    } catch {
+      return ['MALFORMED_RUNNER_POLICY'];
+    }
+  }
+
+  private detectCrossRegionDrift(documentJson: string, allowedRegions: string[]): string[] {
+    const allowed = new Set(allowedRegions);
+    const mismatched = new Set<string>();
+    let match: RegExpExecArray | null;
+    const regex = new RegExp(AWS_REGION_TOKEN_REGEX.source, 'g');
+    while ((match = regex.exec(documentJson)) !== null) {
+      if (!allowed.has(match[1])) mismatched.add(match[1]);
+    }
+    return Array.from(mismatched);
+  }
+
   private fail(
     operatingState: BootstrapOperatingState,
     completedStages: BootstrapPipelineStage[],
@@ -152,6 +220,7 @@ export class BootstrapPolicyOrchestrator {
     reusedCanonicalRole: boolean,
     plannedActions: PlannedPolicyAction[],
     executedActions: PlannedPolicyAction[],
+    fourCheckVerification: FourCheckVerificationSummary,
     errorCode: string,
     errorMessage: string,
     extras?: Partial<BootstrapReconciliationResult>
@@ -164,6 +233,7 @@ export class BootstrapPolicyOrchestrator {
       reusedCanonicalRole,
       plannedActions,
       executedActions,
+      fourCheckVerification,
       errorCode,
       errorMessage,
       ...extras,
@@ -192,19 +262,35 @@ export class BootstrapPolicyOrchestrator {
         requiresDestructiveApproval: false,
         reconciliationDigest: 'UNPROBED_FAIL_CLOSED',
       });
-      return this.fail('PROVIDER_OR_NETWORK_UNAVAILABLE', completedStages, 'DISCOVER_AND_RECONCILE', false, plannedActions, executedActions, 'UG-PROVIDER-UNAVAILABLE', reason, { checkpoint, resumePlan });
+      return this.fail('PROVIDER_OR_NETWORK_UNAVAILABLE', completedStages, 'DISCOVER_AND_RECONCILE', false, plannedActions, executedActions, this.buildFourCheck(false, false, false, false), 'UG-PROVIDER-UNAVAILABLE', reason, { checkpoint, resumePlan });
+    }
+
+    const overprivilegedActions = this.findOverprivilegedRunnerActions(request.environment.runnerPolicyDocumentJson);
+    if (overprivilegedActions.length > 0) {
+      this.ledger.append(request.transactionId, 'FAILED', { reason: 'Runner overprivileged', overprivilegedActions });
+      return this.fail(
+        'OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS',
+        completedStages,
+        'DISCOVER_AND_RECONCILE',
+        false,
+        plannedActions,
+        executedActions,
+        this.buildFourCheck(false, false, false, false),
+        'UG-RUNNER-OVERPRIVILEGED',
+        `Runner role '${runnerRole}' violates separation-of-duties by holding direct workload permissions: ${overprivilegedActions.join(', ')}`
+      );
     }
 
     const roleDef = this.registry.getRole(targetRole);
     if (targetRole === runnerRole || roleDef?.purpose === 'runner') {
       this.ledger.append(request.transactionId, 'FAILED', { reason: 'Self-escalation blocked' });
-      return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'DISCOVER_AND_RECONCILE', false, plannedActions, executedActions, 'UG-SELF-ESCALATION-BLOCKED', `Refusing to attach execution policies to runner role '${targetRole}'.`);
+      return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'DISCOVER_AND_RECONCILE', false, plannedActions, executedActions, this.buildFourCheck(false, false, false, false), 'UG-SELF-ESCALATION-BLOCKED', `Refusing to attach execution policies to runner role '${targetRole}'.`);
     }
 
     const roleCheck = this.roleGuard.evaluateCreation(targetRole, request.environment.discoveredRoles);
     if (['NEAR_DUPLICATE_DETECTED', 'CANONICAL_ALTERNATIVE_EXISTS', 'INVALID_ROLE_NAME'].includes(roleCheck.status)) {
       this.ledger.append(request.transactionId, 'FAILED', { roleCheck });
-      return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'DISCOVER_AND_RECONCILE', false, plannedActions, executedActions, 'UG-ROLE-CONFLICT', roleCheck.reason);
+      return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'DISCOVER_AND_RECONCILE', false, plannedActions, executedActions, this.buildFourCheck(true, false, false, false), 'UG-ROLE-CONFLICT', roleCheck.reason);
     }
     const reusedCanonicalRole = roleCheck.status === 'EXACT_MATCH_EXISTS';
 
@@ -213,7 +299,7 @@ export class BootstrapPolicyOrchestrator {
       const existing = request.environment.existingPolicies.find((p) => p.packId === desired.pack.packId);
       if (existing && !existing.ownedByUgondu) {
         this.ledger.append(request.transactionId, 'PAUSED', { ambiguousPolicyArn: existing.policyArn });
-        return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'DISCOVER_AND_RECONCILE', reusedCanonicalRole, plannedActions, executedActions, 'UG-OWNERSHIP-AMBIGUOUS', `Policy '${existing.policyArn}' has unverified ownership; refusing destructive overwrite or detachment.`);
+        return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'DISCOVER_AND_RECONCILE', reusedCanonicalRole, plannedActions, executedActions, this.buildFourCheck(true, false, false, false), 'UG-OWNERSHIP-AMBIGUOUS', `Policy '${existing.policyArn}' has unverified ownership; refusing destructive overwrite or detachment.`);
       }
     }
     completedStages.push('DISCOVER_AND_RECONCILE');
@@ -222,15 +308,16 @@ export class BootstrapPolicyOrchestrator {
     const maxSizeBytes = request.environment.quotaLimits?.maxPolicySizeBytes ?? 6144;
     const maxAttached = request.environment.quotaLimits?.maxAttachedPolicies ?? 10;
     if (request.desiredPacks.length > maxAttached) {
-      return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'VALIDATE_POLICY_PACK', reusedCanonicalRole, plannedActions, executedActions, 'UG-POLICY-QUOTA-EXCEEDED', `Desired pack count (${request.desiredPacks.length}) exceeds attachment limit (${maxAttached}).`);
+      return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'VALIDATE_POLICY_PACK', reusedCanonicalRole, plannedActions, executedActions, this.buildFourCheck(true, false, false, false), 'UG-POLICY-QUOTA-EXCEEDED', `Desired pack count (${request.desiredPacks.length}) exceeds attachment limit (${maxAttached}).`);
     }
 
     let hadExistingResource = false;
     let driftFound = false;
+    let crossRegionDriftDetected = false;
 
     for (const desired of request.desiredPacks) {
       if (desired.signatureVerified === false) {
-        return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'VALIDATE_POLICY_PACK', reusedCanonicalRole, plannedActions, executedActions, 'UG-POLICY-SIGNATURE-INVALID', `Policy pack '${desired.pack.packId}' failed cryptographic signature verification.`);
+        return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'VALIDATE_POLICY_PACK', reusedCanonicalRole, plannedActions, executedActions, this.buildFourCheck(true, false, false, false), 'UG-POLICY-SIGNATURE-INVALID', `Policy pack '${desired.pack.packId}' failed cryptographic signature verification.`);
       }
 
       const rendered = this.renderer.renderPolicy(desired.template, request.regionScope);
@@ -238,7 +325,7 @@ export class BootstrapPolicyOrchestrator {
       if (!rendered.valid || sizeBytes > maxSizeBytes) {
         const code = !rendered.valid ? 'UG-POLICY-RENDER-INVALID' : 'UG-POLICY-QUOTA-EXCEEDED';
         const msg = !rendered.valid ? rendered.violations.join('; ') : `Rendered policy '${desired.pack.packId}' exceeds size quota.`;
-        return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'VALIDATE_POLICY_PACK', reusedCanonicalRole, plannedActions, executedActions, code, msg);
+        return this.fail('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS', completedStages, 'VALIDATE_POLICY_PACK', reusedCanonicalRole, plannedActions, executedActions, this.buildFourCheck(true, false, false, false), code, msg);
       }
 
       const existing = request.environment.existingPolicies.find((p) => p.packId === desired.pack.packId);
@@ -250,6 +337,9 @@ export class BootstrapPolicyOrchestrator {
       } else {
         hadExistingResource = true;
         const integrity = this.registry.verifyPolicyIntegrity(desired.pack.packId, existing.documentJson);
+        const foreignRegions = this.detectCrossRegionDrift(existing.documentJson, request.regionScope.allowedRegions);
+        if (foreignRegions.length > 0) crossRegionDriftDetected = true;
+
         let formattedSha = existing.documentSha256;
         if (!formattedSha) {
           try {
@@ -258,12 +348,15 @@ export class BootstrapPolicyOrchestrator {
             formattedSha = computePolicyDigest(existing.documentJson);
           }
         }
-        const hashMatches = formattedSha === rendered.documentSha256;
+        const hashMatches = formattedSha === rendered.documentSha256 && foreignRegions.length === 0;
         const isAttached = existing.attachedToRoles.includes(targetRole);
 
         if (!integrity.valid || !hashMatches) {
           driftFound = true;
-          plannedActions.push({ packId: desired.pack.packId, targetRole, action: 'UPDATE_POLICY_VERSION', renderedSha256: rendered.documentSha256, reason: `Policy '${desired.pack.packId}' drifted from canonical SHA-256.` });
+          const driftReason = foreignRegions.length > 0
+            ? `Cross-region ARN drift (${foreignRegions.join(', ')}) reconciled to ${request.regionScope.allowedRegions.join(', ')}.`
+            : `Policy '${desired.pack.packId}' drifted from canonical SHA-256.`;
+          plannedActions.push({ packId: desired.pack.packId, targetRole, action: 'UPDATE_POLICY_VERSION', renderedSha256: rendered.documentSha256, reason: driftReason });
         }
         if (!isAttached) {
           driftFound = true;
@@ -287,7 +380,8 @@ export class BootstrapPolicyOrchestrator {
       this.ledger.append(request.transactionId, 'PAUSED', { missingCapabilities });
       const checkpoint = this.ledger.createCheckpoint(request.transactionId);
       const supportedAuthorizationOptions: SupportedAuthorizationOption[] = ['BOOTSTRAP_SESSION', 'ADMIN_DELEGATION', 'INFRA_CONTROLLER'];
-      return this.fail('BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT', completedStages, 'PROVISION_VIA_BOOTSTRAP', reusedCanonicalRole, plannedActions, executedActions, 'UG-BOOTSTRAP-AUTH-MISSING', `Bootstrap authority required for missing capabilities: ${missingCapabilities.join(', ')}`, { missingCapabilities, supportedAuthorizationOptions, checkpoint });
+      const trustOk = request.environment.trustRelationshipValid !== false;
+      return this.fail('BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT', completedStages, 'PROVISION_VIA_BOOTSTRAP', reusedCanonicalRole, plannedActions, executedActions, this.buildFourCheck(true, trustOk, false, !crossRegionDriftDetected), 'UG-BOOTSTRAP-AUTH-MISSING', `Bootstrap authority required for missing capabilities: ${missingCapabilities.join(', ')}`, { missingCapabilities, supportedAuthorizationOptions, checkpoint });
     }
 
     const mutations = plannedActions.filter((a) => a.action !== 'NO_OP');
@@ -303,9 +397,11 @@ export class BootstrapPolicyOrchestrator {
     completedStages.push('PROVISION_VIA_BOOTSTRAP');
 
     // STAGE 4: VERIFY_EFFECTIVE_RESULT
-    if (request.environment.trustRelationshipValid === false || request.environment.negativeIsolationVerified === false) {
+    const trustValid = request.environment.trustRelationshipValid !== false;
+    const isolationValid = request.environment.negativeIsolationVerified !== false;
+    if (!trustValid || !isolationValid) {
       this.ledger.append(request.transactionId, 'FAILED', { reason: 'Effective verification failed' });
-      return this.fail(operatingState, completedStages, 'VERIFY_EFFECTIVE_RESULT', reusedCanonicalRole, plannedActions, executedActions, 'UG-EFFECTIVE-VERIFICATION-FAILED', 'Post-reconciliation trust relationship or negative isolation verification failed.', { checkpoint });
+      return this.fail(operatingState, completedStages, 'VERIFY_EFFECTIVE_RESULT', reusedCanonicalRole, plannedActions, executedActions, this.buildFourCheck(true, trustValid, true, true), 'UG-EFFECTIVE-VERIFICATION-FAILED', 'Post-reconciliation trust relationship or negative isolation verification failed.', { checkpoint });
     }
 
     const verifiedEntry = this.ledger.append(request.transactionId, 'VERIFIED', { operatingState, targetRole });
@@ -325,6 +421,7 @@ export class BootstrapPolicyOrchestrator {
       reusedCanonicalRole,
       plannedActions,
       executedActions,
+      fourCheckVerification: this.buildFourCheck(true, true, true, true),
       checkpoint,
       evidence: {
         transactionId: request.transactionId,

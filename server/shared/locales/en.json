@@ -1964,7 +1964,13 @@
     "state.drift_reconcilable": "Policy drift detected: reconciling canonical policy versions and role attachments within authority boundary.",
     "state.authority_missing": "Bootstrap authority missing or insufficient for role {role}: halt before workload probes.",
     "state.provider_unavailable": "Provider or network unavailable: checkpoint preserved in continuity ledger for safe resume.",
-    "state.ownership_ambiguous": "Ownership or permissions ambiguous for {id}: refusing destructive or conflicting mutation."
+    "state.ownership_ambiguous": "Ownership or permissions ambiguous for {id}: refusing destructive or conflicting mutation.",
+    "check.runner_delegation": "Runner delegation and separation-of-duties check: UgonduCORRunner scoped strictly to sts:AssumeRole, sts:TagSession, and canonical policy attachment",
+    "check.execution_trust": "Execution-role trust check: UgonduCORExecutionRole trusts UgonduCORRunner with UgonduTransactionId and UgonduCOR session tags",
+    "check.v9_attachments": "V9 policy attachment check: all 5 UgonduCOR-V9-* managed policies verified on UgonduCORExecutionRole",
+    "check.region_consistency": "Region consistency check: all policy ARNs reconciled to target region {region} with zero cross-region drift",
+    "error.runner_overprivileged": "Separation-of-duties violation: runner role {role} contains direct infrastructure workload permissions that belong exclusively on UgonduCORExecutionRole",
+    "error.region_drift": "Region scope drift detected in policy {policy}: reconciling resource ARNs to target region {region}"
   },
   "deploy": {
     "pipeline.discover": "Discovering project topology and target platform capabilities",
