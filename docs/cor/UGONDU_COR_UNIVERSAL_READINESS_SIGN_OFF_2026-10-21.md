@@ -41,3 +41,32 @@
 | Security Authority | To be assigned | `secret-scan.mjs` (445 commits verified) | — | ⚪ Pending AWS IAM |
 | Platform Authority | To be assigned | 5 Go Targets + 9 Microservices | — | ⚪ Pending AWS IAM |
 | Cloud Operations Authority | To be assigned | Run `39529554197` (`aws-physical-gate`) | — | 🔴 Blocked (TagSession) |
+
+
+---
+
+## Addendum — Decision reaffirmed after universal platform/host re-audit (2026-10-21)
+
+**Decision:** 🔴 **WITHHELD — NOT COR CERTIFIED.** This sign-off stays intentionally unsigned.
+
+### New findings that also prevent approval
+
+1. **Candidate identity mismatch:** current PR #3 head is reported as `be67628bd26abf18886e958e8467dbb8492d32bc`, while the prior re-audit references `ce1c3b8dea432bcbc0588504ad0e48f7bac94bf5`. Previous evidence must not be reused until candidate SHA is reconciled and mandatory gates run on the exact same candidate.
+2. **DirectAdmin discovery evidence is not trustworthy yet:** `server/engine-core/src/targets/directadmin.ts` generates default/sample domains, database identifiers, certificate expiry, health, backup, owner, pricing and recovery facts when observations are absent. These must be removed from production-discovery paths or represented as `UNKNOWN/UNOBSERVED`, and each positive fact must carry provider provenance.
+3. **Secret scanner error paths need fail-closed remediation:** `scripts/release/secret-scan.mjs` has branches that suppress tracked-file enumeration errors, unreadable files, and malformed allowlist data by continuing or returning an empty list. A partial scan must never be reported as clean.
+4. **Entrypoint parity is incomplete:** `server/engine-core/src/routes/__tests__/deploy-mode-parity.spec.ts` explicitly does not prove that CLI, IDE, UI or automation entrypoints call the tested routes. Real-process E2E evidence is still required.
+
+### Conditions before sign-off
+
+- [ ] Exact full SHA is identical across PR head, branch, checkout, test evidence, artifacts, release manifest and sign-off.
+- [ ] AWS OIDC tagged role assumption succeeds with least privilege and no untagged fallback.
+- [ ] Physical AWS provision/deploy/readiness/failure recovery/rollback/teardown all execute; independent zero-residual scan passes.
+- [ ] DirectAdmin production discovery has no invented environment facts and passes adversarial evidence-provenance tests.
+- [ ] Secret scanner fails closed for enumeration, read, history, parser and allowlist failures, with auditable coverage.
+- [ ] End-to-end entrypoint parity covers each advertised CLI/UI/API/IDE/automation client and both model-assisted and model-free operation.
+- [ ] Per-target qualification is completed for each marketed cloud, VPS, panel, shared/private host, operating system and runtime tuple; every untested target remains explicitly unavailable/unassessed.
+- [ ] Fine-grained manual approvals, unattended automation, rollback/resume, localization/RTL/accessibility, SSRF/replay/tenant-isolation and autonomy authorization gates pass on the exact candidate.
+- [ ] Every mandatory workflow job succeeds; no skipped/cancelled/failed mandatory jobs.
+- [ ] Independent engineering, security, platform and cloud approvers inspect raw evidence and sign the same immutable candidate manifest.
+
+**Signature table:** remain intentionally unsigned until all criteria are evidenced. A successful code CI run is not a substitute for the failed physical AWS gate or missing provider/entrypoint evidence.
