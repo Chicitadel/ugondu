@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "V9 策略附加检查：已在 UgonduCORExecutionRole 上验证全部 5 项 UgonduCOR-V9-* 托管策略",
     "check.region_consistency": "区域一致性检查：所有策略 ARN 已协调至目标区域 {region}，且无跨区域漂移",
     "error.runner_overprivileged": "违反职责分离原则：运行器角色 {role} 包含仅应属于 UgonduCORExecutionRole 的直接基础设施工作负载权限",
-    "error.region_drift": "在策略 {policy} 中检测到区域范围漂移：正在将资源 ARN 协调至目标区域 {region}"
+    "error.region_drift": "在策略 {policy} 中检测到区域范围漂移：正在将资源 ARN 协调至目标区域 {region}",
+    "error.slr_missing": "服务相关角色 {role} 缺失，且调用方缺少 iam:CreateServiceLinkedRole 权限: {detail}",
+    "error.slr_denied": "自主创建服务相关角色 {role} 被拒绝: {detail}",
+    "error.provisioning_denied": "角色 {role} 的自主策略配置被拒绝: {detail}",
+    "error.policy_quota_exceeded": "策略包超出配额限制：已请求 {count} 个策略，最多允许 {max} 个。",
+    "error.wildcard_resource_disallowed": "语句 {sid} 包含针对变更操作 {action} 的无限制通配符资源。",
+    "state.blocked_authorization": "引导被阻止：角色 {role} 缺少所需权限。在工作负载探测前停止。",
+    "state.blocked_slr": "引导被阻止：缺少必备的服务相关角色 {role}。",
+    "remediation.slr_option_a": "向 {runner} 授予针对 {arn} 的限定范围 iam:CreateServiceLinkedRole 权限以实现自主创建。",
+    "remediation.slr_option_b": "通过 AWS CLI 或 AWS IAM 控制台手动创建服务相关角色 {role}。"
   },
   "deploy": {
     "pipeline.discover": "正在发现项目拓扑结构与目标平台能力",

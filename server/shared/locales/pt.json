@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "Verificação de anexos de políticas V9: todas as 5 políticas gerenciadas UgonduCOR-V9-* verificadas em UgonduCORExecutionRole",
     "check.region_consistency": "Verificação de consistência regional: todos os ARNs de políticas reconciliados para a região de destino {region} com zero desvio entre regiões",
     "error.runner_overprivileged": "Violação de segregação de funções: a função executora {role} contém permissões diretas de carga de trabalho de infraestrutura que pertencem exclusivamente a UgonduCORExecutionRole",
-    "error.region_drift": "Desvio de escopo regional detectado na política {policy}: reconciliando ARNs de recursos para a região de destino {region}"
+    "error.region_drift": "Desvio de escopo regional detectado na política {policy}: reconciliando ARNs de recursos para a região de destino {region}",
+    "error.slr_missing": "A função vinculada ao serviço {role} está ausente e o chamador não possui autoridade iam:CreateServiceLinkedRole: {detail}",
+    "error.slr_denied": "A criação autônoma da função vinculada ao serviço {role} foi negada: {detail}",
+    "error.provisioning_denied": "O provisionamento autônomo de políticas foi negado para a função {role}: {detail}",
+    "error.policy_quota_exceeded": "O pacote de políticas excede o limite de cota: {count} políticas solicitadas, máximo de {max} permitido.",
+    "error.wildcard_resource_disallowed": "A declaração {sid} contém recurso curinga irrestrito para a ação de mutação {action}.",
+    "state.blocked_authorization": "Inicialização bloqueada: autoridade necessária ausente para a função {role}. Parada antes das sondagens de carga de trabalho.",
+    "state.blocked_slr": "Inicialização bloqueada: função vinculada ao serviço pré-requisito {role} ausente.",
+    "remediation.slr_option_a": "Conceder iam:CreateServiceLinkedRole com escopo em {arn} para {runner} para criação autônoma.",
+    "remediation.slr_option_b": "Criar manualmente a função vinculada ao serviço {role} via AWS CLI ou console do AWS IAM."
   },
   "deploy": {
     "pipeline.discover": "Descobrindo a topologia do projeto e as capacidades da plataforma de destino",

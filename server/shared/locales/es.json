@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "Verificación de políticas adjuntas V9: las 5 políticas administradas UgonduCOR-V9-* verificadas en UgonduCORExecutionRole",
     "check.region_consistency": "Verificación de consistencia regional: todos los ARN de políticas reconciliados con la región de destino {region} sin desviación entre regiones",
     "error.runner_overprivileged": "Violación de separación de funciones: el rol de ejecutor {role} contiene permisos directos de carga de trabajo de infraestructura que pertenecen exclusivamente a UgonduCORExecutionRole",
-    "error.region_drift": "Desviación de alcance regional detectada en la política {policy}: reconciliando los ARN de recursos con la región de destino {region}"
+    "error.region_drift": "Desviación de alcance regional detectada en la política {policy}: reconciliando los ARN de recursos con la región de destino {region}",
+    "error.slr_missing": "El rol vinculado al servicio {role} no existe y el autor de la llamada carece de autoridad iam:CreateServiceLinkedRole: {detail}",
+    "error.slr_denied": "La creación autónoma del rol vinculado al servicio {role} fue denegada: {detail}",
+    "error.provisioning_denied": "El aprovisionamiento autónomo de políticas fue denegado para el rol {role}: {detail}",
+    "error.policy_quota_exceeded": "El paquete de políticas supera el límite de cuota: {count} políticas solicitadas, máximo {max} permitidas.",
+    "error.wildcard_resource_disallowed": "La instrucción {sid} contiene un recurso comodín no restringido para la acción mutante {action}.",
+    "state.blocked_authorization": "Arranque bloqueado: falta la autoridad requerida para el rol {role}. Detención antes de las sondas de carga de trabajo.",
+    "state.blocked_slr": "Arranque bloqueado: falta el rol vinculado al servicio prerrequisito {role}.",
+    "remediation.slr_option_a": "Otorgar iam:CreateServiceLinkedRole con ámbito en {arn} a {runner} para la creación autónoma.",
+    "remediation.slr_option_b": "Crear el rol vinculado al servicio {role} manualmente mediante AWS CLI o la consola de AWS IAM."
   },
   "deploy": {
     "pipeline.discover": "Descubriendo la topología del proyecto y las capacidades de la plataforma de destino",

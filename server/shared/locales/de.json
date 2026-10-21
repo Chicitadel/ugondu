@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "Prüfung der V9-Richtlinienanhänge: Alle 5 verwalteten Richtlinien UgonduCOR-V9-* auf UgonduCORExecutionRole verifiziert",
     "check.region_consistency": "Regionskonsistenzprüfung: Alle Richtlinien-ARNs wurden ohne regionsübergreifende Abweichung mit der Zielregion {region} abgeglichen",
     "error.runner_overprivileged": "Verstoß gegen die Funktionstrennung: Die Runner-Rolle {role} enthält direkte Infrastruktur-Workload-Berechtigungen, die ausschließlich zu UgonduCORExecutionRole gehören",
-    "error.region_drift": "Regionsbereichsabweichung in Richtlinie {policy} erkannt: Ressourcen-ARNs werden mit Zielregion {region} abgeglichen"
+    "error.region_drift": "Regionsbereichsabweichung in Richtlinie {policy} erkannt: Ressourcen-ARNs werden mit Zielregion {region} abgeglichen",
+    "error.slr_missing": "Serviceverknüpfte Rolle {role} fehlt und dem Aufrufer fehlt die Autorität iam:CreateServiceLinkedRole: {detail}",
+    "error.slr_denied": "Autonome Erstellung der serviceverknüpften Rolle {role} wurde verweigert: {detail}",
+    "error.provisioning_denied": "Autonome Richtlinienbereitstellung wurde für Rolle {role} verweigert: {detail}",
+    "error.policy_quota_exceeded": "Richtlinienpaket überschreitet Kontingentgrenze: {count} Richtlinien angefordert, maximal {max} zulässig.",
+    "error.wildcard_resource_disallowed": "Anweisung {sid} enthält eine uneingeschränkte Wildcard-Ressource für die mutierende Aktion {action}.",
+    "state.blocked_authorization": "Bootstrap blockiert: Erforderliche Autorität für Rolle {role} fehlt. Stopp vor Workload-Prüfungen.",
+    "state.blocked_slr": "Bootstrap blockiert: Erforderliche serviceverknüpfte Rolle {role} fehlt.",
+    "remediation.slr_option_a": "Bereichsbezogenes iam:CreateServiceLinkedRole auf {arn} für {runner} zur autonomen Erstellung gewähren.",
+    "remediation.slr_option_b": "Serviceverknüpfte Rolle {role} manuell über AWS-CLI oder AWS-IAM-Konsole erstellen."
   },
   "deploy": {
     "pipeline.discover": "Projekttopologie und Fähigkeiten der Zielplattform werden ermittelt",

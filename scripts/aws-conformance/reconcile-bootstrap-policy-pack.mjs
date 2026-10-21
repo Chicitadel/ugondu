@@ -3,7 +3,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : AWS Conformance / Live Bootstrap Policy Pack Reconciler
  * File           : reconcile-bootstrap-policy-pack.mjs
- * Version        : 1.1.0
+ * Version        : 1.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-21
@@ -57,52 +57,33 @@ export function loadAndValidateBootstrapPolicyPack(options = {}) {
   const maxPolicyChars = Number((yaml.match(/maxManagedPolicySizeChars:\s*(\d+)/) || [])[1] || 6144);
   const maxPoliciesPerRole = Number((yaml.match(/maxManagedPoliciesPerRole:\s*(\d+)/) || [])[1] || 10);
   const expectedTotalStatements = Number((yaml.match(/totalStatementsInPack:\s*(\d+)/) || [])[1] || 46);
-  const packAccountId = (yaml.match(/accountId:\s*"?(\d{12})"?/) || [])[1];
-  const packRegion = (yaml.match(/region:\s*([a-z0-9-]+)/) || [])[1];
+  const packAccountId = (yaml.match(/accountId:\s*"?(\d{12})"?/) || [])[1], packRegion = (yaml.match(/region:\s*([a-z0-9-]+)/) || [])[1];
 
-  if (packAccountId !== target.accountId || packRegion !== target.region) {
-    throw new Error(`Pack targetScope (${packAccountId}/${packRegion}) mismatches target config (${target.accountId}/${target.region})`);
-  }
-  if (!/prohibitRunnerExecutionAttachment:\s*true/.test(yaml)) {
-    throw new Error('Safety guardrail violation: prohibitRunnerExecutionAttachment must be true in pack.yaml');
-  }
+  if (packAccountId !== target.accountId || packRegion !== target.region) throw new Error(`Pack targetScope (${packAccountId}/${packRegion}) mismatches target config (${target.accountId}/${target.region})`);
+  if (!/prohibitRunnerExecutionAttachment:\s*true/.test(yaml)) throw new Error('Safety guardrail violation: prohibitRunnerExecutionAttachment must be true in pack.yaml');
 
   const rolesSection = yaml.slice(yaml.indexOf('\nroles:\n') + 7, yaml.indexOf('\npolicies:\n'));
   const roles = rolesSection.split(/\n  - logicalId:\s*/).slice(1).map((b) => ({
-    logicalId: b.split('\n')[0].trim(),
-    physicalName: (b.match(/physicalName:\s*(\S+)/) || [])[1],
-    arn: (b.match(/arn:\s*"?([^"\n]+)"?/) || [])[1],
-    roleKind: (b.match(/roleKind:\s*(\S+)/) || [])[1],
+    logicalId: b.split('\n')[0].trim(), physicalName: (b.match(/physicalName:\s*(\S+)/) || [])[1],
+    arn: (b.match(/arn:\s*"?([^"\n]+)"?/) || [])[1], roleKind: (b.match(/roleKind:\s*(\S+)/) || [])[1],
     prohibitExecutionPolicyAttachment: /prohibitExecutionPolicyAttachment:\s*true/.test(b)
   }));
 
   const executionRole = roles.find((r) => r.logicalId === 'execution-role');
   const runnerRole = roles.find((r) => r.logicalId === 'runner-role');
-  if (!executionRole || executionRole.physicalName !== target.executionRoleName) {
-    throw new Error(`Canonical execution role mismatch: expected ${target.executionRoleName}`);
-  }
-  if (!runnerRole || !runnerRole.prohibitExecutionPolicyAttachment) {
-    throw new Error('Runner role must explicitly set prohibitExecutionPolicyAttachment: true');
-  }
+  if (!executionRole || executionRole.physicalName !== target.executionRoleName) throw new Error(`Canonical execution role mismatch: expected ${target.executionRoleName}`);
+  if (!runnerRole || !runnerRole.prohibitExecutionPolicyAttachment) throw new Error('Runner role must explicitly set prohibitExecutionPolicyAttachment: true');
 
   const rawPolicies = yaml.slice(yaml.indexOf('\npolicies:\n') + 10, yaml.indexOf('\nquotas:\n')).split(/\n  - logicalId:\s*/).slice(1);
-  if (rawPolicies.length !== 5 || rawPolicies.length > maxPoliciesPerRole) {
-    throw new Error(`Invalid split policy count ${rawPolicies.length} (expected 5, max ${maxPoliciesPerRole})`);
-  }
+  if (rawPolicies.length !== 5 || rawPolicies.length > maxPoliciesPerRole) throw new Error(`Invalid split policy count ${rawPolicies.length} (expected 5, max ${maxPoliciesPerRole})`);
 
   let totalStatements = 0;
   const policies = rawPolicies.map((b) => {
-    const logicalId = b.split('\n')[0].trim();
-    const physicalName = (b.match(/physicalName:\s*(\S+)/) || [])[1];
-    const templatePath = (b.match(/templatePath:\s*(\S+)/) || [])[1];
-    const declaredSha = (b.match(/sha256:\s*"?([0-9a-fA-F]{64})"?/) || [])[1];
-    const declaredStatements = Number((b.match(/statementCount:\s*(\d+)/) || [])[1] || 0);
-
-    const rawBuf = fs.readFileSync(path.join(packDir, templatePath));
-    const actualSha = sha256(rawBuf);
+    const logicalId = b.split('\n')[0].trim(), physicalName = (b.match(/physicalName:\s*(\S+)/) || [])[1], templatePath = (b.match(/templatePath:\s*(\S+)/) || [])[1];
+    const declaredSha = (b.match(/sha256:\s*"?([0-9a-fA-F]{64})"?/) || [])[1], declaredStatements = Number((b.match(/statementCount:\s*(\d+)/) || [])[1] || 0);
+    const rawBuf = fs.readFileSync(path.join(packDir, templatePath)), actualSha = sha256(rawBuf);
     if (actualSha !== declaredSha) throw new Error(`SHA-256 mismatch for ${templatePath}`);
-    const parsed = JSON.parse(rawBuf.toString('utf8'));
-    const compactJson = JSON.stringify(parsed);
+    const parsed = JSON.parse(rawBuf.toString('utf8')), compactJson = JSON.stringify(parsed);
     if (compactJson.length > maxPolicyChars) throw new Error(`Policy ${physicalName} exceeds size limit`);
     if (parsed.Statement.length !== declaredStatements) throw new Error(`Policy ${physicalName} statement count mismatch`);
     if (compactJson.includes('us-east-1')) throw new Error(`Policy ${physicalName} contains forbidden us-east-1 drift`);
@@ -110,11 +91,7 @@ export function loadAndValidateBootstrapPolicyPack(options = {}) {
       throw new Error(`Policy ${physicalName} missing target scope parameterization`);
     }
     totalStatements += parsed.Statement.length;
-    return {
-      logicalId, physicalName, arn: `arn:aws:iam::${target.accountId}:policy/${physicalName}`,
-      templatePath, sha256: actualSha, compactCharLength: compactJson.length,
-      statementCount: parsed.Statement.length, compactJson
-    };
+    return { logicalId, physicalName, arn: `arn:aws:iam::${target.accountId}:policy/${physicalName}`, templatePath, sha256: actualSha, compactCharLength: compactJson.length, statementCount: parsed.Statement.length, compactJson };
   });
 
   if (totalStatements !== expectedTotalStatements) throw new Error(`Total statement count mismatch: ${totalStatements}`);
@@ -141,13 +118,9 @@ function inspectRunnerRoleHygiene(aws, runnerRoleName, execRoleArn, region) {
     if (getRes.status !== 0 || !getRes.json?.PolicyDocument) continue;
     const doc = typeof getRes.json.PolicyDocument === 'string' ? JSON.parse(decodeURIComponent(getRes.json.PolicyDocument)) : getRes.json.PolicyDocument;
     if (JSON.stringify(doc).includes('us-east-1')) res.runnerUsEast1DriftDetected = true;
-    const stmts = Array.isArray(doc.Statement) ? doc.Statement : [doc.Statement].filter(Boolean);
-    for (const s of stmts) {
-      const acts = Array.isArray(s.Action) ? s.Action : [s.Action].filter(Boolean);
-      const rsrcs = Array.isArray(s.Resource) ? s.Resource : [s.Resource].filter(Boolean);
-      if (s.Effect === 'Allow' && acts.includes('sts:AssumeRole') && acts.includes('sts:TagSession') && rsrcs.includes(execRoleArn)) {
-        res.delegationStatementConfirmed = true;
-      }
+    for (const s of (Array.isArray(doc.Statement) ? doc.Statement : [doc.Statement].filter(Boolean))) {
+      const acts = Array.isArray(s.Action) ? s.Action : [s.Action].filter(Boolean), rsrcs = Array.isArray(s.Resource) ? s.Resource : [s.Resource].filter(Boolean);
+      if (s.Effect === 'Allow' && acts.includes('sts:AssumeRole') && acts.includes('sts:TagSession') && rsrcs.includes(execRoleArn)) res.delegationStatementConfirmed = true;
       for (const a of acts) {
         if (/^(?:ec2|rds|s3|ecs|ecr):(?!Describe|List)/i.test(a) || /^(?:ec2|rds|s3):Create/i.test(a)) {
           res.runnerOverprivilegedStatementsDetected = true;
@@ -160,9 +133,7 @@ function inspectRunnerRoleHygiene(aws, runnerRoleName, execRoleArn, region) {
 }
 
 export function formatBootstrapRemediationDiagnostic(pack, denialDetail) {
-  const roleArn = pack.executionRole.arn;
-  const runnerArn = pack.runnerRole.arn;
-  const policyNames = pack.policies.map((p) => p.physicalName).join(', ');
+  const roleArn = pack.executionRole.arn, runnerArn = pack.runnerRole.arn, policyNames = pack.policies.map((p) => p.physicalName).join(', ');
   const policyArnGlob = `arn:aws:iam::${pack.target.accountId}:policy/UgonduCOR-V9-*`;
   return [
     '[FAIL] UG-BOOTSTRAP-AUTH-MISSING: AWS COR V9 Policy Pack Reconciliation Failed Closed.',
@@ -174,13 +145,48 @@ export function formatBootstrapRemediationDiagnostic(pack, denialDetail) {
   ].join('\n');
 }
 
+function verifyOrCreateRdsSlr(aws, pack, region) {
+  let roleRes = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
+  const isRds = (r) => {
+    if (!r?.Role) return true;
+    const doc = r.Role.AssumeRolePolicyDocument, s = typeof doc === 'string' ? decodeURIComponent(doc) : JSON.stringify(doc || {});
+    return s.includes('rds.amazonaws.com') || String(r.Role.Arn || '').includes('rds.amazonaws.com');
+  };
+  if (roleRes.status === 0 && isRds(roleRes.json)) {
+    console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
+    return { ok: true };
+  }
+  let createRes;
+  if (roleRes.status !== 0 && /NoSuchEntity/i.test(roleRes.stderr || '')) {
+    createRes = aws(['iam', 'create-service-linked-role', '--aws-service-name', 'rds.amazonaws.com'], region);
+    if (createRes.status === 0 || /InvalidInput|already exists/i.test(createRes.stderr || '')) {
+      const reverify = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
+      if (reverify.status === 0 && isRds(reverify.json)) {
+        console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
+        return { ok: true };
+      }
+    }
+  }
+  return { ok: false, detail: createRes?.stderr || roleRes.stderr || 'AWSServiceRoleForRDS missing or inaccessible' };
+}
+
+function failClosedAuth(pack, region, reportPath, reason, diagnostic) {
+  console.error(diagnostic);
+  const report = {
+    schemaVersion: '1.0.0', packId: pack.packId, phase: 'bootstrap-provision', evaluatedAt: new Date().toISOString(),
+    awsAccountId: pack.target.accountId, awsRegion: region, executionRoleArn: pack.executionRole.arn, runnerRoleArn: pack.runnerRole.arn,
+    operatingState: BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT, errorCode: 'UG-BOOTSTRAP-AUTH-MISSING',
+    status: 'FAIL', reason, diagnostic
+  };
+  writeReport(reportPath, report);
+  return { exitCode: 1, report };
+}
+
 export function runBootstrapProvisionPhase(options = {}) {
   const aws = options.awsRunner || defaultAws;
   const reportPath = resolveReportPath(options.evidenceDir);
   let pack;
-  try {
-    pack = loadAndValidateBootstrapPolicyPack(options);
-  } catch (err) {
+  try { pack = loadAndValidateBootstrapPolicyPack(options); } catch (err) {
     const failReport = { schemaVersion: '1.0.0', phase: 'bootstrap-provision', operatingState: BOOTSTRAP_OPERATING_STATES.SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION, errorCode: 'UG-BOOTSTRAP-BOUNDARY-VIOLATION', status: 'FAIL', reason: err.message };
     writeReport(reportPath, failReport);
     return { exitCode: 1, report: failReport };
@@ -194,7 +200,7 @@ export function runBootstrapProvisionPhase(options = {}) {
     return { exitCode: 1, report: failReport };
   }
 
-  if (options.targetRoleOverride && options.targetRoleOverride === pack.runnerRole.physicalName) {
+  if (options.targetRoleOverride === pack.runnerRole.physicalName) {
     const failReport = { schemaVersion: '1.0.0', phase: 'bootstrap-provision', operatingState: BOOTSTRAP_OPERATING_STATES.SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION, errorCode: 'UG-BOOTSTRAP-BOUNDARY-VIOLATION', status: 'FAIL', reason: 'Self-escalation prohibited' };
     writeReport(reportPath, failReport);
     return { exitCode: 1, report: failReport };
@@ -203,10 +209,7 @@ export function runBootstrapProvisionPhase(options = {}) {
   const runnerHygiene = inspectRunnerRoleHygiene(aws, pack.runnerRole.physicalName, pack.executionRole.arn, region);
   const execRoleName = pack.executionRole.physicalName;
   const listRes = aws(['iam', 'list-attached-role-policies', '--role-name', execRoleName], region);
-  let attachedSet = new Set();
-  let listConfirmed = false;
-  let bootstrapProvisioningDenied = false;
-  let denialDetail = '';
+  let attachedSet = new Set(), listConfirmed = false;
 
   if (listRes.status === 0 && Array.isArray(listRes.json?.AttachedPolicies)) {
     listConfirmed = true;
@@ -217,18 +220,11 @@ export function runBootstrapProvisionPhase(options = {}) {
     return { exitCode: 1, report: failReport };
   }
 
-  const alreadyAttachedCount = attachedSet.size;
-  const attachedDuringBootstrap = [];
-  const reconciledPolicyVersions = [];
-
-  // Ensure prerequisite service-linked roles exist for hands-free autonomous RDS operations
-  try {
-    const slrRes = aws(['iam', 'create-service-linked-role', '--aws-service-name', 'rds.amazonaws.com'], region);
-    if (slrRes.status === 0) {
-      console.log('[BOOTSTRAP-PROVISION] Autonomously created AWSServiceRoleForRDS service-linked role.');
-    }
-  } catch {
-    // Non-fatal if already exists or caller lacks SLR authority
+  const alreadyAttachedCount = attachedSet.size, attachedDuringBootstrap = [], reconciledPolicyVersions = [];
+  const slrRes = verifyOrCreateRdsSlr(aws, pack, region);
+  if (!slrRes.ok) {
+    const diag = `[FAIL] UG-BOOTSTRAP-AUTH-MISSING: AWSServiceRoleForRDS is missing and caller lacks iam:CreateServiceLinkedRole authority.\n  Detail: ${slrRes.detail}\n  Remediation: Grant iam:CreateServiceLinkedRole on rds.amazonaws.com to ${pack.runnerRole.arn} or pre-create AWSServiceRoleForRDS statically.`;
+    return failClosedAuth(pack, region, reportPath, 'AWSServiceRoleForRDS missing and caller lacks iam:CreateServiceLinkedRole', diag);
   }
 
   for (const pol of pack.policies) {
@@ -236,45 +232,59 @@ export function runBootstrapProvisionPhase(options = {}) {
     if (metaRes.status === 0 && metaRes.json?.Policy?.DefaultVersionId) {
       const verRes = aws(['iam', 'get-policy-version', '--policy-arn', pol.arn, '--version-id', metaRes.json.Policy.DefaultVersionId], region);
       const rawVer = verRes.status === 0 && verRes.json?.PolicyVersion?.Document
-        ? JSON.stringify(typeof verRes.json.PolicyVersion.Document === 'string' ? JSON.parse(decodeURIComponent(verRes.json.PolicyVersion.Document)) : verRes.json.PolicyVersion.Document)
-        : '';
+        ? JSON.stringify(typeof verRes.json.PolicyVersion.Document === 'string' ? JSON.parse(decodeURIComponent(verRes.json.PolicyVersion.Document)) : verRes.json.PolicyVersion.Document) : '';
       if (rawVer && (rawVer.includes('us-east-1') || rawVer !== pol.compactJson)) {
         let upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
         if (upRes.status !== 0 && /LimitExceeded/i.test(upRes.stderr || '')) {
           const vList = aws(['iam', 'list-policy-versions', '--policy-arn', pol.arn], region);
-          if (vList.status === 0 && Array.isArray(vList.json?.Versions)) {
-            const nonDefault = vList.json.Versions.filter((v) => !v.IsDefaultVersion);
-            nonDefault.sort((a, b) => new Date(a.CreateDate).getTime() - new Date(b.CreateDate).getTime());
-            if (nonDefault.length > 0) {
-              aws(['iam', 'delete-policy-version', '--policy-arn', pol.arn, '--version-id', nonDefault[0].VersionId], region);
-              upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
-            }
+          const nonDefault = (vList.json?.Versions || []).filter((v) => !v.IsDefaultVersion).sort((a, b) => new Date(a.CreateDate) - new Date(b.CreateDate));
+          if (nonDefault.length > 0) {
+            aws(['iam', 'delete-policy-version', '--policy-arn', pol.arn, '--version-id', nonDefault[0].VersionId], region);
+            upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
           }
         }
-        if (upRes.status === 0) reconciledPolicyVersions.push(pol.physicalName);
-        else console.warn(`[WARN] Autonomous policy update for ${pol.physicalName}: ${upRes.stderr || 'Failed'}`);
+        if (upRes.status === 0) {
+          const newVerId = upRes.json?.PolicyVersion?.VersionId || metaRes.json.Policy.DefaultVersionId;
+          const verCheck = aws(['iam', 'get-policy-version', '--policy-arn', pol.arn, '--version-id', newVerId], region);
+          if (verCheck.status === 0) reconciledPolicyVersions.push(pol.physicalName);
+        } else if (/AccessDenied|Access Denied|not authorized/i.test(upRes.stderr || '')) {
+          return failClosedAuth(pack, region, reportPath, `iam:CreatePolicyVersion denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, upRes.stderr));
+        } else {
+          console.warn(`[WARN] Autonomous policy update for ${pol.physicalName}: ${upRes.stderr || 'Failed'}`);
+        }
       }
     }
 
     if (listConfirmed && attachedSet.has(pol.physicalName)) continue;
+
     let attachRes = aws(['iam', 'attach-role-policy', '--role-name', execRoleName, '--policy-arn', pol.arn], region);
     if (attachRes.status !== 0 && /NoSuchEntity/i.test(attachRes.stderr || '')) {
       const createRes = aws(['iam', 'create-policy', '--policy-name', pol.physicalName, '--policy-document', pol.compactJson, '--tags', 'Key=UgonduCOR,Value=true'], region);
-      if (createRes.status === 0) attachRes = aws(['iam', 'attach-role-policy', '--role-name', execRoleName, '--policy-arn', pol.arn], region);
-      else attachRes = createRes;
+      if (createRes.status === 0) {
+        const polCheck = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
+        if (polCheck.status !== 0) console.warn(`[WARN] Created policy ${pol.physicalName} re-read warning: ${polCheck.stderr}`);
+        attachRes = aws(['iam', 'attach-role-policy', '--role-name', execRoleName, '--policy-arn', pol.arn], region);
+      } else if (/AccessDenied|Access Denied|not authorized/i.test(createRes.stderr || '')) {
+        return failClosedAuth(pack, region, reportPath, `iam:CreatePolicy denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, createRes.stderr));
+      } else {
+        attachRes = createRes;
+      }
     }
+
     if (attachRes.status === 0) {
+      const verifyAttach = aws(['iam', 'list-attached-role-policies', '--role-name', execRoleName], region);
+      if (verifyAttach.status === 0 && Array.isArray(verifyAttach.json?.AttachedPolicies)) {
+        attachedSet = new Set(verifyAttach.json.AttachedPolicies.map((p) => p.PolicyName || p.PolicyArn?.split('/').pop()));
+      }
       attachedDuringBootstrap.push(pol.physicalName);
     } else if (/AccessDenied|Access Denied|not authorized/i.test(attachRes.stderr || '')) {
-      bootstrapProvisioningDenied = true;
-      denialDetail = attachRes.stderr;
-      break;
+      return failClosedAuth(pack, region, reportPath, `iam:AttachRolePolicy denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, attachRes.stderr));
     }
   }
 
   let preliminaryState = BOOTSTRAP_OPERATING_STATES.RETURNING_INSTALLATION_MATCHED;
   if (reconciledPolicyVersions.length > 0) preliminaryState = BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED;
-  else if (!bootstrapProvisioningDenied && attachedDuringBootstrap.length > 0) {
+  else if (attachedDuringBootstrap.length > 0) {
     preliminaryState = (listConfirmed && alreadyAttachedCount > 0 && alreadyAttachedCount < 5)
       ? BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED
       : BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED;
@@ -285,7 +295,7 @@ export function runBootstrapProvisionPhase(options = {}) {
     awsAccountId: pack.target.accountId, awsRegion: region, executionRoleArn: pack.executionRole.arn, runnerRoleArn: pack.runnerRole.arn,
     validatedPolicyCount: pack.policies.length, totalStatementsVerified: pack.totalStatements,
     alreadyAttachedCount, attachedDuringBootstrap, reconciledPolicyVersions, runnerHygiene,
-    bootstrapProvisioningDenied, denialDetail: denialDetail || null,
+    bootstrapProvisioningDenied: false, denialDetail: null,
     checksConfirmed: {
       runnerDelegation: runnerHygiene.delegationStatementConfirmed, executionRoleTrust: false,
       v9PolicyAttachments: listConfirmed && (alreadyAttachedCount + attachedDuringBootstrap.length >= 5),
@@ -296,7 +306,6 @@ export function runBootstrapProvisionPhase(options = {}) {
   writeReport(reportPath, report);
   console.log(`[BOOTSTRAP-PROVISION] Operating state: ${preliminaryState}`);
   if (reconciledPolicyVersions.length > 0) console.log(`[BOOTSTRAP-PROVISION] Reconciled: ${reconciledPolicyVersions.join(', ')}`);
-  if (bootstrapProvisioningDenied) console.log(`[BOOTSTRAP-PROVISION] Runner lacks IAM write authority (${denialDetail || 'AccessDenied'}). Proceeding to effective verification.`);
   return { exitCode: 0, report };
 }
 
@@ -375,8 +384,6 @@ export function runVerifyEffectivePhase(options = {}) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const phaseIdx = process.argv.indexOf('--phase');
-  const phase = phaseIdx >= 0 ? process.argv[phaseIdx + 1] : 'verify-effective';
-  const res = phase === 'bootstrap-provision' ? runBootstrapProvisionPhase() : runVerifyEffectivePhase();
-  process.exit(res.exitCode);
+  const phase = process.argv.includes('--phase') ? process.argv[process.argv.indexOf('--phase') + 1] : 'verify-effective';
+  process.exit((phase === 'bootstrap-provision' ? runBootstrapProvisionPhase() : runVerifyEffectivePhase()).exitCode);
 }

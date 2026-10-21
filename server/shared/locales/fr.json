@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "Vérification de l'attachement des politiques V9 : les 5 politiques gérées UgonduCOR-V9-* ont été vérifiées sur UgonduCORExecutionRole",
     "check.region_consistency": "Vérification de cohérence régionale : tous les ARN de politiques sont réconciliés vers la région cible {region} sans aucune dérive interrégionale",
     "error.runner_overprivileged": "Violation de la séparation des tâches : le rôle de lanceur {role} contient des permissions directes de charge de travail d'infrastructure appartenant exclusivement à UgonduCORExecutionRole",
-    "error.region_drift": "Dérive de portée régionale détectée dans la politique {policy} : réconciliation des ARN de ressources vers la région cible {region}"
+    "error.region_drift": "Dérive de portée régionale détectée dans la politique {policy} : réconciliation des ARN de ressources vers la région cible {region}",
+    "error.slr_missing": "Le rôle lié à un service {role} est manquant et l'appelant ne dispose pas de l'autorité iam:CreateServiceLinkedRole : {detail}",
+    "error.slr_denied": "La création autonome du rôle lié à un service {role} a été refusée : {detail}",
+    "error.provisioning_denied": "Le provisionnement autonome de politiques a été refusé pour le rôle {role} : {detail}",
+    "error.policy_quota_exceeded": "Le pack de politiques dépasse la limite de quota : {count} politiques demandées, {max} au maximum autorisées.",
+    "error.wildcard_resource_disallowed": "L'instruction {sid} contient une ressource générique non restreinte pour l'action de mutation {action}.",
+    "state.blocked_authorization": "Amorçage bloqué : autorité requise manquante pour le rôle {role}. Arrêt avant les sondes de charge de travail.",
+    "state.blocked_slr": "Amorçage bloqué : rôle lié à un service prérequis {role} manquant.",
+    "remediation.slr_option_a": "Accorder iam:CreateServiceLinkedRole restreint sur {arn} à {runner} pour la création autonome.",
+    "remediation.slr_option_b": "Créer manuellement le rôle lié à un service {role} via l'AWS CLI ou la console AWS IAM."
   },
   "deploy": {
     "pipeline.discover": "Découverte de la topologie du projet et des capacités de la plateforme cible",

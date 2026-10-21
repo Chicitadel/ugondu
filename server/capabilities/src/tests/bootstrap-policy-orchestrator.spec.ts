@@ -32,7 +32,7 @@ import {
   computePolicyDigest,
 } from '../index';
 
-describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline', () => {
+describe('BootstrapPolicyOrchestrator — 6 Operating States, 5-Stage Pipeline & 4-Check Verification', () => {
   const scope = {
     accountId: '991158927746',
     allowedRegions: ['eu-west-3'],
@@ -96,7 +96,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     };
   }
 
-  it('State 1: INITIAL_INSTALLATION_AUTHORIZED — provisions and attaches missing policies automatically', () => {
+  it('State 1: INITIAL_INSTALLATION_AUTHORIZED — provisions missing policies and confirms all 4 checks', () => {
     const orchestrator = new BootstrapPolicyOrchestrator();
     const result = orchestrator.executeReconciliation(createBaseRequest());
 
@@ -111,6 +111,14 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
       'READY_FOR_QUALIFICATION_OR_DEPLOY',
     ]);
     expect(result.executedActions.map((a) => a.action)).toEqual(['CREATE_POLICY', 'ATTACH_POLICY']);
+    expect(result.fourCheckVerification).toEqual({
+      runnerDelegationConfirmed: true,
+      executionRoleTrustConfirmed: true,
+      v9PolicyAttachmentsConfirmed: true,
+      regionConsistencyConfirmed: true,
+      confirmedCount: 4,
+      summaryText: '4 of 4 checks confirmed',
+    });
     expect(result.evidence?.evidenceDigest).toMatch(/^[a-f0-9]{64}$/);
     expect(orchestrator.getLedger().verifyIntegrity().valid).toBe(true);
   });
@@ -141,7 +149,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     expect(result.readyForQualificationOrDeploy).toBe(true);
     expect(result.executedActions).toHaveLength(1);
     expect(result.executedActions[0].action).toBe('NO_OP');
-    expect(result.completedStages).toHaveLength(5);
+    expect(result.fourCheckVerification.summaryText).toBe('4 of 4 checks confirmed');
   });
 
   it('State 3: DRIFT_DETECTED_RECONCILABLE — updates drifted policy version and re-attaches when authorized', () => {
@@ -180,6 +188,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     expect(result.operatingState).toBe('DRIFT_DETECTED_RECONCILABLE');
     expect(result.readyForQualificationOrDeploy).toBe(true);
     expect(result.executedActions.map((a) => a.action)).toEqual(['UPDATE_POLICY_VERSION', 'ATTACH_POLICY']);
+    expect(result.fourCheckVerification.summaryText).toBe('4 of 4 checks confirmed');
   });
 
   it('State 4: BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT — halts before provision with UG-BOOTSTRAP-AUTH-MISSING', () => {
@@ -202,6 +211,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     expect(result.missingCapabilities).toEqual(['iam:CreatePolicy', 'iam:AttachRolePolicy']);
     expect(result.supportedAuthorizationOptions).toEqual(['BOOTSTRAP_SESSION', 'ADMIN_DELEGATION', 'INFRA_CONTROLLER']);
     expect(result.executedActions).toHaveLength(0);
+    expect(result.fourCheckVerification.v9PolicyAttachmentsConfirmed).toBe(false);
   });
 
   it('State 5: PROVIDER_OR_NETWORK_UNAVAILABLE — checkpoints ledger and returns fail-closed resume plan', () => {
@@ -224,6 +234,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     expect(result.errorCode).toBe('UG-PROVIDER-UNAVAILABLE');
     expect(result.checkpoint?.lastState).toBe('PAUSED');
     expect(result.resumePlan?.status).toBe('BLOCKED_UNPROBED');
+    expect(result.fourCheckVerification.confirmedCount).toBe(0);
   });
 
   it('State 6: OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS — refuses to overwrite foreign or unowned policies', () => {
@@ -251,6 +262,81 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     expect(result.readyForQualificationOrDeploy).toBe(false);
     expect(result.errorCode).toBe('UG-OWNERSHIP-AMBIGUOUS');
     expect(result.executedActions).toHaveLength(0);
+  });
+
+  it('Rejects over-privileged runner policy containing ec2:CreateVpc / rds:CreateDBInstance with UG-RUNNER-OVERPRIVILEGED', () => {
+    const orchestrator = new BootstrapPolicyOrchestrator();
+    const overprivilegedRunnerPolicy = JSON.stringify({
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Sid: 'RunnerAssumeAndIllegalWorkload',
+          Effect: 'Allow',
+          Action: ['sts:AssumeRole', 'ec2:CreateVpc', 'rds:CreateDBInstance'],
+          Resource: 'arn:aws:iam::991158927746:role/UgonduCORExecutionRole',
+        },
+      ],
+    });
+
+    const result = orchestrator.executeReconciliation(
+      createBaseRequest({
+        environment: {
+          ...createBaseRequest().environment,
+          runnerPolicyDocumentJson: overprivilegedRunnerPolicy,
+        },
+      })
+    );
+
+    expect(result.operatingState).toBe('OWNERSHIP_OR_PERMISSIONS_AMBIGUOUS');
+    expect(result.errorCode).toBe('UG-RUNNER-OVERPRIVILEGED');
+    expect(result.readyForQualificationOrDeploy).toBe(false);
+    expect(result.fourCheckVerification.runnerDelegationConfirmed).toBe(false);
+  });
+
+  it('Detects cross-region us-east-1 ARN drift and reconciles to eu-west-3 via UPDATE_POLICY_VERSION', () => {
+    const orchestrator = new BootstrapPolicyOrchestrator();
+    const usEast1DriftedDoc = JSON.stringify(
+      {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Sid: 'AllowRegionalSsmProbe',
+            Effect: 'Allow',
+            Action: ['ssm:GetParameter'],
+            Resource: 'arn:aws:ssm:us-east-1:991158927746:parameter/ugondu/*',
+          },
+        ],
+      },
+      null,
+      2
+    );
+
+    const result = orchestrator.executeReconciliation(
+      createBaseRequest({
+        environment: {
+          providerReachable: true,
+          discoveredRoles: ['UgonduCORExecutionRole'],
+          existingPolicies: [
+            {
+              packId: samplePack.packId,
+              policyArn: 'arn:aws:iam::991158927746:policy/ugondu-cor-ssm-pack',
+              documentJson: usEast1DriftedDoc,
+              ownedByUgondu: true,
+              attachedToRoles: ['UgonduCORExecutionRole'],
+            },
+          ],
+          bootstrapAuthority: { canCreatePolicy: true, canUpdatePolicyVersion: true, canAttachPolicy: true, authorizationMode: 'BOOTSTRAP_SESSION' },
+        },
+      })
+    );
+
+    expect(result.operatingState).toBe('DRIFT_DETECTED_RECONCILABLE');
+    expect(result.readyForQualificationOrDeploy).toBe(true);
+    expect(result.executedActions.map((a) => a.action)).toEqual(['UPDATE_POLICY_VERSION']);
+    expect(result.executedActions[0].reason).toContain('us-east-1');
+    expect(result.executedActions[0].reason).toContain('eu-west-3');
+    expect(result.fourCheckVerification.regionConsistencyConfirmed).toBe(true);
+    expect(result.fourCheckVerification.summaryText).toBe('4 of 4 checks confirmed');
   });
 
   it('Blocks self-escalation attempts targeting runner role and near-duplicate role collisions', () => {
@@ -291,6 +377,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
     expect(verifyFailed.errorCode).toBe('UG-EFFECTIVE-VERIFICATION-FAILED');
     expect(verifyFailed.failedStage).toBe('VERIFY_EFFECTIVE_RESULT');
     expect(verifyFailed.readyForQualificationOrDeploy).toBe(false);
+    expect(verifyFailed.fourCheckVerification.executionRoleTrustConfirmed).toBe(false);
   });
 
   it('Behaves identically across all entrypoints (CLI, UI, IDE, HEADLESS_CI, AUTOMATED_WORKFLOW)', () => {
@@ -301,6 +388,7 @@ describe('BootstrapPolicyOrchestrator — 6 Operating States & 5-Stage Pipeline'
       expect(res.operatingState).toBe('INITIAL_INSTALLATION_AUTHORIZED');
       expect(res.readyForQualificationOrDeploy).toBe(true);
       expect(res.executedActions.map((a) => a.action)).toEqual(['CREATE_POLICY', 'ATTACH_POLICY']);
+      expect(res.fourCheckVerification.summaryText).toBe('4 of 4 checks confirmed');
     }
   });
 });

@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "V9 नीति संलग्नक जांच: UgonduCORExecutionRole पर सभी 5 UgonduCOR-V9-* प्रबंधित नीतियाँ सत्यापित की गईं",
     "check.region_consistency": "क्षेत्र संगतता जांच: शून्य अंतर-क्षेत्रीय विचलन के साथ सभी नीति ARN को लक्षित क्षेत्र {region} के साथ समन्वित किया गया",
     "error.runner_overprivileged": "कार्य-पृथक्करण उल्लंघन: रनर भूमिका {role} में प्रत्यक्ष इंफ्रास्ट्रक्चर वर्कलोड अनुमतियाँ शामिल हैं जो विशेष रूप से UgonduCORExecutionRole से संबंधित हैं",
-    "error.region_drift": "नीति {policy} में क्षेत्रीय दायरे के विचलन का पता चला: संसाधन ARN को लक्षित क्षेत्र {region} के साथ समन्वित किया जा रहा है"
+    "error.region_drift": "नीति {policy} में क्षेत्रीय दायरे के विचलन का पता चला: संसाधन ARN को लक्षित क्षेत्र {region} के साथ समन्वित किया जा रहा है",
+    "error.slr_missing": "सेवा-लिंक्ड भूमिका {role} अनुपस्थित है और कॉलर के पास iam:CreateServiceLinkedRole अधिकार नहीं है: {detail}",
+    "error.slr_denied": "सेवा-लिंक्ड भूमिका {role} का स्वायत्त निर्माण अस्वीकार कर दिया गया: {detail}",
+    "error.provisioning_denied": "भूमिका {role} के लिए स्वायत्त नीति प्रावधान अस्वीकार कर दिया गया: {detail}",
+    "error.policy_quota_exceeded": "नीति पैक कोटा सीमा से अधिक है: {count} नीतियां अनुरोधित, अधिकतम {max} की अनुमति है।",
+    "error.wildcard_resource_disallowed": "कथन {sid} में परिवर्तनकारी क्रिया {action} के लिए अप्रतिबंधित वाइल्डकार्ड संसाधन शामिल है।",
+    "state.blocked_authorization": "बूटस्ट्रैप अवरुद्ध: भूमिका {role} के लिए आवश्यक अधिकार अनुपस्थित है। वर्कलोड जांच से पहले रोका जा रहा है।",
+    "state.blocked_slr": "बूटस्ट्रैप अवरुद्ध: पूर्व-आवश्यक सेवा-लिंक्ड भूमिका {role} अनुपस्थित है।",
+    "remediation.slr_option_a": "स्वायत्त निर्माण के लिए {runner} को {arn} पर स्कोप्ड iam:CreateServiceLinkedRole प्रदान करें।",
+    "remediation.slr_option_b": "AWS CLI या AWS IAM कंसोल के माध्यम से सेवा-लिंक्ड भूमिका {role} मैन्युअल रूप से बनाएं।"
   },
   "deploy": {
     "pipeline.discover": "प्रोजेक्ट टोपोलॉजी और लक्षित प्लेटफ़ॉर्म क्षमताओं की खोज की जा रही है",

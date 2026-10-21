@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "V9 정책 연결 검사: UgonduCORExecutionRole에서 5개의 모든 UgonduCOR-V9-* 관리형 정책이 검증됨",
     "check.region_consistency": "리전 일관성 검사: 모든 정책 ARN이 리전 간 드리프트 없이 대상 리전 {region}으로 조정됨",
     "error.runner_overprivileged": "직무 분리 위반: 러너 역할 {role}에 UgonduCORExecutionRole에만 속해야 하는 직접 인프라 워크로드 권한이 포함되어 있습니다",
-    "error.region_drift": "정책 {policy}에서 리전 범위 드리프트 감지됨: 리소스 ARN을 대상 리전 {region}으로 조정합니다"
+    "error.region_drift": "정책 {policy}에서 리전 범위 드리프트 감지됨: 리소스 ARN을 대상 리전 {region}으로 조정합니다",
+    "error.slr_missing": "서비스 연결 역할 {role}이 누락되었으며 호출자에게 iam:CreateServiceLinkedRole 권한이 없습니다: {detail}",
+    "error.slr_denied": "서비스 연결 역할 {role}의 자율 생성이 거부되었습니다: {detail}",
+    "error.provisioning_denied": "역할 {role}에 대한 자율 정책 프로비저닝이 거부되었습니다: {detail}",
+    "error.policy_quota_exceeded": "정책 팩이 할당량 한도를 초과했습니다: {count}개의 정책이 요청되었으며 최대 {max}개까지 허용됩니다.",
+    "error.wildcard_resource_disallowed": "문 {sid}에 변이 작업 {action}에 대한 제한되지 않은 와일드카드 리소스가 포함되어 있습니다.",
+    "state.blocked_authorization": "부트스트랩 차단됨: 역할 {role}에 필요한 권한이 누락되었습니다. 워크로드 프로브 전에 중단합니다.",
+    "state.blocked_slr": "부트스트랩 차단됨: 필수 사전 요건인 서비스 연결 역할 {role}이 누락되었습니다.",
+    "remediation.slr_option_a": "자율 생성을 위해 {runner}에게 {arn}에 범위가 지정된 iam:CreateServiceLinkedRole 권한을 부여하십시오.",
+    "remediation.slr_option_b": "AWS CLI 또는 AWS IAM 콘솔을 통해 서비스 연결 역할 {role}을 수동으로 생성하십시오."
   },
   "deploy": {
     "pipeline.discover": "프로젝트 토폴로지 및 대상 플랫폼 기능 검색 중",

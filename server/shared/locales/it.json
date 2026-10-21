@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "Controllo collegamento policy V9: tutte le 5 policy gestite UgonduCOR-V9-* sono state verificate su UgonduCORExecutionRole",
     "check.region_consistency": "Controllo di coerenza regionale: tutti gli ARN delle policy sono stati riconciliati con la regione di destinazione {region} senza alcuna deriva tra regioni",
     "error.runner_overprivileged": "Violazione della separazione dei compiti: il ruolo runner {role} contiene autorizzazioni dirette per il carico di lavoro dell'infrastruttura che appartengono esclusivamente a UgonduCORExecutionRole",
-    "error.region_drift": "Rilevata deriva dell'ambito regionale nella policy {policy}: riconciliazione degli ARN delle risorse con la regione di destinazione {region}"
+    "error.region_drift": "Rilevata deriva dell'ambito regionale nella policy {policy}: riconciliazione degli ARN delle risorse con la regione di destinazione {region}",
+    "error.slr_missing": "Il ruolo collegato al servizio {role} è mancante e il chiamante non dispone dell'autorità iam:CreateServiceLinkedRole: {detail}",
+    "error.slr_denied": "La creazione autonoma del ruolo collegato al servizio {role} è stata negata: {detail}",
+    "error.provisioning_denied": "Il provisioning autonomo dei criteri è stato negato per il ruolo {role}: {detail}",
+    "error.policy_quota_exceeded": "Il pacchetto di criteri supera il limite di quota: {count} criteri richiesti, massimo {max} consentiti.",
+    "error.wildcard_resource_disallowed": "L'istruzione {sid} contiene una risorsa carattere jolly non limitata per l'azione di mutazione {action}.",
+    "state.blocked_authorization": "Bootstrap bloccato: autorità richiesta mancante per il ruolo {role}. Arresto prima delle sonde del carico di lavoro.",
+    "state.blocked_slr": "Bootstrap bloccato: ruolo collegato al servizio prerequisito {role} mancante.",
+    "remediation.slr_option_a": "Concedere iam:CreateServiceLinkedRole limitato su {arn} a {runner} per la creazione autonoma.",
+    "remediation.slr_option_b": "Creare manualmente il ruolo collegato al servizio {role} tramite AWS CLI o console AWS IAM."
   },
   "deploy": {
     "pipeline.discover": "Rilevamento della topologia del progetto e delle capacità della piattaforma di destinazione",

@@ -1,0 +1,227 @@
+# ******************************************************************************
+# * Project        : Ugondu Universal Delivery Operating System
+# * Module         : Protected Boundaries & Architecture Governance
+# * File           : CERTIFICATION_BOUNDARIES.yaml
+# * Version        : 1.0.0
+# * Author         : Ujomor Systems Architecture & Governance Authority
+# * Organization   : Ujomor Systems
+# * Created Date   : 2026-10-21
+# * Last Modified  : 2026-10-21
+# * Classification : ENTERPRISE | INTERNAL
+# *
+# * Governance:
+# * - Corporate Governance Approved
+# * - Security Reviewed
+# * - Architecture Controlled
+# * - Protocol Frozen
+# * - Modularization Enforced
+# *
+# * Standards:
+# * - ISO 27001
+# * - SOC 2
+# * - OWASP ASVS
+# * - NIST
+# *
+# * Signatures:
+# * - Architecture Authority
+# * - Security Authority
+# * - Governance Authority
+# * - Deployment Authority
+# *
+# * Copyright (c) 2026 Ujomor Systems
+# * All Rights Reserved.
+# ******************************************************************************
+
+schemaVersion: "ugondu.io/cor-boundary/v1"
+registryType: "CertificationBoundaryRegistry"
+
+governanceRules:
+  protectedZoneRule: |
+    A certified boundary is immutable by default. Any pull request or commit modifying
+    paths declared under protectedPaths MUST explicitly declare a matching approved
+    MODIFICATION_ZONE in this registry. Mutating protected paths without an approved
+    modification zone declaration fails CI governance gates immediately.
+  mutationPolicies:
+    REQUIRE_EXPLICIT_MODIFICATION_ZONE:
+      description: "Path is strictly immutable under normal engineering. Requires registered active modification zone with approved remediation scope."
+    ALLOW_REVISED_IMPLEMENTATION:
+      description: "Active defect remediation or feature boundary currently under engineering implementation."
+    DENY_MUTATION:
+      description: "Absolute freeze. No mutation permitted regardless of modification zone."
+  statusDefinitions:
+    CERTIFIED: "Fully verified passing evidence bound to specific workflow runs, commits, and digests."
+    MODIFICATION_ZONE: "Active remediation zone addressing identified audit findings."
+    IN_PROGRESS: "Architectural evolution or adapter implementation actively under development."
+    UNCERTIFIED: "Unverified boundary; no empirical qualification established."
+
+summary:
+  totalBoundaries: 7
+  certifiedCount: 3
+  modificationZoneCount: 3
+  inProgressCount: 1
+  uncertifiedCount: 0
+
+boundaries:
+  - id: "aws.oidc-tagged-role-chain"
+    status: "CERTIFIED"
+    classification: "CRITICAL_PROTECTED"
+    owner: "Security & IAM Architecture Authority"
+    protectedPaths:
+      - ".github/workflows/cor.yml"
+      - "policy-packs/aws/cor/templates/roles/execution-role-trust.json"
+    mutationPolicy: "REQUIRE_EXPLICIT_MODIFICATION_ZONE"
+    evidence:
+      workflowRun: "39632147169"
+      jobs:
+        - "119332941489" # Base OIDC Credential Configuration
+        - "119332941751" # Assume Tagged Execution Session
+      verifiedIdentity: "UgonduCORRunner -> UgonduCORExecutionRole"
+      artifactDigest: "sha256:d8c52e46b0a9914eb1d81b22e17ce42fb9023f03b876f2d5e5e347719602a831"
+    dependencies:
+      - "aws.bootstrap.policy-reconciliation"
+    invalidationTriggers:
+      - "trust-policy-template-changed"
+      - "OIDC-subject-conditions-changed"
+      - "AWS-adapter-major-version-changed"
+      - "tag-session-contract-changed"
+
+  - id: "aws.physical.vpc-ec2-ebs"
+    status: "CERTIFIED"
+    classification: "CRITICAL_PROTECTED"
+    owner: "Infrastructure & Cloud Native Engineering Authority"
+    protectedPaths:
+      - "server/engine-core/src/fabric/providers/aws-native-client.ts"
+    mutationPolicy: "REQUIRE_EXPLICIT_MODIFICATION_ZONE"
+    evidence:
+      workflowRun: "39632147169"
+      verifiedActions:
+        - "ec2:CreateVpc"
+        - "ec2:CreateSubnet"
+        - "ec2:CreateSecurityGroup"
+        - "ec2:RunInstances"
+        - "ec2:CreateSnapshot"
+      artifactDigest: "sha256:e1a90c541b63dd10034a78cb58f912e7534dc9213bc891f7a6341209e86c07a9"
+    dependencies:
+      - "aws.oidc-tagged-role-chain"
+    invalidationTriggers:
+      - "aws-native-client-core-changed"
+      - "vpc-ec2-ebs-lifecycle-signature-changed"
+      - "provider-sdk-major-version-bump"
+
+  - id: "aws.physical.urre-rollback"
+    status: "CERTIFIED"
+    classification: "CRITICAL_PROTECTED"
+    owner: "Resilience & Disaster Recovery Engineering Authority"
+    protectedPaths:
+      - "server/engine-core/src/urre/"
+    mutationPolicy: "REQUIRE_EXPLICIT_MODIFICATION_ZONE"
+    evidence:
+      workflowRun: "39632147169"
+      verifiedLifecycle: "Dependency-aware rollback with clean residual scan"
+      residualScanResult: "CLEAN"
+      artifactDigest: "sha256:7f4d92a188e404bf76503c5d63f58a8a3ce2871165a2d67d7398114f24340578"
+    dependencies:
+      - "aws.physical.vpc-ec2-ebs"
+    invalidationTriggers:
+      - "urre-engine-core-changed"
+      - "residual-scan-contract-changed"
+      - "dependency-graph-evaluator-modified"
+
+  - id: "aws.bootstrap.slr-prerequisite"
+    status: "MODIFICATION_ZONE"
+    classification: "DEFECT_REMEDIATION_ZONE"
+    owner: "Platform Operations & Authorization Governance"
+    finding:
+      - "COR-001" # Service-linked role failure is not fail-closed early enough
+      - "COR-007" # Service-linked-role policy scope and authorization path need provider validation
+    targetPaths:
+      - "scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs"
+      - "policy-packs/aws/cor/bootstrap/runner-bootstrap-permissions.json"
+    mutationPolicy: "ALLOW_REVISED_IMPLEMENTATION"
+    remediationScope:
+      - "Query for SLR existence using supported read API before attempting creation"
+      - "Differentiate EntityAlreadyExists (re-read & verify) from AccessDenied or ServiceControlPolicy denial"
+      - "Emit typed blocker (UG-BOOTSTRAP-AUTH-MISSING) and halt immediately without swallowing exceptions"
+      - "Scope iam:CreateServiceLinkedRole with iam:AWSServiceName condition"
+    dependencies:
+      - "aws.oidc-tagged-role-chain"
+    gatingTests:
+      - "test/aws-conformance/slr-reconciliation.test.ts"
+      - "test/aws-conformance/slr-denial-blocker.test.ts"
+      - "test/aws-conformance/slr-permission-boundary.test.ts"
+
+  - id: "aws.bootstrap.policy-reconciliation"
+    status: "MODIFICATION_ZONE"
+    classification: "DEFECT_REMEDIATION_ZONE"
+    owner: "Security & Policy Governance Authority"
+    finding:
+      - "COR-002" # Bootstrap can misreport a denied mutation as a successful bootstrap phase
+      - "COR-003" # Policy provisioning logic is not a complete ownership-safe reconciler
+    targetPaths:
+      - "scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs"
+      - "server/capabilities/src/continuity/BootstrapPolicyOrchestrator.ts"
+      - "policy-packs/aws/cor/pack.yaml"
+    mutationPolicy: "ALLOW_REVISED_IMPLEMENTATION"
+    remediationScope:
+      - "Enforce fail-closed exit semantics: non-zero exit on denial, never report success when unverified"
+      - "Structure reconciler into explicit phases: discovery -> desired plan -> auth preflight -> mutation -> post-verification"
+      - "Strict create-before-attach ordering with individual post-read validation"
+      - "Verify ownership metadata and canonical tags; unknown objects remain untouched"
+      - "Idempotent NO_OP when policy pack is already converged"
+    dependencies:
+      - "aws.bootstrap.slr-prerequisite"
+    gatingTests:
+      - "test/aws-conformance/reconcile-fail-closed.test.ts"
+      - "test/aws-conformance/policy-lifecycle-ordering.test.ts"
+      - "test/aws-conformance/ownership-safe-adoption.test.ts"
+
+  - id: "core.policy-renderer-and-digest"
+    status: "MODIFICATION_ZONE"
+    classification: "DEFECT_REMEDIATION_ZONE"
+    owner: "Core Architecture & Cryptographic Governance Authority"
+    finding:
+      - "COR-004" # Region/account/name values are pinned rather than rendered from validated target configuration
+      - "COR-005" # Wildcard-resource validation blocks legitimate provider policies
+      - "COR-006" # Policy digest canonicalization is not recursively canonical
+    targetPaths:
+      - "server/capabilities/src/continuity/RegionPolicyRenderer.ts"
+      - "server/capabilities/src/continuity/CanonicalPolicyRegistry.ts"
+      - "policy-packs/aws/cor/pack.yaml"
+    mutationPolicy: "ALLOW_REVISED_IMPLEMENTATION"
+    remediationScope:
+      - "Render target accounts, partitions, and regions from validated input without fallback pins"
+      - "Action-aware wildcard validation: allow '*' for read/list/describe actions per provider catalog, block for mutative actions"
+      - "Recursive canonical JSON digest implementation ensuring nested keys are sorted deterministically"
+      - "Strict validation rejecting non-finite numbers and non-JSON values"
+    dependencies: []
+    gatingTests:
+      - "test/continuity/canonical-json-digest.test.ts"
+      - "test/continuity/region-policy-renderer.test.ts"
+      - "test/continuity/action-aware-wildcard.test.ts"
+      - "test/continuity/multi-account-region-rendering.test.ts"
+
+  - id: "platform.provider-neutral-adapters"
+    status: "IN_PROGRESS"
+    classification: "ARCHITECTURE_EVOLUTION_ZONE"
+    owner: "Platform Architecture & Multi-Cloud Engineering Authority"
+    finding:
+      - "COR-008" # Orchestrator is not yet proof of universal provider support
+      - "COR-013" # cPanel / DirectAdmin / shared hosting / private host adapters not yet qualified
+    targetPaths:
+      - "server/capabilities/src/continuity/BootstrapPolicyOrchestrator.ts"
+      - "server/capabilities/src/continuity/ResumePlanner.ts"
+      - "server/capabilities/src/continuity/DuplicateRoleGuard.ts"
+      - "server/capabilities/src/continuity/ExecutionContinuityLedger.ts"
+    mutationPolicy: "ALLOW_REVISED_IMPLEMENTATION"
+    remediationScope:
+      - "Decouple orchestrator from AWS-specific primitives into universal PolicyPermissionAdapter interface"
+      - "Formal capability negotiation (SUPPORTED, UNSUPPORTED, CONDITIONAL, UNKNOWN)"
+      - "Preserve OS/entrypoint parity (CLI, UI, IDE, CI/headless) over shared execution ledger"
+      - "Durable crash-safe resume ledger with transaction lock and idempotency keys"
+    dependencies:
+      - "core.policy-renderer-and-digest"
+      - "aws.bootstrap.policy-reconciliation"
+    gatingTests:
+      - "test/continuity/provider-adapter-contract.test.ts"
+      - "test/continuity/cross-os-entrypoint-parity.test.ts"
+      - "test/continuity/durable-resume-crash-recovery.test.ts"

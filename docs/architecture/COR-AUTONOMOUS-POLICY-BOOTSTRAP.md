@@ -1,135 +1,191 @@
+<!--
+******************************************************************************
+* Project        : Ugondu Universal Delivery Operating System
+* Module         : Architecture Specification & Protected Governance
+* File           : COR-AUTONOMOUS-POLICY-BOOTSTRAP.md
+* Version        : 1.1.0
+* Author         : Ujomor Systems Architecture & Platform Governance Authority
+* Organization   : Ujomor Systems
+* Created Date   : 2026-10-21
+* Last Modified  : 2026-10-21
+* Classification : ENTERPRISE | INTERNAL
+*
+* Governance:
+* - Corporate Governance Approved
+* - Security Reviewed
+* - Architecture Controlled
+* - Protocol Frozen
+* - Modularization Enforced
+*
+* Standards:
+* - ISO 27001
+* - SOC 2
+* - OWASP ASVS
+* - NIST
+*
+* Signatures:
+* - Architecture Authority
+* - Security Authority
+* - Governance Authority
+* - Deployment Authority
+*
+* Copyright (c) 2026 Ujomor Systems
+* All Rights Reserved.
+******************************************************************************
+-->
+
 # COR Autonomous Policy Stabilization and Bootstrap Contract
 
-**Status:** Proposed implementation contract for `phase4/production-hardening`  
-**Scope:** Ugondu bootstrap and recovery; AWS COR V9 is the first provider adapter.  
+**Status:** Implementation Contract for `phase4/production-hardening`  
+**Scope:** Ugondu bootstrap, reconciliation, and recovery; AWS COR V9 is the initial provider adapter.  
 **Decision:** Option A — autonomous reconciliation is the default path. Manual console instructions are not the normal recovery path.
 
-## 1. Required user experience
+---
 
-A user must be able to run one supported CLI command (or one UI action) to bootstrap COR. The same shared engine must be used by terminal, UI, IDE, CI, model-assisted and non-model-assisted entry points. AI may explain or help interpret intent, but it must not be a prerequisite for policy reconciliation.
+## 1. Required User Experience
 
-The command must: discover the caller and target; inspect current resources; validate signed policy-pack provenance and policy documents; build a deterministic plan; provision or update only Ugondu-owned canonical policies; attach missing approved policies to the canonical execution role; verify attachments and trust; run read-only conformance probes; persist evidence and checkpoints; and resume safely after interruption.
+A platform operator must be able to execute one supported CLI command (or trigger one UI action) to bootstrap COR. The identical shared core reconciler engine is invoked across terminal, UI, IDE, CI/CD, model-assisted, and model-free execution entry points. Advanced assistive tooling may explain intent or summarize diagnostics, but core reconciliation remains 100% deterministic and operates fully independent of external model inference.
 
-## 2. Existing implementation discovered
+The autonomous bootstrap sequence enforces deterministic progression:
+1. Discovers caller identity, provider tenancy, account/project, and target regions.
+2. Inspects existing identity objects, roles, and managed policies.
+3. Validates signed policy-pack provenance, recursive canonical digests, and policy documents.
+4. Synthesizes a deterministic reconciliation plan.
+5. Provisions or reconciles only canonical Ugondu-owned managed policies.
+6. Attaches missing approved policies to the canonical execution role (`UgonduCORExecutionRole`).
+7. Verifies attachments, session-tag trust preconditions, and provider-level boundaries.
+8. Executes read-only conformance probes.
+9. Persists signed cryptographic evidence and durable recovery checkpoints.
+10. Resumes deterministically after interruption without replaying non-idempotent operations.
 
-On `phase4/production-hardening`, `.github/workflows/cor.yml` already calls:
+---
 
+## 2. Existing Implementation Baseline
+
+On `phase4/production-hardening`, `.github/workflows/cor.yml` executes:
 1. `node scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs --phase bootstrap-provision` under base OIDC credentials.
 2. Assumption of the tagged `UgonduCORExecutionRole` session.
 3. `node scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs --phase verify-effective` under the execution role.
-4. Read-only conformance probes.
+4. Read-only conformance probes and physical qualification.
 
-The reconciler validates the five V9 policy templates and their SHA-256 values, attempts to reconcile policy versions and attachments, and emits an evidence report. This is a foundation, not proof that every required IAM operation is available or that every recovery path is complete.
+The baseline reconciler validates five V9 policy templates and their SHA-256 digests. Production hardening elevates this foundation from an ad-hoc script into an enterprise ownership-safe reconciler that eliminates hidden prerequisite failures and unhandled error states.
 
-## 3. Bootstrap authority is a distinct capability
+---
 
-Autonomous execution must not be confused with self-granting authority. A workload cannot grant itself permissions that its current principal does not possess. The bootstrap principal must be provisioned once by an authorized administrator, organization control plane, or pre-authorized IaC deployment. After that, routine deployments must not require manual policy attachment.
+## 3. Bootstrap Authority vs. Execution Authority
 
-Maintain two distinct permission domains:
+Autonomous execution must never be conflated with self-granting authorization. A software process cannot grant itself authority absent from its caller's principal. The bootstrap principal is authorized once by an enterprise platform administrator or sovereign IaC deployment. Routine downstream deployments require zero manual policy mutations.
 
-- **Bootstrap principal / runner:** identity discovery, read-only inspection of canonical roles and policies, create/update only canonical Ugondu-owned policy objects where explicitly allowed, attach only allow-listed policy ARNs to the canonical execution role, and verify the result.
-- **Execution role:** runtime infrastructure permissions from the approved signed policy pack. Do not attach the execution pack to the runner.
+Two strictly separated permission domains are enforced:
+- **Bootstrap Principal / Runner (`UgonduCORRunner`):** Identity discovery, read-only inspection of canonical roles and policies, controlled creation/versioning of canonical Ugondu-owned policy objects where pre-authorized, attachment of only allow-listed policy ARNs to `UgonduCORExecutionRole`, and post-mutation verification.
+- **Execution Role (`UgonduCORExecutionRole`):** Workload infrastructure permissions granted exclusively by the approved, signed V9 policy pack. Workload permissions are never granted to the runner principal.
 
-Never grant the runner broad EC2/RDS/S3/ECS/ECR deployment permissions merely to make a workflow pass.
+---
 
-## 4. Required permission inventory
+## 4. Service-Linked Role (SLR) Preflight Resolution
 
-The bootstrap adapter must compute the actual required actions from the operations it plans to perform and report each missing action/resource pair. The baseline inventory to evaluate is:
+To eliminate latent failures (such as COR-001/COR-007 where RDS DB subnet group creation fails downstream due to an unverified service-linked role), the bootstrap reconciler implements deterministic preflight prerequisite resolution:
 
-- Identity and target discovery: `sts:GetCallerIdentity`, `iam:GetRole`, `iam:ListRolePolicies`, `iam:GetRolePolicy`, `iam:ListAttachedRolePolicies`, `iam:GetPolicy`, `iam:GetPolicyVersion`, `iam:ListPolicyVersions`.
-- Create missing canonical managed policies, if enabled: `iam:CreatePolicy`, scoped to the exact canonical policy names and approved tags.
-- Repair a canonical managed policy version, if enabled: `iam:CreatePolicyVersion` and, only when necessary and safe, `iam:DeletePolicyVersion` for the exact canonical policy ARN. Never delete the default version or a version required for rollback.
-- Attach approved policies: `iam:AttachRolePolicy` scoped to the canonical execution role and constrained by `iam:PolicyARN` to the signed pack's exact policy ARN allow-list (a prefix match alone is not sufficient when an exact list can be generated).
-- Trust-policy repair is a separate high-risk capability. It must not occur implicitly during routine bootstrap. Require explicit plan approval or pre-authorized IaC, compare the complete expected principal and conditions, and preserve rollback evidence.
+1. **Deterministic Read Probe:** Query role existence via `iam:GetRole` for `AWSServiceRoleForRDS` prior to any mutating calls.
+2. **Convergence Verification (`NO_OP`):** If the role exists, inspect its service principal (`rds.amazonaws.com`) and canonical state. Record `NO_OP` with evidence and proceed.
+3. **Authorized Creation:** If absent, invoke `iam:CreateServiceLinkedRole` with `--aws-service-name rds.amazonaws.com` only when caller authorization explicitly includes this capability scoped by condition key `iam:AWSServiceName: rds.amazonaws.com`.
+4. **Concurrent Creation Race:** If the provider returns `EntityAlreadyExists`, immediately re-read and verify the role. Never assume success without live read confirmation.
+5. **Fail-Closed on Denial:** If creation returns `AccessDenied`, permissions-boundary violation, Service Control Policy (SCP) rejection, or network timeout:
+   - **Never swallow or ignore exceptions in catch blocks.**
+   - Emit typed diagnostic code `UG-BOOTSTRAP-AUTH-MISSING`.
+   - Record provider request ID, transaction ID, and exact missing action (`iam:CreateServiceLinkedRole`).
+   - Halt execution immediately before any dependent RDS operations execute.
 
-The repository now includes a scoped starter authority document at `policy-packs/aws/cor/bootstrap/runner-bootstrap-permissions.json`. It covers tagged assumption of the canonical execution role, inspection of the canonical attachment set, attachment of the five exact V9 policies, and controlled create/version repair of those exact policy names. Treat it as a reviewed bootstrap artifact, not as a self-installing permission escalation. Validate it against the AWS IAM Service Authorization Reference and an isolated account before applying it. The current target account/role names are intentionally explicit; a future provider-neutral renderer must substitute typed target values and regenerate integrity evidence.
+---
 
-The adapter must not treat AccessDenied, malformed output, missing credentials, throttling, or provider unavailability as evidence that an object does not exist. Classify each result distinctly and fail closed when a safe reconciliation decision cannot be made.
+## 5. Action-Aware Wildcard Validation and Target Rendering
 
-## 5. Policy stabilization and region selection
+Blanket rejection of `Resource: "*"` (COR-005) is architecturally incorrect because numerous AWS read/list/describe APIs natively mandate wildcard resource scope in IAM. The policy renderer and static validator apply action-aware semantic validation:
 
-Region selection must be validated against the provider's region catalog and passed as a typed target parameter. Do not silently use the AWS CLI default region. Do not globally replace arbitrary strings in signed policy documents.
+- **Action Metadata Catalogue:** The validator references provider action definitions to determine whether an API supports resource-level permissions.
+- **Allowed Wildcards:** Actions that require global/all-resource scope (e.g., `ec2:Describe*`, `rds:Describe*`, `iam:List*`) legitimately permit `Resource: "*"`. Where supported by the provider, statements are constrained with condition keys (e.g., `aws:RequestedRegion`).
+- **Denied Wildcards:** Any mutative action (`ec2:RunInstances`, `ec2:CreateVpc`, `s3:PutObject`, `iam:AttachRolePolicy`) targeting `Resource: "*"` is rejected during plan validation unless covered by an explicit, architecturally reviewed exception.
+- **Target Parameterization:** All policy templates decouple target accounts, partitions, role paths, and regions (COR-004). Values are rendered from validated execution targets rather than static fallback defaults (e.g., eliminating hardcoded `eu-west-3` or pinned accounts).
+- **Recursive Canonical Digest:** Policy integrity verification uses recursive canonical JSON hashing (COR-006), deterministically sorting nested keys and preserving array order.
 
-The current V9 pack has a fixed target scope and signed hashes. If region portability is required, introduce a deterministic policy-rendering stage with:
-- canonical, region-neutral source templates;
-- typed placeholders for account, partition, region, and resource identifiers;
-- schema validation before rendering;
-- deny-by-default rejection of unresolved placeholders and unexpected regions;
-- rendered-policy size, action, resource, condition, and statement-count checks;
-- content hashes and evidence for the rendered artifacts;
-- a signature/provenance policy appropriate to generated artifacts;
-- tests for at least `eu-west-3`, a second supported region, invalid regions, and cross-account ARNs.
+---
 
-Never bypass signature verification or widen resource ARNs to `*` to make a regional mismatch disappear. AWS global IAM ARNs and regional service resource ARNs must be handled according to their service-specific ARN semantics.
+## 6. Reconciliation State Machine and Fail-Closed Exit Semantics
 
-## 6. Reconciliation state machine
+The reconciler executes across explicit, durable lifecycle phases:
 
-Use explicit durable states:
+```txt
+DISCOVERING -> VALIDATING -> PLANNING -> AUTHORIZED -> APPLYING -> VERIFYING -> COMPLETE
+```
 
-`DISCOVERING -> VALIDATING -> PLANNING -> AUTHORIZED -> APPLYING -> VERIFYING -> COMPLETE`
+Terminal and resumable failure states include:
+- `AUTHORITY_MISSING`
+- `DRIFT_UNSAFE`
+- `PROVIDER_UNAVAILABLE`
+- `ACCESS_DENIED`
+- `VERIFY_FAILED`
+- `INTERRUPTED`
 
-Terminal or resumable exception states include `AUTHORITY_MISSING`, `DRIFT_UNSAFE`, `PROVIDER_UNAVAILABLE`, `ACCESS_DENIED`, `VERIFY_FAILED`, and `INTERRUPTED`.
+### Fail-Closed Exit Semantics (COR-002 / COR-003)
 
-Before every mutation:
-1. Persist the intended operation and idempotency key.
-2. Re-read the target object and confirm its canonical identity and ownership.
-3. Confirm the requested action is in the approved plan and the policy pack is trusted.
-4. Execute one mutation.
-5. Re-read provider state and verify the postcondition.
-6. Persist evidence and advance the checkpoint.
+- **Strict Non-Zero Exit:** If any required bootstrap mutation is denied or cannot be verified, the reconciler must return a non-zero process exit code and a structured failure packet. It must NEVER exit with status 0 while recording an internal denial.
+- **Immediate Execution Halt:** Workload provisioning must never be invoked after a denied bootstrap mutation. Downstream jobs are blocked immediately at the point of failure.
+- **Create-Before-Attach Lifecycle:** Policy objects must be created or updated, and their live read digests verified, before any attachment operation is attempted.
+- **Ownership Verification:** Pre-existing policies sharing canonical names are adopted only if their tags, ownership metadata, and recursive digests match. Foreign or ambiguous policies trigger `DRIFT_UNSAFE` and halt without overwrite.
 
-On restart, inspect actual provider state before retrying. Do not blindly replay non-idempotent operations. If an object is foreign, ambiguous, or unexpectedly changed, stop and preserve it.
+---
 
-## 7. Verification requirements
+## 7. Verification and Evidence Requirements
 
-A successful bootstrap must verify all of the following from live reads, not inferred booleans:
+Bootstrap success requires live read confirmation across all dimensions:
+- Caller identity and AWS partition match configured target.
+- Execution role trust policy requires runner ARN and mandates session tags `UgonduTransactionId` and `UgonduCOR`.
+- All five V9 policies exist with current default version digests matching expected canonical digests.
+- All five policies are attached to `UgonduCORExecutionRole`.
+- No workload execution policies are attached to `UgonduCORRunner`.
+- Read-only conformance probes execute successfully.
+- Evidence report records exact timestamps, transaction IDs, policy digests, and provider request IDs.
 
-- caller account and principal are expected;
-- canonical runner and execution role names/ARNs match target configuration;
-- execution role trust allows the expected runner and enforces required session tags, including both `UgonduTransactionId` and `UgonduCOR` when the workflow sends both;
-- every expected policy exists and its current default document matches the validated/rendered expected document;
-- every expected policy is attached to the execution role;
-- no execution policy is attached to the runner;
-- effective read-only conformance probes succeed;
-- required negative boundary probes are denied;
-- region/account scope is consistent;
-- the report records evidence, timestamps, policy hashes, operation outcomes, and any skipped/unsupported checks.
+---
 
-A successful API response from `AttachRolePolicy` is not sufficient without a subsequent attachment read. A failed `ListAttachedRolePolicies` call must be classified as inconclusive, not as an empty attachment list.
+## 8. Protected-Zone Governance and Mutation Boundaries
 
-## 8. CI and test contract
+To prevent regressions in qualified production paths, all components are partitioned into formal certification boundaries as codified in `docs/cor/CERTIFICATION_BOUNDARIES.yaml`:
 
-The COR workflow must preserve the ordering: bootstrap identity -> validate/plan -> bootstrap reconcile -> tagged execution session -> verify effective policy state -> conformance probes -> evidence upload. No mutating operation may occur before the plan and authorization preflight are complete.
+### Certified Boundaries (Immutable by Default)
+1. `aws.oidc-tagged-role-chain`: OIDC credential exchange and tagged execution-role assumption (`.github/workflows/cor.yml`, `policy-packs/aws/cor/templates/roles/execution-role-trust.json`).
+2. `aws.physical.vpc-ec2-ebs`: VPC, Subnet, Security Group, EC2 Instance, and EBS Snapshot provisioning (`server/engine-core/src/fabric/providers/aws-native-client.ts`).
+3. `aws.physical.urre-rollback`: Dependency-aware rollback and residual resource cleanup (`server/engine-core/src/urre/`).
 
-Required automated tests:
-- clean first installation and already-correct repeat installation;
-- each policy missing individually and all policies missing;
-- regional drift and invalid region;
-- missing policy, stale default version, and managed-policy version quota;
-- AccessDenied on each required IAM operation;
-- malformed provider responses, throttling and provider outage;
-- wrong account, wrong role, wrong trust principal, missing/extra session tags;
-- interrupted run at every mutation boundary and resume from the durable checkpoint;
-- foreign policy/role collisions and duplicate-role prevention;
-- no runner attachment of execution policies;
-- exact parity of results through CLI, UI and non-AI execution adapters;
-- no secrets in logs or evidence;
-- live AWS verification only in the explicitly authorized physical qualification job.
+**Mutation Rule:** Certified paths cannot be modified unless an active `MODIFICATION_ZONE` is formally approved. Mutating protected paths without authorization triggers immediate CI rejection.
 
-Tests must use injected AWS-call adapters or isolated test accounts; they must never mutate the production qualification account as part of ordinary unit tests.
+### Active Modification Zones
+1. `aws.bootstrap.slr-prerequisite`: Addressing COR-001/COR-007 (SLR preflight resolution).
+2. `aws.bootstrap.policy-reconciliation`: Addressing COR-002/COR-003 (Fail-closed exit semantics and ownership reconciler).
+3. `core.policy-renderer-and-digest`: Addressing COR-004/COR-005/COR-006 (Action-aware wildcard validation, target rendering, recursive canonical digest).
+4. `platform.provider-neutral-adapters`: Addressing COR-008/COR-013 (Universal adapter contracts and cross-OS parity).
 
-## 9. Option A failure behavior
+Any pull request touching a modification zone must execute targeted unit tests and full contract test suites for all dependent certified boundaries.
 
-If the bootstrap identity lacks a required permission, Ugondu must:
-- stop before any dependent mutation;
-- identify the exact missing action, resource, and condition when evidence supports that conclusion;
-- preserve a machine-readable report and resumable checkpoint;
-- distinguish insufficient authority from network outage, missing resource, and malformed response;
-- offer a generated least-privilege bootstrap policy/IaC artifact for an authorized administrator to apply once;
-- resume automatically on the next run after authority is granted.
+---
 
-The user must not be instructed to manually attach each runtime policy as the normal path. Manual intervention is only an exceptional authority bootstrap or a deliberate approval for a high-risk trust change.
+## 9. Failure Handling and Remediation Protocol
 
-## 10. Release acceptance gate
+When a bootstrap identity lacks a required permission:
+1. Halt immediately before any state mutation occurs.
+2. Emit machine-readable diagnostic `UG-BOOTSTRAP-AUTH-MISSING`.
+3. Generate a minimal, scoped provider-native authorization patch artifact (e.g., downloadable IAM policy JSON).
+4. Persist transaction state in the durable execution ledger.
+5. Present the exact resume command: `ugondu resume --transaction <transaction-id>`.
 
-Do not mark autonomous policy bootstrap production-ready until the implementation, tests, signed-pack verification, workflow ordering, live evidence, and recovery behavior all pass. A documentation-only change or a green static test is not proof of live IAM authorization. Keep the release gate fail-closed.
+---
+
+## 10. Universal Platform Acceptance Gate
+
+The COR autonomous policy bootstrap is certified for universal production release only when:
+- Clean account and pre-converged targets execute deterministically with zero drift.
+- SLR preflight handles existing, race-created, and denied paths cleanly.
+- Action-aware wildcard validation permits verified read actions while blocking mutative wildcards.
+- Recursive canonical JSON digest accurately identifies policy modifications.
+- Protected certified boundaries remain completely unregressed.
+- All exit semantics are strictly fail-closed.

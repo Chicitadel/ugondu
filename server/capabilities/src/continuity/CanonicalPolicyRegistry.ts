@@ -2,9 +2,9 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Capabilities / Execution Continuity & Policy Governance
  * File           : CanonicalPolicyRegistry.ts
- * Version        : 1.0.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Version        : 1.1.0
+ * Author         : Air Roofers SASU / Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers SASU (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-21
  * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE
@@ -24,7 +24,7 @@
  * - Security Authority     : Ujomor Systems Governance
  * - Governance Authority   : Air Roofers Corporate Governance
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import * as crypto from 'crypto';
@@ -61,13 +61,28 @@ export interface PolicyIntegrityCheck {
   mismatchedStatements: string[];
 }
 
+export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
+
+/**
+ * Deterministic recursive canonical JSON serializer.
+ * Recursively sorts all object keys lexicographically and strips extraneous whitespace.
+ */
+export function canonicalJson(value: JsonValue): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return '[' + value.map(canonicalJson).join(',') + ']';
+  const object = value as Record<string, JsonValue>;
+  return '{' + Object.keys(object).sort().map(
+    (key) => JSON.stringify(key) + ':' + canonicalJson(object[key])
+  ).join(',') + '}';
+}
+
 /**
  * Computes canonical SHA-256 digest of normalized JSON string or policy document.
  */
 export function computePolicyDigest(policyDocument: string): string {
   try {
-    const parsed = JSON.parse(policyDocument);
-    const normalized = JSON.stringify(parsed, Object.keys(parsed).sort());
+    const parsed = JSON.parse(policyDocument) as JsonValue;
+    const normalized = canonicalJson(parsed);
     return crypto.createHash('sha256').update(normalized, 'utf8').digest('hex');
   } catch {
     return crypto.createHash('sha256').update(policyDocument.trim(), 'utf8').digest('hex');

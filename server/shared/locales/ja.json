@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "V9 ポリシーアタッチメントチェック：UgonduCORExecutionRole 上で 5 つすべての UgonduCOR-V9-* 管理ポリシーが検証されました",
     "check.region_consistency": "リージョン整合性チェック：すべてのポリシー ARN がリージョン間ドリフトなしでターゲットリージョン {region} に調整されました",
     "error.runner_overprivileged": "職務分掌違反：ランナーロール {role} に、UgonduCORExecutionRole 専用であるべき直接的なインフラストラクチャワークロード権限が含まれています",
-    "error.region_drift": "ポリシー {policy} でリージョンスコープのドリフトが検出されました：リソース ARN をターゲットリージョン {region} に調整しています"
+    "error.region_drift": "ポリシー {policy} でリージョンスコープのドリフトが検出されました：リソース ARN をターゲットリージョン {region} に調整しています",
+    "error.slr_missing": "サービスにリンクされたロール {role} が存在せず、呼び出し元に iam:CreateServiceLinkedRole 権限がありません: {detail}",
+    "error.slr_denied": "サービスにリンクされたロール {role} の自律作成が拒否されました: {detail}",
+    "error.provisioning_denied": "ロール {role} の自律ポリシープロビジョニングが拒否されました: {detail}",
+    "error.policy_quota_exceeded": "ポリシーパックがクォータ制限を超過しています: {count} 件のポリシーが要求されましたが、最大 {max} 件まで許可されています。",
+    "error.wildcard_resource_disallowed": "ステートメント {sid} に変更アクション {action} に対する無制限のワイルドカードリソースが含まれています。",
+    "state.blocked_authorization": "ブートストラップがブロックされました: ロール {role} に必要な権限が不足しています。ワークロードプローブの前に停止します。",
+    "state.blocked_slr": "ブートストラップがブロックされました: 前提条件となるサービスにリンクされたロール {role} が不足しています。",
+    "remediation.slr_option_a": "自律作成を行うため、{runner} に対して {arn} でのスコープ付き iam:CreateServiceLinkedRole を付与してください。",
+    "remediation.slr_option_b": "AWS CLI または AWS IAM コンソール経由でサービスにリンクされたロール {role} を手動で作成してください。"
   },
   "deploy": {
     "pipeline.discover": "プロジェクトのトポロジとターゲットプラットフォームの機能を検出しています",

@@ -1970,7 +1970,16 @@
     "check.v9_attachments": "فحص إرفاق سياسات V9: تم التحقق من جميع السياسات المدارة الخمس UgonduCOR-V9-* على UgonduCORExecutionRole",
     "check.region_consistency": "فحص اتساق المنطقة: تمت تسوية جميع معرفات ARN للسياسات مع المنطقة المستهدفة {region} دون أي انحراف عبر المناطق",
     "error.runner_overprivileged": "انتهاك فصل المهام: يحتوي دور المشغّل {role} على أذونات مباشرة لحمل عمل البنية التحتية تنتمي حصرياً إلى UgonduCORExecutionRole",
-    "error.region_drift": "تم اكتشاف انحراف في نطاق المنطقة في السياسة {policy}: جاري تسوية معرفات ARN للموارد مع المنطقة المستهدفة {region}"
+    "error.region_drift": "تم اكتشاف انحراف في نطاق المنطقة في السياسة {policy}: جاري تسوية معرفات ARN للموارد مع المنطقة المستهدفة {region}",
+    "error.slr_missing": "الدور المرتبط بالخدمة {role} مفقود والمستدعي يفتقر إلى صلاحية iam:CreateServiceLinkedRole: {detail}",
+    "error.slr_denied": "تم رفض الإنشاء الذاتي للدور المرتبط بالخدمة {role}: {detail}",
+    "error.provisioning_denied": "تم رفض توفير السياسات الذاتي للدور {role}: {detail}",
+    "error.policy_quota_exceeded": "حزمة السياسات تتجاوز حد الحصة: تم طلب {count} سياسة، الحد الأقصى المسموح به {max}.",
+    "error.wildcard_resource_disallowed": "تحتوي العبارة {sid} على مورد أحرف بدل غير مقيد لإجراء التعديل {action}.",
+    "state.blocked_authorization": "تم حظر التمهيد: الصلاحية المطلوبة مفقودة للدور {role}. التوقف قبل فحوصات حمل العمل.",
+    "state.blocked_slr": "تم حظر التمهيد: الدور المرتبط بالخدمة المتطلب مسبقاً {role} مفقود.",
+    "remediation.slr_option_a": "منح صلاحية iam:CreateServiceLinkedRole محددة النطاق على {arn} إلى {runner} للإنشاء الذاتي.",
+    "remediation.slr_option_b": "إنشاء الدور المرتبط بالخدمة {role} يدوياً عبر AWS CLI أو وحدة تحكم AWS IAM."
   },
   "deploy": {
     "pipeline.discover": "اكتشاف طوبولوجيا المشروع وقدرات المنصة المستهدفة",

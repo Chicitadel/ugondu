@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Qualification / COR Workflow Gate Guardrails
  * File           : cor-workflow-gates.test.js
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-21
@@ -14,8 +14,10 @@
  * - Security Reviewed
  * - Architecture Controlled
  *
- * Guards COR audit findings P0-A (untagged AWS role-assumption fallback) and
- * P0-B (COR job able to succeed while the AWS physical gate fails).
+ * Guards COR audit findings P0-A (untagged AWS role-assumption fallback),
+ * P0-B (COR job able to succeed while the AWS physical gate fails),
+ * COR-001/COR-007 (RDS SLR preflight fail-closed), and COR-002 (Fail-closed
+ * bootstrap denial handling).
  *
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
@@ -81,6 +83,7 @@ function step(job, name) {
   assert.ok(s, `step not found: ${name}`);
   return s;
 }
+
 test('COR-WF-001 tagged assume-role step has no untagged fallback', () => {
   const run = step(jobs['aws-physical-gate'], 'Assume Tagged Execution Session').run;
   const assumeCalls = run.match(/aws sts assume-role/g) || [];
@@ -183,7 +186,10 @@ test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner 
     evidenceDir: tmpDir,
     awsRunner: (args) => {
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
-      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: [] }, stderr: '' };
+      if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
+        return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
+      }
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: attached.map((a) => ({ PolicyArn: a, PolicyName: a.split('/').pop() })) }, stderr: '' };
       if (args[1] === 'attach-role-policy') {
         const arn = args[args.indexOf('--policy-arn') + 1];
         if (!created.includes(arn) && arn.endsWith('UgonduCOR-V9-Discovery')) {
@@ -194,15 +200,18 @@ test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner 
       }
       if (args[1] === 'create-policy') {
         const name = args[args.indexOf('--policy-name') + 1];
-        created.push(`arn:aws:iam::971671216490:policy/${name}`);
-        return { status: 0, json: { Policy: { PolicyName: name } }, stderr: '' };
+        const arn = `arn:aws:iam::971671216490:policy/${name}`;
+        created.push(arn);
+        return { status: 0, json: { Policy: { PolicyName: name, Arn: arn } }, stderr: '' };
       }
+      if (args[1] === 'get-policy') return { status: 0, json: { Policy: { DefaultVersionId: 'v1' } }, stderr: '' };
       return { status: 0, json: {}, stderr: '' };
     }
   });
   assert.equal(provisionRes.exitCode, 0);
   assert.equal(attached.length, 5);
   assert.equal(created.length, 1);
+  assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED);
 
   const verifyRes = runVerifyEffectivePhase({
     evidenceDir: tmpDir,
@@ -218,20 +227,32 @@ test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner 
   assert.equal(verifyRes.report.status, 'PASS');
 });
 
-test('COR-WF-010 operating state 2: RETURNING_INSTALLATION_MATCHED (with or without bootstrap IAM read access)', async () => {
+test('COR-WF-010 operating state 2: RETURNING_INSTALLATION_MATCHED when 5 policies are already attached', async () => {
   const os = require('node:os');
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s2-'));
   const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+
+  const existingPolicies = [
+    { PolicyName: 'UgonduCOR-V9-Discovery' },
+    { PolicyName: 'UgonduCOR-V9-EC2-Creation' },
+    { PolicyName: 'UgonduCOR-V9-EC2-Cleanup' },
+    { PolicyName: 'UgonduCOR-V9-RDS-S3' },
+    { PolicyName: 'UgonduCOR-V9-ECR-ECS' }
+  ];
 
   const provisionRes = runBootstrapProvisionPhase({
     evidenceDir: tmpDir,
     awsRunner: (args) => {
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
-      return { status: 254, json: null, stderr: 'AccessDenied: User is not authorized to perform iam:AttachRolePolicy' };
+      if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
+        return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
+      }
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: existingPolicies }, stderr: '' };
+      return { status: 0, json: {}, stderr: '' };
     }
   });
-  assert.equal(provisionRes.exitCode, 0, 'bootstrap-provision must exit 0 when denied so verify-effective can check pre-existing attachment');
-  assert.equal(provisionRes.report.bootstrapProvisioningDenied, true);
+  assert.equal(provisionRes.exitCode, 0, 'bootstrap-provision must exit 0 when policies are already confirmed attached');
+  assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.RETURNING_INSTALLATION_MATCHED);
 
   const verifyRes = runVerifyEffectivePhase({
     evidenceDir: tmpDir,
@@ -255,6 +276,9 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
     evidenceDir: tmpDir,
     awsRunner: (args) => {
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
+        return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
+      }
       if (args[1] === 'list-attached-role-policies') {
         return { status: 0, json: { AttachedPolicies: [{ PolicyName: 'UgonduCOR-V9-Discovery' }, { PolicyName: 'UgonduCOR-V9-EC2-Creation' }] }, stderr: '' };
       }
@@ -277,31 +301,27 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
   assert.equal(verifyRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED);
 });
 
-test('COR-WF-012 operating state 4: BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT fails closed with Option A & B diagnostics', async () => {
+test('COR-WF-012 operating state 4: BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT fails closed during bootstrap-provision with UG-BOOTSTRAP-AUTH-MISSING', async () => {
   const os = require('node:os');
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s4-'));
-  const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
-  runBootstrapProvisionPhase({
+  const { runBootstrapProvisionPhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  const provisionRes = runBootstrapProvisionPhase({
     evidenceDir: tmpDir,
     awsRunner: (args) => {
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
+        return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
+      }
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: [] }, stderr: '' };
       return { status: 254, json: null, stderr: 'AccessDenied: not authorized to perform iam:AttachRolePolicy' };
     }
   });
-  const verifyRes = runVerifyEffectivePhase({
-    evidenceDir: tmpDir,
-    awsRunner: (args) => {
-      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
-      if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 254, json: null, stderr: 'UnauthorizedOperation: You are not authorized to perform this operation.' };
-      return { status: 0, json: {}, stderr: '' };
-    }
-  });
-  assert.equal(verifyRes.exitCode, 1);
-  assert.equal(verifyRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT);
-  assert.equal(verifyRes.report.errorCode, 'UG-BOOTSTRAP-AUTH-MISSING');
-  assert.match(verifyRes.report.diagnostic, /arn:aws:iam::971671216490:role\/UgonduCORExecutionRole/);
-  assert.match(verifyRes.report.diagnostic, /\(Option A\)/);
-  assert.match(verifyRes.report.diagnostic, /\(Option B\)/);
+  assert.equal(provisionRes.exitCode, 1, 'bootstrap-provision must fail closed with exit code 1 when runner lacks write authority');
+  assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT);
+  assert.equal(provisionRes.report.errorCode, 'UG-BOOTSTRAP-AUTH-MISSING');
+  assert.match(provisionRes.report.diagnostic, /arn:aws:iam::971671216490:role\/UgonduCORExecutionRole/);
+  assert.match(provisionRes.report.diagnostic, /\(Option A\)/);
+  assert.match(provisionRes.report.diagnostic, /\(Option B\)/);
 });
 
 test('COR-WF-013 operating states 5 & 6: CANONICAL_ROLE_MISSING_OR_UNASSUMABLE and SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION', async () => {
@@ -339,4 +359,63 @@ test('COR-WF-013 operating states 5 & 6: CANONICAL_ROLE_MISSING_OR_UNASSUMABLE a
   assert.equal(boundaryFail.exitCode, 1);
   assert.equal(boundaryFail.report.operatingState, BOOTSTRAP_OPERATING_STATES.SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION);
   assert.equal(boundaryFail.report.errorCode, 'UG-BOOTSTRAP-BOUNDARY-VIOLATION');
+});
+
+test('COR-WF-014 RDS service-linked role preflight fails closed with UG-BOOTSTRAP-AUTH-MISSING when missing and caller lacks create authority', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-slr-fail-'));
+  const { runBootstrapProvisionPhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  let slrCreationAttempted = false;
+  const provisionRes = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: [] }, stderr: '' };
+      if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
+        return { status: 254, json: null, stderr: 'NoSuchEntity: The role with name AWSServiceRoleForRDS cannot be found.' };
+      }
+      if (args[1] === 'create-service-linked-role' && args.includes('rds.amazonaws.com')) {
+        slrCreationAttempted = true;
+        return { status: 254, json: null, stderr: 'AccessDenied: User is not authorized to perform: iam:CreateServiceLinkedRole' };
+      }
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(slrCreationAttempted, true, 'create-service-linked-role must be attempted when AWSServiceRoleForRDS returns NoSuchEntity');
+  assert.equal(provisionRes.exitCode, 1, 'must exit 1 when SLR creation fails with AccessDenied');
+  assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT);
+  assert.equal(provisionRes.report.errorCode, 'UG-BOOTSTRAP-AUTH-MISSING');
+  assert.match(provisionRes.report.diagnostic, /AWSServiceRoleForRDS/);
+  assert.match(provisionRes.report.diagnostic, /iam:CreateServiceLinkedRole/);
+});
+
+test('COR-WF-015 RDS service-linked role preflight creates and re-verifies AWSServiceRoleForRDS when missing', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-slr-create-'));
+  const { runBootstrapProvisionPhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  let slrCreated = false;
+  const attached = [];
+  const provisionRes = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: attached.map((a) => ({ PolicyArn: a, PolicyName: a.split('/').pop() })) }, stderr: '' };
+      if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
+        if (!slrCreated) return { status: 254, json: null, stderr: 'NoSuchEntity: role not found' };
+        return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
+      }
+      if (args[1] === 'create-service-linked-role' && args.includes('rds.amazonaws.com')) {
+        slrCreated = true;
+        return { status: 0, json: {}, stderr: '' };
+      }
+      if (args[1] === 'attach-role-policy') {
+        attached.push(args[args.indexOf('--policy-arn') + 1]);
+        return { status: 0, json: {}, stderr: '' };
+      }
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(slrCreated, true, 'create-service-linked-role must be called');
+  assert.equal(provisionRes.exitCode, 0, 'bootstrap-provision succeeds after autonomous SLR creation and verification');
+  assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED);
 });
