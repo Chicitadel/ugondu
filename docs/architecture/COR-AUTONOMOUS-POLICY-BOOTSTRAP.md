@@ -42,6 +42,8 @@ The bootstrap adapter must compute the actual required actions from the operatio
 - Attach approved policies: `iam:AttachRolePolicy` scoped to the canonical execution role and constrained by `iam:PolicyARN` to the signed pack's exact policy ARN allow-list (a prefix match alone is not sufficient when an exact list can be generated).
 - Trust-policy repair is a separate high-risk capability. It must not occur implicitly during routine bootstrap. Require explicit plan approval or pre-authorized IaC, compare the complete expected principal and conditions, and preserve rollback evidence.
 
+The repository now includes a scoped starter authority document at `policy-packs/aws/cor/bootstrap/runner-bootstrap-permissions.json`. It covers tagged assumption of the canonical execution role, inspection of the canonical attachment set, attachment of the five exact V9 policies, and controlled create/version repair of those exact policy names. Treat it as a reviewed bootstrap artifact, not as a self-installing permission escalation. Validate it against the AWS IAM Service Authorization Reference and an isolated account before applying it. The current target account/role names are intentionally explicit; a future provider-neutral renderer must substitute typed target values and regenerate integrity evidence.
+
 The adapter must not treat AccessDenied, malformed output, missing credentials, throttling, or provider unavailability as evidence that an object does not exist. Classify each result distinctly and fail closed when a safe reconciliation decision cannot be made.
 
 ## 5. Policy stabilization and region selection
