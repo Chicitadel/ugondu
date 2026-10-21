@@ -3349,7 +3349,7 @@ aabda1b6ac6ad4edef9c9b0b8c2030d4320f200bfc74f3988f0352814767e58a  policy-packs/a
 c32ef2e4c12331992f83d848fa874200fe4d6b147117247001247a3052a3b9fd  policy-packs/aws/cor/schema/policy-pack.schema.json
 a924036937a4c6e5a6baeef040b6e01b0f925ed83db5f661c3697d8799db9fa2  policy-packs/aws/cor/templates/policies/discovery.json
 2ac6041170ec7587fefdd2b6657d232d3087607dc89172a7f20f3d432978b0e5  policy-packs/aws/cor/templates/policies/ec2-cleanup.json
-6b97c948f448e07fcc3d411b7315207f62faf7bb6a49766fa6d29f8e31ac485a  policy-packs/aws/cor/templates/policies/ec2-creation.json
+480fee8c64d81dc29b2bef0ad1b0f2d60552929807b59b1103a9a5943fe08e1d  policy-packs/aws/cor/templates/policies/ec2-creation.json
 09e8e53d76c6deeb73e10c413f0bc88ed5321642392d287edcb6da09257ff560  policy-packs/aws/cor/templates/policies/ecr-ecs.json
 f4c205fd467b7b07c0e44cd6f40b21e1e1227cb0f097137230d88a95013b78f8  policy-packs/aws/cor/templates/policies/rds-s3.json
 48d7f97020616f8a68688bc24c08ae31df4dbd8dcf12910b9be7fd7dc0272214  policy-packs/aws/cor/templates/roles/execution-role-trust.json
@@ -3508,7 +3508,7 @@ e1e04347ed4caa17c5f0dfe0145504f8010a09afc6c9d1fac4b17d63f443ab1d  server/engine-
 ff5fed4fae61404c0a929252c067aafd39af69f32bc08fd9dd88d37ba2b452fe  server/engine-core/physical-fargate-certification.ts
 a924036937a4c6e5a6baeef040b6e01b0f925ed83db5f661c3697d8799db9fa2  server/engine-core/policies/v9/UgonduCOR-V9-Discovery.json
 2ac6041170ec7587fefdd2b6657d232d3087607dc89172a7f20f3d432978b0e5  server/engine-core/policies/v9/UgonduCOR-V9-EC2-Cleanup.json
-6b97c948f448e07fcc3d411b7315207f62faf7bb6a49766fa6d29f8e31ac485a  server/engine-core/policies/v9/UgonduCOR-V9-EC2-Creation.json
+480fee8c64d81dc29b2bef0ad1b0f2d60552929807b59b1103a9a5943fe08e1d  server/engine-core/policies/v9/UgonduCOR-V9-EC2-Creation.json
 09e8e53d76c6deeb73e10c413f0bc88ed5321642392d287edcb6da09257ff560  server/engine-core/policies/v9/UgonduCOR-V9-ECR-ECS.json
 f4c205fd467b7b07c0e44cd6f40b21e1e1227cb0f097137230d88a95013b78f8  server/engine-core/policies/v9/UgonduCOR-V9-RDS-S3.json
 62b0f43803718f9c65913e6a96a79d8ce0f51d601abff4a687d6a822159c49f4  server/engine-core/policies/v9/validation_evidence.md

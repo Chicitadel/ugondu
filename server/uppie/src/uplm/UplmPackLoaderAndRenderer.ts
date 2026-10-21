@@ -196,9 +196,9 @@ export class UplmPackLoaderAndRenderer {
           logicalId: 'ec2-creation',
           physicalName: 'UgonduCOR-V9-EC2-Creation',
           templatePath: 'templates/policies/ec2-creation.json',
-          sha256: '6b97c948f448e07fcc3d411b7315207f62faf7bb6a49766fa6d29f8e31ac485a',
+          sha256: '480fee8c64d81dc29b2bef0ad1b0f2d60552929807b59b1103a9a5943fe08e1d',
           statementCount: 9,
-          compactCharLength: 3802,
+          compactCharLength: 3927,
           targetRoleLogicalId: 'execution-role',
           description: 'Transaction-tagged EC2 VPC, subnet, IGW, route table, SG, snapshot, and instance creation (9 statements).',
           sids: [

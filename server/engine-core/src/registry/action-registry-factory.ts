@@ -264,8 +264,8 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'aws',
     'CREATE_RDS_SUBNET_GROUP',
     async (node: DagNode) => {
-      const name = node.output?.dbSubnetGroupName || `ugondu-rds-subnet-group-${Date.now()}`;
-      const sgn = await aws.createDBSubnetGroup(name, node.output!.subnetIds);
+      const name = node.output?.dbSubnetGroupName || node.params?.dbSubnetGroupName || `ugondu-rds-subnet-group-${Date.now()}`;
+      const sgn = await aws.createDBSubnetGroup(name, node.output?.subnetIds || node.params?.subnetIds || []);
       return { dbSubnetGroupName: sgn };
     },
     async (node: DagNode) => {
@@ -310,7 +310,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'CREATE_RDS_SNAPSHOT',
     async (node: DagNode) => {
       const rdsId = node.output?.rdsId || node.params?.rdsId;
-      const snapId = await aws.createSnapshot({ resourceType: 'RDS_INSTANCE', resourceId: rdsId });
+      const snapId = await aws.createSnapshot({ resourceType: 'RDS_INSTANCE', resourceId: rdsId, snapshotId: node.output?.rdsSnapshotId || node.params?.rdsSnapshotId });
       return { rdsSnapshotId: node.output?.rdsSnapshotId || node.params?.rdsSnapshotId || snapId };
     },
     async (node: DagNode) => {
@@ -326,7 +326,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'aws',
     'CREATE_S3_BUCKET',
     async (node: DagNode) => {
-      const bucketName = node.output?.bucketName || `ugondu-bucket-${Date.now()}`.toLowerCase();
+      const bucketName = node.output?.bucketName || node.params?.bucketName || `ugondu-bucket-${Date.now()}`.toLowerCase();
       await aws.createS3Bucket(bucketName, false);
       return { bucketName };
     },

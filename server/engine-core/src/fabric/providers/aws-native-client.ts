@@ -220,6 +220,10 @@ export class AwsNativeClient implements IAwsClient {
                 {
                     ResourceType: 'volume',
                     Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
+                },
+                {
+                    ResourceType: 'network-interface',
+                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
                 }
             ]
         });
@@ -530,7 +534,9 @@ export class AwsNativeClient implements IAwsClient {
 
         if (type === 'RDS_INSTANCE') {
             const { CreateDBSnapshotCommand } = require('@aws-sdk/client-rds');
-            const snapId = `snap-${id}-${Date.now()}`;
+            const snapId = (typeof req === 'object' && (req as any).snapshotId)
+                ? (req as any).snapshotId
+                : `ugondu-rds-snap-${this.getTransactionId().toLowerCase()}-${Date.now()}`;
             const cmd = new CreateDBSnapshotCommand({ 
                 DBInstanceIdentifier: id, 
                 DBSnapshotIdentifier: snapId,

@@ -229,8 +229,20 @@ export function runBootstrapProvisionPhase(options = {}) {
         ? JSON.stringify(typeof verRes.json.PolicyVersion.Document === 'string' ? JSON.parse(decodeURIComponent(verRes.json.PolicyVersion.Document)) : verRes.json.PolicyVersion.Document)
         : '';
       if (rawVer && (rawVer.includes('us-east-1') || rawVer !== pol.compactJson)) {
-        const upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
+        let upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
+        if (upRes.status !== 0 && /LimitExceeded/i.test(upRes.stderr || '')) {
+          const vList = aws(['iam', 'list-policy-versions', '--policy-arn', pol.arn], region);
+          if (vList.status === 0 && Array.isArray(vList.json?.Versions)) {
+            const nonDefault = vList.json.Versions.filter((v) => !v.IsDefaultVersion);
+            nonDefault.sort((a, b) => new Date(a.CreateDate).getTime() - new Date(b.CreateDate).getTime());
+            if (nonDefault.length > 0) {
+              aws(['iam', 'delete-policy-version', '--policy-arn', pol.arn, '--version-id', nonDefault[0].VersionId], region);
+              upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
+            }
+          }
+        }
         if (upRes.status === 0) reconciledPolicyVersions.push(pol.physicalName);
+        else console.warn(`[WARN] Autonomous policy update for ${pol.physicalName}: ${upRes.stderr || 'Failed'}`);
       }
     }
 
