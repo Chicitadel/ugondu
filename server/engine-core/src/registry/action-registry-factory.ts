@@ -36,23 +36,12 @@ export interface CompensationRecord {
 }
 
 function recordCompensation(aws: any, node: DagNode, compensatingAction: string, resourceId?: string): void {
-  const entry: CompensationRecord = {
-    nodeId: node.id,
-    originalAction: node.action,
-    compensatingAction,
-    resourceId,
-    compensatedAt: Date.now(),
-  };
+  const entry: CompensationRecord = { nodeId: node.id, originalAction: node.action, compensatingAction, resourceId, compensatedAt: Date.now() };
   if (node.output && typeof node.output === 'object') {
-    node.output['compensated'] = true;
-    node.output['compensatingAction'] = compensatingAction;
-    node.output['compensatedResourceId'] = resourceId;
-    node.output['compensatedAt'] = entry.compensatedAt;
+    Object.assign(node.output, { compensated: true, compensatingAction, compensatedResourceId: resourceId, compensatedAt: entry.compensatedAt });
   }
   if (aws && typeof aws === 'object') {
-    if (!Array.isArray(aws.compensationLedger)) {
-      aws.compensationLedger = [];
-    }
+    if (!Array.isArray(aws.compensationLedger)) aws.compensationLedger = [];
     aws.compensationLedger.push(entry);
   }
 }
@@ -259,6 +248,24 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
       const rdsId = node.output?.rdsId || node.params?.rdsId || `ugondu-rds-${Date.now()}`;
       const sgId = node.output?.securityGroupId || node.params?.securityGroupId;
       const subnetGroupName = node.output?.dbSubnetGroupName || node.params?.dbSubnetGroupName;
+      if ((aws as any).rds) {
+        const { CreateDBInstanceCommand, DescribeDBInstancesCommand } = require('@aws-sdk/client-rds');
+        const txId = typeof aws.getTransactionId === 'function' ? aws.getTransactionId() : (process.env.UGONDU_TRANSACTION_ID || 'tx-cor');
+        await (aws as any).rds.send(new CreateDBInstanceCommand({
+          DBInstanceIdentifier: rdsId, AllocatedStorage: 20, DBInstanceClass: 'db.t3.micro', Engine: 'postgres',
+          MasterUsername: 'postgres', MasterUserPassword: process.env.UGONDU_SECRET_CERT_RDS_PWD,
+          VpcSecurityGroupIds: sgId ? [sgId] : undefined, DBSubnetGroupName: subnetGroupName,
+          Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: txId }]
+        }));
+        for (let r = 0; r < 60; r++) {
+          await sleep(15000);
+          const desc = await (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })).catch(() => null);
+          const st = desc?.DBInstances?.[0]?.DBInstanceStatus;
+          if (st === 'available') return { rdsId };
+          if (st === 'failed' || st === 'incompatible-parameters') throw new Error(`RDS ${rdsId} failed: ${st}`);
+        }
+        return { rdsId };
+      }
       const res = await aws.createRds(rdsId, 'postgres', 20, sgId, credentialRef, subnetGroupName);
       return { rdsId: res.id };
     },
@@ -366,18 +373,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
   ];
 
   for (const a of actions) {
-    registry.registerAction({
-      id: a.id,
-      domain: a.id.split(':')[0],
-      operation: a.id.split(':')[2],
-      providerAgnostic: true,
-      description: a.id,
-      inputSchema: {},
-      outputSchema: {},
-      risk: 'MEDIUM',
-      requiredCapabilities: [],
-      execute: async (p) => registry.dispatchToURRE(a.op, p),
-    });
+    registry.registerAction({ id: a.id, domain: a.id.split(':')[0], operation: a.id.split(':')[2], providerAgnostic: true, description: a.id, inputSchema: {}, outputSchema: {}, risk: 'MEDIUM', requiredCapabilities: [], execute: async (p) => registry.dispatchToURRE(a.op, p) });
   }
 
   urre.registerHandler(
