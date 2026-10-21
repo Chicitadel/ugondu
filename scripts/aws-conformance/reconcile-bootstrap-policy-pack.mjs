@@ -313,6 +313,64 @@ export function runVerifyEffectivePhase(options = {}) {
     return { exitCode: 1, report: failReport };
   }
 
+  // Verify policy attachments and active default documents from live IAM reads before
+  // treating a successful resource probe as proof of bootstrap completion.
+  const attachedRes = aws(['iam', 'list-attached-role-policies', '--role-name', pack.executionRole.physicalName], region);
+  if (attachedRes.status !== 0 || !Array.isArray(attachedRes.json?.AttachedPolicies)) {
+    const failReport = {
+      ...prior, schemaVersion: '1.0.0', packId: pack.packId, phase: 'verify-effective',
+      operatingState: BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT,
+      errorCode: 'UG-BOOTSTRAP-ATTACHMENT-READ-INCONCLUSIVE', status: 'FAIL',
+      reason: 'Could not verify execution-role policy attachments from live IAM reads.',
+      attachmentReadError: attachedRes.stderr || 'Malformed ListAttachedRolePolicies response',
+      effectivePermissionsVerified: false
+    };
+    writeReport(reportPath, failReport);
+    return { exitCode: 1, report: failReport };
+  }
+  const attachedByName = new Map(attachedRes.json.AttachedPolicies.map((p) => [p.PolicyName || p.PolicyArn?.split('/').pop(), p]));
+  const policyVerification = [];
+  for (const pol of pack.policies) {
+    const attached = attachedByName.get(pol.physicalName);
+    if (!attached) {
+      policyVerification.push({ name: pol.physicalName, attached: false, documentMatches: false, reason: 'Policy is not attached to the canonical execution role.' });
+      continue;
+    }
+    const meta = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
+    const versionId = meta.json?.Policy?.DefaultVersionId;
+    if (meta.status !== 0 || !versionId) {
+      policyVerification.push({ name: pol.physicalName, attached: true, documentMatches: false, reason: meta.stderr || 'Unable to read default policy version.' });
+      continue;
+    }
+    const ver = aws(['iam', 'get-policy-version', '--policy-arn', pol.arn, '--version-id', versionId], region);
+    let actual = null;
+    try {
+      const doc = ver.json?.PolicyVersion?.Document;
+      actual = typeof doc === 'string' ? JSON.parse(decodeURIComponent(doc)) : doc;
+    } catch { actual = null; }
+    const normalizedActual = actual ? JSON.stringify(actual) : null;
+    policyVerification.push({
+      name: pol.physicalName,
+      attached: true,
+      defaultVersionId: versionId,
+      documentMatches: ver.status === 0 && normalizedActual === pol.compactJson,
+      reason: ver.status !== 0 ? (ver.stderr || 'Unable to read policy version.') : (normalizedActual === pol.compactJson ? null : 'Active default policy document differs from the validated pack.')
+    });
+  }
+  const missingOrDriftedPolicies = policyVerification.filter((p) => !p.attached || !p.documentMatches);
+  if (missingOrDriftedPolicies.length > 0) {
+    const failReport = {
+      ...prior, schemaVersion: '1.0.0', packId: pack.packId, phase: 'verify-effective', evaluatedAt: new Date().toISOString(),
+      operatingState: BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT,
+      errorCode: 'UG-BOOTSTRAP-POLICY-STATE-MISMATCH', status: 'FAIL', effectivePermissionsVerified: false,
+      policyVerification, missingOrDriftedPolicies,
+      reason: 'One or more canonical V9 policies are missing from the execution role or their active documents differ from the validated policy pack.'
+    };
+    writeReport(reportPath, failReport);
+    console.error('[FAIL] UG-BOOTSTRAP-POLICY-STATE-MISMATCH: policy attachment/document verification failed.');
+    return { exitCode: 1, report: failReport };
+  }
+
   const vpcRes = aws(['ec2', 'describe-vpcs'], region);
   if (vpcRes.status !== 0) {
     const diagnostic = formatBootstrapRemediationDiagnostic(pack, prior.denialDetail || vpcRes.stderr);
@@ -356,7 +414,8 @@ export function runVerifyEffectivePhase(options = {}) {
     ...prior, schemaVersion: '1.0.0', packId: pack.packId, phase: 'verify-effective', evaluatedAt: new Date().toISOString(),
     awsAccountId: pack.target.accountId, awsRegion: region, callerArn: arn, operatingState: finalState,
     effectivePermissionsVerified: true, negativeBoundaryVerified: true,
-    checksConfirmed: { runnerDelegation: true, executionRoleTrust: true, v9PolicyAttachments: true, regionConsistency: !prior.runnerHygiene?.runnerUsEast1DriftDetected },
+    checksConfirmed: { runnerDelegation: true, executionRoleTrust: true, v9PolicyAttachments: policyVerification.length === 5 && policyVerification.every((p) => p.attached && p.documentMatches), regionConsistency: !prior.runnerHygiene?.runnerUsEast1DriftDetected },
+    policyVerification,
     policiesVerified: pack.policies.map((p) => ({ name: p.physicalName, sha256: p.sha256, chars: p.compactCharLength })), status: 'PASS'
   };
   writeReport(reportPath, passReport);
