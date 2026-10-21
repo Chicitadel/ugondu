@@ -284,6 +284,9 @@ export function runBootstrapProvisionPhase(options = {}) {
     operatingState: preliminaryState, status: 'PRELIMINARY'
   };
   writeReport(reportPath, report);
+  console.log(`[BOOTSTRAP-PROVISION] Operating state: ${preliminaryState}`);
+  if (reconciledPolicyVersions.length > 0) console.log(`[BOOTSTRAP-PROVISION] Reconciled: ${reconciledPolicyVersions.join(', ')}`);
+  if (bootstrapProvisioningDenied) console.log(`[BOOTSTRAP-PROVISION] Runner lacks IAM write authority (${denialDetail || 'AccessDenied'}). Proceeding to effective verification.`);
   return { exitCode: 0, report };
 }
 
