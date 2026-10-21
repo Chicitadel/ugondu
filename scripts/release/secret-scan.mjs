@@ -59,7 +59,9 @@ function sha256File(file) {
 }
 
 function loadAllowlist() {
-  if (!fs.existsSync(ALLOWLIST_PATH)) return [];
+  if (!fs.existsSync(ALLOWLIST_PATH)) {
+    throw new Error(`Required secret allowlist is missing: ${ALLOWLIST_PATH}`);
+  }
   try {
     const raw = JSON.parse(fs.readFileSync(ALLOWLIST_PATH, 'utf8'));
     const entries = Array.isArray(raw.entries) ? raw.entries : [];
@@ -69,8 +71,8 @@ function loadAllowlist() {
       const expiry = Date.parse(e.expiryDate);
       return !Number.isNaN(expiry) && expiry > now;
     });
-  } catch {
-    return [];
+  } catch (err) {
+    throw new Error(`Failed to load or validate secret allowlist: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 
@@ -98,8 +100,8 @@ async function scanGitTreeAndHistory(targetDir) {
   try {
     const trackedOutput = execFileSync('git', ['ls-files'], { cwd: targetDir, encoding: 'utf8' });
     trackedFiles = trackedOutput.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  } catch {
-    trackedFiles = [];
+  } catch (err) {
+    throw new Error(`Failed to enumerate tracked files for secret scan: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   for (const rel of trackedFiles) {
@@ -109,8 +111,8 @@ async function scanGitTreeAndHistory(targetDir) {
     let content;
     try {
       content = fs.readFileSync(full, 'utf8');
-    } catch {
-      continue;
+    } catch (err) {
+      throw new Error(`Failed to read tracked file during secret scan (${rel}): ${err instanceof Error ? err.message : String(err)}`);
     }
 
     const lines = content.split(/\r?\n/);
