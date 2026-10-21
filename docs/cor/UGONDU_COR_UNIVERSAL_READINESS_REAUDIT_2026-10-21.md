@@ -188,7 +188,7 @@ Every claimed operation must report evidence-backed `AVAILABLE`, `UNAVAILABLE` o
 - [x] Real-process entrypoint tests cover marketed CLI/UI/API/IDE/automation targets (🟢 Certified; 8/8 tests pass).
 - [x] Execution Continuity & Policy Governance (ECPG Provider-Neutral Core) implemented (🟢 Certified; 72/72 tests pass).
 - [x] AWS Role Chain Reconciliation completed; canonical `UgonduCORExecutionRole` and identity policy remediation specified (🟢 Certified Documentation).
-- [ ] AWS tagged OIDC identity succeeds without fallback (🔴 Blocked: missing identity statement in `UgonduCORRunner-IAM-Policy` in AWS IAM).
+- [ ] AWS tagged OIDC identity succeeds without fallback (🔴 Blocked: tagged assumption still denied at 11:17Z after the policy was reported added; cause unconfirmed, see sign-off Addendum B).
 - [ ] Full physical AWS provision/deploy/readiness/fault/recovery/rollback/teardown executes; independent zero-residual scan passes (🔴 Blocked).
 - [ ] Fine-grained manual and unattended automation flows pass failure/recovery tests.
 - [ ] Model-assisted and model-free E2E agree on deterministic policy; non-authoritative model guard verified.

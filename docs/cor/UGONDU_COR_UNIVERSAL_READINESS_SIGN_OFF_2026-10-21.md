@@ -28,7 +28,7 @@
 
 ## Actions Required Before Withholding May Be Lifted
 
-- [ ] Add `AssumeCORExecutionRoleWithTransactionTag` statement to `UgonduCORRunner-IAM-Policy` in AWS Account `971671216490`.
+- [ ] Prove the `AssumeCORExecutionRoleWithTransactionTag` statement is in the **default version** of `UgonduCORRunner-IAM-Policy`, that the policy is attached to `UgonduCORRunner`, and that the runner role has no permission boundary or SCP denying it (operator reports it was added; the 11:17Z re-run was still denied, see Addendum B).
 - [ ] Execute full physical qualification lifecycle (provision, verify, rollback, cleanup) with zero residuals.
 - [ ] Re-run COR certification workflow with both gates green.
 - [ ] Authorize final release signatures across independent authorities.
@@ -56,3 +56,30 @@
 4. **Entrypoint Parity (🟢 Certified):** Real-process E2E harness covers CLI, IDE, browser UI, direct API, and headless automation (8/8 tests pass).
 5. **ECPG Provider-Neutral Core (🟢 Certified):** Implements universal adapter interface, duplicate role guard, append-only cryptographic ledger, safe resume planner, and region policy renderer (72/72 tests pass).
 6. **AWS OIDC Role Assumption & Physical Lifecycle (🔴 Blocked):** GitHub Actions OIDC role assumption failed closed on missing identity statement in `UgonduCORRunner-IAM-Policy`. Sign-off remains truthfully withheld (🔴).
+
+---
+
+## Addendum B — Post-remediation evidence, 2026-10-21 (honest status)
+
+**Decision unchanged:** 🔴 **WITHHELD — NOT COR CERTIFIED.**
+
+| # | Observation | Evidence | Status |
+|---|---|---|---|
+| B1 | Live runner identity confirmed | Run `39583191856`: caller is `assumed-role/UgonduCORRunner/GitHubActions`; OIDC federation works | 🟢 |
+| B2 | Tagged assumption still denied after the operator reported adding the policy | Attempt 2 (2026-10-21 11:17Z): `AccessDenied ... UgonduCORRunner/GitHubActions is not authorized to perform: sts:TagSession` | 🔴 Open |
+| B3 | Operator CLI check was not valid evidence | Ran as `UgonduPhysicalTest`; `iam:GetPolicy`/`iam:GetRole` denied; wrong principal for assumption | ⚪ Inconclusive (not a defect finding) |
+| B4 | Earlier runbook produced false `CRITICAL` verdicts after failed reads | Replaced by `scripts/aws-conformance/verify-role-chain.ps1` (PASS/FAIL/INCONCLUSIVE, read-only, config-driven) | 🟢 Fixed |
+| B5 | `TestAtomicSymlinkNoGap` intermittent on macOS arm64 | Push run `39583191889` failed (`readlink ...: invalid argument`); same code passed on PR run `39583198800` and on re-run. Not root-caused. | 🟡 Open (flaky) |
+
+**What B2 does and does not establish.** The denial proves the runner's *effective* identity permissions do not currently allow `sts:TagSession` on the ARN stored in secret `AWS_ROLE_TO_ASSUME_EXECUTION`. It does not identify which of these is the cause; each must be checked with an authorized inspection identity:
+1. The statement is in a non-default policy version or an unsaved draft.
+2. The policy is not attached to `UgonduCORRunner` (for example attached to the user or the execution role instead).
+3. The statement `Resource` ARN differs from the ARN in the secret (role path or name variant).
+4. The statement lacks `sts:TagSession` or has `Effect` other than `Allow`.
+5. A permission boundary on `UgonduCORRunner`, or an SCP, denies it.
+6. IAM propagation delay (normally short; least likely after an hour).
+
+Definitive IAM-side check, run by an administrator (not the runner, not `UgonduPhysicalTest`):
+`aws iam simulate-principal-policy --policy-source-arn <runner role ARN> --action-names sts:AssumeRole sts:TagSession --resource-arns <execution role ARN>` and `pwsh scripts/aws-conformance/verify-role-chain.ps1 -TargetId qualification-aws-eu-west-3`.
+
+**Not claimed:** no physical lifecycle (provision, deploy, health, rollback, cleanup) has executed, so none is certified. Do not widen `UgonduPhysicalTest` permissions to make a direct test pass.

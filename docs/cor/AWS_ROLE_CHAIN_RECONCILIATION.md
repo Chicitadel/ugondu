@@ -25,7 +25,7 @@ A comprehensive audit of AWS IAM configuration, repository manifests, and AWS Ma
 4. `policy-packs/aws/cor/templates/roles/runner-assume-role.json` & `execution-role-trust.json`.
 5. AWS IAM Console inspection of roles in Account `971671216490` (`eu-west-3`).
 
-### Core Finding
+### Core Finding (hypothesis; unconfirmed after 2026-10-21 11:17Z re-run)
 The AWS IAM role-assumption failure was caused by an asymmetric authorization configuration on **Role 1 (`UgonduCORRunner`)**:
 - While the target execution role **Role 2 (`UgonduCORExecutionRole`)** possesses an AssumeRole trust policy allowing `sts:AssumeRole` and `sts:TagSession` from `UgonduCORRunner` under the `UgonduTransactionId` tag condition,
 - The caller role's identity policy (**`UgonduCORRunner-IAM-Policy`**) contains general resource management permissions but **lacks an explicit statement authorizing `sts:AssumeRole` and `sts:TagSession`** against `Resource: arn:aws:iam::971671216490:role/UgonduCORExecutionRole`.
@@ -198,99 +198,34 @@ The workflow `.github/workflows/cor.yml` executes this chain at lines 181–233:
 
 ---
 
-## 6. Verification Runbook (PowerShell & AWS CLI)
+## 6. Verification Runbook (Read-Only, Three-State)
 
-Cloud operations personnel can verify and validate this reconciliation using the following PowerShell procedure:
+> [!IMPORTANT]
+> An earlier revision of this runbook continued after denied reads and printed `CRITICAL` verdicts derived from empty data, and it attempted `sts:AssumeRole` as an operator user. Both were defects. A denied read is **INCONCLUSIVE**, never a failed policy check, and a direct assumption by a user proves nothing about the runner role.
+
+Use [`scripts/aws-conformance/verify-role-chain.ps1`](../../scripts/aws-conformance/verify-role-chain.ps1):
 
 ```powershell
-# ==============================================================================
-# Ugondu COR AWS Role-Assumption Verification Runbook
-# Authority: Ujomor Systems Engineering & Governance Authority
-# Classification: ENTERPRISE
-# ==============================================================================
-
-# 1. Configuration Constants
-$AccountId         = "971671216490"
-$Region            = "eu-west-3"
-$RunnerRoleName    = "UgonduCORRunner"
-$ExecutionRoleName = "UgonduCORExecutionRole"
-$RunnerRoleArn     = "arn:aws:iam::$AccountId`:role/$RunnerRoleName"
-$ExecutionRoleArn  = "arn:aws:iam::$AccountId`:role/$ExecutionRoleName"
-$PolicyName        = "UgonduCORRunner-IAM-Policy"
-$TxId              = "cor-audit-$(Get-Date -Format 'yyyyMMddHHmmss')"
-
-Write-Host "Starting AWS Role Chain Reconciliation Verification..." -ForegroundColor Cyan
-
-# 2. Inspect Runner Identity Policy for Required AssumeRole Statement
-Write-Host "Verifying identity policy on $RunnerRoleName..." -ForegroundColor Yellow
-$PolicyArn = "arn:aws:iam::$AccountId`:policy/$PolicyName"
-$VersionId = (aws iam get-policy --policy-arn $PolicyArn --query 'Policy.DefaultVersionId' --output text)
-$PolicyDoc = (aws iam get-policy-version --policy-arn $PolicyArn --version-id $VersionId --query 'PolicyVersion.Document' --output json | ConvertFrom-Json)
-
-$HasStatement = $PolicyDoc.Statement | Where-Object {
-    $_.Sid -eq "AssumeCORExecutionRoleWithTransactionTag" -or
-    ($_.Action -contains "sts:AssumeRole" -and $_.Action -contains "sts:TagSession" -and $_.Resource -eq $ExecutionRoleArn)
-}
-
-if (-not $HasStatement) {
-    Write-Error "CRITICAL: Identity policy $PolicyName lacks permission to assume $ExecutionRoleArn!"
-} else {
-    Write-Host " PASS: $PolicyName contains valid delegation statement to assume $ExecutionRoleName." -ForegroundColor Green
-}
-
-# 3. Inspect Execution Role Trust Policy
-Write-Host "Verifying trust relationship on $ExecutionRoleName..." -ForegroundColor Yellow
-$TrustDoc = (aws iam get-role --role-name $ExecutionRoleName --query 'Role.AssumeRolePolicyDocument' --output json | ConvertFrom-Json)
-
-$TrustPrincipal = $TrustDoc.Statement.Principal.AWS
-if ($TrustPrincipal -ne $RunnerRoleArn) {
-    Write-Error "CRITICAL: Trust principal mismatch. Expected $RunnerRoleArn, found $TrustPrincipal."
-} else {
-    Write-Host " PASS: Trust principal correctly configured to $RunnerRoleArn." -ForegroundColor Green
-}
-
-# 4. Simulate Live Assumption Chain
-Write-Host "Testing chained role assumption with transaction tags..." -ForegroundColor Yellow
-$AssumeOutput = aws sts assume-role `
-    --role-arn $ExecutionRoleArn `
-    --role-session-name $TxId `
-    --tags "Key=UgonduTransactionId,Value=$TxId" "Key=UgonduCOR,Value=true" `
-    --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' `
-    --output text
-
-$Creds = -split $AssumeOutput
-if ($Creds.Count -lt 3) {
-    Write-Error "CRITICAL: Role assumption failed to return temporary session credentials."
-} else {
-    Write-Host " PASS: Chained role assumption succeeded." -ForegroundColor Green
-    
-    # 5. Verify Session Identity
-    $Env:AWS_ACCESS_KEY_ID     = $Creds[0]
-    $Env:AWS_SECRET_ACCESS_KEY = $Creds[1]
-    $Env:AWS_SESSION_TOKEN     = $Creds[2]
-    $Env:AWS_DEFAULT_REGION    = $Region
-
-    $CurrentArn = (aws sts get-caller-identity --query 'Arn' --output text)
-    Write-Host "Active Session ARN: $CurrentArn" -ForegroundColor Cyan
-
-    if ($CurrentArn -match "assumed-role/$ExecutionRoleName/$TxId") {
-        Write-Host " PASS: Active caller identity strictly matches expected tagged session." -ForegroundColor Green
-    } else {
-        Write-Error "CRITICAL: Caller identity mismatch: $CurrentArn"
-    }
-
-    # Clean up environment variables
-    Remove-Item Env:\AWS_ACCESS_KEY_ID
-    Remove-Item Env:\AWS_SECRET_ACCESS_KEY
-    Remove-Item Env:\AWS_SESSION_TOKEN
-    Remove-Item Env:\AWS_DEFAULT_REGION
-}
-
-Write-Host "Role Chain Verification Completed." -ForegroundColor Cyan
+pwsh scripts/aws-conformance/verify-role-chain.ps1 -TargetId qualification-aws-eu-west-3
 ```
 
----
+Properties:
+- Account, region and execution role name come from `config/qualification/aws-target.json`; no account literals in the script.
+- Verdicts are `PASS` / `FAIL` / `INCONCLUSIVE` (exit codes 0 / 2 / 3). Failed or non-JSON reads yield `INCONCLUSIVE` and stop that check.
+- Checks: caller is in the target account and is not the runner or execution role; `UgonduCORRunner-IAM-Policy` is attached to the runner and its **default version** has an Allow for `sts:AssumeRole` + `sts:TagSession` scoped to the execution role ARN (and no `sts:*`); the execution role trust names the runner and carries a `UgonduTransactionId` condition; the runner trusts the GitHub OIDC provider with audience `sts.amazonaws.com`.
+- It never calls `sts:AssumeRole`. Run it with an authorized read-only inspection identity (for example an IAM console administrator session), not with `UgonduPhysicalTest` and not with broader permissions added to that user.
 
+### 6.1 Live proof comes only from the OIDC workflow
+The assumption test is `.github/workflows/cor.yml` job `aws-physical-gate`, which authenticates through GitHub OIDC as `assumed-role/UgonduCORRunner/GitHubActions`, assumes the execution role with `UgonduTransactionId`/`UgonduCOR` tags, and asserts the resulting identity is `assumed-role/UgonduCORExecutionRole/<tx>`. Credentials are never printed.
+
+### 6.2 Evidence log
+| Date (UTC) | Evidence | Result |
+|---|---|---|
+| 2026-10-21 10:16 | Run `39583191856` attempt 1, `Assume Tagged Execution Session` | `AccessDenied: assumed-role/UgonduCORRunner/GitHubActions is not authorized to perform sts:TagSession`. Predates the operator adding the policy. |
+| 2026-10-21 (operator) | Direct CLI test as `UgonduPhysicalTest` | `INCONCLUSIVE`: `iam:GetPolicy`/`iam:GetRole` denied; assumption by wrong principal. Not evidence about the runner. |
+| 2026-10-21 11:17 | Run `39583191856` attempt 2 (after operator reported adding the policy) | Still `AccessDenied` on `sts:TagSession` for `assumed-role/UgonduCORRunner/GitHubActions`. The missing-statement hypothesis is therefore **unconfirmed**; see sign-off Addendum B for the candidate causes. |
+
+---
 ## 7. Release Exit Criteria & Unblocking Sequence
 
 To lift the withholding of the Ugondu COR Universal Certification, the following sequence must be completed:
