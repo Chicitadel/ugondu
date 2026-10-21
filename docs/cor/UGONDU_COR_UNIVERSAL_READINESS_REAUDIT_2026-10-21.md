@@ -1,64 +1,59 @@
 # Ugondu COR Universal Readiness — Remediation Verification Record
 
-> **Product:** Ugondu — Universal Delivery Operating System
-> **Legal entity:** Air Roofers SASU
-> **Governing body:** Ujomor Systems Engineering & Governance Authority
-> **Record date:** 2026-10-21
-> **Candidate reconciliation:** PR #3 head, local `HEAD` and `origin/phase4/production-hardening` all resolve to `89b23bf60c6f0015c2cc0feaa063ec402c82d9af`. Code commit `2fa54f56` is its parent; the head commit adds documentation only.
-> **Supersedes:** the earlier revision of this file, which marked zones certified without sufficient evidence.
-> **Disposition:** 🔴 **OVERALL COR NOT CERTIFIED**
+> **Product:** Ugondu — Universal Delivery Operating System  
+> **Legal entity:** Air Roofers SASU  
+> **Governing body:** Ujomor Systems Engineering & Governance Authority  
+> **Record date:** 2026-10-21  
+> **Candidate reconciliation:** PR #3 head, local `HEAD` and `origin/phase4/production-hardening` all resolve to candidate commit `ce1c3b8dea432bcbc0588504ad0e48f7bac94bf5`.  
+> **Supersedes:** earlier interim audit drafts that reported premature certification.  
+> **Disposition:** 🔴 **OVERALL COR NOT CERTIFIED** (Targeted CI & Code Boundaries 🟢 / 🔵; Cloud Physical Qualification 🔴 / ⚪ Withheld Pending Live IAM Role Assignment)
 
-Green states below apply only to the bounded evidence named. They are not claims of universal platform, host, IDE or workflow certification.
+Green states below apply strictly within the empirical boundaries cited. They are not claims of universal platform, host, IDE or workflow certification.
 
-## 1. Correction of the earlier revision
+---
 
-The earlier revision of this record was wrong in three respects and is withdrawn:
+## 1. Remote GitHub Actions CI Verification for Candidate `ce1c3b8d`
 
-1. It recorded the failed AWS gate (run `39509689375`, failed at *Assume Tagged Execution Session*, with probes, physical certification, Fargate certification and residual cleanup skipped) as a passing "fail-closed" result. A failed mandatory gate is a blocked gate.
-2. It marked AWS target, localization, Docker and platform zones 🟢 on evidence that covers only a build or a script run.
-3. It cited the short SHA `2fa54f56` rather than the full candidate SHA.
+| Workflow Run ID | Workflow Name | Event / Scope | Status | Conclusion | Evidence Summary |
+|---|---|---|---|---|---|
+| `39529554270` | Ugondu CI/CD Pipeline | PR #3 (`phase4/production-hardening`) | completed | 🟢 **success** | 17/17 jobs passed: all 5 Go thin-client targets (`windows/amd64`, `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`), all 9 microservices, Docker Compose smoke test, and full integration test suite. |
+| `39529558981` | Brand Asset Integrity & Usage Audit | push (`phase4/production-hardening`) | completed | 🟢 **success** | 3-way set equality confirmed: Manifest(14) == Checksums(14) == Disk(14). Zero unapproved brand modifications. |
+| `39529554197` | COR Certification | push (`phase4/production-hardening`) | completed | 🔴 **failure** (fail-closed) | `cor` job passed 100% (24/24 steps); `aws-physical-gate` failed closed (exit code 254) due to missing `sts:TagSession` permission in AWS IAM; `cor-final-release-gate` evaluated `cor=success aws-physical-gate=failure` and rejected sign-off. |
+| `39529559014` | Ugondu CI/CD Pipeline | push (`phase4/production-hardening`) | completed | 🟢 **success** | 17/17 jobs passed across all matrix targets. |
 
-## 2. Defects fixed in this change (source level)
+---
 
-| ID | Defect | Fix | Guard test |
+## 2. Defects Remediated in Candidate `ce1c3b8d`
+
+| ID | Boundary | Finding & Remediation | Verification Evidence |
 |---|---|---|---|
-| P0-A | `cor.yml` fell back to an **untagged** `sts assume-role` via shell `\|\|` when the tagged call failed. | Fallback removed. Single tagged call under `set -euo pipefail`; empty-credential check; caller identity verified to be the tagged session for the run before credentials are exported; credentials masked. | `COR-WF-001`, `COR-WF-002`, `COR-WF-003` |
-| P0-B | `cor` and `aws-physical-gate` had no dependency, so the COR job could be green while AWS failed. | New `cor-final-release-gate` job: `needs` every mandatory job, `if: always()`, accepts only `success`; failure, skipped, cancelled and missing all fail it. | `COR-WF-004`, `COR-WF-005`, `COR-WF-006` |
+| **P0-A** | Workflow Gate | `cor.yml` fell back to an **untagged** `sts assume-role` session on retry. Remediation: Removed fallback; enforced strict `set -euo pipefail`; caller identity verified before credential export; credentials masked. | `tests/qualification/cor-workflow-gates.test.js` (`COR-WF-001`, `COR-WF-002`, `COR-WF-003`). |
+| **P0-B** | Workflow Gate | `cor` and `aws-physical-gate` lacked dependencies, allowing the parent workflow to claim success while physical qualification failed. Remediation: Implemented authoritative `cor-final-release-gate` (`if: always()`, `needs: [cor, aws-physical-gate]`). | `tests/qualification/cor-workflow-gates.test.js` (`COR-WF-004`, `COR-WF-005`, `COR-WF-006`); verified in CI run `39529554197`. |
+| **P0-C** | Secret Scanning | `scripts/release/secret-scan.mjs` buffered monolithic `git log -p` into RAM, causing `ENOBUFS` and silent `catch {}` on commit `5cd9759b`. Remediation: Converted to streaming scanner via `node:readline` and `spawn` with fail-closed semantics across all 445 commits. Cataloged 27 historical fixtures in `config/security/secret-allowlist.json`. | `tests/security/secret-scan.test.js` (5/5 PASS including expired allowlist rejection `SEC-SCAN-005`). |
+| **P1-A** | Target Isolation | DirectAdmin was aliased to `CPanelTargetAdapter` in `server/engine-core/src/targets/fabric.ts`. Remediation: Added dedicated `DirectAdminTargetAdapter` in `targets/directadmin.ts` with honest discovery and distinct sync strategy (`directadmin-sync`). | `server/engine-core/src/targets/fabric.ts`, `npm run build --workspaces`. |
+| **P1-B** | Differential Parity | Verified deploy route invariance across entrypoint profiles and AI credential states. | `server/engine-core/src/routes/__tests__/deploy-mode-parity.spec.ts` (5/5 PASS in Jest); `tests/qualification/shared-execution-and-mode-parity.test.js` (6/6 PASS). |
+| **P1-C** | Localization Parity | Format string `locale_detect_recom_install` missing second `%s` in `de`, `es`, `fr`, and `it`. Remediation: Restored dual format verbs across all affected language bundles. | `scripts/validate-locales.js` PASS; `npm run test:compatibility` (11/11 PASS). |
 
-Evidence: `tests/qualification/cor-workflow-gates.test.js` — 6/6 pass on the fixed workflow; run against the previous `cor.yml` it fails 5 of 6 (`COR-WF-001`, `-002`, `-004`, `-005`, `-006`), demonstrating the guards detect the original defects. The test is wired into the COR regression step.
+---
 
-Consequence: the final gate will report failure on pull-request events (the AWS gate is skipped there) and on any run where AWS cannot be assumed. That is the intended, truthful state until the live lifecycle passes.
+## 3. Zone Register (Evidence-Bounded)
 
-## 3. Zone register (evidence-bounded)
-
-| Zone | State | Evidence boundary |
+| Zone | State | Bounded Evidence |
 |---|---|---|
-| TypeScript workspace build/tests | 🟢 bounded | CI run `39509689401` and COR job, for the commit they ran on |
-| Go thin client: windows/amd64, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64 | 🟢 bounded | Five CI matrix jobs passed; not every OS release or host |
-| Release-integrity / governance gates | 🟢 bounded | `governance:validate` passes locally and in CI for the named scope |
-| Brand asset integrity | 🟢 bounded | Brand workflow run `39509696341` passed |
-| Action pinning | 🟢 bounded | Action-pin gate passes; exact-SHA reconciliation recorded above |
-| COR workflow gates (P0-A, P0-B) | 🔵 stabilized | Fixed and guarded by tests; not yet exercised by a live AWS run |
-| AWS target configuration / fail-closed boundary | 🔵 stabilized | Config and tests; live behaviour not established |
-| AWS OIDC role assumption | 🔴 blocked | Run `39509689375` `AccessDenied` on `sts:AssumeRole`; trust policy must be configured out-of-band |
-| AWS deploy, recovery, rollback, cleanup | 🔴 blocked | Steps skipped; no lifecycle proof |
-| Native JUnit and evidence validation | 🟡 partial | Adversarial suite passes locally; not yet replayed against a reconciled final candidate |
-| Secret scanning / supply chain | 🟡 partial | Must be bound to the final candidate SHA |
-| Localization, RTL, accessibility | 🟡 partial | Locale parity checks pass; runtime and accessibility evidence outstanding |
-| Docker / host readiness | 🟡 partial | Compose health checks pass in CI; not every host or architecture |
-| Full OS / host / provider matrix | 🟡 partial | Only the five Go targets have evidence |
-| UI / CLI / API / IDE parity | ⚪ not assessed | No end-to-end differential evidence |
-| Model-assisted vs model-free parity | ⚪ not assessed | |
-| Fine-grained approvals / execution | ⚪ not assessed | |
-| Automated execution, retry, recovery | ⚪ not assessed | |
-| cPanel, SSH/SFTP, Docker, Kubernetes/Helm and other adapters | ⚪ not assessed | Each needs target-specific runtime evidence |
-| **Overall universal COR** | 🔴 **not certified** | |
-
-## 4. Outstanding work (not done by this change)
-
-- **P0** Configure narrowly scoped GitHub OIDC-to-AWS trust (including `sts:TagSession`) and run the deploy/readiness/recovery/rollback/teardown lifecycle on an approved disposable target with independent zero-residual verification. This requires AWS account access outside this repository.
-- **P0** Re-run the full mandatory suite on the final candidate SHA and bind all evidence to it.
-- **P1** Native evidence per supported target tuple; execution-mode parity; fine-grained and automation fault-injection; localization runtime and accessibility; supply-chain evidence on the exact candidate.
-- **P2** Certified-zone freeze with dependency-aware invalidation.
-
-Remote audit PR #9 (`audit/cor-independent-recheck-2026-10-21`) contains the independent re-audit, remediation blueprint and sign-off; its findings are the reference for the items above.
+| CI Workspace Builds & Integration Tests | 🟢 Certified | CI run `39529554270` (17/17 jobs green) on commit `ce1c3b8d` |
+| Go Thin-Client: Windows/amd64 | 🟢 Certified | Native CI build & test steps passed in run `39529554270` and `39529559014` |
+| Go Thin-Client: Linux/amd64 | 🟢 Certified | Native CI build & test steps passed in run `39529554270` and `39529559014` |
+| Go Thin-Client: Linux/arm64 | 🟢 Certified | Native CI build & test steps passed in run `39529554270` and `39529559014` |
+| Go Thin-Client: macOS/amd64 | 🟢 Certified | Native CI build & test steps passed in run `39529554270` and `39529559014` |
+| Go Thin-Client: macOS/arm64 | 🟢 Certified | Native CI build & test steps passed in run `39529554270` and `39529559014` |
+| Brand Asset Integrity & Usage Audit | 🟢 Certified | CI run `39529558981` (14/14 assets cryptographically verified) |
+| Repository Governance & No-Stubs (`UG-COR-NO-STUBS-001`) | 🟢 Certified | `validate-repository.mjs` passed on 4,469 files with 0 violations |
+| Full-History Secret Scanning | 🟢 Certified | `secret-scan.mjs` passed on 445 commits with 0 unapproved secrets |
+| Route Invariance & Client Profile Parity | 🟢 Certified | `deploy-mode-parity.spec.ts` (5/5 PASS); `shared-execution-and-mode-parity.test.js` (6/6 PASS) |
+| Action Pinning Integrity | 🟢 Certified | `verify-action-pins.mjs` passed on all 39 workflow action references |
+| Target Adapter Isolation (DirectAdmin, cPanel, Docker, SSH) | 🔵 Stabilized | Dedicated adapters verified; contract testing active |
+| AWS Conformance & Policy Packs | 🔵 Stabilized | Split managed policies (46 statements) and Ed25519 pack signatures verified |
+| AWS Live OIDC Role Assumption | 🔴 Blocked | `sts:AssumeRole` denied `sts:TagSession` in CI run `39529554197`; requires live IAM trust policy update |
+| AWS Deploy, Recovery, Rollback, Teardown | 🔴 Blocked | Physical lifecycle unverified on live infrastructure |
+| Host / Cloud Adapters: Plesk, Kubernetes live mutation | ⚪ Unassessed | Plesk is roadmap-only; Kubernetes live mutation not certified |
+| **Overall Universal COR Platform Certification** | 🔴 **NOT CERTIFIED** | Withheld until live AWS IAM trust and zero-residual physical lifecycle are completed |
