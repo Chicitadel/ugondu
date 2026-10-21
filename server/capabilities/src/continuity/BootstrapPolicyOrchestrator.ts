@@ -66,6 +66,7 @@ export interface BootstrapAuthorityContext {
   canCreatePolicy: boolean;
   canUpdatePolicyVersion: boolean;
   canAttachPolicy: boolean;
+  canCreateServiceLinkedRole?: boolean;
   authorizationMode?: SupportedAuthorizationOption | 'NONE';
 }
 

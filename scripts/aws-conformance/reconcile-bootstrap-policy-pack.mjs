@@ -221,6 +221,16 @@ export function runBootstrapProvisionPhase(options = {}) {
   const attachedDuringBootstrap = [];
   const reconciledPolicyVersions = [];
 
+  // Ensure prerequisite service-linked roles exist for hands-free autonomous RDS operations
+  try {
+    const slrRes = aws(['iam', 'create-service-linked-role', '--aws-service-name', 'rds.amazonaws.com'], region);
+    if (slrRes.status === 0) {
+      console.log('[BOOTSTRAP-PROVISION] Autonomously created AWSServiceRoleForRDS service-linked role.');
+    }
+  } catch {
+    // Non-fatal if already exists or caller lacks SLR authority
+  }
+
   for (const pol of pack.policies) {
     const metaRes = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
     if (metaRes.status === 0 && metaRes.json?.Policy?.DefaultVersionId) {

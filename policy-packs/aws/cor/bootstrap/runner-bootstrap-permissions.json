@@ -113,6 +113,20 @@
         "iam:GetRolePolicy"
       ],
       "Resource": "arn:aws:iam::971671216490:role/UgonduCORRunner"
+    },
+    {
+      "Sid": "CreateRDSServiceLinkedRoleIfMissing",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateServiceLinkedRole",
+        "iam:GetRole"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "rds.amazonaws.com"
+        }
+      }
     }
   ]
 }
