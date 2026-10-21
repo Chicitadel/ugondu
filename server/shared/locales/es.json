@@ -155,7 +155,7 @@
   "locale_detect_installed": "  Paquetes de Idioma Instalados:",
   "locale_detect_recom": "Recomendación:",
   "locale_detect_recom_use": "  ugondu locale use %s (usar local)",
-  "locale_detect_recom_install": "  ugondu locale install %s (instalar local)",
+  "locale_detect_recom_install": "  ugondu locale install %s\n  ugondu locale use %s  # instalar local",
   "locale_list_header": "Paquetes de Idioma Instalados:",
   "locale_list_empty": "  (No hay paquetes externos instalados. Operando con bootstrap en-US)",
   "locale_list_item": "  %-10s [%s] v%-8s %-20s %-8s (Lista) %s",
