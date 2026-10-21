@@ -47,3 +47,6 @@ export type { DeactivationValidationResult, DeactivationReport } from './capabil
 
 // Agent-Neutral Capability Contract, 4D Authorization & Graphical/CLI Parity
 export * from './agent-neutral/index';
+
+// Execution Continuity & Policy Governance (ECPG Provider-Neutral Core)
+export * from './continuity/index';

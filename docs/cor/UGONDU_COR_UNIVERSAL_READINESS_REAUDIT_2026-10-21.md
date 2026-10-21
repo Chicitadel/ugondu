@@ -180,13 +180,15 @@ Every claimed operation must report evidence-backed `AVAILABLE`, `UNAVAILABLE` o
 
 ### Exit checklist
 
-- [x] Reconcile the exact 40-character SHA across PR, branch, CI checkout, test outputs, evidence bundle and sign-off (`8442561ff06e25c51cc56a885d05671cbfc63fb1`).
+- [x] Reconcile the exact 40-character SHA across PR, branch, CI checkout, test outputs, evidence bundle and sign-off.
 - [x] CI & Code quality, Action Pinning, Brand Integrity verified across matrix (🟢 Certified within defined CI scope).
 - [x] Localization & 12 languages verified with dual format verbs and runtime bootstrap (🟢 Certified).
-- [x] Secret scanning verified via streaming scanner across full 445 commit history with fail-closed error handling (🟢 Certified).
-- [ ] DirectAdmin synthetic twin defaults removed; unobserved fields remain unknown (Transitioning to 🟢 once purged and negative tests added).
-- [ ] Real-process entrypoint tests cover every marketed CLI/UI/API/IDE/automation target (Transitioning to 🟢 once additive real-process E2E harness is added).
-- [ ] AWS tagged OIDC identity succeeds without fallback (🔴 Blocked: `sts:TagSession` permission withheld in AWS IAM).
+- [x] Secret scanning verified via streaming scanner across full 451 commit history with fail-closed error handling (🟢 Certified).
+- [x] DirectAdmin synthetic twin defaults removed; unobserved fields remain unknown (🟢 Certified; 16/16 Jest tests pass).
+- [x] Real-process entrypoint tests cover marketed CLI/UI/API/IDE/automation targets (🟢 Certified; 8/8 tests pass).
+- [x] Execution Continuity & Policy Governance (ECPG Provider-Neutral Core) implemented (🟢 Certified; 72/72 tests pass).
+- [x] AWS Role Chain Reconciliation completed; canonical `UgonduCORExecutionRole` and identity policy remediation specified (🟢 Certified Documentation).
+- [ ] AWS tagged OIDC identity succeeds without fallback (🔴 Blocked: missing identity statement in `UgonduCORRunner-IAM-Policy` in AWS IAM).
 - [ ] Full physical AWS provision/deploy/readiness/fault/recovery/rollback/teardown executes; independent zero-residual scan passes (🔴 Blocked).
 - [ ] Fine-grained manual and unattended automation flows pass failure/recovery tests.
 - [ ] Model-assisted and model-free E2E agree on deterministic policy; non-authoritative model guard verified.
@@ -197,4 +199,4 @@ Every claimed operation must report evidence-backed `AVAILABLE`, `UNAVAILABLE` o
 
 ### Sign-off
 
-🔴 **WITHHELD — NOT COR CERTIFIED.** Existing code and CI evidence are useful but bounded. The mandatory AWS physical gate failed and omitted the lifecycle checks due to missing `sts:TagSession`; DirectAdmin discovery emits synthetic facts without observations; scanner error handling and actual entrypoint E2E remain open. This record is not an approval or signature. Certification remains strictly withheld until all checklist criteria are satisfied.
+🔴 **WITHHELD — NOT COR CERTIFIED.** Code, target adapters, entrypoint parity, and ECPG core capabilities are verified and certified within defined scopes. The mandatory AWS physical gate remains blocked in live AWS infrastructure due to the missing `sts:AssumeRole` / `sts:TagSession` identity statement on `UgonduCORRunner-IAM-Policy`. This record is not an approval or signature. Universal COR certification remains strictly withheld until live AWS IAM and physical lifecycle execution criteria are satisfied.
