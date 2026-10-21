@@ -33,6 +33,7 @@ export interface RegionScopeConfig {
   accountId: string;
   allowedRegions: string[];
   executionRoleName: string;
+  runnerRoleName?: string;
   transactionId?: string;
 }
 
@@ -189,6 +190,7 @@ export class RegionPolicyRenderer {
       let result = s
         .replace(/\${ACCOUNT_ID}/g, scope.accountId)
         .replace(/\${EXECUTION_ROLE_NAME}/g, scope.executionRoleName)
+        .replace(/\${RUNNER_ROLE_NAME}/g, scope.runnerRoleName ?? 'UgonduCORRunner')
         .replace(/\${TRANSACTION_ID}/g, scope.transactionId ?? '*');
       if (primaryRegion) {
         result = result.replace(/\${REGION}/g, primaryRegion);
@@ -222,6 +224,7 @@ export class RegionPolicyRenderer {
       let result = value
         .replace(/\${ACCOUNT_ID}/g, scope.accountId)
         .replace(/\${EXECUTION_ROLE_NAME}/g, scope.executionRoleName)
+        .replace(/\${RUNNER_ROLE_NAME}/g, scope.runnerRoleName ?? 'UgonduCORRunner')
         .replace(/\${TRANSACTION_ID}/g, scope.transactionId ?? '*');
       if (primaryRegion) {
         result = result.replace(/\${REGION}/g, primaryRegion);
@@ -271,6 +274,7 @@ export class RegionPolicyRenderer {
       let result = s
         .replace(/\${ACCOUNT_ID}/g, scope.accountId)
         .replace(/\${EXECUTION_ROLE_NAME}/g, scope.executionRoleName)
+        .replace(/\${RUNNER_ROLE_NAME}/g, scope.runnerRoleName ?? 'UgonduCORRunner')
         .replace(/\${TRANSACTION_ID}/g, scope.transactionId ?? '*');
       if (region) {
         result = result.replace(/\${REGION}/g, region);

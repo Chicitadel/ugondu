@@ -75,7 +75,8 @@
       "Effect": "Allow",
       "Action": [
         "iam:CreatePolicyVersion",
-        "iam:DeletePolicyVersion"
+        "iam:DeletePolicyVersion",
+        "iam:SetDefaultPolicyVersion"
       ],
       "Resource": [
         "arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery",
@@ -91,16 +92,15 @@
       "Action": [
         "iam:CreatePolicy"
       ],
-      "Resource": "*",
+      "Resource": [
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Creation",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Cleanup",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-RDS-S3",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-ECR-ECS"
+      ],
       "Condition": {
         "StringEquals": {
-          "iam:PolicyName": [
-            "UgonduCOR-V9-Discovery",
-            "UgonduCOR-V9-EC2-Creation",
-            "UgonduCOR-V9-EC2-Cleanup",
-            "UgonduCOR-V9-RDS-S3",
-            "UgonduCOR-V9-ECR-ECS"
-          ],
           "aws:RequestTag/UgonduCOR": "true"
         }
       }
@@ -120,7 +120,10 @@
       "Action": [
         "iam:GetRole"
       ],
-      "Resource": "arn:aws:iam::971671216490:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+      "Resource": [
+        "arn:aws:iam::971671216490:role/AWSServiceRoleForRDS",
+        "arn:aws:iam::971671216490:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+      ]
     },
     {
       "Sid": "CreateRDSServiceLinkedRoleIfMissing",

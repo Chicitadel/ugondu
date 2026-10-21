@@ -419,3 +419,23 @@ test('COR-WF-015 RDS service-linked role preflight creates and re-verifies AWSSe
   assert.equal(provisionRes.exitCode, 0, 'bootstrap-provision succeeds after autonomous SLR creation and verification');
   assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED);
 });
+
+test('COR-WF-016 starter bootstrap policy template is account-agnostic and uses valid AWS IAM CreatePolicy resource scoping', async () => {
+  const rootDir = path.resolve(__dirname, '../..');
+  const { renderBootstrapStarterPolicy } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  const rawTemplate = fs.readFileSync(path.join(rootDir, 'policy-packs/aws/cor/bootstrap/runner-bootstrap-permissions.template.json'), 'utf8');
+  assert.ok(!/\b\d{12}\b/.test(rawTemplate), 'template must not hardcode any 12-digit AWS account ID');
+  assert.ok(!rawTemplate.includes('iam:PolicyName'), 'template must not use invalid iam:PolicyName condition key');
+
+  const renderedCustom = renderBootstrapStarterPolicy({ accountId: '210987654321' });
+  const customStr = JSON.stringify(renderedCustom);
+  assert.ok(customStr.includes('arn:aws:iam::210987654321:role/UgonduCORExecutionRole'), 'must render arbitrary customer account ID');
+  assert.ok(!customStr.includes('971671216490'), 'must not leak another account ID into custom rendered policy');
+
+  const renderedDefault = renderBootstrapStarterPolicy();
+  const committedJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'policy-packs/aws/cor/bootstrap/runner-bootstrap-permissions.json'), 'utf8'));
+  assert.deepEqual(renderedDefault, committedJson, 'committed starter policy must match rendered template for target account');
+  const createStmt = committedJson.Statement.find((s) => s.Sid === 'CreateOnlyCanonicalTaggedCORV9Policies');
+  assert.ok(Array.isArray(createStmt.Resource) && createStmt.Resource.length === 5, 'iam:CreatePolicy must scope 5 canonical policy ARNs in Resource');
+  assert.equal(createStmt.Condition?.StringEquals?.['iam:PolicyName'], undefined, 'iam:PolicyName condition key must be absent');
+});

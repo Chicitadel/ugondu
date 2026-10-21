@@ -132,6 +132,21 @@ function inspectRunnerRoleHygiene(aws, runnerRoleName, execRoleArn, region) {
   return res;
 }
 
+export function renderBootstrapStarterPolicy(options = {}) {
+  const packDir = options.packDir || DEFAULT_PACK_DIR;
+  const tplPath = path.join(packDir, 'bootstrap/runner-bootstrap-permissions.template.json');
+  const target = options.target || resolveAwsTarget();
+  const accountId = options.accountId || target.accountId;
+  const execRole = options.executionRoleName || 'UgonduCORExecutionRole';
+  const runnerRole = options.runnerRoleName || 'UgonduCORRunner';
+  if (!/^\d{12}$/.test(String(accountId))) throw new Error(`Invalid 12-digit AWS accountId: ${accountId}`);
+  const raw = fs.readFileSync(tplPath, 'utf8')
+    .replace(/\$\{ACCOUNT_ID\}/g, String(accountId))
+    .replace(/\$\{EXECUTION_ROLE_NAME\}/g, execRole)
+    .replace(/\$\{RUNNER_ROLE_NAME\}/g, runnerRole);
+  return JSON.parse(raw);
+}
+
 export function formatBootstrapRemediationDiagnostic(pack, denialDetail) {
   const roleArn = pack.executionRole.arn, runnerArn = pack.runnerRole.arn, policyNames = pack.policies.map((p) => p.physicalName).join(', ');
   const policyArnGlob = `arn:aws:iam::${pack.target.accountId}:policy/UgonduCOR-V9-*`;
@@ -387,5 +402,10 @@ export function runVerifyEffectivePhase(options = {}) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const phase = process.argv.includes('--phase') ? process.argv[process.argv.indexOf('--phase') + 1] : 'verify-effective';
+  if (phase === 'render-starter-policy') {
+    const accountId = process.argv.includes('--account-id') ? process.argv[process.argv.indexOf('--account-id') + 1] : undefined;
+    console.log(JSON.stringify(renderBootstrapStarterPolicy({ accountId }), null, 2));
+    process.exit(0);
+  }
   process.exit((phase === 'bootstrap-provision' ? runBootstrapProvisionPhase() : runVerifyEffectivePhase()).exitCode);
 }
