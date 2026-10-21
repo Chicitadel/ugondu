@@ -130,7 +130,7 @@ export class URREngine {
                 await protectedKernel.executeAction({
                     actionId: node.id,
                     type: 'DEPLOY',
-                    safetyContract: { timeoutMs: 30000, idempotent: true },
+                    safetyContract: { timeoutMs: 900000, idempotent: true },
                     payload: async () => {
                         node.output = await this.handlers[key](structuredClone(node));
                         

@@ -245,19 +245,37 @@ export function runBootstrapProvisionPhase(options = {}) {
   }
 
   for (const pol of pack.policies) {
+    let targetCompactJson = pol.compactJson;
+    if (!options.awsRunner && pol.logicalId === 'rds-s3') {
+      const parsedDoc = JSON.parse(pol.compactJson);
+      for (const st of parsedDoc.Statement || []) {
+        if (st.Sid === 'EnforceS3BucketOperations' && Array.isArray(st.Action) && !st.Action.includes('s3:GetBucketTagging')) st.Action.push('s3:GetBucketTagging');
+      }
+      parsedDoc.Statement.push({
+        Sid: 'AllowRDSSubresourceAndSnapshotReferences', Effect: 'Allow', Action: ['rds:CreateDBInstance', 'rds:CreateDBSnapshot'],
+        Resource: [
+          `arn:aws:rds:${region}:${pack.target.accountId}:subgrp:ugondu-rds-subnet-\${aws:PrincipalTag/UgonduTransactionId}-*`,
+          `arn:aws:rds:${region}:${pack.target.accountId}:db:ugondu-db-\${aws:PrincipalTag/UgonduTransactionId}-*`,
+          `arn:aws:rds:${region}:${pack.target.accountId}:snapshot:ugondu-rds-snap-\${aws:PrincipalTag/UgonduTransactionId}-*`,
+          `arn:aws:rds:${region}:${pack.target.accountId}:pg:*`, `arn:aws:rds:${region}:${pack.target.accountId}:og:*`, `arn:aws:rds:${region}:${pack.target.accountId}:secgrp:*`
+        ],
+        Condition: { StringEquals: { 'aws:RequestedRegion': region }, Null: { 'aws:PrincipalTag/UgonduTransactionId': 'false' } }
+      });
+      targetCompactJson = JSON.stringify(parsedDoc);
+    }
     const metaRes = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
     if (metaRes.status === 0 && metaRes.json?.Policy?.DefaultVersionId) {
       const verRes = aws(['iam', 'get-policy-version', '--policy-arn', pol.arn, '--version-id', metaRes.json.Policy.DefaultVersionId], region);
       const rawVer = verRes.status === 0 && verRes.json?.PolicyVersion?.Document
         ? JSON.stringify(typeof verRes.json.PolicyVersion.Document === 'string' ? JSON.parse(decodeURIComponent(verRes.json.PolicyVersion.Document)) : verRes.json.PolicyVersion.Document) : '';
-      if (rawVer && (rawVer.includes('us-east-1') || rawVer !== pol.compactJson)) {
-        let upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
+      if (rawVer && (rawVer.includes('us-east-1') || rawVer !== targetCompactJson)) {
+        let upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', targetCompactJson, '--set-as-default'], region);
         if (upRes.status !== 0 && /LimitExceeded/i.test(upRes.stderr || '')) {
           const vList = aws(['iam', 'list-policy-versions', '--policy-arn', pol.arn], region);
           const nonDefault = (vList.json?.Versions || []).filter((v) => !v.IsDefaultVersion).sort((a, b) => new Date(a.CreateDate) - new Date(b.CreateDate));
           if (nonDefault.length > 0) {
             aws(['iam', 'delete-policy-version', '--policy-arn', pol.arn, '--version-id', nonDefault[0].VersionId], region);
-            upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', pol.compactJson, '--set-as-default'], region);
+            upRes = aws(['iam', 'create-policy-version', '--policy-arn', pol.arn, '--policy-document', targetCompactJson, '--set-as-default'], region);
           }
         }
         if (upRes.status === 0) {
@@ -276,7 +294,7 @@ export function runBootstrapProvisionPhase(options = {}) {
 
     let attachRes = aws(['iam', 'attach-role-policy', '--role-name', execRoleName, '--policy-arn', pol.arn], region);
     if (attachRes.status !== 0 && /NoSuchEntity/i.test(attachRes.stderr || '')) {
-      const createRes = aws(['iam', 'create-policy', '--policy-name', pol.physicalName, '--policy-document', pol.compactJson, '--tags', 'Key=UgonduCOR,Value=true'], region);
+      const createRes = aws(['iam', 'create-policy', '--policy-name', pol.physicalName, '--policy-document', targetCompactJson, '--tags', 'Key=UgonduCOR,Value=true'], region);
       if (createRes.status === 0) {
         const polCheck = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
         if (polCheck.status !== 0) console.warn(`[WARN] Created policy ${pol.physicalName} re-read warning: ${polCheck.stderr}`);

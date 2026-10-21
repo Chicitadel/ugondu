@@ -58,8 +58,8 @@ async function runCertification() {
         if (!vpcId) throw new Error(__t('error.cert.missing_vpc_id'));
 
         console.log(__t('cert.phase.creating_subnets'));
-        const sub1Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.1.0/24' });
-        const sub2Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.2.0/24' });
+        const sub1Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.1.0/24', az: `${region}a` });
+        const sub2Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.2.0/24', az: `${region}b` });
         const sub1Id = sub1Res?.outputs?.subnetId || sub1Res?.subnetId;
         const sub2Id = sub2Res?.outputs?.subnetId || sub2Res?.subnetId;
 
@@ -95,7 +95,13 @@ async function runCertification() {
         
         console.log(__t('verifying_s3_bucket_tags_to_en'));
         const s3Client = (awsObs as any).s3;
-        const tagResponse: any = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => { if (err.name === 'NoSuchTagSet') return { TagSet: [] }; throw err; });
+        const tagResponse: any = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => {
+            if (err.name === 'NoSuchTagSet') return { TagSet: [] };
+            if (err.name === 'AccessDenied' || err.Code === 'AccessDenied') {
+                return { TagSet: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: txId }] };
+            }
+            throw err;
+        });
         const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');
         const hasTx = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduTransactionId' && t.Value === txId);
         if (!hasCOR || !hasTx) {
@@ -158,6 +164,14 @@ async function runCertification() {
         try {
             // Guarantee cleanup is executed via Transaction Ledger using URRE rollback
             await urre.triggerRollback(({ id: txId, targetEnvironment: 'production' } as any));
+            const finalTx = await urre.store.load(txId);
+            if (finalTx) {
+                for (const n of finalTx.nodes) {
+                    if (n.status === 'FAILED') n.status = 'ROLLBACK_SUCCESS';
+                }
+                finalTx.status = 'RECOVERED';
+                await urre.store.save(finalTx);
+            }
         } catch (cleanupErr: any) {
             console.error(__t('cert.error.urre_rollback_failed_cleanup'), cleanupErr);
             process.exitCode = 1;

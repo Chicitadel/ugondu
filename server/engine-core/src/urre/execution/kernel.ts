@@ -287,7 +287,7 @@ export const protectedKernel = new ExecutionKernel(
     maxAttempts: 3,
     baseDelayMs: 1000,
     maxDelayMs: 10_000,
-    timeoutMs: 30_000,
+    timeoutMs: 900_000,
     jitterFactor: 0.2,
   }),
   new IdempotencyResolver(),

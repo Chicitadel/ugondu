@@ -55,9 +55,9 @@ governanceRules:
     UNCERTIFIED: "Unverified boundary; no empirical qualification established."
 
 summary:
-  totalBoundaries: 8
+  totalBoundaries: 9
   certifiedCount: 3
-  modificationZoneCount: 4
+  modificationZoneCount: 5
   inProgressCount: 1
   uncertifiedCount: 0
 
@@ -249,3 +249,29 @@ boundaries:
     gatingTests:
       - "server/capabilities/src/tests/universal-placement-resolver.spec.ts"
       - "tests/qualification/universal-region-selection.test.js"
+
+  - id: "aws.physical.rds-fargate-residual-remediation"
+    status: "MODIFICATION_ZONE"
+    classification: "DEFECT_REMEDIATION_ZONE"
+    owner: "Infrastructure & Cloud Native Engineering Authority"
+    finding:
+      - "COR-001" # Physical RDS / Fargate / Residual Scanner end-to-end qualification completion
+    targetPaths:
+      - "server/engine-core/physical-certification.ts"
+      - "server/engine-core/physical-fargate-certification.ts"
+      - "server/engine-core/src/registry/action-registry-factory.ts"
+      - "server/engine-core/src/urre/execution/kernel.ts"
+      - "server/engine-core/src/urre/execution/urre-engine.ts"
+      - "scripts/ci/residual-scanner.ts"
+      - "scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs"
+    mutationPolicy: "ALLOW_REVISED_IMPLEMENTATION"
+    remediationScope:
+      - "Provision certification subnets across 2 distinct Availability Zones (eu-west-3a, eu-west-3b) to satisfy AWS RDS DBSubnetGroup multi-AZ coverage"
+      - "Extend URRE kernel action timeout from 30s to 900s to accommodate 5-8 minute physical AWS RDS instance and snapshot lifecycles"
+      - "Wait for RDS snapshot availability and complete RDS instance deletion before deleting DBSubnetGroup and VPC"
+      - "Isolate Fargate rev2 fault rollback transaction ID and normalize NotFound error handling in residual-scanner.ts"
+    dependencies:
+      - "aws.bootstrap.slr-prerequisite"
+      - "aws.bootstrap.policy-reconciliation"
+    gatingTests:
+      - "tests/qualification/cor-workflow-gates.test.js"

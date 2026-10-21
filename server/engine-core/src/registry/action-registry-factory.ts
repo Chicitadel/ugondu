@@ -121,24 +121,14 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'TERMINATE_SUBNET',
     async (node: DagNode) => {
       await aws.deleteSubnet(node.output!.subnetId);
-      return {
-        success: true,
-        subnetId: node.output!.subnetId,
-        vpcId: node.output?.vpcId,
-        cidrBlock: node.output?.cidrBlock,
-        az: node.output?.az,
-      };
+      return { success: true, subnetId: node.output!.subnetId, vpcId: node.output?.vpcId, cidrBlock: node.output?.cidrBlock, az: node.output?.az };
     },
     async (node: DagNode) => {
       const vpcId = node.output?.vpcId || node.params?.vpcId || 'vpc-default';
       const cidrBlock = node.output?.cidrBlock || node.params?.cidrBlock || '10.0.1.0/24';
       const az = node.output?.az || node.params?.az;
-      let restoredSubnetId: string | undefined;
-      if (typeof aws.createSubnet === 'function') {
-        const sub = await aws.createSubnet(vpcId, cidrBlock, az);
-        restoredSubnetId = sub?.id;
-      }
-      recordCompensation(aws, node, 'RESTORE_SUBNET', restoredSubnetId ?? node.output?.subnetId);
+      const sub = typeof aws.createSubnet === 'function' ? await aws.createSubnet(vpcId, cidrBlock, az) : undefined;
+      recordCompensation(aws, node, 'RESTORE_SUBNET', sub?.id ?? node.output?.subnetId);
     }
   );
 
@@ -165,20 +155,12 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'TERMINATE_SECURITY_GROUP',
     async (node: DagNode) => {
       await aws.deleteSecurityGroup(node.output!.securityGroupId);
-      return {
-        success: true,
-        securityGroupId: node.output!.securityGroupId,
-        vpcId: node.output?.vpcId,
-        name: node.output?.name,
-      };
+      return { success: true, securityGroupId: node.output!.securityGroupId, vpcId: node.output?.vpcId, name: node.output?.name };
     },
     async (node: DagNode) => {
       const vpcId = node.output?.vpcId || node.params?.vpcId || 'vpc-default';
       const sgName = node.output?.name || node.params?.name || 'ugondu-sg-restored';
-      let restoredSgId: string | undefined;
-      if (typeof aws.createSecurityGroup === 'function') {
-        restoredSgId = await aws.createSecurityGroup(vpcId, sgName);
-      }
+      const restoredSgId = typeof aws.createSecurityGroup === 'function' ? await aws.createSecurityGroup(vpcId, sgName) : undefined;
       recordCompensation(aws, node, 'RESTORE_SECURITY_GROUP', restoredSgId ?? node.output?.securityGroupId);
     }
   );
@@ -193,9 +175,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
       const subnetId = node.output?.subnetId || node.params?.subnetId;
       const res = await aws.runInstances(type, ami, subnetId);
       const sgId = node.output?.securityGroupId || node.params?.securityGroupId;
-      if (sgId) {
-        await aws.modifyInstanceSecurityGroups(res.id, [sgId]);
-      }
+      if (sgId) await aws.modifyInstanceSecurityGroups(res.id, [sgId]);
       const volumes = typeof aws.describeInstanceVolumes === 'function' ? await aws.describeInstanceVolumes(res.id) : [];
       const rootVolumeId = Array.isArray(volumes) ? volumes[0] : (volumes?.Volumes?.[0]?.VolumeId || undefined);
       return { instanceId: res.id, rootVolumeId };
@@ -213,21 +193,13 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'TERMINATE_EC2',
     async (node: DagNode) => {
       await aws.terminateInstances(node.output!.instanceId);
-      return {
-        success: true,
-        instanceId: node.output!.instanceId,
-        ami: node.output?.ami,
-        subnetId: node.output?.subnetId,
-      };
+      return { success: true, instanceId: node.output!.instanceId, ami: node.output?.ami, subnetId: node.output?.subnetId };
     },
     async (node: DagNode) => {
       let restoredInstanceId: string | undefined;
       if (typeof aws.runInstances === 'function') {
-        const instanceType =
-          typeof aws.resolveInstanceType === 'function' ? await aws.resolveInstanceType(2, 4096) : 't3.micro';
-        const ami = node.output?.ami || node.params?.ami || 'ami-restored';
-        const subnetId = node.output?.subnetId || node.params?.subnetId;
-        const restored = await aws.runInstances(instanceType, ami, subnetId);
+        const instanceType = typeof aws.resolveInstanceType === 'function' ? await aws.resolveInstanceType(2, 4096) : 't3.micro';
+        const restored = await aws.runInstances(instanceType, node.output?.ami || node.params?.ami || 'ami-restored', node.output?.subnetId || node.params?.subnetId);
         restoredInstanceId = restored?.id;
       }
       recordCompensation(aws, node, 'RESTORE_EC2', restoredInstanceId ?? node.output?.instanceId);
@@ -277,6 +249,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
   );
 
   // RDS
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   urre.registerHandler(
     'aws',
     'CREATE_RDS',
@@ -286,20 +259,28 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
       const rdsId = node.output?.rdsId || node.params?.rdsId || `ugondu-rds-${Date.now()}`;
       const sgId = node.output?.securityGroupId || node.params?.securityGroupId;
       const subnetGroupName = node.output?.dbSubnetGroupName || node.params?.dbSubnetGroupName;
-      const res = await aws.createRds(
-        rdsId,
-        'postgres',
-        20,
-        sgId,
-        credentialRef,
-        subnetGroupName
-      );
+      const res = await aws.createRds(rdsId, 'postgres', 20, sgId, credentialRef, subnetGroupName);
       return { rdsId: res.id };
     },
     async (node: DagNode) => {
-      if (node.output?.rdsId) {
-        await aws.deleteRds(node.output!.rdsId);
-        recordCompensation(aws, node, 'DELETE_RDS', node.output!.rdsId);
+      const rdsId = node.output?.rdsId || node.params?.rdsId;
+      if (rdsId) {
+        for (let i = 0; i < 20; i++) {
+          try { await aws.deleteRds(rdsId); break; } catch (err: any) {
+            if (/NotFound/i.test(String(err?.name || '') + String(err?.message || ''))) break;
+            if (/InvalidDBInstanceState/i.test(String(err?.name || '') + String(err?.message || '')) && i < 19) { await sleep(10000); continue; }
+            throw err;
+          }
+        }
+        if ((aws as any).rds) {
+          const { DescribeDBInstancesCommand } = require('@aws-sdk/client-rds');
+          for (let w = 0; w < 60; w++) {
+            await sleep(15000);
+            const chk = await (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })).catch(() => null);
+            if (!chk || !chk.DBInstances?.length) break;
+          }
+        }
+        recordCompensation(aws, node, 'DELETE_RDS', rdsId);
       }
     }
   );
@@ -311,12 +292,29 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     async (node: DagNode) => {
       const rdsId = node.output?.rdsId || node.params?.rdsId;
       const snapId = await aws.createSnapshot({ resourceType: 'RDS_INSTANCE', resourceId: rdsId, snapshotId: node.output?.rdsSnapshotId || node.params?.rdsSnapshotId });
-      return { rdsSnapshotId: node.output?.rdsSnapshotId || node.params?.rdsSnapshotId || snapId };
+      const actualSnapId = node.output?.rdsSnapshotId || node.params?.rdsSnapshotId || snapId;
+      if ((aws as any).rds) {
+        const { DescribeDBSnapshotsCommand, DescribeDBInstancesCommand } = require('@aws-sdk/client-rds');
+        for (let w = 0; w < 45; w++) {
+          await sleep(10000);
+          const sDesc = await (aws as any).rds.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: actualSnapId })).catch(() => null);
+          const iDesc = rdsId ? await (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })).catch(() => null) : null;
+          if (sDesc?.DBSnapshots?.[0]?.Status === 'available' && (!rdsId || iDesc?.DBInstances?.[0]?.DBInstanceStatus === 'available')) break;
+        }
+      }
+      return { rdsSnapshotId: actualSnapId };
     },
     async (node: DagNode) => {
-      if (node.output?.rdsSnapshotId) {
-        await aws.deleteRdsSnapshot(node.output!.rdsSnapshotId);
-        recordCompensation(aws, node, 'DELETE_RDS_SNAPSHOT', node.output!.rdsSnapshotId);
+      const snapId = node.output?.rdsSnapshotId || node.params?.rdsSnapshotId;
+      if (snapId) {
+        for (let i = 0; i < 20; i++) {
+          try { await aws.deleteRdsSnapshot(snapId); break; } catch (err: any) {
+            if (/NotFound/i.test(String(err?.name || '') + String(err?.message || ''))) break;
+            if (/InvalidDBSnapshotState/i.test(String(err?.name || '') + String(err?.message || '')) && i < 19) { await sleep(10000); continue; }
+            throw err;
+          }
+        }
+        recordCompensation(aws, node, 'DELETE_RDS_SNAPSHOT', snapId);
       }
     }
   );

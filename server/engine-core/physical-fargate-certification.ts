@@ -96,7 +96,7 @@ async function runFargateCertification() {
         if (!taskDefArn2) throw new Error(__t('error.cert.fargate.missing_rev2_arn'));
 
         console.log(__t('cert.fargate.action.deploy_rev2'));
-        const deployment2TxId = txId;
+        const deployment2TxId = `${txId}-rev2`;
         await registry.getAction('orchestration:container:deploy')!.execute({ transactionId: deployment2TxId, clusterName: globalClusterName, serviceName: `${campaignId}-svc`, taskDefinitionArn: taskDefArn2 });
         
         // Load the actual durably saved TX
