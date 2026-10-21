@@ -1150,7 +1150,6 @@ func SortedValidCommands() []string {
 		"rollback",
 		"doctor",
 		"config",
-		"providers",
 		"provider",
 		"models",
 		"plugins",

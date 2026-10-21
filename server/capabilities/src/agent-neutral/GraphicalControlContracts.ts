@@ -260,11 +260,13 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
 export interface CliCommandBinding {
   commandPattern: string;
   capabilityId: CanonicalCapabilityId;
+  legacyCapabilityAlias?: string;
   readOnly: boolean;
   defaultExecutionMode: 'inspect' | 'plan' | 'apply' | 'guided' | 'non-interactive' | 'policy-controlled';
 }
 
 export const CLI_COMMAND_CAPABILITY_MAP: readonly CliCommandBinding[] = [
+  { commandPattern: 'ugondu deploy', capabilityId: 'policy.bootstrap.apply', legacyCapabilityAlias: 'cap.OrchestrateDeployment', readOnly: false, defaultExecutionMode: 'apply' },
   { commandPattern: 'ugondu capability list', capabilityId: 'policy.inspect', readOnly: true, defaultExecutionMode: 'inspect' },
   { commandPattern: 'ugondu capability describe', capabilityId: 'policy.inspect', readOnly: true, defaultExecutionMode: 'inspect' },
   { commandPattern: 'ugondu capability matrix', capabilityId: 'policy.inspect', readOnly: true, defaultExecutionMode: 'inspect' },

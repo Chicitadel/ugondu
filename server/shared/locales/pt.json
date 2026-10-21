@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "São necessários pelo menos dois ambientes para formar uma cadeia de entrega.",
       "failed_to_compile_compliance_evidence": "Falha ao compilar o pacote de evidências de conformidade.",
       "checkpoint_storage_endpoint_not_configured": "O endpoint de armazenamento do ponto de verificação não está configurado.",
-      "unknown_action_type": "Tipo de ação desconhecido especificado na etapa de transação."
+      "unknown_action_type": "Tipo de ação desconhecido especificado na etapa de transação.",
+      "directadmin_unverified_instance_state": "O adaptador DirectAdmin impediu o retorno de um estado de instância não verificado para {id} em produção."
     },
     "system": {
       "unknown_passport_subcommand": "Desconhecido passaporte subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "O provedor de IA upstream retornou um código de status HTTP diferente de 2xx.",
       "upstream_unavailable": "O serviço do provedor de IA upstream está indisponível no momento."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "Instalação inicial autorizada: descobrindo, planejando, provisionando e anexando políticas canônicas.",
+    "state.returning_matched": "Instalação recorrente verificada: funções canônicas e anexos de políticas correspondem aos resumos SHA-256 esperados.",
+    "state.drift_reconcilable": "Desvio de política detectado: reconciliando versões de políticas canônicas e anexos de funções dentro do limite de autoridade.",
+    "state.authority_missing": "Autoridade de inicialização ausente ou insuficiente para a função {role}: parada antes das sondagens de carga de trabalho.",
+    "state.provider_unavailable": "Provedor ou rede indisponível: ponto de verificação preservado no registro de continuidade para retomada segura.",
+    "state.ownership_ambiguous": "Propriedade ou permissões ambíguas para {id}: recusando mutação destrutiva ou conflitante."
+  },
+  "deploy": {
+    "pipeline.discover": "Descobrindo a topologia do projeto e as capacidades da plataforma de destino",
+    "pipeline.validate": "Validando a configuração de implantação e as proteções de segurança",
+    "pipeline.reconcile_policies": "Reconciliando políticas canônicas e anexos de funções de execução",
+    "pipeline.plan_and_execute": "Planejando e executando implantação durável com recuperação por ponto de verificação",
+    "pipeline.verify_health": "Verificando a integridade pós-implantação e registrando evidências auditáveis"
+  },
+  "palette": {
+    "cmd.deploy": "Configurar, reconciliar políticas e implantar a aplicação autonomamente",
+    "cmd.provider": "Inspecionar e gerenciar provedores de nuvem e hospedagem de destino"
   }
 }

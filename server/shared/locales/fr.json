@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "Au moins deux environnements sont requis pour former une chaîne de livraison.",
       "failed_to_compile_compliance_evidence": "Échec de la compilation du package de preuves de conformité.",
       "checkpoint_storage_endpoint_not_configured": "Le point de terminaison de stockage des points de contrôle n'est pas configuré.",
-      "unknown_action_type": "Type d'action inconnu spécifié dans l'étape de transaction."
+      "unknown_action_type": "Type d'action inconnu spécifié dans l'étape de transaction.",
+      "directadmin_unverified_instance_state": "L'adaptateur DirectAdmin a empêché le renvoi d'un état d'instance non vérifié pour {id} en production."
     },
     "system": {
       "unknown_passport_subcommand": "Inconnu passeport subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "Le fournisseur IA en amont a renvoyé un code d'état HTTP non-2xx.",
       "upstream_unavailable": "Le service du fournisseur IA en amont est actuellement indisponible."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "Installation initiale autorisée : découverte, planification, provisionnement et attachement des politiques canoniques.",
+    "state.returning_matched": "Installation existante vérifiée : les rôles canoniques et les attachements de politiques correspondent aux empreintes SHA-256 attendues.",
+    "state.drift_reconcilable": "Dérive de politique détectée : réconciliation des versions de politiques canoniques et des attachements de rôles dans la limite d'autorité.",
+    "state.authority_missing": "Autorité d'amorçage manquante ou insuffisante pour le rôle {role} : arrêt avant les sondes de charge de travail.",
+    "state.provider_unavailable": "Fournisseur ou réseau indisponible : point de contrôle conservé dans le registre de continuité pour une reprise sécurisée.",
+    "state.ownership_ambiguous": "Propriété ou permissions ambiguës pour {id} : refus de toute mutation destructive ou conflictuelle."
+  },
+  "deploy": {
+    "pipeline.discover": "Découverte de la topologie du projet et des capacités de la plateforme cible",
+    "pipeline.validate": "Validation de la configuration de déploiement et des garde-fous de sécurité",
+    "pipeline.reconcile_policies": "Réconciliation des politiques canoniques et des attachements de rôles d'exécution",
+    "pipeline.plan_and_execute": "Planification et exécution d'un déploiement durable avec récupération par point de contrôle",
+    "pipeline.verify_health": "Vérification de l'état de santé post-déploiement et enregistrement des preuves auditables"
+  },
+  "palette": {
+    "cmd.deploy": "Configurer, réconcilier les politiques et déployer l'application de manière autonome",
+    "cmd.provider": "Inspecter et gérer les fournisseurs de cloud et d'hébergement cibles"
   }
 }

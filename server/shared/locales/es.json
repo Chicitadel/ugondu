@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "Se requieren al menos dos entornos para formar una cadena de entrega.",
       "failed_to_compile_compliance_evidence": "Error al compilar el paquete de evidencia de cumplimiento.",
       "checkpoint_storage_endpoint_not_configured": "El punto de enlace de almacenamiento de puntos de control no está configurado.",
-      "unknown_action_type": "Tipo de acción desconocido especificado en el paso de transacción."
+      "unknown_action_type": "Tipo de acción desconocido especificado en el paso de transacción.",
+      "directadmin_unverified_instance_state": "El adaptador de DirectAdmin impidió devolver un estado de instancia no verificado para {id} en producción."
     },
     "system": {
       "unknown_passport_subcommand": "Desconocido pasaporte subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "El proveedor de IA ascendente devolvió un código de estado HTTP distinto de 2xx.",
       "upstream_unavailable": "El servicio del proveedor de IA ascendente no está disponible actualmente."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "Instalación inicial autorizada: descubriendo, planificando, aprovisionando y adjuntando políticas canónicas.",
+    "state.returning_matched": "Instalación recurrente verificada: los roles canónicos y las políticas adjuntas coinciden con los resúmenes SHA-256 esperados.",
+    "state.drift_reconcilable": "Desviación de políticas detectada: reconciliando versiones de políticas canónicas y asignaciones de roles dentro del límite de autoridad.",
+    "state.authority_missing": "Autoridad de arranque faltante o insuficiente para el rol {role}: detención antes de las sondas de carga de trabajo.",
+    "state.provider_unavailable": "Proveedor o red no disponible: punto de control preservado en el registro de continuidad para una reanudación segura.",
+    "state.ownership_ambiguous": "Propiedad o permisos ambiguos para {id}: rechazando mutación destructiva o conflictiva."
+  },
+  "deploy": {
+    "pipeline.discover": "Descubriendo la topología del proyecto y las capacidades de la plataforma de destino",
+    "pipeline.validate": "Validando la configuración de despliegue y las barreras de seguridad",
+    "pipeline.reconcile_policies": "Reconciliando políticas canónicas y asignaciones de roles de ejecución",
+    "pipeline.plan_and_execute": "Planificando y ejecutando un despliegue duradero con recuperación por puntos de control",
+    "pipeline.verify_health": "Verificando el estado posterior al despliegue y registrando evidencia auditable"
+  },
+  "palette": {
+    "cmd.deploy": "Configurar, reconciliar políticas y desplegar la aplicación de forma autónoma",
+    "cmd.provider": "Inspeccionar y gestionar los proveedores de nube y alojamiento de destino"
   }
 }

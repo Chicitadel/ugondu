@@ -4,7 +4,7 @@
  * File           : index.ts
  * Version        : 1.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU (RCS Paris 943 432 534)
  * Created Date   : 2026-10-21
  * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE
@@ -17,9 +17,9 @@
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53 / UAIGOS 3.0.0
+ * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 export * from './DuplicateRoleGuard';
@@ -29,3 +29,4 @@ export * from './EnvironmentReconciler';
 export * from './ResumePlanner';
 export * from './RegionPolicyRenderer';
 export * from './PolicyPermissionAdapter';
+export * from './BootstrapPolicyOrchestrator';

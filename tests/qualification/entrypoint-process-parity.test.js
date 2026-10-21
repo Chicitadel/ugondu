@@ -445,6 +445,30 @@ async function runEntrypointParitySuite() {
       await assert.rejects(abortedFetch, (err) => err.name === 'AbortError');
     });
 
+    // 8. Unified Autonomous Bootstrap Policy Reconciliation & AI/Non-AI Deploy Parity
+    await check('E2E-PAR-008', 'Unified bootstrap policy reconciliation gates deploy across CLI, UI, IDE, CI, and AI-assisted entrypoints', async () => {
+      for (const profile of CLIENT_PROFILES) {
+        const okRes = await post('/v1/deploy/resolve', BASE_PAYLOAD, {
+          ...profile.headers,
+          'x-ugondu-passport-id': 'valid_passport_id'
+        });
+        assert.strictEqual(okRes.status, 200);
+        assert.strictEqual(okRes.body.policyReconciliation.readyForDeploy, true);
+        assert.strictEqual(okRes.body.policyReconciliation.operatingState, 'RETURNING_INSTALLATION_MATCHED');
+
+        const missingAuthRes = await post('/v1/deploy/resolve', {
+          ...BASE_PAYLOAD,
+          bootstrapReconciliation: { policiesAttached: false, bootstrapAuthorized: false }
+        }, {
+          ...profile.headers,
+          'x-ugondu-passport-id': 'valid_passport_id'
+        });
+        assert.strictEqual(missingAuthRes.status, 403);
+        assert.strictEqual(missingAuthRes.body.code, 'UG-BOOTSTRAP-AUTH-MISSING');
+        assert.strictEqual(missingAuthRes.body.operatingState, 'BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT');
+      }
+    });
+
   } finally {
     await new Promise((resolve) => server.close(resolve));
     fs.rmSync(tmpTxDir, { recursive: true, force: true });

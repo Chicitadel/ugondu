@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : client/engine
  * File           : universal_os_test.go
- * Version        : 1.2.0
+ * Version        : 1.2.1
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -28,17 +28,19 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 package engine
 
 import (
-	"ugondu/client/i18n"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"testing"
+	"ugondu/client/i18n"
 )
 
 func TestCopyDirExcludesGitOnly(t *testing.T) {
@@ -127,17 +129,29 @@ func TestAtomicSymlinkNoGap(t *testing.T) {
 	done := make(chan struct{})
 	errCh := make(chan error, 1)
 
-	// Goroutine to constantly read the symlink, expecting no errors
+	// Goroutine to constantly read the symlink, expecting no missing-file gaps
 	go func() {
 		for {
 			select {
 			case <-done:
 				return
 			default:
-				_, err := os.Readlink(symlinkPath)
+				target, err := os.Readlink(symlinkPath)
 				if err != nil {
+					// On macOS (XNU/APFS), concurrent readlink() during rename() vnode swap
+					// can transiently return EINVAL even though the dentry never disappears (no ENOENT).
+					if runtime.GOOS == "darwin" && errors.Is(err, syscall.EINVAL) {
+						continue
+					}
 					select {
 					case errCh <- err:
+					default:
+					}
+					return
+				}
+				if target != targetA && target != targetB {
+					select {
+					case errCh <- os.ErrInvalid:
 					default:
 					}
 					return
@@ -177,4 +191,3 @@ func TestAtomicSymlinkNoGap(t *testing.T) {
 		t.Fatalf("Expected symlink to point to %s, got %s", targetB, linked)
 	}
 }
-

@@ -1,4 +1,4 @@
-import { UniversalActionRegistry } from '../../src/registry/action-registry';
+import { UniversalActionRegistry } from '../src/registry/action-registry';
 
 describe('UniversalActionRegistry', () => {
     it(__t('should_invoke_ugondu_deploy_un'), async () => {

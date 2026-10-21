@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "Mindestens zwei Umgebungen sind erforderlich, um eine Bereitstellungskette zu bilden.",
       "failed_to_compile_compliance_evidence": "Fehler beim Kompilieren des Compliance-Nachweispakets.",
       "checkpoint_storage_endpoint_not_configured": "Checkpoint-Speicherendpunkt ist nicht konfiguriert.",
-      "unknown_action_type": "Unbekannter Aktionstyp im Transaktionsschritt angegeben."
+      "unknown_action_type": "Unbekannter Aktionstyp im Transaktionsschritt angegeben.",
+      "directadmin_unverified_instance_state": "Der DirectAdmin-Adapter hat die Rückgabe eines nicht verifizierten Instanzstatus für {id} in der Produktion verhindert."
     },
     "system": {
       "unknown_passport_subcommand": "Unbekannt Pass subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "Upstream-KI-Anbieter hat einen Nicht-2xx-HTTP-Statuscode zurückgegeben.",
       "upstream_unavailable": "Dienst des Upstream-KI-Anbieters ist derzeit nicht verfügbar."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "Erstinstallation autorisiert: Erkennen, Planen, Bereitstellen und Anhängen kanonischer Richtlinien.",
+    "state.returning_matched": "Bestehende Installation verifiziert: Kanonische Rollen und Richtlinienanhänge stimmen mit den erwarteten SHA-256-Prüfsummen überein.",
+    "state.drift_reconcilable": "Richtlinienabweichung erkannt: Abgleich kanonischer Richtlinienversionen und Rollenanhänge innerhalb der Autoritätsgrenze.",
+    "state.authority_missing": "Bootstrap-Autorität fehlt oder ist unzureichend für Rolle {role}: Stopp vor Workload-Prüfungen.",
+    "state.provider_unavailable": "Anbieter oder Netzwerk nicht verfügbar: Prüfpunkt im Kontinuitätsregister für sichere Wiederaufnahme gesichert.",
+    "state.ownership_ambiguous": "Eigentümerschaft oder Berechtigungen für {id} mehrdeutig: Destruktive oder widersprüchliche Änderung wird verweigert."
+  },
+  "deploy": {
+    "pipeline.discover": "Projekttopologie und Fähigkeiten der Zielplattform werden ermittelt",
+    "pipeline.validate": "Bereitstellungskonfiguration und Sicherheitsleitplanken werden validiert",
+    "pipeline.reconcile_policies": "Kanonische Richtlinien und Ausführungsrollenanhänge werden abgeglichen",
+    "pipeline.plan_and_execute": "Dauerhafte Bereitstellung mit Prüfpunkt-Wiederherstellung wird geplant und ausgeführt",
+    "pipeline.verify_health": "Systemzustand nach der Bereitstellung wird überprüft und prüfbare Nachweise werden aufgezeichnet"
+  },
+  "palette": {
+    "cmd.deploy": "Konfigurieren, Richtlinien abgleichen und Anwendung autonom bereitstellen",
+    "cmd.provider": "Ziel-Cloud- und Hosting-Anbieter prüfen und verwalten"
   }
 }

@@ -138,3 +138,205 @@ test('COR-WF-006 every mandatory gate job is a dependency of the final gate', ()
   const needs = jobs['cor-final-release-gate'].needs;
   for (const j of mandatory) assert.ok(needs.includes(j), `final gate must need '${j}'`);
 });
+
+test('COR-WF-007 bootstrap policy pack reconciliation runs before AWS conformance probes', () => {
+  const steps = jobs['aws-physical-gate'].steps;
+  const names = steps.map((s) => s.name);
+  const oidcIdx = names.indexOf('Configure Base OIDC Credentials');
+  const provisionIdx = names.indexOf('Reconcile AWS COR V9 Policy Pack (Bootstrap Provision)');
+  const assumeIdx = names.indexOf('Assume Tagged Execution Session');
+  const verifyIdx = names.indexOf('Verify Reconciled AWS COR V9 Effective Permissions');
+  const probeIdx = names.indexOf('Run fail-closed AWS read-only conformance probes');
+
+  assert.ok(oidcIdx >= 0 && provisionIdx > oidcIdx, 'bootstrap-provision must follow base OIDC credentials');
+  assert.ok(assumeIdx > provisionIdx, 'tagged session assumption must follow bootstrap-provision');
+  assert.ok(verifyIdx > assumeIdx, 'verify-effective must follow tagged session assumption');
+  assert.ok(probeIdx > verifyIdx, 'conformance probes must run only after verify-effective');
+  assert.match(step(jobs['aws-physical-gate'], 'Reconcile AWS COR V9 Policy Pack (Bootstrap Provision)').run, /--phase bootstrap-provision/);
+  assert.match(step(jobs['aws-physical-gate'], 'Verify Reconciled AWS COR V9 Effective Permissions').run, /--phase verify-effective/);
+});
+
+test('COR-WF-008 validates all 5 UgonduCOR-V9 policy templates, quotas, and guardrails', async () => {
+  const { loadAndValidateBootstrapPolicyPack, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  assert.equal(Object.keys(BOOTSTRAP_OPERATING_STATES).length, 6, 'exactly 6 operating states must be defined');
+  const pack = loadAndValidateBootstrapPolicyPack();
+  assert.equal(pack.policies.length, 5);
+  assert.ok(pack.policies.length <= pack.maxPoliciesPerRole);
+  assert.equal(pack.totalStatements, 46);
+  assert.equal(pack.executionRole.physicalName, 'UgonduCORExecutionRole');
+  assert.equal(pack.runnerRole.physicalName, 'UgonduCORRunner');
+  assert.equal(pack.runnerRole.prohibitExecutionPolicyAttachment, true);
+  for (const p of pack.policies) {
+    assert.ok(p.compactCharLength <= 6144, `${p.physicalName} exceeds 6144 chars`);
+    assert.match(p.sha256, /^[0-9a-f]{64}$/);
+  }
+});
+
+test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner creates/attaches 5 policies', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s1-'));
+  const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+
+  const attached = [];
+  const created = [];
+  const provisionRes = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: [] }, stderr: '' };
+      if (args[1] === 'attach-role-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        if (!created.includes(arn) && arn.endsWith('UgonduCOR-V9-Discovery')) {
+          return { status: 254, json: null, stderr: 'An error occurred (NoSuchEntity) when calling the AttachRolePolicy operation' };
+        }
+        attached.push(arn);
+        return { status: 0, json: {}, stderr: '' };
+      }
+      if (args[1] === 'create-policy') {
+        const name = args[args.indexOf('--policy-name') + 1];
+        created.push(`arn:aws:iam::971671216490:policy/${name}`);
+        return { status: 0, json: { Policy: { PolicyName: name } }, stderr: '' };
+      }
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(provisionRes.exitCode, 0);
+  assert.equal(attached.length, 5);
+  assert.equal(created.length, 1);
+
+  const verifyRes = runVerifyEffectivePhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
+      if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [{ VpcId: 'vpc-1' }] }, stderr: '' };
+      if (args[0] === 'iam' && args[1] === 'list-users') return { status: 254, json: null, stderr: 'AccessDenied' };
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(verifyRes.exitCode, 0);
+  assert.equal(verifyRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED);
+  assert.equal(verifyRes.report.status, 'PASS');
+});
+
+test('COR-WF-010 operating state 2: RETURNING_INSTALLATION_MATCHED (with or without bootstrap IAM read access)', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s2-'));
+  const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+
+  const provisionRes = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      return { status: 254, json: null, stderr: 'AccessDenied: User is not authorized to perform iam:AttachRolePolicy' };
+    }
+  });
+  assert.equal(provisionRes.exitCode, 0, 'bootstrap-provision must exit 0 when denied so verify-effective can check pre-existing attachment');
+  assert.equal(provisionRes.report.bootstrapProvisioningDenied, true);
+
+  const verifyRes = runVerifyEffectivePhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
+      if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [] }, stderr: '' };
+      if (args[0] === 'iam' && args[1] === 'list-users') return { status: 254, json: null, stderr: 'AccessDenied' };
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(verifyRes.exitCode, 0);
+  assert.equal(verifyRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.RETURNING_INSTALLATION_MATCHED);
+  assert.equal(verifyRes.report.status, 'PASS');
+});
+
+test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial policy attachments are repaired', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s3-'));
+  const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  const provisionRes = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      if (args[1] === 'list-attached-role-policies') {
+        return { status: 0, json: { AttachedPolicies: [{ PolicyName: 'UgonduCOR-V9-Discovery' }, { PolicyName: 'UgonduCOR-V9-EC2-Creation' }] }, stderr: '' };
+      }
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(provisionRes.exitCode, 0);
+  assert.equal(provisionRes.report.attachedDuringBootstrap.length, 3);
+  assert.equal(provisionRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED);
+  const verifyRes = runVerifyEffectivePhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
+      if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [] }, stderr: '' };
+      if (args[0] === 'iam' && args[1] === 'list-users') return { status: 254, json: null, stderr: 'AccessDenied' };
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(verifyRes.exitCode, 0);
+  assert.equal(verifyRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED);
+});
+
+test('COR-WF-012 operating state 4: BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT fails closed with Option A & B diagnostics', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s4-'));
+  const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      return { status: 254, json: null, stderr: 'AccessDenied: not authorized to perform iam:AttachRolePolicy' };
+    }
+  });
+  const verifyRes = runVerifyEffectivePhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
+      if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 254, json: null, stderr: 'UnauthorizedOperation: You are not authorized to perform this operation.' };
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(verifyRes.exitCode, 1);
+  assert.equal(verifyRes.report.operatingState, BOOTSTRAP_OPERATING_STATES.BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT);
+  assert.equal(verifyRes.report.errorCode, 'UG-BOOTSTRAP-AUTH-MISSING');
+  assert.match(verifyRes.report.diagnostic, /arn:aws:iam::971671216490:role\/UgonduCORExecutionRole/);
+  assert.match(verifyRes.report.diagnostic, /\(Option A\)/);
+  assert.match(verifyRes.report.diagnostic, /\(Option B\)/);
+});
+
+test('COR-WF-013 operating states 5 & 6: CANONICAL_ROLE_MISSING_OR_UNASSUMABLE and SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION', async () => {
+  const os = require('node:os');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s56-'));
+  const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+
+  const roleMissing = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' };
+      return { status: 254, json: null, stderr: 'NoSuchEntity: The role with name UgonduCORExecutionRole cannot be found.' };
+    }
+  });
+  assert.equal(roleMissing.exitCode, 1);
+  assert.equal(roleMissing.report.operatingState, BOOTSTRAP_OPERATING_STATES.CANONICAL_ROLE_MISSING_OR_UNASSUMABLE);
+
+  const selfEscalate = runBootstrapProvisionPhase({
+    evidenceDir: tmpDir,
+    targetRoleOverride: 'UgonduCORRunner',
+    awsRunner: () => ({ status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORRunner/GitHubActions' }, stderr: '' })
+  });
+  assert.equal(selfEscalate.exitCode, 1);
+  assert.equal(selfEscalate.report.operatingState, BOOTSTRAP_OPERATING_STATES.SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION);
+
+  const boundaryFail = runVerifyEffectivePhase({
+    evidenceDir: tmpDir,
+    awsRunner: (args) => {
+      if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
+      if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [] }, stderr: '' };
+      if (args[0] === 'iam' && args[1] === 'list-users') return { status: 0, json: { Users: [] }, stderr: '' };
+      return { status: 0, json: {}, stderr: '' };
+    }
+  });
+  assert.equal(boundaryFail.exitCode, 1);
+  assert.equal(boundaryFail.report.operatingState, BOOTSTRAP_OPERATING_STATES.SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION);
+  assert.equal(boundaryFail.report.errorCode, 'UG-BOOTSTRAP-BOUNDARY-VIOLATION');
+});

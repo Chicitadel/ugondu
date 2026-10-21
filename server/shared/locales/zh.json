@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "形成交付链至少需要两个环境。",
       "failed_to_compile_compliance_evidence": "编译合规证据包失败。",
       "checkpoint_storage_endpoint_not_configured": "未配置检查点存储端点。",
-      "unknown_action_type": "事务步骤中指定了未知的操作类型。"
+      "unknown_action_type": "事务步骤中指定了未知的操作类型。",
+      "directadmin_unverified_instance_state": "DirectAdmin 适配器已阻止在生产环境中返回 {id} 的未验证实例状态。"
     },
     "system": {
       "unknown_passport_subcommand": "未知的 passport subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "上游AI提供程序返回了非2xx HTTP状态码。",
       "upstream_unavailable": "上游AI提供程序服务当前不可用。"
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "初始安装已获授权：正在发现、规划、配置并附加规范策略。",
+    "state.returning_matched": "现有安装已验证：规范角色与策略附加项均匹配预期的 SHA-256 摘要。",
+    "state.drift_reconcilable": "检测到策略漂移：正在权限边界内协调规范策略版本与角色附加项。",
+    "state.authority_missing": "角色 {role} 缺少引导权限或权限不足：在工作负载探测前停止。",
+    "state.provider_unavailable": "提供商或网络不可用：检查点已保存在连续性账本中以供安全恢复。",
+    "state.ownership_ambiguous": "{id} 的所有权或权限不明确：拒绝执行破坏性或冲突性变更。"
+  },
+  "deploy": {
+    "pipeline.discover": "正在发现项目拓扑结构与目标平台能力",
+    "pipeline.validate": "正在验证部署配置与安全护栏",
+    "pipeline.reconcile_policies": "正在协调规范策略与执行角色附加项",
+    "pipeline.plan_and_execute": "正在规划并执行支持检查点恢复的持久化部署",
+    "pipeline.verify_health": "正在验证部署后健康状态并记录可审计证据"
+  },
+  "palette": {
+    "cmd.deploy": "配置、协调策略并自主部署应用程序",
+    "cmd.provider": "检查并管理目标云与托管服务提供商"
   }
 }

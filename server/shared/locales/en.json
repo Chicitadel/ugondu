@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "At least two environments are required to form a delivery chain.",
       "failed_to_compile_compliance_evidence": "Failed to compile compliance evidence package.",
       "checkpoint_storage_endpoint_not_configured": "Checkpoint storage endpoint is not configured.",
-      "unknown_action_type": "Unknown action type specified in transaction step."
+      "unknown_action_type": "Unknown action type specified in transaction step.",
+      "directadmin_unverified_instance_state": "DirectAdmin adapter prevented returning unverified instance state for {id} in production."
     },
     "system": {
       "unknown_passport_subcommand": "Unknown passport subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "Upstream AI provider returned a non-2xx HTTP status code.",
       "upstream_unavailable": "Upstream AI provider service is currently unavailable."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "Initial installation authorized: discovering, planning, provisioning, and attaching canonical policies.",
+    "state.returning_matched": "Returning installation verified: canonical roles and policy attachments match expected SHA-256 digests.",
+    "state.drift_reconcilable": "Policy drift detected: reconciling canonical policy versions and role attachments within authority boundary.",
+    "state.authority_missing": "Bootstrap authority missing or insufficient for role {role}: halt before workload probes.",
+    "state.provider_unavailable": "Provider or network unavailable: checkpoint preserved in continuity ledger for safe resume.",
+    "state.ownership_ambiguous": "Ownership or permissions ambiguous for {id}: refusing destructive or conflicting mutation."
+  },
+  "deploy": {
+    "pipeline.discover": "Discovering project topology and target platform capabilities",
+    "pipeline.validate": "Validating deployment configuration and safety guardrails",
+    "pipeline.reconcile_policies": "Reconciling canonical policies and execution role attachments",
+    "pipeline.plan_and_execute": "Planning and executing durable deployment with checkpoint recovery",
+    "pipeline.verify_health": "Verifying post-deployment health and recording auditable evidence"
+  },
+  "palette": {
+    "cmd.deploy": "Configure, reconcile policies, and deploy application autonomously",
+    "cmd.provider": "Inspect and manage target cloud and hosting providers"
   }
 }

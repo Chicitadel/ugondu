@@ -184,6 +184,12 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_OIDC_BASE }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      - name: Reconcile AWS COR V9 Policy Pack (Bootstrap Provision)
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_EVIDENCE_INPUT_DIR: .cor_evidence/raw
+        run: node scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs --phase bootstrap-provision
+
       - name: Assume Tagged Execution Session
         shell: bash
         env:
@@ -231,7 +237,13 @@ jobs:
             echo "AWS_SESSION_TOKEN=$ST"
           } >> "$GITHUB_ENV"
           echo "Tagged execution session established and verified."
-      
+
+      - name: Verify Reconciled AWS COR V9 Effective Permissions
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_EVIDENCE_INPUT_DIR: .cor_evidence/raw
+        run: node scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs --phase verify-effective
+
       - name: Run fail-closed AWS read-only conformance probes
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
@@ -243,7 +255,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ugondu-aws-conformance-${{ github.sha }}
-          path: .cor_evidence/raw/tests/aws-conformance-results.json
+          path: |
+            .cor_evidence/raw/tests/aws-policy-reconciliation-results.json
+            .cor_evidence/raw/tests/aws-conformance-results.json
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30

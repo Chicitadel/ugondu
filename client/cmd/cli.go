@@ -234,6 +234,7 @@ func ParseGlobalFlags(args []string) *CLIOptions {
 		for _, v := range SortedValidCommands() {
 			validMap[v] = true
 		}
+		validMap["providers"] = true
 		if validMap[args[0]] || strings.HasPrefix(args[0], "-") {
 			startIdx = 0
 		}
@@ -460,7 +461,7 @@ func ExecuteCommand(args []string) (int, *CLIOutputEnvelope) {
 
 	command := opts.Command
 
-	isValid := false
+	isValid := command == "providers"
 	for _, v := range validCommands {
 		if command == v {
 			isValid = true
@@ -521,10 +522,20 @@ func ExecuteCommand(args []string) (int, *CLIOutputEnvelope) {
 
 		if opts.DryRun {
 			env := NewOutputEnvelope(opts, "DRY_RUN_VERIFIED", ExitSuccess)
-			env.Actions = []CLIActionRecord{
-				{ActionID: "dry-run-fetch", Type: "FETCH_REPOSITORY", Target: targetEnv, Status: "DRY_RUN", Reversible: true},
-				{ActionID: "dry-run-sync", Type: "SYNC_ENVIRONMENT", Target: targetEnv, Status: "DRY_RUN", Reversible: true},
+			pipelineStages := []string{"validate_workspace", "reconcile_bootstrap_policies", "compile_execution_recipe", "preflight_target_adapter"}
+			for _, stage := range pipelineStages {
+				env.Actions = append(env.Actions, CLIActionRecord{
+					ActionID:   stage,
+					Type:       stage,
+					Target:     targetEnv,
+					Status:     "DRY_RUN",
+					Reversible: true,
+				})
 			}
+			env.Actions = append(env.Actions,
+				CLIActionRecord{ActionID: "dry-run-fetch", Type: "FETCH_REPOSITORY", Target: targetEnv, Status: "DRY_RUN", Reversible: true},
+				CLIActionRecord{ActionID: "dry-run-sync", Type: "SYNC_ENVIRONMENT", Target: targetEnv, Status: "DRY_RUN", Reversible: true},
+			)
 			env.Message = "Dry-run deployment preflight verified"
 			RenderEnvelope(opts, env)
 			return ExitSuccess, env

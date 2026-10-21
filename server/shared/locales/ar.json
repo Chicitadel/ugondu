@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "يلزم وجود بيئتين على الأقل لتشكيل سلسلة تسليم.",
       "failed_to_compile_compliance_evidence": "فشل تجميع حزمة أدلة الامتثال.",
       "checkpoint_storage_endpoint_not_configured": "نقطة نهاية تخزين نقطة التحقق غير مهيأة.",
-      "unknown_action_type": "نوع إجراء غير معروف محدد في خطوة المعاملة."
+      "unknown_action_type": "نوع إجراء غير معروف محدد في خطوة المعاملة.",
+      "directadmin_unverified_instance_state": "منع محول DirectAdmin إرجاع حالة مثيل غير متحقق منها للمعرف {id} في بيئة الإنتاج."
     },
     "system": {
       "unknown_passport_subcommand": "غير معروف: passport subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "أرجع موفر الذكاء الاصطناعي الأصلي رمز حالة HTTP بخلاف 2xx.",
       "upstream_unavailable": "خدمة موفر الذكاء الاصطناعي الأصلي غير متوفرة حاليًا."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "تم تفويض التثبيت الأولي: اكتشاف السياسات القانونية وتخطيطها وتوفيرها وإرفاقها.",
+    "state.returning_matched": "تم التحقق من التثبيت العائد: تتطابق الأدوار القانونية ومرفقات السياسات مع بصمات SHA-256 المتوقعة.",
+    "state.drift_reconcilable": "تم اكتشاف انحراف في السياسة: جاري تسوية إصدارات السياسات القانونية ومرفقات الأدوار ضمن حدود الصلاحية.",
+    "state.authority_missing": "صلاحية التمهيد مفقودة أو غير كافية للدور {role}: التوقف قبل فحوصات حمل العمل.",
+    "state.provider_unavailable": "المزود أو الشبكة غير متاحة: تم حفظ نقطة التحقق في سجل الاستمرارية للاستئناف الآمن.",
+    "state.ownership_ambiguous": "الملكية أو الأذونات غامضة للمعرف {id}: رفض التغيير المدمر أو المتعارض."
+  },
+  "deploy": {
+    "pipeline.discover": "اكتشاف طوبولوجيا المشروع وقدرات المنصة المستهدفة",
+    "pipeline.validate": "التحقق من صحة تكوين النشر وضوابط الأمان",
+    "pipeline.reconcile_policies": "تسوية السياسات القانونية ومرفقات أدوار التنفيذ",
+    "pipeline.plan_and_execute": "تخطيط وتنفيذ النشر المستدام مع الاسترداد عبر نقاط التحقق",
+    "pipeline.verify_health": "التحقق من حالة النظام بعد النشر وتسجيل الأدلة القابلة للتدقيق"
+  },
+  "palette": {
+    "cmd.deploy": "تكوين السياسات وتسويتها ونشر التطبيق بشكل ذاتي",
+    "cmd.provider": "فحص وإدارة مزودي السحابة والاستضافة المستهدفين"
   }
 }

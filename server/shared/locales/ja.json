@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "デリバリーチェーンを形成するには、少なくとも2つの環境が必要です。",
       "failed_to_compile_compliance_evidence": "コンプライアンス証拠パッケージのコンパイルに失敗しました。",
       "checkpoint_storage_endpoint_not_configured": "チェックポイントストレージエンドポイントが設定されていません。",
-      "unknown_action_type": "トランザクションステップで未知のアクションタイプが指定されました。"
+      "unknown_action_type": "トランザクションステップで未知のアクションタイプが指定されました。",
+      "directadmin_unverified_instance_state": "DirectAdmin アダプターは本番環境で {id} の未検証のインスタンス状態を返すことを防止しました。"
     },
     "system": {
       "unknown_passport_subcommand": "不明な passport subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "アップストリームAIプロバイダーが非2xx HTTPステータスコードを返しました。",
       "upstream_unavailable": "アップストリームAIプロバイダーサービスは現在利用できません。"
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "初期インストールが承認されました：正規ポリシーの検出、計画、プロビジョニング、およびアタッチを実行しています。",
+    "state.returning_matched": "既存インストールが検証されました：正規ロールとポリシーのアタッチメントが期待される SHA-256 ダイジェストと一致しています。",
+    "state.drift_reconcilable": "ポリシードリフトが検出されました：権限境界内で正規ポリシーのバージョンとロールのアタッチメントを調整しています。",
+    "state.authority_missing": "ロール {role} のブートストラップ権限が不足または欠落しています：ワークロードプローブの前に停止します。",
+    "state.provider_unavailable": "プロバイダーまたはネットワークが利用できません：安全な再開のため継続性台帳にチェックポイントを保持しました。",
+    "state.ownership_ambiguous": "{id} の所有権または権限が曖昧です：破壊的または競合する変更を拒否します。"
+  },
+  "deploy": {
+    "pipeline.discover": "プロジェクトのトポロジとターゲットプラットフォームの機能を検出しています",
+    "pipeline.validate": "デプロイ構成と安全ガードレールを検証しています",
+    "pipeline.reconcile_policies": "正規ポリシーと実行ロールのアタッチメントを調整しています",
+    "pipeline.plan_and_execute": "チェックポイント復旧を備えた永続的なデプロイを計画および実行しています",
+    "pipeline.verify_health": "デプロイ後の健全性を検証し、監査可能な証跡を記録しています"
+  },
+  "palette": {
+    "cmd.deploy": "構成、ポリシーの調整、およびアプリケーションの自律的なデプロイ",
+    "cmd.provider": "ターゲットのクラウドおよびホスティングプロバイダーの検査と管理"
   }
 }

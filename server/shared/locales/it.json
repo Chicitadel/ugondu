@@ -710,7 +710,8 @@
       "at_least_two_environments_required_for_chain": "Sono necessari almeno due ambienti per formare una catena di distribuzione.",
       "failed_to_compile_compliance_evidence": "Impossibile compilare il pacchetto di prove di conformità.",
       "checkpoint_storage_endpoint_not_configured": "L'endpoint di archiviazione dei checkpoint non è configurato.",
-      "unknown_action_type": "Tipo di azione sconosciuto specificato nel passaggio della transazione."
+      "unknown_action_type": "Tipo di azione sconosciuto specificato nel passaggio della transazione.",
+      "directadmin_unverified_instance_state": "L'adattatore DirectAdmin ha impedito la restituzione di uno stato dell'istanza non verificato per {id} in produzione."
     },
     "system": {
       "unknown_passport_subcommand": "Sconosciuto passaporto subcommand",
@@ -1956,5 +1957,24 @@
       "upstream_non_2xx": "Il provider IA a monte ha restituito un codice di stato HTTP non 2xx.",
       "upstream_unavailable": "Il servizio del provider IA a monte non è attualmente disponibile."
     }
+  },
+  "bootstrap": {
+    "state.initial_authorized": "Installazione iniziale autorizzata: rilevamento, pianificazione, provisioning e collegamento delle policy canoniche.",
+    "state.returning_matched": "Installazione esistente verificata: i ruoli canonici e i collegamenti delle policy corrispondono alle impronte SHA-256 previste.",
+    "state.drift_reconcilable": "Rilevata deriva delle policy: riconciliazione delle versioni delle policy canoniche e dei collegamenti dei ruoli entro il perimetro di autorità.",
+    "state.authority_missing": "Autorità di bootstrap mancante o insufficiente per il ruolo {role}: arresto prima delle sonde del carico di lavoro.",
+    "state.provider_unavailable": "Provider o rete non disponibile: checkpoint preservato nel registro di continuità per una ripresa sicura.",
+    "state.ownership_ambiguous": "Proprietà o autorizzazioni ambigue per {id}: rifiuto di modifiche distruttive o in conflitto."
+  },
+  "deploy": {
+    "pipeline.discover": "Rilevamento della topologia del progetto e delle capacità della piattaforma di destinazione",
+    "pipeline.validate": "Convalida della configurazione di distribuzione e dei guardrail di sicurezza",
+    "pipeline.reconcile_policies": "Riconciliazione delle policy canoniche e dei collegamenti dei ruoli di esecuzione",
+    "pipeline.plan_and_execute": "Pianificazione ed esecuzione della distribuzione durevole con ripristino tramite checkpoint",
+    "pipeline.verify_health": "Verifica dello stato post-distribuzione e registrazione delle prove verificabili"
+  },
+  "palette": {
+    "cmd.deploy": "Configura, riconcilia le policy e distribuisci l'applicazione in modo autonomo",
+    "cmd.provider": "Ispeziona e gestisci i provider cloud e di hosting di destinazione"
   }
 }
