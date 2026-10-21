@@ -151,3 +151,18 @@ test('SEC-SCAN-005: Expired allowlist entries are strictly ignored and fail scan
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+
+test('SEC-SCAN-006: Git enumeration failure aborts instead of reporting an empty scan', async () => {
+  const { executeSecretScan } = await getScanner();
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-sec-invalid-root-'));
+  const missingRepo = path.join(parent, 'missing-repository');
+  try {
+    await assert.rejects(
+      executeSecretScan({ targetDir: missingRepo }),
+      /Failed to enumerate tracked files for secret scan/
+    );
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
+});
