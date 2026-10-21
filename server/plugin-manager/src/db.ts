@@ -33,6 +33,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import { __t } from '@ugondu/shared';
 
 const dataDir = path.resolve(__dirname, '../../data');
 if (!fs.existsSync(dataDir)) {
@@ -119,7 +120,7 @@ class PluginDatabase {
 
     activatePlugin(tenantId: string, pluginName: string) {
         if (!tenantId || typeof tenantId !== 'string') {
-            throw new Error('Invalid tenantId for plugin activation');
+            throw new Error(__t('messages.error.invalid_tenant_id_plugin_activation'));
         }
         if (!this.data[tenantId]) {
             this.data[tenantId] = [];

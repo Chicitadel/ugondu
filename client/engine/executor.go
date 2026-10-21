@@ -327,7 +327,7 @@ func ValidateCapabilityIntersection(env *ExecutionEnvelope, steps []map[string]i
 			}
 			for reqCap := range reqSet {
 				if !effectiveCaps[reqCap] && !effectiveCaps["*"] {
-					return fmt.Errorf("%s: %s", i18n.T("err_capability_intersection_denied"), reqCap)
+					return fmt.Errorf("%s", i18n.T("err_capability_intersection_denied_cap", reqCap))
 				}
 			}
 		}
@@ -354,7 +354,7 @@ func ValidateCapabilityIntersection(env *ExecutionEnvelope, steps []map[string]i
 
 		for _, reqCap := range stepRequiredCaps {
 			if !hasScopes || (!effectiveCaps[reqCap] && !effectiveCaps["*"]) {
-				return fmt.Errorf("%s: step %d (%s) requires %s", i18n.T("err_capability_intersection_denied"), i, action, reqCap)
+				return fmt.Errorf("%s", i18n.T("err_step_requires_cap", i, action, reqCap))
 			}
 		}
 
@@ -370,7 +370,7 @@ func ValidateCapabilityIntersection(env *ExecutionEnvelope, steps []map[string]i
 				}
 			}
 			if !granted {
-				return fmt.Errorf("%s: step %d action %s not granted in (server ∩ tenant ∩ target ∩ agent ∩ action)", i18n.T("err_capability_intersection_denied"), i, action)
+				return fmt.Errorf("%s", i18n.T("err_step_action_not_granted", i, action))
 			}
 		}
 	}

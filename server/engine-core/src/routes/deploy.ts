@@ -32,7 +32,7 @@ import * as path from 'path';
 import { Router, Request, Response } from 'express';
 import { randomBytes, sign, createHash, createPublicKey } from 'crypto';
 import canonicalize from 'canonicalize';
-import { __t, Logger, signServiceIdentity, globalTrustRegistry } from '@ugondu/shared';
+import { __t, Logger, signServiceIdentity, globalTrustRegistry, ProductRegistry } from '@ugondu/shared';
 import { hardenedPost, hardenedGet } from '../http/hardened-client';
 import { KeyState } from '../crypto/key-loader';
 import { isPluginRequired } from '../utils/plugin-policy';
@@ -411,8 +411,7 @@ export function createDeployRouter(
       ];
 
       // Plugin Resolution with Strict Failure Policy Enforcement
-      const PLUGIN_MANAGER_URL =
-        process.env['PLUGIN_MANAGER_URL'] ?? 'http://localhost:4003/v1';
+      const PLUGIN_MANAGER_URL = ProductRegistry.getServiceUrl('plugin_manager', '/v1');
       const pmAuth = safeSignServiceToken('engine-core', 'plugin-manager', keyState);
       let discoveredPlugins: unknown[] = [];
 

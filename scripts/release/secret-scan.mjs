@@ -44,7 +44,7 @@ const SECRET_PATTERNS = [
   {
     id: 'aws-access-key-id',
     description: 'AWS Access Key ID',
-    regex: /\b(AKIA|ASIA)[0-9A-Z]{16}\b/g
+    regex: /\b(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[0-9A-Z]{16}\b/g
   },
   {
     id: 'github-personal-token',

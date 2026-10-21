@@ -32,6 +32,7 @@
  ******************************************************************************/
 
 import { ProductRegistry } from './product-registry';
+import { __t } from '../i18n';
 
 export const ALLOWED_ENVIRONMENTS = [
   'development',
@@ -158,7 +159,7 @@ export class ConfigRegistry {
 
   public static parseSecretReference(reference: string): ParsedSecretReference {
     if (!reference || typeof reference !== 'string') {
-      throw new Error('Secret reference must be a non-empty string.');
+      throw new Error(__t('messages.error.secret_reference_must_be_non_empty_string'));
     }
 
     const trimmed = reference.trim();
@@ -381,14 +382,14 @@ export class ConfigRegistry {
     const environment = options.environment || this.validateEnvironment();
 
     if (!Array.isArray(options.allowedOrigins) || options.allowedOrigins.length === 0) {
-      throw new Error('CORS configuration requires at least one explicit allowed origin.');
+      throw new Error(__t('messages.error.cors_requires_explicit_allowed_origin'));
     }
 
     const normalizedOrigins: string[] = [];
     for (const rawOrigin of options.allowedOrigins) {
       const trimmed = String(rawOrigin || '').trim();
       if (!trimmed) {
-        throw new Error('Empty origin entry is not permitted in CORS allowedOrigins.');
+        throw new Error(__t('messages.error.empty_origin_entry_not_permitted'));
       }
 
       if (trimmed === '*' || trimmed.includes('*')) {

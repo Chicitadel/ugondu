@@ -33,6 +33,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { __t } from '../i18n';
 
 export interface HealthContractConfig {
   liveness: string;
@@ -166,7 +167,7 @@ function resolveWorkspaceRoot(customRoot?: string): string {
     }
   }
 
-  throw new Error('Governance root containing .governance/standards/product-registry.json could not be discovered.');
+  throw new Error(__t('messages.error.governance_root_not_discovered'));
 }
 
 /**

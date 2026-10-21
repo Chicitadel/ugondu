@@ -224,5 +224,23 @@
     "about_ugondu": "Acerca de Ugondu",
     "open_dashboard": "Abrir panel de control",
     "back_to_ugondu": "Volver a Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "Inicializando la canalización de recuperación universal...",
+  "repair_usage": "Uso: ugondu repair run <id-capacidad> [--target <entorno>] [--dry-run]",
+  "repair_invoking": "Invocando recuperación para la capacidad: %s...",
+  "repair_err_marshal": "Error al serializar la solicitud de reparación: %v",
+  "repair_err_create_req": "Error al inicializar la solicitud de reparación HTTP: %v",
+  "repair_err_network": "Fallo de red al comunicar con el motor de recuperación: %v",
+  "repair_err_api": "La API de recuperación devolvió el estado de error %d: %s",
+  "repair_warn_parse": "Advertencia: No se pudo analizar el cuerpo de respuesta estructurado: %s",
+  "repair_res_status": "Estado: %s",
+  "repair_res_tx": "ID de transacción: %s",
+  "repair_res_msg": "Mensaje: %s",
+  "repair_dry_run_done": "Simulación de reparación completada con éxito. No se aplicaron cambios.",
+  "repair_exec_done": "Ejecución de reparación completada con éxito.",
+  "unknown_repair_subcommand": "Subcomando de reparación desconocido: '%s'. Ejecute 'ugondu repair' para ver el uso.",
+  "err_capability_intersection_denied": "Intersección de capacidades denegada: acción no autorizada por el sobre",
+  "err_capability_intersection_denied_cap": "Intersección de capacidades denegada: %s no autorizado por el sobre",
+  "err_step_requires_cap": "Intersección de capacidades denegada: el paso %d (%s) requiere %s",
+  "err_step_action_not_granted": "Intersección de capacidades denegada: acción %s del paso %d no otorgada en (servidor ∩ inquilino ∩ destino ∩ agente ∩ acción)"
 }

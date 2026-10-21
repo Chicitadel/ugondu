@@ -224,5 +224,23 @@
     "about_ugondu": "Informazioni su Ugondu",
     "open_dashboard": "Apri dashboard",
     "back_to_ugondu": "Torna a Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "Inizializzazione della pipeline di ripristino universale...",
+  "repair_usage": "Uso: ugondu repair run <id-funzionalità> [--target <ambiente>] [--dry-run]",
+  "repair_invoking": "Invocazione del ripristino per la funzionalità: %s...",
+  "repair_err_marshal": "Impossibile serializzare la richiesta di riparazione: %v",
+  "repair_err_create_req": "Impossibile inizializzare la richiesta di riparazione HTTP: %v",
+  "repair_err_network": "Errore di rete durante la comunicazione con il motore di ripristino: %v",
+  "repair_err_api": "L'API di ripristino ha restituito lo stato di errore %d: %s",
+  "repair_warn_parse": "Avviso: Impossibile analizzare il corpo della risposta strutturata: %s",
+  "repair_res_status": "Stato: %s",
+  "repair_res_tx": "ID transazione: %s",
+  "repair_res_msg": "Messaggio: %s",
+  "repair_dry_run_done": "Simulazione di riparazione completata con successo. Nessuna modifica applicata.",
+  "repair_exec_done": "Esecuzione della riparazione completata con successo.",
+  "unknown_repair_subcommand": "Sottocomando di riparazione sconosciuto: '%s'. Esegui 'ugondu repair' per l'utilizzo.",
+  "err_capability_intersection_denied": "Intersezione delle funzionalità negata: azione non autorizzata dalla busta",
+  "err_capability_intersection_denied_cap": "Intersezione delle funzionalità negata: %s non autorizzato dalla busta",
+  "err_step_requires_cap": "Intersezione delle funzionalità negata: il passaggio %d (%s) richiede %s",
+  "err_step_action_not_granted": "Intersezione delle funzionalità negata: azione %s del passaggio %d non concessa in (server ∩ tenant ∩ destinazione ∩ agente ∩ azione)"
 }

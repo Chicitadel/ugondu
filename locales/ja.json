@@ -224,5 +224,23 @@
     "about_ugondu": "Ugonduについて",
     "open_dashboard": "ダッシュボードを開く",
     "back_to_ugondu": "Ugonduに戻る"
-  }
+  },
+  "universal_recovery_pipeline_init": "ユニバーサルリカバリパイプラインを初期化しています...",
+  "repair_usage": "使用方法: ugondu repair run <機能ID> [--target <環境>] [--dry-run]",
+  "repair_invoking": "機能のリカバリを呼び出しています: %s...",
+  "repair_err_marshal": "修復リクエストのシリアル化に失敗しました: %v",
+  "repair_err_create_req": "HTTP修復リクエストの初期化に失敗しました: %v",
+  "repair_err_network": "リカバリエンジンとの通信中にネットワークエラーが発生しました: %v",
+  "repair_err_api": "リカバリAPIがエラーステータス %d を返しました: %s",
+  "repair_warn_parse": "警告: 構造化された応答本文を解析できませんでした: %s",
+  "repair_res_status": "ステータス: %s",
+  "repair_res_tx": "トランザクションID: %s",
+  "repair_res_msg": "メッセージ: %s",
+  "repair_dry_run_done": "修復ドライランが正常に完了しました。変更は適用されませんでした。",
+  "repair_exec_done": "修復の実行が正常に完了しました。",
+  "unknown_repair_subcommand": "不明な修復サブコマンド: '%s'。使用法については 'ugondu repair' を実行してください。",
+  "err_capability_intersection_denied": "機能の共通集合が拒否されました: アクションはエンベロープによって承認されていません",
+  "err_capability_intersection_denied_cap": "機能の共通集合が拒否されました: %s はエンベロープによって承認されていません",
+  "err_step_requires_cap": "機能の共通集合が拒否されました: ステップ %d (%s) には %s が必要です",
+  "err_step_action_not_granted": "機能の共通集合が拒否されました: ステップ %d アクション %s は (サーバー ∩ テナント ∩ ターゲット ∩ エージェント ∩ アクション) で付与されていません"
 }

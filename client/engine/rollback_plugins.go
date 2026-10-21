@@ -373,7 +373,7 @@ func VerifyPlugins(targetID string) ([]PluginManifest, error) {
 		checked = append(checked, p)
 	}
 	if targetID != "" && len(checked) == 0 {
-		return nil, fmt.Errorf("plugin not found: %s", targetID)
+		return nil, fmt.Errorf("%s", i18n.T("plugin_not_found", targetID))
 	}
 	return checked, nil
 }

@@ -66,6 +66,7 @@ const allowedUnchanged = new Set([
     'company.name',
     'product.brand',
     'brand.name',
+    'repair_res_status',
     'cli_divider',
     'status_border',
     'status_divider',

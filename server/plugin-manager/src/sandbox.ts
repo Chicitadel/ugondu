@@ -309,7 +309,7 @@ async function runViaIsolatedProcessSandbox(
 
     const postDigest = computeDirectorySnapshotHash(pluginRealPath);
     if (preDigest !== postDigest) {
-        throw new Error('Read-only plugin sandbox boundary violated: plugin directory mutated during execution');
+        throw new Error(__t('messages.error.plugin_sandbox_boundary_violated'));
     }
 
     return stdout;

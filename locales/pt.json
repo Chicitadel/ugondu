@@ -224,5 +224,23 @@
     "about_ugondu": "Sobre Ugondu",
     "open_dashboard": "Abrir painel",
     "back_to_ugondu": "Voltar para Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "Inicializando o pipeline de recuperação universal...",
+  "repair_usage": "Uso: ugondu repair run <id-capacidade> [--target <ambiente>] [--dry-run]",
+  "repair_invoking": "Invocando recuperação para capacidade: %s...",
+  "repair_err_marshal": "Falha ao serializar a solicitação de reparo: %v",
+  "repair_err_create_req": "Falha ao inicializar solicitação HTTP de reparo: %v",
+  "repair_err_network": "Falha de rede ao comunicar com o mecanismo de recuperação: %v",
+  "repair_err_api": "A API de recuperação retornou o status de erro %d: %s",
+  "repair_warn_parse": "Aviso: Não foi possível analisar o corpo da resposta estruturada: %s",
+  "repair_res_status": "Status: %s",
+  "repair_res_tx": "ID da transação: %s",
+  "repair_res_msg": "Mensagem: %s",
+  "repair_dry_run_done": "Simulação de reparo concluída com sucesso. Nenhuma alteração aplicada.",
+  "repair_exec_done": "Execução do reparo concluída com sucesso.",
+  "unknown_repair_subcommand": "Subcomando de reparo desconhecido: '%s'. Execute 'ugondu repair' para obter instruções de uso.",
+  "err_capability_intersection_denied": "Interseção de capacidades negada: ação não autorizada pelo envelope",
+  "err_capability_intersection_denied_cap": "Interseção de capacidades negada: %s não autorizado pelo envelope",
+  "err_step_requires_cap": "Interseção de capacidades negada: a etapa %d (%s) requer %s",
+  "err_step_action_not_granted": "Interseção de capacidades negada: ação %s da etapa %d não concedida em (servidor ∩ locatário ∩ destino ∩ agente ∩ ação)"
 }

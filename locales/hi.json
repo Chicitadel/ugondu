@@ -224,5 +224,23 @@
     "about_ugondu": "Ugondu के बारे में",
     "open_dashboard": "डैशबोर्ड खोलें",
     "back_to_ugondu": "Ugondu पर वापस जाएं"
-  }
+  },
+  "universal_recovery_pipeline_init": "सार्वभौमिक पुनर्प्राप्ति पाइपलाइन प्रारंभ की जा रही है...",
+  "repair_usage": "उपयोग: ugondu repair run <क्षमता-आईडी> [--target <पर्यावरण>] [--dry-run]",
+  "repair_invoking": "क्षमता के लिए पुनर्प्राप्ति शुरू की जा रही है: %s...",
+  "repair_err_marshal": "मरम्मत अनुरोध को क्रमबद्ध करने में विफल: %v",
+  "repair_err_create_req": "HTTP मरम्मत अनुरोध प्रारंभ करने में विफल: %v",
+  "repair_err_network": "पुनर्प्राप्ति इंजन के साथ संचार में नेटवर्क विफलता: %v",
+  "repair_err_api": "पुनर्प्राप्ति API ने त्रुटि स्थिति %d लौटाई: %s",
+  "repair_warn_parse": "चेतावनी: संरचित प्रतिक्रिया मुख्य भाग को पार्स नहीं किया जा सका: %s",
+  "repair_res_status": "स्थिति: %s",
+  "repair_res_tx": "लेन-देन आईडी: %s",
+  "repair_res_msg": "संदेश: %s",
+  "repair_dry_run_done": "मरम्मत ड्राई-रन सफलतापूर्वक पूरा हुआ। कोई बदलाव लागू नहीं किया गया।",
+  "repair_exec_done": "मरम्मत निष्पादन सफलतापूर्वक पूरा हुआ।",
+  "unknown_repair_subcommand": "अज्ञात मरम्मत उप-आदेश: '%s'। उपयोग के लिए 'ugondu repair' चलाएं।",
+  "err_capability_intersection_denied": "क्षमता प्रतिच्छेदन अस्वीकृत: लिफाफे द्वारा क्रिया अधिकृत नहीं है",
+  "err_capability_intersection_denied_cap": "क्षमता प्रतिच्छेदन अस्वीकृत: %s लिफाफे द्वारा अधिकृत नहीं है",
+  "err_step_requires_cap": "क्षमता प्रतिच्छेदन अस्वीकृत: चरण %d (%s) को %s की आवश्यकता है",
+  "err_step_action_not_granted": "क्षमता प्रतिच्छेदन अस्वीकृत: चरण %d क्रिया %s (सर्वर ∩ किरायेदार ∩ लक्ष्य ∩ एजेंट ∩ क्रिया) में प्रदान नहीं की गई है"
 }

@@ -36,6 +36,7 @@ import {
   globalTrustRegistry,
   createHealthAndMetadataRouter,
   telemetryContextMiddleware,
+  ProductRegistry,
 } from '@ugondu/shared';
 import { corsMiddleware }               from './bootstrap/cors-config';
 import { loadOrGeneratePersistentKeys } from './bootstrap/key-manager';
@@ -49,7 +50,7 @@ import { admissionController }          from './passport/gatekeeper/admission-co
 
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 export const keyState            = loadOrGeneratePersistentKeys();
-export const BILLING_GATEWAY_URL = process.env['BILLING_GATEWAY_URL'] ?? 'http://localhost:4002/v1';
+export const BILLING_GATEWAY_URL = ProductRegistry.getServiceUrl('billing_gateway', '/v1');
 
 // ─── Admission Passport Registry & Signed Passport Helper ────────────────────
 interface RegisteredPassportRecord {

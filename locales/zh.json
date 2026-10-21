@@ -224,5 +224,23 @@
     "about_ugondu": "关于 Ugondu",
     "open_dashboard": "打开控制面板",
     "back_to_ugondu": "返回 Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "正在初始化通用恢复流水线...",
+  "repair_usage": "用法: ugondu repair run <功能ID> [--target <环境>] [--dry-run]",
+  "repair_invoking": "正在调用功能的恢复: %s...",
+  "repair_err_marshal": "无法序列化修复请求: %v",
+  "repair_err_create_req": "初始化HTTP修复请求失败: %v",
+  "repair_err_network": "与恢复引擎通信时发生网络故障: %v",
+  "repair_err_api": "恢复API返回错误状态 %d: %s",
+  "repair_warn_parse": "警告: 无法解析结构化响应正文: %s",
+  "repair_res_status": "状态: %s",
+  "repair_res_tx": "事务ID: %s",
+  "repair_res_msg": "消息: %s",
+  "repair_dry_run_done": "修复演练成功完成。未应用任何更改。",
+  "repair_exec_done": "修复执行已成功完成。",
+  "unknown_repair_subcommand": "未知的修复子命令: '%s'。运行 'ugondu repair' 查看用法。",
+  "err_capability_intersection_denied": "功能交集被拒绝：信封未授权该操作",
+  "err_capability_intersection_denied_cap": "功能交集被拒绝：%s 未被信封授权",
+  "err_step_requires_cap": "功能交集被拒绝：步骤 %d (%s) 需要 %s",
+  "err_step_action_not_granted": "功能交集被拒绝：步骤 %d 操作 %s 未在 (服务器 ∩ 租户 ∩ 目标 ∩ 代理 ∩ 操作) 中授予"
 }

@@ -37,7 +37,7 @@ import * as https from 'https';
 import { promises as dns } from 'dns';
 import { URL } from 'url';
 import { isPrivateOrLocal } from './ip-blocklist';
-import { __t } from '@ugondu/shared';
+import { __t, ProductRegistry } from '@ugondu/shared';
 
 /**
  * @class SSRFBlockedError
@@ -63,11 +63,11 @@ export interface RequestInit {
 
 function isTrustedInternalServiceOrigin(targetUrl: URL): boolean {
     const trustedUrls = [
-        process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1',
-        process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1',
-        process.env.EVENT_BUS_URL || 'http://localhost:4004/v1',
-        process.env.REPOSITORY_ADAPTER_URL || 'http://localhost:4005/v1',
-        process.env.ENGINE_CORE_URL || 'http://localhost:4001/v1',
+        ProductRegistry.getServiceUrl('billing_gateway', '/v1'),
+        ProductRegistry.getServiceUrl('plugin_manager', '/v1'),
+        ProductRegistry.getServiceUrl('event_bus', '/v1'),
+        ProductRegistry.getServiceUrl('repository_adapter', '/v1'),
+        ProductRegistry.getServiceUrl('engine_core', '/v1'),
     ];
     for (const candidate of trustedUrls) {
         try {

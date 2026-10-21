@@ -224,5 +224,23 @@
     "about_ugondu": "حول Ugondu",
     "open_dashboard": "فتح لوحة التحكم",
     "back_to_ugondu": "العودة إلى Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "بدء تهيئة خط أنابيب الاسترداد الشامل...",
+  "repair_usage": "الاستخدام: ugondu repair run <معرف-القدرة> [--target <البيئة>] [--dry-run]",
+  "repair_invoking": "استدعاء الاسترداد للقدرة: %s...",
+  "repair_err_marshal": "فشل في تسلسل طلب الإصلاح: %v",
+  "repair_err_create_req": "فشل في تهيئة طلب إصلاح HTTP: %v",
+  "repair_err_network": "فشل في الشبكة أثناء الاتصال بمحرك الاسترداد: %v",
+  "repair_err_api": "واجهة برمجة تطبيقات الاسترداد أرجعت حالة خطأ %d: %s",
+  "repair_warn_parse": "تحذير: تعذر تحليل نص الاستجابة المنظم: %s",
+  "repair_res_status": "الحالة: %s",
+  "repair_res_tx": "معرف المعاملة: %s",
+  "repair_res_msg": "الرسالة: %s",
+  "repair_dry_run_done": "اكتمل الاختبار الجاف للإصلاح بنجاح. لم يتم تطبيق أي تغييرات.",
+  "repair_exec_done": "اكتمل تنفيذ الإصلاح بنجاح.",
+  "unknown_repair_subcommand": "أمر فرعي للإصلاح غير معروف: '%s'. شغّل 'ugondu repair' للاستخدام.",
+  "err_capability_intersection_denied": "تم رفض تقاطع القدرات: الإجراء غير مصرح به بواسطة المظروف",
+  "err_capability_intersection_denied_cap": "تم رفض تقاطع القدرات: %s غير مصرح به بواسطة المظروف",
+  "err_step_requires_cap": "تم رفض تقاطع القدرات: الخطوة %d (%s) تتطلب %s",
+  "err_step_action_not_granted": "تم رفض تقاطع القدرات: إجراء الخطوة %d %s غير ممنوح في (الخادم ∩ المستأجر ∩ الهدف ∩ الوكيل ∩ الإجراء)"
 }

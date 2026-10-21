@@ -224,5 +224,23 @@
     "about_ugondu": "About Ugondu",
     "open_dashboard": "Open Dashboard",
     "back_to_ugondu": "Back to Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "Initializing Universal Recovery Pipeline...",
+  "repair_usage": "Usage: ugondu repair run <capability-id> [--target <env>] [--dry-run]",
+  "repair_invoking": "Invoking recovery for capability: %s...",
+  "repair_err_marshal": "Failed to serialize repair request: %v",
+  "repair_err_create_req": "Failed to initialize HTTP repair request: %v",
+  "repair_err_network": "Network failure communicating with recovery engine: %v",
+  "repair_err_api": "Recovery API returned error status %d: %s",
+  "repair_warn_parse": "Warning: Could not parse structured response body: %s",
+  "repair_res_status": "Status: %s",
+  "repair_res_tx": "Transaction ID: %s",
+  "repair_res_msg": "Message: %s",
+  "repair_dry_run_done": "Repair dry-run completed successfully. No changes applied.",
+  "repair_exec_done": "Repair execution completed successfully.",
+  "unknown_repair_subcommand": "Unknown repair subcommand: '%s'. Run 'ugondu repair' for usage.",
+  "err_capability_intersection_denied": "Capability intersection denied: action not authorized by envelope",
+  "err_capability_intersection_denied_cap": "Capability intersection denied: %s not authorized by envelope",
+  "err_step_requires_cap": "Capability intersection denied: step %d (%s) requires %s",
+  "err_step_action_not_granted": "Capability intersection denied: step %d action %s not granted in (server ∩ tenant ∩ target ∩ agent ∩ action)"
 }

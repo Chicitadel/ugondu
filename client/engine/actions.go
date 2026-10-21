@@ -368,9 +368,9 @@ func (a *UpsellNoticeAction) Execute(env *ExecutionEnvelope, payload map[string]
 		return logs, fmt.Errorf(i18n.T("msg_upsell_notice_validation_failure_w"), err)
 	}
 
-	fmt.Println("     -> 💰")
+	fmt.Printf("     -> %s\n", i18n.T("status_divider"))
 	fmt.Printf("     -> %s\n", i18n.T("upsell_notice", p.Message))
-	fmt.Println("     -> 💰")
+	fmt.Printf("     -> %s\n", i18n.T("status_divider"))
 	return logs, nil
 }
 

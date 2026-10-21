@@ -224,5 +224,23 @@
     "about_ugondu": "À propos d'Ugondu",
     "open_dashboard": "Ouvrir le tableau de bord",
     "back_to_ugondu": "Retour à Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "Initialisation du pipeline de récupération universelle...",
+  "repair_usage": "Utilisation : ugondu repair run <id-capacité> [--target <environnement>] [--dry-run]",
+  "repair_invoking": "Appel de la récupération pour la capacité : %s...",
+  "repair_err_marshal": "Échec de sérialisation de la demande de réparation : %v",
+  "repair_err_create_req": "Échec d'initialisation de la requête de réparation HTTP : %v",
+  "repair_err_network": "Échec réseau lors de la communication avec le moteur de récupération : %v",
+  "repair_err_api": "L'API de récupération a renvoyé l'état d'erreur %d : %s",
+  "repair_warn_parse": "Avertissement : Impossible d'analyser le corps de réponse structuré : %s",
+  "repair_res_status": "Statut : %s",
+  "repair_res_tx": "ID de transaction : %s",
+  "repair_res_msg": "Message : %s",
+  "repair_dry_run_done": "Simulation de réparation terminée avec succès. Aucune modification appliquée.",
+  "repair_exec_done": "Exécution de la réparation terminée avec succès.",
+  "unknown_repair_subcommand": "Sous-commande de réparation inconnue : '%s'. Exécutez 'ugondu repair' pour l'utilisation.",
+  "err_capability_intersection_denied": "Intersection de capacités refusée : action non autorisée par l'enveloppe",
+  "err_capability_intersection_denied_cap": "Intersection de capacités refusée : %s non autorisé par l'enveloppe",
+  "err_step_requires_cap": "Intersection de capacités refusée : l'étape %d (%s) nécessite %s",
+  "err_step_action_not_granted": "Intersection de capacités refusée : action %s de l'étape %d non accordée dans (serveur ∩ locataire ∩ cible ∩ agent ∩ action)"
 }

@@ -224,5 +224,23 @@
     "about_ugondu": "Über Ugondu",
     "open_dashboard": "Dashboard öffnen",
     "back_to_ugondu": "Zurück zu Ugondu"
-  }
+  },
+  "universal_recovery_pipeline_init": "Universelle Wiederherstellungs-Pipeline wird initialisiert...",
+  "repair_usage": "Verwendung: ugondu repair run <Funktions-ID> [--target <Umgebung>] [--dry-run]",
+  "repair_invoking": "Wiederherstellung für Funktion aufrufen: %s...",
+  "repair_err_marshal": "Fehler beim Serialisieren der Reparaturanforderung: %v",
+  "repair_err_create_req": "Fehler beim Initialisieren der HTTP-Reparaturanforderung: %v",
+  "repair_err_network": "Netzwerkfehler bei Kommunikation mit Wiederherstellungs-Engine: %v",
+  "repair_err_api": "Wiederherstellungs-API gab Fehlerstatus zurück %d: %s",
+  "repair_warn_parse": "Warnung: Strukturierter Antworttext konnte nicht analysiert werden: %s",
+  "repair_res_status": "Status: %s",
+  "repair_res_tx": "Transaktions-ID: %s",
+  "repair_res_msg": "Nachricht: %s",
+  "repair_dry_run_done": "Reparatur-Testlauf erfolgreich abgeschlossen. Keine Änderungen angewendet.",
+  "repair_exec_done": "Reparaturausführung erfolgreich abgeschlossen.",
+  "unknown_repair_subcommand": "Unbekannter Reparatur-Unterbefehl: '%s'. Führen Sie 'ugondu repair' für die Verwendung aus.",
+  "err_capability_intersection_denied": "Funktionsschnittmenge verweigert: Aktion durch Umschlag nicht autorisiert",
+  "err_capability_intersection_denied_cap": "Funktionsschnittmenge verweigert: %s durch Umschlag nicht autorisiert",
+  "err_step_requires_cap": "Funktionsschnittmenge verweigert: Schritt %d (%s) erfordert %s",
+  "err_step_action_not_granted": "Funktionsschnittmenge verweigert: Schritt %d Aktion %s nicht gewährt in (Server ∩ Mandant ∩ Ziel ∩ Agent ∩ Aktion)"
 }
