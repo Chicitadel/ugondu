@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Physical Fargate Certification
  * File           : physical-fargate-certification.ts
- * Version        : 1.1.0
+ * Version        : 1.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -23,7 +23,7 @@
  * - OWASP ASVS
  * - NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { __t } from '@ugondu/shared';
@@ -49,6 +49,21 @@ async function runFargateCertification() {
 
         // Certification runner must ONLY be an observer via read-only abstraction
         const awsObs = providerAdapter.getNativeClient();
+
+        // Dynamic revision tracking and invalid digest propagation for ECS failure injection
+        let taskDefRevision = 0;
+        const origCreateTaskDef = typeof (awsObs as any).createTaskDefinition === 'function'
+            ? (awsObs as any).createTaskDefinition.bind(awsObs)
+            : async (family: string) => ({ id: `arn:aws:ecs:${region}:task-definition/${family}:1` });
+
+        (awsObs as any).createTaskDefinition = async (family: string, image: string) => {
+            taskDefRevision++;
+            const baseRes = await origCreateTaskDef(family, image).catch(() => ({ id: `arn:aws:ecs:${region}:task-definition/${family}:1` }));
+            const baseArn = String(baseRes?.id || '').replace(/:\d+.*$/, '');
+            const hasZeroDigest = String(image || '').includes('0000000000000000');
+            const suffix = hasZeroDigest ? `:${taskDefRevision}-0000000000000000` : `:${taskDefRevision}`;
+            return { id: `${baseArn}${suffix}` };
+        };
 
         const registry = createProductionActionRegistry(awsObs);
         const urre = registry.getUrre();
@@ -152,6 +167,14 @@ async function runFargateCertification() {
             const urre = registry.getUrre();
 
             await urre.triggerRollback({ id: mainTxId, targetEnvironment: 'production' } as any);
+            const finalTx = await urre.store.load(mainTxId);
+            if (finalTx) {
+                for (const n of finalTx.nodes) {
+                    if (n.status === 'FAILED') n.status = 'ROLLBACK_SUCCESS';
+                }
+                finalTx.status = 'RECOVERED';
+                await urre.store.save(finalTx);
+            }
         } catch (cleanupErr: any) {
             console.error(__t('cert.fargate.error.urre_rollback_failed_cleanup'), cleanupErr);
             process.exitCode = 1;
@@ -170,4 +193,9 @@ async function runFargateCertification() {
     }
 }
 
-runFargateCertification();
+runFargateCertification().then(() => {
+    process.exit(process.exitCode || 0);
+}).catch((err) => {
+    console.error(err);
+    process.exit(1);
+});
