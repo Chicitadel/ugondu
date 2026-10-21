@@ -34,6 +34,10 @@ export class TransactionDag {
         this.nodes.push({ id, provider, action, type, params: {}, status: 'PENDING' });
     }
 
+    public addEdge(from: string, to: string): void {
+        this.edges.push({ from, to });
+    }
+
     public getNode(id: string): DagNode | undefined {
         return this.nodes.find(n => n.id === id);
     }

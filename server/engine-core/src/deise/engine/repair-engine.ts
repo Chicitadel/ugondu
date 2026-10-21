@@ -82,6 +82,7 @@ export class DeploymentRepairEngine {
 
                         // Delegate remediation verb to Provider Adapter via universal contract
                         let repairOperation = 'adapter:ReconcileResourceState';
+                        if (infra.type === 'EC2' && (key === 'Name' || key.toLowerCase().includes('tag'))) { repairOperation = 'ec2:CreateTags'; } else if (infra.type === 'RDS') { repairOperation = 'rds:ModifyDBInstance'; }
 
                         diagnoses.push({
                             category: DriftCategory.INFRASTRUCTURE_DRIFT,
@@ -119,7 +120,7 @@ export class DeploymentRepairEngine {
             requiresApplicationUpload,
             requiresTopologyRepair,
             requiresInfrastructureRepair,
-            infrastructureRepairs: [],
+            infrastructureRepairs: diagnoses.filter(d => d.category === DriftCategory.INFRASTRUCTURE_DRIFT),
             safeToProceed,
             destructiveDeleteBlocked
         };

@@ -29,7 +29,7 @@ export interface ExecutionFaultInjector {
 import { AutonomousResourceReconciler, QuotaContext } from '../../reconciliation/arr-pipeline';
 
 export class URREngine {
-    private store = new TransactionStore();
+    public readonly store = new TransactionStore();
     private handlers: Record<string, ActionHandler> = {};
     private rollbacks: Record<string, RollbackHandler> = {};
     public faultInjector?: ExecutionFaultInjector;
@@ -75,9 +75,24 @@ export class URREngine {
         // Idempotent resume check
         const existing = await this.store.load(tx.id);
         if (existing) {
-            tx = existing;
-            if (tx.status === 'SUCCESS' || tx.status === 'RECOVERED') {
-                Logger.info(`Transaction ${tx.id} already in terminal state: ${tx.status}`);
+            for (const incomingNode of tx.nodes) {
+                const existingIdx = existing.nodes.findIndex(n => n.id === incomingNode.id);
+                if (existingIdx === -1) {
+                    existing.nodes.push(incomingNode);
+                } else if (existing.nodes[existingIdx].status !== 'SUCCESS' && existing.nodes[existingIdx].status !== 'ROLLBACK_SUCCESS') {
+                    existing.nodes[existingIdx] = incomingNode;
+                }
+            }
+            for (const edge of tx.edges) {
+                if (!existing.edges.some(e => e.from === edge.from && e.to === edge.to)) {
+                    existing.edges.push(edge);
+                }
+            }
+            tx.nodes = existing.nodes;
+            tx.edges = existing.edges;
+            const hasPendingOrRunning = tx.nodes.some(n => n.status !== 'SUCCESS' && n.status !== 'ROLLBACK_SUCCESS');
+            if (!hasPendingOrRunning && (existing.status === 'SUCCESS' || existing.status === 'RECOVERED')) {
+                Logger.info(`Transaction ${tx.id} already in terminal state: ${existing.status}`);
                 return;
             }
         }
@@ -93,8 +108,8 @@ export class URREngine {
             const nodeId = queue.shift()!;
             const node = tx.nodes.find(n => n.id === nodeId)!;
 
-            if (node.status === 'SUCCESS') {
-                // Skip already successful nodes (Idempotency)
+            if (node.status === 'SUCCESS' || node.status === 'ROLLBACK_SUCCESS') {
+                // Skip already successful or rolled-back nodes (Idempotency)
                 adj[nodeId].forEach(neighbor => {
                     inDegree[neighbor]--;
                     if (inDegree[neighbor] === 0) queue.push(neighbor);

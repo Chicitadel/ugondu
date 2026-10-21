@@ -6,8 +6,16 @@ import { IAwsClient } from '../../fabric/providers/aws';
 export class AwsPhysicalRepairExecutor {
     constructor(private readonly awsClient: IAwsClient) {}
 
-    public async executeRepair(plan: RepairPlan): Promise<boolean> {
-        if (!plan.requiresInfrastructureRepair) {
+    public async executeRepair(planOrRepair: any): Promise<boolean> {
+        const plan: RepairPlan = (planOrRepair && 'requiresInfrastructureRepair' in planOrRepair) ? planOrRepair : {
+            diagnoses: Array.isArray(planOrRepair) ? planOrRepair : (planOrRepair ? [planOrRepair] : []),
+            requiresApplicationUpload: false,
+            requiresTopologyRepair: false,
+            requiresInfrastructureRepair: true,
+            safeToProceed: true,
+            destructiveDeleteBlocked: false
+        };
+        if (!plan.requiresInfrastructureRepair || plan.diagnoses.length === 0) {
             Logger.info(__t('msg_no_infrastructure_repair_required_enviro'));
             return true;
         }

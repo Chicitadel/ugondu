@@ -126,7 +126,7 @@ async function runCertification() {
         
         if (plan.requiresInfrastructureRepair) {
             console.log(__t('cert.phase.repairing_drift'));
-            await executor.executeRepair(plan.infrastructureRepairs![0]);
+            await executor.executeRepair(plan.infrastructureRepairs?.[0] || plan);
         }
 
         console.log(__t('cert.phase.urre_fault_injection'));

@@ -111,8 +111,17 @@ export class UniversalActionRegistry {
     public async dispatchToURRE(operationType: string, params: Record<string, any>): Promise<Record<string, any>> {
         // Enforce ActionResolver -> Governance -> URRE -> Provider path
         const txId = params.transactionId || `tx-canonical-${Date.now()}`;
-        const dag = new TransactionDag(txId);
-        dag.addNode('OP', 'aws', operationType as any); (dag.getNode('OP') as any).output = params;
+        const existingDag = await this.urre.store.load(txId);
+        const dag = existingDag || new TransactionDag(txId);
+        const nodeId = `OP_${operationType}_${dag.nodes.length + 1}`;
+        dag.addNode(nodeId, 'aws', operationType as any);
+        if (dag.nodes.length > 1) {
+            const prev = dag.nodes[dag.nodes.length - 2];
+            dag.addEdge(prev.id, nodeId);
+        }
+        const opNode = dag.getNode(nodeId)!;
+        opNode.params = { ...params };
+        opNode.output = { ...params };
 
         // Governance Policy evaluation
         const govEngine = new PolicyGovernanceEngine();
@@ -139,13 +148,17 @@ export class UniversalActionRegistry {
         if (!params.transactionOwner) {
             // Enforce transaction ownership locally in the execution engine
             params.transactionOwner = 'ugondu-system-safelock';
-            (dag.getNode('OP') as any).transactionOwner = params.transactionOwner;
+        }
+        (opNode as any).transactionOwner = params.transactionOwner;
+
+        if (dag.status === 'SUCCESS' || dag.status === 'RECOVERED') {
+            dag.status = 'PENDING';
         }
 
         try {
             // Execute via URREngine
             await this.urre.executeTransaction(dag);
-            if (dag.status === 'FAILED' || dag.status === 'RECOVERED') {
+            if ((dag.status as any) === 'FAILED' || (dag.status as any) === 'RECOVERED') {
                 throw new Error(`Action execution failed through URRE (Status: ${dag.status}): ${dag.nodes.find(n=>n.status==='FAILED' || n.status==='ROLLBACK_SUCCESS' || n.status==='ROLLBACK_PENDING')?.error || __t('msg_unknown_error')}`);
             }
         } catch (error: any) {
@@ -161,7 +174,6 @@ export class UniversalActionRegistry {
         }
 
         // Extract outputs
-        const opNode = dag.getNode('OP');
         return { status: 'success', resourceId: opNode?.output?.resourceId || undefined, outputs: opNode?.output };
     }
 
