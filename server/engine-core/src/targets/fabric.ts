@@ -2,10 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Targets / Fabric
  * File           : fabric.ts
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Target Fabric Engineering Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE | INTERNAL
  *
  * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
@@ -14,6 +15,7 @@
 
 import { __t } from '@ugondu/shared';
 import { CPanelTargetAdapter } from './cpanel';
+import { DirectAdminTargetAdapter } from './directadmin';
 import { SshTargetAdapter } from './ssh';
 import { DockerTargetAdapter } from './docker';
 
@@ -59,8 +61,9 @@ export class TargetFabric {
 
         switch (target.environmentType) {
             case 'cpanel':
-            case 'directadmin':
                 return new CPanelTargetAdapter(config as any);
+            case 'directadmin':
+                return new DirectAdminTargetAdapter(config as any);
             case 'ssh':
             case 'baremetal':
                 return new SshTargetAdapter(config as any);

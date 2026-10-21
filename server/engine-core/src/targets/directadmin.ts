@@ -346,3 +346,71 @@ export const Target = {
   discoverEnvironmentTwin: discoverDirectAdminEnvironmentTwin,
 };
 
+
+/**
+ * @interface DirectAdminTargetConfig
+ * @description Corporate Governed interface implementation for DirectAdminTargetConfig
+ * @classification ENTERPRISE
+ */
+export interface DirectAdminTargetConfig {
+  targetId: string;
+  serverHostname: string;
+  username: string;
+  publicHtmlPath?: string;
+  phpVersion?: string;
+}
+
+/**
+ * @class DirectAdminTargetAdapter
+ * @description Dedicated adapter for DirectAdmin shared hosting targets.
+ * Distinct from cPanel; preserves bounded isolation and honest discovery.
+ * @classification ENTERPRISE
+ */
+export class DirectAdminTargetAdapter {
+  private config: DirectAdminTargetConfig;
+
+  constructor(config: DirectAdminTargetConfig) {
+    if (!config.targetId || !config.serverHostname || !config.username) {
+      throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
+    }
+    this.config = {
+      ...config,
+      publicHtmlPath: config.publicHtmlPath || `/home/${config.username}/domains/public_html`,
+    };
+  }
+
+  public getCapabilities(): string[] {
+    return [
+      'FETCH_REPOSITORY',
+      'SYNC_ENVIRONMENT',
+      'COPY_FILE',
+      'CREATE_DIRECTORY',
+      'UPSELL_NOTICE'
+    ];
+  }
+
+  public generateDeploymentPlan(repositoryUrl: string, branch: string): {
+    strategy: 'directadmin-sync';
+    targetPath: string;
+    steps: Array<{ action: string; payload: Record<string, any> }>;
+  } {
+    return {
+      strategy: 'directadmin-sync',
+      targetPath: this.config.publicHtmlPath!,
+      steps: [
+        {
+          action: 'FETCH_REPOSITORY',
+          payload: { url: repositoryUrl, branch }
+        },
+        {
+          action: 'SYNC_ENVIRONMENT',
+          payload: {
+            strategy: 'directadmin-sync',
+            destination: this.config.publicHtmlPath,
+            preservePermissions: true
+          }
+        }
+      ]
+    };
+  }
+}

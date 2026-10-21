@@ -243,7 +243,7 @@ export async function collectQualificationEvidence(outputDir, options = {}) {
   });
 
   // 3. Comprehensive Working Tree & Git History Secret Scan (SARIF 2.1.0)
-  executeSecretScan({ targetDir: ROOT, outDir: outputDir });
+  await executeSecretScan({ targetDir: ROOT, outDir: outputDir });
 
   // 4. Real Dependency Audit (SCA, scanner: 'npm-audit') & Resolved Lockfile SBOM
   const scaResult = runRealDependencyAudit();

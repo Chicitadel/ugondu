@@ -3,11 +3,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Release / Secret Detection & History Security Scanner
  * File           : secret-scan.mjs
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
- * Last Modified  : 2026-10-20
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -25,7 +25,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { execFileSync, spawnSync } from 'node:child_process';
+import readline from 'node:readline';
+import { execFileSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -76,23 +77,33 @@ function loadAllowlist() {
 function isAllowlisted(finding, activeAllowlist) {
   for (const item of activeAllowlist) {
     if (item.fingerprint && item.fingerprint === finding.fingerprint) return true;
-    if (item.ruleId === finding.ruleId && item.filePath === finding.filePath) return true;
+    if (item.ruleId === finding.ruleId && item.filePath === finding.filePath) {
+      if (!item.commit || item.commit === finding.commit || finding.commit === 'WORKING_TREE') {
+        return true;
+      }
+    }
   }
   return false;
 }
 
 /**
- * Native Git history secret scanner that scans every commit and tree state.
+ * Native Git history secret scanner that streams every commit and tree state.
  */
-function scanGitTreeAndHistory(targetDir) {
+async function scanGitTreeAndHistory(targetDir) {
   const findings = [];
   const activeAllowlist = loadAllowlist();
 
   // 1. Scan working tree tracked files
-  const trackedOutput = execFileSync('git', ['ls-files'], { cwd: targetDir, encoding: 'utf8' });
-  const trackedFiles = trackedOutput.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  let trackedFiles = [];
+  try {
+    const trackedOutput = execFileSync('git', ['ls-files'], { cwd: targetDir, encoding: 'utf8' });
+    trackedFiles = trackedOutput.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  } catch {
+    trackedFiles = [];
+  }
 
   for (const rel of trackedFiles) {
+    if (rel.includes('secret-allowlist.json') || rel.includes('gitleaks.toml')) continue;
     const full = path.join(targetDir, rel);
     if (!fs.existsSync(full)) continue;
     let content;
@@ -110,7 +121,6 @@ function scanGitTreeAndHistory(targetDir) {
         let match;
         while ((match = pattern.regex.exec(line)) !== null) {
           const matchVal = match[0];
-          // Ignore harmless placeholder patterns
           if (/AKIA[0-9]{16}/.test(matchVal) && matchVal.includes('0000000000000000')) continue;
           const fingerprint = crypto.createHash('sha256').update(`${pattern.id}:${rel}:${matchVal}`).digest('hex');
           const finding = {
@@ -129,58 +139,80 @@ function scanGitTreeAndHistory(targetDir) {
     }
   }
 
-  // 2. Scan full git commit history diffs
+  // 2. Stream full git commit history diffs without buffer exhaustion
   let commitCount = 0;
-  try {
-    const logOutput = execFileSync(
-      'git',
-      ['log', '-p', '--full-history', '--all', '--no-color'],
-      { cwd: targetDir, encoding: 'utf8', maxBuffer: 100 * 1024 * 1024 }
-    );
+  await new Promise((resolve, reject) => {
+    const proc = spawn('git', ['log', '-p', '--full-history', '--all', '--no-color'], {
+      cwd: targetDir,
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
 
-    const commitDiffs = logOutput.split(/^commit ([0-9a-f]{40})/m);
-    commitCount = Math.floor(commitDiffs.length / 2);
+    let currentCommit = 'unknown';
+    let currentFile = 'unknown';
+    let lineInFile = 0;
 
-    for (let c = 1; c < commitDiffs.length; c += 2) {
-      const commitSha = commitDiffs[c];
-      const diffBody = commitDiffs[c + 1] || '';
+    const rl = readline.createInterface({ input: proc.stdout });
 
-      const lines = diffBody.split(/\r?\n/);
-      let currentFile = 'unknown';
+    rl.on('line', (line) => {
+      if (line.startsWith('commit ') && /^[0-9a-f]{40}$/.test(line.slice(7).trim())) {
+        currentCommit = line.slice(7).trim();
+        commitCount++;
+        return;
+      }
+      if (line.startsWith('+++ b/')) {
+        currentFile = line.substring(6).trim();
+        lineInFile = 0;
+        return;
+      }
+      if (!line.startsWith('+') || line.startsWith('+++')) {
+        if (!line.startsWith('-')) lineInFile++;
+        return;
+      }
+      lineInFile++;
+      if (currentFile.includes('secret-allowlist.json') || currentFile.includes('gitleaks.toml')) return;
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.startsWith('+++ b/')) {
-          currentFile = line.substring(6).trim();
-          continue;
-        }
-        if (!line.startsWith('+') || line.startsWith('+++')) continue;
-        const addedText = line.substring(1);
-
-        for (const pattern of SECRET_PATTERNS) {
-          pattern.regex.lastIndex = 0;
-          let match;
-          while ((match = pattern.regex.exec(addedText)) !== null) {
-            const matchVal = match[0];
-            const fingerprint = crypto.createHash('sha256').update(`${pattern.id}:${commitSha}:${currentFile}:${matchVal}`).digest('hex');
-            const finding = {
-              ruleId: pattern.id,
-              description: pattern.description,
-              filePath: currentFile,
-              lineNumber: i + 1,
-              commit: commitSha,
-              fingerprint
-            };
-            if (!isAllowlisted(finding, activeAllowlist)) {
-              findings.push(finding);
-            }
+      const addedText = line.substring(1);
+      for (const pattern of SECRET_PATTERNS) {
+        pattern.regex.lastIndex = 0;
+        let match;
+        while ((match = pattern.regex.exec(addedText)) !== null) {
+          const matchVal = match[0];
+          if (/AKIA[0-9]{16}/.test(matchVal) && matchVal.includes('0000000000000000')) continue;
+          const fingerprint = crypto.createHash('sha256').update(`${pattern.id}:${currentCommit}:${currentFile}:${matchVal}`).digest('hex');
+          const finding = {
+            ruleId: pattern.id,
+            description: pattern.description,
+            filePath: currentFile,
+            lineNumber: lineInFile,
+            commit: currentCommit,
+            fingerprint
+          };
+          if (!isAllowlisted(finding, activeAllowlist)) {
+            findings.push(finding);
           }
         }
       }
-    }
-  } catch {
-    // If git history cannot be read, continue with tree findings
-  }
+    });
+
+    let stderr = '';
+    proc.stderr.on('data', (d) => { stderr += d.toString(); });
+
+    proc.on('error', (err) => {
+      reject(new Error(`Failed to spawn git log: ${err.message}`));
+    });
+
+    proc.on('close', (code) => {
+      if (code !== 0) {
+        if (stderr.includes('does not have any commits') || stderr.includes('fatal: your current branch')) {
+          resolve();
+          return;
+        }
+        reject(new Error(`git log failed with exit code ${code}: ${stderr}`));
+        return;
+      }
+      resolve();
+    });
+  });
 
   return { findings, commitCount };
 }
@@ -197,7 +229,7 @@ function buildSarifDocument(findings) {
         tool: {
           driver: {
             name: 'UgonduSecretScanner',
-            version: '2.0.0',
+            version: '2.1.0',
             informationUri: 'https://ugondu.airroofers.com',
             rules: SECRET_PATTERNS.map((p) => ({
               id: p.id,
@@ -228,11 +260,11 @@ function buildSarifDocument(findings) {
 /**
  * Executes secret scanning over repository tree and history.
  */
-export function executeSecretScan({ targetDir = ROOT, outDir } = {}) {
+export async function executeSecretScan({ targetDir = ROOT, outDir } = {}) {
   const start = Date.now();
   console.log(`[en] Executing Comprehensive Secret Scan across Working Tree and Full Git History...`);
 
-  const { findings, commitCount } = scanGitTreeAndHistory(targetDir);
+  const { findings, commitCount } = await scanGitTreeAndHistory(targetDir);
   const sarif = buildSarifDocument(findings);
 
   const durationSec = ((Date.now() - start) / 1000).toFixed(3);
@@ -241,7 +273,7 @@ export function executeSecretScan({ targetDir = ROOT, outDir } = {}) {
   const metadata = {
     schemaVersion: '1.0.0',
     scanner: 'UgonduSecretScanner',
-    scannerVersion: '2.0.0',
+    scannerVersion: '2.1.0',
     binarySha256: sha256File(__filename),
     configSha256: sha256File(CONFIG_PATH),
     scannedCommits: commitCount,
@@ -270,8 +302,12 @@ export function executeSecretScan({ targetDir = ROOT, outDir } = {}) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
-  const result = executeSecretScan();
-  if (result.status !== 'PASS') {
-    process.exit(1);
-  }
+  executeSecretScan()
+    .then((result) => {
+      if (result.status !== 'PASS') process.exit(1);
+    })
+    .catch((err) => {
+      console.error(`[ERROR] Secret scan execution failed:`, err);
+      process.exit(1);
+    });
 }

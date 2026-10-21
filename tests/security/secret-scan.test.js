@@ -48,7 +48,7 @@ test('SEC-SCAN-001: Clean repository passes secret scan with 0 unapproved findin
   const { executeSecretScan } = await getScanner();
   const tmpOut = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-sec-out-'));
   try {
-    const res = executeSecretScan({ targetDir: ROOT, outDir: tmpOut });
+    const res = await executeSecretScan({ targetDir: ROOT, outDir: tmpOut });
     assert.strictEqual(res.status, 'PASS');
     assert.strictEqual(res.findingsCount, 0);
 
@@ -76,7 +76,7 @@ test('SEC-SCAN-002: Seeded unencrypted private key in tree is detected and fails
     fs.writeFileSync(fakeKeyPath, `${header}\nMIIEowIBAAKCAQEAzfake\n${footer}\n`);
     execFileSync('git', ['add', 'leak.pem'], { cwd: tmpDir });
 
-    const res = executeSecretScan({ targetDir: tmpDir });
+    const res = await executeSecretScan({ targetDir: tmpDir });
     assert.strictEqual(res.status, 'FAIL');
     assert.ok(res.findingsCount >= 1);
   } finally {
@@ -106,7 +106,7 @@ test('SEC-SCAN-003: Seeded secret in deleted git commit history is detected and 
 
     // File is not in working tree, but is in history
     assert.ok(!fs.existsSync(secretFile));
-    const res = executeSecretScan({ targetDir: tmpDir });
+    const res = await executeSecretScan({ targetDir: tmpDir });
     assert.strictEqual(res.status, 'FAIL', 'Secret scanner must detect historical commits');
     assert.ok(res.findingsCount >= 1);
     assert.strictEqual(res.sarif.runs[0].results[0].ruleId, 'github-personal-token');
@@ -128,5 +128,26 @@ test('SEC-SCAN-004: Valid non-expired allowlist entry suppresses intentional tes
     assert.ok(entry.reviewer);
     assert.ok(entry.expiryDate);
     assert.ok(Date.parse(entry.expiryDate) > Date.now(), 'Allowlist entries must not be expired');
+  }
+});
+
+test('SEC-SCAN-005: Expired allowlist entries are strictly ignored and fail scan on violation', async () => {
+  const { executeSecretScan } = await getScanner();
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-expiry-test-'));
+  try {
+    execFileSync('git', ['init'], { cwd: tmpDir });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmpDir });
+    execFileSync('git', ['config', 'user.email', 'test@test.local'], { cwd: tmpDir });
+
+    const leakFile = path.join(tmpDir, 'leak.txt');
+    const token = ['ghp_', 'EXPIREDENTRYTESTING0123456789ABCDEFG'].join('');
+    fs.writeFileSync(leakFile, `${token}\n`);
+    execFileSync('git', ['add', 'leak.txt'], { cwd: tmpDir });
+
+    const res = await executeSecretScan({ targetDir: tmpDir });
+    assert.strictEqual(res.status, 'FAIL', 'Un-allowlisted or expired token must fail closed');
+    assert.ok(res.findingsCount >= 1);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
