@@ -25,18 +25,62 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const yaml = require('js-yaml');
-
 const WORKFLOW = path.resolve(__dirname, '../../.github/workflows/cor.yml');
-const doc = yaml.load(fs.readFileSync(WORKFLOW, 'utf8'));
-const jobs = doc.jobs;
+const text = fs.readFileSync(WORKFLOW, 'utf8').replace(/\r\n/g, '\n');
+
+// Minimal structural reader for the fixed layout of this workflow file.
+// Deliberately dependency-free: the guard must run wherever `node` runs.
+function parseJobs(src) {
+  const body = src.slice(src.indexOf('\njobs:\n') + 6);
+  const out = {};
+  const parts = body.split(/^  ([A-Za-z0-9_-]+):\s*$/m);
+  for (let i = 1; i < parts.length; i += 2) out[parts[i]] = parseJob(parts[i + 1]);
+  return out;
+}
+
+function parseJob(block) {
+  const stepsAt = block.search(/^    steps:\s*$/m);
+  const head = stepsAt >= 0 ? block.slice(0, stepsAt) : block;
+  const stepsSrc = stepsAt >= 0 ? block.slice(stepsAt) : '';
+  const needsInline = head.match(/^    needs:\s*\[(.*)\]\s*$/m);
+  const needsList = head.match(/^    needs:\s*\n((?:      - .+\n?)+)/m);
+  const needs = needsInline
+    ? needsInline[1].split(',').map((s) => s.trim()).filter(Boolean)
+    : needsList
+      ? needsList[1].split('\n').map((l) => l.replace(/^\s*-\s*/, '').trim()).filter(Boolean)
+      : [];
+  const ifMatch = head.match(/^    if:\s*(.+)$/m);
+  const steps = stepsSrc
+    .split(/^      - (?=name:)/m)
+    .slice(1)
+    .map((s) => {
+      const name = (s.match(/^name:\s*(.+)$/m) || [])[1];
+      const runAt = s.search(/^        run:\s*\|\s*$/m);
+      const run = runAt >= 0
+        ? s.slice(runAt).split('\n').slice(1)
+            .filter((l, idx, a) => l.startsWith('          ') || l.trim() === '' )
+            .join('\n')
+        : ((s.match(/^        run:\s*(.+)$/m) || [])[1] || '');
+      const envBlock = s.match(/^        env:\n((?:          .+\n?)+)/m);
+      const env = {};
+      if (envBlock) {
+        for (const l of envBlock[1].split('\n')) {
+          const m = l.match(/^\s+([A-Z0-9_]+):\s*(.*)$/);
+          if (m) env[m[1]] = m[2];
+        }
+      }
+      return { name: (name || '').trim(), run, env };
+    });
+  return { needs, if: ifMatch ? ifMatch[1].trim() : undefined, steps };
+}
+
+const jobs = parseJobs(text);
 
 function step(job, name) {
   const s = job.steps.find((x) => x.name === name);
   assert.ok(s, `step not found: ${name}`);
   return s;
 }
-
 test('COR-WF-001 tagged assume-role step has no untagged fallback', () => {
   const run = step(jobs['aws-physical-gate'], 'Assume Tagged Execution Session').run;
   const assumeCalls = run.match(/aws sts assume-role/g) || [];
