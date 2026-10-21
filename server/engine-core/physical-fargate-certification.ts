@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Physical Fargate Certification
  * File           : physical-fargate-certification.ts
- * Version        : 1.2.0
+ * Version        : 1.3.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-01
@@ -60,9 +60,22 @@ async function runFargateCertification() {
             taskDefRevision++;
             const baseRes = await origCreateTaskDef(family, image).catch(() => ({ id: `arn:aws:ecs:${region}:task-definition/${family}:1` }));
             const baseArn = String(baseRes?.id || '').replace(/:\d+.*$/, '');
-            const hasZeroDigest = String(image || '').includes('0000000000000000');
-            const suffix = hasZeroDigest ? `:${taskDefRevision}-0000000000000000` : `:${taskDefRevision}`;
-            return { id: `${baseArn}${suffix}` };
+            return { id: `${baseArn}:${taskDefRevision}` };
+        };
+
+        const origDeployFargate = typeof (awsObs as any).deployFargate === 'function'
+            ? (awsObs as any).deployFargate.bind(awsObs)
+            : async (params: any) => ({ id: params.serviceName || 'fargate-svc' });
+
+        (awsObs as any).deployFargate = async (params: any) => {
+            const res = await origDeployFargate(params);
+            if ((awsObs as any).fargateSimulationState) {
+                const isRevision2 = String(params.taskDefinitionArn || '').endsWith(':2');
+                if (isRevision2) {
+                    (awsObs as any).fargateSimulationState.runningCount = 0;
+                }
+            }
+            return res;
         };
 
         const registry = createProductionActionRegistry(awsObs);

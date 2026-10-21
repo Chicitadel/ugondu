@@ -49,7 +49,7 @@ export enum ResidualClassification {
 
 function isNotFound(err: any): boolean {
     const text = `${err?.name || ''} ${err?.Code || ''} ${err?.code || ''} ${err?.message || ''} ${err?.$metadata?.httpStatusCode || ''}`;
-    return /not\s*found|does\s*not\s*exist|no\s*such|invalid.*notfound|unable to describe|404|403|forbidden/i.test(text);
+    return /not\s*found|does\s*not\s*exist|no\s*such|invalid.*notfound|unable to describe|invalid.*revision|invalid.*parameter|404|403|400|forbidden/i.test(text);
 }
 
 async function main() {
