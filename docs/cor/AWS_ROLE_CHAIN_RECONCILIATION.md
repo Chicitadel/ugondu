@@ -223,7 +223,9 @@ The assumption test is `.github/workflows/cor.yml` job `aws-physical-gate`, whic
 |---|---|---|
 | 2026-10-21 10:16 | Run `39583191856` attempt 1, `Assume Tagged Execution Session` | `AccessDenied: assumed-role/UgonduCORRunner/GitHubActions is not authorized to perform sts:TagSession`. Predates the operator adding the policy. |
 | 2026-10-21 (operator) | Direct CLI test as `UgonduPhysicalTest` | `INCONCLUSIVE`: `iam:GetPolicy`/`iam:GetRole` denied; assumption by wrong principal. Not evidence about the runner. |
-| 2026-10-21 11:17 | Run `39583191856` attempt 2 (after operator reported adding the policy) | Still `AccessDenied` on `sts:TagSession` for `assumed-role/UgonduCORRunner/GitHubActions`. The missing-statement hypothesis is therefore **unconfirmed**; see sign-off Addendum B for the candidate causes. |
+| 2026-10-21 11:17 | Run `39583191856` attempt 2 (after operator reported adding the policy) | Still `AccessDenied` on `sts:TagSession` for `assumed-role/UgonduCORRunner/GitHubActions`. |
+| 2026-10-21 11:37 | IAM Console inspection of `UgonduCORRunner` (`UgonduCORRunner-IAM-Policy`) | Confirmed `UgonduCORRunner-IAM-Policy` is a **Customer inline** policy embedded directly in `UgonduCORRunner` (with `VisualEditor39` allowing `sts:AssumeRole` + `sts:TagSession` on `arn:aws:iam::971671216490:role/UgonduCORExecutionRole` and no permissions boundary). |
+| 2026-10-21 11:39 | Run `39583191856` attempt 3 (post-`VisualEditor39` save) | Still `AccessDenied` on `sts:TagSession` for `assumed-role/UgonduCORRunner/GitHubActions` on `resource: ***`. Since `UgonduCORRunner`'s inline policy is now confirmed to allow `sts:AssumeRole` + `sts:TagSession`, the remaining denial is narrowed to either: (A) `UgonduCORExecutionRole`'s Trust Policy `Condition` block rejecting the second workflow tag `UgonduCOR=true` (e.g., `ForAllValues:StringEquals` on `aws:TagKeys` listing only `UgonduTransactionId`), or (B) GitHub repository secret `AWS_ROLE_TO_ASSUME_EXECUTION` pointing to a different ARN than `arn:aws:iam::971671216490:role/UgonduCORExecutionRole`. |
 
 ---
 ## 7. Release Exit Criteria & Unblocking Sequence
