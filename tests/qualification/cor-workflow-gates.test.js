@@ -76,6 +76,34 @@ function parseJob(block) {
 
 const jobs = parseJobs(text);
 
+
+function verifiedPolicyReadback(args) {
+  const names = [
+    ['UgonduCOR-V9-Discovery', 'discovery.json'],
+    ['UgonduCOR-V9-EC2-Creation', 'ec2-creation.json'],
+    ['UgonduCOR-V9-EC2-Cleanup', 'ec2-cleanup.json'],
+    ['UgonduCOR-V9-RDS-S3', 'rds-s3.json'],
+    ['UgonduCOR-V9-ECR-ECS', 'ecr-ecs.json'],
+  ];
+  if (args[0] !== 'iam') return null;
+  if (args[1] === 'list-attached-role-policies') {
+    return { status: 0, json: { AttachedPolicies: names.map(([PolicyName]) => ({ PolicyName, PolicyArn: `arn:aws:iam::971671216490:policy/${PolicyName}` })) }, stderr: '' };
+  }
+  if (args[1] === 'get-policy') {
+    const arn = args[args.indexOf('--policy-arn') + 1] || '';
+    return { status: 0, json: { Policy: { DefaultVersionId: 'v1', Arn: arn } }, stderr: '' };
+  }
+  if (args[1] === 'get-policy-version') {
+    const arn = args[args.indexOf('--policy-arn') + 1] || '';
+    const name = arn.split('/').pop();
+    const entry = names.find(([PolicyName]) => PolicyName === name);
+    if (!entry) return { status: 254, json: null, stderr: 'NoSuchEntity' };
+    const doc = JSON.parse(fs.readFileSync(path.join(__dirname, '../../policy-packs/aws/cor/templates/policies', entry[1]), 'utf8'));
+    return { status: 0, json: { PolicyVersion: { VersionId: 'v1', Document: doc } }, stderr: '' };
+  }
+  return null;
+}
+
 function step(job, name) {
   const s = job.steps.find((x) => x.name === name);
   assert.ok(s, `step not found: ${name}`);
@@ -210,7 +238,7 @@ test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner 
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
       if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [{ VpcId: 'vpc-1' }] }, stderr: '' };
       if (args[0] === 'iam' && args[1] === 'list-users') return { status: 254, json: null, stderr: 'AccessDenied' };
-      return { status: 0, json: {}, stderr: '' };
+      return verifiedPolicyReadback(args) || { status: 0, json: {}, stderr: '' };
     }
   });
   assert.equal(verifyRes.exitCode, 0);
@@ -239,7 +267,7 @@ test('COR-WF-010 operating state 2: RETURNING_INSTALLATION_MATCHED (with or with
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
       if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [] }, stderr: '' };
       if (args[0] === 'iam' && args[1] === 'list-users') return { status: 254, json: null, stderr: 'AccessDenied' };
-      return { status: 0, json: {}, stderr: '' };
+      return verifiedPolicyReadback(args) || { status: 0, json: {}, stderr: '' };
     }
   });
   assert.equal(verifyRes.exitCode, 0);
@@ -270,7 +298,7 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
       if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 0, json: { Vpcs: [] }, stderr: '' };
       if (args[0] === 'iam' && args[1] === 'list-users') return { status: 254, json: null, stderr: 'AccessDenied' };
-      return { status: 0, json: {}, stderr: '' };
+      return verifiedPolicyReadback(args) || { status: 0, json: {}, stderr: '' };
     }
   });
   assert.equal(verifyRes.exitCode, 0);
@@ -293,7 +321,7 @@ test('COR-WF-012 operating state 4: BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT 
     awsRunner: (args) => {
       if (args[0] === 'sts') return { status: 0, json: { Account: '971671216490', Arn: 'arn:aws:sts::971671216490:assumed-role/UgonduCORExecutionRole/12345' }, stderr: '' };
       if (args[0] === 'ec2' && args[1] === 'describe-vpcs') return { status: 254, json: null, stderr: 'UnauthorizedOperation: You are not authorized to perform this operation.' };
-      return { status: 0, json: {}, stderr: '' };
+      return verifiedPolicyReadback(args) || { status: 0, json: {}, stderr: '' };
     }
   });
   assert.equal(verifyRes.exitCode, 1);
