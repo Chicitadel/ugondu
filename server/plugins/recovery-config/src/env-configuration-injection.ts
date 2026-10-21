@@ -112,6 +112,7 @@ export class EnvConfigurationInjection implements RecoveryCapability {
                 }
             }
         }
-        return true;
+        const configRepaired = true;
+        return configRepaired;
     }
 }

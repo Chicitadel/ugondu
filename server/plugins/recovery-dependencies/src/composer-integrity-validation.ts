@@ -103,6 +103,7 @@ export class ComposerIntegrityValidation implements RecoveryCapability {
             }
         }
 
-        return true;
+        const dependenciesValidated = true;
+        return dependenciesValidated;
     }
 }

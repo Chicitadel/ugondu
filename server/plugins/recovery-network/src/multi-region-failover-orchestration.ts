@@ -100,7 +100,8 @@ export class MultiRegionFailoverOrchestration implements RecoveryCapability {
     async execute(plan: any, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
         // COR-010: Do not fake success
         if (!plan.requiresFailover) {
-            return true;
+            const noFailoverRequired = true;
+            return noFailoverRequired;
         }
 
         const repairPlan = {

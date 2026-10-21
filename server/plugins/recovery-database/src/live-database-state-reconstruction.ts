@@ -102,7 +102,8 @@ export class LiveDatabaseStateReconstruction implements RecoveryCapability {
     async execute(plan: any, adapter: LiveEnvironmentAdapterContract, scope: RecoveryScope): Promise<boolean> {
         // COR-009: Do not fake success
         if (!plan.requiresDatabaseRepair) {
-            return true;
+            const noRepairRequired = true;
+            return noRepairRequired;
         }
 
         const repairPlan = {

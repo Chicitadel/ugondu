@@ -9,7 +9,7 @@ export class ResourceLinkageRepair implements RecoveryCapability {
 
     async diagnose(twin: EnvironmentTwin, scope: RecoveryScope): Promise<any> {
         // Diagnosis identifies which declared docroots don't physically exist
-        // based on the edges captured by the SSH Adapter
+        // based on the edges captured by the secure remote transport adapter
         return {
             issue: 'MissingPhysicalDocroots',
             confidence: 1.0,

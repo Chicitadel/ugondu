@@ -93,7 +93,8 @@ export class FrontendValidation implements RecoveryCapability {
 
     async execute(plan: any, adapter: any, scope: RecoveryScope): Promise<boolean> {
         if (!plan.requiresConfigurationRepair) {
-            return true;
+            const noRepairRequired = true;
+            return noRepairRequired;
         }
 
         // Execute configuration repairs
@@ -116,7 +117,8 @@ export class FrontendValidation implements RecoveryCapability {
             try {
                 const response = await fetch(targetUrl);
                 if (response.ok) {
-                    return true;
+                    const verifiedHealthy = response.ok;
+                    return verifiedHealthy;
                 }
             } catch (error) {
                 // Fetch failed, loop will retry

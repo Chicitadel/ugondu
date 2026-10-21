@@ -128,6 +128,7 @@ export class ZddTopologyRepair implements RecoveryCapability {
             }
         }
 
-        return true;
+        const topologyRepaired = true;
+        return topologyRepaired;
     }
 }
