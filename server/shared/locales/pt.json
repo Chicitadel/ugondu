@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "Configurar, reconciliar políticas e implantar a aplicação autonomamente",
     "cmd.provider": "Inspecionar e gerenciar provedores de nuvem e hospedagem de destino"
+  },
+  "placement": {
+    "prompt.select_region": "Onde o Ugondu deve implantar esta carga de trabalho? Insira uma cidade, país ou ID de região do provedor—por exemplo, Paris, França, Nigéria, África do Sul ou eu-west-3. Se não tiver certeza, escolha Recomendar para mim.",
+    "error.selection_required": "Seleção de região obrigatória (REGION_SELECTION_REQUIRED): nenhuma região de implantação foi especificada. Forneça uma cidade, país ou ID de região (por ex., --region Paris, --region South-Africa ou --region eu-west-3).",
+    "error.ambiguous_location": "A localização informada '{input}' corresponde a várias regiões ({candidates}). Selecione uma cidade ou ID de região específico.",
+    "error.unsupported_location": "A localização '{input}' não está disponível no provedor {provider}. As localizações suportadas incluem: {examples}.",
+    "error.residency_conflict": "A região selecionada '{region}' entra em conflito com o requisito de residência de dados '{residency}' (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "Região recomendada {region} ({displayName}) com base em {reason}. Confirmação necessária antes da implantação.",
+    "mode.explicit": "Usar minha localização especificada",
+    "mode.recommend": "Recomendar uma localização adequada para mim",
+    "mode.multi_region": "Planejar múltiplas regiões"
   }
 }

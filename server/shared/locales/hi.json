@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "कॉन्फ़िगर करें, नीतियों का समन्वय करें और स्वायत्त रूप से एप्लिकेशन डिप्लॉय करें",
     "cmd.provider": "लक्षित क्लाउड और होस्टिंग प्रदाताओं का निरीक्षण और प्रबंधन करें"
+  },
+  "placement": {
+    "prompt.select_region": "Ugondu को यह वर्कलोड कहाँ डिप्लॉय करना चाहिए? कोई शहर, देश या प्रदाता क्षेत्र ID दर्ज करें—उदाहरण के लिए पेरिस, फ़्रांस, नाइजीरिया, दक्षिण अफ़्रीका या eu-west-3। यदि आप अनिश्चित हैं, तो मेरे लिए अनुशंसा करें चुनें।",
+    "error.selection_required": "क्षेत्र चयन आवश्यक है (REGION_SELECTION_REQUIRED): कोई डिप्लॉयमेंट क्षेत्र निर्दिष्ट नहीं किया गया था। कृपया कोई शहर, देश या क्षेत्र ID प्रदान करें (जैसे, --region Paris, --region South-Africa या --region eu-west-3)।",
+    "error.ambiguous_location": "स्थान इनपुट '{input}' कई क्षेत्रों ({candidates}) से मेल खाता है। कृपया कोई विशिष्ट शहर या क्षेत्र ID चुनें।",
+    "error.unsupported_location": "स्थान '{input}' प्रदाता {provider} पर उपलब्ध नहीं है। समर्थित स्थानों में शामिल हैं: {examples}।",
+    "error.residency_conflict": "चयनित क्षेत्र '{region}' डेटा-रेजिडेंसी आवश्यकता '{residency}' के साथ टकराता है (CONFLICTS_WITH_POLICY)।",
+    "recommendation.rationale": "{reason} के आधार पर अनुशंसित क्षेत्र {region} ({displayName})। डिप्लॉयमेंट से पहले पुष्टि आवश्यक है।",
+    "mode.explicit": "मेरे निर्दिष्ट स्थान का उपयोग करें",
+    "mode.recommend": "मेरे लिए उपयुक्त स्थान की अनुशंसा करें",
+    "mode.multi_region": "एकाधिक क्षेत्रों की योजना बनाएं"
   }
 }

@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "構成、ポリシーの調整、およびアプリケーションの自律的なデプロイ",
     "cmd.provider": "ターゲットのクラウドおよびホスティングプロバイダーの検査と管理"
+  },
+  "placement": {
+    "prompt.select_region": "Ugondu はこのワークロードをどこにデプロイしますか？都市、国、またはプロバイダーのリージョン ID（例: パリ、フランス、ナイジェリア、南アフリカ、または eu-west-3）を入力してください。不明な場合は「おすすめのリージョンを提案」を選択してください。",
+    "error.selection_required": "リージョンの選択が必要です (REGION_SELECTION_REQUIRED): デプロイ先リージョンが指定されていません。都市、国、またはリージョン ID を指定してください（例: --region Paris、--region South-Africa、または --region eu-west-3）。",
+    "error.ambiguous_location": "入力されたロケーション '{input}' は複数のリージョン ({candidates}) に一致します。特定の都市またはリージョン ID を選択してください。",
+    "error.unsupported_location": "ロケーション '{input}' はプロバイダー {provider} では利用できません。サポートされているロケーション: {examples}。",
+    "error.residency_conflict": "選択されたリージョン '{region}' はデータレジデンシー要件 '{residency}' と競合しています (CONFLICTS_WITH_POLICY)。",
+    "recommendation.rationale": "{reason} に基づく推奨リージョン {region} ({displayName})。デプロイ前に確認が必要です。",
+    "mode.explicit": "指定したロケーションを使用する",
+    "mode.recommend": "適切なロケーションを提案してもらう",
+    "mode.multi_region": "複数のリージョンを計画する"
   }
 }

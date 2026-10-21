@@ -55,9 +55,9 @@ governanceRules:
     UNCERTIFIED: "Unverified boundary; no empirical qualification established."
 
 summary:
-  totalBoundaries: 7
+  totalBoundaries: 8
   certifiedCount: 3
-  modificationZoneCount: 3
+  modificationZoneCount: 4
   inProgressCount: 1
   uncertifiedCount: 0
 
@@ -225,3 +225,27 @@ boundaries:
       - "test/continuity/provider-adapter-contract.test.ts"
       - "test/continuity/cross-os-entrypoint-parity.test.ts"
       - "test/continuity/durable-resume-crash-recovery.test.ts"
+
+  - id: "core.universal-region-selection"
+    status: "MODIFICATION_ZONE"
+    classification: "ARCHITECTURE_EVOLUTION_ZONE"
+    owner: "Platform Architecture & Multi-Region Governance Authority"
+    finding:
+      - "COR-004" # Region/account/name values must be resolved dynamically without hidden defaults
+      - "URS-ADDENDUM" # Universal Region Selection and Multi-Region Governance
+    targetPaths:
+      - "server/capabilities/src/continuity/UniversalPlacementResolver.ts"
+      - "server/capabilities/src/continuity/RegionPolicyRenderer.ts"
+      - "scripts/aws-conformance/target-resolver.mjs"
+      - "server/capabilities/src/agent-neutral/GraphicalControlContracts.ts"
+    mutationPolicy: "ALLOW_REVISED_IMPLEMENTATION"
+    remediationScope:
+      - "Prohibit silent hardcoded deployment region defaults across all entrypoints"
+      - "Resolve beginner-friendly city/country/geography inputs and disambiguate multi-region matches"
+      - "Enforce 7-level placement priority order (residency -> explicit -> approved config -> audience geography -> service/latency -> permissioned IP hint -> REGION_SELECTION_REQUIRED)"
+      - "Support multi-region topologies and failover validation without unapproved region spillover"
+    dependencies:
+      - "core.policy-renderer-and-digest"
+    gatingTests:
+      - "server/capabilities/src/tests/universal-placement-resolver.spec.ts"
+      - "tests/qualification/universal-region-selection.test.js"

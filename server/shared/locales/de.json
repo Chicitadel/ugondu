@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "Konfigurieren, Richtlinien abgleichen und Anwendung autonom bereitstellen",
     "cmd.provider": "Ziel-Cloud- und Hosting-Anbieter prüfen und verwalten"
+  },
+  "placement": {
+    "prompt.select_region": "Wo soll Ugondu diesen Workload bereitstellen? Geben Sie eine Stadt, ein Land oder eine Anbieter-Regions-ID ein — zum Beispiel Paris, Frankreich, Nigeria, Südafrika oder eu-west-3. Wenn Sie unsicher sind, wählen Sie Für mich empfehlen.",
+    "error.selection_required": "Regionsauswahl erforderlich (REGION_SELECTION_REQUIRED): Es wurde keine Bereitstellungsregion angegeben. Geben Sie eine Stadt, ein Land oder eine Regions-ID an (z. B. --region Paris, --region South-Africa oder --region eu-west-3).",
+    "error.ambiguous_location": "Die Standorteingabe '{input}' stimmt mit mehreren Regionen überein ({candidates}). Bitte wählen Sie eine bestimmte Stadt oder Regions-ID aus.",
+    "error.unsupported_location": "Der Standort '{input}' ist beim Anbieter {provider} nicht verfügbar. Unterstützte Standorte sind unter anderem: {examples}.",
+    "error.residency_conflict": "Die ausgewählte Region '{region}' steht im Konflikt mit der Datenresidenzanforderung '{residency}' (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "Empfohlene Region {region} ({displayName}) basierend auf {reason}. Bestätigung vor der Bereitstellung erforderlich.",
+    "mode.explicit": "Meinen angegebenen Standort verwenden",
+    "mode.recommend": "Einen geeigneten Standort für mich empfehlen",
+    "mode.multi_region": "Mehrere Regionen planen"
   }
 }

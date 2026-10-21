@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "Configura, riconcilia le policy e distribuisci l'applicazione in modo autonomo",
     "cmd.provider": "Ispeziona e gestisci i provider cloud e di hosting di destinazione"
+  },
+  "placement": {
+    "prompt.select_region": "Dove dovrebbe distribuire Ugondu questo carico di lavoro? Inserisci una città, un paese o l'ID regione del provider—ad esempio Parigi, Francia, Nigeria, Sudafrica o eu-west-3. Se non sei sicuro, scegli Consiglia per me.",
+    "error.selection_required": "Selezione della regione obbligatoria (REGION_SELECTION_REQUIRED): non è stata specificata alcuna regione di distribuzione. Fornisci una città, un paese o un ID regione (ad es., --region Paris, --region South-Africa o --region eu-west-3).",
+    "error.ambiguous_location": "La posizione inserita '{input}' corrisponde a più regioni ({candidates}). Seleziona una città o un ID regione specifico.",
+    "error.unsupported_location": "La posizione '{input}' non è disponibile sul provider {provider}. Le posizioni supportate includono: {examples}.",
+    "error.residency_conflict": "La regione selezionata '{region}' è in conflitto con il requisito di residenza dei dati '{residency}' (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "Regione consigliata {region} ({displayName}) in base a {reason}. È richiesta la conferma prima della distribuzione.",
+    "mode.explicit": "Usa la posizione da me specificata",
+    "mode.recommend": "Consigliami una posizione adatta",
+    "mode.multi_region": "Pianifica più regioni"
   }
 }

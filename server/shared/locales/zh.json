@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "配置、协调策略并自主部署应用程序",
     "cmd.provider": "检查并管理目标云与托管服务提供商"
+  },
+  "placement": {
+    "prompt.select_region": "Ugondu 应将此工作负载部署到何处？请输入城市、国家/地区或提供商区域 ID——例如巴黎、法国、尼日利亚、南非或 eu-west-3。如果不确定，请选择“为我推荐”。",
+    "error.selection_required": "必须选择区域 (REGION_SELECTION_REQUIRED)：未指定部署区域。请提供城市、国家/地区或区域 ID（例如 --region Paris、--region South-Africa 或 --region eu-west-3）。",
+    "error.ambiguous_location": "位置输入 '{input}' 匹配多个区域 ({candidates})。请选择具体的城市或区域 ID。",
+    "error.unsupported_location": "提供商 {provider} 不支持位置 '{input}'。支持的位置包括：{examples}。",
+    "error.residency_conflict": "所选区域 '{region}' 与数据驻留要求 '{residency}' 冲突 (CONFLICTS_WITH_POLICY)。",
+    "recommendation.rationale": "基于 {reason} 推荐区域 {region} ({displayName})。部署前需要确认。",
+    "mode.explicit": "使用我指定的位置",
+    "mode.recommend": "为我推荐合适的位置",
+    "mode.multi_region": "规划多个区域"
   }
 }

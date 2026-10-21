@@ -47,3 +47,7 @@ export * from './PolicyPermissionAdapter';
 
 // Bootstrap Policy Orchestrator
 export * from './BootstrapPolicyOrchestrator';
+
+// Universal Placement & Region Selection Resolver
+export * from './UniversalPlacementResolver';
+

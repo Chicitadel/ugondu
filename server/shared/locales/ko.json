@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "구성, 정책 조정 및 애플리케이션 자율 배포",
     "cmd.provider": "대상 클라우드 및 호스팅 공급자 검사 및 관리"
+  },
+  "placement": {
+    "prompt.select_region": "Ugondu가 이 워크로드를 어디에 배포해야 합니까? 도시, 국가 또는 공급자 리전 ID(예: 파리, 프랑스, 나이지리아, 남아프리카 공화국 또는 eu-west-3)를 입력하십시오. 확실하지 않은 경우 '나에게 추천'을 선택하십시오.",
+    "error.selection_required": "리전 선택 필요 (REGION_SELECTION_REQUIRED): 배포 리전이 지정되지 않았습니다. 도시, 국가 또는 리전 ID를 입력하십시오(예: --region Paris, --region South-Africa 또는 --region eu-west-3).",
+    "error.ambiguous_location": "입력한 위치 '{input}'이(가) 여러 리전({candidates})과 일치합니다. 특정 도시 또는 리전 ID를 선택하십시오.",
+    "error.unsupported_location": "위치 '{input}'은(는) 공급자 {provider}에서 사용할 수 없습니다. 지원되는 위치: {examples}.",
+    "error.residency_conflict": "선택한 리전 '{region}'이(가) 데이터 상주 요구사항 '{residency}'과(와) 충돌합니다 (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "{reason}에 기반한 추천 리전 {region} ({displayName}). 배포 전에 확인이 필요합니다.",
+    "mode.explicit": "지정한 위치 사용",
+    "mode.recommend": "적합한 위치 추천받기",
+    "mode.multi_region": "다중 리전 계획"
   }
 }

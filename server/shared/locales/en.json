@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "Configure, reconcile policies, and deploy application autonomously",
     "cmd.provider": "Inspect and manage target cloud and hosting providers"
+  },
+  "placement": {
+    "prompt.select_region": "Where should Ugondu deploy this workload? Enter a city, country, or provider region ID—for example Paris, France, Nigeria, South Africa, or eu-west-3. If you are unsure, choose Recommend for me.",
+    "error.selection_required": "Region selection required (REGION_SELECTION_REQUIRED): no deployment region was specified. Provide a city, country, or region ID (e.g., --region Paris, --region South-Africa, or --region eu-west-3).",
+    "error.ambiguous_location": "Location input '{input}' matches multiple regions ({candidates}). Please select a specific city or region ID.",
+    "error.unsupported_location": "Location '{input}' is not available on provider {provider}. Supported locations include: {examples}.",
+    "error.residency_conflict": "Selected region '{region}' conflicts with data-residency requirement '{residency}' (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "Recommended region {region} ({displayName}) based on {reason}. Confirmation required before deployment.",
+    "mode.explicit": "Use my specified location",
+    "mode.recommend": "Recommend a suitable location for me",
+    "mode.multi_region": "Plan multiple regions"
   }
 }

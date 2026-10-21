@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : CEG — Graphical Control Panel & CLI Parity Contracts
  * File           : GraphicalControlContracts.ts
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU (RCS Paris 943 432 534)
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -24,55 +24,140 @@
  * - Security Authority     : Ujomor Systems Governance
  * - Governance Authority   : Air Roofers Corporate Governance
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { createHash } from 'crypto';
-import {
-  type CanonicalCapabilityId,
-  type UplmRiskClass,
-  canonicalCapabilityRegistry,
-} from './CanonicalCapabilityContract';
+import { type CanonicalCapabilityId, type UplmRiskClass, canonicalCapabilityRegistry } from './CanonicalCapabilityContract';
 
 export type GraphicalViewId =
-  | 'ENVIRONMENT_OVERVIEW'
-  | 'POLICY_INVENTORY_AND_DRIFT'
-  | 'BOOTSTRAP_WIZARD'
-  | 'FINE_GRAINED_EXPERT_MODE'
-  | 'REPAIR_AND_MIGRATION'
-  | 'RETIREMENT_AND_UNINSTALL'
-  | 'OPERATION_MONITOR';
+  | 'ENVIRONMENT_OVERVIEW' | 'POLICY_INVENTORY_AND_DRIFT' | 'BOOTSTRAP_WIZARD'
+  | 'FINE_GRAINED_EXPERT_MODE' | 'REPAIR_AND_MIGRATION' | 'RETIREMENT_AND_UNINSTALL' | 'OPERATION_MONITOR';
 
 export interface GraphicalButtonBinding {
-  buttonId: string;
-  label: string;
-  viewId: GraphicalViewId;
-  capabilityId: CanonicalCapabilityId;
-  readOnly: boolean;
-  requiresPlan: boolean;
-  requiresApproval: boolean;
-  disabledWhenOutcomeUnknown?: boolean;
+  buttonId: string; label: string; viewId: GraphicalViewId; capabilityId: CanonicalCapabilityId;
+  readOnly: boolean; requiresPlan: boolean; requiresApproval: boolean; disabledWhenOutcomeUnknown?: boolean;
 }
 
 export interface GraphicalViewDefinition {
-  viewId: GraphicalViewId;
-  title: string;
-  sectionRef: string;
-  displayedFields: string[];
-  buttons: GraphicalButtonBinding[];
+  viewId: GraphicalViewId; title: string; sectionRef: string; displayedFields: string[]; buttons: GraphicalButtonBinding[];
 }
 
 export interface BootstrapWizardStage {
   stageNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-  stageId: string;
-  title: string;
-  capabilityId: CanonicalCapabilityId;
-  readOnly: boolean;
+  stageId: string; title: string; capabilityId: CanonicalCapabilityId; readOnly: boolean;
 }
 
-/**
- * 10-Stage Bootstrap Wizard per Specification §5.3.
- */
+export const PLACEMENT_SELECTION_MODES = ['explicit', 'recommend', 'multi-region'] as const;
+export type PlacementSelectionMode = (typeof PLACEMENT_SELECTION_MODES)[number];
+
+export const SUPPORTED_HOSTING_FAMILIES = ['aws', 'gcp', 'azure', 'vps-cpanel-directadmin', 'private-host'] as const;
+export type SupportedHostingFamily = (typeof SUPPORTED_HOSTING_FAMILIES)[number];
+
+export const DEPLOYMENT_ENVIRONMENTS = ['development', 'staging', 'production'] as const;
+export type DeploymentEnvironment = (typeof DEPLOYMENT_ENVIRONMENTS)[number];
+
+export const PLACEMENT_REGION_MODES = ['auto', 'manual', 'multi-region'] as const;
+export type PlacementRegionMode = (typeof PLACEMENT_REGION_MODES)[number];
+
+export interface PlacementWizardContract {
+  readonly prompt?: string;
+  readonly selectionMode: PlacementSelectionMode;
+  readonly hostingFamilies: readonly SupportedHostingFamily[];
+  readonly regionMode?: PlacementRegionMode;
+  readonly regions?: readonly string[];
+  readonly environment: DeploymentEnvironment;
+  readonly residencyRequirement?: string;
+  readonly budgetCeilingUsd?: number;
+  readonly selectionModes?: readonly PlacementSelectionMode[];
+  readonly supportedHostingFamilies?: readonly SupportedHostingFamily[];
+  readonly deploymentEnvironments?: readonly DeploymentEnvironment[];
+  readonly regionModes?: readonly PlacementRegionMode[];
+}
+
+export const PlacementWizardContract: PlacementWizardContract & {
+  readonly prompt: string;
+  readonly selectionModes: typeof PLACEMENT_SELECTION_MODES;
+  readonly supportedHostingFamilies: typeof SUPPORTED_HOSTING_FAMILIES;
+  readonly deploymentEnvironments: typeof DEPLOYMENT_ENVIRONMENTS;
+  readonly regionModes: typeof PLACEMENT_REGION_MODES;
+} = {
+  prompt: 'Where should Ugondu deploy?',
+  selectionMode: 'recommend',
+  hostingFamilies: SUPPORTED_HOSTING_FAMILIES,
+  regionMode: 'auto',
+  environment: 'production',
+  selectionModes: PLACEMENT_SELECTION_MODES,
+  supportedHostingFamilies: SUPPORTED_HOSTING_FAMILIES,
+  deploymentEnvironments: DEPLOYMENT_ENVIRONMENTS,
+  regionModes: PLACEMENT_REGION_MODES,
+} as const;
+
+export interface PlacementWizardValidationResult {
+  valid: boolean;
+  prompt: string;
+  capabilityId: CanonicalCapabilityId;
+  normalizedSelection?: {
+    selectionMode: PlacementSelectionMode;
+    hostingFamilies: SupportedHostingFamily[];
+    regionMode: PlacementRegionMode;
+    regions: string[];
+    environment: DeploymentEnvironment;
+    residencyRequirement?: string;
+    budgetCeilingUsd?: number;
+  };
+  errors: string[];
+}
+
+export function validatePlacementWizardSelection(
+  input: Partial<PlacementWizardContract> & { mode?: PlacementSelectionMode }
+): PlacementWizardValidationResult {
+  const errors: string[] = [];
+  const mode = input.selectionMode ?? input.mode;
+  if (!mode || !(PLACEMENT_SELECTION_MODES as readonly string[]).includes(mode)) {
+    errors.push(`Invalid placement selectionMode '${String(mode)}'. Expected one of: ${PLACEMENT_SELECTION_MODES.join(', ')}.`);
+  }
+  const families = Array.isArray(input.hostingFamilies) ? input.hostingFamilies : [];
+  if (families.length === 0) {
+    errors.push('At least one supported hosting family must be selected.');
+  } else {
+    for (const fam of families) {
+      if (!(SUPPORTED_HOSTING_FAMILIES as readonly string[]).includes(fam)) {
+        errors.push(`Unsupported hosting family '${String(fam)}'.`);
+      }
+    }
+  }
+  const env = input.environment;
+  if (!env || !(DEPLOYMENT_ENVIRONMENTS as readonly string[]).includes(env)) {
+    errors.push(`Invalid deployment environment '${String(env)}'. Expected one of: ${DEPLOYMENT_ENVIRONMENTS.join(', ')}.`);
+  }
+  const regionMode: PlacementRegionMode = input.regionMode ?? (mode === 'multi-region' ? 'multi-region' : 'auto');
+  if (!(PLACEMENT_REGION_MODES as readonly string[]).includes(regionMode)) {
+    errors.push(`Invalid regionMode '${String(regionMode)}'.`);
+  }
+  const regions = (input.regions ?? []).map((r) => r.trim()).filter(Boolean);
+  if (regionMode === 'manual' && regions.length === 0) {
+    errors.push('Manual region mode requires at least one explicit region.');
+  }
+  if (mode === 'multi-region' && input.regions !== undefined && regions.length < 2 && families.length < 2) {
+    errors.push('Multi-region placement requires at least two regions or two hosting families.');
+  }
+  if (input.budgetCeilingUsd !== undefined && (typeof input.budgetCeilingUsd !== 'number' || input.budgetCeilingUsd <= 0)) {
+    errors.push('budgetCeilingUsd must be a positive number.');
+  }
+  return {
+    valid: errors.length === 0,
+    prompt: PlacementWizardContract.prompt,
+    capabilityId: 'policy.bootstrap.plan',
+    normalizedSelection:
+      errors.length === 0 && mode && env
+        ? { selectionMode: mode, hostingFamilies: [...families], regionMode, regions, environment: env, residencyRequirement: input.residencyRequirement, budgetCeilingUsd: input.budgetCeilingUsd }
+        : undefined,
+    errors,
+  };
+}
+
+/** 10-Stage Bootstrap Wizard per Specification §5.3. */
 export const BOOTSTRAP_WIZARD_STAGES: readonly BootstrapWizardStage[] = [
   { stageNumber: 1, stageId: 'SELECT_PROVIDER_AND_TARGET', title: 'Select provider and target', capabilityId: 'policy.inspect', readOnly: true },
   { stageNumber: 2, stageId: 'VERIFY_IDENTITY_AND_CREDENTIALS', title: 'Verify identity and credential validity', capabilityId: 'policy.inspect', readOnly: true },
@@ -86,22 +171,11 @@ export const BOOTSTRAP_WIZARD_STAGES: readonly BootstrapWizardStage[] = [
   { stageNumber: 10, stageId: 'EXPORT_EVIDENCE_AND_CLOSE', title: 'Export evidence and close the operation', capabilityId: 'policy.evidence.export', readOnly: true },
 ] as const;
 
-/**
- * All 7 Graphical Control Panel Views and their canonical capability button mappings (§5.1 - §5.7).
- */
+/** All 7 Graphical Control Panel Views and their canonical capability button mappings (§5.1 - §5.7). */
 export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefinition> = {
   ENVIRONMENT_OVERVIEW: {
-    viewId: 'ENVIRONMENT_OVERVIEW',
-    title: 'Environment Overview',
-    sectionRef: '5.1',
-    displayedFields: [
-      'providerAndTarget',
-      'authenticatedPrincipalRedacted',
-      'credentialStatusAndExpiry',
-      'permissionReadiness',
-      'discoveryCompleteness',
-      'activeOperationsAndRecentFailures',
-    ],
+    viewId: 'ENVIRONMENT_OVERVIEW', title: 'Environment Overview', sectionRef: '5.1',
+    displayedFields: ['providerAndTarget', 'authenticatedPrincipalRedacted', 'credentialStatusAndExpiry', 'permissionReadiness', 'discoveryCompleteness', 'activeOperationsAndRecentFailures'],
     buttons: [
       { buttonId: 'env.inspect_environment', label: 'Inspect Environment', viewId: 'ENVIRONMENT_OVERVIEW', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
       { buttonId: 'env.verify_identity', label: 'Verify Identity', viewId: 'ENVIRONMENT_OVERVIEW', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
@@ -111,18 +185,8 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
     ],
   },
   POLICY_INVENTORY_AND_DRIFT: {
-    viewId: 'POLICY_INVENTORY_AND_DRIFT',
-    title: 'Policy Inventory and Drift',
-    sectionRef: '5.2',
-    displayedFields: [
-      'desiredVsObservedState',
-      'packVersionAndHash',
-      'ownershipClassification',
-      'principalAttachments',
-      'trustRelationships',
-      'permissionBoundaries',
-      'dependenciesAndDrift',
-    ],
+    viewId: 'POLICY_INVENTORY_AND_DRIFT', title: 'Policy Inventory and Drift', sectionRef: '5.2',
+    displayedFields: ['desiredVsObservedState', 'packVersionAndHash', 'ownershipClassification', 'principalAttachments', 'trustRelationships', 'permissionBoundaries', 'dependenciesAndDrift'],
     buttons: [
       { buttonId: 'inv.inspect_policy', label: 'Inspect Policy', viewId: 'POLICY_INVENTORY_AND_DRIFT', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
       { buttonId: 'inv.compare_with_pack', label: 'Compare With Pack', viewId: 'POLICY_INVENTORY_AND_DRIFT', capabilityId: 'policy.plan', readOnly: true, requiresPlan: false, requiresApproval: false },
@@ -134,17 +198,8 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
     ],
   },
   BOOTSTRAP_WIZARD: {
-    viewId: 'BOOTSTRAP_WIZARD',
-    title: 'Bootstrap Wizard',
-    sectionRef: '5.3',
-    displayedFields: [
-      'wizardStage',
-      'bootstrapState',
-      'authorityGaps',
-      'selectedBootstrapRoute',
-      'planHashAndApprovalStatus',
-      'verificationPostconditions',
-    ],
+    viewId: 'BOOTSTRAP_WIZARD', title: 'Bootstrap Wizard', sectionRef: '5.3',
+    displayedFields: ['wizardStage', 'bootstrapState', 'authorityGaps', 'selectedBootstrapRoute', 'planHashAndApprovalStatus', 'verificationPostconditions'],
     buttons: [
       { buttonId: 'wiz.start_bootstrap', label: 'Start Bootstrap', viewId: 'BOOTSTRAP_WIZARD', capabilityId: 'policy.bootstrap.plan', readOnly: true, requiresPlan: false, requiresApproval: false },
       { buttonId: 'wiz.inspect_only', label: 'Inspect Only', viewId: 'BOOTSTRAP_WIZARD', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
@@ -164,20 +219,8 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
     ],
   },
   FINE_GRAINED_EXPERT_MODE: {
-    viewId: 'FINE_GRAINED_EXPERT_MODE',
-    title: 'Fine-Grained Expert Mode',
-    sectionRef: '5.4',
-    displayedFields: [
-      'actionTypeAndProviderApi',
-      'targetResourceAndScope',
-      'beforeAndAfterState',
-      'requiredProviderPermission',
-      'riskLevelAndReversibility',
-      'ownershipAndDependencyEvidence',
-      'approvalStatus',
-      'preconditionsAndVerification',
-      'rollbackOrRecoveryBehavior',
-    ],
+    viewId: 'FINE_GRAINED_EXPERT_MODE', title: 'Fine-Grained Expert Mode', sectionRef: '5.4',
+    displayedFields: ['actionTypeAndProviderApi', 'targetResourceAndScope', 'beforeAndAfterState', 'requiredProviderPermission', 'riskLevelAndReversibility', 'ownershipAndDependencyEvidence', 'approvalStatus', 'preconditionsAndVerification', 'rollbackOrRecoveryBehavior'],
     buttons: [
       { buttonId: 'exp.export_plan', label: 'Export Plan', viewId: 'FINE_GRAINED_EXPERT_MODE', capabilityId: 'policy.plan', readOnly: true, requiresPlan: true, requiresApproval: false },
       { buttonId: 'exp.validate_selected_plan', label: 'Validate Selected Plan', viewId: 'FINE_GRAINED_EXPERT_MODE', capabilityId: 'policy.plan', readOnly: true, requiresPlan: true, requiresApproval: false },
@@ -185,16 +228,8 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
     ],
   },
   REPAIR_AND_MIGRATION: {
-    viewId: 'REPAIR_AND_MIGRATION',
-    title: 'Repair and Migration',
-    sectionRef: '5.5',
-    displayedFields: [
-      'currentAndProposedVersions',
-      'semanticDiff',
-      'dependentPrincipals',
-      'expectedDisruption',
-      'rollbackOptions',
-    ],
+    viewId: 'REPAIR_AND_MIGRATION', title: 'Repair and Migration', sectionRef: '5.5',
+    displayedFields: ['currentAndProposedVersions', 'semanticDiff', 'dependentPrincipals', 'expectedDisruption', 'rollbackOptions'],
     buttons: [
       { buttonId: 'rep.detect_drift', label: 'Detect Drift', viewId: 'REPAIR_AND_MIGRATION', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
       { buttonId: 'rep.generate_repair_plan', label: 'Generate Repair Plan', viewId: 'REPAIR_AND_MIGRATION', capabilityId: 'policy.plan', readOnly: true, requiresPlan: false, requiresApproval: false },
@@ -208,16 +243,8 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
     ],
   },
   RETIREMENT_AND_UNINSTALL: {
-    viewId: 'RETIREMENT_AND_UNINSTALL',
-    title: 'Retirement and Uninstall',
-    sectionRef: '5.6',
-    displayedFields: [
-      'ownershipClassificationSummary',
-      'dependencyAndConsumerReport',
-      'perResourceEligibility',
-      'retainedResourcesAndReasons',
-      'impactSummary',
-    ],
+    viewId: 'RETIREMENT_AND_UNINSTALL', title: 'Retirement and Uninstall', sectionRef: '5.6',
+    displayedFields: ['ownershipClassificationSummary', 'dependencyAndConsumerReport', 'perResourceEligibility', 'retainedResourcesAndReasons', 'impactSummary'],
     buttons: [
       { buttonId: 'ret.inspect_dependencies', label: 'Inspect Dependencies', viewId: 'RETIREMENT_AND_UNINSTALL', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
       { buttonId: 'ret.check_ownership', label: 'Check Ownership', viewId: 'RETIREMENT_AND_UNINSTALL', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
@@ -231,16 +258,8 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
     ],
   },
   OPERATION_MONITOR: {
-    viewId: 'OPERATION_MONITOR',
-    title: 'Operation Monitor',
-    sectionRef: '5.7',
-    displayedFields: [
-      'durableTimelineStages',
-      'timestampsAndActionOutcomes',
-      'retryAttemptsAndBlockers',
-      'evidenceLinks',
-      'recoveryStatus',
-    ],
+    viewId: 'OPERATION_MONITOR', title: 'Operation Monitor', sectionRef: '5.7',
+    displayedFields: ['durableTimelineStages', 'timestampsAndActionOutcomes', 'retryAttemptsAndBlockers', 'evidenceLinks', 'recoveryStatus'],
     buttons: [
       { buttonId: 'mon.view_details', label: 'View Details', viewId: 'OPERATION_MONITOR', capabilityId: 'policy.inspect', readOnly: true, requiresPlan: false, requiresApproval: false },
       { buttonId: 'mon.retry_safe_step', label: 'Retry Safe Step', viewId: 'OPERATION_MONITOR', capabilityId: 'policy.repair', readOnly: false, requiresPlan: true, requiresApproval: true, disabledWhenOutcomeUnknown: true },
@@ -254,9 +273,6 @@ export const GRAPHICAL_CONTROL_VIEWS: Record<GraphicalViewId, GraphicalViewDefin
   },
 };
 
-/**
- * CLI Command Catalogue to Canonical Capability ID mapping (§3.1 - §3.7).
- */
 export interface CliCommandBinding {
   commandPattern: string;
   capabilityId: CanonicalCapabilityId;
@@ -305,204 +321,102 @@ export const CLI_COMMAND_CAPABILITY_MAP: readonly CliCommandBinding[] = [
 export interface ExpertPlanActionItem {
   actionId: string;
   actionType: 'CREATE_POLICY' | 'ATTACH_POLICY' | 'DETACH_POLICY' | 'UPDATE_POLICY' | 'VERIFY_TRUST' | 'DELETE_POLICY';
-  providerApi: string;
-  targetResource: string;
-  beforeStateHash: string | null;
-  afterStateHash: string;
-  requiredProviderPermission: string;
-  riskLevel: UplmRiskClass;
-  reversible: boolean;
-  ownershipClass: string;
-  mandatorySecurityControl: boolean;
-  selected: boolean;
-  allowedByPolicy: boolean;
+  providerApi: string; targetResource: string; beforeStateHash: string | null; afterStateHash: string;
+  requiredProviderPermission: string; riskLevel: UplmRiskClass; reversible: boolean; ownershipClass: string;
+  mandatorySecurityControl: boolean; selected: boolean; allowedByPolicy: boolean;
   parameters: Record<string, string | number | boolean>;
 }
 
 export interface ExpertPlanState {
-  planId: string;
-  target: string;
-  packId: string;
-  packVersion: string;
-  executionMode: 'guided' | 'non-interactive';
-  timeoutMs: number;
-  concurrencyLimit: number;
-  maxRetries: number;
-  actions: ExpertPlanActionItem[];
-  planHash: string;
+  planId: string; target: string; packId: string; packVersion: string;
+  executionMode: 'guided' | 'non-interactive'; timeoutMs: number; concurrencyLimit: number; maxRetries: number;
+  actions: ExpertPlanActionItem[]; planHash: string;
   approvalStatus: 'UNAPPROVED' | 'APPROVED' | 'INVALIDATED_BY_EDIT';
-  approvedPlanHash?: string;
-  validationPassed: boolean;
-  validationErrors: string[];
+  approvedPlanHash?: string; validationPassed: boolean; validationErrors: string[];
 }
 
 export interface ExpertPlanEditRequest {
-  deselectActionIds?: string[];
-  selectActionIds?: string[];
+  deselectActionIds?: string[]; selectActionIds?: string[];
   parameterUpdates?: Record<string, Record<string, string | number | boolean>>;
-  packVersion?: string;
-  timeoutMs?: number;
-  concurrencyLimit?: number;
-  maxRetries?: number;
-  executionMode?: 'guided' | 'non-interactive';
-  attemptOverrideDeniedActionIds?: string[];
+  packVersion?: string; timeoutMs?: number; concurrencyLimit?: number; maxRetries?: number;
+  executionMode?: 'guided' | 'non-interactive'; attemptOverrideDeniedActionIds?: string[];
 }
 
-export function computeExpertPlanHash(plan: Omit<ExpertPlanState, 'planHash' | 'approvalStatus' | 'approvedPlanHash' | 'validationPassed' | 'validationErrors'>): string {
+export function computeExpertPlanHash(
+  plan: Omit<ExpertPlanState, 'planHash' | 'approvalStatus' | 'approvedPlanHash' | 'validationPassed' | 'validationErrors'>
+): string {
   const canonicalPayload = JSON.stringify({
-    planId: plan.planId,
-    target: plan.target,
-    packId: plan.packId,
-    packVersion: plan.packVersion,
-    executionMode: plan.executionMode,
-    timeoutMs: plan.timeoutMs,
-    concurrencyLimit: plan.concurrencyLimit,
-    maxRetries: plan.maxRetries,
+    planId: plan.planId, target: plan.target, packId: plan.packId, packVersion: plan.packVersion,
+    executionMode: plan.executionMode, timeoutMs: plan.timeoutMs, concurrencyLimit: plan.concurrencyLimit, maxRetries: plan.maxRetries,
     actions: plan.actions.map((a) => ({
-      actionId: a.actionId,
-      actionType: a.actionType,
-      targetResource: a.targetResource,
-      afterStateHash: a.afterStateHash,
-      selected: a.selected,
-      parameters: a.parameters,
+      actionId: a.actionId, actionType: a.actionType, targetResource: a.targetResource,
+      afterStateHash: a.afterStateHash, selected: a.selected, parameters: a.parameters,
     })),
   });
   return createHash('sha256').update(canonicalPayload).digest('hex');
 }
 
-/**
- * Applies edits in Fine-Grained Expert Mode (§5.4).
- *
- * INVARIANTS:
- * - Recomputes planHash and reruns validation after any edit.
- * - Editing a plan invalidates previous approvals bound to the prior hash.
- * - Users cannot deselect mandatory security controls or turn a denied operation into an allowed one.
- */
-export function editExpertPlan(
-  currentPlan: ExpertPlanState,
-  edit: ExpertPlanEditRequest
-): ExpertPlanState {
+export function editExpertPlan(currentPlan: ExpertPlanState, edit: ExpertPlanEditRequest): ExpertPlanState {
   const validationErrors: string[] = [];
-
   if (edit.attemptOverrideDeniedActionIds && edit.attemptOverrideDeniedActionIds.length > 0) {
-    throw new Error(
-      `Security violation: Cannot turn a denied operation into an allowed one via UI settings: [${edit.attemptOverrideDeniedActionIds.join(', ')}]`
-    );
+    throw new Error(`Security violation: Cannot turn a denied operation into an allowed one via UI settings: [${edit.attemptOverrideDeniedActionIds.join(', ')}]`);
   }
-
   const updatedActions = currentPlan.actions.map((action) => {
     let selected = action.selected;
     if (edit.deselectActionIds?.includes(action.actionId)) {
       if (action.mandatorySecurityControl) {
-        throw new Error(
-          `Security violation: Cannot deselect mandatory security control action '${action.actionId}'.`
-        );
+        throw new Error(`Security violation: Cannot deselect mandatory security control action '${action.actionId}'.`);
       }
       selected = false;
     }
     if (edit.selectActionIds?.includes(action.actionId)) {
       if (!action.allowedByPolicy) {
-        throw new Error(
-          `Security violation: Cannot select policy-denied action '${action.actionId}'.`
-        );
+        throw new Error(`Security violation: Cannot select policy-denied action '${action.actionId}'.`);
       }
       selected = true;
     }
     const updatedParams = edit.parameterUpdates?.[action.actionId]
       ? { ...action.parameters, ...edit.parameterUpdates[action.actionId] }
       : { ...action.parameters };
-
-    return {
-      ...action,
-      selected,
-      parameters: updatedParams,
-    };
+    return { ...action, selected, parameters: updatedParams };
   });
 
   const nextTimeoutMs = edit.timeoutMs ?? currentPlan.timeoutMs;
-  if (nextTimeoutMs < 1000 || nextTimeoutMs > 300000) {
-    validationErrors.push('timeoutMs must be between 1000 and 300000 ms.');
-  }
-
+  if (nextTimeoutMs < 1000 || nextTimeoutMs > 300000) validationErrors.push('timeoutMs must be between 1000 and 300000 ms.');
   const nextConcurrency = edit.concurrencyLimit ?? currentPlan.concurrencyLimit;
-  if (nextConcurrency < 1 || nextConcurrency > 10) {
-    validationErrors.push('concurrencyLimit must be between 1 and 10.');
-  }
+  if (nextConcurrency < 1 || nextConcurrency > 10) validationErrors.push('concurrencyLimit must be between 1 and 10.');
 
   const draft = {
-    planId: currentPlan.planId,
-    target: currentPlan.target,
-    packId: currentPlan.packId,
-    packVersion: edit.packVersion ?? currentPlan.packVersion,
-    executionMode: edit.executionMode ?? currentPlan.executionMode,
-    timeoutMs: nextTimeoutMs,
-    concurrencyLimit: nextConcurrency,
-    maxRetries: edit.maxRetries ?? currentPlan.maxRetries,
+    planId: currentPlan.planId, target: currentPlan.target, packId: currentPlan.packId,
+    packVersion: edit.packVersion ?? currentPlan.packVersion, executionMode: edit.executionMode ?? currentPlan.executionMode,
+    timeoutMs: nextTimeoutMs, concurrencyLimit: nextConcurrency, maxRetries: edit.maxRetries ?? currentPlan.maxRetries,
     actions: updatedActions,
   };
-
   const newPlanHash = computeExpertPlanHash(draft);
   const hashChanged = newPlanHash !== currentPlan.planHash;
-
-  const nextApprovalStatus =
-    currentPlan.approvalStatus === 'APPROVED' && hashChanged
-      ? 'INVALIDATED_BY_EDIT'
-      : currentPlan.approvalStatus;
-
+  const nextApprovalStatus = currentPlan.approvalStatus === 'APPROVED' && hashChanged ? 'INVALIDATED_BY_EDIT' : currentPlan.approvalStatus;
   return {
-    ...draft,
-    planHash: newPlanHash,
-    approvalStatus: nextApprovalStatus,
+    ...draft, planHash: newPlanHash, approvalStatus: nextApprovalStatus,
     approvedPlanHash: nextApprovalStatus === 'APPROVED' ? currentPlan.approvedPlanHash : undefined,
-    validationPassed: validationErrors.length === 0,
-    validationErrors,
+    validationPassed: validationErrors.length === 0, validationErrors,
   };
 }
 
-/**
- * Evaluates button availability for a view given provider capability support and operation outcome state.
- */
 export function resolveGraphicalButtonStates(
   viewId: GraphicalViewId,
   provider: string,
   operationOutcomeUnknown = false
-): Array<{
-  buttonId: string;
-  label: string;
-  capabilityId: CanonicalCapabilityId;
-  enabled: boolean;
-  disabledReason?: string;
-}> {
+): Array<{ buttonId: string; label: string; capabilityId: CanonicalCapabilityId; enabled: boolean; disabledReason?: string }> {
   const view = GRAPHICAL_CONTROL_VIEWS[viewId];
   return view.buttons.map((btn) => {
     const desc = canonicalCapabilityRegistry.describe(btn.capabilityId);
     const providerSupported = desc ? desc.supportedProviders.includes(provider) : false;
-
     if (!providerSupported) {
-      return {
-        buttonId: btn.buttonId,
-        label: btn.label,
-        capabilityId: btn.capabilityId,
-        enabled: false,
-        disabledReason: `Provider '${provider}' does not support required capability '${btn.capabilityId}'.`,
-      };
+      return { buttonId: btn.buttonId, label: btn.label, capabilityId: btn.capabilityId, enabled: false, disabledReason: `Provider '${provider}' does not support required capability '${btn.capabilityId}'.` };
     }
-
     if (btn.disabledWhenOutcomeUnknown && operationOutcomeUnknown) {
-      return {
-        buttonId: btn.buttonId,
-        label: btn.label,
-        capabilityId: btn.capabilityId,
-        enabled: false,
-        disabledReason: `Operation outcome is unknown (OPERATION_OUTCOME_UNKNOWN). Re-inspect provider state via 'Verify Current State' before retrying or resuming.`,
-      };
+      return { buttonId: btn.buttonId, label: btn.label, capabilityId: btn.capabilityId, enabled: false, disabledReason: `Operation outcome is unknown (OPERATION_OUTCOME_UNKNOWN). Re-inspect provider state via 'Verify Current State' before retrying or resuming.` };
     }
-
-    return {
-      buttonId: btn.buttonId,
-      label: btn.label,
-      capabilityId: btn.capabilityId,
-      enabled: true,
-    };
+    return { buttonId: btn.buttonId, label: btn.label, capabilityId: btn.capabilityId, enabled: true };
   });
 }

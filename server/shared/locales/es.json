@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "Configurar, reconciliar políticas y desplegar la aplicación de forma autónoma",
     "cmd.provider": "Inspeccionar y gestionar los proveedores de nube y alojamiento de destino"
+  },
+  "placement": {
+    "prompt.select_region": "¿Dónde debe desplegar Ugondu esta carga de trabajo? Introduzca una ciudad, un país o un ID de región del proveedor—por ejemplo París, Francia, Nigeria, Sudáfrica o eu-west-3. Si no está seguro, elija Recomendar para mí.",
+    "error.selection_required": "Se requiere selección de región (REGION_SELECTION_REQUIRED): no se especificó ninguna región de despliegue. Proporcione una ciudad, un país o un ID de región (p. ej., --region Paris, --region South-Africa o --region eu-west-3).",
+    "error.ambiguous_location": "La ubicación introducida '{input}' coincide con varias regiones ({candidates}). Seleccione una ciudad o un ID de región específico.",
+    "error.unsupported_location": "La ubicación '{input}' no está disponible en el proveedor {provider}. Las ubicaciones admitidas incluyen: {examples}.",
+    "error.residency_conflict": "La región seleccionada '{region}' entra en conflicto con el requisito de residencia de datos '{residency}' (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "Región recomendada {region} ({displayName}) basada en {reason}. Se requiere confirmación antes del despliegue.",
+    "mode.explicit": "Usar mi ubicación especificada",
+    "mode.recommend": "Recomendarme una ubicación adecuada",
+    "mode.multi_region": "Planificar múltiples regiones"
   }
 }

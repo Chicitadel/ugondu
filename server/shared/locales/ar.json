@@ -1991,5 +1991,16 @@
   "palette": {
     "cmd.deploy": "تكوين السياسات وتسويتها ونشر التطبيق بشكل ذاتي",
     "cmd.provider": "فحص وإدارة مزودي السحابة والاستضافة المستهدفين"
+  },
+  "placement": {
+    "prompt.select_region": "أين يجب على Ugondu نشر عبء العمل هذا؟ أدخل مدينة أو دولة أو معرّف منطقة المزود—على سبيل المثال باريس أو فرنسا أو نيجيريا أو جنوب أفريقيا أو eu-west-3. إذا لم تكن متأكداً، اختر التوصية لي.",
+    "error.selection_required": "تحديد المنطقة مطلوب (REGION_SELECTION_REQUIRED): لم يتم تحديد منطقة نشر. يرجى تقديم مدينة أو دولة أو معرّف منطقة (مثل --region Paris أو --region South-Africa أو --region eu-west-3).",
+    "error.ambiguous_location": "يتطابق الموقع المدخل '{input}' مع عدة مناطق ({candidates}). يرجى تحديد مدينة معينة أو معرّف منطقة محدد.",
+    "error.unsupported_location": "الموقع '{input}' غير متاح لدى المزود {provider}. تشمل المواقع المدعومة: {examples}.",
+    "error.residency_conflict": "تتعارض المنطقة المحددة '{region}' مع متطلبات إقامة البيانات '{residency}' (CONFLICTS_WITH_POLICY).",
+    "recommendation.rationale": "المنطقة الموصى بها {region} ({displayName}) بناءً على {reason}. يلزم التأكيد قبل النشر.",
+    "mode.explicit": "استخدام موقعي المحدد",
+    "mode.recommend": "التوصية بموقع مناسب لي",
+    "mode.multi_region": "تخطيط مناطق متعددة"
   }
 }
