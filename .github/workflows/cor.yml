@@ -279,7 +279,7 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
           UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
           UGONDU_TRANSACTION_ID: ${{ github.run_id }}
-        run: npx ts-node -T scripts/ci/residual-scanner.ts
+        run: npx ts-node -T --project scripts/tsconfig.json scripts/ci/residual-scanner.ts
 
 
   cor-final-release-gate:
