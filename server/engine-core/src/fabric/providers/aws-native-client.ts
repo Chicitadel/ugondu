@@ -99,8 +99,12 @@ export class AwsNativeClient implements IAwsClient {
     private ecr: ECRClient;
     private cw: CloudWatchLogsClient;
     private iam: IAMClient;
+    private region: string;
+    private currentTransactionId?: string;
 
-    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }) {
+    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }, transactionId?: string) {
+        this.region = region;
+        this.currentTransactionId = transactionId || process.env.UGONDU_TRANSACTION_ID;
         const config = { region, ...(credentials ? { credentials } : {}) };
         this.ec2 = new EC2Client(config);
         this.rds = new RDSClient(config);
@@ -111,6 +115,14 @@ export class AwsNativeClient implements IAwsClient {
         this.cw = new CloudWatchLogsClient(config);
         this.iam = new IAMClient(config);
         Logger.info(`AwsNativeClient natively instantiated for region: ${region}`);
+    }
+
+    public setTransactionId(txId: string): void {
+        this.currentTransactionId = txId;
+    }
+
+    public getTransactionId(): string {
+        return this.currentTransactionId || process.env.UGONDU_TRANSACTION_ID || crypto.randomUUID();
     }
 
     public async resolveInstanceType(cpuCores: number, memoryMb: number): Promise<string> {
@@ -162,11 +174,11 @@ export class AwsNativeClient implements IAwsClient {
             TagSpecifications: [
                 {
                     ResourceType: 'instance',
-                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
+                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
                 },
                 {
                     ResourceType: 'volume',
-                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
+                    Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
                 }
             ]
         });
@@ -227,7 +239,7 @@ export class AwsNativeClient implements IAwsClient {
     public async createVpc(cidr: string, name: string): Promise<string> {
         const cmd = new CreateVpcCommand({ 
             CidrBlock: cidr,
-            TagSpecifications: [{ ResourceType: 'vpc', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
+            TagSpecifications: [{ ResourceType: 'vpc', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }] }]
         });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Vpc || !res.Vpc.VpcId) throw new Error(__t('aws_vpc_creation_failed'));
@@ -277,7 +289,7 @@ export class AwsNativeClient implements IAwsClient {
             VpcId: vpcId, 
             CidrBlock: cidr, 
             AvailabilityZone: az,
-            TagSpecifications: [{ ResourceType: 'subnet', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
+            TagSpecifications: [{ ResourceType: 'subnet', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }] }]
         });
         const res = await this.ec2.send(cmd) as any;
         if (!res.Subnet || !res.Subnet.SubnetId) throw new Error(__t('aws_subnet_creation_failed'));
@@ -289,7 +301,7 @@ export class AwsNativeClient implements IAwsClient {
             VpcId: vpcId, 
             GroupName: name, 
             Description: `Ugondu Managed SG ${name}`,
-            TagSpecifications: [{ ResourceType: 'security-group', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
+            TagSpecifications: [{ ResourceType: 'security-group', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }] }]
         });
         const res = await this.ec2.send(cmd) as any;
         if (!res.GroupId) throw new Error(__t('aws_security_group_creation_fa'));
@@ -313,7 +325,7 @@ export class AwsNativeClient implements IAwsClient {
             DBSubnetGroupName: name,
             DBSubnetGroupDescription: __t('ugondu_managed_db_subnet_group'),
             SubnetIds: subnetIds,
-            Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
+            Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
         });
         const res = await this.rds.send(cmd);
         if (!res.DBSubnetGroup || !res.DBSubnetGroup.DBSubnetGroupName) throw new Error(__t('aws_db_subnet_group_creation_f'));
@@ -342,7 +354,7 @@ export class AwsNativeClient implements IAwsClient {
             MasterUserPassword: password,
             VpcSecurityGroupIds: securityGroupId ? [securityGroupId] : undefined,
             DBSubnetGroupName: dbSubnetGroupName,
-            Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
+            Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
         });
 
         const res = await this.rds.send(cmd);
@@ -387,8 +399,23 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async createS3Bucket(name: string, isPublic: boolean): Promise<{ id: string; endpoint: string }> {
-        const cmd = new CreateBucketCommand({ Bucket: name });
+        const { PutBucketTaggingCommand } = require('@aws-sdk/client-s3');
+        const cmd = new CreateBucketCommand({
+            Bucket: name,
+            ...(this.region && this.region !== 'us-east-1'
+                ? { CreateBucketConfiguration: { LocationConstraint: this.region as any } }
+                : {})
+        });
         await this.s3.send(cmd);
+        await this.s3.send(new PutBucketTaggingCommand({
+            Bucket: name,
+            Tagging: {
+                TagSet: [
+                    { Key: 'UgonduCOR', Value: 'true' },
+                    { Key: 'UgonduTransactionId', Value: this.getTransactionId() }
+                ]
+            }
+        }));
         return { id: name, endpoint: `${name}.s3.amazonaws.com` };
     }
 
@@ -434,7 +461,7 @@ export class AwsNativeClient implements IAwsClient {
             const cmd = new CreateDBSnapshotCommand({ 
                 DBInstanceIdentifier: id, 
                 DBSnapshotIdentifier: snapId,
-                Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }]
+                Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }]
             });
             await this.rds.send(cmd);
             return snapId;
@@ -442,7 +469,7 @@ export class AwsNativeClient implements IAwsClient {
             const { CreateSnapshotCommand } = require('@aws-sdk/client-ec2');
             const cmd = new CreateSnapshotCommand({ 
                 VolumeId: id,
-                TagSpecifications: [{ ResourceType: 'snapshot', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }]
+                TagSpecifications: [{ ResourceType: 'snapshot', Tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }] }]
             });
             const res = await this.ec2.send(cmd) as any;
             if (!res.SnapshotId) throw new Error(__t('ebs_snapshot_creation_failed'));
@@ -458,7 +485,7 @@ export class AwsNativeClient implements IAwsClient {
         throw new Error(`Unsupported AWS snapshot resourceType: ${type}`);
     }
     public async createEcsCluster(name: string): Promise<string> {
-        const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name, tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: crypto.randomUUID() }] }));
+        const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name, tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: this.getTransactionId() }] }));
         if (!res.cluster || !res.cluster.clusterName) throw new Error(__t('ecs_cluster_creation_failed'));
         return res.cluster.clusterName;
     }
@@ -494,7 +521,7 @@ export class AwsNativeClient implements IAwsClient {
     public async createEcsService(clusterName: string, serviceName: string, taskDefinitionArn: string, desiredCount: number, subnets: string[], securityGroups: string[], targetGroupArn?: string): Promise<string> {
         const cmd = new CreateServiceCommand({
             cluster: clusterName,
-            tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: crypto.randomUUID() }],
+            tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: this.getTransactionId() }],
             serviceName: serviceName,
             taskDefinition: taskDefinitionArn,
             desiredCount,
@@ -518,13 +545,13 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async createEcrRepository(name: string): Promise<string> {
-        const res = await this.ecr.send(new CreateRepositoryCommand({ repositoryName: name, tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: crypto.randomUUID() }] }));
+        const res = await this.ecr.send(new CreateRepositoryCommand({ repositoryName: name, tags: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: this.getTransactionId() }] }));
         if (!res.repository || !res.repository.repositoryUri) throw new Error(__t('ecr_repository_creation_failed'));
         return res.repository.repositoryUri;
     }
 
     public async createLogGroup(name: string): Promise<string> {
-        await this.cw.send(new CreateLogGroupCommand({ logGroupName: name, tags: { 'UgonduCOR': 'true', 'UgonduTransactionId': crypto.randomUUID() } }));
+        await this.cw.send(new CreateLogGroupCommand({ logGroupName: name, tags: { 'UgonduCOR': 'true', 'UgonduTransactionId': this.getTransactionId() } }));
         return name;
     }
 

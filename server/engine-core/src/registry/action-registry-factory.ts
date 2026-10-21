@@ -246,7 +246,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'aws',
     'CREATE_RDS_SUBNET_GROUP',
     async (node: DagNode) => {
-      const name = `ugondu-rds-subnet-group-${Date.now()}`;
+      const name = node.output?.dbSubnetGroupName || `ugondu-rds-subnet-group-${Date.now()}`;
       const sgn = await aws.createDBSubnetGroup(name, node.output!.subnetIds);
       return { dbSubnetGroupName: sgn };
     },
@@ -266,7 +266,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
       const credentialRef = process.env.UGONDU_CERT_RDS_CREDENTIAL_REF;
       if (!credentialRef) throw new Error('UGONDU_CERT_RDS_CREDENTIAL_REF is required');
 
-      const rdsId = `ugondu-rds-${Date.now()}`;
+      const rdsId = node.output?.rdsId || `ugondu-rds-${Date.now()}`;
       const res = await aws.createRds(
         rdsId,
         'postgres',
@@ -292,7 +292,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'CREATE_RDS_SNAPSHOT',
     async (node: DagNode) => {
       const snapId = await aws.createSnapshot({ resourceType: 'RDS_INSTANCE', resourceId: node.output!.rdsId });
-      return { rdsSnapshotId: snapId };
+      return { rdsSnapshotId: node.output?.rdsSnapshotId || snapId };
     },
     async (node: DagNode) => {
       if (node.output?.rdsSnapshotId) {
@@ -307,7 +307,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
     'aws',
     'CREATE_S3_BUCKET',
     async (node: DagNode) => {
-      const bucketName = `ugondu-bucket-${Date.now()}`.toLowerCase();
+      const bucketName = node.output?.bucketName || `ugondu-bucket-${Date.now()}`.toLowerCase();
       await aws.createS3Bucket(bucketName, false);
       return { bucketName };
     },
