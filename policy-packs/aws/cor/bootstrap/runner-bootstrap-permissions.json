@@ -2,6 +2,32 @@
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "AssumeCanonicalExecutionRoleWithRequiredSessionTags",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/UgonduTransactionId": "false"
+        },
+        "StringNotEquals": {
+          "aws:RequestTag/UgonduTransactionId": ""
+        },
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduTransactionId",
+            "UgonduCOR"
+          ]
+        }
+      }
+    },
+    {
       "Sid": "InspectCanonicalExecutionRoleAttachments",
       "Effect": "Allow",
       "Action": [
