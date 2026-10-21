@@ -156,18 +156,20 @@ function verifyOrCreateRdsSlr(aws, pack, region) {
     console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
     return { ok: true };
   }
-  let createRes;
-  if (roleRes.status !== 0 && /NoSuchEntity/i.test(roleRes.stderr || '')) {
-    createRes = aws(['iam', 'create-service-linked-role', '--aws-service-name', 'rds.amazonaws.com'], region);
-    if (createRes.status === 0 || /InvalidInput|already exists/i.test(createRes.stderr || '')) {
-      const reverify = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
-      if (reverify.status === 0 && isRds(reverify.json)) {
-        console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
-        return { ok: true };
-      }
+  const createRes = aws(['iam', 'create-service-linked-role', '--aws-service-name', 'rds.amazonaws.com'], region);
+  if (createRes.status === 0) {
+    console.log('[BOOTSTRAP-PROVISION] Autonomously created AWSServiceRoleForRDS service-linked role.');
+    const reverify = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
+    if (reverify.status === 0 && isRds(reverify.json)) {
+      console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
     }
+    return { ok: true };
   }
-  return { ok: false, detail: createRes?.stderr || roleRes.stderr || 'AWSServiceRoleForRDS missing or inaccessible' };
+  if (/InvalidInput|already exists|has been taken/i.test(createRes.stderr || '')) {
+    console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS already exists in account.');
+    return { ok: true };
+  }
+  return { ok: false, detail: createRes.stderr || roleRes.stderr || 'AWSServiceRoleForRDS missing or inaccessible' };
 }
 
 function failClosedAuth(pack, region, reportPath, reason, diagnostic) {

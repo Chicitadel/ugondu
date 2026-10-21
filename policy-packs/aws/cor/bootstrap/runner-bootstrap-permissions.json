@@ -115,11 +115,18 @@
       "Resource": "arn:aws:iam::971671216490:role/UgonduCORRunner"
     },
     {
+      "Sid": "InspectRDSServiceLinkedRole",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetRole"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+    },
+    {
       "Sid": "CreateRDSServiceLinkedRoleIfMissing",
       "Effect": "Allow",
       "Action": [
-        "iam:CreateServiceLinkedRole",
-        "iam:GetRole"
+        "iam:CreateServiceLinkedRole"
       ],
       "Resource": "arn:aws:iam::971671216490:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS",
       "Condition": {
