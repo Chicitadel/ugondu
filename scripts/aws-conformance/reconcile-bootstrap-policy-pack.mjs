@@ -246,6 +246,18 @@ export function runBootstrapProvisionPhase(options = {}) {
 
   for (const pol of pack.policies) {
     let targetCompactJson = pol.compactJson;
+    if (!options.awsRunner && pol.logicalId === 'ec2-creation') {
+      const parsedDoc = JSON.parse(pol.compactJson);
+      parsedDoc.Statement.push({
+        Sid: 'AllowInstanceTagRemediation', Effect: 'Allow', Action: 'ec2:CreateTags',
+        Resource: `arn:aws:ec2:${region}:${pack.target.accountId}:instance/*`,
+        Condition: {
+          StringEquals: { 'aws:ResourceTag/UgonduCOR': 'true', 'aws:ResourceTag/UgonduTransactionId': `\${aws:PrincipalTag/UgonduTransactionId}`, 'aws:RequestedRegion': region },
+          Null: { 'aws:PrincipalTag/UgonduTransactionId': 'false' }
+        }
+      });
+      targetCompactJson = JSON.stringify(parsedDoc);
+    }
     if (!options.awsRunner && pol.logicalId === 'rds-s3') {
       const parsedDoc = JSON.parse(pol.compactJson);
       for (const st of parsedDoc.Statement || []) {
