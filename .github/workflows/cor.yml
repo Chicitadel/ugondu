@@ -91,6 +91,7 @@ jobs:
           node tests/cor-remediation.test.js
           node tests/qualification/evidence-pipeline-adversarial.test.js
           node tests/qualification/shared-execution-and-mode-parity.test.js
+          node tests/qualification/cor-workflow-gates.test.js
 
       - name: Verify externally pinned AWS policy-pack signature
         env:
@@ -189,28 +190,47 @@ jobs:
           EXECUTION_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME_EXECUTION }}
           TX_ID: ${{ github.run_id }}
         run: |
+          set -euo pipefail
+          # Tagged assumption is mandatory (UG-COR-AWS-TAGGED-SESSION). There is
+          # intentionally no untagged fallback: any failure aborts before mutation.
+          if [ -z "${EXECUTION_ROLE_ARN}" ]; then
+            echo "::error::AWS_EXECUTION_ROLE_MISSING: execution role is not configured."
+            exit 1
+          fi
           CREDS=$(aws sts assume-role \
             --role-arn "$EXECUTION_ROLE_ARN" \
             --role-session-name "$TX_ID" \
             --tags "Key=UgonduTransactionId,Value=$TX_ID" "Key=UgonduCOR,Value=true" \
             --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
-            --output text 2>/dev/null || \
-          aws sts assume-role \
-            --role-arn "$EXECUTION_ROLE_ARN" \
-            --role-session-name "$TX_ID" \
-            --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
             --output text)
-          
-          # Read whitespace-delimited fields
-          read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< "$CREDS"
-          echo "::add-mask::$AWS_ACCESS_KEY_ID"
-          echo "::add-mask::$AWS_SECRET_ACCESS_KEY"
-          echo "::add-mask::$AWS_SESSION_TOKEN"
-          
-          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-          echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN" >> $GITHUB_ENV
-          echo "Successfully hopped into Tagged Execution Session."
+
+          read -r AK SK ST <<< "$CREDS"
+          if [ -z "${AK}" ] || [ -z "${SK}" ] || [ -z "${ST}" ]; then
+            echo "::error::AWS_TAGGED_SESSION_EMPTY: tagged assume-role returned no credentials."
+            exit 1
+          fi
+          echo "::add-mask::$AK"
+          echo "::add-mask::$SK"
+          echo "::add-mask::$ST"
+
+          # Verify the resulting identity is the tagged session for this run
+          # before any credential is exported to later (mutating) steps.
+          ARN=$(AWS_ACCESS_KEY_ID="$AK" AWS_SECRET_ACCESS_KEY="$SK" AWS_SESSION_TOKEN="$ST" \
+            aws sts get-caller-identity --query Arn --output text)
+          case "$ARN" in
+            *":assumed-role/"*"/${TX_ID}") ;;
+            *)
+              echo "::error::AWS_SESSION_IDENTITY_MISMATCH: caller identity is not the tagged session for run ${TX_ID}."
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "AWS_ACCESS_KEY_ID=$AK"
+            echo "AWS_SECRET_ACCESS_KEY=$SK"
+            echo "AWS_SESSION_TOKEN=$ST"
+          } >> "$GITHUB_ENV"
+          echo "Tagged execution session established and verified."
       
       - name: Run fail-closed AWS read-only conformance probes
         env:
@@ -246,3 +266,41 @@ jobs:
           UGONDU_TRANSACTION_ID: ${{ github.run_id }}
         run: npx ts-node -T scripts/ci/residual-scanner.ts
 
+
+  cor-final-release-gate:
+    name: COR Final Release Gate
+    runs-on: ubuntu-latest
+    # Authoritative release decision. Must run even when a child gate fails,
+    # fails or is skipped, so that a green companion job can never stand in
+    # for a failed mandatory qualification.
+    if: always()
+    needs:
+      - cor
+      - aws-physical-gate
+    permissions:
+      contents: read
+    steps:
+      - name: Require every mandatory gate to have succeeded
+        shell: bash
+        env:
+          COR_RESULT: ${{ needs.cor.result }}
+          AWS_RESULT: ${{ needs.aws-physical-gate.result }}
+          EVENT_NAME: ${{ github.event_name }}
+          CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          echo "candidate=${CANDIDATE_SHA} event=${EVENT_NAME}"
+          echo "cor=${COR_RESULT} aws-physical-gate=${AWS_RESULT}"
+          fail=0
+          for gate in "cor:${COR_RESULT}" "aws-physical-gate:${AWS_RESULT}"; do
+            name="${gate%%:*}"; result="${gate#*:}"
+            if [ "${result}" != "success" ]; then
+              echo "::error::COR_GATE_NOT_SUCCESS: mandatory gate '${name}' result is '${result}' (failure, skipped, cancelled and missing all block certification)."
+              fail=1
+            fi
+          done
+          if [ "${fail}" -ne 0 ]; then
+            echo "::error::COR NOT CERTIFIED for ${CANDIDATE_SHA}."
+            exit 1
+          fi
+          echo "All mandatory COR gates succeeded for ${CANDIDATE_SHA}."
