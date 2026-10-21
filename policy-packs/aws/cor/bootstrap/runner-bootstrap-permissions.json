@@ -1,0 +1,92 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InspectCanonicalExecutionRoleAttachments",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListAttachedRolePolicies"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole"
+    },
+    {
+      "Sid": "AttachOnlyCanonicalCORV9Policies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+      "Condition": {
+        "ArnEquals": {
+          "iam:PolicyARN": [
+            "arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery",
+            "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Creation",
+            "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Cleanup",
+            "arn:aws:iam::971671216490:policy/UgonduCOR-V9-RDS-S3",
+            "arn:aws:iam::971671216490:policy/UgonduCOR-V9-ECR-ECS"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ReadCanonicalCORV9PolicyVersions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions"
+      ],
+      "Resource": [
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Creation",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Cleanup",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-RDS-S3",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-ECR-ECS"
+      ]
+    },
+    {
+      "Sid": "RepairCanonicalCORV9PolicyVersions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion"
+      ],
+      "Resource": [
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Creation",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Cleanup",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-RDS-S3",
+        "arn:aws:iam::971671216490:policy/UgonduCOR-V9-ECR-ECS"
+      ]
+    },
+    {
+      "Sid": "CreateOnlyCanonicalTaggedCORV9Policies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicy"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PolicyName": [
+            "UgonduCOR-V9-Discovery",
+            "UgonduCOR-V9-EC2-Creation",
+            "UgonduCOR-V9-EC2-Cleanup",
+            "UgonduCOR-V9-RDS-S3",
+            "UgonduCOR-V9-ECR-ECS"
+          ],
+          "aws:RequestTag/UgonduCOR": "true"
+        }
+      }
+    },
+    {
+      "Sid": "InspectRunnerInlinePolicyForDelegation",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListRolePolicies",
+        "iam:GetRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORRunner"
+    }
+  ]
+}
