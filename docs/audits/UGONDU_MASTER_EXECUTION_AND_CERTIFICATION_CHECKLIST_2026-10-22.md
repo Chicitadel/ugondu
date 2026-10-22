@@ -15,7 +15,7 @@ This checklist is the execution ledger. A task is not complete because code exis
 
 | Gate | Status | Current evidence / limitation |
 |---|---|---|
-| AWS physical qualification | 🟢 Candidate-specific | Run `39775766685` reports successful AWS physical qualification and zero-residual cleanup for candidate `a94c8f1c`; not transferable to later SHAs. |
+| AWS physical qualification | 🟡 Unreconciled | Supplied execution log reports success for candidate `a94c8f1c`, but live GitHub job query still returned job `119814175595` as `in_progress` with Fargate and residual-cleanup steps pending. Resolve before green. |
 | Cross-platform thin-client builds | 🟢 Tested combinations only | Run `39779883274` reports Linux amd64/arm64, macOS amd64/arm64 and Windows amd64 build jobs passed. Build success alone is not native end-to-end certification. |
 | Microservice integration tests | 🟢 Tested revision only | Run `39779883274` reports integration tests and Docker image validation passed. |
 | Release publishing | ⚪ Not proven by latest inspected run | Release-publish job was skipped. |
