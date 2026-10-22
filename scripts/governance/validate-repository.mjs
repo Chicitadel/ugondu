@@ -28,7 +28,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -351,6 +351,28 @@ function validateLocalePacks(violations) {
   }
 }
 
+function validateCertificationEvidenceConsistency(violations) {
+  const auditsDir = path.join(ROOT, 'docs', 'audits');
+  if (!fs.existsSync(auditsDir)) return;
+
+  const auditFiles = fs.readdirSync(auditsDir).filter((f) => f.endsWith('.md'));
+  for (const file of auditFiles) {
+    const fullPath = path.join(auditsDir, file);
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const commitMatches = content.matchAll(/(?:Commit|commit\/)([a-f0-9]{8,40})/gi);
+    for (const match of commitMatches) {
+      const sha = match[1];
+      try {
+        execSync(`git rev-parse --verify "${sha}"`, { cwd: ROOT, stdio: 'pipe' });
+      } catch {
+        violations.push(
+          `Certification document docs/audits/${file} references unknown or unverified commit SHA: ${sha}`
+        );
+      }
+    }
+  }
+}
+
 export function runRepositoryValidation() {
   const violations = [];
   const trackedFiles = listTrackedFiles();
@@ -361,6 +383,7 @@ export function runRepositoryValidation() {
   validateSemanticAntiStubs(trackedFiles, violations);
   validateCreatedOrModifiedFileLimits(violations);
   validateLocalePacks(violations);
+  validateCertificationEvidenceConsistency(violations);
 
   return {
     passed: violations.length === 0,
