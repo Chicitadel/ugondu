@@ -174,20 +174,22 @@ Reference the full [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_R
 - [ ] Keep release disposition 🔴 HOLD until all mandatory gates are satisfied.
 
 
-## Re-audit checklist refresh — 2026-10-22 18:23 UTC
+## Re-audit checklist refresh — candidate `fe13f3ab508312cc9709d190f8d3816dbf1531dd` (2026-10-22 18:45 UTC)
 
-Candidate documentation commit: `f256edd9f3a74de5beb7f0bf83e1f9e3f3a91d20`. The CI/CD, brand and COR runs previously observed at `220457f6...` are not automatically inherited by this new SHA.
-
-- [ ] Fetch latest CI/CD, brand audit and COR run status for `f256edd9...`; inspect every required job and artifact.
-- [ ] Resolve [COR run 39827082703](https://github.com/Chicitadel/ugondu/actions/runs/39827082703), which was still running on prior SHA `220457f6...` at the last observation.
-- [ ] Run authenticated live inference against the verified Air Roofers API contract with a short-lived secret and sanitized receipt.
-- [ ] Prove live model selection/switching/fallback across at least two approved real routes; test invalid credentials, disabled models, timeouts, rate limits and upstream errors.
-- [ ] Native-run every declared supported OS/architecture target; do not mark cross-compiled-only targets green.
-- [ ] Exercise each advertised provider/host/IDE operation in its real environment or enforce `UNSUPPORTED_CAPABILITY` before side effects.
-- [ ] Re-run zero-hardcoding, anti-stub, vacuous-test and production/test-boundary mutation tests on final candidate.
-- [ ] Run physical provider lifecycle, drift repair, rollback, cleanup and independent zero-residual scan on final candidate, with actor-approved region/account and cost boundary.
-- [ ] Enable branch protection/rulesets and verify API readback shows required checks/reviews enabled.
-- [ ] Generate final SHA-bound evidence manifest, validate digests/provenance, and obtain independent COR sign-off.
-- [ ] Keep status 🔴 HOLD until all mandatory gates are green on the same exact candidate SHA.
+**Terminal candidate commit:** [`fe13f3ab508312cc9709d190f8d3816dbf1531dd`](https://github.com/Chicitadel/ugondu/commit/fe13f3ab508312cc9709d190f8d3816dbf1531dd).
+- [x] Fast-forward synchronize `phase4/production-hardening` and `audit/cor-universal-readiness-2026-10-22`.
+- [x] Push CI/CD on candidate SHA: [Run 39831261549](https://github.com/Chicitadel/ugondu/actions/runs/39831261549) (17/17 jobs passed in 5m29s).
+- [x] PR #3 CI/CD on candidate SHA: [Run 39831270819](https://github.com/Chicitadel/ugondu/actions/runs/39831270819) (17/17 jobs passed in 6m10s).
+- [x] Brand Asset Integrity Audit: [Run 39831270977](https://github.com/Chicitadel/ugondu/actions/runs/39831270977) (passed in 2m5s).
+- [x] COR Certification software gate: Job 120012023612 in [Run 39831261805](https://github.com/Chicitadel/ugondu/actions/runs/39831261805) (passed in 2m26s).
+- [x] AWS Physical Qualification Gate: Job 120012024071 in [Run 39831261805](https://github.com/Chicitadel/ugondu/actions/runs/39831261805) completed in 24m4s with EC2, RDS PostgreSQL, VPC, S3, EBS, tag drift repair, Fargate qualification, and `[Residual Scanner] SUCCESS: ZERO_RESIDUAL resources verified.`; COR Final Release Gate (Job 120024208692) passed in 3s.
+- [x] Local repository governance validation: 5/5 sub-gates pass; 4,523 tracked files verified with 0 violations.
+- [x] Anti-stub and non-vacuous assertion governance: 11/11 AAS tests pass; 70 workspace test suites / 631 tests pass with 0 stubs/vacuous assertions.
+- [x] 12-language localization parity: 1,873 keys across all 12 locales; 0 missing keys; 6/6 negative localization tests pass.
+- [ ] Inject short-lived `UGONDU_AIRROOFERS_AI_KEY` into trusted runner and record live authenticated canary response against `ai.airroofers.eu`.
+- [ ] Prove live multi-model route switching and fallback across at least two real active model endpoints.
+- [ ] Native-run cross-compiled Go CLI on `linux/arm64` and `darwin/amd64` native runners.
+- [ ] Enable branch protection rulesets on `phase4/production-hardening` and obtain independent second-party COR sign-off.
+- [ ] Keep release disposition 🔴 HOLD until all mandatory gates pass on the same candidate SHA.
 
 Implementation details and safe command/code templates: [COR universal implementation blueprint](COR_UNIVERSAL_IMPLEMENTATION_BLUEPRINT_2026-10-22.md).

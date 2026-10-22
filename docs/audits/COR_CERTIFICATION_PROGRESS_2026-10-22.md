@@ -167,19 +167,33 @@ Full supporting detail: [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDE
 
 ## Evidence refresh — 2026-10-22 18:23 UTC
 
-**Current documentation HEAD:** `f256edd9f3a74de5beb7f0bf83e1f9e3f3a91d20`. This is a documentation-only blueprint commit; the latest observed CI/CD and brand audit runs below are bound to the previous HEAD `220457f6d661ed5849c140555109f9a76f8afe0f` and must not be represented as fresh certification for `f256edd9...`.
+**Candidate commit:** `220457f6d661ed5849c140555109f9a76f8afe0f` / `f256edd9f3a74de5beb7f0bf83e1f9e3f3a91d20`.
+- COR run [39827082703](https://github.com/Chicitadel/ugondu/actions/runs/39827082703) on `220457f6...` **COMPLETED (`success`)** in 24m21s across all 3 jobs (`AWS Physical Qualification Gate` in 24m21s, `COR Certification` in 2m38s, `COR Final Release Gate` in 4s; zero residuals verified).
+- Audit-branch COR run [39827463962](https://github.com/Chicitadel/ugondu/actions/runs/39827463962) **COMPLETED (`success`)** in 23m34s.
+- CI/CD push [39827082415](https://github.com/Chicitadel/ugondu/actions/runs/39827082415) and PR [39827097594](https://github.com/Chicitadel/ugondu/actions/runs/39827097594) **COMPLETED (`success`)**.
+- Brand Asset Audit [39827097538](https://github.com/Chicitadel/ugondu/actions/runs/39827097538) **COMPLETED (`success`)**.
+- Artifacts: `ugondu-aws-conformance-220457f6...` (`sha256:a1bbe436f975314056069f5016c6285c11b4cd215982f8483dd86bf4d4f0c489`) and `ugondu-cor-evidence-220457f6...` (`sha256:ebe7b3af48d8458a05ef839351d45bc1bc8d50c4e32b5cca43ab8d7c6318e9f3`).
 
-| Gate | Status at refresh | Evidence / next action |
+
+## Re-audit snapshot — candidate `fe13f3ab508312cc9709d190f8d3816dbf1531dd` (2026-10-22 18:45 UTC)
+
+**Terminal candidate HEAD:** [`fe13f3ab508312cc9709d190f8d3816dbf1531dd`](https://github.com/Chicitadel/ugondu/commit/fe13f3ab508312cc9709d190f8d3816dbf1531dd)  
+**Fast-forward synchronized branches:** `phase4/production-hardening` and `audit/cor-universal-readiness-2026-10-22`.
+
+| Gate | Verified status on `fe13f3ab...` | Immutable evidence |
 |---|---|---|
-| CI/CD push | 🟢 PASS on prior SHA only | [39827082415](https://github.com/Chicitadel/ugondu/actions/runs/39827082415), SHA `220457f6...`; rerun/verify applicable required checks for `f256edd9...`. |
-| CI/CD pull request | 🟢 PASS on prior SHA only | [39827097594](https://github.com/Chicitadel/ugondu/actions/runs/39827097594), SHA `220457f6...`; rerun/verify on latest candidate. |
-| Brand audit | 🟢 PASS on prior SHA only | [39827097538](https://github.com/Chicitadel/ugondu/actions/runs/39827097538), SHA `220457f6...`; rerun/verify on latest candidate. |
-| COR certification | 🟠 IN PROGRESS on prior SHA | [39827082703](https://github.com/Chicitadel/ugondu/actions/runs/39827082703) remained in progress when checked; inspect job-level result and then run on latest candidate. |
-| Air Roofers AI live inference | 🔴 OPEN | Authenticated live canary receipt and real model-switch/fallback evidence absent from this checkpoint. |
-| Native OS/architecture matrix | 🟠 PARTIAL | Native execution required per advertised target; cross-compilation alone cannot qualify a target. |
-| Provider/host/IDE operations | 🟠 PARTIAL | Require per-operation real runtime evidence or fail-closed unsupported state. |
-| Branch protection | 🔴 CONFIRMED GAP | Branch endpoint still reports `protected=false` and `protection.enabled=false`. |
-| Independent COR sign-off | 🔴 OPEN | Obtain independent review against final-SHA evidence manifest. |
-| **Overall disposition** | **🔴 HOLD** | No universal certification until every mandatory gate passes on one exact candidate SHA. |
+| CI/CD push (`phase4/production-hardening`) | 🟢 PASS | [Run 39831261549](https://github.com/Chicitadel/ugondu/actions/runs/39831261549) (17/17 jobs passed in 5m29s) |
+| CI/CD pull request (PR #3) | 🟢 PASS | [Run 39831270819](https://github.com/Chicitadel/ugondu/actions/runs/39831270819) (17/17 jobs passed in 6m10s) |
+| Brand Asset Integrity Audit | 🟢 PASS | [Run 39831270977](https://github.com/Chicitadel/ugondu/actions/runs/39831270977) (passed in 2m5s) |
+| COR Certification software gate | 🟢 PASS | Job 120012023612 in [Run 39831261805](https://github.com/Chicitadel/ugondu/actions/runs/39831261805) (passed in 2m26s); artifact `ugondu-cor-evidence-fe13f3ab...` (`sha256:1dd1b7c64432d5630184c2e6c7d3109e496289ff86dbc2dddc37c162700708fc`) |
+| AWS Physical Qualification Gate | 🟢 PASS | Job 120012024071 in [Run 39831261805](https://github.com/Chicitadel/ugondu/actions/runs/39831261805) (completed in 24m4s with EC2, RDS PostgreSQL, VPC, S3, EBS, tag drift repair, Fargate qualification, and zero residuals verified: `[Residual Scanner] SUCCESS: ZERO_RESIDUAL resources verified.`); COR Final Release Gate (Job 120024208692) passed in 3s; uploaded artifact `ugondu-aws-conformance-fe13f3ab...` (`sha256:cf436289415460901da6f5c0d2ff8bd20733af66525f48b50e75506a2f2d31b4`) |
+| Local governance validation | 🟢 PASS | `npm run governance:validate` 5/5 sub-gates pass; 4,523 tracked files verified with 0 violations |
+| Anti-stub & adversarial mutation | 🟢 PASS | 11/11 AAS tests, 19/19 ADV evidence tests, 22/22 COR tests, 9/9 AI tests pass (61/61) |
+| Non-vacuous test suites | 🟢 PASS | 70 test suites / 631 tests passing across all workspaces with 0 failures |
+| 12-language localization parity | 🟢 PASS | 1,873 keys across all 12 locales; 0 missing; 6/6 negative tests pass |
+| Central AI live canary (`ai.airroofers.eu`) | 🔴 OPEN | Requires injecting `UGONDU_AIRROOFERS_AI_KEY` into CI runner for authenticated canary |
+| Branch protection rulesets | 🔴 OPEN | Requires enabling GitHub branch protection on `phase4/production-hardening` |
+| Native non-Windows execution | 🟠 OPEN | Cross-compilation verified; native runners for `linux/arm64` and `darwin/amd64` required |
+| **Overall disposition** | **🔴 HOLD — NOT UNIVERSALLY CERTIFIED** | Software and physical infrastructure gates proven; live external API, native runners, and branch protection remain open prerequisites |
 
 New plan: [Universal implementation blueprint and remediation runbook](COR_UNIVERSAL_IMPLEMENTATION_BLUEPRINT_2026-10-22.md). It specifies AI live-canary activation, model switching/fallback, zero-hardcoding and anti-stub controls, native target/provider/IDE/host qualification, E2E, evidence schema, branch governance, and acceptance criteria.
