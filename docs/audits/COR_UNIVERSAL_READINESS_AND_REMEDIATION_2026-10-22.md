@@ -473,3 +473,31 @@ The repository-local remediation commit has now passed the configured CI/CD work
 - **Overall:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**.
 
 Do not infer that a successful workflow proves every possible platform/host/IDE combination. CI build matrices, source adapters, mocked unit tests and registry entries are supporting evidence only; they are not substitutes for the corresponding real execution.
+
+
+## Latest re-audit findings — candidate `096668776b65d4fd28135dd08efc38aac3116cf3`
+
+### Closed or materially improved
+
+- The four previously identified fabric specs (`provisioning-preflight.spec.ts`, `provisioning-rollback.spec.ts`, `provisioning-evidence.spec.ts`, `provisioning-engine.spec.ts`) no longer contain the exact vacuous assertion `expect(true).toBe(true)` at this candidate. They now import and exercise provisioning/preflight/rollback/evidence behavior with test fixture cloud adapters.
+- The target adapter contract now includes fail-closed unsupported-target behavior and a versioned `config/qualification/target-matrix.json`.
+- The workflow’s software COR job passed on this SHA. See [production branch COR run 39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890) and [audit branch COR run 39821659037](https://github.com/Chicitadel/ugondu/actions/runs/39821659037).
+- Public AI health endpoint reachability was reported as HTTP 200, and unauthenticated model-catalog access as HTTP 401. This confirms reachability and an auth boundary only; it does not confirm authenticated inference.
+
+### Remaining findings / risk controls
+
+1. **Vacuous-test closure must be repository-wide, not a four-file spot check.** The new validator and adversarial mutation test must pass in the full candidate workflow. Scan every test language and assertion style for always-true assertions, empty tests, unreachable assertions, skipped tests, and tests that only assert symbol/file presence.
+2. **Fixtures in tests are not production stubs, but their boundary must be proven.** Tests may use deterministic fake adapters; production entrypoints must resolve real adapters and must never silently substitute fixture transports. E2E certification must identify the real execution environment.
+3. **Target-matrix truthfulness is a release gate.** Source currently declares Windows/amd64, Linux/amd64, and macOS/arm64 as native-tested; Linux/arm64 and macOS/amd64 as cross-compiled-only. Reconcile these fields with actual native runner evidence. Do not allow a declarative boolean to self-certify a target.
+4. **IDE/host breadth is not universal merely because a registry entry exists.** Each advertised IDE/host/provider operation needs runtime behavior evidence. Unknown or untested cells must return `UNSUPPORTED_CAPABILITY` with no silent fallback.
+5. **AI activation is not yet proven.** A health 200 and catalog 401 are not a successful authenticated model invocation. Use short-lived secrets, real endpoint transport, non-sensitive canary input, real response provenance and redacted evidence. Test real multi-model switching and fallback.
+6. **Physical AWS status remains unresolved.** On the latest observation, both branch COR runs had passed the software job while the AWS physical job remained in the physical certification step; Fargate and residual cleanup were still pending. Recheck live state before retrying to avoid duplicate resource creation.
+
+### Candidate workflow evidence
+
+- Production branch CI/CD: [39821647584](https://github.com/Chicitadel/ugondu/actions/runs/39821647584) — in progress at observation.
+- Audit branch CI/CD: [39821659001](https://github.com/Chicitadel/ugondu/actions/runs/39821659001) — in progress at observation.
+- Production branch COR: [39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890) — software job passed; AWS physical gate in progress.
+- Audit branch COR: [39821659037](https://github.com/Chicitadel/ugondu/actions/runs/39821659037) — software job passed; AWS physical gate in progress.
+
+**Disposition remains 🔴 HOLD — NOT UNIVERSALLY CERTIFIED.** The current candidate improves the evidence pipeline and removes named vacuous assertions, but universal status cannot be green until the workflows finish successfully, physical lifecycle/cleanup evidence is complete, live authenticated AI inference and multi-model switching are proven, and every claimed target cell is supported by real target-bound evidence.
