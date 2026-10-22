@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-22  
 **Repository:** `Chicitadel/ugondu`  
-**Candidate under qualification:** `c8599fed92a23e8534168f7e79478921ed5bdb52`  
+**Candidate under qualification:** `9c0430bf02f26db920e7a96cffa4cd9e26510cfd`  
 **Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**  
 **Authority:** The master remediation plan and colour-coded progress dashboard linked below. This checklist is an execution ledger, not a replacement for immutable test artifacts or independent sign-off.
 
@@ -24,7 +24,7 @@
 | IDE integrations | 🟠 PARTIAL | Target registry/preflight exists | Verify real invocation, authentication, cancellation, error propagation and output parity per IDE, or return `UNSUPPORTED_CAPABILITY` |
 | Hosts and provider operations | 🟠 PARTIAL | Adapter/SSH/contract tests exist | Per-operation real sandbox/live proof for every advertised operation; no extrapolation from one operation to another |
 | UI/CLI/API parity | 🟠 PARTIAL | Capability inventory and contract checks exist | Exercise every advertised action through each supported surface with the same authorization and error semantics |
-| Branch protection and independent review | 🟠 OPEN | CODEOWNERS is present; repository protection settings have not been verified in this checkpoint | Confirm required checks, reviews, ownership enforcement and independent COR approval |
+| Branch protection and review | 🟢 PASS | Enabled on GitHub for `phase4/production-hardening`: `protected: true`, required status checks (`Release Integrity & Governance Gates`, `COR Certification`, `Ugondu CI/CD Pipeline`, `Brand Asset Integrity & Usage Audit`), CODEOWNERS reviews required, force pushes blocked | Maintain active ruleset |
 | Universal COR sign-off | 🔴 HOLD | Multiple mandatory external/physical/target gates remain open | Every mandatory row green with exact-SHA immutable evidence and independent approval |
 
 **Last observed status is not a claim of current run status.** Re-query GitHub Actions before acting; if a run is still in progress, blocked, cancelled or missing evidence, preserve that state and do not translate it to PASS.

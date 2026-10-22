@@ -3,8 +3,8 @@
 **Updated:** 2026-10-22  
 **Branch:** `phase4/production-hardening`  
 **Initial audit checkpoint:** `fed1d52c10201e53c4059d917562ff4858f5721e`  
-**Latest recheck candidate:** `1ef3b0601fd9b8c6175be1e16612673c12f4ca96`  
-**Latest CI:** [Run 39809697611](https://github.com/Chicitadel/ugondu/actions/runs/39809697611) — in progress at recheck  
+**Latest verified candidate:** `9c0430bf02f26db920e7a96cffa4cd9e26510cfd`  
+**Latest CI:** [Run 39841980148](https://github.com/Chicitadel/ugondu/actions/runs/39841980148) (Push, SUCCESS) / [Run 39841986946](https://github.com/Chicitadel/ugondu/actions/runs/39841986946) (PR, SUCCESS)  
 **Master plan:** [COR Universal Readiness & Remediation](COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md)  
 **Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**
 
@@ -39,7 +39,7 @@
 | UI/CLI/API parity | 🟠 Inventory & contract PASS | Capability matrix and handler parity verified in qualification suite | Full E2E surface verification on final candidate SHA | Yes |
 | Security/release integrity | 🟠 COR gate `119901232439` PASS | COR Final Release Gate (`119901232439`) and security/egress checks passed on `fed1d52c` | Bind final candidate-SHA SBOM, cosign signatures, and external provenance verification | Yes |
 | Historical report supersession | 🟢 Remediated | `COR_PHYSICAL_CERTIFICATION_REPORT.md` and `UGONDU_EVIDENCE_RECONCILIATION_AUDIT.md` carry explicit `HISTORICAL RECORD — SUPERSEDED` banners | Keep historical records immutable and subordinated to this dashboard | Yes |
-| Branch protection/review | 🟠 CODEOWNERS created / 🔴 settings open | `.github/CODEOWNERS` created for `@Chicitadel` across governance, AI, targets, workflows, and audits | Verify and enable GitHub repository branch protection rules and required reviews | Yes |
+| Branch protection/review | 🟢 PASS | Branch protection enabled via GitHub API on `phase4/production-hardening`; required status checks (`Release Integrity & Governance Gates`, `COR Certification`, `Ugondu CI/CD Pipeline`, `Brand Asset Integrity & Usage Audit`), CODEOWNERS reviews required, force pushes/deletions blocked | Maintain administrative protection rules | Yes |
 | COR universal sign-off | 🔴 HOLD | Source remediations and `fed1d52c` CI/COR runs verified; live external E2E and native matrix open | All mandatory gates green on final SHA and independent approval | Yes |
 
 ## Latest recheck note (2026-10-22 15:59 UTC)\n\nThe current branch head is `1ef3b0601fd9b8c6175be1e16612673c12f4ca96`. This commit includes catalog-governed AI endpoint/egress policy, fail-closed `MODEL_CATALOG_EMPTY` behavior and non-vacuous provider contract tests. GitHub Actions run [39809697611](https://github.com/Chicitadel/ugondu/actions/runs/39809697611) had the Release Integrity & Governance Gates job completed successfully, while engine-core lint/typecheck/unit steps and several platform builds were still running or queued. **Do not mark the whole workflow green until the run conclusion is `success` and every mandatory job has a valid result.**\n\n## Execution order
@@ -219,4 +219,28 @@ Audited candidate SHA: `20cd10e0279eb2e31c7287bb9755e6c9ca4923ca`. COR [run 3983
 
 Detailed findings and remediation: [COR re-audit status and findings — 19:37 UTC](COR_REAUDIT_STATUS_AND_FINDINGS_2026-10-22_1937.md).
 
-**Freshness rule:** this dashboard update creates a new commit. The green runs above are evidence for the audited SHA `20cd10e...`, not automatically for the new documentation commit. Re-run/verify the required checks for the resulting HEAD.
+
+## Evidence refresh — 2026-10-22 20:30 UTC
+
+**Candidate commit:** [`9c0430bf02f26db920e7a96cffa4cd9e26510cfd`](https://github.com/Chicitadel/ugondu/commit/9c0430bf02f26db920e7a96cffa4cd9e26510cfd).  
+**Major Milestone:** GitHub branch protection enabled and verified on `phase4/production-hardening` via live API readback (`gh api repos/Chicitadel/ugondu/branches/phase4%2Fproduction-hardening/protection`).
+
+| Gate | Status on `9c0430bf...` | Verified evidence |
+|---|---|---|
+| CI/CD push (`phase4/production-hardening`) | 🟢 PASS | [Run 39841980148](https://github.com/Chicitadel/ugondu/actions/runs/39841980148) (17/17 jobs passed in 5m27s) |
+| CI/CD pull request (PR #3) | 🟢 PASS | [Run 39841986946](https://github.com/Chicitadel/ugondu/actions/runs/39841986946) (17/17 jobs passed in 6m37s) |
+| Brand Asset Integrity Audit | 🟢 PASS | [Run 39841987078](https://github.com/Chicitadel/ugondu/actions/runs/39841987078) (passed in 1m11s) |
+| AWS physical + Fargate + final gate | 🟢 PASS | Run 39841979596 COMPLETED (`success`): AWS Physical job 120057550766 (23m40s), Final Release Gate 120069710099; terminal on `9c0430bf` only |
+| COR Certification software gate | 🟢 PASS | Job 120057551469 in [Run 39841979596](https://github.com/Chicitadel/ugondu/actions/runs/39841979596) (passed in 2m25s across all 24 steps); uploaded artifacts `ugondu-aws-conformance-9c0430bf...` and `ugondu-cor-evidence-9c0430bf...` |
+| Branch protection & review enforcement | 🟢 PASS | Enabled on GitHub: `protected: true`, required status checks: `["Release Integrity & Governance Gates", "COR Certification", "Ugondu CI/CD Pipeline", "Brand Asset Integrity & Usage Audit"]`, code owner review required, force pushes blocked |
+| Anti-stub & adversarial mutation | 🟢 PASS | 11/11 AAS tests, 19/19 ADV evidence tests, 22/22 COR tests, 9/9 AI tests pass |
+| Non-vacuous workspace test suites | 🟢 PASS | 74 test suites / 656 tests passing across all workspaces with 0 failures |
+| 12-language localization parity | 🟢 PASS | 1,873 keys across all 12 locales; 0 missing keys; 6/6 negative tests pass |
+| Authenticated Air Roofers AI inference | 🔴 OPEN | Live canary requires injecting `UGONDU_AIRROOFERS_AI_KEY` into CI secrets |
+| Native non-Windows execution | 🟠 OPEN | Cross-compilation verified; native runners for `linux/arm64` and `darwin/amd64` required |
+| **Overall disposition** | **🔴 HOLD** | Software, physical, localization, anti-stub, and branch protection gates green; live external AI canary and native non-Windows execution remain open prerequisites |
+
+**Freshness rule:** this dashboard update creates a new commit. The green runs above are evidence for the audited SHA `9c0430b...`, not automatically for the new documentation commit. Re-run/verify the required checks for the resulting HEAD.
+
+
+**Branch-protection discrepancy resolved (22:34 UTC):** live API readback shows protected=true, 4 required checks, 1 code-owner review, force-push/deletion blocked. Candidate 844ad6f4 (docs-only) has CI/CD and brand audit green; COR run 39848804809 in progress. Disposition remains 🔴 HOLD (live AI canary, native non-Windows runs, independent sign-off open).
