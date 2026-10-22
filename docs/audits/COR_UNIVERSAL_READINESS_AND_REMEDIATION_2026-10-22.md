@@ -456,3 +456,20 @@ COR universal readiness may be declared only when all are true:
 - Release artifacts, SBOM, signatures and provenance are verified.
 - Repository protection and independent approval are confirmed.
 - Final dashboard and report agree, and no historical report is presented as current sign-off.
+
+
+## Re-audit delta — candidate `c8599fed92a23e8534168f7e79478921ed5bdb52` (observed 2026-10-22 16:24 UTC)
+
+The repository-local remediation commit has now passed the configured CI/CD workflow on `phase4/production-hardening` (run [39811783300](https://github.com/Chicitadel/ugondu/actions/runs/39811783300)) and the audit branch (run [39811782791](https://github.com/Chicitadel/ugondu/actions/runs/39811782791)). The COR software-certification job `119940995996` in [run 39811779347](https://github.com/Chicitadel/ugondu/actions/runs/39811779347) also passed and uploaded an exact-SHA evidence bundle.
+
+**This does not close universal COR.** At the last observed API state, the separate AWS Physical Qualification Gate job `119940995442` was still in progress at the `Run physical certification` step; the Fargate physical qualification and zero-residual cleanup steps were pending. Read-only AWS conformance evidence is not equivalent to a completed physical lifecycle. Live authenticated AI inference through `ai.airroofers.eu`, live multi-model switching/fallback, and full native OS/architecture/IDE/host qualification also remain open in the progress ledger.
+
+### Evidence-driven release disposition
+
+- **Software/CI gate:** 🟢 PASS on the exact candidate SHA, based on the named workflow runs above.
+- **AWS physical lifecycle:** 🟠 IN PROGRESS at last observation; remains release-blocking until physical provisioning, readback, teardown and zero-residual verification all succeed.
+- **Air Roofers AI live activation:** 🔴 OPEN until authenticated real network inference and real model selection/response are recorded on the candidate SHA.
+- **Universal platform/OS/IDE/host certification:** 🔴 OPEN until each claimed target has target-bound runtime evidence or is explicitly marked unsupported.
+- **Overall:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**.
+
+Do not infer that a successful workflow proves every possible platform/host/IDE combination. CI build matrices, source adapters, mocked unit tests and registry entries are supporting evidence only; they are not substitutes for the corresponding real execution.
