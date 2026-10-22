@@ -28,15 +28,11 @@ const assert = require('assert');
 const http = require('http');
 const express = require('express');
 const test = require('node:test');
+const { __t } = require('@ugondu/shared');
 const aiContract = require('../.governance/platform/contracts/ai');
 const {
-  AirRoofersAiProviderAdapter,
-  CredentialBroker,
-  InferenceGateway,
-  ModelCatalog,
-  ProviderAdapterRegistry,
-  QuotaGuard,
-  RoutingPolicyEngine,
+  AirRoofersAiProviderAdapter, CredentialBroker, InferenceGateway,
+  ModelCatalog, ProviderAdapterRegistry, QuotaGuard, RoutingPolicyEngine,
 } = require('../server/engine-core/dist/ai');
 const { createAiRouter } = require('../server/engine-core/dist/routes/ai');
 
@@ -50,49 +46,26 @@ function reportPass(msg) {
 
 function makeRequest(overrides = {}) {
   return {
-    requestId: 'req-cor-006',
-    tenantId: 'tenant-sovereign-eu',
-    productId: 'ugondu',
-    environment: 'production',
-    task: 'chat',
-    modelAlias: 'general-chat',
-    region: 'eu-west-3',
-    dataClassification: 'confidential',
+    requestId: 'req-cor-006', tenantId: 'tenant-sovereign-eu', productId: 'ugondu', environment: 'production',
+    task: 'chat', modelAlias: 'general-chat', region: 'eu-west-3', dataClassification: 'confidential',
     messages: [{ role: 'user', content: 'Verify deployment topology for eu-west-3' }],
-    maxOutputTokens: 512,
-    deadlineMs: 5000,
-    correlationId: 'corr-cor-006',
-    ...overrides,
+    maxOutputTokens: 512, deadlineMs: 5000, correlationId: 'corr-cor-006', ...overrides,
   };
 }
 
 function httpJsonRequest(port, method, path, body, headers = {}) {
   return new Promise((resolve, reject) => {
     const payload = body ? JSON.stringify(body) : undefined;
-    const req = http.request(
-      {
-        hostname: '127.0.0.1',
-        port,
-        path,
-        method,
-        headers: {
-          'content-type': 'application/json',
-          ...(payload ? { 'content-length': Buffer.byteLength(payload) } : {}),
-          ...headers,
-        },
-      },
-      (res) => {
-        let raw = '';
-        res.on('data', (chunk) => { raw += chunk; });
-        res.on('end', () => {
-          try {
-            resolve({ status: res.statusCode, body: JSON.parse(raw) });
-          } catch {
-            resolve({ status: res.statusCode, body: raw });
-          }
-        });
-      }
-    );
+    const req = http.request({
+      hostname: '127.0.0.1', port, path, method,
+      headers: { 'content-type': 'application/json', ...(payload ? { 'content-length': Buffer.byteLength(payload) } : {}), ...headers },
+    }, (res) => {
+      let raw = '';
+      res.on('data', (chunk) => { raw += chunk; });
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, body: JSON.parse(raw) }); } catch { resolve({ status: res.statusCode, body: raw }); }
+      });
+    });
     req.on('error', reject);
     if (payload) req.write(payload);
     req.end();
@@ -126,18 +99,9 @@ async function runTests() {
   await test('AI-002: Missing and expired credentials fail closed with CREDENTIALS_MISSING / CREDENTIALS_EXPIRED', async () => {
     gateway.setModelStatus('policy-advisor', 'disabled', { actorId: 'sec-admin', role: 'admin', reason: 'Isolate' });
     gateway.setModelStatus('sovereign-fallback', 'disabled', { actorId: 'sec-admin', role: 'admin', reason: 'Isolate' });
-
-    await assert.rejects(
-      () => gateway.invoke(makeRequest({ modelAlias: 'general-chat' })),
-      (err) => err.errorCode === 'CREDENTIALS_MISSING'
-    );
-
+    await assert.rejects(() => gateway.invoke(makeRequest({ modelAlias: 'general-chat' })), (err) => err.errorCode === 'CREDENTIALS_MISSING');
     credentialBroker.registerWorkloadSecret('aws-secrets://ugondu/prod/bedrock-workload-identity', 'expired-bedrock-secret-val', '2022-01-01T00:00:00Z');
-    await assert.rejects(
-      () => gateway.invoke(makeRequest({ modelAlias: 'general-chat' })),
-      (err) => err.errorCode === 'CREDENTIALS_EXPIRED'
-    );
-
+    await assert.rejects(() => gateway.invoke(makeRequest({ modelAlias: 'general-chat' })), (err) => err.errorCode === 'CREDENTIALS_EXPIRED');
     gateway.setModelStatus('policy-advisor', 'enabled', { actorId: 'sec-admin', role: 'admin' });
     gateway.setModelStatus('sovereign-fallback', 'enabled', { actorId: 'sec-admin', role: 'admin' });
     reportPass('Missing and expired credentials fail closed with CREDENTIALS_MISSING / CREDENTIALS_EXPIRED');
@@ -193,7 +157,6 @@ async function runTests() {
     const c1 = gateway.invoke(makeRequest({ requestId: 'conc-1', tenantId: 'tenant-burst' }));
     const c2 = gateway.invoke(makeRequest({ requestId: 'conc-2', tenantId: 'tenant-burst' }));
     const c3 = gateway.invoke(makeRequest({ requestId: 'conc-3', tenantId: 'tenant-burst' }));
-
     await assert.rejects(() => c3, (err) => err.errorCode === 'CONCURRENCY_LIMIT_EXCEEDED');
     await Promise.all([c1, c2]);
 
@@ -203,13 +166,10 @@ async function runTests() {
     gateway.setModelStatus('policy-advisor', 'disabled', { actorId: 'admin', role: 'admin' });
     gateway.setModelStatus('sovereign-fallback', 'disabled', { actorId: 'admin', role: 'admin' });
 
-    await assert.rejects(
-      () => gateway.invoke(makeRequest({ modelAlias: 'code-analyzer', task: 'code' })),
-      (err) => {
-        assert.ok(!err.message.includes(rawSecret), 'Secret must never appear in error message');
-        return true;
-      }
-    );
+    await assert.rejects(() => gateway.invoke(makeRequest({ modelAlias: 'code-analyzer', task: 'code' })), (err) => {
+      assert.ok(!err.message.includes(rawSecret), 'Secret must never appear in error message');
+      return true;
+    });
 
     gateway.setModelStatus('sovereign-fallback', 'enabled', { actorId: 'admin', role: 'admin' });
 
@@ -242,79 +202,77 @@ async function runTests() {
 
   await test('AI-007: AirRoofersAiProviderAdapter payload construction, error normalization, and health probe', async () => {
     credentialBroker.registerWorkloadSecret('env://UGONDU_AIRROOFERS_AI_KEY', 'airroofers-sovereign-live-secret-token-888');
+    const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+    process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai.airroofers.eu';
 
-    let capturedReq = null;
-    const mockTransport = async (req) => {
-      capturedReq = req;
-      return {
-        status: 200,
-        body: JSON.stringify({
-          success: true,
-          execution_id: 'aix_test_airroofers_001',
-          output: 'Sovereign deployment topology verified by Air Roofers AI Fabric',
-          token_metrics: { prompt_tokens: 14, completion_tokens: 28, total_tokens: 42 },
-          usage: { prompt_tokens: 14, completion_tokens: 28 },
-          finishReason: 'stop',
-        }),
+    try {
+      let capturedReq = null;
+      const mockTransport = async (req) => {
+        capturedReq = req;
+        return {
+          status: 200,
+          body: JSON.stringify({
+            success: true, execution_id: 'aix_test_airroofers_001',
+            output: 'Sovereign deployment topology verified by Air Roofers AI Fabric',
+            token_metrics: { prompt_tokens: 14, completion_tokens: 28, total_tokens: 42 },
+            usage: { prompt_tokens: 14, completion_tokens: 28 }, finishReason: 'stop',
+          }),
+        };
       };
-    };
 
-    const airAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, mockTransport);
-    providerRegistry.registerAdapter(airAdapter);
+      const airAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, mockTransport);
+      providerRegistry.registerAdapter(airAdapter);
 
-    // 1. Successful prompt execution payload construction and headers
-    const req = makeRequest({
-      modelAlias: 'sovereign-eu-chat',
-      tenantId: 'tenant-airroofers-fr',
-      correlationId: 'corr-airroofers-007',
-    });
-    const result = await airAdapter.invoke(req);
+      // 1. Successful prompt execution payload construction and headers
+      const req = makeRequest({ modelAlias: 'sovereign-eu-chat', tenantId: 'tenant-airroofers-fr', correlationId: 'corr-airroofers-007' });
+      const result = await airAdapter.invoke(req);
+      assert.strictEqual(result.providerId, 'airroofers-ai');
+      assert.strictEqual(result.output, 'Sovereign deployment topology verified by Air Roofers AI Fabric');
+      assert.strictEqual(result.usage.inputTokens, 14);
+      assert.strictEqual(result.usage.outputTokens, 28);
+      assert.strictEqual(result.finishReason, 'stop');
+      assert.ok(capturedReq.url.endsWith('/v1/ai/execute'));
+      assert.strictEqual(capturedReq.headers['authorization'], 'Bearer airroofers-sovereign-live-secret-token-888');
+      assert.strictEqual(capturedReq.headers['x-correlation-id'], 'corr-airroofers-007');
+      assert.strictEqual(capturedReq.headers['x-tenant-id'], 'tenant-airroofers-fr');
 
-    assert.strictEqual(result.providerId, 'airroofers-ai');
-    assert.strictEqual(result.output, 'Sovereign deployment topology verified by Air Roofers AI Fabric');
-    assert.strictEqual(result.usage.inputTokens, 14);
-    assert.strictEqual(result.usage.outputTokens, 28);
-    assert.strictEqual(result.finishReason, 'stop');
+      const sentPayload = JSON.parse(capturedReq.body);
+      assert.strictEqual(sentPayload.model_id, 'airroofers-sentinel-v1');
+      assert.strictEqual(sentPayload.payload.task, 'chat');
+      assert.ok(Array.isArray(sentPayload.payload.messages));
+      assert.strictEqual(sentPayload.context.tenant_id, 'tenant-airroofers-fr');
 
-    assert.ok(capturedReq.url.endsWith('/v1/ai/execute'));
-    assert.strictEqual(capturedReq.headers['authorization'], 'Bearer airroofers-sovereign-live-secret-token-888');
-    assert.strictEqual(capturedReq.headers['x-correlation-id'], 'corr-airroofers-007');
-    assert.strictEqual(capturedReq.headers['x-tenant-id'], 'tenant-airroofers-fr');
+      // 2. Error handling on HTTP 401 (AUTHENTICATION_FAILED), HTTP 429 (PROVIDER_RATE_LIMITED), HTTP 502 (UPSTREAM_UNAVAILABLE)
+      airAdapter.setHttpTransport(async () => ({ status: 401, body: JSON.stringify({ status: 'error', message: 'Unauthorized' }) }));
+      await assert.rejects(() => airAdapter.invoke(req), (err) => err.errorCode === 'AUTHENTICATION_FAILED');
 
-    const sentPayload = JSON.parse(capturedReq.body);
-    assert.strictEqual(sentPayload.model_id, 'airroofers-sentinel-v1');
-    assert.strictEqual(sentPayload.payload.task, 'chat');
-    assert.ok(Array.isArray(sentPayload.payload.messages));
-    assert.strictEqual(sentPayload.context.tenant_id, 'tenant-airroofers-fr');
+      airAdapter.setHttpTransport(async () => ({ status: 429, body: JSON.stringify({ status: 'error', message: 'Rate limit' }) }));
+      await assert.rejects(() => airAdapter.invoke(req), (err) => err.errorCode === 'PROVIDER_RATE_LIMITED');
 
-    // 2. Error handling on HTTP 401 (AUTHENTICATION_FAILED), HTTP 429 (PROVIDER_RATE_LIMITED), HTTP 502 (UPSTREAM_UNAVAILABLE)
-    airAdapter.setHttpTransport(async () => ({ status: 401, body: JSON.stringify({ status: 'error', message: 'Unauthorized' }) }));
-    await assert.rejects(() => airAdapter.invoke(req), (err) => err.errorCode === 'AUTHENTICATION_FAILED');
+      airAdapter.setHttpTransport(async () => ({ status: 502, body: JSON.stringify({ status: 'error', message: 'Bad Gateway' }) }));
+      await assert.rejects(() => airAdapter.invoke(req), (err) => err.errorCode === 'UPSTREAM_UNAVAILABLE');
 
-    airAdapter.setHttpTransport(async () => ({ status: 429, body: JSON.stringify({ status: 'error', message: 'Rate limit' }) }));
-    await assert.rejects(() => airAdapter.invoke(req), (err) => err.errorCode === 'PROVIDER_RATE_LIMITED');
+      // 3. Health check endpoint verification
+      airAdapter.setHttpTransport(async (r) => {
+        assert.ok(r.url.endsWith('/health') || r.url.endsWith('/v1/ai/status'));
+        return { status: 200, body: JSON.stringify({ status: 'operational' }) };
+      });
+      const health = await airAdapter.healthCheck();
+      assert.strictEqual(health.ok, true);
 
-    airAdapter.setHttpTransport(async () => ({ status: 502, body: JSON.stringify({ status: 'error', message: 'Bad Gateway' }) }));
-    await assert.rejects(() => airAdapter.invoke(req), (err) => err.errorCode === 'UPSTREAM_UNAVAILABLE');
+      const unauthAdapter = new AirRoofersAiProviderAdapter('airroofers-ai', catalog, new CredentialBroker(), mockTransport);
+      const failedHealth = await unauthAdapter.healthCheck();
+      assert.strictEqual(failedHealth.ok, false);
+      assert.strictEqual(failedHealth.reasonCode, 'CREDENTIALS_MISSING');
 
-    // 3. Health check endpoint verification
-    airAdapter.setHttpTransport(async (r) => {
-      assert.ok(r.url.endsWith('/health') || r.url.endsWith('/v1/ai/status'));
-      return { status: 200, body: JSON.stringify({ status: 'operational' }) };
-    });
-    const health = await airAdapter.healthCheck();
-    assert.strictEqual(health.ok, true);
-
-    const unauthAdapter = new AirRoofersAiProviderAdapter('airroofers-ai', catalog, new CredentialBroker(), mockTransport);
-    const failedHealth = await unauthAdapter.healthCheck();
-    assert.strictEqual(failedHealth.ok, false);
-    assert.strictEqual(failedHealth.reasonCode, 'CREDENTIALS_MISSING');
-
-    airAdapter.setHttpTransport(mockTransport);
-    const gatewayResult = await gateway.invoke(req);
-    assert.strictEqual(gatewayResult.providerId, 'airroofers-ai');
-
-    reportPass('AirRoofersAiProviderAdapter verified for payload/headers, 401/429/502 error normalization, and health check');
+      airAdapter.setHttpTransport(mockTransport);
+      const gatewayResult = await gateway.invoke(req);
+      assert.strictEqual(gatewayResult.providerId, 'airroofers-ai');
+      reportPass('AirRoofersAiProviderAdapter verified for payload/headers, 401/429/502 error normalization, and health check');
+    } finally {
+      if (prevEnv !== undefined) process.env.UGONDU_AIRROOFERS_AI_BASE_URL = prevEnv;
+      else delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+    }
   });
 
   await test('AI-008: AirRoofersAiProviderAdapter fail-closed endpoint resolution, URL validation, and sovereign domain policy', async () => {
@@ -331,61 +289,45 @@ async function runTests() {
       const noEndpointCatalog = new ModelCatalog(strippedDoc);
       const noEndpointAdapter = new AirRoofersAiProviderAdapter(noEndpointCatalog, credentialBroker);
 
-      await assert.rejects(
-        () => noEndpointAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
-        (err) => {
-          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_REQUIRED');
-          assert.strictEqual(err.statusCode, 500);
-          assert.ok(!err.message.includes(rawSecret));
-          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
-          return true;
-        }
-      );
+      await assert.rejects(() => noEndpointAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
+        assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_REQUIRED');
+        assert.strictEqual(err.statusCode, 500);
+        assert.ok(!err.message.includes(rawSecret) && !JSON.stringify(err.details || {}).includes(rawSecret));
+        return true;
+      });
       assert.throws(() => noEndpointAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_REQUIRED');
 
       // 2. Insecure protocol (http://) -> throws AIRROOFERS_AI_ENDPOINT_INSECURE
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'http://insecure.airroofers.eu';
       const insecureAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
-      await assert.rejects(
-        () => insecureAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
-        (err) => {
-          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_INSECURE');
-          assert.strictEqual(err.statusCode, 400);
-          assert.ok(!err.message.includes(rawSecret));
-          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
-          return true;
-        }
-      );
+      await assert.rejects(() => insecureAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
+        assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_INSECURE');
+        assert.strictEqual(err.statusCode, 400);
+        assert.ok(!err.message.includes(rawSecret) && !JSON.stringify(err.details || {}).includes(rawSecret));
+        return true;
+      });
       assert.throws(() => insecureAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_INSECURE');
 
       // 3. Malformed URL -> throws AIRROOFERS_AI_ENDPOINT_MALFORMED
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'not-a-valid-url';
       const malformedAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
-      await assert.rejects(
-        () => malformedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
-        (err) => {
-          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_MALFORMED');
-          assert.strictEqual(err.statusCode, 400);
-          assert.ok(!err.message.includes(rawSecret));
-          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
-          return true;
-        }
-      );
+      await assert.rejects(() => malformedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
+        assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_MALFORMED');
+        assert.strictEqual(err.statusCode, 400);
+        assert.ok(!err.message.includes(rawSecret) && !JSON.stringify(err.details || {}).includes(rawSecret));
+        return true;
+      });
       assert.throws(() => malformedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_MALFORMED');
 
       // 4. Unauthorized sovereign domain -> throws AIRROOFERS_AI_ENDPOINT_DISALLOWED
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://evil-unauthorized-domain.com';
       const disallowedAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
-      await assert.rejects(
-        () => disallowedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
-        (err) => {
-          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
-          assert.strictEqual(err.statusCode, 403);
-          assert.ok(!err.message.includes(rawSecret));
-          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
-          return true;
-        }
-      );
+      await assert.rejects(() => disallowedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
+        assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+        assert.strictEqual(err.statusCode, 403);
+        assert.ok(!err.message.includes(rawSecret) && !JSON.stringify(err.details || {}).includes(rawSecret));
+        return true;
+      });
       assert.throws(() => disallowedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
 
       // 5. Valid sovereign endpoints succeed: https://ai.airroofers.eu and https://ai-staging.airroofers.eu
@@ -394,12 +336,7 @@ async function runTests() {
         invokedEndpoint = req.url;
         return {
           status: 200,
-          body: JSON.stringify({
-            success: true,
-            output: 'Verified on sovereign fabric',
-            usage: { prompt_tokens: 10, completion_tokens: 20 },
-            finishReason: 'stop',
-          }),
+          body: JSON.stringify({ success: true, output: 'Verified on sovereign fabric', usage: { prompt_tokens: 10, completion_tokens: 20 }, finishReason: 'stop' }),
         };
       };
 
@@ -418,17 +355,81 @@ async function runTests() {
       assert.ok(invokedEndpoint.startsWith('https://ai.airroofers.eu/v1/ai/execute'));
 
       // 6. Redaction verification: secrets never appear in error diagnostics or payloads
-      assert.ok(!invokedEndpoint.includes(rawSecret));
-      assert.ok(!stagingRes.output.includes(rawSecret));
-      assert.ok(!prodRes.output.includes(rawSecret));
-
+      assert.ok(!invokedEndpoint.includes(rawSecret) && !stagingRes.output.includes(rawSecret) && !prodRes.output.includes(rawSecret));
       reportPass('AirRoofersAiProviderAdapter fail-closed endpoint resolution, URL validation, and sovereign domain policy verified');
     } finally {
-      if (prevEnv !== undefined) {
-        process.env.UGONDU_AIRROOFERS_AI_BASE_URL = prevEnv;
-      } else {
-        delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
-      }
+      if (prevEnv !== undefined) process.env.UGONDU_AIRROOFERS_AI_BASE_URL = prevEnv;
+      else delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+    }
+  });
+
+  await test('AI-009: AirRoofersAiProviderAdapter discoverModels, URL credential stripping, and localized diagnostics', async () => {
+    const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+    try {
+      // 1. discoverModels queries GET /v1/ai/models with Bearer auth and parses models array
+      let capturedModelReq = null;
+      const discoverAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, async (req) => {
+        capturedModelReq = req;
+        return {
+          status: 200,
+          body: JSON.stringify({ models: [{ id: 'airroofers-sentinel-v1', status: 'enabled' }, { id: 'airroofers-sovereign-v2', status: 'enabled' }] }),
+        };
+      });
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai.airroofers.eu';
+      const discoveryResult = await discoverAdapter.discoverModels();
+      assert.ok(capturedModelReq.url.endsWith('/v1/ai/models') && capturedModelReq.method === 'GET');
+      assert.strictEqual(capturedModelReq.headers['authorization'], 'Bearer airroofers-sovereign-live-secret-token-888');
+      assert.strictEqual(discoveryResult.models.length, 2);
+      assert.ok(discoveryResult.discoveredAt);
+
+      // 2. URL credential stripping in error details
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://user:supersecretpass@ai.airroofers.eu';
+      const credStripAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, async () => ({ status: 502, body: 'upstream error' }));
+      await assert.rejects(() => credStripAdapter.discoverModels(), (err) => {
+        assert.strictEqual(err.errorCode, 'UPSTREAM_UNAVAILABLE');
+        assert.ok(!err.message.includes('supersecretpass') && !JSON.stringify(err.details || {}).includes('supersecretpass'));
+        return true;
+      });
+
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://user:supersecretpass@unauthorized-domain.com';
+      const disallowedCredAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
+      await assert.rejects(() => disallowedCredAdapter.discoverModels(), (err) => {
+        assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+        assert.ok(!err.message.includes('supersecretpass') && !JSON.stringify(err.details || {}).includes('supersecretpass'));
+        return true;
+      });
+
+      // 3. Localized diagnostics match shared localization tokens
+      delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+      const strippedDoc = JSON.parse(JSON.stringify(aiContract.loadModelCatalog()));
+      delete strippedDoc.providers.find((p) => p.providerId === 'airroofers-ai').defaultEndpoint;
+      const reqAdapter = new AirRoofersAiProviderAdapter(new ModelCatalog(strippedDoc), credentialBroker);
+      await assert.rejects(() => reqAdapter.discoverModels(), (err) => {
+        assert.strictEqual(err.message, __t('ai.error.endpoint_required'));
+        return true;
+      });
+
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'http://ai.airroofers.eu';
+      const insecAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
+      await assert.rejects(() => insecAdapter.discoverModels(), (err) => {
+        assert.strictEqual(err.message, __t('ai.error.endpoint_insecure', { protocol: 'http:' }));
+        return true;
+      });
+
+      // 4. 401 on discoverModels throws AUTHENTICATION_FAILED
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai.airroofers.eu';
+      const authFailAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, async () => ({ status: 401, body: JSON.stringify({ error: 'unauthorized' }) }));
+      await assert.rejects(() => authFailAdapter.discoverModels(), (err) => {
+        assert.strictEqual(err.errorCode, 'AUTHENTICATION_FAILED');
+        assert.strictEqual(err.statusCode, 401);
+        assert.strictEqual(err.message, __t('ai.error.credentials_missing'));
+        return true;
+      });
+
+      reportPass('AirRoofersAiProviderAdapter discoverModels, URL credential stripping, and localized diagnostics verified');
+    } finally {
+      if (prevEnv !== undefined) process.env.UGONDU_AIRROOFERS_AI_BASE_URL = prevEnv;
+      else delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
     }
   });
 

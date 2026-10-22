@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Capabilities / Execution Continuity & Policy Governance
  * File           : LocationCatalogueProvider.ts
- * Version        : 1.2.0
+ * Version        : 1.3.0
  * Author         : Air Roofers SASU / Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-22
@@ -57,7 +57,9 @@ export interface LocationCatalogueResult {
   ttlSeconds: number;
 }
 
-export type LocationDiscoveryHook = (providerId: string) => Promise<PlacementCandidate[] | null> | PlacementCandidate[] | null;
+export type LocationDiscoveryHook = (
+  providerId: string
+) => Promise<PlacementCandidate[] | LocationCatalogueResult | null> | PlacementCandidate[] | LocationCatalogueResult | null;
 
 export interface ILocationCatalogueProvider {
   fetchLocations(providerId: string, options?: { forceRefresh?: boolean }): Promise<LocationCatalogueResult>;
@@ -163,6 +165,10 @@ export class DynamicLocationCatalogueProvider implements ILocationCatalogueProvi
     this.discoveryHooks.delete(providerId.trim().toLowerCase());
   }
 
+  public hasDiscoveryHook(providerId: string): boolean {
+    return this.discoveryHooks.has(providerId.trim().toLowerCase());
+  }
+
   public registerPublishedCatalogue(providerId: string, locations: PlacementCandidate[]): void {
     this.publishedCatalogues.set(providerId.trim().toLowerCase(), locations);
   }
@@ -201,10 +207,31 @@ export class DynamicLocationCatalogueProvider implements ILocationCatalogueProvi
     if (hook) {
       try {
         const live = await hook(norm);
-        if (live && live.length > 0) {
-          const result = this.buildResult(norm, live, 'live-discovered', now);
-          this.cache.set(norm, { result, cachedAtMs: nowMs });
-          return result;
+        if (live) {
+          if (Array.isArray(live) && live.length > 0) {
+            const result = this.buildResult(norm, live, 'live-discovered', now);
+            this.cache.set(norm, { result, cachedAtMs: nowMs });
+            return result;
+          }
+          if (!Array.isArray(live) && 'locations' in live && live.locations.length > 0) {
+            const catVer = live.catalogueVersion || this.computeCatalogueVersion(norm, live.locations);
+            const obs = live.observedAt || now.toISOString();
+            const result: LocationCatalogueResult = {
+              providerId: norm,
+              locations: live.locations.map((c) => ({
+                ...c,
+                providerId: norm,
+                catalogueVersion: catVer,
+                observedAt: c.observedAt?.trim() || obs,
+              })),
+              catalogueVersion: catVer,
+              observedAt: obs,
+              provenance: 'live-discovered',
+              ttlSeconds: live.ttlSeconds ?? this.ttlSeconds,
+            };
+            this.cache.set(norm, { result, cachedAtMs: nowMs });
+            return result;
+          }
         }
       } catch {
         // Discovery hook error or offline condition; fall through to seed fallback
@@ -242,13 +269,14 @@ export class DynamicLocationCatalogueProvider implements ILocationCatalogueProvi
     provenance: LocationCatalogueProvenance,
     now: Date
   ): LocationCatalogueResult {
-    const observedAt = now.toISOString();
+    const trueObserved = candidates.find((c) => c.observedAt && c.observedAt.trim().length > 0)?.observedAt;
+    const observedAt = trueObserved || now.toISOString();
     const catalogueVersion = this.computeCatalogueVersion(providerId, candidates);
     const locations = candidates.map((c) => ({
       ...c,
       providerId,
       catalogueVersion,
-      observedAt,
+      observedAt: (c.observedAt && c.observedAt.trim().length > 0) ? c.observedAt : observedAt,
     }));
     return {
       providerId,

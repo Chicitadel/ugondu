@@ -131,7 +131,15 @@ export class ExternalHttpProviderAdapter implements InferenceProvider {
         );
 
         return this.credentialBroker.withCredential(credentialRef, async ephemeralSecret => {
-            const endpointBase = process.env[provider.endpointEnvVar] || provider.defaultEndpoint;
+            const endpointBase = (process.env[provider.endpointEnvVar] || provider.defaultEndpoint || '').trim();
+            if (!endpointBase) {
+                throw new AiGatewayError(
+                    'UPSTREAM_UNAVAILABLE',
+                    __t('ai.error.endpoint_required') || `Provider ${provider.providerId} endpoint is not configured in ${provider.endpointEnvVar}`,
+                    500,
+                    { providerId: provider.providerId, envVar: provider.endpointEnvVar }
+                );
+            }
             const url = `${endpointBase.replace(/\/+$/, '')}/invoke`;
             const headers: Record<string, string> = {
                 'content-type': 'application/json',

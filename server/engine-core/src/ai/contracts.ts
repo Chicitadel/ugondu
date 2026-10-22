@@ -6,7 +6,7 @@
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -107,7 +107,9 @@ export interface CatalogProviderEntry {
     adapterVersion: string;
     protocol: 'aws-sigv4-https' | 'https-json' | 'local-deterministic';
     endpointEnvVar: string;
-    defaultEndpoint: string;
+    defaultEndpoint?: string;
+    endpointPolicy?: string;
+    notes?: string;
     accountRef: string;
     credentialRef: string;
     status: ModelStatus;
