@@ -211,3 +211,34 @@ The last fully inspected candidate was `20cd10e0279eb2e31c7287bb9755e6c9ca4923ca
 - [ ] Keep overall status 🔴 HOLD until every mandatory gate is green on the same final candidate SHA.
 
 See [COR re-audit status and findings — 19:37 UTC](COR_REAUDIT_STATUS_AND_FINDINGS_2026-10-22_1937.md) for evidence IDs, open findings and remediation acceptance criteria.
+
+
+---
+
+## Authoritative re-audit addendum — 2026-10-22 21:03 UTC
+
+This section supersedes older candidate-SHA/run rows above when they conflict. The full evidence-backed findings, exact remediation snippets, AI activation plan, universal matrix criteria, and command runbook are maintained in [COR Re-audit and Implementation Plan](COR_REAUDIT_AND_IMPLEMENTATION_PLAN_2026-10-22_2103.md). The current status ledger is [COR Certification Progress Dashboard](COR_CERTIFICATION_PROGRESS_2026-10-22.md).
+
+### Current checkpoint
+
+- Observed HEAD before remediation: `f7e5ce517e5d6c1a77df0fd51dc9f5b6f76ea36b`.
+- [Push CI/CD run 39853417908](https://github.com/Chicitadel/ugondu/actions/runs/39853417908) failed in `Run COR Remediation tests`: `REAUDIT-F11`, 21 passed / 1 failed. The failing expectation required policy-pack trust roots to be pinned by the operator/CI environment; repository-local public-key fallback contradicted that contract.
+- Source fix committed: `9423300b6a33dfe6ccbe4d47f6063c0ea84d7700` in `scripts/governance/verify-policy-pack-digests.mjs`. This is a remediation attempt, not a certification result; fresh workflow evidence is required.
+- [Brand audit run 39853427771](https://github.com/Chicitadel/ugondu/actions/runs/39853427771) succeeded on the pre-remediation checkpoint SHA only.
+- [COR run 39853417911](https://github.com/Chicitadel/ugondu/actions/runs/39853417911) was pending at last observation.
+- [COR run 39850666621](https://github.com/Chicitadel/ugondu/actions/runs/39850666621) had a successful software gate but AWS physical qualification was still in progress at last observation.
+- AI adapter source exists, but authenticated live inference, actual model switching/fallback, verified canary workflow wiring, and redacted live receipts remain open.
+- The target matrix still marks `linux/arm64` and `darwin/amd64` as cross-compiled-only, multiple IDEs as unsupported, and GCP/Azure provider operations as unsupported. Universal certification remains on HOLD.
+
+### Required immediate execution
+
+- [ ] Query the current branch HEAD and Actions after all source/documentation commits.
+- [ ] Confirm the new CI run passes `node tests/cor-remediation.test.js` without weakening or deleting `REAUDIT-F11`.
+- [ ] Confirm absent/wrong externally pinned trust anchors fail closed.
+- [ ] Inspect every required job; no pending, cancelled, skipped, stale-SHA, or missing required gate can be green.
+- [ ] Activate the actual Air Roofers AI API using a service-issued credential stored only in GitHub Actions secrets; run authenticated model discovery and real inference.
+- [ ] Add native target tests and per-operation evidence for every supported OS/architecture, IDE, host/provider, and UI/CLI/API surface.
+- [ ] Keep unsupported targets explicitly unsupported until genuinely qualified.
+- [ ] Obtain independent second-party sign-off on the same final SHA.
+
+**Disposition: 🔴 HOLD — NOT UNIVERSALLY CERTIFIED.** Do not release or declare universal green until all mandatory checklist items have exact-SHA evidence.
