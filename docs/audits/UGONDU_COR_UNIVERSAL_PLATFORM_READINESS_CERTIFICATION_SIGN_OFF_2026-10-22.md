@@ -23,19 +23,26 @@
 | COR software gate, candidate `46ea8b3c` | GitHub Actions run `39768866529` reports COR job success | 🟢 Candidate-specific pass |
 | AWS physical gate, candidate `46ea8b3c` | Run `39768866529` reports physical gate success | 🟢 Candidate-specific AWS pass; not universal proof |
 | COR software gate, reconciliation run `39775766685` | Job `119814175901` completed successfully | 🟢 Software gate only |
-| AWS physical gate, reconciliation run `39775766685` | Job `119814175595` was observed in progress at the time of audit; physical certification, Fargate, and zero-residual steps had not all completed | 🟡 Pending final run result |
+| AWS physical gate, reconciliation run `39775766685` | The supplied execution record reports the physical gate and zero-residual scan passed; retained COR/AWS evidence artifacts are present. This remains specific to candidate `a94c8f1c`. | 🟢 Candidate-specific AWS pass; not universal proof |
 | Policy adapter anti-fake behavior | Base adapter now fails closed for provider operations; read-after-write success must be provided by a concrete adapter | 🟡 Source change observed; provider-specific live tests required |
-| Dynamic region/location selection | Resolver prompts for actor-selected region/location; catalogue provider exists | 🟡 Source change observed; each provider's live discovery and region semantics need qualification |
-| Air Roofers AI gateway | Adapter exists, but source includes a hardcoded fallback endpoint `https://ai.airroofers.eu` | 🟡 Adapter exists; zero-hardcoding requirement and live production contract test remain open |
-| Zero hardcoding / anti-stub / anti-scaffolding | Static validator and policy contract exist | 🟡 Static checks are not proof of semantic completeness; adversarial mutation tests and production-path review required |
-| All OS / IDE / shell / host / cloud combinations | No complete, independently evidenced coverage matrix established by this review | ⚪ Unassessed — not green |
+| Dynamic region/location selection | Resolver prompts for actor selection, but the committed model catalogue still embeds provider `supportedRegions` arrays. The matrix is 21 experimental / 1 supported target. | 🔴 Strict no-hardcoded-region and universal certification requirements are not met |
+| Air Roofers AI gateway | Current adapter source has no literal endpoint fallback; committed `config/model-catalog.json` still contains the default endpoint and static supported-region list. AI tests use injected transport. | 🟡 Source fallback removed; catalogue policy, localized diagnostics, and real authenticated inference remain open |
+| Zero hardcoding / anti-stub / anti-scaffolding | Anti-stub validator and adversarial test file exist; current adapter includes literal English diagnostic messages and the catalogue contains endpoint/region/account values. | 🟡 Anti-stub controls have reported passing tests; zero-hardcoding/localization still require remediation and exact-SHA verification |
+| All OS / IDE / shell / host / cloud combinations | Matrix defines 22 targets, but 21 are marked `experimental` and only one `supported`. Cross-platform build jobs do not certify all native E2E cells. | 🔴 Universal certification not established |
 | Final universal release | Universal coverage and current candidate evidence are incomplete or unverified | 🔴 HOLD / NO-GO |
 
 **Certification rule:** status is green only when a real test ran on the exact commit and target environment, produced retained evidence, had no skip/mock/dry-run substitution, and passed cleanup plus rollback assertions where applicable. “Implemented”, “unit tests pass”, or a historical run on another SHA does not equal universal certification.
 
 ---
 
-All findings from the previous audits (`COR-001`–`COR-014`, `URS-01`–`URS-06`, and `UG-COR-AUD-001`–`UG-COR-AUD-010`) have been completely remediated, mathematically proven, and certified across offline cryptographic gates, multi-platform unit and conformance suites, and live physical AWS cloud infrastructure.
+
+> **Historical evidence warning:** The sections below preserve earlier candidate-specific certification assertions for traceability. They are **not the current release decision**. The current decision is HOLD / NO-GO until the re-audit delta's open gates are closed. In particular, old 🟢 rows and historical signatures do not override the current matrix (21 experimental / 1 supported), strict region zero-hardcoding gap, and missing live AI inference evidence. See [latest re-audit delta](./UGONDU_UNIVERSAL_READINESS_REAUDIT_DELTA_2026-10-22.md).
+
+## Historical candidate-specific certification assertions (superseded for current release decisions)
+
+The following historical statement and matrices record what was asserted for earlier candidates. They must not be read as proof of the current universal release:
+
+All findings from the previous audits (`COR-001`–`COR-014`, `URS-01`–`URS-06`, and `UG-COR-AUD-001`–`UG-COR-AUD-010`) were reported as remediated for the historical candidate, based on the evidence available at that time.
 
 The authoritative GitHub Actions release workflows have rendered unanimous **GO** decisions bound to release commit [`46ea8b3c`](https://github.com/Chicitadel/ugondu/commit/46ea8b3ce3c8585e82b7dbd7e937d15fc3677da2):
 - **`COR Certification` (Run `39768866529`, Job `119791062546`)**: **PASSED (`✓`)** in 2m37s.
@@ -76,11 +83,11 @@ The authoritative GitHub Actions release workflows have rendered unanimous **GO*
 
 ---
 
-## 4. Final Release Sign-Off Signatures
+## 4. Historical Release Sign-Off Signatures (not current approval)
 
 | Authority | Representative | Decision | Date |
 |---|---|---|---|
-| **Architecture Authority** | Enterprise Architecture Council (`architecture@airroofers.eu`) | **APPROVED (GO)** | 2026-10-22 |
-| **Security Authority** | Security Governance Board (`security@airroofers.eu`) | **APPROVED (GO)** | 2026-10-22 |
-| **Deployment Authority** | Release Engineering Lead (`releases@airroofers.eu`) | **APPROVED (GO)** | 2026-10-22 |
-| **Platform Governance** | Ujomor Governance Operating System (`governance@ujomor.org`) | **CERTIFIED (GO)** | 2026-10-22 |
+| **Architecture Authority** | Enterprise Architecture Council (`architecture@airroofers.eu`) | Historical approval for prior candidate only — superseded | 2026-10-22 |
+| **Security Authority** | Security Governance Board (`security@airroofers.eu`) | Historical approval for prior candidate only — superseded | 2026-10-22 |
+| **Deployment Authority** | Release Engineering Lead (`releases@airroofers.eu`) | Historical approval for prior candidate only — superseded | 2026-10-22 |
+| **Platform Governance** | Ujomor Governance Operating System (`governance@ujomor.org`) | Historical approval for prior candidate only — superseded | 2026-10-22 |
