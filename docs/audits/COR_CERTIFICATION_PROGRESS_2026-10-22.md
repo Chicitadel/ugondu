@@ -264,3 +264,28 @@ Detailed findings and remediation: [COR re-audit status and findings — 19:37 U
   - Job `120082155508` (`COR Certification` software gate): **SUCCESS** in 2m49s across all 24 steps (clean checkout, exact-SHA verification, workspace tests, stream registry, and authority signing).
   - Job `120082156420` (`AWS Physical Qualification Gate`): **IN PROGRESS** at physical certification lifecycle.
 - **Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED** (pending live authenticated AI canary and native non-Windows target qualification).
+
+
+---
+
+## Authoritative re-audit addendum — 2026-10-22 21:03 UTC
+
+> **This addendum supersedes the earlier candidate/run snapshot above where they conflict.** The older dashboard body contains stale HEAD and run references; do not use its older “Active HEAD” line as the current branch identity. The detailed findings and implementation plan are in [COR Re-audit and Implementation Plan](COR_REAUDIT_AND_IMPLEMENTATION_PLAN_2026-10-22_2103.md).
+
+**Observed branch HEAD at checkpoint:** `f7e5ce517e5d6c1a77df0fd51dc9f5b6f76ea36b`  
+**Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**
+
+| Gate | Snapshot status | Exact evidence / action |
+|---|---|---|
+| Brand asset audit | 🟢 Pass on checkpoint SHA | [39853427771](https://github.com/Chicitadel/ugondu/actions/runs/39853427771) |
+| Push CI/CD | 🔴 Failed on checkpoint SHA | [39853417908](https://github.com/Chicitadel/ugondu/actions/runs/39853417908), failed COR remediation integration test |
+| Failure | 🔴 F-011 trust-root mismatch | `REAUDIT-F11`: policy verifier allowed a repository-local trust-anchor fallback contrary to the test contract; 21 tests passed, 1 failed |
+| Source remediation | 🟠 Committed; not yet re-certified | Commit `9423300b6a33dfe6ccbe4d47f6063c0ea84d7700` removes repository-local public-key fallback in `scripts/governance/verify-policy-pack-digests.mjs` |
+| COR software gate | 🟠 Pending at last query | [39853417911](https://github.com/Chicitadel/ugondu/actions/runs/39853417911) |
+| AWS physical gate | 🟠 In progress on older candidate | [39850666621](https://github.com/Chicitadel/ugondu/actions/runs/39850666621), software gate succeeded; physical gate not terminal at last query |
+| Air Roofers AI live inference | 🔴 Open | No verified live-canary script/workflow wiring or authenticated inference receipt established |
+| OS/architecture universality | 🟠 Partial | `linux/arm64` and `darwin/amd64` are cross-compiled-only in the target matrix |
+| IDE/host/provider universality | 🟠 Partial / unsupported cells remain | Several IDEs and GCP/Azure provider operations are explicitly unsupported in the matrix |
+| Universal COR sign-off | 🔴 Hold | Exact-SHA live AI, native matrix, real per-operation provider evidence, fresh terminal workflows and independent sign-off remain mandatory |
+
+**Re-certification rule:** documentation and source commits create a new candidate SHA. Query the live branch and Actions after all commits; only evidence whose `head_sha` matches the final branch SHA can be displayed as current green evidence.
