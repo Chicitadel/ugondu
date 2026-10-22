@@ -123,3 +123,25 @@
 ## 5. Final decision
 
 **🔴 HOLD — NOT UNIVERSALLY CERTIFIED.** The configured CI/CD workflows, software COR certification, and AWS physical qualification gate passed with zero residual resources, but live Air Roofers AI inference, real multi-model switching/fallback, and complete native target qualification remain unproven in this checkpoint. Update this decision only after current run state and immutable evidence confirm all mandatory acceptance criteria.
+
+
+## Candidate refresh — `096668776b65d4fd28135dd08efc38aac3116cf3` (observed 2026-10-22 17:24 UTC)
+
+### Updated live run state
+
+| Evidence | Status at observation | Meaning |
+|---|---|---|
+| [Production CI/CD 39821647584](https://github.com/Chicitadel/ugondu/actions/runs/39821647584) | 🟠 In progress | Governance/build matrix mostly passed; integration tests still running. |
+| [Audit CI/CD 39821659001](https://github.com/Chicitadel/ugondu/actions/runs/39821659001) | 🟠 In progress | Governance and several builds passed; remaining workspace tests still running. |
+| [Production COR 39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890) | 🟠 Physical gate in progress | Software COR job passed; AWS physical certification still running, with Fargate and zero-residual cleanup pending. |
+| [Audit COR 39821659037](https://github.com/Chicitadel/ugondu/actions/runs/39821659037) | 🟠 Physical gate in progress | Software COR job passed; AWS physical certification still running, with Fargate and zero-residual cleanup pending. |
+
+### Additional audit results and caveats
+
+- Source spot-check confirms the four previously named fabric specs no longer contain `expect(true).toBe(true)`; the new governance ban and adversarial mutation test still require successful candidate workflow completion.
+- The target matrix currently marks Windows/amd64, Linux/amd64 and macOS/arm64 as native-tested, while Linux/arm64 and macOS/amd64 are cross-compiled-only. The former claims must be checked against native runner evidence; the matrix itself is not proof.
+- AI health endpoint HTTP 200 and unauthenticated model-list HTTP 401 establish reachability/authentication boundary only, not successful authenticated inference or real model response.
+- Test-only fake cloud adapters are permissible only if they cannot be resolved by production runtime entrypoints; real E2E evidence must identify the actual target environment and transport.
+- Overall disposition remains 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED** until CI/CD completes, physical AWS/Fargate teardown is verified with zero residual resources, live authenticated AI and real multi-model switching pass, and all advertised target cells have target-bound evidence.
+
+Any subsequent code change must trigger fresh evidence on the final candidate SHA. These run IDs are snapshots at the observation time, not claims about their eventual conclusions.
