@@ -317,6 +317,121 @@ async function runTests() {
     reportPass('AirRoofersAiProviderAdapter verified for payload/headers, 401/429/502 error normalization, and health check');
   });
 
+  await test('AI-008: AirRoofersAiProviderAdapter fail-closed endpoint resolution, URL validation, and sovereign domain policy', async () => {
+    const rawSecret = 'airroofers-sovereign-live-secret-token-888';
+    credentialBroker.registerWorkloadSecret('env://UGONDU_AIRROOFERS_AI_KEY', rawSecret);
+
+    const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+    try {
+      // 1. Neither env var nor provider defaultEndpoint is set -> throws AIRROOFERS_AI_ENDPOINT_REQUIRED
+      delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+      const strippedDoc = JSON.parse(JSON.stringify(aiContract.loadModelCatalog()));
+      const airProv = strippedDoc.providers.find((p) => p.providerId === 'airroofers-ai');
+      delete airProv.defaultEndpoint;
+      const noEndpointCatalog = new ModelCatalog(strippedDoc);
+      const noEndpointAdapter = new AirRoofersAiProviderAdapter(noEndpointCatalog, credentialBroker);
+
+      await assert.rejects(
+        () => noEndpointAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
+        (err) => {
+          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_REQUIRED');
+          assert.strictEqual(err.statusCode, 500);
+          assert.ok(!err.message.includes(rawSecret));
+          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
+          return true;
+        }
+      );
+      assert.throws(() => noEndpointAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_REQUIRED');
+
+      // 2. Insecure protocol (http://) -> throws AIRROOFERS_AI_ENDPOINT_INSECURE
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'http://insecure.airroofers.eu';
+      const insecureAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
+      await assert.rejects(
+        () => insecureAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
+        (err) => {
+          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_INSECURE');
+          assert.strictEqual(err.statusCode, 400);
+          assert.ok(!err.message.includes(rawSecret));
+          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
+          return true;
+        }
+      );
+      assert.throws(() => insecureAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_INSECURE');
+
+      // 3. Malformed URL -> throws AIRROOFERS_AI_ENDPOINT_MALFORMED
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'not-a-valid-url';
+      const malformedAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
+      await assert.rejects(
+        () => malformedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
+        (err) => {
+          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_MALFORMED');
+          assert.strictEqual(err.statusCode, 400);
+          assert.ok(!err.message.includes(rawSecret));
+          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
+          return true;
+        }
+      );
+      assert.throws(() => malformedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_MALFORMED');
+
+      // 4. Unauthorized sovereign domain -> throws AIRROOFERS_AI_ENDPOINT_DISALLOWED
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://evil-unauthorized-domain.com';
+      const disallowedAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
+      await assert.rejects(
+        () => disallowedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })),
+        (err) => {
+          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+          assert.strictEqual(err.statusCode, 403);
+          assert.ok(!err.message.includes(rawSecret));
+          assert.ok(!JSON.stringify(err.details || {}).includes(rawSecret));
+          return true;
+        }
+      );
+      assert.throws(() => disallowedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+
+      // 5. Valid sovereign endpoints succeed: https://ai.airroofers.eu and https://ai-staging.airroofers.eu
+      let invokedEndpoint = '';
+      const transport = async (req) => {
+        invokedEndpoint = req.url;
+        return {
+          status: 200,
+          body: JSON.stringify({
+            success: true,
+            output: 'Verified on sovereign fabric',
+            usage: { prompt_tokens: 10, completion_tokens: 20 },
+            finishReason: 'stop',
+          }),
+        };
+      };
+
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai-staging.airroofers.eu';
+      const stagingAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, transport);
+      assert.strictEqual(stagingAdapter.getBaseUrl(), 'https://ai-staging.airroofers.eu');
+      const stagingRes = await stagingAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' }));
+      assert.strictEqual(stagingRes.output, 'Verified on sovereign fabric');
+      assert.ok(invokedEndpoint.startsWith('https://ai-staging.airroofers.eu/v1/ai/execute'));
+
+      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai.airroofers.eu/';
+      const prodAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, transport);
+      assert.strictEqual(prodAdapter.getBaseUrl(), 'https://ai.airroofers.eu');
+      const prodRes = await prodAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' }));
+      assert.strictEqual(prodRes.output, 'Verified on sovereign fabric');
+      assert.ok(invokedEndpoint.startsWith('https://ai.airroofers.eu/v1/ai/execute'));
+
+      // 6. Redaction verification: secrets never appear in error diagnostics or payloads
+      assert.ok(!invokedEndpoint.includes(rawSecret));
+      assert.ok(!stagingRes.output.includes(rawSecret));
+      assert.ok(!prodRes.output.includes(rawSecret));
+
+      reportPass('AirRoofersAiProviderAdapter fail-closed endpoint resolution, URL validation, and sovereign domain policy verified');
+    } finally {
+      if (prevEnv !== undefined) {
+        process.env.UGONDU_AIRROOFERS_AI_BASE_URL = prevEnv;
+      } else {
+        delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+      }
+    }
+  });
+
   console.log('══════════════════════════════════════════════════════════════');
   console.log(` AI Inference Gateway Results: ${passed} passed, ${failed} failed `);
   console.log('══════════════════════════════════════════════════════════════');

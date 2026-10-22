@@ -2,12 +2,19 @@
  * Project        : Ugondu Platform
  * Module         : Release Qualification / Platform Evidence Tests
  * File           : platform-evidence.test.js
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
- * Last Modified  : 2026-10-20
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
+ *
+ * Purpose:
+ * - Test platform evidence recorder, verifier, and runner discovery.
+ * - Test that universal support claims fail closed without verified evidence.
+ * - Audit governed platform matrix across runtimes, providers, and modes.
+ *
+ * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST
  *
  * Copyright (c) 2026 Air Roofers SASU
  * All Rights Reserved.
@@ -90,6 +97,9 @@ test('native evidence on the host target is tested, never auto-qualified', async
 test('recorded runner identity comes from the process, not the caller', async () => {
   const m = await api();
   const dir = tmp();
+  const runner = m.currentRunner('worker');
+  assert.strictEqual(runner.os, HOST_OS);
+  assert.strictEqual(runner.arch, HOST_ARCH);
   const { record } = m.recordTargetEvidence({
     targetId: 'foreign', os: FOREIGN.os, arch: FOREIGN.arch, runnerKind: 'cross', nativeExecution: false,
     commitSha: COMMIT, treeSha: TREE, suiteResults: [], outDir: dir, runner: { os: FOREIGN.os, arch: FOREIGN.arch }
@@ -121,7 +131,6 @@ test('recording a native claim from a non-matching runner is refused', async () 
 test('forged native evidence from a foreign runner for another target is rejected (cross-run)', async () => {
   const m = await api();
   const dir = tmp();
-  // Evidence generated on the host runner but presented for the foreign target, with a valid digest.
   await forge(dir, { targetId: 'foreign', target: { os: FOREIGN.os, arch: FOREIGN.arch } });
   const d = m.deriveTargetStates(matrix(), dir, ctx);
   assert.strictEqual(d.targets.foreign.state, 'not-assessed');
@@ -161,7 +170,7 @@ test('tampered evidenceSha256 and post-hoc edited content are rejected', async (
   });
   const f = path.join(dir2, 'platforms', 'host.json');
   const rec = JSON.parse(fs.readFileSync(f, 'utf8'));
-  rec.suites[0].failures = 0; // edit without re-signing
+  rec.suites[0].failures = 0;
   fs.writeFileSync(f, JSON.stringify(rec));
   const d = m.deriveTargetStates(matrix(), dir2, ctx);
   assert.strictEqual(d.targets.host.state, 'not-assessed');
@@ -171,7 +180,7 @@ test('duplicate and unknown targets are rejected', async () => {
   const m = await api();
   const dir = tmp();
   await forge(dir, {});
-  await forge(dir, { fileId: 'host-copy' }); // second file claiming the same targetId
+  await forge(dir, { fileId: 'host-copy' });
   await forge(dir, { targetId: 'ghost', target: { os: HOST_OS, arch: HOST_ARCH } });
   const d = m.deriveTargetStates(matrix(), dir, ctx);
   assert.strictEqual(d.targets.host.state, 'not-assessed');
@@ -212,16 +221,61 @@ test('supported claim without evidence is flagged; experimental/unsupported are 
   assert.ok(!v.violations.some((x) => x.id === 'win-arm64'));
   mx.targetDefinitions[0].supportClaim = 'bogus';
   assert.strictEqual(m.verifyMatrixClaims(mx, m.deriveTargetStates(mx, tmp(), ctx)).verdict, 'invalid-matrix');
+  assert.strictEqual(m.verifyMatrixClaims(null, {}).verdict, 'invalid-matrix');
+  assert.strictEqual(m.verifyMatrixClaims({ targetDefinitions: [] }, {}).verdict, 'invalid-matrix');
 });
 
-test('governed matrix: every target has a truthful claim and non-host supported claims are absent', async () => {
+test('universal support verification fails closed on any unassessed, experimental or unsupported target', async () => {
+  const m = await api();
+  const mx = matrix();
+  const dir = tmp();
+  m.recordTargetEvidence({
+    targetId: 'host', os: HOST_OS, arch: HOST_ARCH, runnerKind: 'local', nativeExecution: true,
+    commitSha: COMMIT, treeSha: TREE, suiteResults: GOOD_SUITE, outDir: dir
+  });
+  const d = m.deriveTargetStates(mx, dir, ctx);
+  assert.strictEqual(d.targets.host.state, 'tested');
+  const uv = m.verifyUniversalSupport(mx, d);
+  assert.strictEqual(uv.verdict, 'claim-exceeds-evidence');
+  assert.ok(uv.violations.some((x) => x.id === 'foreign'));
+  assert.ok(uv.violations.some((x) => x.id === 'win-arm64'));
+});
+
+test('governed matrix: audits all required runtimes, providers, and operation modes', async () => {
   const m = await api();
   const real = JSON.parse(fs.readFileSync(path.join(ROOT, 'config/qualification/platform-matrix.json'), 'utf8'));
-  for (const t of real.targetDefinitions) {
-    assert.ok(m.SUPPORT_CLAIMS.includes(t.supportClaim), `${t.id} has valid supportClaim`);
-    if (t.supportClaim === 'supported') assert.strictEqual(`${t.os}/${t.architecture}`, 'windows/amd64');
+  const byId = new Map(real.targetDefinitions.map((t) => [t.id, t]));
+
+  const expectedRuntimes = [
+    'runtime-linux-amd64', 'runtime-linux-arm64', 'runtime-windows-amd64',
+    'runtime-darwin-amd64', 'runtime-darwin-arm64'
+  ];
+  const expectedDelivery = [
+    'delivery-aws-eu-west-3', 'delivery-gcp-europe-west9', 'delivery-azure-francecentral',
+    'delivery-docker-compose', 'delivery-directadmin-shared-hosting', 'delivery-cpanel-hosting',
+    'delivery-vps-private-host'
+  ];
+  const expectedRepo = ['repo-github', 'repo-gitlab', 'repo-bitbucket', 'repo-aws-codecommit'];
+  const expectedModes = [
+    'mode-cli', 'mode-gui-electron', 'mode-ide-vscode',
+    'mode-headless-ci', 'mode-model-assisted', 'mode-non-model-assisted'
+  ];
+
+  for (const id of [...expectedRuntimes, ...expectedDelivery, ...expectedRepo, ...expectedModes]) {
+    assert.ok(byId.has(id), `target ${id} must exist in matrix`);
+    const t = byId.get(id);
+    assert.ok(m.SUPPORT_CLAIMS.includes(t.supportClaim), `${id} must have valid supportClaim`);
+    assert.ok(t.supportOwner && typeof t.supportOwner === 'string', `${id} must have supportOwner`);
+    assert.ok(t.reviewDate && /^\d{4}-\d{2}-\d{2}$/.test(t.reviewDate), `${id} must have reviewDate`);
+    if (t.supportClaim === 'supported') {
+      assert.strictEqual(`${t.os}/${t.architecture}`, 'windows/amd64', 'only native host may claim supported');
+    } else {
+      assert.ok(['experimental', 'unsupported'].includes(t.supportClaim));
+    }
   }
+
   const d = m.deriveTargetStates(real, tmp(), ctx);
   for (const t of real.targetDefinitions) assert.strictEqual(d.targets[t.id].state, 'not-assessed');
   assert.strictEqual(m.verifyMatrixClaims(real, d).verdict, 'claim-exceeds-evidence');
+  assert.strictEqual(m.verifyUniversalSupport(real, d).verdict, 'claim-exceeds-evidence');
 });

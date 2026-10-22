@@ -60,7 +60,7 @@ const defaultHttpTransport: HttpTransport = async (req: HttpTransportRequest): P
 };
 
 /**
- * Sovereign Production Adapter for Air Roofers AI Fabric (https://ai.airroofers.eu).
+ * Sovereign Production Adapter for Air Roofers AI Fabric.
  */
 export class AirRoofersAiProviderAdapter implements InferenceProvider {
     public readonly providerId: string;
@@ -101,11 +101,55 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
         };
     }
 
-    private getBaseUrl(): string {
+    public getBaseUrl(): string {
         const provider = this.catalog.getProvider(this.providerId);
         const envVar = provider?.endpointEnvVar || 'UGONDU_AIRROOFERS_AI_BASE_URL';
-        const defaultEp = provider?.defaultEndpoint || 'https://ai.airroofers.eu';
-        return (process.env[envVar] || defaultEp).replace(/\/+$/, '');
+        const rawUrl = process.env[envVar] || provider?.defaultEndpoint;
+
+        if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) {
+            throw new AiGatewayError(
+                'AIRROOFERS_AI_ENDPOINT_REQUIRED' as any,
+                'Air Roofers AI endpoint configuration is required; fallback to hardcoded default is prohibited by zero-hardcoding governance',
+                500,
+                { providerId: this.providerId, envVar }
+            );
+        }
+
+        let parsed: URL;
+        try {
+            parsed = new URL(rawUrl.trim());
+        } catch {
+            throw new AiGatewayError(
+                'AIRROOFERS_AI_ENDPOINT_MALFORMED' as any,
+                'Air Roofers AI endpoint URL is malformed: ' + rawUrl,
+                400,
+                { providerId: this.providerId, rawUrl }
+            );
+        }
+
+        if (parsed.protocol !== 'https:') {
+            throw new AiGatewayError(
+                'AIRROOFERS_AI_ENDPOINT_INSECURE' as any,
+                'Air Roofers AI endpoint must use HTTPS protocol, received: ' + parsed.protocol,
+                400,
+                { providerId: this.providerId, protocol: parsed.protocol }
+            );
+        }
+
+        if (
+            provider?.supportedRegions &&
+            !['ai.airroofers.eu', 'ai-staging.airroofers.eu', 'ai.airroofers.de', 'ai.airroofers.fr'].includes(parsed.hostname) &&
+            !parsed.hostname.endsWith('.airroofers.eu')
+        ) {
+            throw new AiGatewayError(
+                'AIRROOFERS_AI_ENDPOINT_DISALLOWED' as any,
+                'Air Roofers AI endpoint host is not permitted by residency policy: ' + parsed.hostname,
+                403,
+                { providerId: this.providerId, hostname: parsed.hostname }
+            );
+        }
+
+        return rawUrl.trim().replace(/\/+$/, '');
     }
 
     public async capabilities(): Promise<ModelCapability[]> {

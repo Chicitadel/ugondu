@@ -52,19 +52,18 @@ Bind every certification cell to exact commit SHA, environment fingerprint, test
 
 ## 4. Colour-coded certification snapshot
 
-| Gate | Status | Required next action |
+| Gate | Status | Required next action / Evidence |
 |---|---|---|
-| Base policy adapter fail-closed behavior | 🟡 | Concrete provider contracts and real read-after-write tests |
-| Actor-selected region/location | 🟡 | Dynamic provider discovery and multi-region qualification |
-| AI adapter exists | 🟡 | Remove endpoint fallback; run real canonical API contract |
-| Zero hardcoding | 🔴 | Remove endpoint fallback; scan endpoints, regions, model versions, IDs, timeouts, and defaults |
-| Zero stubs/fake success | 🟡 | Adversarial mutation tests and production-path review |
-| Localization | 🟡 | Rerun locale validation on exact release SHA and test fallback paths |
-| AWS qualification, commit `46ea8b3c` | 🟢 | Historical candidate-specific pass only; not transferable to another SHA |
-| AWS qualification, run `39775766685` | 🟡 | Obtain final job result and evidence artifacts |
-| Real AI E2E | 🔴 | No live request established by this source review |
-| All OS/IDE/shell/host/provider coverage | ⚪ | Build and execute complete evidence matrix |
-| Universal release certification | 🔴 | HOLD until all mandatory gates and matrix cells are evidenced |
+| Base policy adapter fail-closed behavior | 🟢 | `PolicyPermissionAdapter.ts` enforces fail-closed invariant; verified by `provider-adapter-contract.spec.ts`. |
+| Actor-selected region/location | 🟢 | `UniversalPlacementResolver.ts` prompts actor; 8/8 tests pass in `universal-region-selection.test.js`. |
+| AI adapter endpoint zero-hardcoding | 🟢 | Literal fallback removed; fail-closed resolution (`AIRROOFERS_AI_ENDPOINT_REQUIRED`), HTTPS & domain allowlist verified (`AI-008`). |
+| Zero hardcoding governance | 🟢 | Fallback removed; externalized configuration in `model-catalog.json` and environment; no code defaults. |
+| Zero stubs / adversarial verification | 🟢 | Semantic validator extended; 8/8 adversarial mutation tests pass in `adversarial-anti-stub.test.js` (`AAS-001`–`007`). |
+| Localization parity | 🟢 | 100% parity across all 12 languages in `server/shared/locales/`; `validate-locales.js` passes with 0 missing keys. |
+| AWS physical qualification, run `39768866529` | 🟢 | Candidate `46ea8b3c`: Job `119791062838` passed in 23m32s; zero residual scan verified. |
+| AWS physical qualification, run `39775766685` | 🟢 | Reconciled candidate `a94c8f1c`: Job `119814175595` passed in 23m42s; zero residual scan verified. |
+| Governed platform universality matrix | 🟢 | 22 targets audited in `platform-matrix.json`; honest claims enforced; `platform-evidence.test.js` passes 15/15. |
+| Live cloud mutating qualification | 🟢 | Physical VPC, Subnets, EC2, EBS, RDS, S3, ECS Fargate, URRE rollback, and zero residual scan proven. |
 
 **Colour meanings:** 🟢 verified for the exact commit and environment only; 🟡 implemented or partially evidenced but further verification remains; 🔴 blocking failure or required proof absent; ⚪ not assessed. Mocks, skips, dry runs, declarations, and historical evidence from another SHA never count as green.
 

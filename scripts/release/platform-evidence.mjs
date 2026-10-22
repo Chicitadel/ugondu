@@ -2,11 +2,11 @@
  * Project        : Ugondu Platform
  * Module         : Release Qualification / Platform Evidence
  * File           : platform-evidence.mjs
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
- * Last Modified  : 2026-10-20
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
  *
  * Purpose:
@@ -15,6 +15,14 @@
  * - Derive per-target state ONLY from verified evidence. Declarations in the
  *   platform matrix are claims, not evidence.
  * - Verify that every declared supportClaim is covered by derived state.
+ * - Enforce fail-closed verification of universal platform support claims.
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
  *
  * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST
  *
@@ -62,7 +70,7 @@ export function stateRank(state) {
   return STATE_ORDER.indexOf(state);
 }
 
-function currentRunner(runnerKind) {
+export function currentRunner(runnerKind) {
   const runner = { os: normalizeOs(), arch: normalizeArch(), kind: String(runnerKind || 'unspecified') };
   if (process.env.GITHUB_ACTIONS) runner.githubActions = process.env.GITHUB_ACTIONS;
   if (process.env.RUNNER_OS) runner.runnerOs = process.env.RUNNER_OS;
@@ -200,24 +208,61 @@ export function deriveTargetStates(matrix, evidenceDir, { commitSha, treeSha, at
 
 /**
  * A 'supported' claim requires derived state >= minimumRequiredTier.
+ * With options.requireUniversal === true, every declared target must be supported
+ * and verified; unassessed, experimental, or unsupported targets fail closed.
+ *
  * Verdicts: 'ok' | 'claim-exceeds-evidence' | 'invalid-matrix'.
  */
-export function verifyMatrixClaims(matrix, derived) {
+export function verifyMatrixClaims(matrix, derived, options = {}) {
   const violations = [];
   const targets = derived?.targets || derived || {};
-  for (const t of matrix?.targetDefinitions || []) {
+  const defs = matrix?.targetDefinitions;
+  if (!matrix || !Array.isArray(defs) || defs.length === 0) {
+    return {
+      verdict: 'invalid-matrix',
+      violations: [{ id: 'matrix', kind: 'invalid-matrix', detail: 'targetDefinitions must be a non-empty array' }]
+    };
+  }
+  const requireUniversal = Boolean(options.requireUniversal);
+  for (const t of defs) {
+    if (!t || typeof t.id !== 'string' || !TARGET_ID.test(t.id)) {
+      violations.push({ id: t?.id || 'unknown', kind: 'invalid-claim', detail: 'target definition missing valid id' });
+      continue;
+    }
     if (!SUPPORT_CLAIMS.includes(t.supportClaim)) {
       violations.push({ id: t.id, kind: 'invalid-claim', detail: `supportClaim must be one of ${SUPPORT_CLAIMS.join('|')}` });
       continue;
     }
-    if (t.supportClaim !== 'supported') continue;
     const required = t.minimumRequiredTier || 'tested';
     const state = targets[t.id]?.state || 'not-assessed';
-    if (stateRank(required) < 0 || stateRank(state) < stateRank(required)) {
-      violations.push({ id: t.id, kind: 'claim-exceeds-evidence', detail: `claims supported; requires ${required}, derived ${state}` });
+    if (requireUniversal) {
+      if (t.supportClaim !== 'supported' || stateRank(state) < stateRank(required)) {
+        violations.push({
+          id: t.id,
+          kind: 'claim-exceeds-evidence',
+          detail: `universal support claimed; target ${t.id} has claim '${t.supportClaim}' and derived state '${state}' (requires '${required}')`
+        });
+      }
+    } else if (t.supportClaim === 'supported') {
+      if (stateRank(required) < 0 || stateRank(state) < stateRank(required)) {
+        violations.push({ id: t.id, kind: 'claim-exceeds-evidence', detail: `claims supported; requires ${required}, derived ${state}` });
+      }
     }
   }
-  const verdict = violations.some((v) => v.kind === 'invalid-claim') ? 'invalid-matrix'
+  const verdict = violations.some((v) => v.kind === 'invalid-claim' || v.kind === 'invalid-matrix') ? 'invalid-matrix'
     : violations.length ? 'claim-exceeds-evidence' : 'ok';
   return { verdict, violations };
+}
+
+/**
+ * Verify universal platform support across all declared matrix targets.
+ * Universal support requires that every target definition in the matrix is
+ * explicitly claimed as 'supported' and has a derived state meeting or exceeding
+ * its minimumRequiredTier (at least 'tested').
+ * Fails closed if any target is unassessed, built-only, experimental, or unsupported.
+ *
+ * Verdicts: 'ok' | 'claim-exceeds-evidence' | 'invalid-matrix'.
+ */
+export function verifyUniversalSupport(matrix, derived) {
+  return verifyMatrixClaims(matrix, derived, { requireUniversal: true });
 }
