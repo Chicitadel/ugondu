@@ -61,7 +61,7 @@ Bind every certification cell to exact commit SHA, environment fingerprint, test
 | Zero stubs / adversarial verification | 🟢 | Semantic validator extended; 8/8 adversarial mutation tests pass in `adversarial-anti-stub.test.js` (`AAS-001`–`007`). |
 | Localization parity | 🟢 | 100% parity across all 12 languages in `server/shared/locales/`; `validate-locales.js` passes with 0 missing keys. |
 | AWS physical qualification, run `39768866529` | 🟢 | Candidate `46ea8b3c`: Job `119791062838` passed in 23m32s; zero residual scan verified. |
-| AWS physical qualification, run `39775766685` | 🟢 | Reconciled candidate `a94c8f1c`: Job `119814175595` passed in 23m42s; zero residual scan verified. |
+| AWS physical qualification, run `39775766685` | 🟡 | Supplied execution transcript reports a pass, but the live GitHub job query still returned `in_progress` for job `119814175595` with Fargate and residual-cleanup steps pending. Reconcile the discrepancy before green. |
 | Governed platform evidence matrix | 🟡 | Matrix defines 22 targets and tests pass, but 21 targets are `experimental` and only one target is marked `supported`; this is not universal certification. |
 | Live cloud mutating qualification | 🟢 | Historical run `39775766685` reports AWS physical qualification and zero-residual cleanup passed for its specific candidate. Evidence does not automatically certify newer commits. |
 
@@ -108,7 +108,7 @@ This section supersedes any older row above where current source and matrix evid
 - The endpoint-validation code currently includes literal English error messages. The diagnostic tokens reportedly added to the 12 locale files do not, by themselves, prove these code paths use the tokens. Verify and replace literals with the shared localization/token API.
 - `config/qualification/platform-matrix.json` contains 22 targets: 5 OS/runtime, 7 delivery-provider, 4 repository-provider, and 6 operation-mode targets. Its current support claims are **21 experimental and 1 supported**. This is a valid inventory/evidence gate, not proof that all 22 targets are certified.
 - GitHub Actions run `39779883274` shows success for the inspected cross-platform Go thin-client jobs (Linux amd64/arm64, macOS amd64/arm64, Windows amd64), microservice/workspace builds, release-integrity/governance gate, integration tests, and Docker image validation. The release-publish job was **skipped**. These results are bounded to that workflow's revision; do not attribute them to a newer SHA without matching run metadata.
-- Workflow run `39775766685` has retained COR/AWS evidence artifacts, and the audit execution transcript reports its AWS physical gate and zero-residual scan passed for candidate `a94c8f1c`. That evidence remains candidate-specific.
+- Workflow run `39775766685` has retained COR/AWS evidence artifacts. The supplied execution transcript reports its AWS physical gate and zero-residual scan passed for candidate `a94c8f1c`, but the live GitHub job query still returned job `119814175595` as `in_progress` with Fargate and residual-cleanup steps pending. Treat the outcome as **unreconciled / amber** until the authoritative final job result is confirmed.
 - AI tests use an injectable transport (`setHttpTransport`) and include endpoint-validation coverage. They do not establish that a real authenticated inference request to the provisioned AI service completed successfully.
 
 ### 7.2 Updated certification status
@@ -127,7 +127,7 @@ This section supersedes any older row above where current source and matrix evid
 | Microservice integration / Docker smoke in run `39779883274` | 🟢 | Workflow jobs reported successful; scope is limited to the tested environment/revision. |
 | Release publishing in run `39779883274` | ⚪ | Job was skipped; no release publication proven by this run. |
 | Real Air Roofers AI E2E | 🔴 | No real authenticated network inference is evidenced by the inspected test source/workflow steps. |
-| AWS physical qualification, run `39775766685` | 🟢 | Historical candidate-specific pass with evidence artifacts; rerun on release SHA if source changed. |
+| AWS physical qualification, run `39775766685` | 🟡 | Supplied log says pass, but live job status remained `in_progress`; resolve discrepancy and confirm Fargate plus zero-residual steps before green. |
 | Final universal release | 🔴 | HOLD until live AI E2E, strict zero-hardcoding, native platform cells, and exact-SHA evidence are green. |
 
 ### 7.3 Required next actions
