@@ -197,3 +197,26 @@ Full supporting detail: [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDE
 | **Overall disposition** | **🔴 HOLD — NOT UNIVERSALLY CERTIFIED** | Software and physical infrastructure gates proven; live external API, native runners, and branch protection remain open prerequisites |
 
 New plan: [Universal implementation blueprint and remediation runbook](COR_UNIVERSAL_IMPLEMENTATION_BLUEPRINT_2026-10-22.md). It specifies AI live-canary activation, model switching/fallback, zero-hardcoding and anti-stub controls, native target/provider/IDE/host qualification, E2E, evidence schema, branch governance, and acceptance criteria.
+
+
+## Evidence refresh — 2026-10-22 19:37 UTC
+
+Audited candidate SHA: `20cd10e0279eb2e31c7287bb9755e6c9ca4923ca`. COR [run 39836403693](https://github.com/Chicitadel/ugondu/actions/runs/39836403693), CI/CD push [39836403695](https://github.com/Chicitadel/ugondu/actions/runs/39836403695), CI/CD PR [39836411537](https://github.com/Chicitadel/ugondu/actions/runs/39836411537), and brand audit [39836411535](https://github.com/Chicitadel/ugondu/actions/runs/39836411535) all completed successfully on that SHA. COR included successful AWS physical qualification, Fargate qualification and zero-residual cleanup. Artifacts were listed and not expired.
+
+| Gate | Status at 19:37 UTC | Evidence / next step |
+|---|---|---|
+| COR + final release gate | 🟢 PASS on audited SHA | Run 39836403693; all three jobs succeeded. |
+| AWS physical + Fargate + zero residual | 🟢 PASS on audited SHA | Physical job 120025779427 succeeded; do not transfer status to later SHA without policy-approved evidence equivalence. |
+| CI/CD push and PR | 🟢 PASS on audited SHA | Runs 39836403695 and 39836411537. |
+| Brand asset audit | 🟢 PASS on audited SHA | Run 39836411535. |
+| Authenticated Air Roofers AI inference | 🔴 OPEN | Authenticated live canary and response-schema/provenance receipt still required. |
+| Live multi-model switch/fallback | 🔴 OPEN | Prove two real enabled routes and controlled fallback. |
+| Native OS/architecture universality | 🟠 PARTIAL | Native linux/arm64 and darwin/amd64 behavioral execution still required. |
+| IDE/host/provider matrix | 🟠 PARTIAL | Per-operation live evidence or fail-closed unsupported result. |
+| Branch protection | 🔴 GAP CONFIRMED | Branch API still reports protection disabled and required status enforcement off. |
+| Independent sign-off | 🔴 OPEN | Independent assessor approval against final SHA manifest. |
+| **Overall disposition** | **🔴 HOLD** | Current operational COR/AWS gates are green, but universal AI/platform/governance prerequisites remain open. |
+
+Detailed findings and remediation: [COR re-audit status and findings — 19:37 UTC](COR_REAUDIT_STATUS_AND_FINDINGS_2026-10-22_1937.md).
+
+**Freshness rule:** this dashboard update creates a new commit. The green runs above are evidence for the audited SHA `20cd10e...`, not automatically for the new documentation commit. Re-run/verify the required checks for the resulting HEAD.
