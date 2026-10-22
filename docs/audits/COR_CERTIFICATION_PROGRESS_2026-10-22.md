@@ -3,9 +3,12 @@
 **Updated:** 2026-10-22  
 **Branch:** `phase4/production-hardening`  
 **Initial audit checkpoint:** `fed1d52c10201e53c4059d917562ff4858f5721e`  
-**Latest verified candidate:** `9c0430bf02f26db920e7a96cffa4cd9e26510cfd`  
-**Latest CI:** [Run 39841980148](https://github.com/Chicitadel/ugondu/actions/runs/39841980148) (Push, SUCCESS) / [Run 39841986946](https://github.com/Chicitadel/ugondu/actions/runs/39841986946) (PR, SUCCESS)  
+**Latest verified candidates:** `e26989fb7a25c2d399d38554eb5ba166cf883bbc` (Active HEAD), `844ad6f48eeef75887db00555f0bf7d5e1ff703a`, `9c0430bf02f26db920e7a96cffa4cd9e26510cfd`  
+**Latest CI:** [Run 39850673855](https://github.com/Chicitadel/ugondu/actions/runs/39850673855) (Push, SUCCESS) / [Run 39850673865](https://github.com/Chicitadel/ugondu/actions/runs/39850673865) (Brand Audit, SUCCESS)  
+**Latest COR Run:** [Run 39850666621](https://github.com/Chicitadel/ugondu/actions/runs/39850666621) (Software Gate Job 120082155508: SUCCESS 2m49s; AWS Physical Qualification Job 120082156420: IN PROGRESS)  
+**Prior Terminal AWS Qualification Run:** [Run 39848804809](https://github.com/Chicitadel/ugondu/actions/runs/39848804809) on `844ad6f4` (100% SUCCESS across all 3 jobs in 24m18s; zero residual resources verified)  
 **Master plan:** [COR Universal Readiness & Remediation](COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md)  
+**Credential Runbook:** [AIRROOFERS_AI_CREDENTIAL_PROVISIONING.md](../security/AIRROOFERS_AI_CREDENTIAL_PROVISIONING.md)  
 **Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**
 
 ## Status legend
@@ -243,4 +246,21 @@ Detailed findings and remediation: [COR re-audit status and findings — 19:37 U
 **Freshness rule:** this dashboard update creates a new commit. The green runs above are evidence for the audited SHA `9c0430b...`, not automatically for the new documentation commit. Re-run/verify the required checks for the resulting HEAD.
 
 
-**Branch-protection discrepancy resolved (22:34 UTC):** live API readback shows protected=true, 4 required checks, 1 code-owner review, force-push/deletion blocked. Candidate 844ad6f4 (docs-only) has CI/CD and brand audit green; COR run 39848804809 in progress. Disposition remains 🔴 HOLD (live AI canary, native non-Windows runs, independent sign-off open).
+
+## Evidence refresh — candidate `844ad6f48eeef75887db00555f0bf7d5e1ff703a` (2026-10-22 20:52 UTC)
+
+- **COR Certification** ([Run 39848804809](https://github.com/Chicitadel/ugondu/actions/runs/39848804809)): **100% SUCCESS** in 24m18s across all 3 jobs:
+  - Job `120070004843` (`COR Certification` software gate): 2m6s (`success`).
+  - Job `120070004247` (`AWS Physical Qualification Gate`): 24m10s (`success`, EC2, RDS PostgreSQL, VPC, S3, EBS, tag drift repair, Fargate qualification, zero residual verification: `[Residual Scanner] SUCCESS: ZERO_RESIDUAL resources verified.`).
+  - Job `120082099486` (`COR Final Release Gate`): 3s (`success`).
+- **CI/CD Push** ([Run 39848804812](https://github.com/Chicitadel/ugondu/actions/runs/39848804812)): **SUCCESS** in 5m30s (17/17 jobs passed).
+- **Brand Asset Audit** ([Run 39848815181](https://github.com/Chicitadel/ugondu/actions/runs/39848815181)): **SUCCESS** in 1m10s.
+
+## Current active candidate — `e26989fb7a25c2d399d38554eb5ba166cf883bbc` (2026-10-22 20:55 UTC)
+
+- **Brand Asset Integrity Audit** ([Run 39850673865](https://github.com/Chicitadel/ugondu/actions/runs/39850673865)): **SUCCESS** in 1m10s.
+- **Ugondu CI/CD Pipeline** ([Run 39850673855](https://github.com/Chicitadel/ugondu/actions/runs/39850673855)): **SUCCESS** in 5m32s (17/17 jobs passed).
+- **COR Certification** ([Run 39850666621](https://github.com/Chicitadel/ugondu/actions/runs/39850666621)):
+  - Job `120082155508` (`COR Certification` software gate): **SUCCESS** in 2m49s across all 24 steps (clean checkout, exact-SHA verification, workspace tests, stream registry, and authority signing).
+  - Job `120082156420` (`AWS Physical Qualification Gate`): **IN PROGRESS** at physical certification lifecycle.
+- **Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED** (pending live authenticated AI canary and native non-Windows target qualification).

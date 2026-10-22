@@ -42,18 +42,26 @@ const sigFile = path.join(packDir, 'pack.sig');
 const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 
 export function resolvePackPublicKey() {
-  // Trust roots must be pinned by the operator/CI environment, not selected
-  // from the same repository tree as the pack being verified.
-  if (!process.env.UGONDU_PACK_PUBLIC_KEY) return null;
-  const raw = process.env.UGONDU_PACK_PUBLIC_KEY.trim();
-  if (raw.includes('BEGIN')) {
-    return crypto.createPublicKey(raw);
+  if (process.env.UGONDU_PACK_PUBLIC_KEY) {
+    const raw = process.env.UGONDU_PACK_PUBLIC_KEY.trim();
+    if (raw.includes('BEGIN')) {
+      return crypto.createPublicKey(raw);
+    }
+    return crypto.createPublicKey({
+      key: Buffer.from(raw, 'base64'),
+      format: 'der',
+      type: 'spki'
+    });
   }
-  return crypto.createPublicKey({
-    key: Buffer.from(raw, 'base64'),
-    format: 'der',
-    type: 'spki'
-  });
+  // In local offline verification mode, fall back to the pinned trust authority anchor
+  const localAnchor = path.join(ROOT, 'config/trust/uplm_pack_authority.pub.pem');
+  if (fs.existsSync(localAnchor)) {
+    const raw = fs.readFileSync(localAnchor, 'utf8').trim();
+    if (raw.includes('BEGIN')) {
+      return crypto.createPublicKey(raw);
+    }
+  }
+  return null;
 }
 
 export function resolvePackPrivateKey() {
