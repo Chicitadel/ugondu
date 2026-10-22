@@ -193,3 +193,21 @@ Reference the full [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_R
 - [ ] Keep release disposition 🔴 HOLD until all mandatory gates pass on the same candidate SHA.
 
 Implementation details and safe command/code templates: [COR universal implementation blueprint](COR_UNIVERSAL_IMPLEMENTATION_BLUEPRINT_2026-10-22.md).
+
+
+## Evidence reconciliation — 2026-10-22 19:37 UTC
+
+The last fully inspected candidate was `20cd10e0279eb2e31c7287bb9755e6c9ca4923ca`. COR run [39836403693](https://github.com/Chicitadel/ugondu/actions/runs/39836403693), CI/CD push [39836403695](https://github.com/Chicitadel/ugondu/actions/runs/39836403695), CI/CD PR [39836411537](https://github.com/Chicitadel/ugondu/actions/runs/39836411537), and brand audit [39836411535](https://github.com/Chicitadel/ugondu/actions/runs/39836411535) succeeded on that exact SHA. The physical AWS job also passed physical certification, Fargate qualification and zero-residual cleanup.
+
+- [x] COR, physical AWS qualification, Fargate and zero-residual cleanup passed on candidate `20cd10e...`.
+- [x] CI/CD push, CI/CD PR and brand audit passed on candidate `20cd10e...`.
+- [ ] Run or verify required CI/COR/brand checks on the latest HEAD created by this documentation refresh.
+- [ ] Execute authenticated Air Roofers AI live canary using the verified API contract and protected short-lived credentials.
+- [ ] Prove live model switching and fallback across at least two real enabled routes.
+- [ ] Native-run linux/arm64 and darwin/amd64 and every other advertised OS/architecture cell.
+- [ ] Complete provider/host/IDE/entrypoint matrix with real operations or fail-closed unsupported outcomes.
+- [ ] Enable branch protection and verify required checks/reviews through authorized API readback.
+- [ ] Obtain independent second-party sign-off on the final candidate SHA and evidence manifest.
+- [ ] Keep overall status 🔴 HOLD until every mandatory gate is green on the same final candidate SHA.
+
+See [COR re-audit status and findings — 19:37 UTC](COR_REAUDIT_STATUS_AND_FINDINGS_2026-10-22_1937.md) for evidence IDs, open findings and remediation acceptance criteria.
