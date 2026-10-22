@@ -172,3 +172,22 @@ Reference the full [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_R
 - [ ] Obtain native target evidence for Linux/ARM64 and macOS/AMD64 before marking those cells green.
 - [ ] Re-run physical qualification on the final release candidate SHA or explicitly bind the prior physical evidence to an approved immutable artifact equivalence rule.
 - [ ] Keep release disposition 🔴 HOLD until all mandatory gates are satisfied.
+
+
+## Re-audit checklist refresh — 2026-10-22 18:23 UTC
+
+Candidate documentation commit: `f256edd9f3a74de5beb7f0bf83e1f9e3f3a91d20`. The CI/CD, brand and COR runs previously observed at `220457f6...` are not automatically inherited by this new SHA.
+
+- [ ] Fetch latest CI/CD, brand audit and COR run status for `f256edd9...`; inspect every required job and artifact.
+- [ ] Resolve [COR run 39827082703](https://github.com/Chicitadel/ugondu/actions/runs/39827082703), which was still running on prior SHA `220457f6...` at the last observation.
+- [ ] Run authenticated live inference against the verified Air Roofers API contract with a short-lived secret and sanitized receipt.
+- [ ] Prove live model selection/switching/fallback across at least two approved real routes; test invalid credentials, disabled models, timeouts, rate limits and upstream errors.
+- [ ] Native-run every declared supported OS/architecture target; do not mark cross-compiled-only targets green.
+- [ ] Exercise each advertised provider/host/IDE operation in its real environment or enforce `UNSUPPORTED_CAPABILITY` before side effects.
+- [ ] Re-run zero-hardcoding, anti-stub, vacuous-test and production/test-boundary mutation tests on final candidate.
+- [ ] Run physical provider lifecycle, drift repair, rollback, cleanup and independent zero-residual scan on final candidate, with actor-approved region/account and cost boundary.
+- [ ] Enable branch protection/rulesets and verify API readback shows required checks/reviews enabled.
+- [ ] Generate final SHA-bound evidence manifest, validate digests/provenance, and obtain independent COR sign-off.
+- [ ] Keep status 🔴 HOLD until all mandatory gates are green on the same exact candidate SHA.
+
+Implementation details and safe command/code templates: [COR universal implementation blueprint](COR_UNIVERSAL_IMPLEMENTATION_BLUEPRINT_2026-10-22.md).
