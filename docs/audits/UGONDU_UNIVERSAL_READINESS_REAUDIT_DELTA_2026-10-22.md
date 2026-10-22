@@ -5,6 +5,7 @@
 **Branch inspected:** `phase4/production-hardening`  
 **Audit type:** Source re-read and workflow evidence reconciliation  
 **Disposition:** **HOLD / NO-GO for universal release**  
+**Execution checklist:** [Master execution and certification checklist](./UGONDU_MASTER_EXECUTION_AND_CERTIFICATION_CHECKLIST_2026-10-22.md)  
 **Related baseline:** [Core audit and remediation plan](./UGONDU_COR_UNIVERSAL_READINESS_AUDIT_REMEDIATION_PLAN_2026-10-22.md)  
 **Related sign-off:** [Universal platform readiness sign-off](./UGONDU_COR_UNIVERSAL_PLATFORM_READINESS_CERTIFICATION_SIGN_OFF_2026-10-22.md)
 
