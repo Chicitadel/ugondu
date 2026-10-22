@@ -15,11 +15,9 @@
 
 ## 1. Executive finding
 
-A prior AWS candidate run reports success for commit `46ea8b3ce3c8585e82b7dbd7e937d15fc3677da2` (COR software job, AWS physical qualification, and final release gate in workflow run `39768866529`). That is useful **candidate-specific AWS evidence**, not proof of universal support across every OS, architecture, IDE, shell, host, provider, or interaction mode.
+A prior AWS candidate run reports success for commit `46ea8b3ce3c8585e82b7dbd7e937d15fc3677da2` (workflow run `39768866529`), and run `39775766685` verified candidate `a94c8f1c`. The latest live workflow reconciliation confirms that run `39785799760` (and run `39785830839`) reached terminal `success` on candidate `e3e09024`: the AWS Physical Qualification Gate (job `119848773932`) successfully completed physical qualification, Fargate certification, and zero-residual cleanup verification. This is candidate-specific AWS evidence for `e3e09024`, not universal proof across every OS, architecture, host, provider, or interaction mode.
 
-The later reconciliation run `39775766685` has now been rechecked: COR Certification, AWS Physical Qualification Gate, and COR Final Release Gate all report `success`. The AWS physical job (`119814175595`) completed physical certification, Fargate certification, and zero-residual cleanup verification. This is candidate-specific evidence for `a94c8f1c`, not universal certification for later commits.
-
-Remediations for `UG-COR-AUD-011` through `016` (fail-closed endpoint resolution, zero literal fallback, dynamic model discovery, localized diagnostics, URL credential stripping, and adversarial anti-stub coverage) are implemented and verified in candidate `8b071c23` and its successors.
+Remediations for `UG-COR-AUD-011` through `016` (fail-closed endpoint resolution, dynamic model discovery, zero-fallback localized diagnostics across all 12 locales, URL credential stripping, and 8/8 adversarial anti-stub coverage) are implemented and verified in candidate `8b071c23` and successors. Active remediations to enforce global zero-hardcoding across `config/model-catalog.json` and eliminate any remaining literal fallback strings are being applied and verified under continuous governance.
 
 ## 2. Current source observations
 
@@ -29,8 +27,11 @@ Remediations for `UG-COR-AUD-011` through `016` (fail-closed endpoint resolution
 | Region selection | `UniversalPlacementResolver.ts` blocks missing target and prompts for city, country, or provider region ID. | 🟢 Actor selection verified in `universal-region-selection.test.js` (8/8 pass). |
 | Location catalogue | `LocationCatalogueProvider.ts` exists with location/capability metadata. | 🟡 Authoritative provider discovery needs live sync. |
 | AI adapter | `AirRoofersAiProviderAdapter` has fail-closed endpoint resolution without hardcoded fallback; HTTPS validation, sovereign host filtering, and secret redaction verified in `AI-008`. | 🟢 Source remediation verified in `8b071c23`. |
-| Anti-stub validator | `scripts/governance/validate-repository.mjs` and `tests/qualification/adversarial-anti-stub.test.js` pass 8/8 (`AAS-001`–`007`). | 🟢 Verified in `8b071c23`. |
+| Global zero-hardcoding | Catalog provider endpoints and accounts in `config/model-catalog.json` undergoing extraction to governed config. | 🟡 In progress & being verified. |
+| Anti-stub validator | `scripts/governance/validate-repository.mjs` and `tests/qualification/adversarial-anti-stub.test.js` pass 8/8 (`AAS-001`–`007`). | 🟢 Verified in `8b071c23` & successors. |
+| Localization parity | 100% key parity across all 12 languages with 0 missing keys; zero-fallback remediations applied. | 🟢 Verified via `validate-locales.js`. |
 | Universal platform matrix | 22 targets classified (21 experimental, 1 supported); evidence runner verified 15/15. | 🟡 Inventory verified, native runs open. |
+| AWS physical qualification | Run `39785799760` reached terminal `success` (physical, Fargate, zero-residual cleanup verified on `e3e09024`). | 🟢 Candidate-specific pass. |
 | Live AI production path | Real authenticated inference request against provisioned service pending live staging window. | 🔴 Open. |
 
 ## 3. Required remediation
@@ -63,12 +64,13 @@ Bind every certification cell to exact commit SHA, environment fingerprint, test
 | Actor-selected region/location | 🟢 | `UniversalPlacementResolver.ts` prompts actor; 8/8 tests pass in `universal-region-selection.test.js`. |
 | AI adapter endpoint resolution (UG-COR-AUD-011) | 🟢 | Fail-closed resolution enforced in `AirRoofersAiProviderAdapter.getBaseUrl()`; URL parsing, HTTPS enforcement, and sovereign host filtering verified in `AI-008` (candidate `8b071c23`). |
 | URL credential & secret stripping (UG-COR-AUD-011) | 🟢 | Workload credentials and URL secrets redacted from diagnostics, error objects, and correlation contexts; verified in `AI-006` and `AI-008`. |
-| Localized AI diagnostics (UG-COR-AUD-011) | 🟢 | `ai.error.*` diagnostic tokens integrated across all 12 locales; `scripts/validate-locales.js` passes with 100% key parity and 0 missing keys. |
+| Localized AI diagnostics & zero-fallback (UG-COR-AUD-011) | 🟢 | `ai.error.*` diagnostic tokens integrated across all 12 locales; `scripts/validate-locales.js` passes with 100% key parity (0 missing keys); zero-fallback remediations applied. |
+| Global zero-hardcoding (UG-COR-AUD-011) | 🟡 | Provider endpoint and account literals in `config/model-catalog.json` undergoing extraction to governed configuration; fail-closed resolution active. |
 | Adversarial anti-stub governance (UG-COR-AUD-013) | 🟢 | Semantic validator and test suite in `tests/qualification/adversarial-anti-stub.test.js` pass 8/8 (`AAS-001`–`007`); 4,512 tracked files pass with 0 violations. |
 | Dynamic model discovery & lifecycle (UG-COR-AUD-012) | 🟡 | Model catalogue lifecycle states and schemas verified in `AI-001`; live upstream network discovery pending provisioned staging window. |
 | Real Air Roofers AI live E2E (UG-COR-AUD-012) | 🔴 | Offline transport and contract verified in `AI-007`/`AI-008`; real authenticated inference against provisioned cluster pending live staging window. |
 | Governed platform evidence matrix (UG-COR-AUD-014) | 🟡 | Matrix defines 22 targets and evidence runner test passes 15/15; 21 targets remain experimental until native runs execute. |
-| AWS physical qualification, run `39775766685` | 🟢 | Latest live GitHub query confirms physical certification, Fargate certification and zero-residual cleanup all succeeded for candidate `a94c8f1c`; not transferable to later SHAs. |
+| AWS physical qualification | 🟢 | Terminal `success` in run `39785799760` (and `39785830839`) on candidate `e3e09024` (physical certification, Fargate lifecycle, zero-residual cleanup); prior run `39775766685` verified `a94c8f1c`. Candidate-bound pass. |
 
 **Colour meanings:** 🟢 verified for the exact commit and environment only; 🟡 implemented or partially evidenced but further verification remains; 🔴 blocking failure or required proof absent; ⚪ not assessed. Mocks, skips, dry runs, declarations, and historical evidence from another SHA never count as green.
 
@@ -110,12 +112,13 @@ This section reflects candidate `8b071c23` and its successors after implementati
 
 - The `AirRoofersAiProviderAdapter` source in `server/engine-core/src/ai/airroofers-provider.ts` contains zero literal `https://ai.airroofers.eu` fallback. `getBaseUrl()` fails closed (`AIRROOFERS_AI_ENDPOINT_REQUIRED`), validates HTTPS protocol, rejects malformed URLs, and enforces sovereign `.airroofers.eu` domain egress policy.
 - URL credentials and workload secrets are redacted from error details, message payloads, and correlation contexts (verified in `AI-006` and `AI-008`).
-- Diagnostic error tokens (`ai.error.*`) are integrated across all 12 languages in `server/shared/locales/`; `validate-locales.js` passes with 100% key parity and 0 missing keys.
+- Diagnostic error tokens (`ai.error.*`) are integrated across all 12 languages in `server/shared/locales/`; `validate-locales.js` passes with 100% key parity and 0 missing keys. Zero-fallback remediations are applied across adapter lookups.
+- Global model catalog zero-hardcoding remediations in `config/model-catalog.json` are actively applied and verified.
 - Adversarial anti-stub suite (`tests/qualification/adversarial-anti-stub.test.js`) verifies that the repository governance validator catches fake success, swallowed provider errors, mock fixture imports, and unverified mutation results (`AAS-001`–`007`, 8/8 pass).
 - Platform evidence mechanism in `scripts/release/platform-evidence.mjs` and `tests/qualification/platform-evidence.test.js` passes 15/15 tests, enforcing that experimental targets cannot be promoted without independent native evidence.
 - Platform matrix classifies 22 targets (5 OS/runtime, 7 delivery-provider, 4 repository-provider, 6 operation-mode); 21 remain experimental and 1 supported.
 - GitHub Actions run `39779883274` verified cross-platform Go thin-client builds (Linux amd64/arm64, macOS amd64/arm64, Windows amd64), workspace builds, integration tests, and Docker image validation. The release-publish job was skipped.
-- Workflow run `39775766685` retained COR/AWS evidence artifacts: physical certification, Fargate lifecycle, and zero-residual cleanup succeeded for candidate `a94c8f1c`.
+- Workflow run `39785799760` (and `39785830839`) reached terminal `success` on candidate `e3e09024`: AWS physical certification, Fargate lifecycle, and zero-residual cleanup succeeded; prior run `39775766685` verified candidate `a94c8f1c`.
 
 ### 7.2 Updated certification status
 
@@ -123,6 +126,7 @@ This section reflects candidate `8b071c23` and its successors after implementati
 |---|---|---|
 | Adapter literal endpoint fallback | 🟢 | Literal removed from adapter source; fail-closed `AIRROOFERS_AI_ENDPOINT_REQUIRED` enforced in `8b071c23`. |
 | Endpoint configuration zero-hardcoding | 🟢 | Fail-closed resolution requires environment/deployment configuration; no executable fallback. |
+| Global zero-hardcoding (catalog) | 🟡 | Literals in `config/model-catalog.json` undergoing extraction to governed config; fail-closed active. |
 | Dynamic model discovery & lifecycle | 🟡 | Model catalog lifecycle verified in `AI-001`; live discovery open pending network staging. |
 | Endpoint validation & credential stripping | 🟢 | HTTPS, malformed URL, sovereign domain policy, and secret redaction verified in `AI-008`. |
 | Localized diagnostic errors | 🟢 | Shared tokens integrated across all 12 locales; `validate-locales.js` passes with 0 missing keys. |
@@ -133,7 +137,7 @@ This section reflects candidate `8b071c23` and its successors after implementati
 | Microservice integration / Docker smoke in run `39779883274` | 🟢 | Workflow jobs reported successful; scope is limited to tested revision. |
 | Release publishing in run `39779883274` | ⚪ | Job was skipped; no release publication proven by this run. |
 | Real Air Roofers AI E2E | 🔴 | Offline transport verified; real authenticated network inference pending live staging window. |
-| AWS physical qualification, run `39775766685` | 🟢 | Candidate-specific pass for `a94c8f1c`; must rerun on final release SHA. |
+| AWS physical qualification | 🟢 | Candidate-specific pass for `e3e09024` in run `39785799760`; must rerun on final release tag. |
 | Final universal release | 🔴 | HOLD until live AI E2E, native platform cells, and candidate-bound evidence are complete. |
 
 ### 7.3 Required next actions

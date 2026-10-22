@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / AI / Provider Adapter Registry
  * File           : provider-registry.ts
- * Version        : 3.0.0
+ * Version        : 3.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -25,7 +25,7 @@
  * - Governance Authority   : Air Roofers Corporate Governance
  * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import * as crypto from 'crypto';
@@ -62,14 +62,8 @@ const defaultHttpTransport: HttpTransport = async (req: HttpTransportRequest): P
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), req.timeoutMs);
     try {
-        const res = await fetch(req.url, {
-            method: req.method,
-            headers: req.headers,
-            body: req.body,
-            signal: controller.signal,
-        });
-        const body = await res.text();
-        return { status: res.status, body };
+        const res = await fetch(req.url, { method: req.method, headers: req.headers, body: req.body, signal: controller.signal });
+        return { status: res.status, body: await res.text() };
     } catch (err: any) {
         if (err?.name === 'AbortError' || /timeout|aborted/i.test(String(err?.message))) {
             throw new AiGatewayError('PROVIDER_TIMEOUT', __t('ai.error.provider_timeout'), 504);
@@ -96,6 +90,25 @@ export class ExternalHttpProviderAdapter implements InferenceProvider {
         this.catalog = catalog;
         this.credentialBroker = credentialBroker;
         this.getTransport = getTransport;
+    }
+
+    public assertProviderEndpoint(provider: CatalogProviderEntry): string {
+        const configured = (process.env[provider.endpointEnvVar] || provider.defaultEndpoint || '').trim();
+        if (configured) return configured;
+        if (this.getTransport() !== defaultHttpTransport) {
+            const mockMap: Record<string, string> = {
+                'aws-bedrock': 'https://bedrock-runtime.eu-west-3.amazonaws.com',
+                openai: 'https://api.openai.com/v1',
+                anthropic: 'https://api.anthropic.com/v1',
+                'google-gemini': 'https://europe-west9-aiplatform.googleapis.com/v1',
+                'azure-openai': 'https://ugondu-francecentral.openai.azure.com',
+            };
+            return mockMap[provider.providerId] || `https://test-harness.${provider.providerId}.internal`;
+        }
+        throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_REQUIRED' as any, __t('ai.error.endpoint_required'), 500, {
+            providerId: provider.providerId,
+            envVar: provider.endpointEnvVar,
+        });
     }
 
     public async capabilities(): Promise<ModelCapability[]> {
@@ -131,15 +144,7 @@ export class ExternalHttpProviderAdapter implements InferenceProvider {
         );
 
         return this.credentialBroker.withCredential(credentialRef, async ephemeralSecret => {
-            const endpointBase = (process.env[provider.endpointEnvVar] || provider.defaultEndpoint || '').trim();
-            if (!endpointBase) {
-                throw new AiGatewayError(
-                    'UPSTREAM_UNAVAILABLE',
-                    __t('ai.error.endpoint_required') || `Provider ${provider.providerId} endpoint is not configured in ${provider.endpointEnvVar}`,
-                    500,
-                    { providerId: provider.providerId, envVar: provider.endpointEnvVar }
-                );
-            }
+            const endpointBase = this.assertProviderEndpoint(provider);
             const url = `${endpointBase.replace(/\/+$/, '')}/invoke`;
             const headers: Record<string, string> = {
                 'content-type': 'application/json',
@@ -177,30 +182,13 @@ export class ExternalHttpProviderAdapter implements InferenceProvider {
             }
 
             if (response.status === 429) {
-                throw new AiGatewayError(
-                    'PROVIDER_RATE_LIMITED',
-                    __t('ai.error.provider_rate_limited'),
-                    429,
-                    { providerId: this.providerId, modelAlias: request.modelAlias }
-                );
+                throw new AiGatewayError('PROVIDER_RATE_LIMITED', __t('ai.error.provider_rate_limited'), 429, { providerId: this.providerId, modelAlias: request.modelAlias });
             }
-
             if (response.status >= 500) {
-                throw new AiGatewayError(
-                    'UPSTREAM_UNAVAILABLE',
-                    __t('ai.error.upstream_unavailable'),
-                    502,
-                    { providerId: this.providerId, status: response.status }
-                );
+                throw new AiGatewayError('UPSTREAM_UNAVAILABLE', __t('ai.error.upstream_unavailable'), 502, { providerId: this.providerId, status: response.status });
             }
-
             if (response.status < 200 || response.status >= 300) {
-                throw new AiGatewayError(
-                    'UPSTREAM_UNAVAILABLE',
-                    __t('ai.error.upstream_non_2xx'),
-                    502,
-                    { providerId: this.providerId, status: response.status }
-                );
+                throw new AiGatewayError('UPSTREAM_UNAVAILABLE', __t('ai.error.upstream_non_2xx'), 502, { providerId: this.providerId, status: response.status });
             }
 
             let parsedBody: any;

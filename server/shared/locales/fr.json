@@ -486,7 +486,7 @@
         "rev2": "Déploiement de la Révision 2 avec un condensat d'image non valide..."
       },
       "trigger_rollback": "Déclenchement de la restauration pour transactionId : {txId}",
-      "cleanup": "Nettoyage des ressources de certification Fargate...",
+      "cleanup": "Nettoyage des ressources éphémères de certification Fargate...",
       "complete": "\n✔ Exécution de la certification Fargate terminée."
     }
   },
@@ -499,7 +499,7 @@
       "residual_scan_failed": "Analyse résiduelle ÉCHOUÉE ! Fuite de ressources détectée.",
       "missing_region": "BLOQUÉ : UGONDU_CERT_REGION est requis",
       "missing_creds": "BLOQUÉ : UGONDU_CERT_RDS_CREDENTIAL_REF est requis",
-      "missing_volume_id": "ID de volume manquant",
+      "missing_volume_id": "L'identifiant de volume EBS est requis pour la vérification des instantanés.",
       "fargate": {
         "missing_digest": "Condensat physique de l'image manquant",
         "missing_taskdef_arn": "ARN de définition de tâche manquant",
@@ -915,7 +915,7 @@
   "reapply_frozen_authority_matri": "Reapply Frozen Autorité Matrix",
   "standard_automated_remediation": "Standard Automated Remediation (valeur système)",
   "cors_policy_violation": "Violation de la politique CORS",
-  "unimplemented_autonomous_code_": "NON IMPLÉMENTÉ : le plan de correctif de code autonome est préparé",
+  "unimplemented_autonomous_code_": "Le correctif de code autonome nécessite un plan de remédiation vérifié.",
   "unknown_credentials_command_tr": "Inconnu identifiants command. Try 'ugondu identifiants import <chemin>'.",
   "error_payload_required": "Erreur: Payload est requis",
   "cpanel_adapter_requires_specif": "CPanel adaptateur requires specific scoped identifiants (cpanelToken).",

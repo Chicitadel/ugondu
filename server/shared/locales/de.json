@@ -486,7 +486,7 @@
         "rev2": "Revision 2 wird mit ungültigem Image-Digest bereitgestellt..."
       },
       "trigger_rollback": "Rollback wird ausgelöst für transactionId: {txId}",
-      "cleanup": "Bereinigung der Fargate-Zertifizierungsressourcen...",
+      "cleanup": "Bereinigung kurzlebiger Fargate-Zertifizierungsressourcen...",
       "complete": "\n✔ Fargate-Zertifizierungslauf abgeschlossen."
     }
   },
@@ -499,7 +499,7 @@
       "residual_scan_failed": "Restbestands-Scan FEHLGESCHLAGEN! Ressourcen sind geleakt.",
       "missing_region": "BLOCKIERT: UGONDU_CERT_REGION ist erforderlich",
       "missing_creds": "BLOCKIERT: UGONDU_CERT_RDS_CREDENTIAL_REF ist erforderlich",
-      "missing_volume_id": "Fehlende Volume-ID",
+      "missing_volume_id": "EBS-Volume-ID ist für die Snapshot-Verifizierung erforderlich.",
       "fargate": {
         "missing_digest": "Physischer Image-Digest fehlt",
         "missing_taskdef_arn": "ARN der Aufgabendefinition fehlt",
@@ -915,7 +915,7 @@
   "reapply_frozen_authority_matri": "Reapply Frozen Autorität Matrix",
   "standard_automated_remediation": "Standard Automated Remediation (Systemwert)",
   "cors_policy_violation": "Verstoß gegen die CORS-Richtlinie",
-  "unimplemented_autonomous_code_": "NICHT IMPLEMENTIERT: Plan für autonomes Code-Patching ist als Gerüst angelegt",
+  "unimplemented_autonomous_code_": "Autonomes Code-Patching erfordert einen verifizierten Sanierungsplan.",
   "unknown_credentials_command_tr": "Unbekannt Anmeldedaten command. Try 'ugondu Anmeldedaten import <Pfad>'.",
   "error_payload_required": "Fehler: Payload ist erforderlich",
   "cpanel_adapter_requires_specif": "CPanel Adapter requires specific scoped Anmeldedaten (cpanelToken).",

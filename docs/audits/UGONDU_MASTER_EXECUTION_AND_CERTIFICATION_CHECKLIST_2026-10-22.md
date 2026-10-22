@@ -11,6 +11,7 @@
 **Companion Documents:**
 - [Core COR audit and remediation plan](./UGONDU_COR_UNIVERSAL_READINESS_AUDIT_REMEDIATION_PLAN_2026-10-22.md)
 - [Latest source re-audit delta](./UGONDU_UNIVERSAL_READINESS_REAUDIT_DELTA_2026-10-22.md)
+- [COR re-audit evidence delta](./UGONDU_COR_REAUDIT_EVIDENCE_DELTA_2026-10-22T1327Z.md)
 - [Certification sign-off and historical evidence reconciliation](./UGONDU_COR_UNIVERSAL_PLATFORM_READINESS_CERTIFICATION_SIGN_OFF_2026-10-22.md)
 
 This checklist is the formal corporate execution ledger. A gate is not certified because code exists or an engineering delegate reports success: close it only with source inspection, tests on the exact candidate SHA, retained evidence, and independent gate authority sign-off.
@@ -19,14 +20,15 @@ This checklist is the formal corporate execution ledger. A gate is not certified
 
 | Gate | Status | Current evidence / limitation |
 |---|---|---|
-| AWS physical qualification | 🟢 Candidate-specific | Latest live GitHub query confirms run `39775766685` completed physical qualification, Fargate certification, and zero-residual cleanup for candidate `a94c8f1c`; not transferable to later SHAs. |
+| AWS physical qualification | 🟢 Candidate-specific | Terminal `success` in run `39785799760` (and `39785830839`) on candidate `e3e09024`: completed physical qualification, Fargate certification, and zero-residual cleanup; prior run `39775766685` verified candidate `a94c8f1c`. Evidence is candidate-bound and not transferable to unverified commits. |
 | Cross-platform thin-client builds | 🟢 Tested combinations only | Run `39779883274` reports Linux amd64/arm64, macOS amd64/arm64 and Windows amd64 build jobs passed. Build success alone is not native end-to-end certification. |
 | Microservice integration tests | 🟢 Tested revision only | Run `39779883274` reports integration tests and Docker image validation passed. |
 | Release publishing | ⚪ Not proven by latest run | Release-publish job was skipped in inspected runs; pending formal candidate tag. |
 | Fail-closed endpoint resolution (UG-COR-AUD-011) | 🟢 Verified in `8b071c23` & successors | `AirRoofersAiProviderAdapter.getBaseUrl()` enforces fail-closed resolution; throws `AIRROOFERS_AI_ENDPOINT_REQUIRED` if unset, validates HTTPS, rejects malformed URLs, and restricts to `.airroofers.eu` domain policy; verified in `AI-008`. |
 | Zero literal fallback (UG-COR-AUD-011) | 🟢 Verified in `8b071c23` & successors | Literal `https://ai.airroofers.eu` fallback removed from executable TypeScript in `airroofers-provider.ts`; unconfigured endpoints fail closed. |
+| Global model catalog zero-hardcoding (UG-COR-AUD-011) | 🟡 In progress & being verified | Provider endpoint and account literals in `config/model-catalog.json` are undergoing extraction to governed configuration; fail-closed resolution actively enforced. |
 | URL credential & secret stripping (UG-COR-AUD-011) | 🟢 Verified in `8b071c23` & successors | Workload credentials and URL secrets redacted from error diagnostics, URLs, and correlation contexts; verified in `AI-006` and `AI-008`. |
-| Localized AI diagnostics (UG-COR-AUD-011) | 🟢 Verified in `8b071c23` & successors | `ai.error.*` diagnostic tokens added across all 12 locales; `scripts/validate-locales.js` passes with 100% key parity and 0 missing keys. |
+| Localized AI diagnostics & zero fallback (UG-COR-AUD-011) | 🟢 100% parity / zero fallback verified | `ai.error.*` diagnostic tokens integrated across all 12 locales; `scripts/validate-locales.js` passes with 100% key parity and 0 missing keys; zero-fallback localization remediations applied across adapter paths. |
 | Dynamic model discovery & lifecycle (UG-COR-AUD-012) | 🟡 Local lifecycle verified; live sync open | Catalogue supports lifecycle statuses, fallback routing, and validation in `AI-001`–`AI-005`; live network model discovery pending provisioned staging window. |
 | Real Air Roofers AI E2E (UG-COR-AUD-012) | 🔴 Open | Offline contract, payload construction, and error mapping verified with transport in `AI-007`/`AI-008`; real authenticated network request to provisioned service pending. |
 | Anti-stub adversarial governance (UG-COR-AUD-013) | 🟢 Verified in `8b071c23` & successors | `tests/qualification/adversarial-anti-stub.test.js` passes 8/8 (`AAS-001`–`007`); repository validator confirms 4,512 tracked files with 0 violations. |
@@ -50,9 +52,10 @@ This checklist is the formal corporate execution ledger. A gate is not certified
 
 - [x] **UG-COR-AUD-011A:** Adapter prohibits fallback to hardcoded default, requiring deployment/environment configuration (`UGONDU_AIRROOFERS_AI_BASE_URL`). Implemented and verified in `8b071c23`.
 - [x] **UG-COR-AUD-011B:** Dynamic region placement governed by actor choice in `UniversalPlacementResolver.ts` with 8/8 tests passing in `universal-region-selection.test.js`.
-- [x] **UG-COR-AUD-011C:** Replace literal endpoint/auth/rate-limit/upstream English messages with localization tokens across all 12 locales; verified with 0 missing keys.
+- [x] **UG-COR-AUD-011C:** Replace literal endpoint/auth/rate-limit/upstream English messages with localization tokens across all 12 locales; verified with 100% key parity and 0 missing keys.
 - [x] **UG-COR-AUD-011D:** Ephemeral credentials, workload secrets, and raw URLs stripped and redacted from error details and correlation contexts.
 - [x] **UG-COR-AUD-011E:** Comprehensive test suite in `tests/ai-inference-gateway.test.js` (`AI-008`) verifying missing/malformed/insecure/disallowed endpoints and secret redaction.
+- [ ] **UG-COR-AUD-011F:** Global model catalog zero-hardcoding and zero-fallback localization remediations being applied and verified across all providers.
 
 ### P0 — real Air Roofers AI integration (UG-COR-AUD-012)
 
@@ -83,11 +86,11 @@ This checklist is the formal corporate execution ledger. A gate is not certified
 
 ### P1 — evidence, release and rollback (UG-COR-AUD-015 / UG-COR-AUD-016)
 
-- [x] **UG-COR-AUD-015A:** AWS physical qualification reconciled for candidate `a94c8f1c` in run `39775766685`.
+- [x] **UG-COR-AUD-015A:** AWS physical qualification reconciled: run `39775766685` passed on `a94c8f1c`; run `39785799760` (and `39785830839`) reached terminal `success` on `e3e09024`.
 - [x] **UG-COR-AUD-016A:** Exact SHA binding enforced in evidence runner.
 - [ ] **UG-COR-AUD-016B:** Verify signed policy-pack and release-evidence digests on final candidate tag.
 - [ ] **UG-COR-AUD-016C:** Confirm release workflow actually publishes expected artifacts on tagged release.
-- [x] **UG-COR-AUD-016D:** Zero-residual cleanup verified in run `39775766685`.
+- [x] **UG-COR-AUD-016D:** Zero-residual cleanup verified in runs `39775766685` and `39785799760`.
 - [ ] **UG-COR-AUD-016E:** Obtain independent governance sign-off on release candidate.
 
 ## 4. Required endpoint resolution pattern

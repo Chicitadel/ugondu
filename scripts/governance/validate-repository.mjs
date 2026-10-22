@@ -52,14 +52,13 @@ const AUTH_BYPASS_RE = /&&\s*false\b/;
 const FAKE_LOCALE_PREFIX_RE = /\[(?:AR|FR|DE)\]/;
 const PROD_MOCK_IMPORT_RE = /(?:import\s+.*\s+from\s+['"][^'"]*(?:mock|fixture|stubs?|__tests__)[^'"]*['"]|require\(['"][^'"]*(?:mock|fixture|stubs?|__tests__)[^'"]*['"]\))/i;
 const SWALLOWED_ERROR_RE = /catch\s*(?:\([^)]*\))?\s*\{\s*return\s*(?:\{[^}]*(?:success:\s*true|applied:\s*true|valid:\s*true)|true|['"]APPLIED_AND_MATCHES['"])/i;
+const NOOP_MUTATION_RE = /(?:(?:async\s+)?(?:export\s+)?(?:(?:public|private|protected|static)\s+)*(?:function\s+)?\b([a-zA-Z0-9_]+)\s*\([^)]*\)\s*(?::\s*(?:Promise<[^>]+>|[a-zA-Z0-9_<>]+))?\s*\{|(?:export\s+)?(?:const|let|var)\s+\b([a-zA-Z0-9_]+)\s*=\s*(?:async\s+)?\([^)]*\)\s*(?::\s*(?:Promise<[^>]+>|[a-zA-Z0-9_<>]+))?\s*=>\s*\{)\s*(?:\/\*[\s\S]*?\*\/|\/\/[^\r\n]*\s*)*\}/g;
 export const MAX_GOVERNED_LOC = 500;
 
 function isTestOrFixturePath(normalizedPath) {
-  return (
-    /\.(?:test|spec)\.[jt]sx?$/i.test(normalizedPath) ||
+  return /\.(?:test|spec)\.[jt]sx?$/i.test(normalizedPath) ||
     /(?:^|\/)(?:tests|__tests__|__mocks__|test-helpers|fixtures|__fixtures__)\//i.test(normalizedPath) ||
-    /(?:^|\/)fixture[s]?\//i.test(normalizedPath)
-  );
+    /(?:^|\/)fixture[s]?\//i.test(normalizedPath);
 }
 
 function listTrackedFiles() {
@@ -283,6 +282,21 @@ function validateSemanticAntiStubs(trackedFiles, violations) {
         }
       });
     }
+
+    let noopMatch;
+    NOOP_MUTATION_RE.lastIndex = 0;
+    while ((noopMatch = NOOP_MUTATION_RE.exec(content)) !== null) {
+      const name = noopMatch[1] || noopMatch[2];
+      if (name === 'constructor' || name === 'deleteTaskDefinition') continue;
+      const isMutationVerb = /(?:[Rr]econcil|[Mm]utat|[Rr]emediat|[Oo]rchestrat|[Pp]rovision|^apply|^enforce)/.test(name);
+      const isPureEmptyVoid = /:\s*(?:Promise<\s*void\s*>|void\b)/.test(noopMatch[0]) && /\{\s*\}/.test(noopMatch[0]);
+      if (isMutationVerb || isPureEmptyVoid) {
+        const lineNum = content.slice(0, noopMatch.index).split('\n').length;
+        violations.push(
+          `Anti-stub violation: unproven operational stub (no-op mutation method '${name}') in ${normalized}:${lineNum}`
+        );
+      }
+    }
   }
 }
 
@@ -310,13 +324,7 @@ function validateCreatedOrModifiedFileLimits(violations) {
 
   for (const relPath of candidates) {
     const normalized = relPath.replace(/\\/g, '/');
-    if (
-      normalized.includes('/node_modules/') ||
-      normalized.includes('/dist/') ||
-      /\.(json|ya?ml|md|lock)$/i.test(normalized)
-    ) {
-      continue;
-    }
+    if (normalized.includes('/node_modules/') || normalized.includes('/dist/') || /\.(json|ya?ml|md|lock)$/i.test(normalized)) continue;
     const absPath = path.join(ROOT, normalized);
     if (!fs.existsSync(absPath) || !fs.statSync(absPath).isFile()) continue;
     const lineCount = fs.readFileSync(absPath, 'utf8').split(/\r?\n/).length;

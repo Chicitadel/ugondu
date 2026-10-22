@@ -486,7 +486,7 @@
         "rev2": "Развертывание Ревизии 2 с недействительным дайджестом образа..."
       },
       "trigger_rollback": "Запуск отката для transactionId: {txId}",
-      "cleanup": "Очистка ресурсов сертификации Fargate...",
+      "cleanup": "Очистка временных ресурсов сертификации Fargate...",
       "complete": "\n✔ Цикл сертификации Fargate завершен."
     }
   },
@@ -499,7 +499,7 @@
       "residual_scan_failed": "Сканирование остаточных ресурсов НЕ ПРОЙДЕНО! Обнаружена утечка ресурсов.",
       "missing_region": "ЗАБЛОКИРОВАНО: Требуется переменная UGONDU_CERT_REGION",
       "missing_creds": "ЗАБЛОКИРОВАНО: Требуется переменная UGONDU_CERT_RDS_CREDENTIAL_REF",
-      "missing_volume_id": "Отсутствует идентификатор тома (Volume ID)",
+      "missing_volume_id": "Идентификатор тома EBS требуется для проверки снимка состояния (snapshot).",
       "fargate": {
         "missing_digest": "Отсутствует физический дайджест образа",
         "missing_taskdef_arn": "Отсутствует ARN определения задачи",
@@ -915,7 +915,7 @@
   "reapply_frozen_authority_matri": "Reapply Frozen Полномочия Matrix",
   "standard_automated_remediation": "Standard Automated Remediation (системное значение)",
   "cors_policy_violation": "Нарушение политики CORS",
-  "unimplemented_autonomous_code_": "НЕ РЕАЛИЗОВАНО: план автономного исправления кода подготовлен в виде каркаса",
+  "unimplemented_autonomous_code_": "Для автономного исправления кода требуется проверенный план устранения неполадок.",
   "unknown_credentials_command_tr": "Неизвестный учетные данные command. Try 'ugondu учетные данные import <путь>'.",
   "error_payload_required": "Ошибка: Payload обязателен",
   "cpanel_adapter_requires_specif": "CPanel адаптер requires specific scoped учетные данные (cpanelToken).",

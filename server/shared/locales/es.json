@@ -486,7 +486,7 @@
         "rev2": "Desplegando la Revisión 2 con un digest de imagen no válido..."
       },
       "trigger_rollback": "Activando reversión para transactionId: {txId}",
-      "cleanup": "Limpiando recursos de certificación de Fargate...",
+      "cleanup": "Limpiando recursos efímeros de certificación de Fargate...",
       "complete": "\n✔ Ejecución de certificación de Fargate completada."
     }
   },
@@ -499,7 +499,7 @@
       "residual_scan_failed": "¡Escaneo de residuos FALLIDO! Se filtraron recursos.",
       "missing_region": "BLOQUEADO: Se requiere UGONDU_CERT_REGION",
       "missing_creds": "BLOQUEADO: Se requiere UGONDU_CERT_RDS_CREDENTIAL_REF",
-      "missing_volume_id": "Falta el ID del volumen",
+      "missing_volume_id": "El identificador de volumen EBS es necesario para la verificación de instantáneas.",
       "fargate": {
         "missing_digest": "Falta el digest físico de la imagen",
         "missing_taskdef_arn": "Falta el ARN de la definición de tarea",
@@ -915,7 +915,7 @@
   "reapply_frozen_authority_matri": "Reapply Frozen Autoridad Matrix",
   "standard_automated_remediation": "Standard Automated Remediation (valor del sistema)",
   "cors_policy_violation": "Violación de la política CORS",
-  "unimplemented_autonomous_code_": "NO IMPLEMENTADO: el plan de parcheo de código autónomo está estructurado",
+  "unimplemented_autonomous_code_": "El parcheo autónomo de código requiere un plan de corrección verificado.",
   "unknown_credentials_command_tr": "Desconocido credenciales command. Try 'ugondu credenciales import <ruta>'.",
   "error_payload_required": "Error: Payload es obligatorio",
   "cpanel_adapter_requires_specif": "CPanel adaptador requires specific scoped credenciales (cpanelToken).",

@@ -486,7 +486,7 @@
         "rev2": "Distribuzione della Revisione 2 con digest dell'immagine non valido..."
       },
       "trigger_rollback": "Attivazione del rollback per transactionId: {txId}",
-      "cleanup": "Pulizia delle risorse di certificazione Fargate...",
+      "cleanup": "Pulizia delle risorse effimere di certificazione Fargate...",
       "complete": "\n✔ Esecuzione della certificazione Fargate completata."
     }
   },
@@ -499,7 +499,7 @@
       "residual_scan_failed": "Scansione residui FALLITA! Risorse non rilasciate.",
       "missing_region": "BLOCCATO: UGONDU_CERT_REGION è obbligatorio",
       "missing_creds": "BLOCCATO: UGONDU_CERT_RDS_CREDENTIAL_REF è obbligatorio",
-      "missing_volume_id": "ID volume mancante",
+      "missing_volume_id": "L'identificatore del volume EBS è richiesto per la verifica dello snapshot.",
       "fargate": {
         "missing_digest": "Digest fisico dell'immagine mancante",
         "missing_taskdef_arn": "ARN della definizione di task mancante",
@@ -915,7 +915,7 @@
   "reapply_frozen_authority_matri": "Reapply Frozen Autorità Matrix",
   "standard_automated_remediation": "Standard Automated Remediation (valore di sistema)",
   "cors_policy_violation": "Violazione della politica CORS",
-  "unimplemented_autonomous_code_": "NON IMPLEMENTATO: il piano di patching autonomo del codice è predisposto",
+  "unimplemented_autonomous_code_": "L'applicazione autonoma di patch al codice richiede un piano di rimedio verificato.",
   "unknown_credentials_command_tr": "Sconosciuto credenziali command. Try 'ugondu credenziali import <percorso>'.",
   "error_payload_required": "Errore: Payload è obbligatorio",
   "cpanel_adapter_requires_specif": "CPanel adattatore requires specific scoped credenziali (cpanelToken).",

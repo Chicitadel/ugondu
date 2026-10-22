@@ -2,9 +2,9 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / AI / Contracts
  * File           : contracts.ts
- * Version        : 3.0.0
+ * Version        : 3.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
  * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE | INTERNAL
@@ -25,7 +25,7 @@
  * - Governance Authority   : Air Roofers Corporate Governance
  * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 export type Modality = 'text' | 'image' | 'audio' | 'video' | 'embedding';
@@ -175,6 +175,11 @@ export interface ModelCatalogDocument {
     catalogId?: string;
     updatedAt?: string;
     constitutionalInvariant?: string;
+    zeroHardcodingGovernance?: {
+        standard?: string;
+        policy?: string;
+        enforcement?: string;
+    };
     identityPolicy?: IdentityProtectionPolicy;
     providers: CatalogProviderEntry[];
     models: CatalogModelEntry[];
@@ -192,6 +197,7 @@ export type AiErrorCode =
     | 'CREDENTIALS_MISSING'
     | 'CREDENTIALS_EXPIRED'
     | 'CREDENTIALS_INVALID'
+    | 'AUTHENTICATION_FAILED'
     | 'REGION_DISALLOWED'
     | 'DATA_CLASSIFICATION_DISALLOWED'
     | 'ENVIRONMENT_DISALLOWED'
@@ -213,7 +219,11 @@ export type AiErrorCode =
     | 'CIRCUIT_OPEN'
     | 'NO_POLICY_EQUIVALENT_FALLBACK'
     | 'STREAM_CANCELLED'
-    | 'UNAUTHORIZED_ADMIN';
+    | 'UNAUTHORIZED_ADMIN'
+    | 'AIRROOFERS_AI_ENDPOINT_REQUIRED'
+    | 'AIRROOFERS_AI_ENDPOINT_INSECURE'
+    | 'AIRROOFERS_AI_ENDPOINT_MALFORMED'
+    | 'AIRROOFERS_AI_ENDPOINT_DISALLOWED';
 
 export class AiGatewayError extends Error {
     public readonly errorCode: AiErrorCode;

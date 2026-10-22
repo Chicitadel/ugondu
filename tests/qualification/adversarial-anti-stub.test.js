@@ -252,3 +252,27 @@ test('AAS-007: Proves clean production source passes with 0 violations', async (
   assert.strictEqual(result.policyId, 'UG-COR-NO-STUBS-001', 'Must validate against UG-COR-NO-STUBS-001');
   assert.ok(result.checkedFiles > 4000, `Checked files count should exceed 4000, got ${result.checkedFiles}`);
 });
+
+test('AAS-008: Injects no-op mutation method and proves validator catches it as an unproven operational stub', async () => {
+  const { validateSemanticAntiStubs } = await getValidator();
+  const probe = createTempProbe('aas008', [
+    '/**',
+    ' * Corporate capability policy reconciler mutation probe',
+    ' */',
+    'export function applyPolicyReconciliation(): void {',
+    '}'
+  ].join('\n'));
+
+  try {
+    const violations = [];
+    validateSemanticAntiStubs([probe.relPath], violations);
+    assert.strictEqual(violations.length, 1, 'Expected exactly one unproven operational stub violation');
+    assert.match(
+      violations[0],
+      /Anti-stub violation: unproven operational stub \(no-op mutation method 'applyPolicyReconciliation'\)/,
+      'Must detect no-op mutation method as an unproven operational stub'
+    );
+  } finally {
+    cleanupProbe(probe.absPath);
+  }
+});

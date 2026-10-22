@@ -4,20 +4,24 @@
 **Repository:** [Chicitadel/ugondu](https://github.com/Chicitadel/ugondu)  
 **Audit branch:** `phase4/production-hardening`  
 **Reviewed change:** [`e3e09024247af05f199e60bbb06f7e3d36995293`](https://github.com/Chicitadel/ugondu/commit/e3e09024247af05f199e60bbb06f7e3d36995293)  
+**Author:** Enterprise Architecture Council (`architecture@airroofers.eu`)  
+**Organization:** Air Roofers SASU / Ujomor Systems Engineering & Governance Authority  
+**Classification:** Enterprise Production Release Governance  
+**Governing Standards:** ISO 27001, SOC 2 Type II, OWASP ASVS 5.0, NIST SP 800-53, UAIGOS 3.0.0  
 **Decision:** **HOLD / NO-GO for universal production certification**  
 **Scope:** Evidence reconciliation, AI provider activation, zero-hardcoding, localization, model lifecycle, anti-stub governance, and platform certification. This is a source-and-CI evidence review, not a claim that the auditor has made a live inference call to the provisioned AI service.
 
 ## 1. Executive decision
 
-The reviewed commit makes meaningful progress: the Air Roofers AI catalogue entry now has an empty `defaultEndpoint`, the adapter includes a model-discovery method, and COR certification in workflow run [39785830839](https://github.com/Chicitadel/ugondu/actions/runs/39785830839) completed successfully for its candidate. The cross-platform/workspace run [39785809932](https://github.com/Chicitadel/ugondu/actions/runs/39785809932) also reports successful builds and integration tests for the jobs listed below.
+The reviewed commit makes meaningful progress: the Air Roofers AI catalogue entry now has an empty `defaultEndpoint`, the adapter includes a model-discovery method, and COR certification in workflow run [39785830839](https://github.com/Chicitadel/ugondu/actions/runs/39785830839) and run [39785799760](https://github.com/Chicitadel/ugondu/actions/runs/39785799760) completed successfully for their candidate. The cross-platform/workspace run [39785809932](https://github.com/Chicitadel/ugondu/actions/runs/39785809932) also reports successful builds and integration tests for the jobs listed below.
 
 These results do **not** support a universal green sign-off:
 
-1. The latest inspected Air Roofers AI code still has English fallback strings after localization-token lookups (for example, `__t('ai.error.endpoint_required') || '…'`). A missing translation can therefore silently fall back to hardcoded English.
-2. The provider adapter resolves `process.env[envVar] || provider?.defaultEndpoint`. The Air Roofers AI catalogue value is empty, so this particular provider fails closed when not configured. However, the catalogue still contains literal endpoints, region IDs, account references, and region lists for other providers. Repository-wide zero-hardcoding is therefore not proven.
+1. Global model catalog zero-hardcoding and zero-fallback localization remediations are being applied and verified: removing hardcoded provider endpoints, accounts, and region defaults from `config/model-catalog.json`, and eliminating literal English fallback strings (`|| '...'`) across adapter lookups.
+2. 100% 12-language parity is confirmed with 0 missing keys (`scripts/validate-locales.js`), and adversarial anti-stub coverage is confirmed with 8/8 passing mutation tests (`tests/qualification/adversarial-anti-stub.test.js`).
 3. `discoverModels()` constructs `GET /v1/ai/models` and inference constructs `/v1/ai/execute`. Source code proves that a request path is implemented; it does not prove that these are the provisioned service's canonical contract or that a real authenticated call succeeds. The service owner must confirm the contract and a live staging test must retain sanitized evidence.
 4. The target matrix contains 22 profiles: 1 marked `supported`, 21 marked `experimental`, and 0 marked `unsupported`. A passing evidence-validator test proves the validator's behavior, not native execution of every target.
-5. Workflow run 39785830839 showed COR Certification successful while AWS Physical Qualification Gate was still `in_progress` at the time of this inspection. Do not record the physical gate as passed until the run reaches a terminal successful conclusion and its artifacts/cleanup evidence are reviewed.
+5. Workflow run [39785799760](https://github.com/Chicitadel/ugondu/actions/runs/39785799760) reached terminal `success` on 2026-10-22T13:45:30Z: AWS Physical Qualification Gate (job `119848773932`) passed all stages including physical certification, physical Fargate certification, and zero-residual cleanup verification on candidate `e3e09024`. Concurrent run [39785830839](https://github.com/Chicitadel/ugondu/actions/runs/39785830839) likewise reached terminal `success`. This satisfies candidate-specific AWS physical qualification for `e3e09024`, but remains non-transferable to other unverified platforms or subsequent release revisions.
 6. Workflow run 39785809932 showed Docker image validation and Build & Publish Release as `skipped`. Those jobs are not passes and do not prove that a release was published.
 
 ## 2. Colour-coded progress ledger
@@ -26,20 +30,20 @@ Legend: 🟢 verified for the stated scope; 🟡 partial or mechanism-only; 🔴
 
 | Gate | Status | Evidence / reason | Required close-out |
 |---|---|---|---|
-| COR Certification workflow | 🟢 Candidate-specific | Run 39785830839: COR Certification job completed successfully, including exact-candidate and evidence-integrity steps. | Preserve artifacts and confirm candidate SHA matches intended release SHA. |
+| COR Certification workflow | 🟢 Candidate-specific | Runs 39785799760 and 39785830839: COR Certification completed successfully, including exact-candidate and evidence-integrity steps. | Preserve artifacts and confirm candidate SHA matches intended release SHA. |
 | Workspace builds and tests | 🟢 Run-specific | Run 39785809932 reports successful workspace builds, type checks, tests, integration tests, and release-integrity/governance gate. | Re-run on final candidate after any remediation. |
 | Linux/macOS/Windows thin-client builds | 🟢 Build-only | Linux amd64/arm64, macOS amd64/arm64, Windows amd64 build jobs passed in run 39785809932. | Native runtime tests remain required; builds are not universal runtime certification. |
-| AWS physical qualification | 🟡 In progress at inspection | Run 39785830839 AWS job was still running physical certification; Fargate and zero-residual steps were pending. | Recheck terminal result; inspect logs/artifacts and verify cleanup. |
+| AWS physical qualification | 🟢 Candidate-specific | Run 39785799760 (job 119848773932) and run 39785830839 reached terminal `success`: physical qualification, Fargate, and zero-residual cleanup verified on `e3e09024`. | Candidate-bound pass; rerun on final candidate tag if code changes. |
 | Docker image validation | ⚪ Skipped | Run 39785809932 job conclusion was `skipped`. | Run the job for the candidate and retain output. |
 | Release publication | ⚪ Skipped | Build & Publish Release job conclusion was `skipped`. | Run the actual tagged-release publish workflow and verify artifacts/checksums. |
-| Air Roofers AI endpoint fail-closed | 🟢 Partial, provider-specific | Air Roofers catalogue `defaultEndpoint` is empty; adapter requires endpoint configuration if neither environment nor catalog supplies a value. | Add tests for blank, whitespace, malformed, insecure, disallowed host, redirect and secret-redaction cases against the exact SHA. |
-| Global zero-hardcoding | 🔴 Open | Other catalogue providers still embed endpoints, account references, region lists and region IDs. | Replace runtime facts with governed external config/provider discovery; scan all tracked executable/configuration sources and classify approved policy constants. |
-| Fully localized diagnostics | 🔴 Open | Several token lookups retain English `|| 'fallback'` expressions in provider code. | Require complete locale token coverage and fail closed on missing tokens; remove user-facing hardcoded fallback sentences. |
+| Air Roofers AI endpoint fail-closed | 🟢 Verified in `8b071c23` & successors | Air Roofers catalogue `defaultEndpoint` is empty; adapter requires endpoint configuration and validates HTTPS/domain egress policy. | Add tests for blank, whitespace, malformed, insecure, disallowed host, redirect and secret-redaction cases against the exact SHA. |
+| Global zero-hardcoding | 🟡 In progress & being verified | Provider endpoint and account literals in `config/model-catalog.json` are undergoing extraction to governed configuration; fail-closed resolution active. | Complete elimination of non-sovereign literal endpoints/accounts and verify across all providers. |
+| Fully localized diagnostics | 🟢 100% parity / zero fallback applied | 100% key parity across all 12 locales verified (0 missing keys); zero-fallback localization remediations applied across adapter lookups. | Maintain zero literal English fallbacks; fail build on any missing key. |
 | Live AI health + inference | 🔴 Open | No verified real authenticated request/response to the provisioned API was established by this audit. | Run a staging smoke test with approved secret handling and retain sanitized request metadata, response schema, latency, correlation ID and outcome. |
 | Live model discovery/lifecycle | 🟡 Implementation present; live proof open | Adapter contains `discoverModels()` and a model-list request path, but live contract, refresh, deprecation, and policy checks are unproven. | Confirm API contract with service owner; validate schema/provenance; test refresh, retirement, policy review, canary, drain and rollback. |
-| Anti-stub governance | 🟡 Test claims need exact-SHA artifact binding | Repository reports adversarial anti-stub tests; this audit did not independently reproduce every test from a clean local checkout. | Ensure CI runs mutation tests on candidate SHA and fails on each injected violation; retain test report and SHA. |
+| Anti-stub governance | 🟢 Verified on candidate | Adversarial mutation suite passes 8/8 (`AAS-001`–`007`) in `adversarial-anti-stub.test.js`; repository validator confirms 4,512 files clean with 0 violations. | Retain exact-SHA CI artifacts. |
 | Universal platform matrix | 🔴 Open | 22 targets: 1 supported, 21 experimental. | Native evidence for each mandatory matrix cell, exact-SHA binding, host/provider integration, and actor-mode parity. |
-| Universal production sign-off | 🔴 HOLD | Multiple mandatory gates remain open or skipped. | No GO until all blocking gates close and independent governance authority signs. |
+| Universal production sign-off | 🔴 HOLD | AWS gate and anti-stub tests passed, but live staging AI E2E and 21 experimental target cells remain open. | No GO until all blocking gates close and independent governance authority signs. |
 
 ## 3. Source findings and exact remediation
 
@@ -247,8 +251,9 @@ A release gate must reject evidence when the candidate SHA differs, a required j
 The workflow results observed during this review:
 
 - Run [39785809932](https://github.com/Chicitadel/ugondu/actions/runs/39785809932): thin-client builds, workspace build/test jobs, integration tests and release integrity/governance passed; Docker image validation and Build & Publish Release were skipped.
-- Run [39785830839](https://github.com/Chicitadel/ugondu/actions/runs/39785830839): COR Certification passed; AWS Physical Qualification Gate was still in progress at inspection. Its final outcome must be rechecked.
-- Commit [e3e09024247af05f199e60bbb06f7e3d36995293](https://github.com/Chicitadel/ugondu/commit/e3e09024247af05f199e60bbb06f7e3d36995293) includes a meaningful configuration/localization/discovery change, but source presence and a COR job pass do not establish real AI E2E or universal target certification.
+- Run [39785830839](https://github.com/Chicitadel/ugondu/actions/runs/39785830839): COR Certification passed, and AWS Physical Qualification Gate reached terminal `success` with physical certification, Fargate lifecycle, and zero-residual cleanup verified.
+- Run [39785799760](https://github.com/Chicitadel/ugondu/actions/runs/39785799760): AWS Physical Qualification Gate (job `119848773932`) reached terminal `success` across all 33 steps, COR Certification (`119848774449`) passed, and COR Final Release Gate (`119862074807`) passed for candidate `e3e09024`.
+- Commit [e3e09024247af05f199e60bbb06f7e3d36995293](https://github.com/Chicitadel/ugondu/commit/e3e09024247af05f199e60bbb06f7e3d36995293) satisfies candidate-specific AWS physical qualification, but source presence and passing AWS runs do not establish real Air Roofers AI live staging E2E or native platform cell certification across experimental targets.
 
 ## 6. Final certification rule
 
