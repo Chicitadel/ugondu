@@ -163,3 +163,23 @@ This candidate adds real behavioral assertions in the previously identified six 
 | **Overall** | **🔴 HOLD** | Await COR result and close the operational and governance gates above. |
 
 Full supporting detail: [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_RECONCILIATION_2026-10-22.md).
+
+
+## Evidence refresh — 2026-10-22 18:23 UTC
+
+**Current documentation HEAD:** `f256edd9f3a74de5beb7f0bf83e1f9e3f3a91d20`. This is a documentation-only blueprint commit; the latest observed CI/CD and brand audit runs below are bound to the previous HEAD `220457f6d661ed5849c140555109f9a76f8afe0f` and must not be represented as fresh certification for `f256edd9...`.
+
+| Gate | Status at refresh | Evidence / next action |
+|---|---|---|
+| CI/CD push | 🟢 PASS on prior SHA only | [39827082415](https://github.com/Chicitadel/ugondu/actions/runs/39827082415), SHA `220457f6...`; rerun/verify applicable required checks for `f256edd9...`. |
+| CI/CD pull request | 🟢 PASS on prior SHA only | [39827097594](https://github.com/Chicitadel/ugondu/actions/runs/39827097594), SHA `220457f6...`; rerun/verify on latest candidate. |
+| Brand audit | 🟢 PASS on prior SHA only | [39827097538](https://github.com/Chicitadel/ugondu/actions/runs/39827097538), SHA `220457f6...`; rerun/verify on latest candidate. |
+| COR certification | 🟠 IN PROGRESS on prior SHA | [39827082703](https://github.com/Chicitadel/ugondu/actions/runs/39827082703) remained in progress when checked; inspect job-level result and then run on latest candidate. |
+| Air Roofers AI live inference | 🔴 OPEN | Authenticated live canary receipt and real model-switch/fallback evidence absent from this checkpoint. |
+| Native OS/architecture matrix | 🟠 PARTIAL | Native execution required per advertised target; cross-compilation alone cannot qualify a target. |
+| Provider/host/IDE operations | 🟠 PARTIAL | Require per-operation real runtime evidence or fail-closed unsupported state. |
+| Branch protection | 🔴 CONFIRMED GAP | Branch endpoint still reports `protected=false` and `protection.enabled=false`. |
+| Independent COR sign-off | 🔴 OPEN | Obtain independent review against final-SHA evidence manifest. |
+| **Overall disposition** | **🔴 HOLD** | No universal certification until every mandatory gate passes on one exact candidate SHA. |
+
+New plan: [Universal implementation blueprint and remediation runbook](COR_UNIVERSAL_IMPLEMENTATION_BLUEPRINT_2026-10-22.md). It specifies AI live-canary activation, model switching/fallback, zero-hardcoding and anti-stub controls, native target/provider/IDE/host qualification, E2E, evidence schema, branch governance, and acceptance criteria.
