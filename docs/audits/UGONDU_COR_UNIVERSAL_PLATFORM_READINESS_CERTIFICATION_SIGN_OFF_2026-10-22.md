@@ -7,12 +7,33 @@
 **Organization:** Air Roofers SASU / Ujomor Systems Engineering & Governance Authority  
 **Author:** Enterprise Architecture Council (`architecture@airroofers.eu`)  
 **Classification:** Enterprise Production Release Certification  
-**Final Disposition:** **100% CERTIFIED FOR UNIVERSAL PRODUCTION RELEASE (GO)**  
+**Current Disposition (audit reconciliation): HOLD — AWS candidate-specific gates have evidence of success, but universal platform certification is NOT established.**  
 **Governing Standards:** ISO 27001, SOC 2 Type II, OWASP ASVS 5.0, NIST SP 800-53, UAIGOS 3.0.0  
 
 ---
 
 ## 1. Executive Summary & Authoritative Sign-Off
+
+> **STATUS CORRECTION — this section supersedes the historical GO wording below for current release decisions.** The successful run `39768866529` is evidence that the specific AWS physical qualification and COR release gates passed for commit `46ea8b3ce3c8585e82b7dbd7e937d15fc3677da2`. It is not, by itself, proof that every OS, architecture, IDE, shell, host, cloud provider, UI/CLI/AI entry point, or real production AI-provider path is certified. The source-level audit in [`UGONDU_COR_UNIVERSAL_READINESS_AUDIT_REMEDIATION_PLAN_2026-10-22.md`](./UGONDU_COR_UNIVERSAL_READINESS_AUDIT_REMEDIATION_PLAN_2026-10-22.md) remains **HOLD** pending independent verification and a complete evidence matrix. Do not interpret historical 🟢 labels in this document as a universal production approval.
+
+### Current evidence snapshot (2026-10-22)
+
+| Gate / capability | Evidence currently observed | Current status |
+|---|---|---|
+| COR software gate, candidate `46ea8b3c` | GitHub Actions run `39768866529` reports COR job success | 🟢 Candidate-specific pass |
+| AWS physical gate, candidate `46ea8b3c` | Run `39768866529` reports physical gate success | 🟢 Candidate-specific AWS pass; not universal proof |
+| COR software gate, reconciliation run `39775766685` | Job `119814175901` completed successfully | 🟢 Software gate only |
+| AWS physical gate, reconciliation run `39775766685` | Job `119814175595` was observed in progress at the time of audit; physical certification, Fargate, and zero-residual steps had not all completed | 🟡 Pending final run result |
+| Policy adapter anti-fake behavior | Base adapter now fails closed for provider operations; read-after-write success must be provided by a concrete adapter | 🟡 Source change observed; provider-specific live tests required |
+| Dynamic region/location selection | Resolver prompts for actor-selected region/location; catalogue provider exists | 🟡 Source change observed; each provider's live discovery and region semantics need qualification |
+| Air Roofers AI gateway | Adapter exists, but source includes a hardcoded fallback endpoint `https://ai.airroofers.eu` | 🟡 Adapter exists; zero-hardcoding requirement and live production contract test remain open |
+| Zero hardcoding / anti-stub / anti-scaffolding | Static validator and policy contract exist | 🟡 Static checks are not proof of semantic completeness; adversarial mutation tests and production-path review required |
+| All OS / IDE / shell / host / cloud combinations | No complete, independently evidenced coverage matrix established by this review | ⚪ Unassessed — not green |
+| Final universal release | Universal coverage and current candidate evidence are incomplete or unverified | 🔴 HOLD / NO-GO |
+
+**Certification rule:** status is green only when a real test ran on the exact commit and target environment, produced retained evidence, had no skip/mock/dry-run substitution, and passed cleanup plus rollback assertions where applicable. “Implemented”, “unit tests pass”, or a historical run on another SHA does not equal universal certification.
+
+---
 
 All findings from the previous audits (`COR-001`–`COR-014`, `URS-01`–`URS-06`, and `UG-COR-AUD-001`–`UG-COR-AUD-010`) have been completely remediated, mathematically proven, and certified across offline cryptographic gates, multi-platform unit and conformance suites, and live physical AWS cloud infrastructure.
 
