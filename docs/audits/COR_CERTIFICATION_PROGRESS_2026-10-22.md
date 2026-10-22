@@ -2,7 +2,9 @@
 
 **Updated:** 2026-10-22  
 **Branch:** `phase4/production-hardening`  
-**Prior audited checkpoint:** `fed1d52c10201e53c4059d917562ff4858f5721e`  
+**Initial audit checkpoint:** `fed1d52c10201e53c4059d917562ff4858f5721e`  
+**Latest recheck candidate:** `1ef3b0601fd9b8c6175be1e16612673c12f4ca96`  
+**Latest CI:** [Run 39809697611](https://github.com/Chicitadel/ugondu/actions/runs/39809697611) — in progress at recheck  
 **Master plan:** [COR Universal Readiness & Remediation](COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md)  
 **Disposition:** 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED**
 
@@ -17,8 +19,8 @@
 
 | Gate | Current status | Evidence available | Remaining action | Release-blocking |
 |---|---|---|---|---|
-| Branch/commit identity | 🟢 Checkpoint | Branch verified at `fed1d52c10201e53c4059d917562ff4858f5721e` | Record final candidate HEAD and confirm clean/synchronized checkout before release | Yes |
-| GitHub CI/CD & COR workflows | 🟢 Verified on `fed1d52c` | CI/CD [Run 39794583218](https://github.com/Chicitadel/ugondu/actions/runs/39794583218) and COR Certification [Run 39794575804](https://github.com/Chicitadel/ugondu/actions/runs/39794575804) (`119887724433`, `119887725049`, `119901232439`) succeeded | Re-run both workflows on final candidate commit and archive exact-SHA artifacts | Yes |
+| Branch/commit identity | 🟠 Latest SHA observed | Latest branch HEAD `1ef3b0601fd9b8c6175be1e16612673c12f4ca96` | Recheck exact candidate and clean/synchronized state at release | Yes |
+| GitHub CI/CD & COR workflows | 🟠 Prior checkpoint passed; latest run in progress | Prior runs [39794583218](https://github.com/Chicitadel/ugondu/actions/runs/39794583218) and [39794575804](https://github.com/Chicitadel/ugondu/actions/runs/39794575804) passed on `fed1d52c`; latest run [39809697611](https://github.com/Chicitadel/ugondu/actions/runs/39809697611) targets `1ef3b060` | Wait for all required jobs to finish, inspect skipped jobs/artifacts and archive exact-SHA results | Yes |
 | 12-locale key parity | 🟢 Local & CI PASS | 1,872 keys / 12 locales verified in CI and local run | Re-run on final candidate SHA and preserve runtime UI/CLI rendering evidence | Yes |
 | Localization negative tests | 🟢 Local & CI PASS | 6/6 negative localization checks passing | Re-run on final candidate SHA and confirm tests cannot be skipped | Yes |
 | Engine-core build | 🟢 Local & CI PASS | 0 TypeScript build errors across `server/engine-core` and workspaces | Clean install and all-workspace build on final candidate SHA | Yes |
@@ -40,7 +42,7 @@
 | Branch protection/review | 🟠 CODEOWNERS created / 🔴 settings open | `.github/CODEOWNERS` created for `@Chicitadel` across governance, AI, targets, workflows, and audits | Verify and enable GitHub repository branch protection rules and required reviews | Yes |
 | COR universal sign-off | 🔴 HOLD | Source remediations and `fed1d52c` CI/COR runs verified; live external E2E and native matrix open | All mandatory gates green on final SHA and independent approval | Yes |
 
-## Execution order
+## Latest recheck note (2026-10-22 15:59 UTC)\n\nThe current branch head is `1ef3b0601fd9b8c6175be1e16612673c12f4ca96`. This commit includes catalog-governed AI endpoint/egress policy, fail-closed `MODEL_CATALOG_EMPTY` behavior and non-vacuous provider contract tests. GitHub Actions run [39809697611](https://github.com/Chicitadel/ugondu/actions/runs/39809697611) had the Release Integrity & Governance Gates job completed successfully, while engine-core lint/typecheck/unit steps and several platform builds were still running or queued. **Do not mark the whole workflow green until the run conclusion is `success` and every mandatory job has a valid result.**\n\n## Execution order
 
 1. **Freeze candidate and baseline** — exact SHA, clean tree, CI runs (`39794583218`, `39794575804`) and artifact inventory.
 2. **Preserve zero-hardcoding and anti-stub enforcement** — semantic checks, allowlists, mutation tests, and `<= 500` LOC governance.
