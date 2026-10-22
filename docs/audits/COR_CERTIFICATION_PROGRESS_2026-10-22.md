@@ -92,3 +92,32 @@
 5. Complete target-native OS/architecture, IDE, host and provider-operation qualification; mark unsupported cells explicitly rather than treating build success as support.
 6. Refresh this dashboard from immutable evidence and obtain independent COR sign-off only after every mandatory row is green.
 
+
+
+## Re-audit update — candidate `096668776b65d4fd28135dd08efc38aac3116cf3` (2026-10-22 17:24 UTC)
+
+This candidate adds real behavioral assertions in the previously identified six placeholder spec files, a repository-wide governance ban/mutation check for `expect(true).toBe(true)`, a declarative target matrix, and fail-closed `UNSUPPORTED_CAPABILITY` behavior for unknown targets. Source spot-check at this SHA confirmed the four fabric specs no longer contain the identified vacuous assertion. This is a source-level check; it does not by itself establish all tests are non-vacuous or all declared target claims are independently proven.
+
+| Gate | Current observed status | Evidence | Release effect |
+|---|---|---|---|
+| COR software certification | 🟢 PASS | [Run 39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890), software job passed on exact SHA `096668776b65d4fd28135dd08efc38aac3116cf3`. | Satisfied for software job |
+| Production-hardening CI/CD | 🟠 IN PROGRESS | [Run 39821647584](https://github.com/Chicitadel/ugondu/actions/runs/39821647584): governance and multiple build jobs passed; integration tests still running at observation time. | Blocking until overall success |
+| Audit-branch CI/CD | 🟠 IN PROGRESS | [Run 39821659001](https://github.com/Chicitadel/ugondu/actions/runs/39821659001): governance passed; workspace tests still running at observation time. | Blocking until overall success |
+| Audit-branch COR / AWS physical gate | 🟠 IN PROGRESS | [Run 39821659037](https://github.com/Chicitadel/ugondu/actions/runs/39821659037): software job passed; AWS physical job remained at `Run physical certification`; Fargate and zero-residual cleanup pending. | 🔴 Blocking |
+| Production-branch AWS physical gate | 🟠 IN PROGRESS | [Run 39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890): software job passed; physical certification still running. | 🔴 Blocking |
+| Air Roofers AI service reachability | 🟢 BASIC REACHABILITY ONLY | Staging audit reports `https://ai.airroofers.eu/health` returned HTTP 200 and unauthenticated `/v1/ai/models` returned HTTP 401. These results show public health reachability and an authentication gate only. | Does not close live inference |
+| Authenticated live AI inference | 🔴 OPEN | No redacted successful inference response from a real enabled model bound to this candidate has been established in this checkpoint. | 🔴 Blocking |
+| Multi-model route switching/fallback | 🟠 CONTRACT TESTS; LIVE PROOF OPEN | AF-STG-011/012 are reported 13/13 passing, but these are not equivalent to exercising multiple real upstream models. | 🔴 Blocking |
+| Zero-vacuous assertion scan | 🟢 SOURCE FIX; CI VALIDATION PENDING | The four previously named fabric specs were checked at this SHA and no longer contain the exact assertion. The new CI governance/adversarial tests must finish successfully. | Blocking until CI passes |
+| Target matrix / universal platform claim | 🟠 DECLARED MATRIX; TARGET EVIDENCE PARTIAL | Matrix marks Windows/amd64, Linux/amd64, macOS/arm64 as tested, while Linux/arm64 and macOS/amd64 are cross-compiled-only. IDE matrix includes experimental/unsupported entries. Claims must be reconciled against native job evidence; cross-compilation is not native certification. | 🔴 Blocking for universal sign-off |
+| Overall universal COR | 🔴 HOLD | Software job is green, but whole workflows, physical AWS/Fargate cleanup, authenticated AI E2E and full target-cell evidence are not all green on this SHA. | No universal certification claim |
+
+### Immediate actions
+
+1. Wait for and inspect the terminal conclusions of runs `39821632890`, `39821647584`, `39821659001`, and `39821659037`; a green sub-job does not make the parent workflow green.
+2. Verify physical AWS/Fargate lifecycle and zero residual resources on both required branch candidates; preserve evidence artifacts and digests.
+3. Execute authenticated real inference with ephemeral credentials against `ai.airroofers.eu`; record only redacted metadata, exact SHA, model/provider ID, correlation ID, status and latency.
+4. Qualify actual model switching/fallback across at least two enabled real routes; test invalid auth, empty/unsigned catalog, denied egress, timeout and upstream outage.
+5. Reconcile every `nativeExecutionVerified` target-matrix value with native runner evidence. Any mismatch must be corrected to `cross-compiled-only`, `unverified`, or `unsupported`, never marked green by assertion.
+6. Keep overall disposition 🔴 HOLD until all required gates are green on one exact candidate and independent review accepts the evidence.
+
