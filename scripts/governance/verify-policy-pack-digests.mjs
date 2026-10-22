@@ -53,14 +53,8 @@ export function resolvePackPublicKey() {
       type: 'spki'
     });
   }
-  // In local offline verification mode, fall back to the pinned trust authority anchor
-  const localAnchor = path.join(ROOT, 'config/trust/uplm_pack_authority.pub.pem');
-  if (fs.existsSync(localAnchor)) {
-    const raw = fs.readFileSync(localAnchor, 'utf8').trim();
-    if (raw.includes('BEGIN')) {
-      return crypto.createPublicKey(raw);
-    }
-  }
+  // Trust roots must be pinned by the operator/CI environment.
+  // Never silently trust a repository-local key as the verification authority.
   return null;
 }
 
