@@ -56,6 +56,29 @@ A source remediation was committed as `9423300b6a33dfe6ccbe4d47f6063c0ea84d7700`
 
 **Remediation committed:** `scripts/governance/verify-policy-pack-digests.mjs` now returns no key when `UGONDU_PACK_PUBLIC_KEY` is absent and contains an explicit operator/CI trust-root comment. No local fallback is permitted.
 
+The resolver's required fail-closed behavior is:
+
+```js
+export function resolvePackPublicKey() {
+  if (process.env.UGONDU_PACK_PUBLIC_KEY) {
+    const raw = process.env.UGONDU_PACK_PUBLIC_KEY.trim();
+    if (raw.includes('BEGIN')) {
+      return crypto.createPublicKey(raw);
+    }
+    return crypto.createPublicKey({
+      key: Buffer.from(raw, 'base64'),
+      format: 'der',
+      type: 'spki'
+    });
+  }
+  // Trust roots must be pinned by the operator/CI environment.
+  // Never silently trust a repository-local key as the verification authority.
+  return null;
+}
+```
+
+This deliberately removes the prior `config/trust/uplm_pack_authority.pub.pem` fallback. It does not disable verification: it requires the operator/CI to inject the independently trusted public key. If the variable is absent, verification must fail closed.
+
 **Required proof:**
 
 ```bash
