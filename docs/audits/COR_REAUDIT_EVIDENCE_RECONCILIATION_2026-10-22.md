@@ -267,3 +267,20 @@ The latest completed CI/CD run is green, and the earlier candidate shows meaning
 - [COR progress dashboard](https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/audits/COR_CERTIFICATION_PROGRESS_2026-10-22.md)
 - [Master remediation plan](https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/audits/COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md)
 - [Master execution checklist](https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/audits/MASTER_EXECUTION_AND_CERTIFICATION_CHECKLIST_2026-10-22.md)
+
+
+## Evidence refresh — 2026-10-22 17:56 UTC
+
+This section supersedes earlier “latest run” observations in this document where the run IDs or status differ.
+
+- Observed branch HEAD remains `30fd056f32aa38b71d6cf116f5d61ade0e2a8d14`.
+- CI/CD run [39825554911](https://github.com/Chicitadel/ugondu/actions/runs/39825554911) completed successfully on that SHA.
+- CI/CD run [39825545809](https://github.com/Chicitadel/ugondu/actions/runs/39825545809) completed successfully on the same SHA.
+- Brand Asset Audit [39825554972](https://github.com/Chicitadel/ugondu/actions/runs/39825554972) completed successfully on that SHA.
+- COR Certification [39825545791](https://github.com/Chicitadel/ugondu/actions/runs/39825545791) remained **pending** at the latest check. It must not be reported as passed.
+- Older physical AWS COR evidence remains valid for its exact candidate only: [run 39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890) completed successfully, including the physical AWS lifecycle and zero-residual cleanup gate, on candidate `096668776b65d4fd28135dd08efc38aac3116cf3`. It does not certify the later documentation HEAD by itself.
+- The live GitHub branch endpoint explicitly reports `protected: false` and `protection.enabled: false` for `phase4/production-hardening`. Branch protection is therefore a confirmed release-governance gap, not merely an unverified prior concern.
+- AI health reachability and unauthenticated HTTP 401 remain insufficient to prove authenticated inference. The authenticated live canary and real model-switching receipt remain open.
+- The qualification matrix must continue to distinguish build/cross-compile from native execution. Linux/ARM64 and macOS/AMD64 require native target-bound evidence before being certified.
+
+**Disposition remains 🔴 HOLD — NOT UNIVERSALLY CERTIFIED.** The successful CI and brand audit results are useful progress but do not close the pending COR, authenticated live AI, native target, or branch-protection gates.
