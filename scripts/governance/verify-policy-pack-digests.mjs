@@ -7,7 +7,7 @@
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-20
- * Last Modified  : 2026-10-22
+ * Last Modified  : 2026-10-20
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -23,7 +23,7 @@
  * Pack digest = SHA-256 over the sorted lines "<relative-path>:<sha256>" of every
  * templatePath referenced by pack.yaml (policies and roles), newline-joined.
  * Cryptographic provenance is verified via Ed25519 signature in pack.sig anchored
- * to externally injected UGONDU_PACK_PUBLIC_KEY (or pinned trust anchor in local mode).
+ * to externally injected UGONDU_PACK_PUBLIC_KEY.
  *
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
@@ -42,16 +42,10 @@ const sigFile = path.join(packDir, 'pack.sig');
 const sha = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 
 export function resolvePackPublicKey() {
-  // In CI (CI === 'true'), trust roots must be injected via UGONDU_PACK_PUBLIC_KEY.
-  // In local verification mode (CI !== 'true'), fall back to the pinned trust anchor.
-  let raw = process.env.UGONDU_PACK_PUBLIC_KEY ? process.env.UGONDU_PACK_PUBLIC_KEY.trim() : '';
-  if (!raw && process.env.CI !== 'true') {
-    const localTrustAnchor = path.join(ROOT, 'config/trust/uplm_pack_authority.pub.pem');
-    if (fs.existsSync(localTrustAnchor)) {
-      raw = fs.readFileSync(localTrustAnchor, 'utf8').trim();
-    }
-  }
-  if (!raw) return null;
+  // Trust roots must be pinned by the operator/CI environment, not selected
+  // from the same repository tree as the pack being verified.
+  if (!process.env.UGONDU_PACK_PUBLIC_KEY) return null;
+  const raw = process.env.UGONDU_PACK_PUBLIC_KEY.trim();
   if (raw.includes('BEGIN')) {
     return crypto.createPublicKey(raw);
   }
