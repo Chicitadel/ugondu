@@ -61,3 +61,32 @@
 - Keep historical reports immutable and clearly superseded; the master plan is the current disposition authority.
 
 **Current release decision: 🔴 HOLD — NOT UNIVERSALLY CERTIFIED.**
+
+
+## Candidate re-audit checkpoint — 2026-10-22 16:24 UTC
+
+**Candidate SHA:** `c8599fed92a23e8534168f7e79478921ed5bdb52`
+
+| Gate | Observed status | Evidence / interpretation | Release effect |
+|---|---|---|---|
+| CI/CD on `phase4/production-hardening` | 🟢 SUCCESS | [Run 39811783300](https://github.com/Chicitadel/ugondu/actions/runs/39811783300) completed successfully. The reported workflow matrix includes governance/release-integrity, engine-core lint/typecheck/tests, workspaces, thin-client OS/architecture builds, service integration checks, and image validation. This proves the configured CI jobs, not universal native behavior. | Required baseline satisfied for this SHA |
+| CI/CD on audit branch | 🟢 SUCCESS | [Run 39811782791](https://github.com/Chicitadel/ugondu/actions/runs/39811782791) completed successfully on the same SHA. | Required baseline satisfied for this SHA |
+| COR software certification job | 🟢 SUCCESS | In [COR run 39811779347](https://github.com/Chicitadel/ugondu/actions/runs/39811779347), job `119940995996` completed successfully: exact-SHA checkout, build, locale/I18N checks, architecture/import scans, typecheck, workspace tests, COR remediation suite, externally pinned policy/evidence verification, release integrity, signing trust root, stream registry, fresh qualification and evidence upload. Artifact: `ugondu-cor-evidence-c8599fed92a23e8534168f7e79478921ed5bdb52`. | Software gate satisfied; not sufficient for universal sign-off |
+| AWS physical qualification | 🟠 IN PROGRESS / NOT YET VERIFIED COMPLETE | In the same COR run, job `119940995442` passed OIDC setup, region configuration, V9 policy reconciliation, tagged session/effective-permission checks and read-only conformance probes. At last API observation, `Run physical certification` was still running; Fargate qualification and residual-resource cleanup were pending. Evidence artifact `ugondu-aws-conformance-c8599fed92a23e8534168f7e79478921ed5bdb52` is read-only conformance evidence, not proof that the full create/readback/repair/teardown lifecycle passed. | 🔴 Blocking |
+| Live `ai.airroofers.eu` inference E2E | 🔴 OPEN | Source/provider contract and fail-closed behavior have test evidence, but no candidate-SHA evidence has been established here for a real authenticated request through the provisioned service and a real model response. | 🔴 Blocking |
+| Multi-model live switching/fallback | 🔴 OPEN | Unit/contract behavior is not equivalent to testing two or more real enabled model routes, policy-controlled switching, timeout/error paths and fallback on live endpoints. | 🔴 Blocking |
+| Native OS/architecture behavior | 🟠 PARTIAL | CI cross-builds are useful compatibility evidence; native behavior remains established only for the previously documented subset. Every declared target needs target-bound runtime evidence, not compile-only status. | 🔴 Blocking |
+| IDE/host/provider operation coverage | 🟠 PARTIAL | Registry/preflight and adapter tests exist. Each claimed IDE, host and provider operation still requires real target/sandbox evidence or explicit `UNSUPPORTED_CAPABILITY`. | 🔴 Blocking |
+| Universal COR disposition | 🔴 HOLD | The software COR job passed, but the physical AWS job was still in progress at last observation and live AI E2E plus the full native target matrix remain open. | No universal certification claim |
+
+**Important status semantics:** a successful CI workflow, successful software-COR job, or uploaded evidence bundle must not be interpreted as a universal platform certification. The AWS job remains unresolved until its overall job conclusion is `success`, Fargate qualification passes, cleanup verifies zero residual resources, and the exact-SHA physical report is archived. A stalled or unavailable runner is `BLOCKED/IN PROGRESS`, never PASS.
+
+### Next actions, in strict order
+
+1. Recheck COR run `39811779347` and job `119940995442`; inspect the physical-certification step logs if it remains in progress. Do not rerun blindly if a cloud operation may still own resources.
+2. Confirm Fargate lifecycle and residual-resource cleanup, then archive and verify the exact-SHA physical report and artifact digests.
+3. Run an authenticated, non-sensitive canary through the actual `ai.airroofers.eu` service using ephemeral CI credentials; capture request correlation ID, selected model/provider, response status, latency, policy decision and redacted result metadata. Do not store credentials or sensitive prompt/response payloads.
+4. Execute live multi-model route/switch/fallback tests for each enabled provider; prove empty catalog, invalid credentials, denied egress, timeout and provider failure all fail closed.
+5. Complete target-native OS/architecture, IDE, host and provider-operation qualification; mark unsupported cells explicitly rather than treating build success as support.
+6. Refresh this dashboard from immutable evidence and obtain independent COR sign-off only after every mandatory row is green.
+
