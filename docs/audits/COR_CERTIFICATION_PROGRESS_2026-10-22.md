@@ -147,3 +147,19 @@ This candidate adds real behavioral assertions in the previously identified six 
 3. Separate simulated contract tests from live network E2E. Never report a mocked staging transport as real API qualification.
 4. Do not mark unsupported OS/IDE/host/provider cells green to satisfy a universal-support goal. Either implement and qualify them or keep the capability explicitly unsupported and fail-closed.
 5. The full gate-by-gate plan, code guard examples, AI live-canary requirements, evidence receipt schema and execution sequence are in the linked re-audit report.
+
+
+## Latest verified checkpoint — 2026-10-22 17:56 UTC
+
+| Gate | Verified status | Evidence |
+|---|---|---|
+| CI/CD on current documentation HEAD `30fd056f` | 🟢 Pass | [39825554911](https://github.com/Chicitadel/ugondu/actions/runs/39825554911) and [39825545809](https://github.com/Chicitadel/ugondu/actions/runs/39825545809) succeeded. |
+| Brand asset audit on current documentation HEAD | 🟢 Pass | [39825554972](https://github.com/Chicitadel/ugondu/actions/runs/39825554972) succeeded. |
+| COR on current documentation HEAD | 🟠 Pending | [39825545791](https://github.com/Chicitadel/ugondu/actions/runs/39825545791) was still pending at 17:56 UTC. |
+| AWS physical lifecycle | 🟢 Pass on prior code candidate only | [39821632890](https://github.com/Chicitadel/ugondu/actions/runs/39821632890) succeeded on code candidate `096668776b65d4fd28135dd08efc38aac3116cf3`; do not inherit it to the current SHA. |
+| Branch protection | 🔴 Confirmed gap | GitHub branch API reports `protected=false` and `protection.enabled=false` for `phase4/production-hardening`. |
+| Authenticated live AI + model switching | 🔴 Open | No authenticated live inference receipt evidenced. Health HTTP 200 / unauthenticated HTTP 401 are not inference proof. |
+| Native Linux/ARM64 and macOS/AMD64 execution | 🟠 Open | Cross-compilation alone is not native execution. |
+| **Overall** | **🔴 HOLD** | Await COR result and close the operational and governance gates above. |
+
+Full supporting detail: [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_RECONCILIATION_2026-10-22.md).
