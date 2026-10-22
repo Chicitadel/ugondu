@@ -160,3 +160,15 @@ Reference the full [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_R
 - [ ] Run fresh AWS/Fargate physical lifecycle, teardown and zero-residual verification on the final candidate SHA.
 - [ ] Recheck branch protection/rulesets and obtain independent second-party COR sign-off.
 - [ ] Keep overall disposition 🔴 HOLD until all required gates pass on one exact candidate.
+
+
+## Latest status refresh — 2026-10-22 17:56 UTC
+
+- [ ] Confirm COR run [39825545791](https://github.com/Chicitadel/ugondu/actions/runs/39825545791) completes on `30fd056f32aa38b71d6cf116f5d61ade0e2a8d14`; it was still pending at the last check.
+- [x] CI/CD pass on current documentation HEAD: [39825554911](https://github.com/Chicitadel/ugondu/actions/runs/39825554911).
+- [x] Brand asset audit pass on current documentation HEAD: [39825554972](https://github.com/Chicitadel/ugondu/actions/runs/39825554972).
+- [ ] Enable branch protection/rulesets; the live branch API currently reports protection disabled.
+- [ ] Capture authenticated live AI inference and real model-switching receipts from `ai.airroofers.eu`.
+- [ ] Obtain native target evidence for Linux/ARM64 and macOS/AMD64 before marking those cells green.
+- [ ] Re-run physical qualification on the final release candidate SHA or explicitly bind the prior physical evidence to an approved immutable artifact equivalence rule.
+- [ ] Keep release disposition 🔴 HOLD until all mandatory gates are satisfied.
