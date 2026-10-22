@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "機能の共通集合が拒否されました: ステップ %d (%s) には %s が必要です",
   "err_step_action_not_granted": "機能の共通集合が拒否されました: ステップ %d アクション %s は (サーバー ∩ テナント ∩ ターゲット ∩ エージェント ∩ アクション) で付与されていません",
   "ai": {
+    "provider": {
+      "airroofers": "Air Roofers ソブリンAIファブリック"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "プロバイダーが無効になっているため、モデルをアクティブ化できません。",
       "catalog_duplicate_alias": "カタログ内で重複するモデルエイリアスが検出されました。",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "現在のIDでは管理アクションを実行する権限がありません。",
       "unauthorized_admin_diagnostics": "AIゲートウェイ診断への不正アクセスです。",
       "unexpected_gateway_error": "AI推論ゲートウェイで予期しないエラーが発生しました。",
+      "unproven_verification": "ポリシーまたはAIの検証が未証明です: 書き込み後の読み取り確認が必要です。",
       "upstream_non_2xx": "アップストリームAIプロバイダーが非2xx HTTPステータスコードを返しました。",
       "upstream_unavailable": "アップストリームAIプロバイダーサービスは現在利用できません。"
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "入力されたロケーション '{input}' は複数のリージョン ({candidates}) に一致します。特定の都市またはリージョン ID を選択してください。",
     "error.unsupported_location": "ロケーション '{input}' はプロバイダー {provider} では利用できません。サポートされているロケーション: {examples}。",
     "error.residency_conflict": "選択されたリージョン '{region}' はデータレジデンシー要件 '{residency}' と競合しています (CONFLICTS_WITH_POLICY)。",
+    "error.catalogue_unreachable": "信頼できるプロバイダーのロケーションカタログにアクセスできません: {detail}",
     "recommendation.rationale": "{reason} に基づく推奨リージョン {region} ({displayName})。デプロイ前に確認が必要です。",
     "mode.explicit": "指定したロケーションを使用する",
     "mode.recommend": "適切なロケーションを提案してもらう",
-    "mode.multi_region": "複数のリージョンを計画する"
+    "mode.multi_region": "複数のリージョンを計画する",
+    "source.live_discovered": "信頼できるプロバイダーのライブカタログ検出",
+    "source.cached_fallback": "検証済みのキャッシュされたプロバイダーカタログ"
   }
 }

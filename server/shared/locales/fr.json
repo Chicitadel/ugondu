@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "Intersection de capacités refusée : l'étape %d (%s) nécessite %s",
   "err_step_action_not_granted": "Intersection de capacités refusée : action %s de l'étape %d non accordée dans (serveur ∩ locataire ∩ cible ∩ agent ∩ action)",
   "ai": {
+    "provider": {
+      "airroofers": "Tissu IA Souverain Air Roofers"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "Impossible d'activer le modèle car le fournisseur est désactivé.",
       "catalog_duplicate_alias": "Alias de modèle en double détecté dans le catalogue.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "L'action administrative n'est pas autorisée pour l'identité actuelle.",
       "unauthorized_admin_diagnostics": "Accès non autorisé aux diagnostics de la passerelle IA.",
       "unexpected_gateway_error": "Une erreur inattendue s'est produite dans la passerelle d'inférence IA.",
+      "unproven_verification": "Vérification de la stratégie ou de l'IA non prouvée : confirmation de lecture après écriture requise.",
       "upstream_non_2xx": "Le fournisseur IA en amont a renvoyé un code d'état HTTP non-2xx.",
       "upstream_unavailable": "Le service du fournisseur IA en amont est actuellement indisponible."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "L'emplacement saisi '{input}' correspond à plusieurs régions ({candidates}). Veuillez sélectionner une ville ou un identifiant de région spécifique.",
     "error.unsupported_location": "L'emplacement '{input}' n'est pas disponible chez le fournisseur {provider}. Les emplacements pris en charge incluent : {examples}.",
     "error.residency_conflict": "La région sélectionnée '{region}' entre en conflit avec l'exigence de résidence des données '{residency}' (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "Catalogue des emplacements des fournisseurs faisant autorité inaccessible : {detail}",
     "recommendation.rationale": "Région recommandée {region} ({displayName}) en fonction de {reason}. Confirmation requise avant le déploiement.",
     "mode.explicit": "Utiliser l'emplacement que j'ai spécifié",
     "mode.recommend": "Me recommander un emplacement approprié",
-    "mode.multi_region": "Planifier plusieurs régions"
+    "mode.multi_region": "Planifier plusieurs régions",
+    "source.live_discovered": "Découverte en direct du catalogue de fournisseurs faisant autorité",
+    "source.cached_fallback": "Catalogue de fournisseurs mis en cache vérifié"
   }
 }

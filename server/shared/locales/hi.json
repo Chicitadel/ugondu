@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "क्षमता प्रतिच्छेदन अस्वीकृत: चरण %d (%s) को %s की आवश्यकता है",
   "err_step_action_not_granted": "क्षमता प्रतिच्छेदन अस्वीकृत: चरण %d क्रिया %s (सर्वर ∩ किरायेदार ∩ लक्ष्य ∩ एजेंट ∩ क्रिया) में प्रदान नहीं की गई है",
   "ai": {
+    "provider": {
+      "airroofers": "Air Roofers संप्रभु एआई फैब्रिक"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "मॉडल को सक्रिय नहीं किया जा सकता क्योंकि प्रदाता अक्षम है।",
       "catalog_duplicate_alias": "कैटलॉग में डुप्लिकेट मॉडल उपनाम का पता चला।",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "वर्तमान पहचान के लिए प्रशासनिक कार्रवाई अनधिकृत है।",
       "unauthorized_admin_diagnostics": "एआई गेटवे डायग्नोस्टिक्स तक अनधिकृत पहुंच।",
       "unexpected_gateway_error": "एआई अनुमान गेटवे में एक अप्रत्याशित त्रुटि हुई।",
+      "unproven_verification": "नीति या एआई सत्यापन अप्रमाणित: लिखने के बाद पढ़ने की पुष्टि आवश्यक है।",
       "upstream_non_2xx": "अपस्ट्रीम एआई प्रदाता ने गैर-2xx HTTP स्थिति कोड लौटाया।",
       "upstream_unavailable": "अपस्ट्रीम एआई प्रदाता सेवा वर्तमान में अनुपलब्ध है।"
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "स्थान इनपुट '{input}' कई क्षेत्रों ({candidates}) से मेल खाता है। कृपया कोई विशिष्ट शहर या क्षेत्र ID चुनें।",
     "error.unsupported_location": "स्थान '{input}' प्रदाता {provider} पर उपलब्ध नहीं है। समर्थित स्थानों में शामिल हैं: {examples}।",
     "error.residency_conflict": "चयनित क्षेत्र '{region}' डेटा-रेजिडेंसी आवश्यकता '{residency}' के साथ टकराता है (CONFLICTS_WITH_POLICY)।",
+    "error.catalogue_unreachable": "प्रामाणिक प्रदाता स्थान कैटलॉग पहुंच योग्य नहीं है: {detail}",
     "recommendation.rationale": "{reason} के आधार पर अनुशंसित क्षेत्र {region} ({displayName})। डिप्लॉयमेंट से पहले पुष्टि आवश्यक है।",
     "mode.explicit": "मेरे निर्दिष्ट स्थान का उपयोग करें",
     "mode.recommend": "मेरे लिए उपयुक्त स्थान की अनुशंसा करें",
-    "mode.multi_region": "एकाधिक क्षेत्रों की योजना बनाएं"
+    "mode.multi_region": "एकाधिक क्षेत्रों की योजना बनाएं",
+    "source.live_discovered": "प्रामाणिक प्रदाता लाइव कैटलॉग खोज",
+    "source.cached_fallback": "सत्यापित कैश्ड प्रदाता कैटलॉग"
   }
 }

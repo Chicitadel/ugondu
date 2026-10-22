@@ -20,8 +20,8 @@
       "accountRef": "secretless-registry://accounts/aws-971671216490-eu-west-3",
       "credentialRef": "aws-secrets://ugondu/prod/bedrock-workload-identity",
       "status": "enabled",
-      "supportedRegions": ["eu-west-3", "eu-central-1"],
-      "supportedModalities": ["text", "image", "embedding"],
+      "supportedRegions": ["eu-west-3","eu-central-1"],
+      "supportedModalities": ["text","image","embedding"],
       "supportsStreaming": true,
       "supportsToolCalling": true,
       "defaultTimeoutMs": 25000
@@ -36,8 +36,8 @@
       "accountRef": "secretless-registry://accounts/openai-enterprise-eu",
       "credentialRef": "env://UGONDU_OPENAI_API_KEY",
       "status": "enabled",
-      "supportedRegions": ["eu-west-3", "eu-central-1", "us-east-1"],
-      "supportedModalities": ["text", "image", "embedding"],
+      "supportedRegions": ["eu-west-3","eu-central-1","us-east-1"],
+      "supportedModalities": ["text","image","embedding"],
       "supportsStreaming": true,
       "supportsToolCalling": true,
       "defaultTimeoutMs": 30000
@@ -52,8 +52,8 @@
       "accountRef": "secretless-registry://accounts/anthropic-enterprise-eu",
       "credentialRef": "env://UGONDU_ANTHROPIC_API_KEY",
       "status": "enabled",
-      "supportedRegions": ["eu-west-3", "eu-central-1", "us-east-1"],
-      "supportedModalities": ["text", "image"],
+      "supportedRegions": ["eu-west-3","eu-central-1","us-east-1"],
+      "supportedModalities": ["text","image"],
       "supportsStreaming": true,
       "supportsToolCalling": true,
       "defaultTimeoutMs": 30000
@@ -68,8 +68,8 @@
       "accountRef": "secretless-registry://accounts/gcp-vertex-eu-west9",
       "credentialRef": "env://UGONDU_GEMINI_API_KEY",
       "status": "enabled",
-      "supportedRegions": ["eu-west-3", "eu-central-1"],
-      "supportedModalities": ["text", "image", "audio", "video", "embedding"],
+      "supportedRegions": ["eu-west-3","eu-central-1"],
+      "supportedModalities": ["text","image","audio","video","embedding"],
       "supportsStreaming": true,
       "supportsToolCalling": true,
       "defaultTimeoutMs": 30000
@@ -84,8 +84,8 @@
       "accountRef": "secretless-registry://accounts/azure-france-central-ea",
       "credentialRef": "kms://alias/ugondu-azure-openai-key",
       "status": "enabled",
-      "supportedRegions": ["eu-west-3", "eu-central-1"],
-      "supportedModalities": ["text", "embedding"],
+      "supportedRegions": ["eu-west-3","eu-central-1"],
+      "supportedModalities": ["text","embedding"],
       "supportsStreaming": true,
       "supportsToolCalling": true,
       "defaultTimeoutMs": 30000
@@ -100,11 +100,27 @@
       "accountRef": "secretless-registry://accounts/air-roofers-sovereign-internal",
       "credentialRef": "env://UGONDU_SOVEREIGN_MODEL_TOKEN",
       "status": "enabled",
-      "supportedRegions": ["eu-west-3", "eu-central-1", "us-east-1"],
-      "supportedModalities": ["text", "embedding"],
+      "supportedRegions": ["eu-west-3","eu-central-1","us-east-1"],
+      "supportedModalities": ["text","embedding"],
       "supportsStreaming": true,
       "supportsToolCalling": true,
       "defaultTimeoutMs": 10000
+    },
+    {
+      "providerId": "airroofers-ai",
+      "legalEntity": "Air Roofers SASU (Sovereign AI Fabric)",
+      "adapterVersion": "3.1.0",
+      "protocol": "https-json",
+      "endpointEnvVar": "UGONDU_AIRROOFERS_AI_BASE_URL",
+      "defaultEndpoint": "https://ai.airroofers.eu",
+      "accountRef": "secretless-registry://accounts/airroofers-sovereign-eu",
+      "credentialRef": "env://UGONDU_AIRROOFERS_AI_KEY",
+      "status": "enabled",
+      "supportedRegions": ["eu-west-3","eu-central-1"],
+      "supportedModalities": ["text","embedding"],
+      "supportsStreaming": false,
+      "supportsToolCalling": true,
+      "defaultTimeoutMs": 30000
     }
   ],
   "models": [
@@ -114,42 +130,16 @@
       "providerModelIdRef": "secretless-registry://models/aws-bedrock/general-chat-v3",
       "credentialRef": "aws-secrets://ugondu/prod/bedrock-workload-identity",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
-      "allowedTools": ["inspect_topology", "verify_readiness", "calculate_cost", "validate_manifest"],
-      "capabilities": {
-        "streaming": true,
-        "toolCalling": true,
-        "structuredOutput": true,
-        "modalities": ["text"],
-        "maxInputTokens": 128000,
-        "maxOutputTokens": 4096
-      },
-      "policy": {
-        "timeoutMs": 25000,
-        "maxOutputTokens": 4096,
-        "fallbackAliases": ["policy-advisor", "sovereign-fallback"],
-        "rateLimitRpm": 120,
-        "costPer1kInput": 0.003,
-        "costPer1kOutput": 0.015,
-        "pricingSource": "aws-bedrock-eu-west-3-schedule",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "allowedTools": ["inspect_topology","verify_readiness","calculate_cost","validate_manifest"],
+      "capabilities": { "streaming": true, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 128000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":25000,"maxOutputTokens":4096,"fallbackAliases":["policy-advisor","sovereign-fallback"],"rateLimitRpm":120,"costPer1kInput":0.003,"costPer1kOutput":0.015,"pricingSource":"aws-bedrock-eu-west-3-schedule","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "deployment-classifier",
@@ -157,42 +147,16 @@
       "providerModelIdRef": "secretless-registry://models/sovereign/deployment-classifier-v3",
       "credentialRef": "env://UGONDU_SOVEREIGN_MODEL_TOKEN",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential", "restricted"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential","restricted"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
-      "allowedTools": ["inspect_topology", "classify_repository", "verify_readiness"],
-      "capabilities": {
-        "streaming": true,
-        "toolCalling": true,
-        "structuredOutput": true,
-        "modalities": ["text"],
-        "maxInputTokens": 64000,
-        "maxOutputTokens": 2048
-      },
-      "policy": {
-        "timeoutMs": 10000,
-        "maxOutputTokens": 2048,
-        "fallbackAliases": ["sovereign-fallback"],
-        "rateLimitRpm": 600,
-        "costPer1kInput": 0.0001,
-        "costPer1kOutput": 0.0002,
-        "pricingSource": "internal-sovereign-ledger",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "allowedTools": ["inspect_topology","classify_repository","verify_readiness"],
+      "capabilities": { "streaming": true, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 64000, "maxOutputTokens": 2048 },
+      "policy": {"timeoutMs":10000,"maxOutputTokens":2048,"fallbackAliases":["sovereign-fallback"],"rateLimitRpm":600,"costPer1kInput":0.0001,"costPer1kOutput":0.0002,"pricingSource":"internal-sovereign-ledger","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "policy-advisor",
@@ -200,42 +164,16 @@
       "providerModelIdRef": "secretless-registry://models/anthropic/policy-advisor-v3",
       "credentialRef": "env://UGONDU_ANTHROPIC_API_KEY",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
-      "allowedTools": ["inspect_topology", "verify_readiness", "calculate_cost", "evaluate_policy"],
-      "capabilities": {
-        "streaming": true,
-        "toolCalling": true,
-        "structuredOutput": true,
-        "modalities": ["text"],
-        "maxInputTokens": 200000,
-        "maxOutputTokens": 4096
-      },
-      "policy": {
-        "timeoutMs": 30000,
-        "maxOutputTokens": 4096,
-        "fallbackAliases": ["sovereign-fallback"],
-        "rateLimitRpm": 90,
-        "costPer1kInput": 0.003,
-        "costPer1kOutput": 0.015,
-        "pricingSource": "anthropic-enterprise-eu-schedule",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "allowedTools": ["inspect_topology","verify_readiness","calculate_cost","evaluate_policy"],
+      "capabilities": { "streaming": true, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 200000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":30000,"maxOutputTokens":4096,"fallbackAliases":["sovereign-fallback"],"rateLimitRpm":90,"costPer1kInput":0.003,"costPer1kOutput":0.015,"pricingSource":"anthropic-enterprise-eu-schedule","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "code-analyzer",
@@ -243,42 +181,16 @@
       "providerModelIdRef": "secretless-registry://models/openai/code-analyzer-v3",
       "credentialRef": "env://UGONDU_OPENAI_API_KEY",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
-      "allowedTools": ["inspect_topology", "analyze_dockerfile", "validate_manifest", "calculate_cost"],
-      "capabilities": {
-        "streaming": true,
-        "toolCalling": true,
-        "structuredOutput": true,
-        "modalities": ["text", "image"],
-        "maxInputTokens": 128000,
-        "maxOutputTokens": 8192
-      },
-      "policy": {
-        "timeoutMs": 30000,
-        "maxOutputTokens": 8192,
-        "fallbackAliases": ["policy-advisor", "sovereign-fallback"],
-        "rateLimitRpm": 100,
-        "costPer1kInput": 0.0025,
-        "costPer1kOutput": 0.01,
-        "pricingSource": "openai-enterprise-eu-schedule",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "allowedTools": ["inspect_topology","analyze_dockerfile","validate_manifest","calculate_cost"],
+      "capabilities": { "streaming": true, "toolCalling": true, "structuredOutput": true, "modalities": ["text","image"], "maxInputTokens": 128000, "maxOutputTokens": 8192 },
+      "policy": {"timeoutMs":30000,"maxOutputTokens":8192,"fallbackAliases":["policy-advisor","sovereign-fallback"],"rateLimitRpm":100,"costPer1kInput":0.0025,"costPer1kOutput":0.01,"pricingSource":"openai-enterprise-eu-schedule","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "embeddings-standard",
@@ -286,42 +198,16 @@
       "providerModelIdRef": "secretless-registry://models/google-gemini/embeddings-standard-v3",
       "credentialRef": "env://UGONDU_GEMINI_API_KEY",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
       "allowedTools": [],
-      "capabilities": {
-        "streaming": false,
-        "toolCalling": false,
-        "structuredOutput": true,
-        "modalities": ["embedding", "text"],
-        "maxInputTokens": 32768,
-        "maxOutputTokens": 1536
-      },
-      "policy": {
-        "timeoutMs": 15000,
-        "maxOutputTokens": 1536,
-        "fallbackAliases": ["sovereign-embeddings"],
-        "rateLimitRpm": 300,
-        "costPer1kInput": 0.0001,
-        "costPer1kOutput": 0.0001,
-        "pricingSource": "gcp-vertex-eu-west9-schedule",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "capabilities": { "streaming": false, "toolCalling": false, "structuredOutput": true, "modalities": ["embedding","text"], "maxInputTokens": 32768, "maxOutputTokens": 1536 },
+      "policy": {"timeoutMs":15000,"maxOutputTokens":1536,"fallbackAliases":["sovereign-embeddings"],"rateLimitRpm":300,"costPer1kInput":0.0001,"costPer1kOutput":0.0001,"pricingSource":"gcp-vertex-eu-west9-schedule","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "azure-enterprise-chat",
@@ -329,42 +215,16 @@
       "providerModelIdRef": "secretless-registry://models/azure-openai/enterprise-chat-v3",
       "credentialRef": "kms://alias/ugondu-azure-openai-key",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
-      "allowedTools": ["inspect_topology", "verify_readiness", "calculate_cost"],
-      "capabilities": {
-        "streaming": true,
-        "toolCalling": true,
-        "structuredOutput": true,
-        "modalities": ["text"],
-        "maxInputTokens": 128000,
-        "maxOutputTokens": 4096
-      },
-      "policy": {
-        "timeoutMs": 30000,
-        "maxOutputTokens": 4096,
-        "fallbackAliases": ["sovereign-fallback"],
-        "rateLimitRpm": 120,
-        "costPer1kInput": 0.003,
-        "costPer1kOutput": 0.015,
-        "pricingSource": "azure-francecentral-ea",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "allowedTools": ["inspect_topology","verify_readiness","calculate_cost"],
+      "capabilities": { "streaming": true, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 128000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":30000,"maxOutputTokens":4096,"fallbackAliases":["sovereign-fallback"],"rateLimitRpm":120,"costPer1kInput":0.003,"costPer1kOutput":0.015,"pricingSource":"azure-francecentral-ea","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "sovereign-fallback",
@@ -372,42 +232,16 @@
       "providerModelIdRef": "secretless-registry://models/sovereign/deterministic-assistant-v3",
       "credentialRef": "env://UGONDU_SOVEREIGN_MODEL_TOKEN",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential", "restricted"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential","restricted"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
-      "allowedTools": ["inspect_topology", "verify_readiness", "calculate_cost", "validate_manifest", "evaluate_policy", "classify_repository", "analyze_dockerfile"],
-      "capabilities": {
-        "streaming": true,
-        "toolCalling": true,
-        "structuredOutput": true,
-        "modalities": ["text"],
-        "maxInputTokens": 128000,
-        "maxOutputTokens": 4096
-      },
-      "policy": {
-        "timeoutMs": 10000,
-        "maxOutputTokens": 4096,
-        "fallbackAliases": [],
-        "rateLimitRpm": 600,
-        "costPer1kInput": 0.0001,
-        "costPer1kOutput": 0.0002,
-        "pricingSource": "internal-sovereign-ledger",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "allowedTools": ["inspect_topology","verify_readiness","calculate_cost","validate_manifest","evaluate_policy","classify_repository","analyze_dockerfile"],
+      "capabilities": { "streaming": true, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 128000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":10000,"maxOutputTokens":4096,"fallbackAliases":[],"rateLimitRpm":600,"costPer1kInput":0.0001,"costPer1kOutput":0.0002,"pricingSource":"internal-sovereign-ledger","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "sovereign-embeddings",
@@ -415,42 +249,16 @@
       "providerModelIdRef": "secretless-registry://models/sovereign/deterministic-embeddings-v3",
       "credentialRef": "env://UGONDU_SOVEREIGN_MODEL_TOKEN",
       "status": "enabled",
-      "environments": ["development", "test", "staging", "production"],
-      "allowedRegions": ["eu-west-3", "eu-central-1"],
-      "dataClassifications": ["public", "internal", "confidential", "restricted"],
-      "approvedProducts": ["ugondu", "uppie", "*"],
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential","restricted"],
+      "approvedProducts": ["ugondu","uppie","*"],
       "approvedTenants": ["*"],
       "allowedTools": [],
-      "capabilities": {
-        "streaming": false,
-        "toolCalling": false,
-        "structuredOutput": true,
-        "modalities": ["embedding", "text"],
-        "maxInputTokens": 32768,
-        "maxOutputTokens": 1536
-      },
-      "policy": {
-        "timeoutMs": 10000,
-        "maxOutputTokens": 1536,
-        "fallbackAliases": [],
-        "rateLimitRpm": 600,
-        "costPer1kInput": 0.00005,
-        "costPer1kOutput": 0.00005,
-        "pricingSource": "internal-sovereign-ledger",
-        "pricingDate": "2026-10-01"
-      },
-      "conformance": {
-        "contractTestsPassed": true,
-        "lastVerifiedAt": "2026-10-18T00:00:00Z",
-        "suiteVersion": "3.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "capabilities": { "streaming": false, "toolCalling": false, "structuredOutput": true, "modalities": ["embedding","text"], "maxInputTokens": 32768, "maxOutputTokens": 1536 },
+      "policy": {"timeoutMs":10000,"maxOutputTokens":1536,"fallbackAliases":[],"rateLimitRpm":600,"costPer1kInput":0.00005,"costPer1kOutput":0.00005,"pricingSource":"internal-sovereign-ledger","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-18T00:00:00Z","suiteVersion":"3.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     },
     {
       "alias": "legacy-unapproved",
@@ -458,42 +266,67 @@
       "providerModelIdRef": "secretless-registry://models/openai/legacy-v1",
       "credentialRef": "env://UGONDU_OPENAI_API_KEY",
       "status": "disabled",
-      "environments": ["development", "test"],
+      "environments": ["development","test"],
       "allowedRegions": ["eu-west-3"],
       "dataClassifications": ["public"],
       "approvedProducts": ["ugondu"],
       "approvedTenants": ["*"],
       "allowedTools": [],
-      "capabilities": {
-        "streaming": false,
-        "toolCalling": false,
-        "structuredOutput": false,
-        "modalities": ["text"],
-        "maxInputTokens": 4096,
-        "maxOutputTokens": 1024
-      },
-      "policy": {
-        "timeoutMs": 10000,
-        "maxOutputTokens": 1024,
-        "fallbackAliases": [],
-        "rateLimitRpm": 10,
-        "costPer1kInput": 0.002,
-        "costPer1kOutput": 0.002,
-        "pricingSource": "openai-legacy",
-        "pricingDate": "2026-01-01"
-      },
-      "conformance": {
-        "contractTestsPassed": false,
-        "lastVerifiedAt": "2026-01-01T00:00:00Z",
-        "suiteVersion": "1.0.0"
-      },
-      "governance": {
-        "owner": "Ujomor Systems Engineering & Governance Authority",
-        "approver": "Air Roofers Corporate Governance",
-        "rotationDays": 30,
-        "expiresAt": "2027-10-18T00:00:00Z",
-        "incidentOwner": "Ujomor Security Operations"
-      }
+      "capabilities": { "streaming": false, "toolCalling": false, "structuredOutput": false, "modalities": ["text"], "maxInputTokens": 4096, "maxOutputTokens": 1024 },
+      "policy": {"timeoutMs":10000,"maxOutputTokens":1024,"fallbackAliases":[],"rateLimitRpm":10,"costPer1kInput":0.002,"costPer1kOutput":0.002,"pricingSource":"openai-legacy","pricingDate":"2026-01-01"},
+      "conformance": {"contractTestsPassed":false,"lastVerifiedAt":"2026-01-01T00:00:00Z","suiteVersion":"1.0.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
+    },
+    {
+      "alias": "airroofers-sentinel",
+      "providerId": "airroofers-ai",
+      "providerModelIdRef": "secretless-registry://models/airroofers/sentinel-guard-v1",
+      "credentialRef": "env://UGONDU_AIRROOFERS_AI_KEY",
+      "status": "enabled",
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential"],
+      "approvedProducts": ["ugondu","uppie","*"],
+      "approvedTenants": ["*"],
+      "allowedTools": ["inspect_topology","verify_readiness"],
+      "capabilities": { "streaming": false, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 128000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":30000,"maxOutputTokens":4096,"fallbackAliases":["sovereign-fallback"],"rateLimitRpm":200,"costPer1kInput":0.001,"costPer1kOutput":0.005,"pricingSource":"airroofers-fabric-ledger","pricingDate":"2026-10-22"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-22T00:00:00Z","suiteVersion":"3.1.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-22T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
+    },
+    {
+      "alias": "sovereign-eu-chat",
+      "providerId": "airroofers-ai",
+      "providerModelIdRef": "secretless-registry://models/airroofers-ai/airroofers-sentinel-v1",
+      "credentialRef": "env://UGONDU_AIRROOFERS_AI_KEY",
+      "status": "enabled",
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential","restricted"],
+      "approvedProducts": ["ugondu","uppie","*"],
+      "approvedTenants": ["*"],
+      "allowedTools": ["inspect_topology","verify_readiness","calculate_cost","validate_manifest"],
+      "capabilities": { "streaming": false, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 128000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":30000,"maxOutputTokens":4096,"fallbackAliases":["sovereign-fallback"],"rateLimitRpm":300,"costPer1kInput":0.001,"costPer1kOutput":0.002,"pricingSource":"airroofers-sovereign-schedule","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-22T00:00:00Z","suiteVersion":"3.1.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
+    },
+    {
+      "alias": "airroofers-sentinel-v1",
+      "providerId": "airroofers-ai",
+      "providerModelIdRef": "secretless-registry://models/airroofers-ai/airroofers-sentinel-v1",
+      "credentialRef": "env://UGONDU_AIRROOFERS_AI_KEY",
+      "status": "enabled",
+      "environments": ["development","test","staging","production"],
+      "allowedRegions": ["eu-west-3","eu-central-1"],
+      "dataClassifications": ["public","internal","confidential","restricted"],
+      "approvedProducts": ["ugondu","uppie","*"],
+      "approvedTenants": ["*"],
+      "allowedTools": ["inspect_topology","verify_readiness","calculate_cost","validate_manifest"],
+      "capabilities": { "streaming": false, "toolCalling": true, "structuredOutput": true, "modalities": ["text"], "maxInputTokens": 128000, "maxOutputTokens": 4096 },
+      "policy": {"timeoutMs":30000,"maxOutputTokens":4096,"fallbackAliases":["sovereign-fallback"],"rateLimitRpm":300,"costPer1kInput":0.001,"costPer1kOutput":0.002,"pricingSource":"airroofers-sovereign-schedule","pricingDate":"2026-10-01"},
+      "conformance": {"contractTestsPassed":true,"lastVerifiedAt":"2026-10-22T00:00:00Z","suiteVersion":"3.1.0"},
+      "governance": {"owner":"Ujomor Systems Engineering & Governance Authority","approver":"Air Roofers Corporate Governance","rotationDays":30,"expiresAt":"2027-10-18T00:00:00Z","incidentOwner":"Ujomor Security Operations"}
     }
   ]
 }

@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "Interseção de capacidades negada: a etapa %d (%s) requer %s",
   "err_step_action_not_granted": "Interseção de capacidades negada: ação %s da etapa %d não concedida em (servidor ∩ locatário ∩ destino ∩ agente ∩ ação)",
   "ai": {
+    "provider": {
+      "airroofers": "Tecido de IA Soberana Air Roofers"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "Não é possível ativar o modelo porque o provedor está desativado.",
       "catalog_duplicate_alias": "Alias de modelo duplicado detectado no catálogo.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "A ação administrativa não é autorizada para a identidade atual.",
       "unauthorized_admin_diagnostics": "Acesso não autorizado ao diagnóstico do gateway de IA.",
       "unexpected_gateway_error": "Ocorreu um erro inesperado no gateway de inferência de IA.",
+      "unproven_verification": "Verificação de política ou IA não comprovada: confirmação de leitura após gravação necessária.",
       "upstream_non_2xx": "O provedor de IA upstream retornou um código de status HTTP diferente de 2xx.",
       "upstream_unavailable": "O serviço do provedor de IA upstream está indisponível no momento."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "A localização informada '{input}' corresponde a várias regiões ({candidates}). Selecione uma cidade ou ID de região específico.",
     "error.unsupported_location": "A localização '{input}' não está disponível no provedor {provider}. As localizações suportadas incluem: {examples}.",
     "error.residency_conflict": "A região selecionada '{region}' entra em conflito com o requisito de residência de dados '{residency}' (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "Catálogo de localização de provedores autorizados inacessível: {detail}",
     "recommendation.rationale": "Região recomendada {region} ({displayName}) com base em {reason}. Confirmação necessária antes da implantação.",
     "mode.explicit": "Usar minha localização especificada",
     "mode.recommend": "Recomendar uma localização adequada para mim",
-    "mode.multi_region": "Planejar múltiplas regiões"
+    "mode.multi_region": "Planejar múltiplas regiões",
+    "source.live_discovered": "Descoberta de catálogo em tempo real de provedores autorizados",
+    "source.cached_fallback": "Catálogo de provedores em cache verificado"
   }
 }

@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "기능 교차 거부됨: 단계 %d (%s)에는 %s이(가) 필요합니다",
   "err_step_action_not_granted": "기능 교차 거부됨: 단계 %d 작업 %s이(가) (서버 ∩ 테넌트 ∩ 대상 ∩ 에이전트 ∩ 작업)에서 부여되지 않았습니다",
   "ai": {
+    "provider": {
+      "airroofers": "Air Roofers 소버린 AI 패브릭"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "공급자가 비활성화되어 있으므로 모델을 활성화할 수 없습니다.",
       "catalog_duplicate_alias": "카탈로그에서 중복된 모델 별칭이 감지되었습니다.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "현재 ID에 대해 관리 작업이 승인되지 않았습니다.",
       "unauthorized_admin_diagnostics": "AI 게이트웨이 진단에 대한 무단 액세스입니다.",
       "unexpected_gateway_error": "AI 추론 게이트웨이에서 예기치 않은 오류가 발생했습니다.",
+      "unproven_verification": "정책 또는 AI 검증이 입증되지 않음: 쓰기 후 읽기 확인이 필요합니다.",
       "upstream_non_2xx": "업스트림 AI 공급자가 2xx가 아닌 HTTP 상태 코드를 반환했습니다.",
       "upstream_unavailable": "업스트림 AI 공급자 서비스를 현재 사용할 수 없습니다."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "입력한 위치 '{input}'이(가) 여러 리전({candidates})과 일치합니다. 특정 도시 또는 리전 ID를 선택하십시오.",
     "error.unsupported_location": "위치 '{input}'은(는) 공급자 {provider}에서 사용할 수 없습니다. 지원되는 위치: {examples}.",
     "error.residency_conflict": "선택한 리전 '{region}'이(가) 데이터 상주 요구사항 '{residency}'과(와) 충돌합니다 (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "신뢰할 수 있는 공급자 위치 카탈로그에 연결할 수 없음: {detail}",
     "recommendation.rationale": "{reason}에 기반한 추천 리전 {region} ({displayName}). 배포 전에 확인이 필요합니다.",
     "mode.explicit": "지정한 위치 사용",
     "mode.recommend": "적합한 위치 추천받기",
-    "mode.multi_region": "다중 리전 계획"
+    "mode.multi_region": "다중 리전 계획",
+    "source.live_discovered": "신뢰할 수 있는 공급자 라이브 카탈로그 검색",
+    "source.cached_fallback": "검증된 캐시된 공급자 카탈로그"
   }
 }

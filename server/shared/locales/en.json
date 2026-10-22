@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "Capability intersection denied: step %d (%s) requires %s",
   "err_step_action_not_granted": "Capability intersection denied: step %d action %s not granted in (server ∩ tenant ∩ target ∩ agent ∩ action)",
   "ai": {
+    "provider": {
+      "airroofers": "Air Roofers Sovereign AI Fabric"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "Cannot activate model because the provider is disabled.",
       "catalog_duplicate_alias": "Duplicate model alias detected in catalog.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "Administrative action is unauthorized for the current identity.",
       "unauthorized_admin_diagnostics": "Unauthorized access to AI gateway diagnostics.",
       "unexpected_gateway_error": "An unexpected error occurred in the AI inference gateway.",
+      "unproven_verification": "Policy or AI verification unproven: read-after-write confirmation required.",
       "upstream_non_2xx": "Upstream AI provider returned a non-2xx HTTP status code.",
       "upstream_unavailable": "Upstream AI provider service is currently unavailable."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "Location input '{input}' matches multiple regions ({candidates}). Please select a specific city or region ID.",
     "error.unsupported_location": "Location '{input}' is not available on provider {provider}. Supported locations include: {examples}.",
     "error.residency_conflict": "Selected region '{region}' conflicts with data-residency requirement '{residency}' (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "Authoritative provider location catalogue unreachable: {detail}",
     "recommendation.rationale": "Recommended region {region} ({displayName}) based on {reason}. Confirmation required before deployment.",
     "mode.explicit": "Use my specified location",
     "mode.recommend": "Recommend a suitable location for me",
-    "mode.multi_region": "Plan multiple regions"
+    "mode.multi_region": "Plan multiple regions",
+    "source.live_discovered": "Authoritative provider live catalogue discovery",
+    "source.cached_fallback": "Verified cached provider catalogue"
   }
 }

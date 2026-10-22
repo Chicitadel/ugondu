@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "功能交集被拒绝：步骤 %d (%s) 需要 %s",
   "err_step_action_not_granted": "功能交集被拒绝：步骤 %d 操作 %s 未在 (服务器 ∩ 租户 ∩ 目标 ∩ 代理 ∩ 操作) 中授予",
   "ai": {
+    "provider": {
+      "airroofers": "Air Roofers 主权人工智能架构"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "无法激活模型，因为提供程序已被禁用。",
       "catalog_duplicate_alias": "在目录中检测到重复的模型别名。",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "当前身份未被授权执行管理操作。",
       "unauthorized_admin_diagnostics": "对AI网关诊断的未授权访问。",
       "unexpected_gateway_error": "AI推理网关发生意外错误。",
+      "unproven_verification": "策略或人工智能验证未证实：需要写后读确认。",
       "upstream_non_2xx": "上游AI提供程序返回了非2xx HTTP状态码。",
       "upstream_unavailable": "上游AI提供程序服务当前不可用。"
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "位置输入 '{input}' 匹配多个区域 ({candidates})。请选择具体的城市或区域 ID。",
     "error.unsupported_location": "提供商 {provider} 不支持位置 '{input}'。支持的位置包括：{examples}。",
     "error.residency_conflict": "所选区域 '{region}' 与数据驻留要求 '{residency}' 冲突 (CONFLICTS_WITH_POLICY)。",
+    "error.catalogue_unreachable": "无法访问权威提供商位置目录：{detail}",
     "recommendation.rationale": "基于 {reason} 推荐区域 {region} ({displayName})。部署前需要确认。",
     "mode.explicit": "使用我指定的位置",
     "mode.recommend": "为我推荐合适的位置",
-    "mode.multi_region": "规划多个区域"
+    "mode.multi_region": "规划多个区域",
+    "source.live_discovered": "权威提供商实时目录发现",
+    "source.cached_fallback": "已验证的缓存提供商目录"
   }
 }

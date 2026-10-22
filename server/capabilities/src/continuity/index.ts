@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Capabilities / Execution Continuity & Policy Governance
  * File           : index.ts
- * Version        : 1.1.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Version        : 1.2.0
+ * Author         : Air Roofers SASU / Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers SASU (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-21
- * Last Modified  : 2026-10-21
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -21,7 +21,7 @@
  * - Security Authority     : Ujomor Systems Governance
  * - Governance Authority   : Air Roofers Corporate Governance
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 // Duplicate Role Guard & Preflight Verification
@@ -48,6 +48,8 @@ export * from './PolicyPermissionAdapter';
 // Bootstrap Policy Orchestrator
 export * from './BootstrapPolicyOrchestrator';
 
+// Dynamic Location & Placement Catalogue Provider
+export * from './LocationCatalogueProvider';
+
 // Universal Placement & Region Selection Resolver
 export * from './UniversalPlacementResolver';
-

@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "تم رفض تقاطع القدرات: الخطوة %d (%s) تتطلب %s",
   "err_step_action_not_granted": "تم رفض تقاطع القدرات: إجراء الخطوة %d %s غير ممنوح في (الخادم ∩ المستأجر ∩ الهدف ∩ الوكيل ∩ الإجراء)",
   "ai": {
+    "provider": {
+      "airroofers": "نسيج الذكاء الاصطناعي السيادي Air Roofers"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "لا يمكن تفعيل النموذج لأن الموفر معطل.",
       "catalog_duplicate_alias": "تم اكتشاف اسم مستعار مكرر للنموذج في الفهرس.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "الإجراء الإداري غير مصرح به للهوية الحالية.",
       "unauthorized_admin_diagnostics": "وصول غير مصرح به إلى تشخيصات بوابة الذكاء الاصطناعي.",
       "unexpected_gateway_error": "حدث خطأ غير متوقع في بوابة استنتاج الذكاء الاصطناعي.",
+      "unproven_verification": "لم يتم إثبات التحقق من السياسة أو الذكاء الاصطناعي: يلزم تأكيد القراءة بعد الكتابة.",
       "upstream_non_2xx": "أرجع موفر الذكاء الاصطناعي الأصلي رمز حالة HTTP بخلاف 2xx.",
       "upstream_unavailable": "خدمة موفر الذكاء الاصطناعي الأصلي غير متوفرة حاليًا."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "يتطابق الموقع المدخل '{input}' مع عدة مناطق ({candidates}). يرجى تحديد مدينة معينة أو معرّف منطقة محدد.",
     "error.unsupported_location": "الموقع '{input}' غير متاح لدى المزود {provider}. تشمل المواقع المدعومة: {examples}.",
     "error.residency_conflict": "تتعارض المنطقة المحددة '{region}' مع متطلبات إقامة البيانات '{residency}' (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "تعذر الوصول إلى دليل مواقع موفري الخدمة المعتمدين: {detail}",
     "recommendation.rationale": "المنطقة الموصى بها {region} ({displayName}) بناءً على {reason}. يلزم التأكيد قبل النشر.",
     "mode.explicit": "استخدام موقعي المحدد",
     "mode.recommend": "التوصية بموقع مناسب لي",
-    "mode.multi_region": "تخطيط مناطق متعددة"
+    "mode.multi_region": "تخطيط مناطق متعددة",
+    "source.live_discovered": "اكتشاف مباشر لدليل موفر الخدمة المعتمد",
+    "source.cached_fallback": "دليل موفر الخدمة المخزن مؤقتًا والمتحقق منه"
   }
 }

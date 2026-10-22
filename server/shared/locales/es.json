@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "Intersección de capacidades denegada: el paso %d (%s) requiere %s",
   "err_step_action_not_granted": "Intersección de capacidades denegada: acción %s del paso %d no otorgada en (servidor ∩ inquilino ∩ destino ∩ agente ∩ acción)",
   "ai": {
+    "provider": {
+      "airroofers": "Tejido de IA Soberana Air Roofers"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "No se puede activar el modelo porque el proveedor está deshabilitado.",
       "catalog_duplicate_alias": "Se detectó un alias de modelo duplicado en el catálogo.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "La acción administrativa no está autorizada para la identidad actual.",
       "unauthorized_admin_diagnostics": "Acceso no autorizado a los diagnósticos de la pasarela de IA.",
       "unexpected_gateway_error": "Ocurrió un error inesperado en la pasarela de inferencia de IA.",
+      "unproven_verification": "Verificación de política o IA no demostrada: se requiere confirmación de lectura tras escritura.",
       "upstream_non_2xx": "El proveedor de IA ascendente devolvió un código de estado HTTP distinto de 2xx.",
       "upstream_unavailable": "El servicio del proveedor de IA ascendente no está disponible actualmente."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "La ubicación introducida '{input}' coincide con varias regiones ({candidates}). Seleccione una ciudad o un ID de región específico.",
     "error.unsupported_location": "La ubicación '{input}' no está disponible en el proveedor {provider}. Las ubicaciones admitidas incluyen: {examples}.",
     "error.residency_conflict": "La región seleccionada '{region}' entra en conflicto con el requisito de residencia de datos '{residency}' (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "No se puede acceder al catálogo de ubicaciones de proveedores autorizados: {detail}",
     "recommendation.rationale": "Región recomendada {region} ({displayName}) basada en {reason}. Se requiere confirmación antes del despliegue.",
     "mode.explicit": "Usar mi ubicación especificada",
     "mode.recommend": "Recomendarme una ubicación adecuada",
-    "mode.multi_region": "Planificar múltiples regiones"
+    "mode.multi_region": "Planificar múltiples regiones",
+    "source.live_discovered": "Descubrimiento de catálogo en vivo de proveedores autorizados",
+    "source.cached_fallback": "Catálogo de proveedores en caché verificado"
   }
 }

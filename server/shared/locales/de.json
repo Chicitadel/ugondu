@@ -1887,6 +1887,9 @@
   "err_step_requires_cap": "Funktionsschnittmenge verweigert: Schritt %d (%s) erfordert %s",
   "err_step_action_not_granted": "Funktionsschnittmenge verweigert: Schritt %d Aktion %s nicht gewährt in (Server ∩ Mandant ∩ Ziel ∩ Agent ∩ Aktion)",
   "ai": {
+    "provider": {
+      "airroofers": "Souveränes KI-Fabric von Air Roofers"
+    },
     "error": {
       "cannot_activate_model_provider_disabled": "Modell kann nicht aktiviert werden, da der Anbieter deaktiviert ist.",
       "catalog_duplicate_alias": "Doppelter Modellalias im Katalog erkannt.",
@@ -1954,6 +1957,7 @@
       "unauthorized_admin": "Administrative Aktion ist für die aktuelle Identität nicht autorisiert.",
       "unauthorized_admin_diagnostics": "Unbefugter Zugriff auf die Diagnose des KI-Gateways.",
       "unexpected_gateway_error": "Im KI-Inferenz-Gateway ist ein unerwarteter Fehler aufgetreten.",
+      "unproven_verification": "Richtlinien- oder KI-Überprüfung unbewiesen: Read-After-Write-Bestätigung erforderlich.",
       "upstream_non_2xx": "Upstream-KI-Anbieter hat einen Nicht-2xx-HTTP-Statuscode zurückgegeben.",
       "upstream_unavailable": "Dienst des Upstream-KI-Anbieters ist derzeit nicht verfügbar."
     }
@@ -1998,9 +2002,12 @@
     "error.ambiguous_location": "Die Standorteingabe '{input}' stimmt mit mehreren Regionen überein ({candidates}). Bitte wählen Sie eine bestimmte Stadt oder Regions-ID aus.",
     "error.unsupported_location": "Der Standort '{input}' ist beim Anbieter {provider} nicht verfügbar. Unterstützte Standorte sind unter anderem: {examples}.",
     "error.residency_conflict": "Die ausgewählte Region '{region}' steht im Konflikt mit der Datenresidenzanforderung '{residency}' (CONFLICTS_WITH_POLICY).",
+    "error.catalogue_unreachable": "Autorisierter Anbieter-Standortkatalog nicht erreichbar: {detail}",
     "recommendation.rationale": "Empfohlene Region {region} ({displayName}) basierend auf {reason}. Bestätigung vor der Bereitstellung erforderlich.",
     "mode.explicit": "Meinen angegebenen Standort verwenden",
     "mode.recommend": "Einen geeigneten Standort für mich empfehlen",
-    "mode.multi_region": "Mehrere Regionen planen"
+    "mode.multi_region": "Mehrere Regionen planen",
+    "source.live_discovered": "Live-Katalogerkennung autorisierter Anbieter",
+    "source.cached_fallback": "Verifizierter zwischengespeicherter Anbieterkatalog"
   }
 }

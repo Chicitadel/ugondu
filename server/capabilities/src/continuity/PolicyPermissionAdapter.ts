@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Capabilities / Execution Continuity & Policy Governance
  * File           : PolicyPermissionAdapter.ts
- * Version        : 1.1.0
+ * Version        : 1.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-21
- * Last Modified  : 2026-10-21
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -192,7 +192,7 @@ export interface PolicyPermissionAdapter {
   readonly providerId: string;
   readonly adapterVersion?: string;
 
-  // Normative Provider-Neutral Contract (Section 4)
+  // Normative Provider-Neutral Contract
   discoverIdentity?(): Promise<ProviderIdentity>;
   negotiateCapabilities?(): Promise<ProviderCapability[]>;
   inspectPolicy(policyId: string): Promise<NativePolicySnapshot | any>;
@@ -215,12 +215,27 @@ export interface PolicyPermissionAdapter {
   verifyPolicyMutation(result: MutationResult): Promise<ValidationReport>;
 }
 
+export function assertPolicyVerification(evidence: {
+  verification: string;
+  observedDigest?: string;
+  expectedDigest?: string;
+}): void {
+  if (
+    !evidence ||
+    evidence.verification !== 'VERIFIED' ||
+    !evidence.observedDigest ||
+    evidence.observedDigest !== evidence.expectedDigest
+  ) {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN');
+  }
+}
+
 export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAdapter {
   abstract readonly providerId: string;
   readonly adapterVersion: string = '1.0.0';
 
   public async discoverIdentity(): Promise<ProviderIdentity> {
-    return { providerId: this.providerId, tenantOrAccountId: 'default', principalId: 'default-principal' };
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: discoverIdentity must be implemented by provider adapter');
   }
 
   public async negotiateCapabilities(): Promise<ProviderCapability[]> {
@@ -229,25 +244,31 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
 
   public abstract inspectPolicy(policyId: string): Promise<NativePolicySnapshot | any>;
 
-  public async planPolicyReconciliation(input: unknown): Promise<unknown> {
-    return { planId: `plan_${this.providerId}_reconcile`, providerId: this.providerId, status: 'PLANNED', input };
+  public async planPolicyReconciliation(_input: unknown): Promise<unknown> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: planPolicyReconciliation requires provider implementation');
   }
 
-  public async applyPolicyReconciliation(plan: unknown): Promise<unknown> {
-    return { applied: true, providerId: this.providerId, plan };
+  public async applyPolicyReconciliation(_plan: unknown): Promise<unknown> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: applyPolicyReconciliation requires provider implementation');
   }
 
-  public async verifyPolicyReconciliation(_plan: unknown): Promise<ReconcileOutcome> {
+  public async verifyPolicyReconciliation(evidence: any): Promise<ReconcileOutcome> {
+    if (!evidence || evidence.verification !== 'VERIFIED' || !evidence.observedDigest || evidence.observedDigest !== evidence.expectedDigest) {
+      throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: read-after-write verification failed');
+    }
     return 'APPLIED_AND_MATCHES';
   }
 
-  public async inspectAttachments(targetId: string): Promise<unknown> {
-    return { providerId: this.providerId, targetId, attachments: [] };
+  public async inspectAttachments(_targetId: string): Promise<unknown> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: inspectAttachments requires provider implementation');
   }
 
-  public async attachPolicy?(targetId: string, policyId: string): Promise<void> {}
-  public async rollback?(evidence: unknown): Promise<unknown> {
-    return { rolledBack: true, providerId: this.providerId, evidence };
+  public async attachPolicy(_targetId: string, _policyId: string): Promise<void> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: attachPolicy requires provider implementation');
+  }
+
+  public async rollback(_evidence: unknown): Promise<unknown> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: rollback requires provider implementation');
   }
 
   public capabilities(): ProviderCapabilities {
@@ -259,28 +280,36 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
     };
   }
 
-  public async inspectPrincipal(ref: PrincipalRef): Promise<PrincipalSnapshot> {
-    return { ref, exists: false, probedAt: new Date().toISOString(), verified: false };
+  public async inspectPrincipal(_ref: PrincipalRef): Promise<PrincipalSnapshot> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: inspectPrincipal requires provider implementation');
   }
 
-  public async listPolicyBindings(_p: PrincipalRef): Promise<PolicyBinding[]> { return []; }
+  public async listPolicyBindings(_p: PrincipalRef): Promise<PolicyBinding[]> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: listPolicyBindings requires provider implementation');
+  }
+
   public async validateNativePolicy(_d: unknown): Promise<ValidationReport> {
-    return { valid: true, violations: [], warnings: [], evaluatedAt: new Date().toISOString() };
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: validateNativePolicy requires provider implementation');
   }
+
   public async renderPolicy(_t: unknown, _c: Record<string, unknown>): Promise<RenderedPolicy> {
-    return { providerId: this.providerId, document: {}, documentSha256: '', renderedAt: new Date().toISOString() };
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: renderPolicy requires provider implementation');
   }
+
   public diffPolicy(_exp: RenderedPolicy, _obs: NativePolicySnapshot): PolicyDiff {
-    return { matches: true, expectedSha256: '', mismatchedStatements: [] };
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: diffPolicy requires provider implementation');
   }
+
   public async planPolicyMutation(_diff: PolicyDiff): Promise<MutationPlan> {
-    return { planId: `mut_${this.providerId}`, action: 'NOOP', policyId: '', proposedChanges: {}, planDigest: '' };
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: planPolicyMutation requires provider implementation');
   }
-  public async applyApprovedPolicyPlan(plan: ApprovedPlan): Promise<MutationResult> {
-    return { success: true, outcome: 'APPLIED_AND_MATCHES', mutationId: plan.plan.planId, executedAt: new Date().toISOString() };
+
+  public async applyApprovedPolicyPlan(_plan: ApprovedPlan): Promise<MutationResult> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: applyApprovedPolicyPlan requires provider implementation');
   }
-  public async verifyPolicyMutation(result: MutationResult): Promise<ValidationReport> {
-    return { valid: result.success, violations: [], warnings: [], evaluatedAt: new Date().toISOString() };
+
+  public async verifyPolicyMutation(_result: MutationResult): Promise<ValidationReport> {
+    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: verifyPolicyMutation requires provider implementation');
   }
 }
 

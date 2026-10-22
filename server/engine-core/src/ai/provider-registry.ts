@@ -41,6 +41,7 @@ import {
 } from './contracts';
 import { CredentialBroker } from './credential-broker';
 import { ModelCatalog } from './model-catalog';
+import { AirRoofersAiProviderAdapter } from './airroofers-provider';
 
 export interface HttpTransportRequest {
     url: string;
@@ -397,6 +398,10 @@ export class ProviderAdapterRegistry {
                 new ExternalHttpProviderAdapter(providerId, catalog, credentialBroker, getTransport)
             );
         }
+        this.adapters.set(
+            'airroofers-ai',
+            new AirRoofersAiProviderAdapter(catalog, credentialBroker, getTransport)
+        );
         this.adapters.set(
             'sovereign-deterministic',
             new SovereignDeterministicAdapter(catalog, credentialBroker)

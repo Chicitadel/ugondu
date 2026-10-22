@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Capabilities / Execution Continuity & Policy Governance
  * File           : UniversalPlacementResolver.ts
- * Version        : 1.1.0
+ * Version        : 1.2.0
  * Author         : Air Roofers SASU / Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-10-21
- * Last Modified  : 2026-10-21
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -25,23 +25,29 @@
  ******************************************************************************/
 
 import * as crypto from 'crypto';
+import {
+  DynamicLocationCatalogueProvider,
+  ILocationCatalogueProvider,
+  LocationCatalogueProvenance,
+  LocationCatalogueResult,
+  PlacementCandidate,
+  PlacementLocationType,
+} from './LocationCatalogueProvider';
+
+export {
+  DynamicLocationCatalogueProvider,
+  ILocationCatalogueProvider,
+  LocationCatalogueProvenance,
+  LocationCatalogueResult,
+  PlacementCandidate,
+  PlacementLocationType,
+};
 
 export type PlacementScope = 'organization' | 'project' | 'environment' | 'workload' | 'service';
 export type PlacementSource = 'actor-explicit' | 'approved-project-config' | 'policy-required' | 'recommendation-accepted' | 'migration-approved';
 export type PlacementStatus = 'RESOLVED' | 'AMBIGUOUS' | 'UNSUPPORTED' | 'CONFLICTS_WITH_POLICY' | 'REQUIRES_CONFIRMATION' | 'UNAVAILABLE' | 'REGION_SELECTION_REQUIRED';
 export type PlacementDecisionState = 'ACTOR_SELECTED' | 'APPROVED_CONFIG' | 'RECOMMENDATION' | 'UNRESOLVED';
 export type MultiRegionTopologyMode = 'single-region' | 'active-active' | 'active-passive' | 'disaster-recovery' | 'independent';
-export type PlacementLocationType = 'region' | 'zone' | 'cluster' | 'datacenter' | 'hosting-location' | 'provider-defined';
-
-export interface PlacementCandidate {
-  providerId: string; nativeLocationId: string; displayName: string;
-  countryCode?: string; cityOrArea?: string; geography?: string; aliases?: string[];
-  locationType: PlacementLocationType; capabilities: string[];
-  availability: 'available' | 'restricted' | 'unknown';
-  estimatedLatencyMs?: number; latencySource?: 'measured' | 'provider-published' | 'estimated';
-  residencyAttributes?: string[]; costTier?: 'low' | 'standard' | 'premium';
-  catalogueVersion: string; observedAt: string;
-}
 
 export interface ApprovedProjectPlacementConfig {
   providerId: string; tenantRef?: string; projectId: string; environmentId: string;
@@ -93,9 +99,6 @@ export interface PlacementAdapter {
   validate(input: { intent: PlacementIntent; selected: PlacementCandidate[]; catalogue: PlacementCandidate[] }): Promise<{ status: PlacementStatus; blockers: string[]; warnings: string[] }>;
 }
 
-const CAT_VER = '2026.10.21-v1';
-const OBS_AT = '2026-10-21T00:00:00.000Z';
-const CLOUD_CAPS = ['compute', 'containers', 'iam-regional-condition', 'kms', 'vpc', 'rds', 's3', 'cloudwatch'];
 const IPV4_REGEX = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
 const IPV6_REGEX = /\b(?:[0-9a-fA-F]{1,4}:){2,7}[0-9a-fA-F]{1,4}\b/g;
 
@@ -109,54 +112,23 @@ function normalizeToken(value: string): string {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
-function mkLoc(
-  providerId: string, nativeLocationId: string, displayName: string, countryCode: string,
-  cityOrArea: string, geography: string, aliases: string[], residencyAttributes: string[],
-  estimatedLatencyMs: number, costTier: 'low' | 'standard' | 'premium' = 'standard',
-  locationType: PlacementLocationType = 'region', capabilities: string[] = CLOUD_CAPS
-): PlacementCandidate {
-  return {
-    providerId, nativeLocationId, displayName, countryCode, cityOrArea, geography, aliases,
-    locationType, capabilities, availability: 'available', estimatedLatencyMs,
-    latencySource: locationType === 'region' ? 'provider-published' : 'estimated',
-    residencyAttributes, costTier, catalogueVersion: CAT_VER, observedAt: OBS_AT,
-  };
-}
-
 export class AuthoritativeLocationCatalogue {
-  private static readonly entries: PlacementCandidate[] = [
-    mkLoc('aws', 'eu-west-3', 'Europe (Paris)', 'FR', 'Paris', 'Western Europe', ['paris', 'france', 'western europe', 'europe', 'hexagone'], ['EU', 'EEA', 'GDPR', 'FR', 'EUROPE', 'WESTERN_EUROPE'], 18, 'standard'),
-    mkLoc('aws', 'af-south-1', 'Africa (Cape Town)', 'ZA', 'Cape Town', 'Africa', ['cape town', 'south africa', 'africa', 'sub-saharan africa', 'nigeria', 'west africa', 'lagos'], ['AFRICA', 'SUB_SAHARAN_AFRICA', 'ZA'], 42, 'standard'),
-    mkLoc('aws', 'eu-central-1', 'Europe (Frankfurt)', 'DE', 'Frankfurt', 'Central Europe', ['frankfurt', 'germany', 'central europe', 'europe'], ['EU', 'EEA', 'GDPR', 'DE', 'EUROPE'], 20, 'standard'),
-    mkLoc('aws', 'eu-west-1', 'Europe (Ireland)', 'IE', 'Dublin', 'Western Europe', ['dublin', 'ireland', 'europe'], ['EU', 'EEA', 'GDPR', 'IE', 'EUROPE'], 24, 'low'),
-    mkLoc('aws', 'eu-west-2', 'Europe (London)', 'GB', 'London', 'Western Europe', ['london', 'uk', 'united kingdom', 'great britain', 'europe'], ['UK', 'GB', 'EUROPE'], 21, 'standard'),
-    mkLoc('aws', 'us-east-1', 'US East (N. Virginia)', 'US', 'Northern Virginia', 'North America', ['northern virginia', 'virginia', 'n. virginia', 'usa', 'united states', 'us', 'north america'], ['US', 'USA', 'NORTH_AMERICA'], 75, 'low'),
-    mkLoc('aws', 'us-west-2', 'US West (Oregon)', 'US', 'Oregon', 'North America', ['oregon', 'usa', 'united states', 'us', 'north america'], ['US', 'USA', 'NORTH_AMERICA'], 135, 'low'),
-    mkLoc('aws', 'ap-southeast-1', 'Asia Pacific (Singapore)', 'SG', 'Singapore', 'Southeast Asia', ['singapore', 'southeast asia', 'apac', 'asia'], ['APAC', 'SG', 'ASIA'], 160, 'standard'),
-    mkLoc('aws', 'ap-northeast-1', 'Asia Pacific (Tokyo)', 'JP', 'Tokyo', 'East Asia', ['tokyo', 'japan', 'east asia', 'apac', 'asia'], ['APAC', 'JP', 'ASIA'], 210, 'standard'),
-    mkLoc('aws', 'sa-east-1', 'South America (São Paulo)', 'BR', 'São Paulo', 'South America', ['sao paulo', 'brazil', 'south america', 'latam'], ['LATAM', 'BR', 'SOUTH_AMERICA'], 185, 'premium'),
-    mkLoc('gcp', 'europe-west9', 'Europe West 9 (Paris)', 'FR', 'Paris', 'Western Europe', ['paris', 'france', 'western europe', 'europe'], ['EU', 'EEA', 'GDPR', 'FR', 'EUROPE'], 19, 'standard'),
-    mkLoc('gcp', 'africa-south1', 'Africa South 1 (Johannesburg)', 'ZA', 'Johannesburg', 'Africa', ['johannesburg', 'south africa', 'africa', 'sub-saharan africa', 'nigeria', 'west africa'], ['AFRICA', 'SUB_SAHARAN_AFRICA', 'ZA'], 45, 'standard'),
-    mkLoc('gcp', 'us-east4', 'US East 4 (Northern Virginia)', 'US', 'Virginia', 'North America', ['virginia', 'northern virginia', 'usa', 'united states', 'us'], ['US', 'USA', 'NORTH_AMERICA'], 78, 'low'),
-    mkLoc('azure', 'francecentral', 'France Central (Paris)', 'FR', 'Paris', 'Western Europe', ['paris', 'france', 'france central', 'western europe', 'europe'], ['EU', 'EEA', 'GDPR', 'FR', 'EUROPE'], 20, 'standard'),
-    mkLoc('azure', 'southafricanorth', 'South Africa North (Johannesburg)', 'ZA', 'Johannesburg', 'Africa', ['johannesburg', 'south africa', 'africa', 'sub-saharan africa', 'nigeria', 'west africa'], ['AFRICA', 'SUB_SAHARAN_AFRICA', 'ZA'], 46, 'standard'),
-    mkLoc('azure', 'eastus', 'East US (Virginia)', 'US', 'Virginia', 'North America', ['virginia', 'east us', 'usa', 'united states', 'us'], ['US', 'USA', 'NORTH_AMERICA'], 76, 'low'),
-    mkLoc('vps', 'vps-dc-eu-par1', 'VPS Datacenter Paris 1', 'FR', 'Paris', 'Western Europe', ['paris', 'france', 'europe'], ['EU', 'EEA', 'GDPR', 'FR', 'EUROPE'], 22, 'low', 'datacenter', ['compute', 'ssh', 'systemd', 'docker', 'tls']),
-    mkLoc('vps', 'vps-dc-af-los1', 'VPS Datacenter Lagos 1', 'NG', 'Lagos', 'West Africa', ['lagos', 'nigeria', 'west africa', 'africa'], ['AFRICA', 'WEST_AFRICA', 'NG'], 25, 'low', 'datacenter', ['compute', 'ssh', 'systemd', 'docker', 'tls']),
-    mkLoc('cpanel', 'cpanel-account-host', 'cPanel Managed Hosting Account Target', 'FR', 'Paris', 'Western Europe', ['paris', 'france', 'cpanel-host'], ['EU', 'GDPR', 'FR'], 28, 'low', 'hosting-location', ['web-hosting', 'tls', 'dns-zone', 'mysql']),
-    mkLoc('directadmin', 'directadmin-account-host', 'DirectAdmin Hosting Account Target', 'DE', 'Frankfurt', 'Central Europe', ['frankfurt', 'germany', 'directadmin-host'], ['EU', 'GDPR', 'DE'], 26, 'low', 'hosting-location', ['web-hosting', 'tls', 'dns-zone', 'mariadb']),
-    mkLoc('private-host', 'private-onprem-dc1', 'Private Sovereign Datacenter 1', 'FR', 'Paris', 'Western Europe', ['paris', 'france', 'on-prem', 'sovereign-dc'], ['EU', 'GDPR', 'FR', 'SOVEREIGN'], 12, 'standard', 'datacenter', ['bare-metal', 'kubernetes', 'ssh', 'airgapped-ready']),
-  ];
+  public static async getLocationsForProvider(providerId: string): Promise<PlacementCandidate[]> {
+    const res = await DynamicLocationCatalogueProvider.getInstance().fetchLocations(providerId);
+    return res.locations;
+  }
 
-  public static getLocationsForProvider(providerId: string): PlacementCandidate[] {
-    const norm = providerId.trim().toLowerCase();
-    return this.entries.filter((c) => c.providerId === norm).map((c) => ({ ...c }));
+  public static getSeedLocationsForProvider(providerId: string): PlacementCandidate[] {
+    return DynamicLocationCatalogueProvider.getInstance().getSeedLocations(providerId);
   }
 }
 
 export class DefaultPlacementAdapter implements PlacementAdapter {
+  constructor(private readonly catalogueProvider: ILocationCatalogueProvider = DynamicLocationCatalogueProvider.getInstance()) {}
+
   public async listLocations(input: { providerId: string; tenantRef: string; requiredCapabilities: string[] }): Promise<PlacementCandidate[]> {
-    return AuthoritativeLocationCatalogue.getLocationsForProvider(input.providerId);
+    const res = await this.catalogueProvider.fetchLocations(input.providerId);
+    return res.locations;
   }
 
   public async resolveName(input: { userInput: string; catalogue: PlacementCandidate[]; locale: string }): Promise<{ status: PlacementStatus; matches: PlacementCandidate[]; explanation: string }> {
@@ -237,12 +209,13 @@ export class UniversalPlacementResolver {
     const catalogue = await this.adapter.listLocations({
       providerId: intent.providerId, tenantRef: intent.tenantRef ?? intent.projectId, requiredCapabilities: reqCaps,
     });
+    const catalogueVersion = catalogue[0]?.catalogueVersion;
 
     const fail = (status: PlacementStatus, alternatives: PlacementCandidate[], rationale: string[], blockers: string[]): ResolvedPlacement =>
       this.buildResult(intent, {
         status, decisionState: 'UNRESOLVED', selected: [], alternatives, topologyMode,
         rationale: rationale.map(sanitize), blockers: blockers.map(sanitize), warnings: warnings.map(sanitize), requiresConfirmation: true,
-      });
+      }, catalogueVersion);
 
     if (catalogue.length === 0) {
       return fail('UNAVAILABLE', [], ['Provider location catalogue is empty or unavailable.'], [`No authoritative locations available for provider '${intent.providerId}'.`]);
@@ -285,7 +258,7 @@ export class UniversalPlacementResolver {
         status: 'RESOLVED', decisionState: 'ACTOR_SELECTED', selected,
         alternatives: compliantCatalogue.filter((c) => !selected.some((s) => s.nativeLocationId === c.nativeLocationId)),
         source: 'actor-explicit', topologyMode: effectiveTopo, rationale, blockers: [], warnings, requiresConfirmation: intent.requireConfirmation,
-      });
+      }, catalogueVersion);
     }
 
     // Priority 3: Valid Approved Project/Environment Configuration
@@ -313,7 +286,7 @@ export class UniversalPlacementResolver {
               source: 'approved-project-config', topologyMode: cfg.topologyMode ?? (cfgCandidates.length > 1 ? 'active-active' : topologyMode),
               rationale: [`Reused validated approved configuration for project '${intent.projectId}' (${intent.environmentId}).`],
               blockers: [], warnings: [...warnings, ...val.warnings], requiresConfirmation: false,
-            });
+            }, catalogueVersion);
           }
           return fail(val.status, compliantCatalogue, ['Approved project configuration conflicts with active policy or capability constraints.'], val.blockers);
         }
@@ -384,7 +357,7 @@ export class UniversalPlacementResolver {
           selected: [best], alternatives: compliantCatalogue.filter((c) => c.nativeLocationId !== best.nativeLocationId),
           source: autoApprove ? 'recommendation-accepted' : undefined, topologyMode,
           rationale: rationale.map(sanitize), blockers: [], warnings: warnings.map(sanitize), requiresConfirmation: !autoApprove,
-        });
+        }, catalogueVersion);
       }
     }
 
@@ -397,7 +370,7 @@ export class UniversalPlacementResolver {
       promptMessage: 'Where should Ugondu deploy this workload? Enter a city, country, or provider region ID—for example Paris, France, Nigeria, South Africa, or eu-west-3. If you are unsure, choose Recommend for me. Ugondu will compare supported locations against your customers, latency, cost, data-residency rules, and required services before proposing a target.',
       cliExample: `ugondu deploy --provider ${intent.providerId} --project ${intent.projectId} --env ${intent.environmentId} --region <Paris|France|Nigeria|South Africa|eu-west-3>`,
       configExample: `apiVersion: ugondu.dev/v1\nkind: DeploymentPlacement\nmetadata:\n  project: ${intent.projectId}\n  environment: ${intent.environmentId}\nspec:\n  provider: ${intent.providerId}\n  selection:\n    mode: explicit\n    locations:\n      - id: <actor-selected-native-location-id>`,
-    });
+    }, catalogueVersion);
   }
 
   private matchesGeographyTokens(c: PlacementCandidate, tokens: string[]): boolean {
@@ -428,8 +401,12 @@ export class UniversalPlacementResolver {
     return { valid: blockers.length === 0, failoverCandidates, blockers };
   }
 
-  private buildResult(intent: PlacementIntent, partial: Omit<ResolvedPlacement, 'planFingerprint' | 'catalogueVersion' | 'regionSummaries'>): ResolvedPlacement {
-    const catVer = partial.selected[0]?.catalogueVersion ?? partial.alternatives[0]?.catalogueVersion ?? CAT_VER;
+  private buildResult(
+    intent: PlacementIntent,
+    partial: Omit<ResolvedPlacement, 'planFingerprint' | 'catalogueVersion' | 'regionSummaries'>,
+    defaultCatVer?: string
+  ): ResolvedPlacement {
+    const catVer = partial.selected[0]?.catalogueVersion ?? partial.alternatives[0]?.catalogueVersion ?? defaultCatVer ?? 'unknown';
     const regionSummaries: MultiRegionChangeSummary[] = partial.selected.map((c, idx) => ({
       nativeLocationId: c.nativeLocationId, displayName: c.displayName,
       role: partial.topologyMode === 'single-region' ? 'primary' : partial.topologyMode === 'active-active' ? (idx === 0 ? 'primary' : 'active-peer') : partial.topologyMode === 'active-passive' ? (idx === 0 ? 'primary' : 'passive-standby') : partial.topologyMode === 'disaster-recovery' ? (idx === 0 ? 'primary' : 'dr-target') : 'independent',
