@@ -98,7 +98,14 @@ export interface InferenceProvider {
     readonly providerId: string;
     capabilities(): Promise<ModelCapability[]>;
     invoke(request: InferenceRequest): Promise<InferenceResult>;
-    healthCheck(): Promise<{ ok: boolean; checkedAt: string; reasonCode?: string }>;
+    healthCheck(): Promise<{
+        ok: boolean;
+        checkedAt: string;
+        reasonCode?: string;
+        reachabilityVerified?: boolean;
+        credentialsConfigured?: boolean;
+        transportMode?: 'production' | 'injected-test-double';
+    }>;
 }
 
 export interface CatalogProviderEntry {
@@ -118,6 +125,19 @@ export interface CatalogProviderEntry {
     supportsStreaming: boolean;
     supportsToolCalling: boolean;
     defaultTimeoutMs: number;
+    egressPolicy?: {
+        approvedHosts?: string[];
+        approvedHostSuffixes?: string[];
+        rejectIpLiterals?: boolean;
+        rejectPrivateNetworks?: boolean;
+        allowRedirects?: boolean;
+    };
+    contractRoutes?: {
+        healthPath?: string;
+        statusPath?: string;
+        modelsPath?: string;
+        executePath?: string;
+    };
 }
 
 export interface CatalogModelPolicy {
@@ -191,6 +211,7 @@ export type AiErrorCode =
     | 'CATALOG_DUPLICATE_ALIAS'
     | 'MODEL_NOT_FOUND'
     | 'MODEL_DISABLED'
+    | 'MODEL_CATALOG_EMPTY'
     | 'MODEL_CONFORMANCE_FAILED'
     | 'PROVIDER_NOT_FOUND'
     | 'PROVIDER_DISABLED'
@@ -224,6 +245,8 @@ export type AiErrorCode =
     | 'AIRROOFERS_AI_ENDPOINT_INSECURE'
     | 'AIRROOFERS_AI_ENDPOINT_MALFORMED'
     | 'AIRROOFERS_AI_ENDPOINT_DISALLOWED';
+
+export type AiGatewayErrorCode = AiErrorCode;
 
 export class AiGatewayError extends Error {
     public readonly errorCode: AiErrorCode;

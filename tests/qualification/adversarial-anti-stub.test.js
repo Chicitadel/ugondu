@@ -32,6 +32,7 @@ const { pathToFileURL } = require('node:url');
 
 const ROOT = path.resolve(__dirname, '../..');
 const PROBE_DIR = path.join(ROOT, 'server', 'capabilities', 'src');
+const AI_PROBE_DIR = path.join(ROOT, 'server', 'engine-core', 'src', 'ai');
 
 let validatorModule = null;
 
@@ -43,9 +44,9 @@ async function getValidator() {
   return validatorModule;
 }
 
-function createTempProbe(basename, content) {
+function createTempProbe(basename, content, dir = PROBE_DIR) {
   const fileName = `temp-adversarial-${basename}-${Date.now()}-${Math.random().toString(36).slice(2)}.ts`;
-  const absPath = path.join(PROBE_DIR, fileName);
+  const absPath = path.join(dir, fileName);
   fs.writeFileSync(absPath, content, 'utf8');
   const relPath = path.relative(ROOT, absPath).replace(/\\/g, '/');
   return { absPath, relPath };
@@ -60,13 +61,15 @@ function cleanupProbe(absPath) {
 }
 
 function cleanupAllProbes() {
-  if (!fs.existsSync(PROBE_DIR)) return;
-  const entries = fs.readdirSync(PROBE_DIR);
-  for (const entry of entries) {
-    if (entry.startsWith('temp-adversarial-')) {
-      try {
-        fs.unlinkSync(path.join(PROBE_DIR, entry));
-      } catch {}
+  for (const dir of [PROBE_DIR, AI_PROBE_DIR]) {
+    if (!fs.existsSync(dir)) continue;
+    const entries = fs.readdirSync(dir);
+    for (const entry of entries) {
+      if (entry.startsWith('temp-adversarial-')) {
+        try {
+          fs.unlinkSync(path.join(dir, entry));
+        } catch {}
+      }
     }
   }
 }
@@ -271,6 +274,33 @@ test('AAS-008: Injects no-op mutation method and proves validator catches it as 
       violations[0],
       /Anti-stub violation: unproven operational stub \(no-op mutation method 'applyPolicyReconciliation'\)/,
       'Must detect no-op mutation method as an unproven operational stub'
+    );
+  } finally {
+    cleanupProbe(probe.absPath);
+  }
+});
+
+test('AAS-009: Injects hardcoded fallback capability array into production AI adapter and proves validator catches it', async () => {
+  const { validateSemanticAntiStubs } = await getValidator();
+  const probe = createTempProbe('aas009', [
+    '/**',
+    ' * Corporate AI provider adapter capability fallback probe',
+    ' */',
+    'export class ProbeAiAdapter {',
+    '  public async capabilities() {',
+    '    return [{ streaming: false, toolCalling: true, structuredOutput: true }];',
+    '  }',
+    '}'
+  ].join('\n'), AI_PROBE_DIR);
+
+  try {
+    const violations = [];
+    validateSemanticAntiStubs([probe.relPath], violations);
+    assert.strictEqual(violations.length, 1, 'Expected exactly one fallback capability violation');
+    assert.match(
+      violations[0],
+      /Unverified fallback capability declaration in production AI adapter:/,
+      'Must detect hardcoded fallback capability array in production AI adapter'
     );
   } finally {
     cleanupProbe(probe.absPath);

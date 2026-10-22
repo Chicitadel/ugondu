@@ -259,6 +259,9 @@ async function runTests() {
       });
       const health = await airAdapter.healthCheck();
       assert.strictEqual(health.ok, true);
+      assert.strictEqual(health.reachabilityVerified, true);
+      assert.strictEqual(health.credentialsConfigured, true);
+      assert.strictEqual(health.transportMode, 'injected-test-double');
 
       const unauthAdapter = new AirRoofersAiProviderAdapter('airroofers-ai', catalog, new CredentialBroker(), mockTransport);
       const failedHealth = await unauthAdapter.healthCheck();
@@ -284,10 +287,8 @@ async function runTests() {
       // 1. Neither env var nor provider defaultEndpoint is set -> throws AIRROOFERS_AI_ENDPOINT_REQUIRED
       delete process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
       const strippedDoc = JSON.parse(JSON.stringify(aiContract.loadModelCatalog()));
-      const airProv = strippedDoc.providers.find((p) => p.providerId === 'airroofers-ai');
-      delete airProv.defaultEndpoint;
-      const noEndpointCatalog = new ModelCatalog(strippedDoc);
-      const noEndpointAdapter = new AirRoofersAiProviderAdapter(noEndpointCatalog, credentialBroker);
+      delete strippedDoc.providers.find((p) => p.providerId === 'airroofers-ai').defaultEndpoint;
+      const noEndpointAdapter = new AirRoofersAiProviderAdapter(new ModelCatalog(strippedDoc), credentialBroker);
 
       await assert.rejects(() => noEndpointAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
         assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_REQUIRED');
@@ -319,25 +320,24 @@ async function runTests() {
       });
       assert.throws(() => malformedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_MALFORMED');
 
-      // 4. Unauthorized sovereign domain -> throws AIRROOFERS_AI_ENDPOINT_DISALLOWED
-      process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://evil-unauthorized-domain.com';
-      const disallowedAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
-      await assert.rejects(() => disallowedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
-        assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
-        assert.strictEqual(err.statusCode, 403);
-        assert.ok(!err.message.includes(rawSecret) && !JSON.stringify(err.details || {}).includes(rawSecret));
-        return true;
-      });
-      assert.throws(() => disallowedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+      // 4. Unauthorized sovereign domain & SSRF loopback/IP literal -> throws AIRROOFERS_AI_ENDPOINT_DISALLOWED
+      for (const badHost of ['https://evil-unauthorized-domain.com', 'https://127.0.0.1/v1', 'https://localhost/v1']) {
+        process.env.UGONDU_AIRROOFERS_AI_BASE_URL = badHost;
+        const disallowedAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
+        await assert.rejects(() => disallowedAdapter.invoke(makeRequest({ modelAlias: 'sovereign-eu-chat' })), (err) => {
+          assert.strictEqual(err.errorCode, 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+          assert.strictEqual(err.statusCode, 403);
+          assert.ok(!err.message.includes(rawSecret) && !JSON.stringify(err.details || {}).includes(rawSecret));
+          return true;
+        });
+        assert.throws(() => disallowedAdapter.getBaseUrl(), (err) => err.errorCode === 'AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+      }
 
       // 5. Valid sovereign endpoints succeed: https://ai.airroofers.eu and https://ai-staging.airroofers.eu
       let invokedEndpoint = '';
       const transport = async (req) => {
         invokedEndpoint = req.url;
-        return {
-          status: 200,
-          body: JSON.stringify({ success: true, output: 'Verified on sovereign fabric', usage: { prompt_tokens: 10, completion_tokens: 20 }, finishReason: 'stop' }),
-        };
+        return { status: 200, body: JSON.stringify({ success: true, output: 'Verified on sovereign fabric', usage: { prompt_tokens: 10, completion_tokens: 20 }, finishReason: 'stop' }) };
       };
 
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai-staging.airroofers.eu';
@@ -370,10 +370,7 @@ async function runTests() {
       let capturedModelReq = null;
       const discoverAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker, async (req) => {
         capturedModelReq = req;
-        return {
-          status: 200,
-          body: JSON.stringify({ models: [{ id: 'airroofers-sentinel-v1', status: 'enabled' }, { id: 'airroofers-sovereign-v2', status: 'enabled' }] }),
-        };
+        return { status: 200, body: JSON.stringify({ models: [{ id: 'airroofers-sentinel-v1', status: 'enabled' }, { id: 'airroofers-sovereign-v2', status: 'enabled' }] }) };
       });
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai.airroofers.eu';
       const discoveryResult = await discoverAdapter.discoverModels();
@@ -381,6 +378,11 @@ async function runTests() {
       assert.strictEqual(capturedModelReq.headers['authorization'], 'Bearer airroofers-sovereign-live-secret-token-888');
       assert.strictEqual(discoveryResult.models.length, 2);
       assert.ok(discoveryResult.discoveredAt);
+
+      const healthProbe = await discoverAdapter.healthCheck();
+      assert.strictEqual(healthProbe.reachabilityVerified, true);
+      assert.strictEqual(healthProbe.credentialsConfigured, true);
+      assert.strictEqual(healthProbe.transportMode, 'injected-test-double');
 
       // 2. URL credential stripping in error details
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://user:supersecretpass@ai.airroofers.eu';
@@ -404,17 +406,11 @@ async function runTests() {
       const strippedDoc = JSON.parse(JSON.stringify(aiContract.loadModelCatalog()));
       delete strippedDoc.providers.find((p) => p.providerId === 'airroofers-ai').defaultEndpoint;
       const reqAdapter = new AirRoofersAiProviderAdapter(new ModelCatalog(strippedDoc), credentialBroker);
-      await assert.rejects(() => reqAdapter.discoverModels(), (err) => {
-        assert.strictEqual(err.message, __t('ai.error.endpoint_required'));
-        return true;
-      });
+      await assert.rejects(() => reqAdapter.discoverModels(), (err) => err.message === __t('ai.error.endpoint_required'));
 
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'http://ai.airroofers.eu';
       const insecAdapter = new AirRoofersAiProviderAdapter(catalog, credentialBroker);
-      await assert.rejects(() => insecAdapter.discoverModels(), (err) => {
-        assert.strictEqual(err.message, __t('ai.error.endpoint_insecure', { protocol: 'http:' }));
-        return true;
-      });
+      await assert.rejects(() => insecAdapter.discoverModels(), (err) => err.message === __t('ai.error.endpoint_insecure', { protocol: 'http:' }));
 
       // 4. 401 on discoverModels throws AUTHENTICATION_FAILED
       process.env.UGONDU_AIRROOFERS_AI_BASE_URL = 'https://ai.airroofers.eu';

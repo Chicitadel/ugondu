@@ -202,14 +202,29 @@ function validateSemanticAntiStubs(trackedFiles, violations) {
     const lines = content.split(/\r?\n/);
 
     lines.forEach((line, idx) => {
+      const lineNo = idx + 1;
       if (
         PROD_MOCK_IMPORT_RE.test(line) ||
         (/\bimport\b/.test(line) && PROD_MOCK_IMPORT_RE.test(lines.slice(idx, idx + 4).join(' ')))
       ) {
-        violations.push(`Production source imports mock/fixture/test double: ${normalized}:${idx + 1}`);
+        violations.push(`Production source imports mock/fixture/test double: ${normalized}:${lineNo}`);
       }
       if (/\bcatch\b/.test(line) && SWALLOWED_ERROR_RE.test(lines.slice(idx, idx + 5).join(' '))) {
-        violations.push(`Swallowed provider error returning fake-success in ${normalized}:${idx + 1}`);
+        violations.push(`Swallowed provider error returning fake-success in ${normalized}:${lineNo}`);
+      }
+      if (
+        normalized.startsWith('server/engine-core/src/ai/') &&
+        /return\s*\[\s*\{\s*streaming:\s*(?:true|false),\s*toolCalling:\s*(?:true|false)/.test(line)
+      ) {
+        violations.push(`Unverified fallback capability declaration in production AI adapter: ${normalized}:${lineNo}`);
+      }
+      if (
+        normalized.endsWith('/airroofers-provider.ts') &&
+        /\['ai\.airroofers\.eu',\s*'ai-staging\.airroofers\.eu'/.test(line)
+      ) {
+        violations.push(
+          `Hardcoded hostname allowlist in AI provider adapter (must reside in governed catalog): ${normalized}:${lineNo}`
+        );
       }
     });
 

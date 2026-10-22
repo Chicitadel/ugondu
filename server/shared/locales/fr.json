@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "La sortie du fournisseur IA a enfreint le schéma de réponse requis.",
       "missing_required_field": "Champ obligatoire manquant dans la requête d'inférence IA.",
       "modality_unsupported": "La modalité d'inférence demandée n'est pas prise en charge par ce modèle.",
+      "model_catalog_empty": "Aucun modèle activé n'est enregistré dans le catalogue pour ce fournisseur d'IA ; la déclaration de capacités est interdite sans entrées de catalogue vérifiées.",
       "model_conformance_failed": "Le modèle a échoué aux tests de conformité architecturale et de sécurité.",
       "model_disabled": "Le modèle IA sélectionné est désactivé par la politique administrative.",
       "model_not_found": "Le modèle IA demandé est introuvable dans le catalogue.",

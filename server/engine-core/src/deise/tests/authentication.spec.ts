@@ -1,15 +1,35 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Engine Core / DEISE / Authentication Tests
+ * File           : authentication.spec.ts
+ * Version        : 3.1.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers SASU
+ * Created Date   : 2026-10-22
+ * Last Modified  : 2026-10-22
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
+ ******************************************************************************/
+
 import { describe, it, expect } from '@jest/globals';
 
 describe('Authentication Onboarding & Credentials', () => {
-    
     it(__t('should_support_credential_inta'), () => {
         const connection = {
             id: 'aws-prod',
             provider: 'aws',
             authentication: {
                 method: 'oidc-role',
-                credential_reference: 'secure://os-keychain/aws-prod'
-            }
+                credential_reference: 'secure://os-keychain/aws-prod',
+            },
         };
         expect(connection.authentication.credential_reference).toMatch(/^secure:\/\//);
         expect((connection.authentication as any).secret_value).toBeUndefined();
@@ -24,8 +44,10 @@ describe('Authentication Onboarding & Credentials', () => {
     });
 
     it(__t('should_perform_credential_vali'), () => {
-        const isValid = true; 
-        expect(isValid).toBe(true);
+        const validateCredRef = (ref?: string) => Boolean(ref && /^(secure|aws-secrets|kms|env|secretless-registry):\/\/.+/.test(ref));
+        expect(validateCredRef('secure://os-keychain/aws-prod')).toBe(true);
+        expect(validateCredRef('plaintext-secret')).toBe(false);
+        expect(validateCredRef('')).toBe(false);
     });
 
     it(__t('should_detect_and_block_accoun'), () => {
@@ -66,10 +88,9 @@ describe('Authentication Onboarding & Credentials', () => {
     it(__t('should_support_multi_account_s'), () => {
         const connections = [
             { id: 'aws-dev', account_id: '111' },
-            { id: 'aws-prod', account_id: '222' }
+            { id: 'aws-prod', account_id: '222' },
         ];
         const getConn = (id: string) => connections.find(c => c.id === id);
         expect(getConn('aws-prod')?.account_id).toBe('222');
     });
-
 });

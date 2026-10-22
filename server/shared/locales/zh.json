@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "AI提供程序的输出违反了必需的响应架构。",
       "missing_required_field": "AI推理请求中缺少必需字段。",
       "modality_unsupported": "该模型不支持所请求的推理形式。",
+      "model_catalog_empty": "目录中未注册此人工智能提供商的已启用模型；在没有经过验证的目录条目的情况下，禁止声明功能。",
       "model_conformance_failed": "模型未通过架构一致性和安全性测试。",
       "model_disabled": "所选的AI模型被管理策略禁用。",
       "model_not_found": "在目录中未找到所请求的AI模型。",

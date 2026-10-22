@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "AIプロバイダーの出力が必要な応答スキーマに違反しました。",
       "missing_required_field": "AI推論リクエストに必要なフィールドがありません。",
       "modality_unsupported": "要求された推論モダリティはこのモデルでサポートされていません。",
+      "model_catalog_empty": "このAIプロバイダーに対して有効なモデルがカタログに登録されていません。検証済みのカタログエントリなしでの機能公開は禁止されています。",
       "model_conformance_failed": "モデルがアーキテクチャの適合性および安全性テストに失敗しました。",
       "model_disabled": "選択されたAIモデルは管理ポリシーにより無効になっています。",
       "model_not_found": "要求されたAIモデルがカタログに見つかりませんでした。",

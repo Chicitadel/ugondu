@@ -139,7 +139,9 @@
       "supportedModalities": ["text","embedding"],
       "supportsStreaming": false,
       "supportsToolCalling": true,
-      "defaultTimeoutMs": 30000
+      "defaultTimeoutMs": 30000,
+      "egressPolicy": {"approvedHosts":["ai.airroofers.eu","ai-staging.airroofers.eu","ai.airroofers.de","ai.airroofers.fr"],"approvedHostSuffixes":[".airroofers.eu"],"rejectIpLiterals":true,"rejectPrivateNetworks":true,"allowRedirects":false},
+      "contractRoutes": {"healthPath":"/health","statusPath":"/v1/ai/status","modelsPath":"/v1/ai/models","executePath":"/v1/ai/execute"}
     }
   ],
   "models": [

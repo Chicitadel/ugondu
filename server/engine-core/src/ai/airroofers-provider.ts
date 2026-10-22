@@ -47,7 +47,7 @@ const defaultHttpTransport: HttpTransport = async (req: HttpTransportRequest): P
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), req.timeoutMs);
     try {
-        const res = await fetch(req.url, { method: req.method, headers: req.headers, body: req.body, signal: controller.signal });
+        const res = await fetch(req.url, { method: req.method, headers: req.headers, body: req.body, redirect: 'error', signal: controller.signal });
         return { status: res.status, body: await res.text() };
     } catch (err: any) {
         if (err?.name === 'AbortError' || /timeout|aborted/i.test(String(err?.message))) {
@@ -67,6 +67,7 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
     private readonly catalog: ModelCatalog;
     private readonly credentialBroker: CredentialBroker;
     private transport: HttpTransport = defaultHttpTransport;
+    private isDefaultTransport = true;
 
     constructor(
         arg1: ModelCatalog | string,
@@ -90,10 +91,15 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
     }
 
     public setHttpTransport(transport: HttpTransport | (() => HttpTransport)): void {
+        this.isDefaultTransport = false;
         this.transport = async (req: HttpTransportRequest): Promise<HttpTransportResponse> => {
             const res = (transport as any)(req);
             return typeof res === 'function' ? await res(req) : await res;
         };
+    }
+
+    public isProductionTransport(): boolean {
+        return this.isDefaultTransport;
     }
 
     private redactRawUrl(raw: string): string {
@@ -127,44 +133,72 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
             throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_INSECURE' as any, __t('ai.error.endpoint_insecure', { protocol: parsed.protocol }), 400, { providerId: this.providerId, protocol: parsed.protocol });
         }
 
-        if (provider?.supportedRegions && !['ai.airroofers.eu', 'ai-staging.airroofers.eu', 'ai.airroofers.de', 'ai.airroofers.fr'].includes(parsed.hostname) && !parsed.hostname.endsWith('.airroofers.eu')) {
-            throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_DISALLOWED' as any, __t('ai.error.endpoint_disallowed', { hostname: parsed.hostname }), 403, { providerId: this.providerId, hostname: parsed.hostname });
+        const host = parsed.hostname.toLowerCase();
+        const egress = provider?.egressPolicy;
+        const rejectIp = egress?.rejectIpLiterals ?? true;
+        const rejectPrivate = egress?.rejectPrivateNetworks ?? true;
+
+        if (
+            (rejectIp && (/^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.startsWith('[') || host.includes(':'))) ||
+            (rejectPrivate && (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.localhost')))
+        ) {
+            throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_DISALLOWED' as any, __t('ai.error.endpoint_disallowed', { hostname: host }), 403, { providerId: this.providerId, hostname: host, reason: 'SSRF_OR_PRIVATE_HOST' });
         }
 
-        return rawUrl.trim().replace(/\/+$/, '');
+        if (egress || provider?.supportedRegions) {
+            const approvedHosts = egress?.approvedHosts ?? [];
+            const approvedSuffixes = egress?.approvedHostSuffixes ?? [];
+            const isApproved = approvedHosts.includes(host) || approvedSuffixes.some(s => host.endsWith(s));
+            if ((approvedHosts.length > 0 || approvedSuffixes.length > 0) && !isApproved) {
+                throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_DISALLOWED' as any, __t('ai.error.endpoint_disallowed', { hostname: host }), 403, { providerId: this.providerId, hostname: host });
+            }
+        }
+
+        parsed.username = '';
+        parsed.password = '';
+        return parsed.toString().replace(/\/+$/, '');
     }
 
     public async capabilities(): Promise<ModelCapability[]> {
         const models = this.catalog.listModels(true).filter(m => m.providerId === this.providerId && m.status === 'enabled');
-        if (models.length > 0) return models.map(m => m.capabilities);
-        return [{ streaming: false, toolCalling: true, structuredOutput: true, modalities: ['text', 'embedding'], maxInputTokens: 128000, maxOutputTokens: 4096 }];
+        if (models.length === 0) {
+            throw new AiGatewayError('MODEL_CATALOG_EMPTY' as any, __t('ai.error.model_catalog_empty'), 503, { providerId: this.providerId });
+        }
+        return models.map(m => m.capabilities);
     }
 
-    public async healthCheck(): Promise<{ ok: boolean; checkedAt: string; reasonCode?: string }> {
+    public async healthCheck(): Promise<{ ok: boolean; checkedAt: string; reasonCode?: string; reachabilityVerified?: boolean; credentialsConfigured?: boolean; transportMode?: 'production' | 'injected-test-double' }> {
         const checkedAt = new Date().toISOString();
+        const transportMode = this.isDefaultTransport ? 'production' : 'injected-test-double';
         const provider = this.catalog.getProvider(this.providerId);
-        if (!provider || provider.status !== 'enabled') return { ok: false, checkedAt, reasonCode: 'PROVIDER_DISABLED' };
+        if (!provider || provider.status !== 'enabled') {
+            return { ok: false, checkedAt, reasonCode: 'PROVIDER_DISABLED', reachabilityVerified: false, credentialsConfigured: false, transportMode };
+        }
         try {
             this.credentialBroker.resolveHandle(provider.credentialRef);
         } catch (err: any) {
-            return { ok: false, checkedAt, reasonCode: err instanceof AiGatewayError ? err.errorCode : 'CREDENTIALS_MISSING' };
+            return { ok: false, checkedAt, reasonCode: err instanceof AiGatewayError ? err.errorCode : 'CREDENTIALS_MISSING', reachabilityVerified: false, credentialsConfigured: false, transportMode };
         }
 
+        const healthPath = provider.contractRoutes?.healthPath || '/health';
         try {
-            const res = await this.transport({ url: `${this.getBaseUrl()}/health`, method: 'GET', headers: { accept: 'application/json' }, timeoutMs: 5000 });
-            return res.status >= 200 && res.status < 300 ? { ok: true, checkedAt } : { ok: false, checkedAt, reasonCode: `HTTP_${res.status}` };
+            const res = await this.transport({ url: `${this.getBaseUrl()}${healthPath}`, method: 'GET', headers: { accept: 'application/json' }, timeoutMs: 5000 });
+            return res.status >= 200 && res.status < 300
+                ? { ok: true, checkedAt, reachabilityVerified: true, credentialsConfigured: true, transportMode }
+                : { ok: false, checkedAt, reasonCode: `HTTP_${res.status}`, reachabilityVerified: false, credentialsConfigured: true, transportMode };
         } catch (err: any) {
-            return { ok: false, checkedAt, reasonCode: err instanceof AiGatewayError ? err.errorCode : 'UPSTREAM_UNAVAILABLE' };
+            return { ok: false, checkedAt, reasonCode: err instanceof AiGatewayError ? err.errorCode : 'UPSTREAM_UNAVAILABLE', reachabilityVerified: false, credentialsConfigured: true, transportMode };
         }
     }
 
     public async discoverModels(): Promise<{ models: Array<{ id: string; name?: string; status: string; capabilities?: any }>; discoveredAt: string }> {
         const provider = this.assertProviderEnabled();
         const baseUrl = this.getBaseUrl();
+        const modelsPath = provider.contractRoutes?.modelsPath || '/v1/ai/models';
         const discoveredAt = new Date().toISOString();
         return this.credentialBroker.withCredential(provider.credentialRef, async ephemeralSecret => {
             const res = await this.transport({
-                url: `${baseUrl}/v1/ai/models`,
+                url: `${baseUrl}${modelsPath}`,
                 method: 'GET',
                 headers: { accept: 'application/json', authorization: `Bearer ${ephemeralSecret}` },
                 timeoutMs: 10000,
@@ -187,13 +221,14 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
         const provider = this.assertProviderEnabled();
         const model = this.resolveModelForRequest(request);
         const credentialRef = model.credentialRef || provider.credentialRef;
+        const executePath = provider.contractRoutes?.executePath || '/v1/ai/execute';
         const effectiveTimeoutMs = Math.min(
             request.deadlineMs > 0 ? request.deadlineMs : model.policy.timeoutMs,
             model.policy.timeoutMs
         );
 
         return this.credentialBroker.withCredential(credentialRef, async ephemeralSecret => {
-            const url = `${this.getBaseUrl()}/v1/ai/execute`;
+            const url = `${this.getBaseUrl()}${executePath}`;
             const headers: Record<string, string> = {
                 'content-type': 'application/json',
                 accept: 'application/json',

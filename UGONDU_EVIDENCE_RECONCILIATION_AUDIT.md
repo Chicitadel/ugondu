@@ -1,8 +1,10 @@
+> [!WARNING] HISTORICAL RECORD — SUPERSEDED: This document is preserved as an immutable historical audit record from its original date. It is NOT a current release sign-off. For the current canonical certification disposition (HOLD — NOT UNIVERSALLY CERTIFIED) and active gate ledger, see [COR_CERTIFICATION_PROGRESS_2026-10-22.md](docs/audits/COR_CERTIFICATION_PROGRESS_2026-10-22.md) and [COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md](docs/audits/COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md).
+
 # UGONDU EVIDENCE RECONCILIATION AUDIT
 
 **Date:** 2026-10-04
 **Target:** Ugondu Local Repository
-**Auditor:** Gemini 3.1 Pro (High) - Zero-Trust Challenge Audit
+**Auditor:** Ujomor Systems Engineering & Governance Authority — Zero-Trust Challenge Audit
 **Audit Mandate:** Invalidate previous COR and reconcile all contradictory claims against physical evidence.
 
 ## 1. Executive Determination

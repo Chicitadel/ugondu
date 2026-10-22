@@ -1,3 +1,5 @@
+> [!WARNING] HISTORICAL RECORD — SUPERSEDED: This document is preserved as an immutable historical audit record from its original date. It is NOT a current release sign-off. For the current canonical certification disposition (HOLD — NOT UNIVERSALLY CERTIFIED) and active gate ledger, see [COR_CERTIFICATION_PROGRESS_2026-10-22.md](docs/audits/COR_CERTIFICATION_PROGRESS_2026-10-22.md) and [COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md](docs/audits/COR_UNIVERSAL_READINESS_AND_REMEDIATION_2026-10-22.md).
+
 # UGONDU PHYSICAL CERTIFICATION REPORT (COR-4 / COR-5)
 **Date:** 2026-10-05T07:18:17.961Z
 **Provider:** AWS

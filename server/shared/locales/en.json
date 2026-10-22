@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "AI provider output violated the required response schema.",
       "missing_required_field": "Required field missing from AI inference request.",
       "modality_unsupported": "Requested inference modality is unsupported by this model.",
+      "model_catalog_empty": "No enabled models are registered in the catalog for this AI provider; capability advertisement is prohibited without verified catalog entries.",
       "model_conformance_failed": "Model failed architectural conformance and safety tests.",
       "model_disabled": "Selected AI model is disabled by administrative policy.",
       "model_not_found": "Requested AI model was not found in the catalog.",

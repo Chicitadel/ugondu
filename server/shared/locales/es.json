@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "La salida del proveedor de IA violó el esquema de respuesta requerido.",
       "missing_required_field": "Falta un campo obligatorio en la solicitud de inferencia de IA.",
       "modality_unsupported": "La modalidad de inferencia solicitada no es compatible con este modelo.",
+      "model_catalog_empty": "No hay modelos habilitados registrados en el catálogo para este proveedor de IA; está prohibido anunciar capacidades sin entradas de catálogo verificadas.",
       "model_conformance_failed": "El modelo falló las pruebas de seguridad y conformidad arquitectónica.",
       "model_disabled": "El modelo de IA seleccionado está deshabilitado por política administrativa.",
       "model_not_found": "El modelo de IA solicitado no se encontró en el catálogo.",

@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "Ausgabe des KI-Anbieters hat das erforderliche Antwortschema verletzt.",
       "missing_required_field": "Erforderliches Feld fehlt in der KI-Inferenzanforderung.",
       "modality_unsupported": "Angeforderte Inferenzmodalität wird von diesem Modell nicht unterstützt.",
+      "model_catalog_empty": "Im Katalog sind keine aktivierten Modelle für diesen KI-Anbieter registriert; die Ankündigung von Fähigkeiten ohne verifizierte Katalogeinträge ist untersagt.",
       "model_conformance_failed": "Modell hat Architekturkonformitäts- und Sicherheitstests nicht bestanden.",
       "model_disabled": "Ausgewähltes KI-Modell ist durch administrative Richtlinie deaktiviert.",
       "model_not_found": "Angefordertes KI-Modell wurde im Katalog nicht gefunden.",

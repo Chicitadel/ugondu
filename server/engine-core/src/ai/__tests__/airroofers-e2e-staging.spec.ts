@@ -28,6 +28,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import * as fs from 'fs';
 import {
     AiGatewayError,
     AirRoofersAiProviderAdapter,
@@ -42,6 +43,32 @@ import {
     QuotaGuard,
     RoutingPolicyEngine,
 } from '../index';
+
+function buildStagingCatalog(disableAirRoofersModels = false): ModelCatalog {
+    const doc = JSON.parse(fs.readFileSync(ModelCatalog.resolveDefaultCatalogPath(), 'utf8'));
+    const airProvider = doc.providers.find((p: any) => p.providerId === 'airroofers-ai');
+    if (airProvider) {
+        airProvider.egressPolicy = {
+            approvedHosts: ['ai.airroofers.eu', 'ai-staging.airroofers.eu', 'ai.airroofers.de', 'ai.airroofers.fr'],
+            approvedHostSuffixes: ['.airroofers.eu'],
+            rejectIpLiterals: true,
+            rejectPrivateNetworks: true,
+            allowRedirects: false,
+        };
+        airProvider.contractRoutes = {
+            healthPath: '/health',
+            statusPath: '/v1/ai/status',
+            modelsPath: '/v1/ai/models',
+            executePath: '/v1/ai/execute',
+        };
+    }
+    if (disableAirRoofersModels) {
+        for (const m of doc.models) {
+            if (m.providerId === 'airroofers-ai') m.status = 'disabled';
+        }
+    }
+    return new ModelCatalog(doc);
+}
 
 interface StagingSimulatorConfig {
     bearerToken?: string;
@@ -115,24 +142,8 @@ function createStagingSimulator(config: StagingSimulatorConfig, captured: HttpTr
                 body: JSON.stringify({
                     status: 'success',
                     models: [
-                        {
-                            id: 'sentinel-guard-v1',
-                            name: 'Air Roofers Sentinel Guard V1',
-                            type: 'sentinel',
-                            version: '1.0.0',
-                            provider: 'airroofers',
-                            status: 'active',
-                            capabilities: ['text', 'audit', 'policy_eval'],
-                        },
-                        {
-                            id: 'airroofers-sentinel-v1',
-                            name: 'Air Roofers Sentinel V1',
-                            type: 'llm',
-                            version: '1.2.0',
-                            provider: 'airroofers',
-                            status: 'active',
-                            capabilities: ['text', 'toolCalling', 'structuredOutput'],
-                        },
+                        { id: 'sentinel-guard-v1', name: 'Air Roofers Sentinel Guard V1', type: 'sentinel', version: '1.0.0', provider: 'airroofers', status: 'active', capabilities: ['text', 'audit', 'policy_eval'] },
+                        { id: 'airroofers-sentinel-v1', name: 'Air Roofers Sentinel V1', type: 'llm', version: '1.2.0', provider: 'airroofers', status: 'active', capabilities: ['text', 'toolCalling', 'structuredOutput'] },
                     ],
                 }),
             };
@@ -144,12 +155,7 @@ function createStagingSimulator(config: StagingSimulatorConfig, captured: HttpTr
             if (config.rateLimitTenants?.has(tenantHeader)) {
                 return {
                     status: 429,
-                    body: JSON.stringify({
-                        status: 'error',
-                        success: false,
-                        code: 'RATE_LIMIT_EXCEEDED',
-                        error: 'Tenant rate limit quota exceeded on AI Fabric Platform',
-                    }),
+                    body: JSON.stringify({ status: 'error', success: false, code: 'RATE_LIMIT_EXCEEDED', error: 'Tenant rate limit quota exceeded on AI Fabric Platform' }),
                 };
             }
 
@@ -168,19 +174,9 @@ function createStagingSimulator(config: StagingSimulatorConfig, captured: HttpTr
                     execution_id: 'aix_stg_0192837465',
                     execution_hash: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
                     timestamp: 1729605600,
-                    model: {
-                        id: parsedBody.model_id || 'sentinel-guard-v1',
-                        name: 'Air Roofers Sentinel Guard V1',
-                        type: 'sentinel',
-                        version: '1.0.0',
-                        provider: 'airroofers',
-                    },
+                    model: { id: parsedBody.model_id || 'sentinel-guard-v1', name: 'Air Roofers Sentinel Guard V1', type: 'sentinel', version: '1.0.0', provider: 'airroofers' },
                     output: 'Deployment manifest verified with compliance score 100%. Zero violations detected.',
-                    usage: {
-                        prompt_tokens: 12,
-                        completion_tokens: 24,
-                        total_tokens: 36,
-                    },
+                    usage: { prompt_tokens: 12, completion_tokens: 24, total_tokens: 36 },
                 }),
             };
         }
@@ -226,7 +222,7 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
         capturedRequests = [];
         simConfig = { bearerToken: VALID_BEARER_TOKEN };
 
-        catalog = new ModelCatalog();
+        catalog = buildStagingCatalog();
         credentialBroker = new CredentialBroker();
         credentialBroker.registerWorkloadSecret(CREDENTIAL_REF, VALID_BEARER_TOKEN);
 
@@ -239,8 +235,11 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
     });
 
     test('AF-STG-001: Health probe GET /health succeeds and reports operational status', async () => {
-        const result = await adapter.healthCheck();
+        const result: any = await adapter.healthCheck();
         expect(result.ok).toBe(true);
+        expect(result.reachabilityVerified).toBe(true);
+        expect(result.credentialsConfigured).toBe(true);
+        expect(result.transportMode).toBe('injected-test-double');
         expect(typeof result.checkedAt).toBe('string');
         expect(capturedRequests.length).toBe(1);
         expect(capturedRequests[0].method).toBe('GET');
@@ -303,56 +302,36 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
         simConfig.bearerToken = 'different-token-causing-401';
         const request = buildTestRequest();
 
-        await expect(adapter.invoke(request)).rejects.toMatchObject({
-            errorCode: 'AUTHENTICATION_FAILED',
-            statusCode: 401,
-        });
-
-        await expect(adapter.discoverModels()).rejects.toMatchObject({
-            errorCode: 'AUTHENTICATION_FAILED',
-            statusCode: 401,
-        });
+        await expect(adapter.invoke(request)).rejects.toMatchObject({ errorCode: 'AUTHENTICATION_FAILED', statusCode: 401 });
+        await expect(adapter.discoverModels()).rejects.toMatchObject({ errorCode: 'AUTHENTICATION_FAILED', statusCode: 401 });
     });
 
     test('AF-STG-005: Error normalization: HTTP 429 maps to PROVIDER_RATE_LIMITED', async () => {
         simConfig.rateLimitTenants = new Set(['tenant-rate-limited']);
         const request = buildTestRequest({ tenantId: 'tenant-rate-limited' });
-
-        await expect(adapter.invoke(request)).rejects.toMatchObject({
-            errorCode: 'PROVIDER_RATE_LIMITED',
-            statusCode: 429,
-        });
+        await expect(adapter.invoke(request)).rejects.toMatchObject({ errorCode: 'PROVIDER_RATE_LIMITED', statusCode: 429 });
     });
 
     test('AF-STG-006: Error normalization: HTTP 502/503 maps to UPSTREAM_UNAVAILABLE', async () => {
         simConfig.upstreamStatus = 502;
-        await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({
-            errorCode: 'UPSTREAM_UNAVAILABLE',
-            statusCode: 502,
-        });
+        await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({ errorCode: 'UPSTREAM_UNAVAILABLE', statusCode: 502 });
 
         simConfig.upstreamStatus = 503;
-        await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({
-            errorCode: 'UPSTREAM_UNAVAILABLE',
-            statusCode: 502,
-        });
+        await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({ errorCode: 'UPSTREAM_UNAVAILABLE', statusCode: 502 });
     });
 
     test('AF-STG-007: Redaction invariant: bearer token NEVER leaks in diagnostics or errors', async () => {
         const sensitiveSecret = 'sk-prod-SECRET-TOKEN-LIVE-AIRROOFERS-999';
         credentialBroker.registerWorkloadSecret(CREDENTIAL_REF, sensitiveSecret);
 
-        // 1. Upstream error payload containing the sensitive token (parsed error message)
-        adapter.setHttpTransport(async () => {
-            return {
-                status: 200,
-                body: JSON.stringify({
-                    success: false,
-                    code: 'UPSTREAM_FAULT',
-                    error: `Upstream gateway error with bearer token: Bearer ${sensitiveSecret}`,
-                }),
-            };
-        });
+        adapter.setHttpTransport(async () => ({
+            status: 200,
+            body: JSON.stringify({
+                success: false,
+                code: 'UPSTREAM_FAULT',
+                error: `Upstream gateway error with bearer token: Bearer ${sensitiveSecret}`,
+            }),
+        }));
 
         try {
             await adapter.invoke(buildTestRequest());
@@ -363,18 +342,15 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
             expect(err.message).toContain('[REDACTED_SECRET]');
         }
 
-        // 2. Output payload containing the sensitive token (sanitized on completion)
-        adapter.setHttpTransport(async () => {
-            return {
-                status: 200,
-                body: JSON.stringify({
-                    success: true,
-                    code: 200,
-                    output: `Diagnostic report with token ${sensitiveSecret}`,
-                    usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
-                }),
-            };
-        });
+        adapter.setHttpTransport(async () => ({
+            status: 200,
+            body: JSON.stringify({
+                success: true,
+                code: 200,
+                output: `Diagnostic report with token ${sensitiveSecret}`,
+                usage: { prompt_tokens: 5, completion_tokens: 10, total_tokens: 15 },
+            }),
+        }));
 
         const redactedRes = await adapter.invoke(buildTestRequest());
         expect(redactedRes.output).not.toContain(sensitiveSecret);
@@ -393,11 +369,51 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
             expect(err.statusCode).toBe(403);
         }
 
-        // Must reject invocation fail-closed
         await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({
             errorCode: 'AIRROOFERS_AI_ENDPOINT_DISALLOWED',
             statusCode: 403,
         });
+    });
+
+    test('AF-STG-009: SSRF and private-network egress protection rejects IP literals and loopback fail-closed', async () => {
+        const forbiddenEndpoints = [
+            'https://127.0.0.1',
+            'https://169.254.169.254',
+            'https://[::1]',
+            'https://localhost',
+        ];
+        for (const forbiddenUrl of forbiddenEndpoints) {
+            process.env['UGONDU_AIRROOFERS_AI_BASE_URL'] = forbiddenUrl;
+            expect(() => adapter.getBaseUrl()).toThrow(AiGatewayError);
+            try {
+                adapter.getBaseUrl();
+            } catch (err: any) {
+                expect(err.errorCode).toBe('AIRROOFERS_AI_ENDPOINT_DISALLOWED');
+                expect(err.statusCode).toBe(403);
+            }
+            await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({
+                errorCode: 'AIRROOFERS_AI_ENDPOINT_DISALLOWED',
+                statusCode: 403,
+            });
+        }
+        expect(capturedRequests.length).toBe(0);
+    });
+
+    test('AF-STG-010: Fail-closed capabilities on empty catalog and production transport mode tracking', async () => {
+        const validCapabilities = await adapter.capabilities();
+        expect(validCapabilities.length).toBeGreaterThan(0);
+
+        const emptyCatalog = buildStagingCatalog(true);
+        const freshAdapter = new AirRoofersAiProviderAdapter('airroofers-ai', emptyCatalog, credentialBroker);
+        expect(freshAdapter.isProductionTransport()).toBe(true);
+
+        await expect(freshAdapter.capabilities()).rejects.toMatchObject({
+            errorCode: 'MODEL_CATALOG_EMPTY',
+            statusCode: 503,
+        });
+
+        freshAdapter.setHttpTransport(createStagingSimulator(simConfig, capturedRequests));
+        expect(freshAdapter.isProductionTransport()).toBe(false);
     });
 
     test('End-to-end InferenceGateway routing to airroofers-sentinel model alias', async () => {
@@ -406,13 +422,7 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
 
         const routingPolicy = new RoutingPolicyEngine(catalog);
         const quotaGuard = new QuotaGuard();
-        const gateway = new InferenceGateway({
-            catalog,
-            credentialBroker,
-            providerRegistry,
-            routingPolicy,
-            quotaGuard,
-        });
+        const gateway = new InferenceGateway({ catalog, credentialBroker, providerRegistry, routingPolicy, quotaGuard });
 
         const gatewayResult = await gateway.invoke(buildTestRequest());
         expect(gatewayResult.providerId).toBe('airroofers-ai');

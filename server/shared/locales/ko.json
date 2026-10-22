@@ -1934,6 +1934,7 @@
       "malformed_output_schema": "AI 공급자 출력이 필수 응답 스키마를 위반했습니다.",
       "missing_required_field": "AI 추론 요청에 필수 필드가 없습니다.",
       "modality_unsupported": "요청된 추론 방식은 이 모델에서 지원되지 않습니다.",
+      "model_catalog_empty": "이 AI 공급자에 대해 카탈로그에 등록된 활성 모델이 없습니다. 검증된 카탈로그 항목 없이는 기능 선언이 금지됩니다.",
       "model_conformance_failed": "모델이 아키텍처 적합성 및 안전성 테스트에 실패했습니다.",
       "model_disabled": "선택한 AI 모델은 관리 정책에 의해 비활성화되었습니다.",
       "model_not_found": "요청한 AI 모델을 카탈로그에서 찾을 수 없습니다.",
