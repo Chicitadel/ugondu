@@ -121,3 +121,29 @@ This candidate adds real behavioral assertions in the previously identified six 
 5. Reconcile every `nativeExecutionVerified` target-matrix value with native runner evidence. Any mismatch must be corrected to `cross-compiled-only`, `unverified`, or `unsupported`, never marked green by assertion.
 6. Keep overall disposition 🔴 HOLD until all required gates are green on one exact candidate and independent review accepts the evidence.
 
+
+
+## Re-audit snapshot — 2026-10-22 17:45 UTC
+
+**Observed repository HEAD:** [`e4e670afd642e030ebda6a61eac23ef70d3a7112`](https://github.com/Chicitadel/ugondu/commit/e4e670afd642e030ebda6a61eac23ef70d3a7112).  
+**New evidence reconciliation report:** [COR_REAUDIT_EVIDENCE_RECONCILIATION_2026-10-22.md](COR_REAUDIT_EVIDENCE_RECONCILIATION_2026-10-22.md).
+
+| Gate | Current status at observation time | Evidence / action |
+|---|---|---|
+| CI/CD on observed HEAD | 🟢 One completed run passed; newer runs pending | [Run 39824623462](https://github.com/Chicitadel/ugondu/actions/runs/39824623462) succeeded. [Run 39824632526](https://github.com/Chicitadel/ugondu/actions/runs/39824632526) was queued and [Brand Audit 39824632351](https://github.com/Chicitadel/ugondu/actions/runs/39824632351) was in progress. |
+| COR on observed HEAD | 🟠 Pending | [Run 39824623474](https://github.com/Chicitadel/ugondu/actions/runs/39824623474) had not returned a completed result. |
+| Software COR on candidate 09666877 | 🟢 Prior candidate-bound pass | Do not inherit this result automatically to `e4e670af` or any later code SHA. |
+| AI health / authentication boundary | 🟢 Reachability only | Health HTTP 200 and unauthenticated models HTTP 401 do not prove authenticated inference. |
+| Live authenticated inference / real model switching | 🔴 Open | Add trusted-branch-only ephemeral secret injection and a real API canary with redacted evidence. The staging suite uses simulated transport and is not a substitute. |
+| OS / architecture qualification | 🟠 Partial | Five Go client targets build; cross-compile is not native runtime evidence. Native proof required for each advertised target. |
+| IDE / host / provider qualification | 🟠 Partial | Matrix statuses require operation-level evidence; IDEs currently include experimental/unsupported cells, and GCP/Azure are unsupported. |
+| Branch protection / independent sign-off | 🔴 Open in prior ledger | Recheck current rulesets and require independent second-party COR review. |
+| **Overall disposition** | **🔴 HOLD — NOT UNIVERSALLY CERTIFIED** | Green status may be assigned only after the final exact SHA passes all mandatory gates and evidence is accepted. |
+
+### Non-regression rules
+
+1. Treat every status as SHA-bound; do not carry evidence across commits without an approved content-equivalence rule.
+2. The target matrix is a declaration, not proof. Any `tested`/ `certified` cell must reference a matching native/provider run and immutable receipt.
+3. Separate simulated contract tests from live network E2E. Never report a mocked staging transport as real API qualification.
+4. Do not mark unsupported OS/IDE/host/provider cells green to satisfy a universal-support goal. Either implement and qualify them or keep the capability explicitly unsupported and fail-closed.
+5. The full gate-by-gate plan, code guard examples, AI live-canary requirements, evidence receipt schema and execution sequence are in the linked re-audit report.
