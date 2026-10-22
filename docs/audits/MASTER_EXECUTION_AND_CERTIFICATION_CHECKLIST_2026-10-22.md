@@ -145,3 +145,18 @@
 - Overall disposition remains 🔴 **HOLD — NOT UNIVERSALLY CERTIFIED** until CI/CD completes, physical AWS/Fargate teardown is verified with zero residual resources, live authenticated AI and real multi-model switching pass, and all advertised target cells have target-bound evidence.
 
 Any subsequent code change must trigger fresh evidence on the final candidate SHA. These run IDs are snapshots at the observation time, not claims about their eventual conclusions.
+
+
+## Re-audit addendum — 2026-10-22 17:45 UTC
+
+Reference the full [COR re-audit evidence reconciliation](COR_REAUDIT_EVIDENCE_RECONCILIATION_2026-10-22.md).
+
+- [ ] Wait for the final result of COR run [39824623474](https://github.com/Chicitadel/ugondu/actions/runs/39824623474) on observed HEAD `e4e670afd642e030ebda6a61eac23ef70d3a7112`.
+- [ ] Confirm the queued/new CI run [39824632526](https://github.com/Chicitadel/ugondu/actions/runs/39824632526) and Brand Asset Audit [39824632351](https://github.com/Chicitadel/ugondu/actions/runs/39824632351) conclude successfully.
+- [ ] Run authenticated live `ai.airroofers.eu/v1/ai/execute` canary with an ephemeral `UGONDU_AIRROOFERS_AI_KEY` injected only into a trusted workflow; retain a redacted, exact-SHA-bound receipt.
+- [ ] Prove real model discovery and switching across at least two approved routes; test unsigned/disabled model rejection, invalid auth, timeout, upstream failure and no-eligible-model behavior.
+- [ ] Add native execution evidence for every advertised OS/architecture cell. Cross-compilation is not native qualification.
+- [ ] Reconcile every provider-operation and IDE integration status to target-bound evidence. Matrix values alone do not certify a capability.
+- [ ] Run fresh AWS/Fargate physical lifecycle, teardown and zero-residual verification on the final candidate SHA.
+- [ ] Recheck branch protection/rulesets and obtain independent second-party COR sign-off.
+- [ ] Keep overall disposition 🔴 HOLD until all required gates pass on one exact candidate.
