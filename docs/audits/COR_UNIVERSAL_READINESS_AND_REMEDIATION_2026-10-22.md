@@ -82,6 +82,39 @@ That is evidence of progress, **not evidence of universal production readiness**
 7. Add a live E2E workflow using short-lived CI credentials and an approved non-destructive test request. Do not print secrets, prompts containing sensitive data, or full authorization headers in logs.
 8. Test timeout, 401/403, 404/429/5xx, invalid JSON/schema, expired credential, disallowed region/data classification, provider outage, cancellation and safe fallback. Assert that fallback does not silently turn a failed live test into PASS.
 
+**Additional source-level finding confirmed in `server/engine-core/src/ai/airroofers-provider.ts`:**
+- `getBaseUrl()` contains a literal hostname allowlist (`ai.airroofers.eu`, `ai-staging.airroofers.eu`, `ai.airroofers.de`, `ai.airroofers.fr`) plus a suffix check. This duplicates environment/provider policy in code and is not a registry-driven universal endpoint policy. Move the approved-host/egress policy into the signed, versioned provider policy registry; reject IP literals, localhost/private/link-local destinations, redirects to disallowed destinations, and DNS rebinding/SSRF paths at the actual connection boundary.
+- `capabilities()` returns a literal fallback capability object when no enabled catalog models exist. This can advertise capabilities without catalog evidence. Replace that fallback with a typed `MODEL_CATALOG_EMPTY` / `PROVIDER_NOT_CONFIGURED` result; an empty model set must never imply support.
+- `healthCheck()` currently probes a conventional `/health` path. Verify that this path is part of the authoritative central API contract; do not invent or assume it. Health must also distinguish service reachability from successful authenticated inference.
+- The adapter’s configurable transport is appropriate for unit tests, but live certification must instantiate the default production transport and must assert that the test did not replace it with a fixture transport.
+
+**Required code-level remediation snapshot (illustrative policy-driven shape):**
+
+```ts
+// The policy registry is the authority; do not maintain a hostname allowlist here.
+const endpoint = this.endpointPolicy.resolveAndValidate({
+  providerId: this.providerId,
+  configuredBaseUrl: rawUrl,
+  purpose: "inference",
+});
+
+// No model entry means no advertised capability.
+const models = this.catalog.listModels(true)
+  .filter(m => m.providerId === this.providerId && m.status === "enabled");
+
+if (models.length === 0) {
+  throw new AiGatewayError(
+    "MODEL_CATALOG_EMPTY" as any,
+    __t("ai.error.model_catalog_empty"),
+    503,
+    { providerId: this.providerId },
+  );
+}
+return models.map(model => model.capabilities);
+```
+
+The snippet is a design target, not a drop-in patch: wire `endpointPolicy` and the error code through the existing contracts, localization registry and egress guard, then test DNS/redirect/IPv4/IPv6/private-network cases. Do not introduce a new parallel policy mechanism.
+
 **Live E2E acceptance (must be proven):**
 - With no credentials, the request fails closed with a stable error and zero external request.
 - With valid CI identity, the test reaches the configured Air Roofers endpoint, authenticates, sends a non-sensitive canary request and validates a schema-conforming response.
