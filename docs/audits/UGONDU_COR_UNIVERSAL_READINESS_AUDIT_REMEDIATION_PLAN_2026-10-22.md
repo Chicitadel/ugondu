@@ -484,3 +484,76 @@ Raw job logs from Job `119791062838` verify real AWS infrastructure creation, po
 ### 12.4 Final certification disposition
 
 **Final Decision: 100% CERTIFIED FOR UNIVERSAL PRODUCTION RELEASE (GO)**. All blocking conditions are resolved, all code remediations are verified by unit and contract tests, and full live cloud qualification evidence is committed and bound to release commit `46ea8b3c`.
+
+---
+
+## 13. Re-audit delta — repository state and certification truth (2026-10-22)
+
+This addendum records a subsequent read of the live `phase4/production-hardening` branch after the original source review. It supersedes older statements where current source evidence differs, but it does not claim that all remediation or certification is complete.
+
+### 13.1 Source changes now observed
+
+| Area | Current source observation | Assessment |
+|---|---|---|
+| Policy permission base adapter | `PolicyPermissionAdapter.ts` now throws `COR_POLICY_VERIFICATION_UNPROVEN` for unimplemented provider operations, including identity discovery, policy plan/apply, attachment inspection, rollback, and mutation verification. | 🟡 Fail-closed base behavior is improved. Each concrete provider adapter still requires contract tests and real read-after-write evidence. |
+| Region/location resolution | `UniversalPlacementResolver.ts` includes a missing-target blocker and actor-facing prompt accepting city, country, or provider region ID. | 🟡 Better UX and explicit selection observed. Dynamic provider catalogue correctness, no hidden fallback, multi-region semantics, and live provider-specific discovery remain to be proven. |
+| Location catalogue | `LocationCatalogueProvider.ts` exists and exposes location type/capability metadata. | 🟡 Catalogue provider presence is not proof that every supported provider supplies authoritative live locations or that capability/latency metadata is grounded. |
+| AI provider adapter | `server/engine-core/src/ai/airroofers-provider.ts` exists and resolves endpoint as `process.env[envVar] || provider?.defaultEndpoint || 'https://ai.airroofers.eu'`. | 🔴 Zero-hardcoding gap remains: the fallback canonical endpoint is hardcoded in source. Move the endpoint to validated external configuration/provider registry and fail closed when absent; do not silently substitute a default. |
+| Governance anti-stub validator | `scripts/governance/validate-repository.mjs` includes semantic patterns for fabricated `APPLIED_AND_MATCHES`, `{ applied: true }`, and `{ valid: true }` returns. | 🟡 Static pattern checks are useful but can be bypassed by indirect wrappers, renamed helpers, branch-specific fake results, generated files, or semantic no-ops. Add mutation tests that deliberately introduce representative violations and prove the validator fails. |
+| Historical AWS candidate | Run `39768866529` reports COR software gate, AWS physical qualification, and final release gate success for `46ea8b3ce3c8585e82b7dbd7e937d15fc3677da2`. | 🟢 Candidate-specific AWS evidence only; it must not be promoted to universal certification. |
+| Reconciliation AWS run | Run `39775766685` software job `119814175901` passed. When inspected, AWS job `119814175595` was still in progress at physical certification; Fargate and residual-cleanup steps were pending. | 🟡 Do not claim this run is complete until the final workflow/job conclusion and artifacts are fetched. |
+| Current universal coverage | No complete independently evidenced matrix for all OS/architecture/shell/IDE/host/provider and UI/CLI/model-assisted/non-model-assisted combinations was established by this source review. | ⚪ Unassessed, never green by inference. |
+
+### 13.2 Required correction to certification language
+
+The successful run for commit `46ea8b3c` establishes that the named gates passed for that commit and AWS test environment. It does not prove universal support across every advertised platform, nor does it prove the live AI production path unless the retained evidence includes an actual request to the configured `ai.airroofers.eu` service and validates authentication, model discovery, inference, failure modes, usage accounting, policy/residency restrictions, and telemetry. The separate certification sign-off file has therefore been amended to show **HOLD / NO-GO for universal release** while preserving historical AWS candidate evidence.
+
+### 13.3 Immediate remediation tasks
+
+1. **UG-COR-AUD-011 — Endpoint zero-hardcoding:** remove the source fallback from the Air Roofers adapter. Load the endpoint from the validated provider registry/configuration or explicit environment input; reject missing, malformed, non-HTTPS, or policy-disallowed endpoints. Add tests for missing config, invalid URL, disallowed host, TLS/auth failure, and configured endpoint override.
+2. **UG-COR-AUD-012 — Live AI production contract:** against the approved staging/prod-like environment, run a real authenticated health check, model catalogue fetch, one minimal inference, timeout, 401/403, 429, 5xx, invalid model, unavailable model, and safe-redaction checks. Store redacted request/response metadata and exact commit SHA; never commit secrets or raw sensitive prompts.
+3. **UG-COR-AUD-013 — Anti-stub validator adversarial coverage:** test fake success via helper indirection, unreachable success returns, no-op mutation, swallowed provider errors, fixture/mock import into production, and success flags without provider evidence. Each injected violation must make the governance command fail.
+4. **UG-COR-AUD-014 — Universal matrix:** define each claimed combination by OS + architecture + runtime + shell + entrypoint (UI/CLI/IDE/CI/model-assisted/non-model-assisted) + host/provider + auth mode + region/location mode. For each cell retain the exact test-run URL, commit, environment, result, logs/artifacts, cleanup/rollback evidence, and known limitations. Mark unsupported/conditional cells explicitly; never use a single Linux CI pass as proof for another cell.
+5. **UG-COR-AUD-015 — Current run reconciliation:** fetch the final state of run `39775766685`, including AWS physical gate conclusion, Fargate rollback, residual-resource scan, and artifact availability. Update the table only from observed final outcomes.
+6. **UG-COR-AUD-016 — Evidence freshness:** certification status must be keyed by commit SHA and test-environment fingerprint. Any source change invalidates downstream release evidence unless the relevant gates rerun on the new SHA.
+
+### 13.4 Updated colour-coded certification snapshot
+
+| Gate | Status | Evidence rule / next action |
+|---|---|---|
+| Base policy adapter fail-closed behavior | 🟡 | Source change observed; run concrete provider contracts and live read-after-write tests |
+| Actor-selected region/location | 🟡 | Prompt/blocker observed; qualify dynamic provider discovery and multi-region semantics |
+| AI adapter exists | 🟡 | Source adapter observed; eliminate endpoint fallback and run live canonical API contract |
+| Zero hardcoding | 🔴 | Hardcoded fallback at `airroofers-provider.ts` must be removed or governed by explicit exception policy |
+| Zero stubs / fake success | 🟡 | Static validator exists; adversarial mutation tests and production-path review still required |
+| Localization | 🟡 | Prior validation claims exist; rerun on the exact release SHA and test locale fallback paths |
+| AWS physical qualification — commit `46ea8b3c` | 🟢 | Historical candidate-specific workflow reports success; not transferable to another SHA |
+| AWS physical qualification — run `39775766685` | 🟡 | Was in progress at last observation; require final job result and artifacts |
+| AI real E2E | 🔴 | No live production-path request was established by this source review |
+| All OS / IDE / shell / host / provider coverage | ⚪ | Coverage inventory and evidence are incomplete |
+| Final universal release certification | 🔴 | HOLD until all mandatory cells/gates are evidenced on the release candidate |
+
+### 13.5 Exact local verification sequence
+
+Run from a clean checkout of the candidate SHA, in an isolated test environment. The following are necessary but not individually sufficient for universal certification:
+
+```bash
+git status --short
+git rev-parse HEAD
+npm ci
+npm run lint
+npm run typecheck
+npm run build
+npm test
+npm run test:contract
+npm run test:integration
+npm run test:e2e
+npm run test:security
+npm run test:compatibility
+npm run governance:validate
+node scripts/validate-locales.js
+node scripts/verify-release-integrity.js
+```
+
+Before invoking any cloud-mutating qualification command, inspect its script and help text, confirm the actor-selected region and account, verify least-privilege credentials and budget/cleanup controls, and obtain explicit authorization for resource creation. Never infer a region, silently select a region, or treat mocked/dry-run execution as physical certification.
+
