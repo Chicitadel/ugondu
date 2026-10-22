@@ -33,6 +33,7 @@ const { pathToFileURL } = require('node:url');
 const ROOT = path.resolve(__dirname, '../..');
 const PROBE_DIR = path.join(ROOT, 'server', 'capabilities', 'src');
 const AI_PROBE_DIR = path.join(ROOT, 'server', 'engine-core', 'src', 'ai');
+const FABRIC_TEST_PROBE_DIR = path.join(ROOT, 'server', 'engine-core', 'src', 'fabric', 'tests');
 
 let validatorModule = null;
 
@@ -44,8 +45,8 @@ async function getValidator() {
   return validatorModule;
 }
 
-function createTempProbe(basename, content, dir = PROBE_DIR) {
-  const fileName = `temp-adversarial-${basename}-${Date.now()}-${Math.random().toString(36).slice(2)}.ts`;
+function createTempProbe(basename, content, dir = PROBE_DIR, ext = '.ts') {
+  const fileName = `temp-adversarial-${basename}-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
   const absPath = path.join(dir, fileName);
   fs.writeFileSync(absPath, content, 'utf8');
   const relPath = path.relative(ROOT, absPath).replace(/\\/g, '/');
@@ -61,7 +62,7 @@ function cleanupProbe(absPath) {
 }
 
 function cleanupAllProbes() {
-  for (const dir of [PROBE_DIR, AI_PROBE_DIR]) {
+  for (const dir of [PROBE_DIR, AI_PROBE_DIR, FABRIC_TEST_PROBE_DIR]) {
     if (!fs.existsSync(dir)) continue;
     const entries = fs.readdirSync(dir);
     for (const entry of entries) {
@@ -301,6 +302,37 @@ test('AAS-009: Injects hardcoded fallback capability array into production AI ad
       violations[0],
       /Unverified fallback capability declaration in production AI adapter:/,
       'Must detect hardcoded fallback capability array in production AI adapter'
+    );
+  } finally {
+    cleanupProbe(probe.absPath);
+  }
+});
+
+test('AAS-010: Injects vacuous test assertion into a temporary .spec.ts file and proves runRepositoryValidation catches it and fails closed', async () => {
+  const { runRepositoryValidation } = await getValidator();
+  const vacuousLine = '    ' + 'expect(' + 'true).toBe(true);';
+  const probe = createTempProbe(
+    'aas010',
+    [
+      'describe("Vacuous probe suite", () => {',
+      '  it("contains prohibited vacuous assertion", () => {',
+      vacuousLine,
+      '  });',
+      '});'
+    ].join('\n'),
+    FABRIC_TEST_PROBE_DIR,
+    '.spec.ts'
+  );
+
+  try {
+    const result = runRepositoryValidation();
+    assert.strictEqual(result.passed, false, 'runRepositoryValidation must fail closed when vacuous assertion is present');
+    const vacuousViolation = result.violations.find((v) => v.includes(probe.relPath));
+    assert.ok(vacuousViolation, 'Must report violation for the temporary .spec.ts file');
+    assert.match(
+      vacuousViolation,
+      /Vacuous test assertion prohibited by Gate B\/F governance:/,
+      'Must report Gate B/F vacuous test assertion governance violation'
     );
   } finally {
     cleanupProbe(probe.absPath);

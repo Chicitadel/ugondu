@@ -4,27 +4,14 @@
  * File           : UplmPackLoaderAndRenderer.ts
  * Version        : 1.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU (RCS Paris 943 432 534)
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
  *
- * Governance:
- * - Corporate Policy Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
- *
- * Signatures:
- * - Architecture Authority : Ujomor Systems Engineering
- * - Security Authority     : Ujomor Systems Governance
- * - Governance Authority   : Air Roofers Corporate Governance
- *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Governance     : Corporate Policy Governed | Security Reviewed | Protocol Frozen
+ * Standards      : ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { createHash } from 'crypto';
@@ -97,26 +84,14 @@ export interface RenderedPolicyArtifact {
   sids: string[];
 }
 
-const ALLOWED_IAM_RUNTIME_VARIABLES = new Set([
-  '${aws:PrincipalTag/UgonduTransactionId}',
-]);
-
+const ALLOWED_IAM_RUNTIME_VARIABLES = new Set(['${aws:PrincipalTag/UgonduTransactionId}']);
 const ALLOWED_TEMPLATE_VARIABLES = new Set([
-  'accountId',
-  'region',
-  'partition',
-  'targetRoleName',
-  'runnerRoleName',
-  'transactionId',
+  'accountId', 'region', 'partition', 'targetRoleName', 'runnerRoleName', 'transactionId',
 ]);
-
 const SECRET_DETECTION_REGEX =
   /(AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|aws_secret_access_key|secretAccessKey|sessionToken|BEGIN [A-Z ]*PRIVATE KEY)/i;
 
-/**
- * Loads and validates the AWS COR V9 policy pack from `policy-packs/aws/cor`.
- * Verifies every template SHA-256, compact character size, statement count, and Sid 1:1 preservation.
- */
+/** Loads and validates the AWS COR V9 policy pack from `policy-packs/aws/cor`. */
 export class UplmPackLoaderAndRenderer {
   static resolveDefaultAwsCorPackDir(): string {
     const candidates = [
@@ -125,9 +100,7 @@ export class UplmPackLoaderAndRenderer {
       path.resolve(process.cwd(), '../../policy-packs/aws/cor'),
     ];
     for (const c of candidates) {
-      if (fs.existsSync(path.join(c, 'pack.yaml'))) {
-        return c;
-      }
+      if (fs.existsSync(path.join(c, 'pack.yaml'))) return c;
     }
     return candidates[0];
   }
@@ -202,15 +175,9 @@ export class UplmPackLoaderAndRenderer {
           targetRoleLogicalId: 'execution-role',
           description: 'Transaction-tagged EC2 VPC, subnet, IGW, route table, SG, snapshot, and instance creation (9 statements).',
           sids: [
-            'CreateTaggedVpc',
-            'CreateTaggedSubnet',
-            'CreateTaggedInternetGateway',
-            'CreateTaggedRouteTable',
-            'CreateTaggedSecurityGroup',
-            'CreateTaggedSnapshot',
-            'LaunchTaggedInstanceTags',
-            'LaunchTaggedInstanceReadOnly',
-            'AllowTaggingDuringCreation',
+            'CreateTaggedVpc', 'CreateTaggedSubnet', 'CreateTaggedInternetGateway',
+            'CreateTaggedRouteTable', 'CreateTaggedSecurityGroup', 'CreateTaggedSnapshot',
+            'LaunchTaggedInstanceTags', 'LaunchTaggedInstanceReadOnly', 'AllowTaggingDuringCreation',
           ],
         },
         {
@@ -223,18 +190,10 @@ export class UplmPackLoaderAndRenderer {
           targetRoleLogicalId: 'execution-role',
           description: 'Ownership tag protection and transaction-scoped EC2 cleanup and routing operations (12 statements).',
           sids: [
-            'DenyRemovalOfUgonduOwnershipTags',
-            'EnforceDeleteVpc',
-            'EnforceDeleteSubnet',
-            'EnforceDeleteInternetGateway',
-            'EnforceDeleteRouteTable',
-            'EnforceDeleteSecurityGroup',
-            'EnforceTerminateInstances',
-            'EnforceDeleteNetworkInterface',
-            'EnforceDeleteSnapshot',
-            'AllowAttachDetachGateway',
-            'AllowRouteTableAssoc',
-            'AllowRouteOps',
+            'DenyRemovalOfUgonduOwnershipTags', 'EnforceDeleteVpc', 'EnforceDeleteSubnet',
+            'EnforceDeleteInternetGateway', 'EnforceDeleteRouteTable', 'EnforceDeleteSecurityGroup',
+            'EnforceTerminateInstances', 'EnforceDeleteNetworkInterface', 'EnforceDeleteSnapshot',
+            'AllowAttachDetachGateway', 'AllowRouteTableAssoc', 'AllowRouteOps',
           ],
         },
         {
@@ -247,17 +206,11 @@ export class UplmPackLoaderAndRenderer {
           targetRoleLogicalId: 'execution-role',
           description: 'Transaction-isolated RDS instance/snapshot/subnet-group and S3 bucket/object lifecycle permissions (11 statements).',
           sids: [
-            'AllowRDSTaggingDuringCreation',
-            'CreateTransactionTaggedDBInstance',
-            'CreateTransactionTaggedDBSnapshot',
-            'CreateTransactionTaggedDBSubnetGroup',
-            'EnforceDBInstanceDestructiveBounds',
-            'EnforceDBSnapshotDestructiveBounds',
-            'EnforceDBSubnetGroupDestructiveBounds',
-            'EnforceS3BucketCreation',
-            'EnforceS3BucketTagging',
-            'EnforceS3BucketOperations',
-            'EnforceS3ObjectOperations',
+            'AllowRDSTaggingDuringCreation', 'CreateTransactionTaggedDBInstance',
+            'CreateTransactionTaggedDBSnapshot', 'CreateTransactionTaggedDBSubnetGroup',
+            'EnforceDBInstanceDestructiveBounds', 'EnforceDBSnapshotDestructiveBounds',
+            'EnforceDBSubnetGroupDestructiveBounds', 'EnforceS3BucketCreation',
+            'EnforceS3BucketTagging', 'EnforceS3BucketOperations', 'EnforceS3ObjectOperations',
           ],
         },
         {
@@ -270,18 +223,10 @@ export class UplmPackLoaderAndRenderer {
           targetRoleLogicalId: 'execution-role',
           description: 'Transaction-scoped ECR repository, ECS cluster/service/task-definition, tag-stripping deny, and scoped PassRole (12 statements).',
           sids: [
-            'AllowECRTaggingDuringCreation',
-            'AllowECSTaggingDuringCreation',
-            'CreateECROperations',
-            'EnforceECROperations',
-            'CreateECSTaskDefinition',
-            'CreateECSCluster',
-            'CreateECSService',
-            'DeregisterECSTaskDefinition',
-            'DeleteECSCluster',
-            'ModifyECSService',
-            'DenyECSTagStripping',
-            'AllowPassRoleForECS',
+            'AllowECRTaggingDuringCreation', 'AllowECSTaggingDuringCreation', 'CreateECROperations',
+            'EnforceECROperations', 'CreateECSTaskDefinition', 'CreateECSCluster',
+            'CreateECSService', 'DeregisterECSTaskDefinition', 'DeleteECSCluster',
+            'ModifyECSService', 'DenyECSTagStripping', 'AllowPassRoleForECS',
           ],
         },
       ],
@@ -364,16 +309,7 @@ export class UplmPackLoaderAndRenderer {
     }
   }
 
-  /**
-   * Renders a policy template using a validated `ResolvedEnvironment`.
-   *
-   * INVARIANTS (§4.4):
-   * - Rejects unresolved placeholders (`{{...}}`, `${...}` except valid AWS IAM runtime variables).
-   * - Rejects unknown template variables.
-   * - Rejects out-of-scope account or region.
-   * - Rejects any secret or credential material in the template or environment.
-   * - Enforces managed policy size and role attachment quota headroom.
-   */
+  /** Renders a policy template using a validated `ResolvedEnvironment` with §4.4 invariants. */
   static renderTemplateObject(
     template: Record<string, unknown>,
     env: ResolvedEnvironment,
@@ -393,13 +329,10 @@ export class UplmPackLoaderAndRenderer {
     }
 
     if (!env.transactionId || !/^[a-zA-Z0-9_-]{3,64}$/.test(env.transactionId)) {
-      throw new Error(
-        `VALIDATION_FAILED: Invalid or missing transactionId '${env.transactionId}'.`
-      );
+      throw new Error(`VALIDATION_FAILED: Invalid or missing transactionId '${env.transactionId}'.`);
     }
 
-    const availableSlots =
-      env.quotas.maxManagedPoliciesPerRole - env.quotas.currentAttachedManagedPolicies;
+    const availableSlots = env.quotas.maxManagedPoliciesPerRole - env.quotas.currentAttachedManagedPolicies;
     if (availableSlots < 5) {
       throw new Error(
         `QUOTA_EXCEEDED: Target role has only ${availableSlots} managed policy attachment slots remaining; 5 are required.`
@@ -421,7 +354,6 @@ export class UplmPackLoaderAndRenderer {
           throw new Error('SECURITY_VIOLATION: Secrets or credentials must never appear in policy templates.');
         }
 
-        // Resolve {{varName}} placeholders strictly against ALLOWED_TEMPLATE_VARIABLES
         const resolved = val.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, varName: string) => {
           if (!ALLOWED_TEMPLATE_VARIABLES.has(varName)) {
             throw new Error(`UNRESOLVED_PLACEHOLDER: Unknown template variable '{{${varName}}}'.`);
@@ -433,12 +365,10 @@ export class UplmPackLoaderAndRenderer {
           return replacement;
         });
 
-        // Check for any remaining {{ or }}
         if (resolved.includes('{{') || resolved.includes('}}')) {
           throw new Error(`UNRESOLVED_PLACEHOLDER: Malformed or unresolved mustache placeholder in '${resolved}'.`);
         }
 
-        // Check any ${...} expressions: only allow valid AWS IAM runtime variables
         const dollarMatches = resolved.match(/\$\{[^}]*\}/g) ?? [];
         for (const dm of dollarMatches) {
           if (!ALLOWED_IAM_RUNTIME_VARIABLES.has(dm)) {
@@ -448,9 +378,7 @@ export class UplmPackLoaderAndRenderer {
 
         return resolved;
       }
-      if (Array.isArray(val)) {
-        return val.map((item) => transformValue(item));
-      }
+      if (Array.isArray(val)) return val.map((item) => transformValue(item));
       if (val !== null && typeof val === 'object') {
         const out: Record<string, unknown> = {};
         for (const [k, v] of Object.entries(val as Record<string, unknown>)) {

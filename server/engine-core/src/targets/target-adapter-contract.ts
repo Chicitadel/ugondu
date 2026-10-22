@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Engine Core — Target Adapter Contract & Registry
  * File           : target-adapter-contract.ts
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -25,29 +25,15 @@
  * - Governance Authority   : Air Roofers Corporate Governance
  * - Deployment Authority   : Ujomor Systems Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { createHash } from 'crypto';
 import canonicalize from 'canonicalize';
 import { __t } from '@ugondu/shared';
 
-export type SupportedTargetPlatform =
-  | 'linux'
-  | 'windows'
-  | 'macos'
-  | 'docker'
-  | 'aws-ecs-fargate'
-  | 'kubernetes'
-  | 'cpanel'
-  | 'directadmin';
-
-export type DeploymentStrategyType =
-  | 'atomic'
-  | 'quota-sync'
-  | 'container-swap'
-  | 'rolling-update'
-  | 'blue-green';
+export type SupportedTargetPlatform = 'linux' | 'windows' | 'macos' | 'docker' | 'aws-ecs-fargate' | 'kubernetes' | 'cpanel' | 'directadmin';
+export type DeploymentStrategyType = 'atomic' | 'quota-sync' | 'container-swap' | 'rolling-update' | 'blue-green';
 
 export interface TargetContext {
   targetId: string;
@@ -152,9 +138,7 @@ export interface TargetHealthResult {
   details: Record<string, unknown>;
 }
 
-/**
- * Unified TargetAdapter contract (COR-021)
- */
+/** Unified TargetAdapter contract (COR-021) */
 export interface TargetAdapter {
   readonly platform: SupportedTargetPlatform;
   discover(ctx: TargetContext): Promise<TargetDiscoveryResult>;
@@ -199,47 +183,24 @@ class DeterministicTargetAdapter implements TargetAdapter {
       runtimeCapabilities: [...this.profile.runtimeCapabilities],
       osFamily: this.profile.osFamily,
       discoveredAt: new Date().toISOString(),
-      metadata: {
-        repositoryUrl: ctx.repositoryUrl,
-        branch: ctx.branch,
-        defaultStrategy: this.profile.defaultStrategy,
-      },
+      metadata: { repositoryUrl: ctx.repositoryUrl, branch: ctx.branch, defaultStrategy: this.profile.defaultStrategy },
     };
   }
 
   public async preflight(ctx: TargetContext): Promise<TargetPreflightResult> {
     const capabilities = ctx.capabilities ?? {};
-    let strategy = this.profile.defaultStrategy;
-    if (strategy === 'atomic' && capabilities['allowAtomic'] === false) {
-      strategy = 'quota-sync';
-    }
+    const strategy = (this.profile.defaultStrategy === 'atomic' && capabilities['allowAtomic'] === false)
+      ? 'quota-sync'
+      : this.profile.defaultStrategy;
 
     const checks: TargetPreflightCheck[] = [
-      {
-        name: 'repository_coordinates_valid',
-        passed: Boolean(ctx.repositoryUrl && ctx.branch),
-        detail: `Repository ${ctx.repositoryUrl}@${ctx.branch}`,
-      },
-      {
-        name: 'target_identity_bound',
-        passed: Boolean(ctx.targetId),
-        detail: `Target ID ${ctx.targetId} bound to platform ${this.platform}`,
-      },
-      {
-        name: 'platform_capability_verified',
-        passed: this.profile.runtimeCapabilities.length > 0,
-        detail: `Verified ${this.profile.runtimeCapabilities.length} capabilities for ${this.platform}`,
-      },
+      { name: 'repository_coordinates_valid', passed: Boolean(ctx.repositoryUrl && ctx.branch), detail: `Repository ${ctx.repositoryUrl}@${ctx.branch}` },
+      { name: 'target_identity_bound', passed: Boolean(ctx.targetId), detail: `Target ID ${ctx.targetId} bound to platform ${this.platform}` },
+      { name: 'platform_capability_verified', passed: this.profile.runtimeCapabilities.length > 0, detail: `Verified ${this.profile.runtimeCapabilities.length} capabilities for ${this.platform}` },
     ];
 
     const passed = checks.every((c) => c.passed);
-    return {
-      passed,
-      platform: this.platform,
-      strategy,
-      checks,
-      blockedReason: passed ? undefined : 'PREFLIGHT_CHECK_FAILED',
-    };
+    return { passed, platform: this.platform, strategy, checks, blockedReason: passed ? undefined : 'PREFLIGHT_CHECK_FAILED' };
   }
 
   public async plan(ctx: TargetContext): Promise<TargetPlanResult> {
@@ -250,7 +211,6 @@ class DeterministicTargetAdapter implements TargetAdapter {
 
     const strategy = preflight.strategy;
     const steps = this.profile.buildPlatformSteps(ctx, strategy);
-
     const capabilities = ctx.capabilities ?? {};
     if (capabilities['allowRollback']) {
       steps.push({
@@ -266,50 +226,20 @@ class DeterministicTargetAdapter implements TargetAdapter {
       type: idx === 0 ? 'CREATE' : 'UPDATE',
       resource: resName,
       targetId: ctx.targetId,
-      attributes: {
-        platform: this.platform,
-        strategy,
-        branch: ctx.branch,
-        artifactCount: fileMapKeys.length,
-      },
+      attributes: { platform: this.platform, strategy, branch: ctx.branch, artifactCount: fileMapKeys.length },
     }));
 
-    const blastRadius = [
-      ...this.profile.primaryResources,
-      `target:${ctx.targetId}`,
-      `platform:${this.platform}`,
-    ];
-
+    const blastRadius = [...this.profile.primaryResources, `target:${ctx.targetId}`, `platform:${this.platform}`];
     const rollback: TargetRollbackAction[] = this.profile.primaryResources.map((resName, idx) => ({
       action: idx === 0 ? 'DELETE' : 'RESTORE',
       resource: resName,
-      payload: {
-        targetId: ctx.targetId,
-        platform: this.platform,
-        strategy,
-      },
+      payload: { targetId: ctx.targetId, platform: this.platform, strategy },
     }));
 
-    const risk =
-      strategy === 'quota-sync'
-        ? 'MEDIUM'
-        : fileMapKeys.length > 50
-          ? 'MEDIUM'
-          : this.profile.defaultRisk;
-
+    const risk = strategy === 'quota-sync' || fileMapKeys.length > 50 ? 'MEDIUM' : this.profile.defaultRisk;
     const planHash = computePlanHash(steps, resourceChanges, ctx.targetId, strategy);
 
-    return {
-      platform: this.platform,
-      targetId: ctx.targetId,
-      strategy,
-      steps,
-      resourceChanges,
-      blastRadius,
-      risk,
-      rollback,
-      planHash,
-    };
+    return { platform: this.platform, targetId: ctx.targetId, strategy, steps, resourceChanges, blastRadius, risk, rollback, planHash };
   }
 
   public async apply(ctx: TargetContext, plan: TargetPlanResult, transactionId: string): Promise<TargetApplyResult> {
@@ -322,14 +252,7 @@ class DeterministicTargetAdapter implements TargetAdapter {
     }) ?? '{}';
     const receiptHash = createHash('sha256').update(receiptPayload, 'utf8').digest('hex');
 
-    return {
-      applied: true,
-      transactionId,
-      targetId: ctx.targetId,
-      executedSteps: plan.steps.length,
-      receiptHash,
-      appliedAt: new Date().toISOString(),
-    };
+    return { applied: true, transactionId, targetId: ctx.targetId, executedSteps: plan.steps.length, receiptHash, appliedAt: new Date().toISOString() };
   }
 
   public async verify(ctx: TargetContext, applyResult: TargetApplyResult): Promise<TargetVerifyResult> {
@@ -345,35 +268,14 @@ class DeterministicTargetAdapter implements TargetAdapter {
   }
 
   public async rollback(ctx: TargetContext, transactionId: string, _plan?: TargetPlanResult): Promise<TargetRollbackResult> {
-    return {
-      rolledBack: true,
-      transactionId,
-      targetId: ctx.targetId,
-      restoredState: 'PREVIOUS_VERIFIED_RELEASE',
-      rolledBackAt: new Date().toISOString(),
-    };
+    return { rolledBack: true, transactionId, targetId: ctx.targetId, restoredState: 'PREVIOUS_VERIFIED_RELEASE', rolledBackAt: new Date().toISOString() };
   }
 
   public async health(targetId: string, options?: Record<string, unknown>): Promise<TargetHealthResult> {
     if (!targetId || options?.['simulateOffline'] === true) {
-      return {
-        status: 'OFFLINE',
-        targetId: targetId || 'unknown',
-        platform: this.platform,
-        checkedAt: new Date().toISOString(),
-        details: { reason: 'Target offline or unverified' },
-      };
+      return { status: 'OFFLINE', targetId: targetId || 'unknown', platform: this.platform, checkedAt: new Date().toISOString(), details: { reason: 'Target offline or unverified' } };
     }
-    return {
-      status: 'HEALTHY',
-      targetId,
-      platform: this.platform,
-      checkedAt: new Date().toISOString(),
-      details: {
-        osFamily: this.profile.osFamily,
-        capabilitiesCount: this.profile.runtimeCapabilities.length,
-      },
-    };
+    return { status: 'HEALTHY', targetId, platform: this.platform, checkedAt: new Date().toISOString(), details: { osFamily: this.profile.osFamily, capabilitiesCount: this.profile.runtimeCapabilities.length } };
   }
 }
 
@@ -386,16 +288,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['LinuxReleaseDirectory', 'SystemdServiceUnit', 'AtomicSymlink'],
     defaultRisk: 'LOW',
     buildPlatformSteps: (ctx, strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'linux' },
-        compensatingAction: 'CLEANUP_WORKSPACE',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy, os: 'linux', serviceManager: 'systemd', targetPath: `/var/www/${ctx.projectId ?? 'app'}` },
-        compensatingAction: 'RESTORE_SYMLINK',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'linux' }, compensatingAction: 'CLEANUP_WORKSPACE' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy, os: 'linux', serviceManager: 'systemd', targetPath: `/var/www/${ctx.projectId ?? 'app'}` }, compensatingAction: 'RESTORE_SYMLINK' },
     ],
   },
   {
@@ -406,16 +300,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['WindowsReleaseDirectory', 'WindowsService', 'IISApplicationPool'],
     defaultRisk: 'LOW',
     buildPlatformSteps: (ctx, strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'windows' },
-        compensatingAction: 'CLEANUP_WORKSPACE',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy, os: 'windows', serviceManager: 'scm', targetPath: `C:\\inetpub\\wwwroot\\${ctx.projectId ?? 'app'}` },
-        compensatingAction: 'RESTORE_JUNCTION',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'windows' }, compensatingAction: 'CLEANUP_WORKSPACE' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy, os: 'windows', serviceManager: 'scm', targetPath: `C:\\inetpub\\wwwroot\\${ctx.projectId ?? 'app'}` }, compensatingAction: 'RESTORE_JUNCTION' },
     ],
   },
   {
@@ -426,16 +312,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['DarwinReleaseBundle', 'LaunchdDaemon', 'AtomicSymlink'],
     defaultRisk: 'LOW',
     buildPlatformSteps: (ctx, strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'macos' },
-        compensatingAction: 'CLEANUP_WORKSPACE',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy, os: 'macos', serviceManager: 'launchd', targetPath: `/usr/local/var/ugondu/${ctx.projectId ?? 'app'}` },
-        compensatingAction: 'RESTORE_SYMLINK',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'macos' }, compensatingAction: 'CLEANUP_WORKSPACE' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy, os: 'macos', serviceManager: 'launchd', targetPath: `/usr/local/var/ugondu/${ctx.projectId ?? 'app'}` }, compensatingAction: 'RESTORE_SYMLINK' },
     ],
   },
   {
@@ -446,20 +324,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['DockerContainerImage', 'DockerContainerRuntime', 'DockerNetworkBinding'],
     defaultRisk: 'LOW',
     buildPlatformSteps: (ctx, strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'docker' },
-        compensatingAction: 'CLEANUP_BUILD_CONTEXT',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: {
-          strategy,
-          runtime: 'docker',
-          securityFlags: ['--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges'],
-        },
-        compensatingAction: 'ROLLBACK_CONTAINER_IMAGE',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'docker' }, compensatingAction: 'CLEANUP_BUILD_CONTEXT' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy, runtime: 'docker', securityFlags: ['--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges'] }, compensatingAction: 'ROLLBACK_CONTAINER_IMAGE' },
     ],
   },
   {
@@ -470,16 +336,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['EcsTaskDefinition', 'EcsFargateService', 'AlbTargetGroupBinding'],
     defaultRisk: 'LOW',
     buildPlatformSteps: (ctx, strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'aws-ecs-fargate' },
-        compensatingAction: 'CLEANUP_WORKSPACE',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy, provider: 'aws', computeEngine: 'fargate', launchType: 'FARGATE' },
-        compensatingAction: 'DEREGISTER_TASK_DEFINITION',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'aws-ecs-fargate' }, compensatingAction: 'CLEANUP_WORKSPACE' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy, provider: 'aws', computeEngine: 'fargate', launchType: 'FARGATE' }, compensatingAction: 'DEREGISTER_TASK_DEFINITION' },
     ],
   },
   {
@@ -490,16 +348,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['KubernetesDeployment', 'KubernetesService', 'KubernetesPodTemplate'],
     defaultRisk: 'LOW',
     buildPlatformSteps: (ctx, strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'kubernetes' },
-        compensatingAction: 'CLEANUP_MANIFEST_STAGING',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy, orchestrator: 'kubernetes', maxUnavailable: 0, maxSurge: '25%' },
-        compensatingAction: 'ROLLOUT_UNDO_DEPLOYMENT',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'kubernetes' }, compensatingAction: 'CLEANUP_MANIFEST_STAGING' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy, orchestrator: 'kubernetes', maxUnavailable: 0, maxSurge: '25%' }, compensatingAction: 'ROLLOUT_UNDO_DEPLOYMENT' },
     ],
   },
   {
@@ -510,16 +360,8 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['CPanelPublicHtml', 'CPanelPhpFpmPool'],
     defaultRisk: 'MEDIUM',
     buildPlatformSteps: (ctx, _strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'cpanel' },
-        compensatingAction: 'CLEANUP_STAGING_ARCHIVE',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy: 'quota-sync', panel: 'cpanel', preservePermissions: true },
-        compensatingAction: 'RESTORE_ACCOUNT_SNAPSHOT',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'cpanel' }, compensatingAction: 'CLEANUP_STAGING_ARCHIVE' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy: 'quota-sync', panel: 'cpanel', preservePermissions: true }, compensatingAction: 'RESTORE_ACCOUNT_SNAPSHOT' },
     ],
   },
   {
@@ -530,47 +372,42 @@ const PLATFORM_PROFILES: PlatformProfile[] = [
     primaryResources: ['DirectAdminDomainRoot', 'DirectAdminAppPool'],
     defaultRisk: 'MEDIUM',
     buildPlatformSteps: (ctx, _strategy) => [
-      {
-        action: 'FETCH_REPOSITORY',
-        payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'directadmin' },
-        compensatingAction: 'CLEANUP_STAGING_ARCHIVE',
-      },
-      {
-        action: 'SYNC_ENVIRONMENT',
-        payload: { strategy: 'quota-sync', panel: 'directadmin', preservePermissions: true },
-        compensatingAction: 'RESTORE_DOMAIN_BACKUP',
-      },
+      { action: 'FETCH_REPOSITORY', payload: { url: ctx.repositoryUrl, branch: ctx.branch, platform: 'directadmin' }, compensatingAction: 'CLEANUP_STAGING_ARCHIVE' },
+      { action: 'SYNC_ENVIRONMENT', payload: { strategy: 'quota-sync', panel: 'directadmin', preservePermissions: true }, compensatingAction: 'RESTORE_DOMAIN_BACKUP' },
     ],
   },
 ];
 
-const PLATFORM_ALIASES: Record<string, SupportedTargetPlatform> = {
-  linux: 'linux',
-  ssh: 'linux',
-  baremetal: 'linux',
-  vps: 'linux',
-  production: 'linux',
-  staging: 'linux',
-  windows: 'windows',
-  win32: 'windows',
-  macos: 'macos',
-  darwin: 'macos',
-  docker: 'docker',
-  container: 'docker',
-  'aws-ecs-fargate': 'aws-ecs-fargate',
-  fargate: 'aws-ecs-fargate',
-  ecs: 'aws-ecs-fargate',
-  aws: 'aws-ecs-fargate',
-  cloud: 'aws-ecs-fargate',
-  kubernetes: 'kubernetes',
-  k8s: 'kubernetes',
+export const PLATFORM_ALIASES: Record<string, SupportedTargetPlatform> = {
+  linux: 'linux', ssh: 'linux', baremetal: 'linux', vps: 'linux', production: 'linux', staging: 'linux', 'aws-ec2': 'linux',
+  windows: 'windows', win32: 'windows',
+  macos: 'macos', darwin: 'macos',
+  docker: 'docker', container: 'docker',
+  'aws-ecs-fargate': 'aws-ecs-fargate', 'aws-fargate': 'aws-ecs-fargate', fargate: 'aws-ecs-fargate', ecs: 'aws-ecs-fargate', aws: 'aws-ecs-fargate', cloud: 'aws-ecs-fargate',
+  kubernetes: 'kubernetes', k8s: 'kubernetes', eks: 'kubernetes',
   cpanel: 'cpanel',
   directadmin: 'directadmin',
 };
 
-/**
- * Unified TargetAdapterRegistry supporting all 8 required target platforms.
- */
+export const EXPLICITLY_UNSUPPORTED_PLATFORMS = new Set([
+  'unsupported-platform', 'heroku', 'plesk', 'gcp', 'azure',
+  'digitalocean', 'linode', 'netlify', 'vercel', 'fly.io', 'openshift', 'nomad',
+]);
+
+export class UnsupportedPlatformError extends Error {
+  public readonly code = 'UNSUPPORTED_CAPABILITY';
+  public readonly platform: string;
+
+  constructor(platform: string) {
+    super(`Unsupported target platform: ${platform}`);
+    this.name = 'UnsupportedPlatformError';
+    this.platform = platform;
+    (this as any).code = 'UNSUPPORTED_CAPABILITY';
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+/** Unified TargetAdapterRegistry supporting canonical target platforms with fail-closed capability checking. */
 export class TargetAdapterRegistry {
   private readonly adapters = new Map<SupportedTargetPlatform, TargetAdapter>();
 
@@ -585,12 +422,18 @@ export class TargetAdapterRegistry {
   }
 
   public normalizePlatform(rawPlatform: string | undefined): SupportedTargetPlatform {
-    if (!rawPlatform) return 'linux';
+    if (!rawPlatform || !rawPlatform.trim()) return 'linux';
     const key = rawPlatform.trim().toLowerCase();
-    return PLATFORM_ALIASES[key] ?? 'linux';
+    if (EXPLICITLY_UNSUPPORTED_PLATFORMS.has(key)) {
+      throw new UnsupportedPlatformError(rawPlatform);
+    }
+    const mapped = PLATFORM_ALIASES[key];
+    if (mapped) return mapped;
+    throw new UnsupportedPlatformError(rawPlatform);
   }
 
   public has(platform: string): boolean {
+    if (!platform || !platform.trim()) return false;
     const key = platform.trim().toLowerCase();
     const mapped = PLATFORM_ALIASES[key];
     return Boolean(mapped && this.adapters.has(mapped));
@@ -600,7 +443,7 @@ export class TargetAdapterRegistry {
     const normalized = this.normalizePlatform(platform);
     const adapter = this.adapters.get(normalized);
     if (!adapter) {
-      throw new Error(`Unsupported target platform: ${platform}`);
+      throw new UnsupportedPlatformError(platform);
     }
     return adapter;
   }

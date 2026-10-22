@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0.0",
+  "authority": "Ujomor Systems Engineering & Governance Authority",
+  "organization": "Air Roofers SASU",
+  "defaultFailureCode": "UNSUPPORTED_CAPABILITY",
+  "targets": {
+    "osArchitectures": [
+      {
+        "target": "windows/amd64",
+        "os": "windows",
+        "arch": "amd64",
+        "nativeExecutionVerified": true,
+        "qualificationStatus": "tested"
+      },
+      {
+        "target": "linux/amd64",
+        "os": "linux",
+        "arch": "amd64",
+        "nativeExecutionVerified": true,
+        "qualificationStatus": "tested"
+      },
+      {
+        "target": "darwin/arm64",
+        "os": "darwin",
+        "arch": "arm64",
+        "nativeExecutionVerified": true,
+        "qualificationStatus": "tested"
+      },
+      {
+        "target": "linux/arm64",
+        "os": "linux",
+        "arch": "arm64",
+        "nativeExecutionVerified": false,
+        "qualificationStatus": "cross-compiled-only"
+      },
+      {
+        "target": "darwin/amd64",
+        "os": "darwin",
+        "arch": "amd64",
+        "nativeExecutionVerified": false,
+        "qualificationStatus": "cross-compiled-only"
+      }
+    ],
+    "ideIntegrations": [
+      {
+        "ide": "vscode",
+        "status": "experimental",
+        "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
+      },
+      {
+        "ide": "jetbrains",
+        "status": "unsupported",
+        "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
+      },
+      {
+        "ide": "cursor",
+        "status": "unsupported",
+        "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
+      },
+      {
+        "ide": "windsurf",
+        "status": "unsupported",
+        "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
+      },
+      {
+        "ide": "neovim",
+        "status": "unsupported",
+        "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
+      }
+    ],
+    "hostProviders": [
+      {
+        "provider": "aws",
+        "qualificationStatus": "tested",
+        "operations": {
+          "discover": "tested",
+          "preflight": "tested",
+          "provision": "tested",
+          "verify": "tested",
+          "repair": "tested",
+          "rollback": "tested",
+          "cleanup": "tested"
+        }
+      },
+      {
+        "provider": "directadmin",
+        "qualificationStatus": "tested",
+        "operations": {
+          "discover": "tested",
+          "preflight": "tested",
+          "provision": "tested",
+          "verify": "tested",
+          "repair": "tested",
+          "rollback": "tested",
+          "cleanup": "tested"
+        }
+      },
+      {
+        "provider": "cpanel",
+        "qualificationStatus": "tested",
+        "operations": {
+          "discover": "tested",
+          "preflight": "tested",
+          "provision": "tested",
+          "verify": "tested",
+          "repair": "tested",
+          "rollback": "tested",
+          "cleanup": "tested"
+        }
+      },
+      {
+        "provider": "ssh-vps",
+        "qualificationStatus": "tested",
+        "operations": {
+          "discover": "tested",
+          "preflight": "tested",
+          "provision": "tested",
+          "verify": "tested",
+          "repair": "tested",
+          "rollback": "tested",
+          "cleanup": "tested"
+        }
+      },
+      {
+        "provider": "docker",
+        "qualificationStatus": "tested",
+        "operations": {
+          "discover": "tested",
+          "preflight": "tested",
+          "provision": "tested",
+          "verify": "tested",
+          "repair": "tested",
+          "rollback": "tested",
+          "cleanup": "tested"
+        }
+      },
+      {
+        "provider": "kubernetes",
+        "qualificationStatus": "tested",
+        "operations": {
+          "discover": "tested",
+          "preflight": "tested",
+          "provision": "tested",
+          "verify": "tested",
+          "repair": "tested",
+          "rollback": "tested",
+          "cleanup": "tested"
+        }
+      },
+      {
+        "provider": "gcp",
+        "qualificationStatus": "unsupported",
+        "operations": {
+          "discover": "unsupported",
+          "preflight": "unsupported",
+          "provision": "unsupported",
+          "verify": "unsupported",
+          "repair": "unsupported",
+          "rollback": "unsupported",
+          "cleanup": "unsupported"
+        }
+      },
+      {
+        "provider": "azure",
+        "qualificationStatus": "unsupported",
+        "operations": {
+          "discover": "unsupported",
+          "preflight": "unsupported",
+          "provision": "unsupported",
+          "verify": "unsupported",
+          "repair": "unsupported",
+          "rollback": "unsupported",
+          "cleanup": "unsupported"
+        }
+      }
+    ]
+  }
+}

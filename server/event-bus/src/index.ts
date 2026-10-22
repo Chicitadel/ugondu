@@ -4,22 +4,14 @@
  * File           : index.ts
  * Version        : 2026.3.1-LTS
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-03
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE | INTERNAL
  *
- * Governance:
- * - Corporate Policy Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
- *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Governance     : Corporate Policy Governed | Security Reviewed | Protocol Frozen
+ * Standards      : ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import express, { Request, Response } from 'express';
@@ -133,9 +125,7 @@ export function validateEventEnvelope(
         errors.push('payload is required and must be a non-null object');
     }
 
-    if (errors.length > 0) {
-        return { valid: false, errors };
-    }
+    if (errors.length > 0) return { valid: false, errors };
 
     const normalizedTimestamp =
         typeof raw.timestamp === 'number'
@@ -145,12 +135,9 @@ export function validateEventEnvelope(
     return {
         valid: true,
         envelope: {
-            eventId: raw.eventId.trim(),
-            schemaVersion: raw.schemaVersion.trim(),
-            type: raw.type.trim(),
-            tenantId: raw.tenantId.trim(),
-            correlationId: raw.correlationId.trim(),
-            timestamp: normalizedTimestamp,
+            eventId: raw.eventId.trim(), schemaVersion: raw.schemaVersion.trim(),
+            type: raw.type.trim(), tenantId: raw.tenantId.trim(),
+            correlationId: raw.correlationId.trim(), timestamp: normalizedTimestamp,
             payload: Logger.redact(raw.payload),
         },
     };
@@ -166,19 +153,11 @@ app.use(telemetryContextMiddleware);
 app.use(express.json());
 
 app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).json({
-        status: 'ok',
-        service: 'event-bus',
-        timestamp: new Date().toISOString(),
-    });
+    res.status(200).json({ status: 'ok', service: 'event-bus', timestamp: new Date().toISOString() });
 });
 
 app.get('/health/live', (_req: Request, res: Response) => {
-    res.status(200).json({
-        status: 'live',
-        service: 'event-bus',
-        timestamp: new Date().toISOString(),
-    });
+    res.status(200).json({ status: 'live', service: 'event-bus', timestamp: new Date().toISOString() });
 });
 
 app.get('/health/ready', (_req: Request, res: Response) => {
@@ -200,10 +179,7 @@ app.get('/health/ready', (_req: Request, res: Response) => {
     return res.status(200).json({
         status: 'ready',
         service: 'event-bus',
-        checks: {
-            eventStore: 'ok',
-            queue: 'ok',
-        },
+        checks: { eventStore: 'ok', queue: 'ok' },
         queueDepth: activeQueueDepth,
         maxQueueDepth: runtimeConfig.maxQueueDepth,
         timestamp: new Date().toISOString(),
@@ -220,13 +196,8 @@ app.get('/v1/metadata', (_req: Request, res: Response) => {
         maxRetries: runtimeConfig.maxRetries,
         deadLetterCount: deadLetterLog.length,
         endpoints: [
-            '/health',
-            '/health/live',
-            '/health/ready',
-            '/v1/metadata',
-            '/v1/events/publish',
-            '/v1/events/subscribe',
-            '/v1/events/dlq',
+            '/health', '/health/live', '/health/ready', '/v1/metadata',
+            '/v1/events/publish', '/v1/events/subscribe', '/v1/events/dlq',
         ],
         timestamp: new Date().toISOString(),
     });
@@ -235,21 +206,14 @@ app.get('/v1/metadata', (_req: Request, res: Response) => {
 app.get('/v1/events/dlq', (req: Request, res: Response) => {
     const headerTenant = req.headers['x-tenant-id'];
     const queryTenant = typeof req.query.tenantId === 'string' ? req.query.tenantId : undefined;
-    if (
-        typeof headerTenant === 'string' &&
-        queryTenant &&
-        headerTenant.trim() !== queryTenant.trim()
-    ) {
+    if (typeof headerTenant === 'string' && queryTenant && headerTenant.trim() !== queryTenant.trim()) {
         return res.status(403).json({
             error: 'Cross-tenant dead-letter access denied',
             code: ErrorCode.CROSS_TENANT_ACCESS_DENIED,
         });
     }
-    const effectiveTenant =
-        (typeof headerTenant === 'string' && headerTenant.trim()) || queryTenant;
-    return res.status(200).json({
-        deadLetterLog: eventStore.getDeadLetters(effectiveTenant),
-    });
+    const effectiveTenant = (typeof headerTenant === 'string' && headerTenant.trim()) || queryTenant;
+    return res.status(200).json({ deadLetterLog: eventStore.getDeadLetters(effectiveTenant) });
 });
 
 app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
@@ -260,9 +224,7 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
             ? body.event.trim()
             : '';
     const webhookUrl = typeof body.webhookUrl === 'string' ? body.webhookUrl.trim() : '';
-    const tenantId = typeof body.tenantId === 'string' && body.tenantId.trim()
-        ? body.tenantId.trim()
-        : '';
+    const tenantId = typeof body.tenantId === 'string' && body.tenantId.trim() ? body.tenantId.trim() : '';
 
     if (!eventType || !webhookUrl || !tenantId) {
         return res.status(400).json({
@@ -299,7 +261,6 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
 });
 
 app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any> => {
-    // 1. Bounded Queue / Backpressure Guard
     if (activeQueueDepth >= runtimeConfig.maxQueueDepth) {
         Logger.warn('Event Bus queue capacity reached; applying backpressure', {
             queueDepth: activeQueueDepth,
@@ -313,7 +274,6 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
         });
     }
 
-    // 2. Versioned Envelope Schema Validation
     const validation = validateEventEnvelope(req.body);
     if (!validation.valid) {
         return res.status(400).json({
@@ -324,8 +284,6 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
     }
 
     const { envelope } = validation;
-
-    // 3. Tenant Isolation Guard
     const headerTenant = req.headers['x-tenant-id'];
     if (typeof headerTenant === 'string' && headerTenant.trim() !== envelope.tenantId) {
         Logger.warn('Cross-tenant event publish blocked', {
@@ -339,7 +297,6 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
         });
     }
 
-    // 4. Idempotency Deduplication by eventId
     if (eventStore.hasProcessedEvent(envelope.eventId)) {
         Logger.info('Duplicate eventId suppressed by idempotency filter', {
             eventId: envelope.eventId,
@@ -359,7 +316,6 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
     activeQueueDepth++;
     try {
         eventStore.markEventProcessed(envelope.eventId, envelope.timestamp);
-
         Logger.info(__t('dispatching') + ` ${envelope.type}`, {
             eventId: envelope.eventId,
             tenantId: envelope.tenantId,
@@ -424,10 +380,7 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
                             timestamp: envelope.timestamp,
                             payload: envelope.payload,
                         },
-                        {
-                            headers: outboundHeaders,
-                            timeout: 5000,
-                        }
+                        { headers: outboundHeaders, timeout: 5000 }
                     );
                     delivered = true;
                     deliveredCount++;
@@ -452,33 +405,20 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
             }
 
             if (!delivered) {
-                const dlqEntry: DeadLetterEntry = {
-                    eventId: envelope.eventId,
-                    schemaVersion: envelope.schemaVersion,
-                    type: envelope.type,
-                    tenantId: envelope.tenantId,
-                    correlationId: envelope.correlationId,
-                    webhookUrl,
-                    attempts,
-                    reason: lastErrorMessage,
-                    failedAt: new Date().toISOString(),
+                eventStore.addDeadLetter({
+                    eventId: envelope.eventId, schemaVersion: envelope.schemaVersion,
+                    type: envelope.type, tenantId: envelope.tenantId, correlationId: envelope.correlationId,
+                    webhookUrl, attempts, reason: lastErrorMessage, failedAt: new Date().toISOString(),
                     payload: envelope.payload,
-                };
-                eventStore.addDeadLetter(dlqEntry);
+                });
                 deadLetteredCount++;
             }
         }
 
         return res.status(200).json({
-            dispatched: true,
-            deduplicated: false,
-            eventId: envelope.eventId,
-            tenantId: envelope.tenantId,
-            type: envelope.type,
-            schemaVersion: envelope.schemaVersion,
-            deliveredCount,
-            deadLetteredCount,
-            payload: envelope.payload,
+            dispatched: true, deduplicated: false, eventId: envelope.eventId,
+            tenantId: envelope.tenantId, type: envelope.type, schemaVersion: envelope.schemaVersion,
+            deliveredCount, deadLetteredCount, payload: envelope.payload,
             message: __t('event_success', envelope.type, deliveredCount),
         });
     } finally {

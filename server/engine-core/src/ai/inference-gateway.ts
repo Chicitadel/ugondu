@@ -4,42 +4,21 @@
  * File           : inference-gateway.ts
  * Version        : 3.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE | INTERNAL
  *
- * Governance:
- * - Corporate Policy Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
- *
- * Signatures:
- * - Architecture Authority : Ujomor Systems Engineering
- * - Security Authority     : Ujomor Systems Governance
- * - Governance Authority   : Air Roofers Corporate Governance
- * - Deployment Authority   : Air Roofers Release Engineering
- *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Governance     : Corporate Policy Governed | Security Reviewed | Protocol Frozen
+ * Standards      : ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import * as crypto from 'crypto';
 import { __t } from '@ugondu/shared';
 import {
-    AdminAuthContext,
-    AiAuditRecord,
-    AiErrorCode,
-    AiGatewayError,
-    CatalogModelEntry,
-    InferenceRequest,
-    InferenceResult,
-    ModelStatus,
-    StreamChunk,
+    AdminAuthContext, AiAuditRecord, AiErrorCode, AiGatewayError,
+    CatalogModelEntry, InferenceRequest, InferenceResult, ModelStatus, StreamChunk,
 } from './contracts';
 import { CredentialBroker } from './credential-broker';
 import { ModelCatalog, ModelStatusScope } from './model-catalog';
@@ -51,34 +30,19 @@ const IDENTITY_QUERY_REGEX =
     /\b(who are you|what model are you|which model are you|what llm|which llm|which provider|what provider|what is your underlying model|who created you|what ai are you|qui es[- ]tu|quel mod[eè]le)\b/i;
 
 const RETRYABLE_UPSTREAM_CODES = new Set<AiErrorCode>([
-    'PROVIDER_TIMEOUT',
-    'PROVIDER_RATE_LIMITED',
-    'UPSTREAM_UNAVAILABLE',
-    'NETWORK_INTERRUPTED',
-    'CIRCUIT_OPEN',
+    'PROVIDER_TIMEOUT', 'PROVIDER_RATE_LIMITED', 'UPSTREAM_UNAVAILABLE', 'NETWORK_INTERRUPTED', 'CIRCUIT_OPEN',
 ]);
 
 export interface GatewayDiagnosticsReport {
     generatedAt: string;
     schemaVersion: string;
     providers: Array<{
-        providerId: string;
-        legalEntity: string;
-        adapterVersion: string;
-        status: ModelStatus;
-        credentialRef: string;
-        supportedRegions: string[];
-        health: { ok: boolean; checkedAt: string; reasonCode?: string };
+        providerId: string; legalEntity: string; adapterVersion: string; status: ModelStatus;
+        credentialRef: string; supportedRegions: string[]; health: { ok: boolean; checkedAt: string; reasonCode?: string };
     }>;
     models: Array<{
-        alias: string;
-        providerId: string;
-        providerModelIdRef: string;
-        credentialRef: string;
-        status: ModelStatus;
-        allowedRegions: string[];
-        dataClassifications: string[];
-        fallbackAliases: string[];
+        alias: string; providerId: string; providerModelIdRef: string; credentialRef: string;
+        status: ModelStatus; allowedRegions: string[]; dataClassifications: string[]; fallbackAliases: string[];
     }>;
     circuits: ReturnType<RoutingPolicyEngine['getCircuitStates']>;
     quotas: ReturnType<QuotaGuard['listSnapshots']>;
@@ -95,11 +59,8 @@ export class InferenceGateway {
     private readonly maxAuditEntries = 1000;
 
     constructor(deps?: {
-        catalog?: ModelCatalog;
-        credentialBroker?: CredentialBroker;
-        providerRegistry?: ProviderAdapterRegistry;
-        routingPolicy?: RoutingPolicyEngine;
-        quotaGuard?: QuotaGuard;
+        catalog?: ModelCatalog; credentialBroker?: CredentialBroker;
+        providerRegistry?: ProviderAdapterRegistry; routingPolicy?: RoutingPolicyEngine; quotaGuard?: QuotaGuard;
     }) {
         this.catalog = deps?.catalog ?? new ModelCatalog();
         this.credentialBroker = deps?.credentialBroker ?? new CredentialBroker();
@@ -116,11 +77,9 @@ export class InferenceGateway {
         try {
             const decision = this.routingPolicy.evaluate(request);
             resolvedModel = decision.primaryModel;
-
             const lease = this.quotaGuard.acquireLease(request, decision.primaryModel);
             try {
-                // Product-level identity protection (Section 6.6):
-                // Return Ugondu product identity without disclosing underlying provider or model details.
+                // Product-level identity protection (Section 6.6)
                 if (this.isIdentityQuery(request)) {
                     const identityPolicy = this.catalog.getIdentityPolicy();
                     const identityOutput = `${identityPolicy.productIdentityName} — Corporate Policy Governed by ${identityPolicy.organization}.`;
@@ -129,28 +88,16 @@ export class InferenceGateway {
                     const latencyMs = Math.max(1, Date.now() - startedAt);
 
                     this.recordAudit({
-                        request,
-                        resolvedModelAlias: decision.primaryModel.alias,
-                        providerId: 'ugondu-platform',
-                        adapterVersion: decision.primaryProvider.adapterVersion,
-                        policyDecision: 'ALLOW',
-                        outcome: 'SUCCESS',
-                        latencyMs,
-                        usage,
-                        costUsd,
+                        request, resolvedModelAlias: decision.primaryModel.alias,
+                        providerId: 'ugondu-platform', adapterVersion: decision.primaryProvider.adapterVersion,
+                        policyDecision: 'ALLOW', outcome: 'SUCCESS', latencyMs, usage, costUsd,
                         notes: 'Product-level identity protection applied',
                     });
 
                     return {
-                        requestId: request.requestId,
-                        providerId: 'ugondu-platform',
-                        modelAlias: request.modelAlias,
-                        adapterVersion: decision.primaryProvider.adapterVersion,
-                        output: identityOutput,
-                        usage,
-                        finishReason: 'stop',
-                        latencyMs,
-                        costUsd,
+                        requestId: request.requestId, providerId: 'ugondu-platform',
+                        modelAlias: request.modelAlias, adapterVersion: decision.primaryProvider.adapterVersion,
+                        output: identityOutput, usage, finishReason: 'stop', latencyMs, costUsd,
                     };
                 }
 
@@ -164,51 +111,36 @@ export class InferenceGateway {
                 const finalResult: InferenceResult = {
                     ...execution.result,
                     output: this.credentialBroker.redactString(execution.result.output),
-                    toolCalls:
-                        decision.validatedTools.length > 0 ? decision.validatedTools : undefined,
+                    toolCalls: decision.validatedTools.length > 0 ? decision.validatedTools : undefined,
                     finishReason:
-                        decision.validatedTools.length > 0
-                            ? 'tool_call'
-                            : execution.result.finishReason,
+                        decision.validatedTools.length > 0 ? 'tool_call' : execution.result.finishReason,
                     costUsd,
                 };
 
                 this.recordAudit({
-                    request,
-                    resolvedModelAlias: execution.modelUsed.alias,
-                    providerId: execution.modelUsed.providerId,
-                    adapterVersion: execution.result.adapterVersion,
+                    request, resolvedModelAlias: execution.modelUsed.alias,
+                    providerId: execution.modelUsed.providerId, adapterVersion: execution.result.adapterVersion,
                     policyDecision: execution.result.fallbackUsed ? 'FALLBACK_ALLOW' : 'ALLOW',
-                    outcome: 'SUCCESS',
-                    latencyMs: finalResult.latencyMs,
-                    usage: finalResult.usage,
-                    costUsd,
+                    outcome: 'SUCCESS', latencyMs: finalResult.latencyMs, usage: finalResult.usage, costUsd,
                 });
 
                 return finalResult;
             } finally {
-                // Safe idempotent release if execution threw before normal release
                 lease.release(decision.primaryModel, { inputTokens: 0, outputTokens: 0 });
             }
         } catch (err: any) {
             const gatewayErr = this.normalizeError(err);
             this.recordAudit({
-                request,
-                resolvedModelAlias: resolvedModel?.alias || request?.modelAlias || 'unknown',
-                providerId: resolvedModel?.providerId || 'unassigned',
-                adapterVersion: '3.0.0',
-                policyDecision: 'DENY',
-                outcome: gatewayErr.statusCode >= 500 ? 'FAILED' : 'DENIED',
-                errorCode: gatewayErr.errorCode,
-                latencyMs: Math.max(1, Date.now() - startedAt),
+                request, resolvedModelAlias: resolvedModel?.alias || request?.modelAlias || 'unknown',
+                providerId: resolvedModel?.providerId || 'unassigned', adapterVersion: '3.0.0',
+                policyDecision: 'DENY', outcome: gatewayErr.statusCode >= 500 ? 'FAILED' : 'DENIED',
+                errorCode: gatewayErr.errorCode, latencyMs: Math.max(1, Date.now() - startedAt),
             });
             throw gatewayErr;
         }
     }
 
-    /**
-     * Bounded streaming invocation with backpressure, tenant isolation, and disconnect cleanup.
-     */
+    /** Bounded streaming invocation with backpressure, tenant isolation, and disconnect cleanup. */
     public async *invokeStream(
         request: InferenceRequest,
         signal?: AbortSignal
@@ -217,7 +149,6 @@ export class InferenceGateway {
         const startedAt = Date.now();
         const decision = this.routingPolicy.evaluate(streamRequest);
         const lease = this.quotaGuard.acquireLease(streamRequest, decision.primaryModel);
-
         const boundTenantId = streamRequest.tenantId;
         const boundRequestId = streamRequest.requestId;
 
@@ -233,19 +164,14 @@ export class InferenceGateway {
             );
 
             const segments = result.result.output.match(/[\s\S]{1,16}/g) || [result.result.output];
-            const maxChunks = 64;
-            const chunks = segments.slice(0, maxChunks);
+            const chunks = segments.slice(0, 64);
 
             for (let idx = 0; idx < chunks.length; idx++) {
                 if (signal?.aborted) {
                     this.recordAudit({
-                        request: streamRequest,
-                        resolvedModelAlias: result.modelUsed.alias,
-                        providerId: result.modelUsed.providerId,
-                        adapterVersion: result.result.adapterVersion,
-                        policyDecision: 'ALLOW',
-                        outcome: 'CANCELLED',
-                        errorCode: 'STREAM_CANCELLED',
+                        request: streamRequest, resolvedModelAlias: result.modelUsed.alias,
+                        providerId: result.modelUsed.providerId, adapterVersion: result.result.adapterVersion,
+                        policyDecision: 'ALLOW', outcome: 'CANCELLED', errorCode: 'STREAM_CANCELLED',
                         latencyMs: Math.max(1, Date.now() - startedAt),
                     });
                     throw new AiGatewayError('STREAM_CANCELLED', __t('ai.error.stream_cancelled'), 499);
@@ -266,15 +192,11 @@ export class InferenceGateway {
 
             const costUsd = lease.release(result.modelUsed, result.result.usage);
             this.recordAudit({
-                request: streamRequest,
-                resolvedModelAlias: result.modelUsed.alias,
-                providerId: result.modelUsed.providerId,
-                adapterVersion: result.result.adapterVersion,
+                request: streamRequest, resolvedModelAlias: result.modelUsed.alias,
+                providerId: result.modelUsed.providerId, adapterVersion: result.result.adapterVersion,
                 policyDecision: result.result.fallbackUsed ? 'FALLBACK_ALLOW' : 'ALLOW',
-                outcome: 'SUCCESS',
-                latencyMs: Math.max(1, Date.now() - startedAt),
-                usage: result.result.usage,
-                costUsd,
+                outcome: 'SUCCESS', latencyMs: Math.max(1, Date.now() - startedAt),
+                usage: result.result.usage, costUsd,
             });
         } finally {
             lease.release(decision.primaryModel, { inputTokens: 0, outputTokens: 0 });
@@ -289,23 +211,13 @@ export class InferenceGateway {
     ) {
         const change = this.catalog.setModelStatus(alias, status, auth, scope);
         this.auditLedger.push({
-            eventId: crypto.randomUUID(),
-            timestamp: change.timestamp,
-            requestId: `admin-${Date.now()}`,
-            correlationId: `admin-${change.targetId}`,
-            tenantId: scope?.tenantId || 'global',
-            productId: scope?.productId || 'ugondu',
-            environment: scope?.environment || 'production',
-            region: scope?.region || 'global',
-            dataClassification: 'internal',
-            requestedModelAlias: alias,
-            resolvedModelAlias: alias,
-            providerId: this.catalog.getModel(alias)?.providerId || 'unknown',
-            adapterVersion: '3.0.0',
-            policyDecision: 'ALLOW',
-            outcome: 'ADMIN_CHANGE',
-            latencyMs: 1,
-            actor: auth.actorId,
+            eventId: crypto.randomUUID(), timestamp: change.timestamp,
+            requestId: `admin-${Date.now()}`, correlationId: `admin-${change.targetId}`,
+            tenantId: scope?.tenantId || 'global', productId: scope?.productId || 'ugondu',
+            environment: scope?.environment || 'production', region: scope?.region || 'global',
+            dataClassification: 'internal', requestedModelAlias: alias, resolvedModelAlias: alias,
+            providerId: this.catalog.getModel(alias)?.providerId || 'unknown', adapterVersion: '3.0.0',
+            policyDecision: 'ALLOW', outcome: 'ADMIN_CHANGE', latencyMs: 1, actor: auth.actorId,
             notes: `Model ${alias} status changed from ${change.previousStatus} to ${change.newStatus}`,
         });
         return change;
@@ -313,19 +225,11 @@ export class InferenceGateway {
 
     public async getAdminDiagnostics(auth: AdminAuthContext): Promise<GatewayDiagnosticsReport> {
         if (!auth || !auth.actorId || !['admin', 'auditor'].includes(auth.role)) {
-            throw new AiGatewayError(
-                'UNAUTHORIZED_ADMIN',
-                __t('ai.error.unauthorized_admin_diagnostics'),
-                403
-            );
+            throw new AiGatewayError('UNAUTHORIZED_ADMIN', __t('ai.error.unauthorized_admin_diagnostics'), 403);
         }
         const expectedAdminToken = process.env['UGONDU_ADMIN_DIAGNOSTICS_TOKEN'];
         if (expectedAdminToken && auth.adminToken !== expectedAdminToken) {
-            throw new AiGatewayError(
-                'UNAUTHORIZED_ADMIN',
-                __t('ai.error.invalid_admin_diagnostics_token'),
-                403
-            );
+            throw new AiGatewayError('UNAUTHORIZED_ADMIN', __t('ai.error.invalid_admin_diagnostics_token'), 403);
         }
 
         const providers = await Promise.all(
@@ -333,36 +237,22 @@ export class InferenceGateway {
                 const adapter = this.providerRegistry.getAdapter(p.providerId);
                 const health = await adapter.healthCheck();
                 return {
-                    providerId: p.providerId,
-                    legalEntity: p.legalEntity,
-                    adapterVersion: p.adapterVersion,
-                    status: p.status,
-                    credentialRef: p.credentialRef,
-                    supportedRegions: p.supportedRegions,
-                    health,
+                    providerId: p.providerId, legalEntity: p.legalEntity, adapterVersion: p.adapterVersion,
+                    status: p.status, credentialRef: p.credentialRef, supportedRegions: p.supportedRegions, health,
                 };
             })
         );
 
         const models = this.catalog.listModels(true).map(m => ({
-            alias: m.alias,
-            providerId: m.providerId,
-            providerModelIdRef: m.providerModelIdRef,
-            credentialRef: m.credentialRef,
-            status: m.status,
-            allowedRegions: m.allowedRegions,
-            dataClassifications: m.dataClassifications,
-            fallbackAliases: m.policy.fallbackAliases,
+            alias: m.alias, providerId: m.providerId, providerModelIdRef: m.providerModelIdRef,
+            credentialRef: m.credentialRef, status: m.status, allowedRegions: m.allowedRegions,
+            dataClassifications: m.dataClassifications, fallbackAliases: m.policy.fallbackAliases,
         }));
 
         return {
-            generatedAt: new Date().toISOString(),
-            schemaVersion: this.catalog.getSchemaVersion(),
-            providers,
-            models,
-            circuits: this.routingPolicy.getCircuitStates(),
-            quotas: this.quotaGuard.listSnapshots(),
-            recentAuditEvents: this.getAuditEvents(50),
+            generatedAt: new Date().toISOString(), schemaVersion: this.catalog.getSchemaVersion(),
+            providers, models, circuits: this.routingPolicy.getCircuitStates(),
+            quotas: this.quotaGuard.listSnapshots(), recentAuditEvents: this.getAuditEvents(50),
         };
     }
 
@@ -380,12 +270,9 @@ export class InferenceGateway {
         let primaryError: AiGatewayError | undefined;
 
         if (this.routingPolicy.isCircuitOpen(primaryModel.alias)) {
-            primaryError = new AiGatewayError(
-                'CIRCUIT_OPEN',
-                __t('ai.error.circuit_open'),
-                503,
-                { modelAlias: primaryModel.alias }
-            );
+            primaryError = new AiGatewayError('CIRCUIT_OPEN', __t('ai.error.circuit_open'), 503, {
+                modelAlias: primaryModel.alias,
+            });
         } else {
             try {
                 const adapter = this.providerRegistry.getAdapter(primaryModel.providerId);
@@ -409,7 +296,6 @@ export class InferenceGateway {
             }
         }
 
-        // Attempt policy-equivalent fallbacks only for retryable upstream/circuit failures
         const fallbacks = this.routingPolicy.resolvePolicyEquivalentFallbacks(primaryModel, request);
         for (const candidate of fallbacks) {
             try {

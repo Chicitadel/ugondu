@@ -4,28 +4,14 @@
  * File           : routing-policy.ts
  * Version        : 3.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-22
  * Classification : ENTERPRISE | INTERNAL
  *
- * Governance:
- * - Corporate Policy Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
- *
- * Signatures:
- * - Architecture Authority : Ujomor Systems Engineering
- * - Security Authority     : Ujomor Systems Governance
- * - Governance Authority   : Air Roofers Corporate Governance
- * - Deployment Authority   : Air Roofers Release Engineering
- *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Governance     : Corporate Policy Governed | Security Reviewed | Protocol Frozen
+ * Standards      : ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { __t } from '@ugondu/shared';
@@ -55,13 +41,7 @@ export interface RoutingDecision {
 }
 
 const FORBIDDEN_TOOL_NAMES = new Set([
-    'shell_exec',
-    'exec_raw',
-    'command',
-    'arbitrary_script',
-    'bash',
-    'sh',
-    'powershell',
+    'shell_exec', 'exec_raw', 'command', 'arbitrary_script', 'bash', 'sh', 'powershell',
 ]);
 
 const DEFAULT_TOOL_SCHEMAS: Record<string, ToolParameterSchema> = {
@@ -152,7 +132,6 @@ export class RoutingPolicyEngine {
 
         this.assertPolicyEligibility(model, provider, request);
         const validatedTools = this.validateToolCalls(model, request);
-
         const effectiveTimeoutMs = Math.min(request.deadlineMs, model.policy.timeoutMs);
 
         return {
@@ -194,7 +173,6 @@ export class RoutingPolicyEngine {
                 this.validateToolCalls(candidate, request);
                 candidates.push({ model: candidate, provider });
             } catch {
-                // Candidate does not satisfy policy equivalence (e.g. region or data classification mismatch)
                 continue;
             }
         }
@@ -204,9 +182,7 @@ export class RoutingPolicyEngine {
 
     public isCircuitOpen(alias: string): boolean {
         const record = this.circuits.get(alias);
-        if (!record || record.state === 'CLOSED') {
-            return false;
-        }
+        if (!record || record.state === 'CLOSED') return false;
         if (record.state === 'OPEN' && record.openedAt) {
             if (Date.now() - record.openedAt >= this.cooldownMs) {
                 record.state = 'HALF_OPEN';
@@ -218,11 +194,7 @@ export class RoutingPolicyEngine {
     }
 
     public recordSuccess(alias: string): void {
-        this.circuits.set(alias, {
-            alias,
-            state: 'CLOSED',
-            consecutiveFailures: 0,
-        });
+        this.circuits.set(alias, { alias, state: 'CLOSED', consecutiveFailures: 0 });
     }
 
     public recordFailure(alias: string): CircuitBreakerState {
@@ -253,22 +225,13 @@ export class RoutingPolicyEngine {
             throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.invalid_request_body'), 400);
         }
         const requiredStrings: Array<keyof InferenceRequest> = [
-            'requestId',
-            'tenantId',
-            'productId',
-            'environment',
-            'task',
-            'modelAlias',
-            'region',
-            'dataClassification',
-            'correlationId',
+            'requestId', 'tenantId', 'productId', 'environment', 'task',
+            'modelAlias', 'region', 'dataClassification', 'correlationId',
         ];
         for (const field of requiredStrings) {
             const val = request[field];
             if (typeof val !== 'string' || val.trim().length === 0) {
-                throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.missing_required_field'), 400, {
-                    field,
-                });
+                throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.missing_required_field'), 400, { field });
             }
         }
         if (
@@ -284,7 +247,6 @@ export class RoutingPolicyEngine {
         if (!Array.isArray(request.messages) || request.messages.length === 0) {
             throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.empty_messages'), 400);
         }
-        // Reject raw provider URLs or secret-like modelAlias values
         if (/^https?:\/\//i.test(request.modelAlias) || /^(sk-|AKIA)/i.test(request.modelAlias)) {
             throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.invalid_model_alias'), 400);
         }
@@ -296,12 +258,10 @@ export class RoutingPolicyEngine {
         request: InferenceRequest
     ): void {
         if (!model.environments.includes(request.environment)) {
-            throw new AiGatewayError(
-                'ENVIRONMENT_DISALLOWED',
-                __t('ai.error.environment_disallowed'),
-                403,
-                { modelAlias: model.alias, environment: request.environment }
-            );
+            throw new AiGatewayError('ENVIRONMENT_DISALLOWED', __t('ai.error.environment_disallowed'), 403, {
+                modelAlias: model.alias,
+                environment: request.environment,
+            });
         }
 
         if (
@@ -334,12 +294,10 @@ export class RoutingPolicyEngine {
             !model.approvedProducts.includes('*') &&
             !model.approvedProducts.includes(request.productId)
         ) {
-            throw new AiGatewayError(
-                'TENANT_OR_PRODUCT_DISALLOWED',
-                __t('ai.error.product_disallowed'),
-                403,
-                { productId: request.productId, modelAlias: model.alias }
-            );
+            throw new AiGatewayError('TENANT_OR_PRODUCT_DISALLOWED', __t('ai.error.product_disallowed'), 403, {
+                productId: request.productId,
+                modelAlias: model.alias,
+            });
         }
 
         if (
@@ -348,46 +306,34 @@ export class RoutingPolicyEngine {
             !model.approvedTenants.includes('*') &&
             !model.approvedTenants.includes(request.tenantId)
         ) {
-            throw new AiGatewayError(
-                'TENANT_OR_PRODUCT_DISALLOWED',
-                __t('ai.error.tenant_disallowed'),
-                403,
-                { tenantId: request.tenantId, modelAlias: model.alias }
-            );
+            throw new AiGatewayError('TENANT_OR_PRODUCT_DISALLOWED', __t('ai.error.tenant_disallowed'), 403, {
+                tenantId: request.tenantId,
+                modelAlias: model.alias,
+            });
         }
 
         const requiredModality: Modality = request.task === 'embedding' ? 'embedding' : 'text';
         if (!model.capabilities.modalities.includes(requiredModality)) {
-            throw new AiGatewayError(
-                'CAPABILITY_UNSUPPORTED',
-                __t('ai.error.modality_unsupported'),
-                422,
-                { modelAlias: model.alias, requiredModality }
-            );
+            throw new AiGatewayError('CAPABILITY_UNSUPPORTED', __t('ai.error.modality_unsupported'), 422, {
+                modelAlias: model.alias,
+                requiredModality,
+            });
         }
 
         if (request.stream && !model.capabilities.streaming) {
-            throw new AiGatewayError(
-                'CAPABILITY_UNSUPPORTED',
-                __t('ai.error.streaming_unsupported'),
-                422,
-                { modelAlias: model.alias }
-            );
+            throw new AiGatewayError('CAPABILITY_UNSUPPORTED', __t('ai.error.streaming_unsupported'), 422, {
+                modelAlias: model.alias,
+            });
         }
 
         if (
             request.maxOutputTokens !== undefined &&
             request.maxOutputTokens > model.policy.maxOutputTokens
         ) {
-            throw new AiGatewayError(
-                'TOKEN_LIMIT_EXCEEDED',
-                __t('ai.error.token_limit_exceeded'),
-                422,
-                {
-                    requested: request.maxOutputTokens,
-                    maxAllowed: model.policy.maxOutputTokens,
-                }
-            );
+            throw new AiGatewayError('TOKEN_LIMIT_EXCEEDED', __t('ai.error.token_limit_exceeded'), 422, {
+                requested: request.maxOutputTokens,
+                maxAllowed: model.policy.maxOutputTokens,
+            });
         }
     }
 
@@ -395,44 +341,35 @@ export class RoutingPolicyEngine {
         model: CatalogModelEntry,
         request: InferenceRequest
     ): Array<{ name: string; arguments: Record<string, unknown>; validated: boolean }> {
-        if (!request.requestedTools || request.requestedTools.length === 0) {
-            return [];
-        }
+        if (!request.requestedTools || request.requestedTools.length === 0) return [];
 
         if (!model.capabilities.toolCalling) {
-            throw new AiGatewayError(
-                'CAPABILITY_UNSUPPORTED',
-                __t('ai.error.tool_calling_unsupported'),
-                422,
-                { modelAlias: model.alias }
-            );
+            throw new AiGatewayError('CAPABILITY_UNSUPPORTED', __t('ai.error.tool_calling_unsupported'), 422, {
+                modelAlias: model.alias,
+            });
         }
 
         const allowedModelTools = new Set(model.allowedTools || []);
         const authorizedCallerTools = request.authorizedTools
             ? new Set(request.authorizedTools)
             : allowedModelTools;
-
         const validated: Array<{ name: string; arguments: Record<string, unknown>; validated: boolean }> = [];
 
         for (const tool of request.requestedTools) {
             if (!tool || typeof tool.name !== 'string' || !tool.name.trim()) {
                 throw new AiGatewayError('TOOL_SCHEMA_INVALID', __t('ai.error.tool_name_missing'), 400);
             }
-
             if (FORBIDDEN_TOOL_NAMES.has(tool.name.toLowerCase())) {
                 throw new AiGatewayError('TOOL_NOT_ALLOWED', __t('ai.error.forbidden_shell_tool'), 403, {
                     toolName: tool.name,
                 });
             }
-
             if (!allowedModelTools.has(tool.name)) {
                 throw new AiGatewayError('TOOL_NOT_ALLOWED', __t('ai.error.tool_not_in_allowlist'), 403, {
                     toolName: tool.name,
                     modelAlias: model.alias,
                 });
             }
-
             if (!authorizedCallerTools.has(tool.name)) {
                 throw new AiGatewayError('TOOL_UNAUTHORIZED', __t('ai.error.tool_unauthorized'), 403, {
                     toolName: tool.name,
@@ -440,11 +377,7 @@ export class RoutingPolicyEngine {
             }
 
             this.validateSingleToolSchema(tool, request.toolSchemas?.[tool.name]);
-            validated.push({
-                name: tool.name,
-                arguments: tool.arguments,
-                validated: true,
-            });
+            validated.push({ name: tool.name, arguments: tool.arguments, validated: true });
         }
 
         return validated;
@@ -461,19 +394,15 @@ export class RoutingPolicyEngine {
         }
 
         const schema = customSchema || DEFAULT_TOOL_SCHEMAS[tool.name];
-        if (!schema) {
-            return;
-        }
+        if (!schema) return;
 
         if (Array.isArray(schema.required)) {
             for (const reqKey of schema.required) {
                 if (tool.arguments[reqKey] === undefined || tool.arguments[reqKey] === null) {
-                    throw new AiGatewayError(
-                        'TOOL_SCHEMA_INVALID',
-                        __t('ai.error.tool_missing_required_arg'),
-                        400,
-                        { toolName: tool.name, missingArgument: reqKey }
-                    );
+                    throw new AiGatewayError('TOOL_SCHEMA_INVALID', __t('ai.error.tool_missing_required_arg'), 400, {
+                        toolName: tool.name,
+                        missingArgument: reqKey,
+                    });
                 }
             }
         }
@@ -483,27 +412,20 @@ export class RoutingPolicyEngine {
                 const propSpec = schema.properties[argName];
                 if (!propSpec) {
                     if (schema.additionalProperties === false) {
-                        throw new AiGatewayError(
-                            'TOOL_SCHEMA_INVALID',
-                            __t('ai.error.tool_unexpected_arg'),
-                            400,
-                            { toolName: tool.name, argument: argName }
-                        );
+                        throw new AiGatewayError('TOOL_SCHEMA_INVALID', __t('ai.error.tool_unexpected_arg'), 400, {
+                            toolName: tool.name,
+                            argument: argName,
+                        });
                     }
                     continue;
                 }
                 if (typeof argVal !== propSpec.type) {
-                    throw new AiGatewayError(
-                        'TOOL_SCHEMA_INVALID',
-                        __t('ai.error.tool_arg_type_mismatch'),
-                        400,
-                        {
-                            toolName: tool.name,
-                            argument: argName,
-                            expectedType: propSpec.type,
-                            actualType: typeof argVal,
-                        }
-                    );
+                    throw new AiGatewayError('TOOL_SCHEMA_INVALID', __t('ai.error.tool_arg_type_mismatch'), 400, {
+                        toolName: tool.name,
+                        argument: argName,
+                        expectedType: propSpec.type,
+                        actualType: typeof argVal,
+                    });
                 }
             }
         }

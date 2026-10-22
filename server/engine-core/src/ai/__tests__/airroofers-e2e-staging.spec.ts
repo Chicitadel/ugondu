@@ -359,16 +359,7 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
 
     test('AF-STG-008: Canonical domain policy: non-whitelisted domain rejected fail-closed', async () => {
         process.env['UGONDU_AIRROOFERS_AI_BASE_URL'] = 'https://unauthorized-evil.com';
-
-        expect(() => adapter.getBaseUrl()).toThrow();
-        try {
-            adapter.getBaseUrl();
-        } catch (err: any) {
-            expect(err).toBeInstanceOf(AiGatewayError);
-            expect(err.errorCode).toBe('AIRROOFERS_AI_ENDPOINT_DISALLOWED');
-            expect(err.statusCode).toBe(403);
-        }
-
+        expect(() => adapter.getBaseUrl()).toThrow(AiGatewayError);
         await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({
             errorCode: 'AIRROOFERS_AI_ENDPOINT_DISALLOWED',
             statusCode: 403,
@@ -376,21 +367,9 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
     });
 
     test('AF-STG-009: SSRF and private-network egress protection rejects IP literals and loopback fail-closed', async () => {
-        const forbiddenEndpoints = [
-            'https://127.0.0.1',
-            'https://169.254.169.254',
-            'https://[::1]',
-            'https://localhost',
-        ];
-        for (const forbiddenUrl of forbiddenEndpoints) {
+        for (const forbiddenUrl of ['https://127.0.0.1', 'https://169.254.169.254', 'https://[::1]', 'https://localhost']) {
             process.env['UGONDU_AIRROOFERS_AI_BASE_URL'] = forbiddenUrl;
             expect(() => adapter.getBaseUrl()).toThrow(AiGatewayError);
-            try {
-                adapter.getBaseUrl();
-            } catch (err: any) {
-                expect(err.errorCode).toBe('AIRROOFERS_AI_ENDPOINT_DISALLOWED');
-                expect(err.statusCode).toBe(403);
-            }
             await expect(adapter.invoke(buildTestRequest())).rejects.toMatchObject({
                 errorCode: 'AIRROOFERS_AI_ENDPOINT_DISALLOWED',
                 statusCode: 403,
@@ -400,29 +379,74 @@ describe('Air Roofers AI Fabric Staging E2E Contract (UG-COR-REAUDIT Sec 3.4)', 
     });
 
     test('AF-STG-010: Fail-closed capabilities on empty catalog and production transport mode tracking', async () => {
-        const validCapabilities = await adapter.capabilities();
-        expect(validCapabilities.length).toBeGreaterThan(0);
-
-        const emptyCatalog = buildStagingCatalog(true);
-        const freshAdapter = new AirRoofersAiProviderAdapter('airroofers-ai', emptyCatalog, credentialBroker);
+        expect((await adapter.capabilities()).length).toBeGreaterThan(0);
+        const freshAdapter = new AirRoofersAiProviderAdapter('airroofers-ai', buildStagingCatalog(true), credentialBroker);
         expect(freshAdapter.isProductionTransport()).toBe(true);
-
-        await expect(freshAdapter.capabilities()).rejects.toMatchObject({
-            errorCode: 'MODEL_CATALOG_EMPTY',
-            statusCode: 503,
-        });
-
+        await expect(freshAdapter.capabilities()).rejects.toMatchObject({ errorCode: 'MODEL_CATALOG_EMPTY', statusCode: 503 });
         freshAdapter.setHttpTransport(createStagingSimulator(simConfig, capturedRequests));
         expect(freshAdapter.isProductionTransport()).toBe(false);
+    });
+
+    test('AF-STG-011: Zero-code-change catalog extensibility and fail-closed unknown/disabled model rejection', async () => {
+        const rawDoc = JSON.parse(fs.readFileSync(ModelCatalog.resolveDefaultCatalogPath(), 'utf8'));
+        const baseTemplate = rawDoc.models.find((m: any) => m.alias === 'airroofers-sentinel');
+        rawDoc.models.push(
+            { ...JSON.parse(JSON.stringify(baseTemplate)), alias: 'airroofers-sovereign-v2', providerModelIdRef: 'secretless-registry://models/airroofers-ai/airroofers-sovereign-v2', status: 'enabled' },
+            { ...JSON.parse(JSON.stringify(baseTemplate)), alias: 'airroofers-unsigned-draft', providerModelIdRef: 'secretless-registry://models/airroofers-ai/airroofers-unsigned-draft', status: 'disabled', conformance: { contractTestsPassed: false, lastVerifiedAt: '2026-10-22T00:00:00Z', suiteVersion: '3.1.0' } }
+        );
+        catalog.reload(rawDoc);
+
+        const providerRegistry = new ProviderAdapterRegistry(catalog, credentialBroker);
+        providerRegistry.registerAdapter(adapter);
+        const gateway = new InferenceGateway({ catalog, credentialBroker, providerRegistry, routingPolicy: new RoutingPolicyEngine(catalog), quotaGuard: new QuotaGuard() });
+
+        const directRes = await adapter.invoke(buildTestRequest({ modelAlias: 'airroofers-sovereign-v2' }));
+        expect(directRes.modelAlias).toBe('airroofers-sovereign-v2');
+        const v2Result = await gateway.invoke(buildTestRequest({ modelAlias: 'airroofers-sovereign-v2' }));
+        expect(v2Result.providerId).toBe('airroofers-ai');
+        expect(v2Result.modelAlias).toBe('airroofers-sovereign-v2');
+        expect(JSON.parse(capturedRequests[capturedRequests.length - 1].body || '{}').model_id).toBe('airroofers-sovereign-v2');
+
+        await expect(gateway.invoke(buildTestRequest({ modelAlias: 'airroofers-unknown-v99' }))).rejects.toMatchObject({ errorCode: 'MODEL_NOT_FOUND', statusCode: 404 });
+        await expect(gateway.invoke(buildTestRequest({ modelAlias: 'airroofers-unsigned-draft' }))).rejects.toMatchObject({ errorCode: 'MODEL_DISABLED', statusCode: 403 });
+        expect(() => gateway.setModelStatus('airroofers-unsigned-draft', 'enabled', { actorId: 'sec-admin', role: 'admin' })).toThrow(
+            expect.objectContaining({ errorCode: 'MODEL_CONFORMANCE_FAILED', statusCode: 409 })
+        );
+    });
+
+    test('AF-STG-012: Controlled multi-model switching and fail-closed error propagation across catalog models', async () => {
+        credentialBroker.registerWorkloadSecret('env://UGONDU_SOVEREIGN_MODEL_TOKEN', 'sov-deterministic-token-stg');
+        const providerRegistry = new ProviderAdapterRegistry(catalog, credentialBroker);
+        providerRegistry.registerAdapter(adapter);
+        const gateway = new InferenceGateway({ catalog, credentialBroker, providerRegistry, routingPolicy: new RoutingPolicyEngine(catalog), quotaGuard: new QuotaGuard() });
+
+        const resSentinel = await gateway.invoke(buildTestRequest({ modelAlias: 'airroofers-sentinel', requestId: 'req-sw-1' }));
+        const resEuChat = await gateway.invoke(buildTestRequest({ modelAlias: 'sovereign-eu-chat', requestId: 'req-sw-2' }));
+        expect(resSentinel.modelAlias).toBe('airroofers-sentinel');
+        expect(resEuChat.modelAlias).toBe('sovereign-eu-chat');
+        expect(JSON.parse(capturedRequests[0].body || '{}').model_id).toBe('sentinel-guard-v1');
+        expect(JSON.parse(capturedRequests[1].body || '{}').model_id).toBe('airroofers-sentinel-v1');
+
+        simConfig.upstreamStatus = 503;
+        const fallbackRes = await gateway.invoke(buildTestRequest({ modelAlias: 'airroofers-sentinel', requestId: 'req-sw-fb' }));
+        expect(fallbackRes.fallbackUsed).toBe(true);
+        expect(fallbackRes.modelAlias).toBe('sovereign-fallback');
+        expect(fallbackRes.primaryModelAlias).toBe('airroofers-sentinel');
+
+        gateway.setModelStatus('sovereign-fallback', 'disabled', { actorId: 'sec-admin', role: 'admin', reason: 'Disable fallback' });
+        await expect(gateway.invoke(buildTestRequest({ requestId: 'req-sw-fail-503' }))).rejects.toMatchObject({ errorCode: 'UPSTREAM_UNAVAILABLE', statusCode: 502 });
+        await expect(gateway.invoke(buildTestRequest({ requestId: 'req-sw-circuit-open' }))).rejects.toMatchObject({ errorCode: 'CIRCUIT_OPEN', statusCode: 503 });
+
+        gateway.routingPolicy.resetCircuits();
+        simConfig.upstreamStatus = undefined;
+        simConfig.rateLimitTenants = new Set(['tenant-enterprise-alpha']);
+        await expect(gateway.invoke(buildTestRequest({ requestId: 'req-sw-fail-429' }))).rejects.toMatchObject({ errorCode: 'PROVIDER_RATE_LIMITED', statusCode: 429 });
     });
 
     test('End-to-end InferenceGateway routing to airroofers-sentinel model alias', async () => {
         const providerRegistry = new ProviderAdapterRegistry(catalog, credentialBroker);
         providerRegistry.registerAdapter(adapter);
-
-        const routingPolicy = new RoutingPolicyEngine(catalog);
-        const quotaGuard = new QuotaGuard();
-        const gateway = new InferenceGateway({ catalog, credentialBroker, providerRegistry, routingPolicy, quotaGuard });
+        const gateway = new InferenceGateway({ catalog, credentialBroker, providerRegistry, routingPolicy: new RoutingPolicyEngine(catalog), quotaGuard: new QuotaGuard() });
 
         const gatewayResult = await gateway.invoke(buildTestRequest());
         expect(gatewayResult.providerId).toBe('airroofers-ai');

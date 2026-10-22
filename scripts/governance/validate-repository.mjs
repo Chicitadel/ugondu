@@ -52,6 +52,7 @@ const AUTH_BYPASS_RE = /&&\s*false\b/;
 const FAKE_LOCALE_PREFIX_RE = /\[(?:AR|FR|DE)\]/;
 const PROD_MOCK_IMPORT_RE = /(?:import\s+.*\s+from\s+['"][^'"]*(?:mock|fixture|stubs?|__tests__)[^'"]*['"]|require\(['"][^'"]*(?:mock|fixture|stubs?|__tests__)[^'"]*['"]\))/i;
 const SWALLOWED_ERROR_RE = /catch\s*(?:\([^)]*\))?\s*\{\s*return\s*(?:\{[^}]*(?:success:\s*true|applied:\s*true|valid:\s*true)|true|['"]APPLIED_AND_MATCHES['"])/i;
+const VACUOUS_ASSERTION_RE = /(?:expect\(\s*true\s*\)\.toBe\(\s*true\s*\)|assert\.ok\(\s*true\s*\))/;
 const NOOP_MUTATION_RE = /(?:(?:async\s+)?(?:export\s+)?(?:(?:public|private|protected|static)\s+)*(?:function\s+)?\b([a-zA-Z0-9_]+)\s*\([^)]*\)\s*(?::\s*(?:Promise<[^>]+>|[a-zA-Z0-9_<>]+))?\s*\{|(?:export\s+)?(?:const|let|var)\s+\b([a-zA-Z0-9_]+)\s*=\s*(?:async\s+)?\([^)]*\)\s*(?::\s*(?:Promise<[^>]+>|[a-zA-Z0-9_<>]+))?\s*=>\s*\{)\s*(?:\/\*[\s\S]*?\*\/|\/\/[^\r\n]*\s*)*\}/g;
 export const MAX_GOVERNED_LOC = 500;
 
@@ -193,6 +194,21 @@ function validateSemanticAntiStubs(trackedFiles, violations) {
 
   for (const relPath of trackedFiles) {
     const normalized = relPath.replace(/\\/g, '/');
+    if (
+      !normalized.includes('/node_modules/') &&
+      !normalized.includes('/dist/') &&
+      /\.(?:spec|test)\.[cm]?[jt]s$/.test(normalized)
+    ) {
+      const absTestPath = path.join(ROOT, normalized);
+      if (fs.existsSync(absTestPath) && fs.statSync(absTestPath).isFile()) {
+        fs.readFileSync(absTestPath, 'utf8').split(/\r?\n/).forEach((line, idx) => {
+          if (VACUOUS_ASSERTION_RE.test(line)) {
+            violations.push(`Vacuous test assertion prohibited by Gate B/F governance: ${normalized}:${idx + 1}`);
+          }
+        });
+      }
+      continue;
+    }
     if (!isTargetProductionSource(normalized)) continue;
 
     const absPath = path.join(ROOT, normalized);
