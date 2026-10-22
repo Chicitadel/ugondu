@@ -442,3 +442,50 @@ Add mutation-testing fixtures to prove each guard fails. Ensure test-only fixtur
 7. Previous certification claims, to be reconciled rather than silently overwritten: https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/audits/UGONDU_COR_UNIVERSAL_PLATFORM_READINESS_CERTIFICATION_SIGN_OFF_2026-10-22.md
 
 **Change control:** This document is an audit and remediation plan, not a declaration that the remediation has already been implemented. Update statuses only after the cited evidence exists and is independently reviewed.
+
+
+---
+
+## 12. Audit reconciliation addendum — current repository evidence reviewed 2026-10-22 11:48 UTC
+
+This addendum is authoritative for interpreting the plan above where historical records conflict.
+
+### 12.1 Conflicting certification records
+
+The repository contains a 2026-10-22 sign-off document at:
+`docs/audits/UGONDU_COR_UNIVERSAL_PLATFORM_READINESS_CERTIFICATION_SIGN_OFF_2026-10-22.md`
+which declares 100% universal production certification for commit `86a17ca4c904b1cbec9b67c5fc3432bb84810f3a`, citing COR run `39691931451), AWS physical qualification and a final release gate.
+
+However, the independently retrieved prior re-audit at:
+`docs/cor/UGONDU_COR_UNIVERSAL_READINESS_REAUDIT_2026-10-21.md`
+records a materially different result for candidate `8442561ff06e25c51cc56a885d05671cbfc63fb1`: ordinary CI passed 17/17 jobs, while the AWS physical gate failed closed due to missing `sts:TagSession`, and overall COR was not certified. Earlier context also records a later RDS service-linked-role failure. These records may refer to different candidate commits, but they demonstrate why status must be commit-scoped and why a sign-off document alone is not the underlying evidence.
+
+For the documentation branch commit that introduced this plan, GitHub's combined status endpoint returned no status entries. That result is **NO EVIDENCE**, not a pass and not necessarily a failure.
+
+### 12.2 Mandatory resolution of certification conflict
+
+Before universal GO:
+1. Fetch the exact current tip SHA of `phase4/production-hardening`.
+2. Fetch raw workflow run/job metadata for every run cited by the sign-off; verify repository, workflow, event, head SHA, conclusion, job IDs, timestamps and artifacts.
+3. Verify that the final release gate consumed the same exact SHA as the COR and physical AWS gates.
+4. Verify the physical AWS logs show actual resource creation, policy enforcement, verification, rollback/cleanup, and zero residual resources—not only a successful wrapper exit.
+5. Reconcile `sts:TagSession`, RDS service-linked-role, AMI lookup, permissions, region portability and policy digest issues against the exact candidate.
+6. If the 2026-10-22 cited run cannot be fetched or is not tied to the current candidate SHA, change the sign-off disposition to HOLD pending evidence. Do not assume that the earlier failure remains current if a later verified run genuinely resolved it; instead prove the later run.
+7. Add a governance check that refuses conflicting or stale certification artifacts and regenerates the authoritative table from workflow evidence.
+
+### 12.3 Previously recorded AWS and portability risks to carry forward
+
+Prior audit records include:
+- OIDC physical gate failed on missing `sts:TagSession`.
+- An autonomous RDS service-linked-role remediation was attempted, followed by a recorded RDS SLR failure in a subsequent AWS gate.
+- Earlier physical runs failed on SSM AMI lookup and then `ec2:CreateVpc`; rollback reportedly completed and the residual scan was clean in that earlier run.
+- Region-specific IAM assumptions were previously identified and must remain prohibited.
+- GCP, Azure, Kubernetes, VPS, cPanel, DirectAdmin, shared/private hosts, and cross-OS / IDE / CLI / UI parity were previously recorded as unverified.
+
+These are historical risk indicators, not automatic assertions that the current branch still has each defect. They must be re-tested against the current candidate.
+
+### 12.4 Updated decision rule
+
+**Overall status remains HOLD / NOT UNIVERSALLY CERTIFIED by this audit.** The source review has identified at least one production base adapter with fabricated success behavior and one static placement catalogue, and the conflicting certification records have not been independently reconciled here. No claim that all platforms, OSes, IDEs, hosts, AI models or cloud providers are green is justified until the corresponding real evidence is linked to the exact release SHA.
+
+The previous section's colour table remains the working baseline; the evidence reconciliation tasks above are mandatory release blockers.
