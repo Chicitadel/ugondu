@@ -47,6 +47,7 @@ jobs:
       - name: Run live canary
         env:
           UGONDU_AIRROOFERS_AI_KEY: ${{ secrets.UGONDU_AIRROOFERS_AI_KEY }}
+          UGONDU_AIRROOFERS_AI_BASE_URL: https://ai.airroofers.eu
         run: node scripts/qualification/airroofers-ai-live-canary.mjs
 
       - name: Upload redacted receipt

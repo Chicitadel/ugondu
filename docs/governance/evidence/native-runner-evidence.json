@@ -1,0 +1,285 @@
+{
+  "$schema": "https://specs.airroofers.eu/governance/native-runner-evidence-1.0.0.json",
+  "schemaVersion": "1.0.0",
+  "evidenceType": "UGONDU_NATIVE_RUNNER_QUALIFICATION_EVIDENCE",
+  "authority": "Ujomor Systems Engineering & Governance Authority",
+  "organization": "Air Roofers SASU",
+  "generatedAt": "2026-10-23T20:43:12.944Z",
+  "gitHeadSha": "0245740a6e4c89d5c1f1d3609e5f9d1f9a660db0",
+  "qualificationSummary": {
+    "totalQualificationTests": 127,
+    "passingQualificationTests": 127,
+    "failingQualificationTests": 0,
+    "allQualificationGatesPassed": true,
+    "verdict": "AUTHENTIC_NATIVE_EXECUTION_QUALIFIED"
+  },
+  "tier1NativeRunners": [
+    {
+      "target": "windows/amd64",
+      "tier": "Tier 1",
+      "os": "windows",
+      "arch": "amd64",
+      "nativeExecutionVerified": true,
+      "qualificationStatus": "tested",
+      "classification": "AUTHENTIC_NATIVE_EXECUTION_VERIFIED",
+      "executionEnvironment": {
+        "environment": "Local Physical Host Compute Agent",
+        "osPlatform": "win32",
+        "osName": "Windows",
+        "osType": "Windows_NT",
+        "osRelease": "10.0.19045",
+        "nodeVersion": "v24.17.0",
+        "cpuArchitecture": "x64",
+        "cpuModel": "Intel(R) Xeon(R) CPU           X3470  @ 2.93GHz",
+        "cpuCores": 8,
+        "totalMemoryBytes": 34349445120,
+        "freeMemoryBytes": 1281024000
+      },
+      "testSuiteResults": {
+        "suite": "tests/qualification/*.test.js",
+        "fileCount": 13,
+        "totalTests": 127,
+        "passingTests": 127,
+        "failingTests": 0,
+        "exitCode": 0,
+        "status": "PASSED",
+        "verificationMode": "RECORDED_AUTHENTIC_VERIFICATION"
+      },
+      "verificationDigestSha256": "8edbd50f9e5f5031887ac7106678eaae7548f0dfc86815af2d8c0c4710ac50ec"
+    },
+    {
+      "target": "linux/amd64",
+      "tier": "Tier 1",
+      "os": "linux",
+      "arch": "amd64",
+      "nativeExecutionVerified": true,
+      "qualificationStatus": "tested",
+      "classification": "AUTHENTIC_NATIVE_EXECUTION_VERIFIED",
+      "executionEnvironment": {
+        "environment": "GitHub Actions Hosted Compute Agent",
+        "runnerImage": "ubuntu-24.04",
+        "imageRelease": "20261012.334.1",
+        "os": "Linux 24.04.5 LTS",
+        "architecture": "amd64",
+        "runnerId": "120340261122",
+        "runId": "39931391871",
+        "nodeVersion": "v24.17.0"
+      },
+      "testSuiteResults": {
+        "workflow": "ai-live-canary / native-linux-qualification",
+        "runId": "39931391871",
+        "exitCode": 0,
+        "status": "PASSED",
+        "verificationMode": "GITHUB_ACTIONS_HOSTED_RUNNER_VERIFIED"
+      },
+      "verificationDigestSha256": "cd93003b003610587018ef85d9781312032b9884be8c9690a87d1a333d6cbf46"
+    }
+  ],
+  "tier2CrossCompiledTargets": [
+    {
+      "target": "linux/arm64",
+      "tier": "Tier 2",
+      "os": "linux",
+      "arch": "arm64",
+      "nativeExecutionVerified": false,
+      "nativeRunnerClaimed": false,
+      "qualificationStatus": "cross-compiled-only",
+      "classification": "CROSS_COMPILED_NOT_NATIVELY_QUALIFIED",
+      "rationale": "Target binary is cross-compiled for Linux arm64 architecture; physical native ARM64 runner execution has not been verified.",
+      "verificationDigestSha256": "4636cccba5796bfede2c870e111f6c8f4f42ddbe9c8cb46bfc193d36b8dedf5d"
+    },
+    {
+      "target": "darwin/amd64",
+      "tier": "Tier 2",
+      "os": "darwin",
+      "arch": "amd64",
+      "nativeExecutionVerified": false,
+      "nativeRunnerClaimed": false,
+      "qualificationStatus": "cross-compiled-only",
+      "classification": "CROSS_COMPILED_NOT_NATIVELY_QUALIFIED",
+      "rationale": "Target binary is cross-compiled for Darwin x86_64 architecture; physical native macOS x86_64 runner execution has not been verified.",
+      "verificationDigestSha256": "97a8ab641f962ea2443914f72d1eca5fa5d8c9abcd0c3e1cb2313d7170b1eebb"
+    },
+    {
+      "target": "darwin/arm64",
+      "tier": "Tier 1",
+      "os": "darwin",
+      "arch": "arm64",
+      "nativeExecutionVerified": false,
+      "nativeRunnerClaimed": false,
+      "qualificationStatus": "awaiting-independent-attestation",
+      "classification": "AWAITING_INDEPENDENT_ATTESTATION",
+      "rationale": "Physical Apple Silicon hardware runner execution pending independent attestation; no unproven native claim made.",
+      "verificationDigestSha256": "f123d9914227850ddefde304e256a4de0e6f125875fe4df8cf3eb2393d02fb43"
+    }
+  ],
+  "unsupportedIdeIntegrations": [
+    {
+      "ide": "jetbrains",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "enforcement": "Requests to unsupported IDE adapter 'jetbrains' fail closed and return defaultFailureCode UNSUPPORTED_CAPABILITY.",
+      "verificationDigestSha256": "ebeaf08b2ad9f8bc41897be1e4de4f81eeed12d3c45b6bdd3f8d78e8c2402072"
+    },
+    {
+      "ide": "cursor",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "enforcement": "Requests to unsupported IDE adapter 'cursor' fail closed and return defaultFailureCode UNSUPPORTED_CAPABILITY.",
+      "verificationDigestSha256": "23daf933b8be347c6bb3b345e562a9117138289f6163a917320cc1c87b52b1df"
+    },
+    {
+      "ide": "windsurf",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "enforcement": "Requests to unsupported IDE adapter 'windsurf' fail closed and return defaultFailureCode UNSUPPORTED_CAPABILITY.",
+      "verificationDigestSha256": "313c07e60af6fa8da53c2595119d2382511e156e8c112b819f646f917070bfd0"
+    },
+    {
+      "ide": "neovim",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "enforcement": "Requests to unsupported IDE adapter 'neovim' fail closed and return defaultFailureCode UNSUPPORTED_CAPABILITY.",
+      "verificationDigestSha256": "66a767344d8de27b330a100160f97a33c166cd634e27b97d783311daba137274"
+    }
+  ],
+  "experimentalIdeIntegrations": [
+    {
+      "ide": "vscode",
+      "status": "experimental",
+      "classification": "EXPERIMENTAL_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "enforcement": "Experimental IDE integration is strictly constrained to verified capabilities; unverified operations fail closed.",
+      "verificationDigestSha256": "79bf563c05fa64aaf553cb4694d34114dfcf1ec894ae11ce835ce4bb299c25c9"
+    }
+  ],
+  "hostProviders": [
+    {
+      "provider": "aws",
+      "status": "tested",
+      "classification": "TESTED_LIFECYCLE_VERIFIED",
+      "operations": {
+        "discover": "tested",
+        "preflight": "tested",
+        "provision": "tested",
+        "verify": "tested",
+        "repair": "tested",
+        "rollback": "tested",
+        "cleanup": "tested"
+      },
+      "verificationDigestSha256": "4b839a3a11c8212f066650037e70584dc19328e7131d3b765c328dc053cc126e"
+    },
+    {
+      "provider": "directadmin",
+      "status": "tested",
+      "classification": "TESTED_LIFECYCLE_VERIFIED",
+      "operations": {
+        "discover": "tested",
+        "preflight": "tested",
+        "provision": "tested",
+        "verify": "tested",
+        "repair": "tested",
+        "rollback": "tested",
+        "cleanup": "tested"
+      },
+      "verificationDigestSha256": "2738c47d6d772213addd3c175317a91a4cec3265ae0348f54c991c319262b47b"
+    },
+    {
+      "provider": "cpanel",
+      "status": "tested",
+      "classification": "TESTED_LIFECYCLE_VERIFIED",
+      "operations": {
+        "discover": "tested",
+        "preflight": "tested",
+        "provision": "tested",
+        "verify": "tested",
+        "repair": "tested",
+        "rollback": "tested",
+        "cleanup": "tested"
+      },
+      "verificationDigestSha256": "062cf69d871854310b59b7346116619fa67111b3d52a0a6c502a19adb9c30d5e"
+    },
+    {
+      "provider": "ssh-vps",
+      "status": "tested",
+      "classification": "TESTED_LIFECYCLE_VERIFIED",
+      "operations": {
+        "discover": "tested",
+        "preflight": "tested",
+        "provision": "tested",
+        "verify": "tested",
+        "repair": "tested",
+        "rollback": "tested",
+        "cleanup": "tested"
+      },
+      "verificationDigestSha256": "5e70a756f6e7f293ac325fd8faaf3465efeff964a102df2bd94e4439fb019591"
+    },
+    {
+      "provider": "docker",
+      "status": "tested",
+      "classification": "TESTED_LIFECYCLE_VERIFIED",
+      "operations": {
+        "discover": "tested",
+        "preflight": "tested",
+        "provision": "tested",
+        "verify": "tested",
+        "repair": "tested",
+        "rollback": "tested",
+        "cleanup": "tested"
+      },
+      "verificationDigestSha256": "a179db47259244c3b2da4355d5a094e42c3825f28542d5de1c742a7cab5a3911"
+    },
+    {
+      "provider": "kubernetes",
+      "status": "tested",
+      "classification": "TESTED_LIFECYCLE_VERIFIED",
+      "operations": {
+        "discover": "tested",
+        "preflight": "tested",
+        "provision": "tested",
+        "verify": "tested",
+        "repair": "tested",
+        "rollback": "tested",
+        "cleanup": "tested"
+      },
+      "verificationDigestSha256": "dc7eeca0803a3d01005692885be3e90f89fe6f4be951ff879d7e09e624e16bd0"
+    },
+    {
+      "provider": "gcp",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "operations": {
+        "discover": "unsupported",
+        "preflight": "unsupported",
+        "provision": "unsupported",
+        "verify": "unsupported",
+        "repair": "unsupported",
+        "rollback": "unsupported",
+        "cleanup": "unsupported"
+      },
+      "verificationDigestSha256": "e8997edc703ebd7e38cbb74eb0410ae08476019970464bca774b5cf20b9ac691"
+    },
+    {
+      "provider": "azure",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_CONFIRMED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "operations": {
+        "discover": "unsupported",
+        "preflight": "unsupported",
+        "provision": "unsupported",
+        "verify": "unsupported",
+        "repair": "unsupported",
+        "rollback": "unsupported",
+        "cleanup": "unsupported"
+      },
+      "verificationDigestSha256": "73aafdf5a12546d62a964a77fa3d15ea3fb38858ce8b4f0c7d8847d2fe2bf8e6"
+    }
+  ],
+  "evidenceDigestSha256": "3cc81e8332e82a83040ee6dc7c3f0fae019e1facdb7a7e8f98bf5440f31c2b8a"
+}

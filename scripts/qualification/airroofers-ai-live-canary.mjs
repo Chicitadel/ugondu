@@ -44,7 +44,6 @@ const ROOT = path.resolve(__dirname, '..', '..');
 
 const SERVICE_KEY_FORMAT_REGEX = /^air_prod_[0-9a-f]{48}$/;
 const ALLOWED_HOSTS = ['ai.airroofers.eu', 'ai-staging.airroofers.eu'];
-const DEFAULT_BASE_URL = 'https://ai.airroofers.eu';
 const EVIDENCE_RELATIVE_PATH = path.join('docs', 'security', 'evidence', 'live_ai_canary_receipt.json');
 
 export class LiveCanaryConfigurationError extends Error {
@@ -107,13 +106,20 @@ export async function runLiveCanary() {
     );
   }
 
-  const rawBaseUrl = process.env.UGONDU_AIRROOFERS_AI_BASE_URL || DEFAULT_BASE_URL;
+  const rawBaseUrl = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
+  if (!rawBaseUrl || typeof rawBaseUrl !== 'string' || !rawBaseUrl.trim()) {
+    throw new LiveCanaryConfigurationError(
+      'Live canary requires explicitly configured endpoint via UGONDU_AIRROOFERS_AI_BASE_URL (silent defaults strictly prohibited)'
+    );
+  }
+
+  const trimmedBaseUrl = rawBaseUrl.trim();
   let endpoint;
   try {
-    endpoint = new URL(rawBaseUrl);
+    endpoint = new URL(trimmedBaseUrl);
   } catch {
     throw new LiveCanaryConfigurationError(
-      `Live canary endpoint URL is invalid: ${redactSecrets(rawBaseUrl)}`
+      `Live canary endpoint URL is invalid: ${redactSecrets(trimmedBaseUrl)}`
     );
   }
 

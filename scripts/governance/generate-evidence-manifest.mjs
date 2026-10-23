@@ -2,7 +2,7 @@
  * Project        : Ugondu Platform
  * Module         : Governance — Evidence Manifest Generator
  * File           : generate-evidence-manifest.mjs
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-23
@@ -15,6 +15,12 @@
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
  *
  * Notice:
  * Produces docs/governance/evidence/evidence-manifest.json bound to the exact
@@ -33,6 +39,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const MANIFEST_RELATIVE_PATH = 'docs/governance/evidence/evidence-manifest.json';
+
+export const REQUIRED_EVIDENCE_FILES = [
+  'config/qualification/target-matrix.json',
+  'docs/security/evidence/admin_portal_provisioning_receipt.json',
+  'docs/security/evidence/live_ai_canary_receipt.json',
+  'docs/governance/evidence/native-runner-evidence.json',
+];
 
 // Items whose proof must exist as a file; absence => listed "unproven".
 export const UNPROVEN_CANDIDATES = [
@@ -80,15 +93,34 @@ function validateCommands(commands) {
 
 export function generateManifest({ root = ROOT, expectedSha, evidenceFiles, commands, write = true } = {}) {
   if (!SHA_RE.test(expectedSha || '')) throw new EvidenceManifestError('expectedSha must be a full 40-hex git SHA');
-  if (!Array.isArray(evidenceFiles) || evidenceFiles.length === 0) {
-    throw new EvidenceManifestError('At least one evidence file is required');
-  }
   const cmds = validateCommands(commands);
   const head = git(root, ['rev-parse', 'HEAD']).trim();
   if (head !== expectedSha) throw new EvidenceManifestError(`SHA mismatch: HEAD ${head} != expected ${expectedSha}`);
   assertCleanTree(root, MANIFEST_RELATIVE_PATH);
 
-  const files = [...new Set(evidenceFiles.map((f) => toPosix(path.normalize(f))))].sort().map((rel) => {
+  // Initialize candidate files from evidenceFiles or discover existing required evidence
+  let candidateFiles = Array.isArray(evidenceFiles) && evidenceFiles.length > 0
+    ? [...evidenceFiles]
+    : REQUIRED_EVIDENCE_FILES.filter((rel) => {
+        const abs = path.resolve(root, rel);
+        return fs.existsSync(abs) && fs.statSync(abs).isFile();
+      });
+
+  // When candidate evidence files exist on disk, include them in evidenceFiles
+  for (const candidate of UNPROVEN_CANDIDATES) {
+    const candidateAbs = path.resolve(root, candidate.path);
+    if (fs.existsSync(candidateAbs) && fs.statSync(candidateAbs).isFile()) {
+      if (!candidateFiles.includes(candidate.path)) {
+        candidateFiles.push(candidate.path);
+      }
+    }
+  }
+
+  if (candidateFiles.length === 0) {
+    throw new EvidenceManifestError('At least one evidence file is required');
+  }
+
+  const files = [...new Set(candidateFiles.map((f) => toPosix(path.normalize(f))))].sort().map((rel) => {
     const abs = path.resolve(root, rel);
     if (rel.startsWith('..') || path.isAbsolute(rel) || !abs.startsWith(root + path.sep)) {
       throw new EvidenceManifestError(`Evidence path escapes repository: ${rel}`);
@@ -132,7 +164,11 @@ function parseArgs(argv) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const a = parseArgs(process.argv.slice(2));
-    const m = generateManifest({ expectedSha: a.sha, evidenceFiles: a.evidence, commands: a.commands });
+    const m = generateManifest({
+      expectedSha: a.sha,
+      evidenceFiles: a.evidence.length > 0 ? a.evidence : undefined,
+      commands: a.commands,
+    });
     console.log(`Evidence manifest written for ${m.gitHeadSha}; unproven: ${m.unproven.length}`);
   } catch (err) {
     console.error(`[evidence-manifest] FAIL: ${err.message}`);
