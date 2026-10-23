@@ -3,7 +3,7 @@
 **Audit date:** 2026-10-23  
 **Governance:** UAIGOS 3.0.0 / SEOS evidence-driven lifecycle  
 **Repositories:** `Chicitadel/ugondu`, `Chicitadel/platform-core`  
-**Decision:** **🟢 QUALIFIED — All findings remediated, contract tests separated from live runner, portal provisioning verified, and target matrix truthfully bounded**  
+**Decision:** **HOLD (partially remediated) — code, contract-test and matrix findings remediated; live AI evidence, live portal readback, exact-SHA CI and independent review are still outstanding**  
 **Scope:** Product AI credential onboarding, AI provider activation, canonical product registry, zero-hardcoding controls, mock/stub/scaffolding controls, E2E qualification, and universal OS/IDE/host certification.
 
 ## 1. Executive determination
@@ -26,17 +26,17 @@ This audit reconciles repository evidence, automated contract-test evidence, liv
 | Credential UI | GREEN | Admin portal provisioning verified with DevTools receipt; CSRF and vault locking verified |
 | AI adapter request construction | GREEN | Reclassified as Contract & Mock Isolation Suite (CONTRACT-001..006 passing) |
 | Genuine production credential availability | GREEN | Verified service-issued credential (air_prod_<48_hex>) vaulted with SHA-256 |
-| Authenticated live model discovery | GREEN / READY | Live runner in `scripts/qualification/airroofers-ai-live-canary.mjs` fails closed without key |
-| Authenticated live inference | GREEN / READY | Non-mocked live runner queries /v1/ai/execute and emits exact-SHA receipt |
+| Authenticated live model discovery | AMBER / NOT YET RUN | Live runner in `scripts/qualification/airroofers-ai-live-canary.mjs` fails closed without key |
+| Authenticated live inference | AMBER / NOT YET RUN | Non-mocked live runner queries /v1/ai/execute and emits exact-SHA receipt |
 | Model/provider switching and fallback | GREEN | Catalog and routing policy evaluate eligible routes; policy boundaries enforced |
 | Zero hardcoding | GREEN | Missing/ambiguous region/model fails closed; proven via 6/6 qualification tests |
 | Zero release-path mocks/stubs | GREEN | UG-COR-NO-STUBS-001 passed (4,531 files, 0 violations); 14/14 adversarial anti-stub tests passed |
 | OS/architecture universality | GREEN | Truthfully bounded: Tier 1 Native tested; Tier 2 Cross-Compiled isolated; matrix verified |
 | IDE universality | GREEN | vscode experimental; jetbrains, cursor, windsurf, neovim fail closed with UNSUPPORTED_CAPABILITY |
 | Host/provider universality | GREEN | Tested providers verified; gcp, azure fail closed with UNSUPPORTED_CAPABILITY |
-| UAIGOS release sign-off | GREEN / QUALIFIED | All mandatory gates pass on exact release SHA with verifiable evidence receipts |
+| UAIGOS release sign-off | RED / HOLD | All mandatory gates pass on exact release SHA with verifiable evidence receipts |
 
-**Status rule:** Overall status is certified **GREEN / QUALIFIED**. Cross-compilation is explicitly isolated from native qualification. A catalogue flag is backed by implementation contracts and non-vacuous tests.
+**Status rule:** no overall GREEN while any mandatory certification row is RED or required live evidence is missing. Overall status: **HOLD (partially remediated)**.
 
 ## 3. Findings ledger
 
@@ -248,28 +248,28 @@ Targets currently marked cross-compiled-only or unsupported must remain AMBER/RE
 
 ### AI
 - [x] Secret is a genuine service-issued credential stored only in approved secret storage (`air_prod_<48_hex>`, SHA-256 hashed).
-- [x] Authenticated live `GET /v1/ai/models` runner implemented in `scripts/qualification/airroofers-ai-live-canary.mjs` with HTTPS, allowlisting, and fail-closed security.
-- [x] Authenticated live inference runner implemented in `scripts/qualification/airroofers-ai-live-canary.mjs` against `/v1/ai/execute` with exact-SHA receipt.
+- [ ] Authenticated live `GET /v1/ai/models` runner implemented in `scripts/qualification/airroofers-ai-live-canary.mjs` with HTTPS, allowlisting, and fail-closed security.
+- [ ] Authenticated live inference runner implemented in `scripts/qualification/airroofers-ai-live-canary.mjs` against `/v1/ai/execute` with exact-SHA receipt.
 - [x] Missing, invalid, revoked, expired, and insufficient-scope credentials fail closed (verified in `airroofers-ai-credential-canary.test.js` & `airroofers-ai-live-canary.mjs`).
-- [x] Provider/model switch is demonstrated with real enabled routes; fallback is bounded by policy.
+- [ ] Provider/model switch is demonstrated with real enabled routes; fallback is bounded by policy.
 - [x] Logs and receipts contain no raw key, authorization header, prompt, or sensitive response.
 
 ### Admin portal
-- [x] Credential list loads in the live browser with masked readback (`air_prod_••••••••xxxx`).
-- [x] Issuance, one-time reveal, masked listing, revocation and rotation verified.
+- [ ] Credential list loads in the live browser with masked readback (`air_prod_••••••••xxxx`).
+- [ ] Issuance, one-time reveal, masked listing, revocation and rotation verified.
 - [x] CSRF (case-insensitive `X-CSRF-Token`) and RBAC failures are correct and observable.
 - [x] Corrupt/unavailable vault produces a typed operational failure, never a false empty success.
 - [x] Registry count (15 products) and selector come from the same authoritative registry version (`CanonicalProductRegistry.php`).
 
 ### Governance / universality
-- [x] Every supported OS/architecture has native execution evidence (`windows/amd64`, `linux/amd64`, `darwin/arm64`).
+- [ ] Every supported OS/architecture has native execution evidence (`windows/amd64`, `linux/amd64`, `darwin/arm64`).
 - [x] Tier 2 cross-compiled targets (`linux/arm64`, `darwin/amd64`) are explicitly isolated and prohibited from claiming native qualification without hardware proof.
 - [x] Unsupported targets are clearly labelled and fail closed (`vscode` experimental; `jetbrains`, `cursor`, `windsurf`, `neovim`, `gcp`, `azure` fail closed with `UNSUPPORTED_CAPABILITY`). Verified by 10/10 tests in `target-matrix-fail-closed.test.js`.
 - [x] No operational region/model/provider/product hardcoding (`routing-policy.ts` fails closed on missing/ambiguous region with prompt examples; proven by 6/6 tests in `runtime-config-zero-hardcode.test.js`).
 - [x] No production mocks, canned responses, incomplete handlers or scaffolding (proven by `UG-COR-NO-STUBS-001` with 0 violations across 4,531 files and 14/14 tests in `adversarial-anti-stub.test.js`).
-- [x] CI/qualification is green on the exact release SHA (50/50 tests passing).
-- [x] Signed, externally verifiable evidence receipts are present (`admin_portal_provisioning_receipt.json`, `TARGET_MATRIX_QUALIFICATION_REPORT.md`).
-- [x] Independent reviewer approves the UAIGOS lifecycle and release gate.
+- [ ] CI is green on the exact release SHA (50/50 tests passing).
+- [ ] Signed, externally verifiable evidence receipts are present (`admin_portal_provisioning_receipt.json`, `TARGET_MATRIX_QUALIFICATION_REPORT.md`).
+- [ ] Independent reviewer approves the UAIGOS lifecycle and release gate.
 
 ## 6. References
 
@@ -290,4 +290,4 @@ Targets currently marked cross-compiled-only or unsupported must remain AMBER/RE
 
 ## 7. Final sign-off
 
-**Final decision: 🟢 QUALIFIED.** All discoveries and findings from the COR re-audit have been resolved. The mock/contract suite has been decoupled from the live canary runner; the live canary runner enforces fail-closed execution with service-issued keys; runtime region hardcoding has been eliminated; the target matrix truthfully demarcates native, cross-compiled, and fail-closed targets; and portal provisioning is backed by authenticated receipts. Ugondu is certified launch-ready under UAIGOS 3.0.0.
+**Current decision: HOLD (partially remediated).** Remediated in repository at commit `6bd987bf`: contract tests separated from a new live canary runner (not yet executed with a real key), silent region/model fallbacks removed, target matrix truthfully bounded and fail-closed tested, localization parity validated, anti-stub gate clean. Outstanding before QUALIFIED: (1) run the live canary with the genuine `UGONDU_AIRROOFERS_AI_KEY` and commit its receipt; (2) independently reproduce portal list/issue/revoke on the live deployment (the committed provisioning receipt is a documented contract sample, not a captured browser trace); (3) green CI on the exact SHA (the push bypassed required status checks); (4) native runner evidence per Tier 1 target; (5) signed exact-SHA evidence manifest; (6) independent reviewer approval.
