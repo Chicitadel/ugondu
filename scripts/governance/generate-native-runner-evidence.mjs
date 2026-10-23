@@ -2,11 +2,11 @@
  * Project        : Ugondu Platform
  * Module         : Governance — Native Runner Evidence Generator
  * File           : generate-native-runner-evidence.mjs
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-23
- * Last Modified  : 2026-10-23
+ * Last Modified  : 2026-10-24
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -23,10 +23,13 @@
  * - NIST
  *
  * Notice:
- * Generates docs/governance/evidence/native-runner-evidence.json capturing
- * authentic native execution evidence for Tier 1 native targets (windows/amd64
- * and linux/amd64) while strictly classifying cross-compiled targets,
- * experimental IDEs, and unsupported providers as non-native / fail-closed.
+ * Builds docs/governance/evidence/native-runner-evidence.json ONLY from observed
+ * execution records and verified CI runs bound to the candidate SHA. Nothing is
+ * assumed: each native claim names its scope, and non-native targets, IDEs and
+ * providers are derived from config/qualification/target-matrix.json.
+ * Usage: node scripts/governance/generate-native-runner-evidence.mjs \
+ *          --windows-record f.json --linux-record f.json --darwin-ci-run <id> \
+ *          [--candidate-sha <sha>]
  *
  * Copyright (c) 2026 Air Roofers SASU
  * All Rights Reserved.
@@ -34,391 +37,145 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { assertCandidateBinding } from './evidence-freshness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const EVIDENCE_RELATIVE_PATH = 'docs/governance/evidence/native-runner-evidence.json';
-export const EVIDENCE_SCHEMA_VERSION = '1.0.0';
+export const EVIDENCE_SCHEMA_VERSION = '2.0.0';
 
-export function canonicalJson(value) {
-  if (value === null || typeof value !== 'object') {
-    return JSON.stringify(value);
+export class NativeEvidenceError extends Error {
+  constructor(message) { super(message); this.name = 'NativeEvidenceError'; }
+}
+
+export function canonicalJson(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return `[${v.map(canonicalJson).join(',')}]`;
+  return `{${Object.keys(v).sort().filter((k) => v[k] !== undefined)
+    .map((k) => `${JSON.stringify(k)}:${canonicalJson(v[k])}`).join(',')}}`;
+}
+
+export const computeSha256 = (v) => crypto.createHash('sha256')
+  .update(typeof v === 'string' ? v : canonicalJson(v)).digest('hex');
+
+const withDigest = (o) => ({ ...o, verificationDigestSha256: computeSha256(o) });
+
+/** Default CI-run lookup through the authenticated GitHub CLI. */
+export function ghRunLookup(runId) {
+  const out = execFileSync('gh', ['run', 'view', String(runId), '--json', 'headSha,conclusion,status,jobs'], { encoding: 'utf8' });
+  return JSON.parse(out);
+}
+
+function requireRecord(rec, label, platform, arch, candidate) {
+  if (!rec || rec.recordType !== 'UGONDU_NATIVE_EXECUTION_RECORD') throw new NativeEvidenceError(`${label}: not a native execution record`);
+  if (rec.gitSha !== candidate) throw new NativeEvidenceError(`${label}: record SHA ${rec.gitSha} != candidate ${candidate}`);
+  if (rec.host?.platform !== platform || rec.host?.arch !== arch) {
+    throw new NativeEvidenceError(`${label}: observed ${rec.host?.platform}/${rec.host?.arch}, expected ${platform}/${arch}`);
   }
-  if (Array.isArray(value)) {
-    return `[${value.map(canonicalJson).join(',')}]`;
-  }
-  const keys = Object.keys(value).sort();
-  return `{${keys
-    .filter((k) => value[k] !== undefined)
-    .map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k])}`)
-    .join(',')}}`;
-}
-
-export function computeSha256(value) {
-  const content = typeof value === 'string' ? value : canonicalJson(value);
-  return crypto.createHash('sha256').update(content).digest('hex');
-}
-
-export function getGitHeadSha(root = ROOT) {
-  try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
-  } catch {
-    return '0245740a6e4c89d5c1f1d3609e5f9d1f9a660db0';
+  if (rec.suite?.status !== 'PASSED' || !(rec.suite.totalTests > 0) || rec.suite.failingTests !== 0) {
+    throw new NativeEvidenceError(`${label}: qualification suite did not pass`);
   }
 }
 
-export function getQualificationTestFiles(root = ROOT) {
-  const dir = path.join(root, 'tests', 'qualification');
-  if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir)
-    .filter((f) => f.endsWith('.test.js'))
-    .sort()
-    .map((f) => path.join('tests', 'qualification', f));
-}
-
-export function captureLocalExecutionResults(root = ROOT, runLive = false) {
-  const testFiles = getQualificationTestFiles(root);
-  if (runLive && testFiles.length > 0) {
-    try {
-      const output = execFileSync(process.execPath, ['--test', ...testFiles], {
-        cwd: root,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe']
-      });
-      const testsMatch = output.match(/ℹ\s+tests\s+(\d+)/);
-      const passMatch = output.match(/ℹ\s+pass\s+(\d+)/);
-      const failMatch = output.match(/ℹ\s+fail\s+(\d+)/);
-      const total = testsMatch ? parseInt(testsMatch[1], 10) : 127;
-      const passed = passMatch ? parseInt(passMatch[1], 10) : 127;
-      const failed = failMatch ? parseInt(failMatch[1], 10) : 0;
-      return {
-        suite: 'tests/qualification/*.test.js',
-        fileCount: testFiles.length,
-        totalTests: total,
-        passingTests: passed,
-        failingTests: failed,
-        exitCode: 0,
-        status: failed === 0 ? 'PASSED' : 'FAILED',
-        verificationMode: 'LIVE_PROCESS_EXECUTION_VERIFIED'
-      };
-    } catch (err) {
-      return {
-        suite: 'tests/qualification/*.test.js',
-        fileCount: testFiles.length,
-        totalTests: 127,
-        passingTests: 0,
-        failingTests: 127,
-        exitCode: err.status || 1,
-        status: 'FAILED',
-        verificationMode: 'LIVE_PROCESS_EXECUTION_FAILED',
-        error: err.message
-      };
-    }
+function requireRun(lookup, runId, candidate, label, jobNeedle) {
+  const run = lookup(runId);
+  if (run.headSha !== candidate) throw new NativeEvidenceError(`${label}: run ${runId} headSha ${run.headSha} != candidate ${candidate}`);
+  if (run.status !== 'completed') throw new NativeEvidenceError(`${label}: run ${runId} not completed`);
+  if (jobNeedle) {
+    const job = (run.jobs || []).find((j) => j.name.includes(jobNeedle));
+    if (!job) throw new NativeEvidenceError(`${label}: no job matching '${jobNeedle}' in run ${runId}`);
+    if (job.conclusion !== 'success') throw new NativeEvidenceError(`${label}: job '${job.name}' concluded ${job.conclusion}`);
+    return { run, job: job.name };
   }
-
-  return {
-    suite: 'tests/qualification/*.test.js',
-    fileCount: testFiles.length || 13,
-    totalTests: 127,
-    passingTests: 127,
-    failingTests: 0,
-    exitCode: 0,
-    status: 'PASSED',
-    verificationMode: 'RECORDED_AUTHENTIC_VERIFICATION'
-  };
+  if (run.conclusion !== 'success') throw new NativeEvidenceError(`${label}: run ${runId} concluded ${run.conclusion}`);
+  return { run, job: null };
 }
 
-export function buildNativeRunnerEvidence({ root = ROOT, runLive = false, timestamp } = {}) {
-  const gitSha = getGitHeadSha(root);
-  const now = timestamp || new Date().toISOString();
-  const localTestResults = captureLocalExecutionResults(root, runLive);
+export function buildNativeRunnerEvidence({ root = ROOT, candidateSha, windowsRecord, linuxRecord, darwinCiRunId, lookup = ghRunLookup, timestamp } = {}) {
+  const binding = assertCandidateBinding(root, candidateSha);
+  const candidate = binding.candidate;
+  requireRecord(windowsRecord, 'windows/amd64', 'win32', 'x64', candidate);
+  requireRecord(linuxRecord, 'linux/amd64', 'linux', 'x64', candidate);
+  if (linuxRecord.ci?.runnerOs !== 'Linux' || !linuxRecord.ci?.runId) {
+    throw new NativeEvidenceError('linux/amd64: record was not produced on a hosted Linux CI runner');
+  }
+  requireRun(lookup, linuxRecord.ci.runId, candidate, 'linux/amd64', null);
+  const darwin = requireRun(lookup, darwinCiRunId, candidate, 'darwin/arm64', 'darwin/arm64');
 
-  const localHostRecord = {
-    target: 'windows/amd64',
-    tier: 'Tier 1',
-    os: 'windows',
-    arch: 'amd64',
-    nativeExecutionVerified: true,
-    qualificationStatus: 'tested',
-    classification: 'AUTHENTIC_NATIVE_EXECUTION_VERIFIED',
-    executionEnvironment: {
-      environment: 'Local Physical Host Compute Agent',
-      osPlatform: process.platform,
-      osName: 'Windows',
-      osType: os.type(),
-      osRelease: os.release(),
-      nodeVersion: process.version,
-      cpuArchitecture: process.arch,
-      cpuModel: os.cpus()[0]?.model || 'AMD/Intel x64 Architecture',
-      cpuCores: os.cpus().length,
-      totalMemoryBytes: os.totalmem(),
-      freeMemoryBytes: os.freemem()
-    },
-    testSuiteResults: localTestResults
-  };
-  localHostRecord.verificationDigestSha256 = computeSha256(localHostRecord);
+  const matrix = JSON.parse(fs.readFileSync(path.join(root, 'config/qualification/target-matrix.json'), 'utf8'));
+  const t = matrix.targets;
+  const suiteScope = 'node-qualification-suite (tests/qualification/*.test.js)';
 
-  const linuxGhRecord = {
-    target: 'linux/amd64',
-    tier: 'Tier 1',
-    os: 'linux',
-    arch: 'amd64',
-    nativeExecutionVerified: true,
-    qualificationStatus: 'tested',
-    classification: 'AUTHENTIC_NATIVE_EXECUTION_VERIFIED',
-    executionEnvironment: {
-      environment: 'GitHub Actions Hosted Compute Agent',
-      runnerImage: 'ubuntu-24.04',
-      imageRelease: '20261012.334.1',
-      os: 'Linux 24.04.5 LTS',
-      architecture: 'amd64',
-      runnerId: '120657131714',
-      runId: '40024493431',
-      nodeVersion: 'v24.17.0'
-    },
-    testSuiteResults: {
-      workflow: 'ai-live-canary / native-linux-qualification',
-      runId: '40024493431',
-      exitCode: 0,
-      status: 'PASSED',
-      verificationMode: 'GITHUB_ACTIONS_HOSTED_RUNNER_VERIFIED'
-    }
-  };
-  linuxGhRecord.verificationDigestSha256 = computeSha256(linuxGhRecord);
-
-  const crossCompiledTargets = [
-    {
-      target: 'linux/arm64',
-      tier: 'Tier 2',
-      os: 'linux',
-      arch: 'arm64',
-      nativeExecutionVerified: false,
-      nativeRunnerClaimed: false,
-      qualificationStatus: 'cross-compiled-only',
-      classification: 'CROSS_COMPILED_NOT_NATIVELY_QUALIFIED',
-      rationale: 'Target binary is cross-compiled for Linux arm64 architecture; physical native ARM64 runner execution has not been verified.'
-    },
-    {
-      target: 'darwin/amd64',
-      tier: 'Tier 2',
-      os: 'darwin',
-      arch: 'amd64',
-      nativeExecutionVerified: false,
-      nativeRunnerClaimed: false,
-      qualificationStatus: 'cross-compiled-only',
-      classification: 'CROSS_COMPILED_NOT_NATIVELY_QUALIFIED',
-      rationale: 'Target binary is cross-compiled for Darwin x86_64 architecture; physical native macOS x86_64 runner execution has not been verified.'
-    },
-    {
-      target: 'darwin/arm64',
-      tier: 'Tier 1',
-      os: 'darwin',
-      arch: 'arm64',
-      nativeExecutionVerified: false,
-      nativeRunnerClaimed: false,
-      qualificationStatus: 'awaiting-independent-attestation',
-      classification: 'AWAITING_INDEPENDENT_ATTESTATION',
-      rationale: 'Physical Apple Silicon hardware runner execution pending independent attestation; no unproven native claim made.'
-    }
-  ].map((target) => ({
-    ...target,
-    verificationDigestSha256: computeSha256(target)
+  const native = [
+    withDigest({ target: 'windows/amd64', scope: suiteScope, classification: 'NATIVE_EXECUTION_VERIFIED', record: windowsRecord }),
+    withDigest({ target: 'linux/amd64', scope: suiteScope, classification: 'NATIVE_EXECUTION_VERIFIED', ciRunId: linuxRecord.ci.runId, record: linuxRecord }),
+    withDigest({
+      target: 'darwin/arm64', scope: 'go-thin-client (go vet, go test, binary --help/version on macOS arm64 runner)',
+      classification: 'NATIVE_EXECUTION_VERIFIED_THIN_CLIENT_ONLY', ciRunId: String(darwinCiRunId), ciJob: darwin.job,
+      limitation: 'The Node qualification suite was not executed on darwin/arm64; only the Go thin-client was.',
+    }),
+  ];
+  const crossCompiled = t.osArchitectures.filter((o) => !o.nativeExecutionVerified).map((o) => withDigest({
+    target: o.target, classification: 'CROSS_COMPILED_NOT_NATIVELY_QUALIFIED', nativeExecutionVerified: false,
+    rationale: 'Binary is built for this target but never executed on native hardware.',
+  }));
+  const ides = t.ideIntegrations.map((i) => withDigest({
+    ide: i.ide, status: i.status, classification: i.status === 'unsupported' ? 'UNSUPPORTED_FAIL_CLOSED_BY_MATRIX' : 'EXPERIMENTAL_NOT_QUALIFIED',
+    failClosedBehavior: i.unsupportedBehavior,
+  }));
+  const providers = t.hostProviders.map((p) => withDigest({
+    provider: p.provider, matrixStatus: p.qualificationStatus,
+    classification: p.qualificationStatus === 'unsupported' ? 'UNSUPPORTED_FAIL_CLOSED_BY_MATRIX' : 'MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED',
+    limitation: p.qualificationStatus === 'unsupported' ? undefined : 'Per-operation disposable-infrastructure receipts are not part of this evidence file.',
   }));
 
-  const unsupportedIdeIntegrations = [
-    'jetbrains',
-    'cursor',
-    'windsurf',
-    'neovim'
-  ].map((ide) => {
-    const record = {
-      ide,
-      status: 'unsupported',
-      classification: 'UNSUPPORTED_FAIL_CLOSED_CONFIRMED',
-      failClosedBehavior: 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY',
-      enforcement: `Requests to unsupported IDE adapter '${ide}' fail closed and return defaultFailureCode UNSUPPORTED_CAPABILITY.`
-    };
-    record.verificationDigestSha256 = computeSha256(record);
-    return record;
-  });
-
-  const experimentalIdeIntegrations = [
-    {
-      ide: 'vscode',
-      status: 'experimental',
-      classification: 'EXPERIMENTAL_FAIL_CLOSED_CONFIRMED',
-      failClosedBehavior: 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY',
-      enforcement: 'Experimental IDE integration is strictly constrained to verified capabilities; unverified operations fail closed.'
-    }
-  ].map((ide) => ({
-    ...ide,
-    verificationDigestSha256: computeSha256(ide)
-  }));
-
-  const hostProviders = [
-    {
-      provider: 'aws',
-      status: 'tested',
-      classification: 'TESTED_LIFECYCLE_VERIFIED',
-      operations: {
-        discover: 'tested',
-        preflight: 'tested',
-        provision: 'tested',
-        verify: 'tested',
-        repair: 'tested',
-        rollback: 'tested',
-        cleanup: 'tested'
-      }
-    },
-    {
-      provider: 'directadmin',
-      status: 'tested',
-      classification: 'TESTED_LIFECYCLE_VERIFIED',
-      operations: {
-        discover: 'tested',
-        preflight: 'tested',
-        provision: 'tested',
-        verify: 'tested',
-        repair: 'tested',
-        rollback: 'tested',
-        cleanup: 'tested'
-      }
-    },
-    {
-      provider: 'cpanel',
-      status: 'tested',
-      classification: 'TESTED_LIFECYCLE_VERIFIED',
-      operations: {
-        discover: 'tested',
-        preflight: 'tested',
-        provision: 'tested',
-        verify: 'tested',
-        repair: 'tested',
-        rollback: 'tested',
-        cleanup: 'tested'
-      }
-    },
-    {
-      provider: 'ssh-vps',
-      status: 'tested',
-      classification: 'TESTED_LIFECYCLE_VERIFIED',
-      operations: {
-        discover: 'tested',
-        preflight: 'tested',
-        provision: 'tested',
-        verify: 'tested',
-        repair: 'tested',
-        rollback: 'tested',
-        cleanup: 'tested'
-      }
-    },
-    {
-      provider: 'docker',
-      status: 'tested',
-      classification: 'TESTED_LIFECYCLE_VERIFIED',
-      operations: {
-        discover: 'tested',
-        preflight: 'tested',
-        provision: 'tested',
-        verify: 'tested',
-        repair: 'tested',
-        rollback: 'tested',
-        cleanup: 'tested'
-      }
-    },
-    {
-      provider: 'kubernetes',
-      status: 'tested',
-      classification: 'TESTED_LIFECYCLE_VERIFIED',
-      operations: {
-        discover: 'tested',
-        preflight: 'tested',
-        provision: 'tested',
-        verify: 'tested',
-        repair: 'tested',
-        rollback: 'tested',
-        cleanup: 'tested'
-      }
-    },
-    {
-      provider: 'gcp',
-      status: 'unsupported',
-      classification: 'UNSUPPORTED_FAIL_CLOSED_CONFIRMED',
-      failClosedBehavior: 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY',
-      operations: {
-        discover: 'unsupported',
-        preflight: 'unsupported',
-        provision: 'unsupported',
-        verify: 'unsupported',
-        repair: 'unsupported',
-        rollback: 'unsupported',
-        cleanup: 'unsupported'
-      }
-    },
-    {
-      provider: 'azure',
-      status: 'unsupported',
-      classification: 'UNSUPPORTED_FAIL_CLOSED_CONFIRMED',
-      failClosedBehavior: 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY',
-      operations: {
-        discover: 'unsupported',
-        preflight: 'unsupported',
-        provision: 'unsupported',
-        verify: 'unsupported',
-        repair: 'unsupported',
-        rollback: 'unsupported',
-        cleanup: 'unsupported'
-      }
-    }
-  ].map((p) => ({
-    ...p,
-    verificationDigestSha256: computeSha256(p)
-  }));
-
-  const evidencePayload = {
-    $schema: 'https://specs.airroofers.eu/governance/native-runner-evidence-1.0.0.json',
+  const body = {
+    $schema: 'https://specs.airroofers.eu/governance/native-runner-evidence-2.0.0.json',
     schemaVersion: EVIDENCE_SCHEMA_VERSION,
     evidenceType: 'UGONDU_NATIVE_RUNNER_QUALIFICATION_EVIDENCE',
     authority: 'Ujomor Systems Engineering & Governance Authority',
     organization: 'Air Roofers SASU',
-    generatedAt: now,
-    gitHeadSha: gitSha,
-    qualificationSummary: {
-      totalQualificationTests: localTestResults.totalTests,
-      passingQualificationTests: localTestResults.passingTests,
-      failingQualificationTests: localTestResults.failingTests,
-      allQualificationGatesPassed: localTestResults.status === 'PASSED',
-      verdict: 'AUTHENTIC_NATIVE_EXECUTION_QUALIFIED'
-    },
-    tier1NativeRunners: [localHostRecord, linuxGhRecord],
-    tier2CrossCompiledTargets: crossCompiledTargets,
-    unsupportedIdeIntegrations,
-    experimentalIdeIntegrations,
-    hostProviders
+    generatedAt: timestamp || new Date().toISOString(),
+    gitHeadSha: candidate,
+    verdict: 'NATIVE_EXECUTION_VERIFIED_FOR_RECORDED_TARGETS_ONLY',
+    universalClaim: false,
+    tier1NativeRunners: native,
+    tier2CrossCompiledTargets: crossCompiled,
+    ideIntegrations: ides,
+    hostProviders: providers,
   };
-
-  const { evidenceDigestSha256: _omitted, ...bodyToDigest } = evidencePayload;
-  evidencePayload.evidenceDigestSha256 = computeSha256(bodyToDigest);
-  return evidencePayload;
+  return { ...body, evidenceDigestSha256: computeSha256(body) };
 }
 
 export function writeNativeRunnerEvidence(options = {}) {
   const root = options.root || ROOT;
   const evidence = buildNativeRunnerEvidence(options);
-  const targetPath = path.resolve(root, EVIDENCE_RELATIVE_PATH);
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-  fs.writeFileSync(targetPath, JSON.stringify(evidence, null, 2) + '\n', 'utf8');
-  return { path: targetPath, relativePath: EVIDENCE_RELATIVE_PATH, evidence };
+  const target = path.resolve(root, EVIDENCE_RELATIVE_PATH);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, JSON.stringify(evidence, null, 2) + '\n', 'utf8');
+  return { path: target, relativePath: EVIDENCE_RELATIVE_PATH, evidence };
+}
+
+function arg(name) {
+  const i = process.argv.indexOf(name);
+  return i >= 0 ? process.argv[i + 1] : undefined;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const runLive = process.argv.includes('--run-tests');
-  const result = writeNativeRunnerEvidence({ runLive });
-  console.log(`[native-runner-evidence] Evidence written to ${result.relativePath}`);
-  console.log(`[native-runner-evidence] Digest: ${result.evidence.evidenceDigestSha256}`);
-  console.log(`[native-runner-evidence] Qualification Verdict: ${result.evidence.qualificationSummary.verdict}`);
-  console.log(`[native-runner-evidence] Passing Tests: ${result.evidence.qualificationSummary.passingQualificationTests}/${result.evidence.qualificationSummary.totalQualificationTests}`);
+  try {
+    const rd = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
+    const head = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
+    const result = writeNativeRunnerEvidence({
+      candidateSha: arg('--candidate-sha') || head,
+      windowsRecord: rd(arg('--windows-record')),
+      linuxRecord: rd(arg('--linux-record')),
+      darwinCiRunId: arg('--darwin-ci-run'),
+    });
+    console.log(`[native-runner-evidence] Written ${result.relativePath} (${result.evidence.verdict}) digest ${result.evidence.evidenceDigestSha256}`);
+  } catch (err) {
+    console.error(`[native-runner-evidence] FAIL: ${err.message}`);
+    process.exit(1);
+  }
 }
