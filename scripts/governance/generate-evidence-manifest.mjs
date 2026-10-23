@@ -36,6 +36,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { assertCandidateBinding } from './evidence-freshness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const MANIFEST_RELATIVE_PATH = 'docs/governance/evidence/evidence-manifest.json';
@@ -94,8 +95,13 @@ function validateCommands(commands) {
 export function generateManifest({ root = ROOT, expectedSha, evidenceFiles, commands, write = true } = {}) {
   if (!SHA_RE.test(expectedSha || '')) throw new EvidenceManifestError('expectedSha must be a full 40-hex git SHA');
   const cmds = validateCommands(commands);
-  const head = git(root, ['rev-parse', 'HEAD']).trim();
-  if (head !== expectedSha) throw new EvidenceManifestError(`SHA mismatch: HEAD ${head} != expected ${expectedSha}`);
+  let binding;
+  try {
+    binding = assertCandidateBinding(root, expectedSha);
+  } catch (err) {
+    throw new EvidenceManifestError(err.message);
+  }
+  const head = binding.candidate;
   assertCleanTree(root, MANIFEST_RELATIVE_PATH);
 
   // Initialize candidate files from evidenceFiles or discover existing required evidence
@@ -137,6 +143,9 @@ export function generateManifest({ root = ROOT, expectedSha, evidenceFiles, comm
   const manifest = {
     schema: 'ugondu.evidence-manifest/1',
     gitHeadSha: head,
+    candidateSha: head,
+    releaseHeadSha: binding.head,
+    bindingProtocol: 'CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT',
     evidenceFiles: files,
     testCommands: cmds,
     allTestCommandsPassed: cmds.every((c) => c.exitCode === 0),

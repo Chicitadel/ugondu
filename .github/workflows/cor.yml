@@ -105,6 +105,11 @@ jobs:
           UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
         run: node scripts/release/verify-evidence-bundle.mjs --verify
 
+      - name: Verify evidence freshness (candidate-bound, evidence-only descendant)
+        run: |
+          node --test tests/qualification/evidence-freshness.test.js
+          node scripts/governance/verify-evidence-freshness.mjs
+
       - name: Release integrity
         run: npm run verify:release-integrity
 
