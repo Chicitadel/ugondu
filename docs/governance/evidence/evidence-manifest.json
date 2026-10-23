@@ -1,6 +1,6 @@
 {
   "schema": "ugondu.evidence-manifest/1",
-  "gitHeadSha": "2305b151e523d53b2fb5e5c62368ab6f044e38cf",
+  "gitHeadSha": "016217aac3918f91d4898ad00691062cc40c21e1",
   "evidenceFiles": [
     {
       "path": "config/qualification/target-matrix.json",
@@ -12,7 +12,7 @@
     },
     {
       "path": "docs/security/evidence/live_ai_canary_receipt.json",
-      "sha256": "ca6a4e27472e7bdf399065ee967a10e34f4fb832c6e1a90813cc2bf2acc88450"
+      "sha256": "ee31be2c4bcb1640a86d81e4389b791a385fd21a57339ad6035f4d1235f4182f"
     }
   ],
   "testCommands": [
@@ -33,7 +33,7 @@
       "exitCode": 0
     },
     {
-      "command": "gh workflow run ai-live-canary (run 39930903184)",
+      "command": "gh workflow run ai-live-canary (run 39931391871)",
       "exitCode": 0
     }
   ],
