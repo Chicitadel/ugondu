@@ -1,0 +1,48 @@
+{
+  "schema": "ugondu.evidence-manifest/1",
+  "gitHeadSha": "2305b151e523d53b2fb5e5c62368ab6f044e38cf",
+  "evidenceFiles": [
+    {
+      "path": "config/qualification/target-matrix.json",
+      "sha256": "0b882e4ca6afc4fe969801c56d8ef77b49a162775edd457fc666a84710d1d277"
+    },
+    {
+      "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
+      "sha256": "38012bca46376bd2f8b85a71421cf81777e15b1dad0bf1b1c8320011283f1c7f"
+    },
+    {
+      "path": "docs/security/evidence/live_ai_canary_receipt.json",
+      "sha256": "ca6a4e27472e7bdf399065ee967a10e34f4fb832c6e1a90813cc2bf2acc88450"
+    }
+  ],
+  "testCommands": [
+    {
+      "command": "node --test tests/qualification/airroofers-ai-credential-canary.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/evidence-manifest.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/target-matrix-fail-closed.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/governance/validate-repository.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "gh workflow run ai-live-canary (run 39930903184)",
+      "exitCode": 0
+    }
+  ],
+  "allTestCommandsPassed": true,
+  "unproven": [
+    {
+      "id": "native-runner-evidence",
+      "expectedPath": "docs/governance/evidence/native-runner-evidence.json",
+      "reason": "Native runner evidence absent"
+    }
+  ]
+}
