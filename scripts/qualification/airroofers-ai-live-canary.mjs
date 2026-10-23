@@ -308,6 +308,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
       errorClass,
       message,
       statusCode: error?.statusCode || null,
+      details: error?.details || null,
       timestamp: new Date().toISOString(),
     }));
     process.exit(1);
