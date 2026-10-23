@@ -4,9 +4,9 @@
  * File           : identity.ts
  * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-23
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -24,7 +24,7 @@
  * - Security Authority     : Ujomor Systems Governance
  * - Governance Authority   : Air Roofers Corporate Governance
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 /**
@@ -35,8 +35,14 @@
  * This interface is provider-neutral. All provider-specific logic lives in
  * the UPPIE adapter layer (IPolicyProviderAdapter).
  *
- * Replaces: IdentityCapability (v1.0.0) — deprecated, dead code, removed.
+ * Replaces: IdentityCapability (v1.0.0) — deprecated, tombstoned below for backward compatibility.
  */
+/**
+ * @deprecated Deprecated since v2.0.0. Use AuthorizationCapability instead.
+ * Preserved for backwards compatibility with legacy callers.
+ */
+export type IdentityCapability = AuthorizationCapability;
+
 export interface AuthorizationCapability {
   /** Discover all policies, roles, and assignments in the target environment. */
   discoverAuthority(context: AuthorizationCapabilityContext): Promise<AuthorityDiscoveryResult>;

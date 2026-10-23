@@ -1,8 +1,8 @@
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
- * Module         : Tests / Qualification — Air Roofers AI Credential Canary
+ * Module         : Tests / Qualification — Air Roofers AI Credential Contract & Mock Isolation Test Suite
  * File           : airroofers-ai-credential-canary.test.js
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-23
@@ -19,6 +19,12 @@
  * Standards:
  * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
  *
+ * Scope & Isolation Guarantee:
+ * This suite verifies credential format validation, credential broker resolution,
+ * request contract serialization, header construction, and mock transport isolation.
+ * This test suite executes exclusively against in-memory mock transports and does
+ * NOT perform live network calls, nor does it claim live AI activation or live inference.
+ *
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
@@ -32,7 +38,7 @@ const {
 } = require('../../server/engine-core/dist/ai');
 
 const AIRROOFERS_SECRET_REF = 'env://UGONDU_AIRROOFERS_AI_KEY';
-const AIRROOFERS_CANARY_SECRET = 'air_prod_' + 'a1b2c3d4e5f678901234567890abcdef1234567890abcdef';
+const AIRROOFERS_MOCK_TEST_SECRET = 'air_prod_' + 'a1b2c3d4e5f678901234567890abcdef1234567890abcdef';
 const AIRROOFERS_BASE_URL = 'https://ai.airroofers.eu';
 const SERVICE_KEY_FORMAT_REGEX = /^air_prod_[0-9a-f]{48}$/;
 
@@ -41,16 +47,18 @@ function validateAirRoofersKeyFormat(candidate) {
   return SERVICE_KEY_FORMAT_REGEX.test(candidate.trim());
 }
 
-function makeCanaryRequest(overrides = {}) {
+function makeContractTestRequest(overrides = {}) {
   return {
-    requestId: 'req-canary-sovereign-001', tenantId: 'tenant-airroofers-fr', productId: 'ugondu',
+    requestId: 'req-contract-isolated-001', tenantId: 'tenant-airroofers-fr', productId: 'ugondu',
     environment: 'production', task: 'chat', modelAlias: 'sovereign-eu-chat', region: 'eu-west-3',
-    dataClassification: 'confidential', messages: [{ role: 'user', content: 'Verify sovereign AI fabric connectivity and credentials' }],
-    maxOutputTokens: 256, deadlineMs: 5000, correlationId: 'corr-canary-sovereign-001', ...overrides,
+    dataClassification: 'confidential', messages: [{ role: 'user', content: 'Verify sovereign AI contract serialization and credentials' }],
+    maxOutputTokens: 256, deadlineMs: 5000, correlationId: 'corr-contract-isolated-001', ...overrides,
   };
 }
 
-test('CANARY-001: Candidate secret format enforcement (air_prod_<48_hex_chars>) and vault registration', () => {
+test('CONTRACT-001: Secret format validation and broker handle resolution under mock isolation (no live activation claimed)', () => {
+  // Verifies structural key format and credential broker resolution.
+  // This test executes offline in memory with zero live network calls.
   const malformedCandidates = [
     'mock-token-12345', 'sk-ant-api03-invalid-placeholder',
     'air_dev_a1b2c3d4e5f678901234567890abcdef1234567890abcdef',
@@ -61,30 +69,30 @@ test('CANARY-001: Candidate secret format enforcement (air_prod_<48_hex_chars>) 
     assert.strictEqual(validateAirRoofersKeyFormat(candidate), false, `Malformed must fail: ${candidate}`);
   }
 
-  assert.strictEqual(validateAirRoofersKeyFormat(AIRROOFERS_CANARY_SECRET), true);
-  assert.strictEqual(AIRROOFERS_CANARY_SECRET.startsWith('air_prod_'), true);
-  assert.strictEqual(AIRROOFERS_CANARY_SECRET.length, 57);
+  assert.strictEqual(validateAirRoofersKeyFormat(AIRROOFERS_MOCK_TEST_SECRET), true);
+  assert.strictEqual(AIRROOFERS_MOCK_TEST_SECRET.startsWith('air_prod_'), true);
+  assert.strictEqual(AIRROOFERS_MOCK_TEST_SECRET.length, 57);
 
   const broker = new CredentialBroker();
-  broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_CANARY_SECRET);
+  broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_MOCK_TEST_SECRET);
   const handle = broker.resolveHandle(AIRROOFERS_SECRET_REF);
 
   assert.strictEqual(handle.credentialRef, AIRROOFERS_SECRET_REF);
   assert.strictEqual(handle.scheme, 'env');
   assert.strictEqual(handle.keyId, 'UGONDU_AIRROOFERS_AI_KEY');
-  const expectedHash = crypto.createHash('sha256').update(AIRROOFERS_CANARY_SECRET).digest('hex').slice(0, 16);
+  const expectedHash = crypto.createHash('sha256').update(AIRROOFERS_MOCK_TEST_SECRET).digest('hex').slice(0, 16);
   assert.strictEqual(handle.fingerprintSha256, expectedHash);
-  assert.strictEqual(String(handle).includes(AIRROOFERS_CANARY_SECRET), false);
+  assert.strictEqual(String(handle).includes(AIRROOFERS_MOCK_TEST_SECRET), false);
 });
 
-test('CANARY-002: Request construction to https://ai.airroofers.eu/v1/ai/execute with Bearer auth and sovereign headers', async () => {
+test('CONTRACT-002: Request serialization and header construction using isolated mock transport (no live activation claimed)', async () => {
   const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
   process.env.UGONDU_AIRROOFERS_AI_BASE_URL = AIRROOFERS_BASE_URL;
 
   try {
     const catalog = new ModelCatalog();
     const broker = new CredentialBroker();
-    broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_CANARY_SECRET);
+    broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_MOCK_TEST_SECRET);
 
     let capturedRequest = null;
     const mockTransport = async (req) => {
@@ -92,8 +100,8 @@ test('CANARY-002: Request construction to https://ai.airroofers.eu/v1/ai/execute
       return {
         status: 200,
         body: JSON.stringify({
-          success: true, execution_id: 'aix_canary_001',
-          output: 'Air Roofers sovereign AI live canary verified',
+          success: true, execution_id: 'aix_mock_contract_001',
+          output: 'Air Roofers contract serialization and mock isolation verified',
           token_metrics: { prompt_tokens: 16, completion_tokens: 24, total_tokens: 40 },
           finishReason: 'stop',
         }),
@@ -101,15 +109,16 @@ test('CANARY-002: Request construction to https://ai.airroofers.eu/v1/ai/execute
     };
 
     const adapter = new AirRoofersAiProviderAdapter(catalog, broker, mockTransport);
+    assert.strictEqual(adapter.isProductionTransport(), false, 'Adapter must operate under mock transport isolation');
     assert.strictEqual(adapter.getBaseUrl(), AIRROOFERS_BASE_URL);
 
-    const req = makeCanaryRequest();
+    const req = makeContractTestRequest();
     const result = await adapter.invoke(req);
 
-    assert.ok(capturedRequest, 'Transport must capture outbound request');
+    assert.ok(capturedRequest, 'Mock transport must capture outbound request');
     assert.strictEqual(capturedRequest.url, `${AIRROOFERS_BASE_URL}/v1/ai/execute`);
     assert.strictEqual(capturedRequest.method, 'POST');
-    assert.strictEqual(capturedRequest.headers['authorization'], `Bearer ${AIRROOFERS_CANARY_SECRET}`);
+    assert.strictEqual(capturedRequest.headers['authorization'], `Bearer ${AIRROOFERS_MOCK_TEST_SECRET}`);
     assert.strictEqual(capturedRequest.headers['x-correlation-id'], req.correlationId);
     assert.strictEqual(capturedRequest.headers['x-tenant-id'], req.tenantId);
     assert.strictEqual(capturedRequest.headers['x-request-id'], req.requestId);
@@ -125,7 +134,7 @@ test('CANARY-002: Request construction to https://ai.airroofers.eu/v1/ai/execute
     assert.strictEqual(body.context.region, 'eu-west-3');
 
     assert.strictEqual(result.providerId, 'airroofers-ai');
-    assert.strictEqual(result.output, 'Air Roofers sovereign AI live canary verified');
+    assert.strictEqual(result.output, 'Air Roofers contract serialization and mock isolation verified');
     assert.strictEqual(result.usage.inputTokens, 16);
     assert.strictEqual(result.usage.outputTokens, 24);
     assert.strictEqual(result.finishReason, 'stop');
@@ -135,7 +144,7 @@ test('CANARY-002: Request construction to https://ai.airroofers.eu/v1/ai/execute
   }
 });
 
-test('CANARY-003: Negative rejection when key is missing fails closed with CREDENTIALS_MISSING (503)', async () => {
+test('CONTRACT-003: Negative rejection when key is missing fails closed with CREDENTIALS_MISSING (503)', async () => {
   const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
   process.env.UGONDU_AIRROOFERS_AI_BASE_URL = AIRROOFERS_BASE_URL;
 
@@ -143,13 +152,14 @@ test('CANARY-003: Negative rejection when key is missing fails closed with CREDE
     const catalog = new ModelCatalog();
     const emptyBroker = new CredentialBroker();
     const adapter = new AirRoofersAiProviderAdapter(catalog, emptyBroker, async () => ({ status: 200, body: '{}' }));
+    assert.strictEqual(adapter.isProductionTransport(), false, 'Must operate under mock transport isolation');
 
     const health = await adapter.healthCheck();
     assert.strictEqual(health.ok, false);
     assert.strictEqual(health.credentialsConfigured, false);
     assert.strictEqual(health.reasonCode, 'CREDENTIALS_MISSING');
 
-    await assert.rejects(() => adapter.invoke(makeCanaryRequest()), (err) => {
+    await assert.rejects(() => adapter.invoke(makeContractTestRequest()), (err) => {
       assert.strictEqual(err.errorCode, 'CREDENTIALS_MISSING');
       assert.strictEqual(err.statusCode, 503);
       return true;
@@ -166,7 +176,7 @@ test('CANARY-003: Negative rejection when key is missing fails closed with CREDE
   }
 });
 
-test('CANARY-004: Negative rejection when key is malformed or invalid fails with AUTHENTICATION_FAILED (401)', async () => {
+test('CONTRACT-004: Negative rejection when key is rejected upstream fails with AUTHENTICATION_FAILED (401)', async () => {
   const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
   process.env.UGONDU_AIRROOFERS_AI_BASE_URL = AIRROOFERS_BASE_URL;
 
@@ -185,8 +195,9 @@ test('CANARY-004: Negative rejection when key is malformed or invalid fails with
     };
 
     const adapter = new AirRoofersAiProviderAdapter(catalog, broker, rejectingTransport);
+    assert.strictEqual(adapter.isProductionTransport(), false, 'Must operate under mock transport isolation');
 
-    await assert.rejects(() => adapter.invoke(makeCanaryRequest()), (err) => {
+    await assert.rejects(() => adapter.invoke(makeContractTestRequest()), (err) => {
       assert.strictEqual(err.errorCode, 'AUTHENTICATION_FAILED');
       assert.strictEqual(err.statusCode, 401);
       return true;
@@ -203,14 +214,14 @@ test('CANARY-004: Negative rejection when key is malformed or invalid fails with
   }
 });
 
-test('CANARY-005: Model discovery mapping (/v1/ai/models) routes with Bearer authentication', async () => {
+test('CONTRACT-005: Model discovery schema routing under isolated mock transport', async () => {
   const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
   process.env.UGONDU_AIRROOFERS_AI_BASE_URL = AIRROOFERS_BASE_URL;
 
   try {
     const catalog = new ModelCatalog();
     const broker = new CredentialBroker();
-    broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_CANARY_SECRET);
+    broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_MOCK_TEST_SECRET);
 
     let capturedReq = null;
     const transport = async (req) => {
@@ -227,12 +238,13 @@ test('CANARY-005: Model discovery mapping (/v1/ai/models) routes with Bearer aut
     };
 
     const adapter = new AirRoofersAiProviderAdapter(catalog, broker, transport);
+    assert.strictEqual(adapter.isProductionTransport(), false, 'Must operate under mock transport isolation');
     const discovery = await adapter.discoverModels();
 
     assert.ok(capturedReq);
     assert.strictEqual(capturedReq.url, `${AIRROOFERS_BASE_URL}/v1/ai/models`);
     assert.strictEqual(capturedReq.method, 'GET');
-    assert.strictEqual(capturedReq.headers['authorization'], `Bearer ${AIRROOFERS_CANARY_SECRET}`);
+    assert.strictEqual(capturedReq.headers['authorization'], `Bearer ${AIRROOFERS_MOCK_TEST_SECRET}`);
     assert.strictEqual(capturedReq.headers['accept'], 'application/json');
 
     assert.strictEqual(discovery.models.length, 2);
@@ -245,33 +257,34 @@ test('CANARY-005: Model discovery mapping (/v1/ai/models) routes with Bearer aut
   }
 });
 
-test('CANARY-006: Zero secret leakage in errors, diagnostics, and telemetry payloads', async () => {
+test('CONTRACT-006: Zero secret leakage in errors, diagnostics, and telemetry payloads under mock transport', async () => {
   const prevEnv = process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
   process.env.UGONDU_AIRROOFERS_AI_BASE_URL = AIRROOFERS_BASE_URL;
 
   try {
     const catalog = new ModelCatalog();
     const broker = new CredentialBroker();
-    broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_CANARY_SECRET);
+    broker.registerWorkloadSecret(AIRROOFERS_SECRET_REF, AIRROOFERS_MOCK_TEST_SECRET);
 
     const errorTransport = async () => ({
       status: 502,
-      body: JSON.stringify({ error: `Provider error with token ${AIRROOFERS_CANARY_SECRET}` }),
+      body: JSON.stringify({ error: `Provider error with token ${AIRROOFERS_MOCK_TEST_SECRET}` }),
     });
 
     const adapter = new AirRoofersAiProviderAdapter(catalog, broker, errorTransport);
+    assert.strictEqual(adapter.isProductionTransport(), false, 'Must operate under mock transport isolation');
 
-    await assert.rejects(() => adapter.invoke(makeCanaryRequest()), (err) => {
+    await assert.rejects(() => adapter.invoke(makeContractTestRequest()), (err) => {
       const errorString = JSON.stringify({
         name: err.name, code: err.errorCode, message: err.message, details: err.details, stack: err.stack,
       });
-      assert.strictEqual(errorString.includes(AIRROOFERS_CANARY_SECRET), false, 'Error must not leak secret');
+      assert.strictEqual(errorString.includes(AIRROOFERS_MOCK_TEST_SECRET), false, 'Error must not leak secret');
       return true;
     });
 
-    const sampleLog = `Outbound request authenticated using secret ${AIRROOFERS_CANARY_SECRET}`;
+    const sampleLog = `Outbound request authenticated using secret ${AIRROOFERS_MOCK_TEST_SECRET}`;
     const redacted = broker.redactString(sampleLog);
-    assert.strictEqual(redacted.includes(AIRROOFERS_CANARY_SECRET), false);
+    assert.strictEqual(redacted.includes(AIRROOFERS_MOCK_TEST_SECRET), false);
     assert.ok(redacted.includes('[REDACTED_SECRET]'));
   } finally {
     if (prevEnv !== undefined) process.env.UGONDU_AIRROOFERS_AI_BASE_URL = prevEnv;

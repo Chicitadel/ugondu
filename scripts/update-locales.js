@@ -4,9 +4,9 @@
  * File           : update-locales.js
  * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-23
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -22,7 +22,7 @@
  * - OWASP ASVS
  * - NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 'use strict';

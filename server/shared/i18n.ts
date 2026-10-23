@@ -4,9 +4,9 @@
  * File           : i18n.ts
  * Version        : 2.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-23
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
@@ -21,7 +21,7 @@
  * - OWASP ASVS
  * - NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 /** Structured stderr emitter (dependency-free; mirrors the Logger envelope). */

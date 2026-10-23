@@ -96,8 +96,9 @@ export class ExternalHttpProviderAdapter implements InferenceProvider {
         const configured = (process.env[provider.endpointEnvVar] || provider.defaultEndpoint || '').trim();
         if (configured) return configured;
         if (this.getTransport() !== defaultHttpTransport) {
+            const dynamicRegion = (process.env['UGONDU_AWS_REGION'] || process.env['AWS_REGION'] || 'eu-central-1').trim();
             const mockMap: Record<string, string> = {
-                'aws-bedrock': 'https://bedrock-runtime.eu-west-3.amazonaws.com',
+                'aws-bedrock': `https://bedrock-runtime.${dynamicRegion}.amazonaws.com`,
                 openai: 'https://api.openai.com/v1',
                 anthropic: 'https://api.anthropic.com/v1',
                 'google-gemini': 'https://europe-west9-aiplatform.googleapis.com/v1',

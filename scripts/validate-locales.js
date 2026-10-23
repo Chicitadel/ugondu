@@ -6,7 +6,7 @@
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-22
+ * Last Modified  : 2026-10-23
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -30,12 +30,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const defaultDir = path.join(__dirname, '..', 'server', 'shared', 'locales');
+const defaultDirs = [
+  path.join(__dirname, '..', 'server', 'shared', 'locales'),
+  path.join(__dirname, '..', 'locales')
+].filter(d => fs.existsSync(d));
 const targetDirs = process.env.UGONDU_LOCALES_DIR
   ? [process.env.UGONDU_LOCALES_DIR]
   : process.argv.slice(2).filter(a => !a.startsWith('-')).length > 0
     ? process.argv.slice(2).filter(a => !a.startsWith('-'))
-    : [defaultDir];
+    : defaultDirs;
 
 const sourceFile = 'en.json';
 const requiredLocales = [

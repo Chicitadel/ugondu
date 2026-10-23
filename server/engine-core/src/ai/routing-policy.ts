@@ -224,9 +224,45 @@ export class RoutingPolicyEngine {
         if (!request || typeof request !== 'object') {
             throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.invalid_request_body'), 400);
         }
+
+        // Validate modelAlias: must be non-empty string, fail closed without silent substitution
+        if (!request.modelAlias || typeof request.modelAlias !== 'string' || request.modelAlias.trim().length === 0) {
+            throw new AiGatewayError('MODEL_NOT_FOUND', __t('ai.error.model_not_found'), 404, {
+                field: 'modelAlias',
+                reason: 'MODEL_REQUIRED_NO_SILENT_SUBSTITUTION',
+                message: 'Model alias is required and cannot be silently substituted or defaulted.',
+            });
+        }
+
+        // Validate region: absent/empty or ambiguous must fail closed with prompt / examples
+        if (!request.region || typeof request.region !== 'string' || request.region.trim().length === 0) {
+            throw new AiGatewayError('REGION_REQUIRED_OR_AMBIGUOUS', __t('ai.error.region_required_or_ambiguous'), 400, {
+                field: 'region',
+                errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
+                alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
+                reason: 'REGION_REQUIRED_MISSING',
+                examples: ['eu-west-3', 'af-south-1', 'eu-central-1', 'us-east-1'],
+                prompt: 'Where should Ugondu route this inference request? Provide an explicit target region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1). Automatic defaulting is strictly prohibited under UAIGOS governance.',
+            });
+        }
+
+        const normalizedRegion = request.region.trim().toLowerCase();
+        const ambiguousTokens = ['ambiguous', 'auto', 'recommend', 'prompt', 'unknown', '*', 'any', 'default', 'all'];
+        if (ambiguousTokens.includes(normalizedRegion)) {
+            throw new AiGatewayError('REGION_REQUIRED_OR_AMBIGUOUS', __t('ai.error.region_required_or_ambiguous'), 400, {
+                field: 'region',
+                providedRegion: request.region,
+                errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
+                alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
+                reason: 'REGION_AMBIGUOUS',
+                examples: ['eu-west-3', 'af-south-1', 'eu-central-1', 'us-east-1'],
+                prompt: 'Ambiguous region specified. Automatic region defaulting is prohibited. Please specify an explicit region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1).',
+            });
+        }
+
         const requiredStrings: Array<keyof InferenceRequest> = [
             'requestId', 'tenantId', 'productId', 'environment', 'task',
-            'modelAlias', 'region', 'dataClassification', 'correlationId',
+            'dataClassification', 'correlationId',
         ];
         for (const field of requiredStrings) {
             const val = request[field];
@@ -272,6 +308,9 @@ export class RoutingPolicyEngine {
                 modelAlias: model.alias,
                 region: request.region,
                 allowedRegions: model.allowedRegions,
+                supportedRegions: provider.supportedRegions,
+                alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
+                prompt: `The requested region '${request.region}' is not authorized for model '${model.alias}'. Allowed regions: ${model.allowedRegions.join(', ')}.`,
             });
         }
 

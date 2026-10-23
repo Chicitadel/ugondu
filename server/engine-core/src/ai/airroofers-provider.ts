@@ -218,6 +218,24 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
 
     public async invoke(request: InferenceRequest): Promise<InferenceResult> {
         const startedAt = Date.now();
+        if (!request.region || typeof request.region !== 'string' || !request.region.trim()) {
+            throw new AiGatewayError('REGION_REQUIRED_OR_AMBIGUOUS', __t('ai.error.region_required_or_ambiguous'), 400, {
+                field: 'region',
+                errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
+                alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
+                prompt: 'Where should Ugondu route this inference request? Provide an explicit target region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1).',
+            });
+        }
+        const normalizedRegion = request.region.trim().toLowerCase();
+        if (['ambiguous', 'auto', 'recommend', 'prompt', 'unknown', '*', 'any', 'default', 'all'].includes(normalizedRegion)) {
+            throw new AiGatewayError('REGION_REQUIRED_OR_AMBIGUOUS', __t('ai.error.region_required_or_ambiguous'), 400, {
+                field: 'region',
+                providedRegion: request.region,
+                errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
+                alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
+                prompt: 'Ambiguous region specified. Automatic region defaulting is prohibited. Please specify an explicit region.',
+            });
+        }
         const provider = this.assertProviderEnabled();
         const model = this.resolveModelForRequest(request);
         const credentialRef = model.credentialRef || provider.credentialRef;
@@ -352,6 +370,12 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
     }
 
     private resolveModelForRequest(request: InferenceRequest): CatalogModelEntry {
+        if (!request.modelAlias || typeof request.modelAlias !== 'string' || !request.modelAlias.trim()) {
+            throw new AiGatewayError('MODEL_NOT_FOUND', __t('ai.error.model_not_found'), 404, {
+                field: 'modelAlias',
+                reason: 'MODEL_REQUIRED_NO_SILENT_SUBSTITUTION',
+            });
+        }
         const model = this.catalog.getModel(request.modelAlias);
         if (!model) throw new AiGatewayError('MODEL_NOT_FOUND', __t('ai.error.model_not_found'), 404, { modelAlias: request.modelAlias });
         return model;

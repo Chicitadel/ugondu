@@ -4,9 +4,9 @@
  * File           : PolicyPermissionAdapter.ts
  * Version        : 1.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-21
- * Last Modified  : 2026-10-22
+ * Last Modified  : 2026-10-23
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -21,7 +21,7 @@
  * - Security Authority     : Ujomor Systems Governance
  * - Governance Authority   : Air Roofers Corporate Governance
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 export type CapabilityStatus = 'SUPPORTED' | 'UNSUPPORTED' | 'CONDITIONAL' | 'UNKNOWN';
@@ -271,6 +271,9 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: rollback requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public capabilities(): ProviderCapabilities {
     return {
       policyRead: 'unknown', policyWrite: 'unknown', resourceLevelScope: 'unknown',
@@ -280,34 +283,58 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
     };
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async inspectPrincipal(_ref: PrincipalRef): Promise<PrincipalSnapshot> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: inspectPrincipal requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async listPolicyBindings(_p: PrincipalRef): Promise<PolicyBinding[]> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: listPolicyBindings requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async validateNativePolicy(_d: unknown): Promise<ValidationReport> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: validateNativePolicy requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async renderPolicy(_t: unknown, _c: Record<string, unknown>): Promise<RenderedPolicy> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: renderPolicy requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public diffPolicy(_exp: RenderedPolicy, _obs: NativePolicySnapshot): PolicyDiff {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: diffPolicy requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async planPolicyMutation(_diff: PolicyDiff): Promise<MutationPlan> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: planPolicyMutation requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async applyApprovedPolicyPlan(_plan: ApprovedPlan): Promise<MutationResult> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: applyApprovedPolicyPlan requires provider implementation');
   }
 
+  /**
+   * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
+   */
   public async verifyPolicyMutation(_result: MutationResult): Promise<ValidationReport> {
     throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: verifyPolicyMutation requires provider implementation');
   }
@@ -339,6 +366,13 @@ export class AdapterRegistry {
       const missingMethod = (typeof (adapter as any).discoverIdentity === 'function' ? normativeMethods : legacyMethods)
         .find((m) => typeof (adapter as any)[m] !== 'function');
       throw new Error(`Adapter for provider '${adapter.providerId}' is non-compliant: missing required method '${missingMethod}'`);
+    }
+
+    if (hasLegacy && !hasNormative) {
+      process.emitWarning(
+        `[UGONDU_DEPRECATION] Provider adapter '${adapter.providerId}' implements deprecated granular mutation contract. Migrate to normative reconciliation contract.`,
+        'DeprecationWarning'
+      );
     }
 
     this.adapters.set(adapter.providerId, adapter);

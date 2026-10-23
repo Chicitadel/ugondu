@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Qualification — Adversarial Anti-Stub Governance Suite
  * File           : adversarial-anti-stub.test.js
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-22
- * Last Modified  : 2026-10-22
+ * Last Modified  : 2026-10-23
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -336,5 +336,104 @@ test('AAS-010: Injects vacuous test assertion into a temporary .spec.ts file and
     );
   } finally {
     cleanupProbe(probe.absPath);
+  }
+});
+
+test('AAS-011: Proves production AdapterRegistry rejects incomplete adapters, mocks, and stubs', () => {
+  const { AdapterRegistry } = require('../../server/capabilities/dist/continuity/PolicyPermissionAdapter');
+
+  assert.throws(
+    () => AdapterRegistry.registerAdapter({ providerId: 'mock-provider-stub' }),
+    /Adapter for provider 'mock-provider-stub' is non-compliant: missing required method/,
+    'Production AdapterRegistry must reject incomplete stub/mock adapter missing required methods'
+  );
+
+  assert.throws(
+    () => AdapterRegistry.registerAdapter({}),
+    /Adapter registration failed: missing providerId/,
+    'Production AdapterRegistry must reject adapter without providerId'
+  );
+});
+
+test('AAS-012: Proves production BasePolicyPermissionAdapter and assertPolicyVerification reject unproven evidence and stubs', async () => {
+  const {
+    BasePolicyPermissionAdapter,
+    assertPolicyVerification,
+  } = require('../../server/capabilities/dist/continuity/PolicyPermissionAdapter');
+
+  assert.throws(
+    () => assertPolicyVerification({ verification: 'UNVERIFIED' }),
+    /COR_POLICY_VERIFICATION_UNPROVEN/,
+    'assertPolicyVerification must reject UNVERIFIED evidence'
+  );
+
+  assert.throws(
+    () => assertPolicyVerification({ verification: 'VERIFIED', observedDigest: 'digest-a', expectedDigest: 'digest-b' }),
+    /COR_POLICY_VERIFICATION_UNPROVEN/,
+    'assertPolicyVerification must reject mismatched digests'
+  );
+
+  class ConcreteAdapter extends BasePolicyPermissionAdapter {
+    get providerId() { return 'adversarial-probe'; }
+    async inspectPolicy() { return {}; }
+  }
+
+  const adapterInstance = new ConcreteAdapter();
+  await assert.rejects(
+    () => adapterInstance.planPolicyReconciliation({}),
+    /COR_POLICY_VERIFICATION_UNPROVEN/,
+    'Production BasePolicyPermissionAdapter must reject unproven planPolicyReconciliation'
+  );
+  await assert.rejects(
+    () => adapterInstance.applyPolicyReconciliation({}),
+    /COR_POLICY_VERIFICATION_UNPROVEN/,
+    'Production BasePolicyPermissionAdapter must reject unproven applyPolicyReconciliation'
+  );
+});
+
+test('AAS-013: Proves tombstoned legacy functions and adapters emit structured deprecation warnings', async () => {
+  const { AdapterRegistry } = require('../../server/capabilities/dist/continuity/PolicyPermissionAdapter');
+  const { normalizeEdition } = require('../../server/capabilities/dist/edition-registry/EditionDefinition');
+
+  const warnings = [];
+  const warningHandler = (warning) => {
+    if (warning.name === 'DeprecationWarning') warnings.push(warning.message);
+  };
+  process.on('warning', warningHandler);
+
+  try {
+    const normalized = normalizeEdition('FREE');
+    assert.strictEqual(normalized, 'COMMUNITY', 'Must preserve backward-compatible COMMUNITY mapping');
+
+    const legacyAdapter = {
+      providerId: 'legacy-mutation-adapter',
+      capabilities: () => ({}),
+      inspectPrincipal: async () => ({}),
+      inspectPolicy: async () => ({}),
+      listPolicyBindings: async () => [],
+      validateNativePolicy: async () => ({ valid: true, errors: [] }),
+      renderPolicy: async () => ({ document: '' }),
+      diffPolicy: () => ({ changed: false }),
+      planPolicyMutation: async () => ({}),
+      applyApprovedPolicyPlan: async () => ({}),
+      verifyPolicyMutation: async () => ({ valid: true, errors: [] }),
+    };
+
+    AdapterRegistry.registerAdapter(legacyAdapter);
+    assert.ok(AdapterRegistry.getAdapter('legacy-mutation-adapter'), 'Must register legacy adapter for backward compatibility');
+
+    await new Promise((resolve) => setImmediate(resolve));
+
+    assert.ok(
+      warnings.some((msg) => msg.includes("Edition alias 'FREE' is deprecated")),
+      'Must emit structured DeprecationWarning for deprecated FREE edition alias'
+    );
+    assert.ok(
+      warnings.some((msg) => msg.includes('implements deprecated granular mutation contract')),
+      'Must emit structured DeprecationWarning for legacy mutation adapter contract'
+    );
+  } finally {
+    process.removeListener('warning', warningHandler);
+    AdapterRegistry.clear();
   }
 });

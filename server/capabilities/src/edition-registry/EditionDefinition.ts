@@ -4,9 +4,9 @@
  * File           : EditionDefinition.ts
  * Version        : 1.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-10-23
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -18,7 +18,7 @@
  * Standards:
  * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 /**
@@ -64,10 +64,19 @@ export const EDITION_RANK: Record<UgonduEdition, number> = {
   SOVEREIGN:    5,
 };
 
-/** Normalize legacy edition aliases (e.g., FREE -> COMMUNITY) where canonical tier names are needed. */
+/**
+ * Normalize legacy edition aliases (e.g., FREE -> COMMUNITY) where canonical tier names are needed.
+ * @deprecated Deprecated since v1.0.0. 'FREE' edition alias is deprecated; use 'COMMUNITY'.
+ */
 export function normalizeEdition(value: string): UgonduEdition | undefined {
   const upper = value.trim().toUpperCase();
-  if (upper === 'FREE') return 'COMMUNITY';
+  if (upper === 'FREE') {
+    process.emitWarning(
+      "[UGONDU_DEPRECATION] Edition alias 'FREE' is deprecated and will be removed in a future release. Use 'COMMUNITY' instead.",
+      'DeprecationWarning'
+    );
+    return 'COMMUNITY';
+  }
   return UGONDU_EDITIONS.find((e) => e === upper);
 }
 
