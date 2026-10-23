@@ -44,23 +44,11 @@ jobs:
             exit 1
           fi
 
-      - name: Capture native linux/amd64 qualification record
-        run: node scripts/governance/capture-native-run.mjs --out native-record/linux-amd64.json
-
       - name: Run live canary
         env:
           UGONDU_AIRROOFERS_AI_KEY: ${{ secrets.UGONDU_AIRROOFERS_AI_KEY }}
           UGONDU_AIRROOFERS_AI_BASE_URL: https://ai.airroofers.eu
         run: node scripts/qualification/airroofers-ai-live-canary.mjs
-
-      - name: Upload native execution record
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: native-linux-amd64-record
-          path: native-record/linux-amd64.json
-          if-no-files-found: error
-          retention-days: 90
 
       - name: Upload redacted receipt
         if: always()

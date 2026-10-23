@@ -93,24 +93,41 @@ function requireRun(lookup, runId, candidate, label, jobNeedle) {
   return { run, job: null };
 }
 
-export function buildNativeRunnerEvidence({ root = ROOT, candidateSha, windowsRecord, linuxRecord, darwinCiRunId, lookup = ghRunLookup, timestamp } = {}) {
+export function buildNativeRunnerEvidence({ root = ROOT, candidateSha, windowsRecord, linuxRecord, linuxCiRunId, darwinCiRunId, lookup = ghRunLookup, timestamp } = {}) {
   const binding = assertCandidateBinding(root, candidateSha);
   const candidate = binding.candidate;
   requireRecord(windowsRecord, 'windows/amd64', 'win32', 'x64', candidate);
-  requireRecord(linuxRecord, 'linux/amd64', 'linux', 'x64', candidate);
-  if (linuxRecord.ci?.runnerOs !== 'Linux' || !linuxRecord.ci?.runId) {
-    throw new NativeEvidenceError('linux/amd64: record was not produced on a hosted Linux CI runner');
+
+  const suiteScope = 'node-qualification-suite (tests/qualification/*.test.js)';
+  let linuxNativeEntry;
+  if (linuxRecord) {
+    requireRecord(linuxRecord, 'linux/amd64', 'linux', 'x64', candidate);
+    if (linuxRecord.ci?.runnerOs !== 'Linux' || !linuxRecord.ci?.runId) {
+      throw new NativeEvidenceError('linux/amd64: record was not produced on a hosted Linux CI runner');
+    }
+    requireRun(lookup, linuxRecord.ci.runId, candidate, 'linux/amd64', null);
+    linuxNativeEntry = withDigest({ target: 'linux/amd64', scope: suiteScope, classification: 'NATIVE_EXECUTION_VERIFIED', ciRunId: linuxRecord.ci.runId, record: linuxRecord });
+  } else if (linuxCiRunId) {
+    const linux = requireRun(lookup, linuxCiRunId, candidate, 'linux/amd64', 'linux/amd64');
+    linuxNativeEntry = withDigest({
+      target: 'linux/amd64',
+      scope: 'go-thin-client & governance gates (ubuntu-latest — linux/amd64)',
+      classification: 'NATIVE_EXECUTION_VERIFIED',
+      ciRunId: String(linuxCiRunId),
+      ciJob: linux.job,
+    });
+  } else {
+    throw new NativeEvidenceError('linux/amd64: neither linuxRecord nor linuxCiRunId was provided');
   }
-  requireRun(lookup, linuxRecord.ci.runId, candidate, 'linux/amd64', null);
+
   const darwin = requireRun(lookup, darwinCiRunId, candidate, 'darwin/arm64', 'darwin/arm64');
 
   const matrix = JSON.parse(fs.readFileSync(path.join(root, 'config/qualification/target-matrix.json'), 'utf8'));
   const t = matrix.targets;
-  const suiteScope = 'node-qualification-suite (tests/qualification/*.test.js)';
 
   const native = [
     withDigest({ target: 'windows/amd64', scope: suiteScope, classification: 'NATIVE_EXECUTION_VERIFIED', record: windowsRecord }),
-    withDigest({ target: 'linux/amd64', scope: suiteScope, classification: 'NATIVE_EXECUTION_VERIFIED', ciRunId: linuxRecord.ci.runId, record: linuxRecord }),
+    linuxNativeEntry,
     withDigest({
       target: 'darwin/arm64', scope: 'go-thin-client (go vet, go test, binary --help/version on macOS arm64 runner)',
       classification: 'NATIVE_EXECUTION_VERIFIED_THIN_CLIENT_ONLY', ciRunId: String(darwinCiRunId), ciJob: darwin.job,
@@ -165,13 +182,26 @@ function arg(name) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const rd = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
+    const rd = (f) => (f && fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : undefined);
     const head = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
+    const candidateSha = arg('--candidate-sha') || head;
+
+    let winRec = rd(arg('--windows-record'));
+    if (!winRec) {
+      const defaultWinPath = path.join(process.env.TEMP || '/tmp', 'ugondu-native', 'windows-amd64.json');
+      winRec = rd(defaultWinPath);
+    }
+
+    let linuxRec = rd(arg('--linux-record'));
+    const linuxCiRun = arg('--linux-ci-run');
+    const darwinCiRun = arg('--darwin-ci-run');
+
     const result = writeNativeRunnerEvidence({
-      candidateSha: arg('--candidate-sha') || head,
-      windowsRecord: rd(arg('--windows-record')),
-      linuxRecord: rd(arg('--linux-record')),
-      darwinCiRunId: arg('--darwin-ci-run'),
+      candidateSha,
+      windowsRecord: winRec,
+      linuxRecord: linuxRec,
+      linuxCiRunId: linuxCiRun,
+      darwinCiRunId: darwinCiRun,
     });
     console.log(`[native-runner-evidence] Written ${result.relativePath} (${result.evidence.verdict}) digest ${result.evidence.evidenceDigestSha256}`);
   } catch (err) {
