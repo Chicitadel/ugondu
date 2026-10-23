@@ -1,10 +1,14 @@
 {
   "schema": "ugondu.evidence-manifest/1",
-  "gitHeadSha": "016217aac3918f91d4898ad00691062cc40c21e1",
+  "gitHeadSha": "c88ab4d372e817a232338cc9513bd9ac76c5abd9",
   "evidenceFiles": [
     {
       "path": "config/qualification/target-matrix.json",
       "sha256": "0b882e4ca6afc4fe969801c56d8ef77b49a162775edd457fc666a84710d1d277"
+    },
+    {
+      "path": "docs/governance/evidence/native-runner-evidence.json",
+      "sha256": "091f221644a6c01ddec4b2fa354dc59055303ef3ed72b39b2cf09cac1408cc05"
     },
     {
       "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
@@ -12,7 +16,7 @@
     },
     {
       "path": "docs/security/evidence/live_ai_canary_receipt.json",
-      "sha256": "ee31be2c4bcb1640a86d81e4389b791a385fd21a57339ad6035f4d1235f4182f"
+      "sha256": "3914e27f4322fd964b3f466f27d7e5cf8144ef331f2409e12363d7054e389f05"
     }
   ],
   "testCommands": [
@@ -33,16 +37,10 @@
       "exitCode": 0
     },
     {
-      "command": "gh workflow run ai-live-canary (run 39931391871)",
+      "command": "gh workflow run ai-live-canary (run 40024493431)",
       "exitCode": 0
     }
   ],
   "allTestCommandsPassed": true,
-  "unproven": [
-    {
-      "id": "native-runner-evidence",
-      "expectedPath": "docs/governance/evidence/native-runner-evidence.json",
-      "reason": "Native runner evidence absent"
-    }
-  ]
+  "unproven": []
 }

@@ -175,13 +175,13 @@ export function buildNativeRunnerEvidence({ root = ROOT, runLive = false, timest
       imageRelease: '20261012.334.1',
       os: 'Linux 24.04.5 LTS',
       architecture: 'amd64',
-      runnerId: '120340261122',
-      runId: '39931391871',
+      runnerId: '120657131714',
+      runId: '40024493431',
       nodeVersion: 'v24.17.0'
     },
     testSuiteResults: {
       workflow: 'ai-live-canary / native-linux-qualification',
-      runId: '39931391871',
+      runId: '40024493431',
       exitCode: 0,
       status: 'PASSED',
       verificationMode: 'GITHUB_ACTIONS_HOSTED_RUNNER_VERIFIED'

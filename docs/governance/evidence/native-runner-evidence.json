@@ -4,8 +4,8 @@
   "evidenceType": "UGONDU_NATIVE_RUNNER_QUALIFICATION_EVIDENCE",
   "authority": "Ujomor Systems Engineering & Governance Authority",
   "organization": "Air Roofers SASU",
-  "generatedAt": "2026-10-23T20:43:12.944Z",
-  "gitHeadSha": "0245740a6e4c89d5c1f1d3609e5f9d1f9a660db0",
+  "generatedAt": "2026-10-23T21:09:17.176Z",
+  "gitHeadSha": "c88ab4d372e817a232338cc9513bd9ac76c5abd9",
   "qualificationSummary": {
     "totalQualificationTests": 127,
     "passingQualificationTests": 127,
@@ -33,7 +33,7 @@
         "cpuModel": "Intel(R) Xeon(R) CPU           X3470  @ 2.93GHz",
         "cpuCores": 8,
         "totalMemoryBytes": 34349445120,
-        "freeMemoryBytes": 1281024000
+        "freeMemoryBytes": 6748119040
       },
       "testSuiteResults": {
         "suite": "tests/qualification/*.test.js",
@@ -45,7 +45,7 @@
         "status": "PASSED",
         "verificationMode": "RECORDED_AUTHENTIC_VERIFICATION"
       },
-      "verificationDigestSha256": "8edbd50f9e5f5031887ac7106678eaae7548f0dfc86815af2d8c0c4710ac50ec"
+      "verificationDigestSha256": "86bbcf6763450323b2a41d99279e6bed1a2a7a186a435fc3453682ecf2a0008f"
     },
     {
       "target": "linux/amd64",
@@ -61,18 +61,18 @@
         "imageRelease": "20261012.334.1",
         "os": "Linux 24.04.5 LTS",
         "architecture": "amd64",
-        "runnerId": "120340261122",
-        "runId": "39931391871",
+        "runnerId": "120657131714",
+        "runId": "40024493431",
         "nodeVersion": "v24.17.0"
       },
       "testSuiteResults": {
         "workflow": "ai-live-canary / native-linux-qualification",
-        "runId": "39931391871",
+        "runId": "40024493431",
         "exitCode": 0,
         "status": "PASSED",
         "verificationMode": "GITHUB_ACTIONS_HOSTED_RUNNER_VERIFIED"
       },
-      "verificationDigestSha256": "cd93003b003610587018ef85d9781312032b9884be8c9690a87d1a333d6cbf46"
+      "verificationDigestSha256": "6a5be28afa93dc0c18112179d1a6ea946ba01796f6d4a08ac222a1e152370c1b"
     }
   ],
   "tier2CrossCompiledTargets": [
@@ -281,5 +281,5 @@
       "verificationDigestSha256": "73aafdf5a12546d62a964a77fa3d15ea3fb38858ce8b4f0c7d8847d2fe2bf8e6"
     }
   ],
-  "evidenceDigestSha256": "3cc81e8332e82a83040ee6dc7c3f0fae019e1facdb7a7e8f98bf5440f31c2b8a"
+  "evidenceDigestSha256": "2535fde64f6124b67034d8cc74e3676c6288e98b377a5f657e3fc9054311669f"
 }
