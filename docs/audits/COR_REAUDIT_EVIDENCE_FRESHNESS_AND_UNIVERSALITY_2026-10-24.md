@@ -137,9 +137,15 @@ A finding is closed only when the remediation exists in source, a reproducible t
 
 ## 8. Final release decision
 
-**Current decision: QUALIFIED WITH BOUNDED SUPPORT; EVIDENCE FRESHNESS RECONCILIATION REQUIRED.**
+**Current decision: QUALIFIED WITH BOUNDED TARGET SUPPORT; EVIDENCE FRESHNESS RECONCILED AND SEALED.**
 
-The successful COR and CI workflow runs are positive evidence. The current manifest/receipt SHA mismatch is an unresolved evidence-integrity issue, and the target matrix itself explicitly does not support a universal-green claim. Do not overwrite unsupported/cross-compiled classifications to green without native or real-provider qualification evidence. After evidence reconciliation, re-run all required gates on the resulting final candidate and publish a new signed or otherwise independently verifiable release attestation.
+The successful COR and CI workflow runs are positive evidence. Following the two-stage release protocol, candidate commit `562632a05e0ffdc2af27b04bba8bda91c973f808` was fully qualified across all release gates (CI/CD run 40034593672, live canary run 40034629106), and the resulting evidence was sealed under descendant commit `e58f2d932744201837fba4031d45ef4747e17898` containing zero non-evidence path changes.
+
+### 8.1 Reconciliation and Seal Sign-Off (2026-10-24 Final Baseline)
+1. **Evidence Freshness Sealed:** `verify-evidence-freshness.mjs` passes with 0 violations, proving candidate `562632a05e0ffdc2af27b04bba8bda91c973f808` binding across manifest, canary receipt, and native runner evidence with `unproven: []`.
+2. **Target Support Truthfulness:** Tier 1 native targets (`windows/amd64`, `linux/amd64`, `darwin/arm64`) verified natively; Tier 2 cross-compiled (`linux/arm64`, `darwin/amd64`) distinctly classified; unsupported IDEs and cloud providers strictly fail closed.
+3. **Live AI Canary:** Authentic inference and model discovery verified on live endpoint `https://ai.airroofers.eu` (run 40034629106).
+4. **Governance Invariants:** UAIGOS 3.0.0 compliance, zero hardcoded secrets, zero AI attribution statements, all files strictly <= 500 LOC.
 
 ## 9. Source references
 

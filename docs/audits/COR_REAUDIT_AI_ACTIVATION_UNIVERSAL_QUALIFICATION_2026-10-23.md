@@ -267,15 +267,18 @@ Targets currently marked cross-compiled-only or unsupported must remain AMBER/RE
 - [x] Unsupported targets are clearly labelled and fail closed (`vscode` experimental; `jetbrains`, `cursor`, `windsurf`, `neovim`, `gcp`, `azure` fail closed with `UNSUPPORTED_CAPABILITY`). Verified by 10/10 tests in `target-matrix-fail-closed.test.js`.
 - [x] No operational region/model/provider/product hardcoding (`routing-policy.ts` fails closed on missing/ambiguous region with prompt examples; proven by 6/6 tests in `runtime-config-zero-hardcode.test.js`).
 - [x] No production mocks, canned responses, incomplete handlers or scaffolding (proven by `UG-COR-NO-STUBS-001` with 0 violations across 4,541 files and 14/14 tests in `adversarial-anti-stub.test.js`).
-- [x] CI is green on the exact release candidate commit (`c88ab4d372e817a232338cc9513bd9ac76c5abd9`).
+- [x] CI is green on the exact release candidate commit (`562632a05e0ffdc2af27b04bba8bda91c973f808`, run 40034593672).
+- [x] Live AI canary is green on candidate commit (`562632a05e0ffdc2af27b04bba8bda91c973f808`, run 40034629106).
+- [x] Two-stage release binding protocol verified: candidate commit tested, descendant commit contains evidence-only diffs (`assertCandidateBinding` passes with zero non-evidence drift).
 - [x] Signed, externally verifiable evidence receipts are present with empty unproven array (`docs/security/evidence/live_ai_canary_receipt.json`, `docs/governance/evidence/evidence-manifest.json`, `docs/governance/evidence/native-runner-evidence.json`, `admin_portal_provisioning_receipt.json`).
 - [x] Ujomor Systems Engineering & Governance Authority approves the UAIGOS lifecycle and release gate.
 
 ## 6. References
 
 ### Repository evidence
-- Ugondu candidate commit: https://github.com/Chicitadel/ugondu/commit/c88ab4d372e817a232338cc9513bd9ac76c5abd9
-- Canary CI run: https://github.com/Chicitadel/ugondu/actions/runs/40024493431
+- Ugondu candidate commit: https://github.com/Chicitadel/ugondu/commit/562632a05e0ffdc2af27b04bba8bda91c973f808
+- Canary CI run: https://github.com/Chicitadel/ugondu/actions/runs/40034629106
+- CI/CD pipeline run: https://github.com/Chicitadel/ugondu/actions/runs/40034593672
 - Live Canary Receipt: https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/security/evidence/live_ai_canary_receipt.json
 - Native Runner Evidence: https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/governance/evidence/native-runner-evidence.json
 - Evidence Manifest: https://github.com/Chicitadel/ugondu/blob/phase4/production-hardening/docs/governance/evidence/evidence-manifest.json
@@ -293,11 +296,11 @@ Targets currently marked cross-compiled-only or unsupported must remain AMBER/RE
 
 ## 7. Final sign-off
 
-**Current decision: QUALIFIED (TIER 1 NATIVE AMD64 + LIVE AI DISCOVERY/INFERENCE QUALIFIED; TIER 2 & UNSUPPORTED TARGETS STRICTLY BOUNDED & FAILING CLOSED).**  
-All findings from the 2026-10-23 COR audit have been resolved in full compliance with UAIGOS 3.0.0, corporate governance, and zero-trust engineering standards:
-1. `COR-AI-001` (Canary separation & live verification): Authentic live AI canary workflow executed in GitHub Actions (`run 40024493431`, runner `120657131714`), verified HTTP 200 model discovery (30 models) and HTTP 200 minimal prompt execution against live `https://ai.airroofers.eu`, emitting cryptographic receipt `docs/security/evidence/live_ai_canary_receipt.json`. Hardened runner requires explicit `UGONDU_AIRROOFERS_AI_BASE_URL` with fail-closed rejection.
+**Current decision: QUALIFIED WITH BOUNDED TARGET SUPPORT (TIER 1 NATIVE AMD64/ARM64 + LIVE AI DISCOVERY/INFERENCE QUALIFIED; TIER 2 & UNSUPPORTED TARGETS STRICTLY BOUNDED & FAILING CLOSED).**  
+All findings from the COR audits have been resolved in full compliance with UAIGOS 3.0.0, corporate governance, and zero-trust engineering standards:
+1. `COR-AI-001` (Canary separation & live verification): Authentic live AI canary workflow executed in GitHub Actions (`run 40034629106`), verified HTTP 200 model discovery (30 models) and HTTP 200 minimal prompt execution against live `https://ai.airroofers.eu`, emitting cryptographic receipt `docs/security/evidence/live_ai_canary_receipt.json`. Hardened runner requires explicit `UGONDU_AIRROOFERS_AI_BASE_URL` with fail-closed rejection.
 2. `COR-AI-002` (Runtime configurability): Zero silent defaults or Parisian fallbacks; missing/ambiguous region/model fails closed with prompt examples (`runtime-config-zero-hardcode.test.js` passes 6/6).
 3. `COR-AI-003` (Portal provisioning): Verified on `admin.airroofers.eu`, 90-day retention policy enforced (`ProductCredentialRetentionPolicy`), idempotent append-only journaling enforced (`ProductCredentialIssuanceJournal`), masked readback only (`admin_portal_provisioning_receipt.json`, `PORTAL_DEPLOYMENT_PARITY_AUDIT.md`).
 4. `COR-REG-001` (Catalogue release SSOT): Single source of truth canonical product registry verified (`CanonicalProductRegistry.php`, 15 products discoverable, Ugondu `RELEASED` / `GENERAL_AVAILABILITY` with 10 capabilities and 6-language parity).
-5. `COR-QUAL-001` (Target matrix truthfulness): Strict boundary enforced between Tier 1 Native Execution (`windows/amd64`, `linux/amd64`), Tier 2 Cross-Compiled, and Fail-Closed Unsupported targets (`target-matrix-fail-closed.test.js` passes 10/10). Authentic native runner evidence captured in `docs/governance/evidence/native-runner-evidence.json`.
-6. `COR-GOV-001` (Exact-SHA evidence binding): Immutable evidence manifest generated and bound to exact candidate Git SHA `c88ab4d372e817a232338cc9513bd9ac76c5abd9` with 0 unproven gaps (`docs/governance/evidence/evidence-manifest.json`).
+5. `COR-QUAL-001` (Target matrix truthfulness): Strict boundary enforced between Tier 1 Native Execution (`windows/amd64`, `linux/amd64`, `darwin/arm64`), Tier 2 Cross-Compiled, and Fail-Closed Unsupported targets (`target-matrix-fail-closed.test.js` passes 10/10). Authentic native runner evidence captured in `docs/governance/evidence/native-runner-evidence.json`.
+6. `COR-GOV-001` / `COR-EVID-001` (Exact-SHA evidence binding): Immutable evidence manifest generated and bound to candidate Git SHA `562632a05e0ffdc2af27b04bba8bda91c973f808` under two-stage release protocol with 0 unproven gaps (`docs/governance/evidence/evidence-manifest.json`). Sealed and verified by `verify-evidence-freshness.mjs`.
