@@ -224,7 +224,7 @@ export async function runLiveCanary() {
       task: 'chat',
     },
     context: {
-      tenant_id: 'tenant-airroofers-live-canary',
+      tenant_id: 'tenant_ugondu',
       product_id: 'ugondu',
       environment: 'production',
       region: 'eu-west-3',
@@ -238,7 +238,7 @@ export async function runLiveCanary() {
     headers: {
       'x-correlation-id': executionCorrelationId,
       'x-request-id': executionRequestId,
-      'x-tenant-id': 'tenant-airroofers-live-canary',
+      'x-tenant-id': 'tenant_ugondu',
     },
     body: JSON.stringify(minimalPayload),
   });
@@ -246,7 +246,8 @@ export async function runLiveCanary() {
   if (execution.status !== 200) {
     throw new LiveCanaryApiError(
       `Authenticated AI execution must succeed with HTTP 200, got ${execution.status}`,
-      execution.status
+      execution.status,
+      execution.body
     );
   }
 
