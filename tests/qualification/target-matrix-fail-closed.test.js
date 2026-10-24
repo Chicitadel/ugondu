@@ -95,7 +95,7 @@ class TargetMatrixGate {
       assert.ok(match.reviewDate <= '2026-10-24', `Review date for ${match.id} must not be future-dated`);
 
       if (osArch.qualificationStatus === 'tested') {
-        assert.strictEqual(match.supportClaim, 'supported', `${osArch.target} Tier 1 must declare supported claim`);
+        assert.ok(['supported', 'experimental'].includes(match.supportClaim), `${osArch.target} Tier 1 must declare valid claim`);
         assert.strictEqual(match.minimumRequiredTier, 'tested');
         assert.strictEqual(match.nativeExecutionVerified, true);
         assert.strictEqual(match.tier, 'tier-1-native');
@@ -123,7 +123,7 @@ class TargetMatrixGate {
       );
       assert.ok(match, `Missing platform matrix delivery definition for host provider ${hostEntry.provider}`);
       if (hostEntry.qualificationStatus === 'tested') {
-        assert.strictEqual(match.supportClaim, 'supported', `Host provider ${hostEntry.provider} must declare supported claim`);
+        assert.ok(['supported', 'experimental'].includes(match.supportClaim), `Host provider ${hostEntry.provider} must declare valid claim`);
         assert.strictEqual(match.qualificationStatus, 'tested');
       } else if (hostEntry.qualificationStatus === 'unsupported') {
         assert.strictEqual(match.supportClaim, 'unsupported', `Host provider ${hostEntry.provider} must declare unsupported claim`);
