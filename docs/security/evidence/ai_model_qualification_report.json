@@ -1,0 +1,1187 @@
+{
+  "reportType": "AI_MODEL_QUALIFICATION_REPORT",
+  "version": "1.0.0",
+  "generatedAt": "2026-10-24T10:31:13.021Z",
+  "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+  "qualificationMode": "CATALOG_OFFLINE",
+  "summary": {
+    "totalDiscovered": 12,
+    "qualifiedCount": 12,
+    "activeCount": 12,
+    "disabledCount": 0
+  },
+  "receipts": [
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "general-chat",
+      "providerId": "aws-bedrock",
+      "timestamp": "2026-10-24T10:31:13.014Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": true,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "090d968a8f02e396e22f96edcfadc28eaf6f7dec39ee327334b42b52f269a39e",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "deployment-classifier",
+      "providerId": "sovereign-deterministic",
+      "timestamp": "2026-10-24T10:31:13.015Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": true,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 64000,
+        "maxOutputTokens": 2048
+      },
+      "inferenceDigestSha256": "02d73166bbdc8ccf35e81d82774f248c2ee7ade324a217346cd925ca19609e77",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "policy-advisor",
+      "providerId": "anthropic",
+      "timestamp": "2026-10-24T10:31:13.015Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": true,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 200000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "46e393f9e21b439d1e3efbd3463c197751d9c3eb8407803f64b322524accfe58",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "code-analyzer",
+      "providerId": "openai",
+      "timestamp": "2026-10-24T10:31:13.016Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": true,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text",
+          "image"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 8192
+      },
+      "inferenceDigestSha256": "6008d993a551e73894902edaf26f2fc0a357b434b1790fa24a4817e35734cf1c",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "embeddings-standard",
+      "providerId": "google-gemini",
+      "timestamp": "2026-10-24T10:31:13.017Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": false,
+        "toolCalling": false,
+        "structuredOutput": true,
+        "modalities": [
+          "embedding",
+          "text"
+        ],
+        "maxInputTokens": 32768,
+        "maxOutputTokens": 1536
+      },
+      "inferenceDigestSha256": "507e4bbd282395e6b76d3073b9ae2f2d6431ddfe99446b2ed8ec22e29ae2c80d",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "azure-enterprise-chat",
+      "providerId": "azure-openai",
+      "timestamp": "2026-10-24T10:31:13.017Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": true,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "6bb536ad9a326d66aa524751b723e1075973467e87c4867863e2bdee0c9adfc3",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "sovereign-fallback",
+      "providerId": "sovereign-deterministic",
+      "timestamp": "2026-10-24T10:31:13.018Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": true,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "0abfb09144fb1a7453f784e7299e10601a81365e121d1cbcfba8781c99e50ad3",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "sovereign-embeddings",
+      "providerId": "sovereign-deterministic",
+      "timestamp": "2026-10-24T10:31:13.018Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": false,
+        "toolCalling": false,
+        "structuredOutput": true,
+        "modalities": [
+          "embedding",
+          "text"
+        ],
+        "maxInputTokens": 32768,
+        "maxOutputTokens": 1536
+      },
+      "inferenceDigestSha256": "167e6f07fc2760e9699636fcdd998d99da32f05a7f5c2b7886fd8aae95e8104a",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "legacy-unapproved",
+      "providerId": "openai",
+      "timestamp": "2026-10-24T10:31:13.019Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": false,
+        "toolCalling": false,
+        "structuredOutput": false,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 4096,
+        "maxOutputTokens": 1024
+      },
+      "inferenceDigestSha256": "9d160e7660c893efb22472b329ff7f25bf53dba9341e360aa3b5dc93273614ed",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "airroofers-sentinel",
+      "providerId": "airroofers-ai",
+      "timestamp": "2026-10-24T10:31:13.020Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": false,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "30bf6b07b2eb8a6e4e3c1871d4f44ab9a1915a22809b8bc9e25cef5008f6a6ef",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "sovereign-eu-chat",
+      "providerId": "airroofers-ai",
+      "timestamp": "2026-10-24T10:31:13.020Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": false,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "08a0efb79902c0ee8c8d04c0689a29a081562299ddde271e70efafa3ff35595e",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    },
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "airroofers-sentinel-v1",
+      "providerId": "airroofers-ai",
+      "timestamp": "2026-10-24T10:31:13.020Z",
+      "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+      "status": "QUALIFIED",
+      "capabilities": {
+        "streaming": false,
+        "toolCalling": true,
+        "structuredOutput": true,
+        "modalities": [
+          "text"
+        ],
+        "maxInputTokens": 128000,
+        "maxOutputTokens": 4096
+      },
+      "inferenceDigestSha256": "aa336675c55e24e160efb5e339c94f91f548d22bbf5ca8af58460e4c5129a1dc",
+      "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+    }
+  ],
+  "diagnostics": [
+    {
+      "alias": "general-chat",
+      "providerId": "aws-bedrock",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "general-chat",
+        "providerId": "aws-bedrock",
+        "timestamp": "2026-10-24T10:31:13.014Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": true,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "090d968a8f02e396e22f96edcfadc28eaf6f7dec39ee327334b42b52f269a39e",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "deployment-classifier",
+      "providerId": "sovereign-deterministic",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.014Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "deployment-classifier",
+        "providerId": "sovereign-deterministic",
+        "timestamp": "2026-10-24T10:31:13.015Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": true,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 64000,
+          "maxOutputTokens": 2048
+        },
+        "inferenceDigestSha256": "02d73166bbdc8ccf35e81d82774f248c2ee7ade324a217346cd925ca19609e77",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "policy-advisor",
+      "providerId": "anthropic",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.015Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "policy-advisor",
+        "providerId": "anthropic",
+        "timestamp": "2026-10-24T10:31:13.015Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": true,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 200000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "46e393f9e21b439d1e3efbd3463c197751d9c3eb8407803f64b322524accfe58",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "code-analyzer",
+      "providerId": "openai",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "code-analyzer",
+        "providerId": "openai",
+        "timestamp": "2026-10-24T10:31:13.016Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": true,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text",
+            "image"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 8192
+        },
+        "inferenceDigestSha256": "6008d993a551e73894902edaf26f2fc0a357b434b1790fa24a4817e35734cf1c",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "embeddings-standard",
+      "providerId": "google-gemini",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.016Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "embeddings-standard",
+        "providerId": "google-gemini",
+        "timestamp": "2026-10-24T10:31:13.017Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": false,
+          "toolCalling": false,
+          "structuredOutput": true,
+          "modalities": [
+            "embedding",
+            "text"
+          ],
+          "maxInputTokens": 32768,
+          "maxOutputTokens": 1536
+        },
+        "inferenceDigestSha256": "507e4bbd282395e6b76d3073b9ae2f2d6431ddfe99446b2ed8ec22e29ae2c80d",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "azure-enterprise-chat",
+      "providerId": "azure-openai",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "azure-enterprise-chat",
+        "providerId": "azure-openai",
+        "timestamp": "2026-10-24T10:31:13.017Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": true,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "6bb536ad9a326d66aa524751b723e1075973467e87c4867863e2bdee0c9adfc3",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "sovereign-fallback",
+      "providerId": "sovereign-deterministic",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.017Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "sovereign-fallback",
+        "providerId": "sovereign-deterministic",
+        "timestamp": "2026-10-24T10:31:13.018Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": true,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "0abfb09144fb1a7453f784e7299e10601a81365e121d1cbcfba8781c99e50ad3",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "sovereign-embeddings",
+      "providerId": "sovereign-deterministic",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.018Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "sovereign-embeddings",
+        "providerId": "sovereign-deterministic",
+        "timestamp": "2026-10-24T10:31:13.018Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": false,
+          "toolCalling": false,
+          "structuredOutput": true,
+          "modalities": [
+            "embedding",
+            "text"
+          ],
+          "maxInputTokens": 32768,
+          "maxOutputTokens": 1536
+        },
+        "inferenceDigestSha256": "167e6f07fc2760e9699636fcdd998d99da32f05a7f5c2b7886fd8aae95e8104a",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "legacy-unapproved",
+      "providerId": "openai",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "legacy-unapproved",
+        "providerId": "openai",
+        "timestamp": "2026-10-24T10:31:13.019Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": false,
+          "toolCalling": false,
+          "structuredOutput": false,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 4096,
+          "maxOutputTokens": 1024
+        },
+        "inferenceDigestSha256": "9d160e7660c893efb22472b329ff7f25bf53dba9341e360aa3b5dc93273614ed",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "airroofers-sentinel",
+      "providerId": "airroofers-ai",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.019Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "airroofers-sentinel",
+        "providerId": "airroofers-ai",
+        "timestamp": "2026-10-24T10:31:13.020Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": false,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "30bf6b07b2eb8a6e4e3c1871d4f44ab9a1915a22809b8bc9e25cef5008f6a6ef",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "sovereign-eu-chat",
+      "providerId": "airroofers-ai",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "sovereign-eu-chat",
+        "providerId": "airroofers-ai",
+        "timestamp": "2026-10-24T10:31:13.020Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": false,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "08a0efb79902c0ee8c8d04c0689a29a081562299ddde271e70efafa3ff35595e",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    },
+    {
+      "alias": "airroofers-sentinel-v1",
+      "providerId": "airroofers-ai",
+      "state": "ACTIVE",
+      "canRoute": true,
+      "circuitBreaker": {
+        "state": "CLOSED",
+        "consecutiveFailures": 0,
+        "openedAt": null
+      },
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Discovered"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "SCHEMA_VALIDATED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Schema structural criteria validated"
+        },
+        {
+          "from": "SCHEMA_VALIDATED",
+          "to": "POLICY_CHECKED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Governance and credential policies verified"
+        },
+        {
+          "from": "POLICY_CHECKED",
+          "to": "CAPABILITY_PROBED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Capabilities probed and verified"
+        },
+        {
+          "from": "CAPABILITY_PROBED",
+          "to": "INFERENCE_VERIFIED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Minimal test inference verified"
+        },
+        {
+          "from": "INFERENCE_VERIFIED",
+          "to": "QUALIFIED",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Qualification receipt signed"
+        },
+        {
+          "from": "QUALIFIED",
+          "to": "ACTIVE",
+          "timestamp": "2026-10-24T10:31:13.020Z",
+          "reason": "Activated for live routing"
+        }
+      ],
+      "receipt": {
+        "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+        "version": "1.0.0",
+        "modelAlias": "airroofers-sentinel-v1",
+        "providerId": "airroofers-ai",
+        "timestamp": "2026-10-24T10:31:13.020Z",
+        "gitSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+        "status": "QUALIFIED",
+        "capabilities": {
+          "streaming": false,
+          "toolCalling": true,
+          "structuredOutput": true,
+          "modalities": [
+            "text"
+          ],
+          "maxInputTokens": 128000,
+          "maxOutputTokens": 4096
+        },
+        "inferenceDigestSha256": "aa336675c55e24e160efb5e339c94f91f548d22bbf5ca8af58460e4c5129a1dc",
+        "verification": "SOVEREIGN_GOVERNANCE_QUALIFIED"
+      }
+    }
+  ]
+}
