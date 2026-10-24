@@ -493,5 +493,3 @@ test('LIFECYCLE-032: Public AI barrel strictly prohibits minting exports and exp
   assert.strictEqual(typeof aiBarrel.validateLiveInferenceReceipt, 'function');
   assert.strictEqual(typeof aiBarrel.isTrustedLiveInferenceReceipt, 'function');
 });
-
-require('./model-lifecycle-adversarial-qualification.test.js');
