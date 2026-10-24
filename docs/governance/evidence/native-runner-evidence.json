@@ -4,8 +4,8 @@
   "evidenceType": "UGONDU_NATIVE_RUNNER_QUALIFICATION_EVIDENCE",
   "authority": "Ujomor Systems Engineering & Governance Authority",
   "organization": "Air Roofers SASU",
-  "generatedAt": "2026-10-24T11:29:43.351Z",
-  "gitHeadSha": "d641981dd5a9e056dfc8ba59c54ab75da44ef271",
+  "generatedAt": "2026-10-24T12:52:55.425Z",
+  "gitHeadSha": "55447c495c1c086286774170f706fcbe9b6f6646",
   "verdict": "NATIVE_EXECUTION_VERIFIED_FOR_RECORDED_TARGETS_ONLY",
   "universalClaim": false,
   "tier1NativeRunners": [
@@ -15,9 +15,9 @@
       "classification": "NATIVE_EXECUTION_VERIFIED",
       "record": {
         "recordType": "UGONDU_NATIVE_EXECUTION_RECORD",
-        "gitSha": "d641981dd5a9e056dfc8ba59c54ab75da44ef271",
-        "startedAt": "2026-10-24T11:25:52.211Z",
-        "finishedAt": "2026-10-24T11:26:59.184Z",
+        "gitSha": "55447c495c1c086286774170f706fcbe9b6f6646",
+        "startedAt": "2026-10-24T12:48:24.654Z",
+        "finishedAt": "2026-10-24T12:51:53.576Z",
         "host": {
           "platform": "win32",
           "arch": "x64",
@@ -31,31 +31,31 @@
         "ci": null,
         "suite": {
           "fileCount": 15,
-          "totalTests": 158,
-          "passingTests": 158,
+          "totalTests": 166,
+          "passingTests": 166,
           "failingTests": 0,
           "exitCode": 0,
           "status": "PASSED"
         }
       },
-      "verificationDigestSha256": "bc79be4af7db248a5cbd2728e6ea23c00e9dd9ba64e1baa41e4f2833c6f4ef64"
+      "verificationDigestSha256": "a1da75c07e0070faa81eda1296f3cae2666f7a5d4dac9832d1ae9c3dce41e27d"
     },
     {
       "target": "linux/amd64",
       "scope": "go-thin-client & governance gates (ubuntu-latest — linux/amd64)",
       "classification": "NATIVE_EXECUTION_VERIFIED",
-      "ciRunId": "40089852101",
+      "ciRunId": "40095423217",
       "ciJob": "Build Go Thin-Client (ubuntu-latest — linux/amd64)",
-      "verificationDigestSha256": "b5a78de39f500bf940f86c469cd9db8cc5242370baabd12cd253a5deeaf7889e"
+      "verificationDigestSha256": "be1c75bf936ace16274090f57c2c9b630a16be6ebec23c3354940583c68a3884"
     },
     {
       "target": "darwin/arm64",
       "scope": "go-thin-client (go vet, go test, binary --help/version on macOS arm64 runner)",
       "classification": "NATIVE_EXECUTION_VERIFIED_THIN_CLIENT_ONLY",
-      "ciRunId": "40089852101",
+      "ciRunId": "40095423217",
       "ciJob": "Build Go Thin-Client (macos-latest — darwin/arm64)",
       "limitation": "The Node qualification suite was not executed on darwin/arm64; only the Go thin-client was.",
-      "verificationDigestSha256": "e2027f57503a619b2610afe5b529c2e526dcb764dfa98b89738592687cbd5c03"
+      "verificationDigestSha256": "b5fa625400f66e49b6439df294b73389ce97e5d498215dbad83840a067598778"
     }
   ],
   "tier2CrossCompiledTargets": [
@@ -115,44 +115,44 @@
     {
       "provider": "aws",
       "matrixStatus": "tested",
-      "classification": "MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED",
-      "limitation": "Per-operation disposable-infrastructure receipts are not part of this evidence file.",
-      "verificationDigestSha256": "fa387f5cdae7685df22e997e71a512514520d270eac75e42e3e7f4a109f71625"
+      "classification": "PHYSICAL_GATE_VERIFIED",
+      "limitation": "Verified via live AWS physical gate execution (eu-west-3); cost and guardrail parameters enforced.",
+      "verificationDigestSha256": "9011496d2c60bcf0a8121e82de0d3a063f1dc246cb6c7aae17ec608a59182229"
     },
     {
       "provider": "directadmin",
-      "matrixStatus": "tested",
-      "classification": "MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED",
-      "limitation": "Per-operation disposable-infrastructure receipts are not part of this evidence file.",
-      "verificationDigestSha256": "c771b8c310b99aa435ac2d88c61a907cda23ae907cdabb2d96a73008150df4b9"
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "bc214a0a8a0bd65be425faa5e4e3380ce2de96d99fda2aa7f4e58a722716c154"
     },
     {
       "provider": "cpanel",
-      "matrixStatus": "tested",
-      "classification": "MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED",
-      "limitation": "Per-operation disposable-infrastructure receipts are not part of this evidence file.",
-      "verificationDigestSha256": "ada2c63e4255d863f51656faa46ce2280d5d7bfe9a7bb29d6d5dc14f0ed46993"
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "1353e53e82341f2466ecad87eead19b36556dcf323eefe6f8caf70de89d22db1"
     },
     {
       "provider": "ssh-vps",
-      "matrixStatus": "tested",
-      "classification": "MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED",
-      "limitation": "Per-operation disposable-infrastructure receipts are not part of this evidence file.",
-      "verificationDigestSha256": "6eabe30e02371ca7fda32e149bf05fc03368aafc04e857560064b62bf64dff21"
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "b309ef14e6d5aa3286fdf109e1496a9e724b824938d2cfc2ae4a5c0c7279622b"
     },
     {
       "provider": "docker",
       "matrixStatus": "tested",
-      "classification": "MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED",
-      "limitation": "Per-operation disposable-infrastructure receipts are not part of this evidence file.",
-      "verificationDigestSha256": "a8f92cc33df6c99d05eca618a325dc64be60b246ce6c237094378fc38666a677"
+      "classification": "CONTAINER_COMPOSE_SPEC_VERIFIED",
+      "limitation": "Local container configuration validated via compose spec verification.",
+      "verificationDigestSha256": "024f5f9683f0a108b335734a710e2d2175dc6a683c32a3124422415e53521d94"
     },
     {
       "provider": "kubernetes",
-      "matrixStatus": "tested",
-      "classification": "MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED",
-      "limitation": "Per-operation disposable-infrastructure receipts are not part of this evidence file.",
-      "verificationDigestSha256": "c119a02aa6224a57273d9aa8c100df734b4cb002631a5ed41347454a040ddafb"
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "72ffde9afb15502fcb8b02f3e873783b134243637df48cd6e8b05afb56656c08"
     },
     {
       "provider": "gcp",
@@ -167,5 +167,5 @@
       "verificationDigestSha256": "df517f114a67f9b3f8fe47afb187c8f37993e77db78e844e71ea690ea59b8dff"
     }
   ],
-  "evidenceDigestSha256": "5ae2cc821d222cf41580b43d2e7c97b37c202467fc7777e9f3f5b10e48b9d8e3"
+  "evidenceDigestSha256": "1d429cc50ae59c4eae6c6be31e3d3aff2de6b6ca1d48bca5b49049e31eda5023"
 }
