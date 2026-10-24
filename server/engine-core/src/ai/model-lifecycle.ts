@@ -59,7 +59,7 @@ import {
 } from './lifecycle-state';
 
 export type { LifecycleFailureReasonCode, LiveInferenceReceipt, LiveInferenceReceiptParams, ModelLifecycleAuditRecord, ModelQualificationReceipt, ModelQualificationState, PersistedLifecycleRecord };
-export { ALLOWLISTED_LIVE_ENDPOINT_HOST, assertValidLifecycleTransition, CircuitBreaker, computeReceiptDigest, createTrustedLiveInferenceReceipt, DEV_FALLBACK_KEY, DEV_KEY_ID, isTrustedLiveInferenceReceipt, isValidLifecycleTransition, loadPersistedLifecycleReceipt, ModelLifecycleError, ModelLifecycleStateMachine, persistLifecycleReceipt, ProvenanceConfigurationError, TrustedReceiptService, VALID_LIFECYCLE_TRANSITIONS, validateLiveInferenceReceipt };
+export { ALLOWLISTED_LIVE_ENDPOINT_HOST, assertValidLifecycleTransition, CircuitBreaker, computeReceiptDigest, DEV_FALLBACK_KEY, DEV_KEY_ID, isTrustedLiveInferenceReceipt, isValidLifecycleTransition, loadPersistedLifecycleReceipt, ModelLifecycleError, ModelLifecycleStateMachine, persistLifecycleReceipt, ProvenanceConfigurationError, TrustedReceiptService, VALID_LIFECYCLE_TRANSITIONS, validateLiveInferenceReceipt };
 
 const SERVICE_KEY_FORMAT_REGEX = /^air_prod_[0-9a-f]{48}$/;
 
@@ -84,6 +84,8 @@ export interface ModelLifecycleOptions {
     gitSha?: string;
     circuitBreakerOptions?: { failureThreshold?: number; cooldownMs?: number };
     adapter?: AirRoofersAiProviderAdapter;
+    probeFn?: unknown;
+    executeFn?: unknown;
 }
 
 export interface PolicyCheckOptions {
@@ -101,7 +103,9 @@ export interface InferenceVerificationOptions {
 }
 
 export interface FullLifecycleOptions extends PolicyCheckOptions, InferenceVerificationOptions {
+    /** Testing/dev callback seam; prohibited when NODE_ENV === 'production'. */
     probeFn?: (model: Record<string, any>) => Promise<boolean | { ok: boolean; reason?: string }>;
+    /** Testing/dev callback seam; prohibited when NODE_ENV === 'production'. */
     executeFn?: (model: Record<string, any>) => Promise<string | { output?: string } | any>;
     adapter?: AirRoofersAiProviderAdapter;
     receiptMetadata?: Record<string, unknown>;
@@ -128,6 +132,17 @@ export class ModelLifecycle {
 
     constructor(model: Record<string, any>, options: ModelLifecycleOptions = {}) {
         if (!model || typeof model !== 'object') throw new ModelLifecycleError('INVALID_REQUEST', 'Model payload must be an object', 400);
+        if (process.env.NODE_ENV === 'production') {
+            if ((options as any).probeFn !== undefined && (options as any).probeFn !== null) {
+                throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary probeFn callback injection: only concrete AirRoofersAiProviderAdapter permitted', 403);
+            }
+            if ((options as any).executeFn !== undefined && (options as any).executeFn !== null) {
+                throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn callback injection: only concrete AirRoofersAiProviderAdapter permitted', 403);
+            }
+            if ((options as any).mockAdapter || ((options as any).adapter && !(options.adapter as any).isProductionTransport?.())) {
+                throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects non-production adapter injection', 403);
+            }
+        }
         this.model = { ...model };
         this.alias = model.alias || model.id || 'unassigned-model';
         this.providerId = model.providerId || model.provider || 'airroofers-ai';
@@ -249,7 +264,7 @@ export class ModelLifecycle {
     ): Promise<this> {
         if (this.state !== 'POLICY_CHECKED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Capability probe requires POLICY_CHECKED state, got ${this.state}`, 400);
         const isProduction = process.env.NODE_ENV === 'production';
-        if (isProduction && typeof probeFn === 'function') {
+        if (isProduction && (typeof probeFn === 'function' || typeof (probeFn as any)?.probeFn === 'function' || typeof (options as any)?.probeFn === 'function')) {
             this.transitionTo('DISABLED', 'Arbitrary probeFn callback injection rejected in production');
             throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary probeFn callback: only concrete AirRoofersAiProviderAdapter permitted', 403);
         }
@@ -293,7 +308,7 @@ export class ModelLifecycle {
         if (this.state !== 'CAPABILITY_PROBED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Inference verification requires CAPABILITY_PROBED state, got ${this.state}`, 400);
         const isProduction = process.env.NODE_ENV === 'production';
 
-        if (isProduction && typeof executeFn === 'function') {
+        if (isProduction && (typeof executeFn === 'function' || typeof (executeFn as any)?.executeFn === 'function' || typeof (options as any)?.executeFn === 'function')) {
             this.transitionTo('DISABLED', 'Arbitrary executeFn callback injection rejected in production');
             throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn callback injection: only concrete AirRoofersAiProviderAdapter permitted', 403);
         }
@@ -419,10 +434,8 @@ export class ModelLifecycle {
             qualifiedAt: new Date().toISOString(),
             correlationId: this.liveInferenceReceipt?.providerRequestId || this.liveInferenceReceipt?.correlationId || (metadata.correlationId as string) || `corr-qual-${Date.now()}`,
             checks: [
-                { checkId: 'schema-validation', status: 'PASS' },
-                { checkId: 'policy-check', status: 'PASS' },
-                { checkId: 'capability-probe', status: 'PASS' },
-                { checkId: 'inference-verification', status: 'PASS', resultDigest: this.inferenceVerificationDigest },
+                { checkId: 'schema-validation', status: 'PASS' }, { checkId: 'policy-check', status: 'PASS' },
+                { checkId: 'capability-probe', status: 'PASS' }, { checkId: 'inference-verification', status: 'PASS', resultDigest: this.inferenceVerificationDigest },
             ],
             ...metadata,
             ...(isMockExecutor ? { testOnly: true, liveExecution: false } : {}),
@@ -448,23 +461,28 @@ export class ModelLifecycle {
 
     public getDiagnostics(): Record<string, unknown> {
         return redactSecrets({
-            alias: this.alias,
-            providerId: this.providerId,
-            state: this.state,
-            canRoute: this.canRoute(),
-            inferenceVerificationDigest: this.inferenceVerificationDigest,
-            liveInferenceReceipt: this.liveInferenceReceipt,
+            alias: this.alias, providerId: this.providerId, state: this.state, canRoute: this.canRoute(),
+            inferenceVerificationDigest: this.inferenceVerificationDigest, liveInferenceReceipt: this.liveInferenceReceipt,
             circuitBreaker: { state: this.circuitBreaker.state, consecutiveFailures: this.circuitBreaker.consecutiveFailures, openedAt: this.circuitBreaker.openedAt },
-            history: this.history,
-            receipt: this.receipt,
+            history: this.history, receipt: this.receipt,
         });
     }
 
     public async runFullLifecycle(options: FullLifecycleOptions = {}): Promise<ModelQualificationReceipt | any> {
         const isProduction = process.env.NODE_ENV === 'production';
-        if (isProduction && ((options as any).mockAdapter || (options.executeFn as any)?.isMock || typeof options.executeFn === 'function' || typeof options.probeFn === 'function')) {
-            this.transitionTo('DISABLED', 'Mock adapter or callback injection rejected in production');
-            throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn/probeFn or mock adapter injection: only genuine provider transport permitted', 403);
+        if (isProduction) {
+            if (options.probeFn !== undefined && options.probeFn !== null) {
+                this.transitionTo('DISABLED', 'Arbitrary probeFn callback injection rejected in production');
+                throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary probeFn callback injection: only concrete AirRoofersAiProviderAdapter permitted', 403);
+            }
+            if (options.executeFn !== undefined && options.executeFn !== null) {
+                this.transitionTo('DISABLED', 'Arbitrary executeFn callback injection rejected in production');
+                throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn callback injection: only concrete AirRoofersAiProviderAdapter permitted', 403);
+            }
+            if ((options as any).mockAdapter || (options.adapter as any)?.mockAdapter || (options.adapter as any)?.isMock || (options.adapter && !options.adapter.isProductionTransport())) {
+                this.transitionTo('DISABLED', 'Mock adapter injection rejected in production');
+                throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn/probeFn or mock adapter injection: only genuine provider transport permitted', 403);
+            }
         }
         this.validateSchema();
         const credentialsRequired = isCredentialsRequiredForModel(this.model, options);

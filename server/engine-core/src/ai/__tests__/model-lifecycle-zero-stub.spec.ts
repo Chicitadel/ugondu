@@ -143,6 +143,37 @@ describe('F-14, F-19 & F-20 Zero-Stub Production Composition & Dev-Key Isolation
         ).rejects.toMatchObject({ errorCode: 'MOCK_ADAPTER_INJECTION_PROHIBITED', statusCode: 403 });
         expect(lc.state).toBe('DISABLED');
         expect(lc.canRoute()).toBe(false);
+
+        const lcProbe = new ModelLifecycle({ alias: 'zero-stub-full-probe', providerId: 'airroofers-ai' });
+        await expect(
+            lcProbe.runFullLifecycle({ secret: validSecret, probeFn: async () => ({ ok: true }) })
+        ).rejects.toMatchObject({ errorCode: 'MOCK_ADAPTER_INJECTION_PROHIBITED', statusCode: 403 });
+        expect(lcProbe.state).toBe('DISABLED');
+        expect(lcProbe.canRoute()).toBe(false);
+    });
+
+    test('F-19: in production mode, ModelLifecycle constructor rejects arbitrary executeFn or probeFn in options with 403', () => {
+        process.env.NODE_ENV = 'production';
+        expect(() => new ModelLifecycle({ alias: 'test-model' }, { probeFn: async () => ({ ok: true }) } as any)).toThrow(ModelLifecycleError);
+        try {
+            new ModelLifecycle({ alias: 'test-model' }, { probeFn: async () => ({ ok: true }) } as any);
+        } catch (err: any) {
+            expect(err.errorCode).toBe('MOCK_ADAPTER_INJECTION_PROHIBITED');
+            expect(err.statusCode).toBe(403);
+        }
+
+        expect(() => new ModelLifecycle({ alias: 'test-model' }, { executeFn: async () => 'test' } as any)).toThrow(ModelLifecycleError);
+        try {
+            new ModelLifecycle({ alias: 'test-model' }, { executeFn: async () => 'test' } as any);
+        } catch (err: any) {
+            expect(err.errorCode).toBe('MOCK_ADAPTER_INJECTION_PROHIBITED');
+            expect(err.statusCode).toBe(403);
+        }
+    });
+
+    test('F-19: model-lifecycle module strictly does NOT re-export createTrustedLiveInferenceReceipt', async () => {
+        const lifecycleModule = await import('../model-lifecycle');
+        expect((lifecycleModule as any).createTrustedLiveInferenceReceipt).toBeUndefined();
     });
 
     test('F-20: in non-production, development key fallback stamps keyId dev-key-local-only and testOnly true', () => {

@@ -211,10 +211,7 @@ test('LIFECYCLE-011: Production qualification in offline mode fails closed with 
 
 test('LIFECYCLE-012: Missing catalog throws MODEL_CATALOG_UNAVAILABLE instead of fabricating synthetic sentinel', async () => {
   const { runModelQualification } = await loadLifecycleModule();
-  await assert.rejects(
-    async () => { await runModelQualification({ rootDir: path.resolve(__dirname, '../../nonexistent_dir_000') }); },
-    (err) => err.errorCode === 'MODEL_CATALOG_UNAVAILABLE' && err.statusCode === 503
-  );
+  await assert.rejects(async () => { await runModelQualification({ rootDir: path.resolve(__dirname, '../../nonexistent_dir_000') }); }, (err) => err.errorCode === 'MODEL_CATALOG_UNAVAILABLE' && err.statusCode === 503);
 });
 
 test('LIFECYCLE-013: Live sovereign mode without genuine capability probe fails closed with CAPABILITY_PROBE_REQUIRED', async () => {
@@ -322,15 +319,7 @@ test('LIFECYCLE-020: In production mode, runModelQualification rejects arbitrary
   const prevEnv = process.env.NODE_ENV;
   process.env.NODE_ENV = 'production';
   try {
-    await assert.rejects(
-      async () => {
-        await runModelQualification({
-          mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
-          executeProbe: async () => ({ output: 'mocked' }),
-        });
-      },
-      (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403
-    );
+    await assert.rejects(async () => { await runModelQualification({ mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu', executeProbe: async () => ({ output: 'mocked' }) }); }, (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403);
   } finally {
     process.env.NODE_ENV = prevEnv;
   }
@@ -341,15 +330,7 @@ test('LIFECYCLE-021: In production mode, runModelQualification rejects manual di
   const prevEnv = process.env.NODE_ENV;
   process.env.NODE_ENV = 'production';
   try {
-    await assert.rejects(
-      async () => {
-        await runModelQualification({
-          mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
-          discoveredModels: [{ alias: 'injected-mock-model', providerId: 'airroofers-ai' }],
-        });
-      },
-      (err) => err.errorCode === 'DISCOVERY_MOCK_PROHIBITED' && err.statusCode === 403
-    );
+    await assert.rejects(async () => { await runModelQualification({ mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu', discoveredModels: [{ alias: 'injected-mock-model', providerId: 'airroofers-ai' }] }); }, (err) => err.errorCode === 'DISCOVERY_MOCK_PROHIBITED' && err.statusCode === 403);
   } finally {
     process.env.NODE_ENV = prevEnv;
   }
@@ -364,12 +345,7 @@ test('LIFECYCLE-022: In production mode, ModelLifecycle rejects mockAdapter flag
     lc.validateSchema();
     lc.checkPolicy({ secret: MOCK_SECRET_KEY });
     await lc.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
-    await assert.rejects(
-      async () => {
-        await lc.verifyInference(async () => ({ output: 'output' }), { mockAdapter: true });
-      },
-      (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403
-    );
+    await assert.rejects(async () => { await lc.verifyInference(async () => ({ output: 'output' }), { mockAdapter: true }); }, (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403);
     assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
     assert.strictEqual(lc.canRoute(), false);
   } finally {
@@ -383,12 +359,7 @@ test('LIFECYCLE-023: In production mode, ModelLifecycle rejects mockAdapter in r
   process.env.NODE_ENV = 'production';
   try {
     const lc = new ModelLifecycle({ alias: 'prod-full-mock-guard', providerId: 'airroofers-ai' });
-    await assert.rejects(
-      async () => {
-        await lc.runFullLifecycle({ secret: MOCK_SECRET_KEY, mockAdapter: true });
-      },
-      (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403
-    );
+    await assert.rejects(async () => { await lc.runFullLifecycle({ secret: MOCK_SECRET_KEY, mockAdapter: true }); }, (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403);
     assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
     assert.strictEqual(lc.canRoute(), false);
   } finally {
@@ -455,4 +426,72 @@ test('LIFECYCLE-029: assertCurrentLiveReport fails closed with LIVE_AI_QUALIFICA
   const sha = 'target-sha-5555555555555555555555555555555';
   const offlineReport = { gitSha: sha, qualificationMode: 'CATALOG_OFFLINE', summary: { totalDiscovered: 5, qualifiedCount: 0, activeCount: 0, disabledCount: 5 } };
   assert.throws(() => assertCurrentLiveReport(offlineReport, sha), (err) => err.errorCode === 'LIVE_AI_QUALIFICATION_REQUIRED' && err.statusCode === 403);
+});
+
+test('LIFECYCLE-030: Reconcile endpoint model discovery - dynamic 30 models vs offline catalog 12 models', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+  const offlineReport = await runModelQualification({ offline: true });
+  assert.strictEqual(offlineReport.qualificationMode, 'CATALOG_OFFLINE');
+  assert.strictEqual(offlineReport.summary.totalDiscovered, 12);
+  assert.strictEqual(offlineReport.summary.qualifiedCount, 0);
+  assert.strictEqual(offlineReport.summary.activeCount, 0);
+  assert.strictEqual(offlineReport.summary.disabledCount, 12);
+  assert.ok(offlineReport.reconciliation);
+  assert.strictEqual(offlineReport.reconciliation.status, 'RECONCILED');
+
+  const fleet30 = Array.from({ length: 30 }, (_, i) => ({
+    id: `sovereign-model-${String(i + 1).padStart(2, '0')}`,
+    alias: `sovereign-model-${String(i + 1).padStart(2, '0')}`,
+    providerId: 'airroofers-ai',
+    capabilities: { modalities: ['text'], streaming: false, toolCalling: true },
+  }));
+
+  const liveReport = await runModelQualification({
+    mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
+    discoveredModels: fleet30,
+    probeFn: async () => ({ ok: true, source: 'airroofers-live-transport' }),
+    executeProbe: async (m) => ({ output: `Inference response for ${m.alias}`, latencyMs: 25 }),
+  });
+
+  assert.strictEqual(liveReport.qualificationMode, 'LIVE_SOVEREIGN');
+  assert.strictEqual(liveReport.summary.totalDiscovered, 30);
+  assert.strictEqual(liveReport.summary.qualifiedCount, 30);
+  assert.strictEqual(liveReport.summary.activeCount, 30);
+  assert.strictEqual(liveReport.summary.disabledCount, 0);
+  assert.ok(liveReport.summary.activeCount <= liveReport.summary.qualifiedCount);
+  assert.ok(liveReport.summary.qualifiedCount <= liveReport.summary.totalDiscovered);
+});
+
+test('LIFECYCLE-031: Live qualification with partial model failures keeps unproven models disabled and maintains count invariants', async () => {
+  const { runModelQualification, ModelLifecycleState } = await loadLifecycleModule();
+  const fleet30 = Array.from({ length: 30 }, (_, i) => ({
+    id: `sovereign-model-${String(i + 1).padStart(2, '0')}`,
+    alias: `sovereign-model-${String(i + 1).padStart(2, '0')}`,
+    providerId: 'airroofers-ai',
+  }));
+
+  const liveReport = await runModelQualification({
+    mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
+    discoveredModels: fleet30,
+    probeFn: async (m) => {
+      const idx = parseInt(m.alias.replace('sovereign-model-', ''), 10);
+      return idx > 20 ? { ok: false, reason: 'Modalities unsupported on sovereign edge' } : { ok: true, source: 'airroofers-live-transport' };
+    },
+    executeProbe: async (m) => ({ output: `Verified ${m.alias}`, latencyMs: 30 }),
+  });
+
+  assert.strictEqual(liveReport.summary.totalDiscovered, 30);
+  assert.strictEqual(liveReport.summary.qualifiedCount, 20);
+  assert.strictEqual(liveReport.summary.activeCount, 20);
+  assert.strictEqual(liveReport.summary.disabledCount, 10);
+  assert.strictEqual(liveReport.summary.pendingCount, 0);
+  assert.ok(liveReport.summary.activeCount <= liveReport.summary.qualifiedCount);
+  assert.ok(liveReport.summary.qualifiedCount <= liveReport.summary.totalDiscovered);
+
+  const disabledModels = liveReport.diagnostics.filter((d) => d.state === ModelLifecycleState.DISABLED);
+  assert.strictEqual(disabledModels.length, 10);
+  for (const d of disabledModels) {
+    assert.strictEqual(d.canRoute, false);
+    assert.strictEqual(d.errorCode, 'CAPABILITY_PROBE_FAILED');
+  }
 });

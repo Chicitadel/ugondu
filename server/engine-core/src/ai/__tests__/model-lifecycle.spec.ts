@@ -35,7 +35,6 @@ import {
     assertValidLifecycleTransition,
     computeReceiptDigest,
     computeSha256,
-    createTrustedLiveInferenceReceipt,
     isValidLifecycleTransition,
     LiveInferenceReceipt,
     loadPersistedLifecycleReceipt,
@@ -46,6 +45,7 @@ import {
     persistLifecycleReceipt,
     validateLiveInferenceReceipt,
 } from '../model-lifecycle';
+import { createTrustedLiveInferenceReceipt } from '../trusted-receipt';
 import { ModelCatalog } from '../model-catalog';
 import { RoutingPolicyEngine } from '../routing-policy';
 import { InferenceRequest } from '../contracts';
