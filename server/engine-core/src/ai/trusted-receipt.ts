@@ -334,6 +334,15 @@ export function validateLiveInferenceReceipt(
     return true;
 }
 
+export function verifyEvidenceIntegrity(
+    receipt: unknown,
+    expectedModelId?: string,
+    expectedCandidateSha?: string,
+    secretSignerOrKey?: string
+): receipt is LiveInferenceReceipt {
+    return validateLiveInferenceReceipt(receipt, expectedModelId, expectedCandidateSha, secretSignerOrKey);
+}
+
 export function createTrustedLiveInferenceReceipt(
     params: LiveInferenceReceiptParams,
     secretSignerOrKey?: string
@@ -413,9 +422,6 @@ export function createTrustedLiveInferenceReceipt(
 }
 
 export class TrustedReceiptService {
-    public static createReceipt(params: LiveInferenceReceiptParams, secretSignerOrKey?: string): LiveInferenceReceipt {
-        return createTrustedLiveInferenceReceipt(params, secretSignerOrKey);
-    }
     public static validateReceipt(receipt: unknown, expectedModelId?: string, expectedCandidateSha?: string, secretSignerOrKey?: string): receipt is LiveInferenceReceipt {
         return validateLiveInferenceReceipt(receipt, expectedModelId, expectedCandidateSha, secretSignerOrKey);
     }

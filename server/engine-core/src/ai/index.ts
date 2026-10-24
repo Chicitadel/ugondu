@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / AI / Index
  * File           : index.ts
- * Version        : 3.0.0
+ * Version        : 3.3.1
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-24
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -25,11 +25,27 @@
  * - Governance Authority   : Air Roofers Corporate Governance
  * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 export * from './contracts';
-export * from './trusted-receipt';
+
+export {
+    type LiveInferenceReceipt,
+    type LiveInferenceReceiptParams,
+    type ProvenanceKeyInfo,
+    ALLOWLISTED_LIVE_ENDPOINT_HOST,
+    ALLOWLISTED_LIVE_ENDPOINT_PROTOCOL,
+    DEV_KEY_ID,
+    DEV_FALLBACK_KEY,
+    ProvenanceConfigurationError,
+    isWeakProvenanceKey,
+    validateLiveInferenceReceipt,
+    isTrustedLiveInferenceReceipt,
+    verifyEvidenceIntegrity,
+    TrustedReceiptService,
+} from './trusted-receipt';
+
 export * from './lifecycle-state';
 export * from './model-lifecycle';
 export * from './credential-broker';

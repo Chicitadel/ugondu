@@ -204,9 +204,7 @@ test('LIFECYCLE-011: Production qualification in offline mode fails closed with 
   process.env.NODE_ENV = 'production';
   try {
     await assert.rejects(async () => { await runModelQualification({ offline: true }); }, (err) => err.errorCode === 'LIVE_QUALIFICATION_REQUIRED');
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-012: Missing catalog throws MODEL_CATALOG_UNAVAILABLE instead of fabricating synthetic sentinel', async () => {
@@ -250,9 +248,7 @@ test('LIFECYCLE-015: In production mode, injected mock executor marks receipt te
     assert.throws(() => lc.activate(), (err) => err.errorCode === 'LIVE_INFERENCE_RECEIPT_REQUIRED' && err.statusCode === 403);
     assert.strictEqual(lc.state, 'QUALIFIED');
     assert.strictEqual(lc.canRoute(), false);
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-016: Missing probeFn in probeCapability throws CAPABILITY_PROBE_REQUIRED (503)', async () => {
@@ -301,10 +297,7 @@ test('LIFECYCLE-019: Decoupling between live canary receipt and fleet qualificat
   assert.strictEqual(report.qualificationMode, 'CATALOG_OFFLINE');
   assert.strictEqual(report.summary.activeCount, 0);
   assert.strictEqual(report.summary.qualifiedCount, 0);
-  assert.strictEqual(
-    report.summary.totalDiscovered,
-    report.summary.qualifiedCount + report.summary.disabledCount + report.summary.pendingCount
-  );
+  assert.strictEqual(report.summary.totalDiscovered, report.summary.qualifiedCount + report.summary.disabledCount + report.summary.pendingCount);
   assert.ok(report.summary.disabledCount > 0);
 
   const reportPath = path.resolve(__dirname, '../../docs/security/evidence/ai_model_qualification_report.json');
@@ -320,9 +313,7 @@ test('LIFECYCLE-020: In production mode, runModelQualification rejects arbitrary
   process.env.NODE_ENV = 'production';
   try {
     await assert.rejects(async () => { await runModelQualification({ mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu', executeProbe: async () => ({ output: 'mocked' }) }); }, (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403);
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-021: In production mode, runModelQualification rejects manual discoveredModels injection with DISCOVERY_MOCK_PROHIBITED', async () => {
@@ -331,9 +322,7 @@ test('LIFECYCLE-021: In production mode, runModelQualification rejects manual di
   process.env.NODE_ENV = 'production';
   try {
     await assert.rejects(async () => { await runModelQualification({ mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu', discoveredModels: [{ alias: 'injected-mock-model', providerId: 'airroofers-ai' }] }); }, (err) => err.errorCode === 'DISCOVERY_MOCK_PROHIBITED' && err.statusCode === 403);
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-022: In production mode, ModelLifecycle rejects mockAdapter flag in verifyInference with MOCK_ADAPTER_INJECTION_PROHIBITED', async () => {
@@ -348,9 +337,7 @@ test('LIFECYCLE-022: In production mode, ModelLifecycle rejects mockAdapter flag
     await assert.rejects(async () => { await lc.verifyInference(async () => ({ output: 'output' }), { mockAdapter: true }); }, (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403);
     assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
     assert.strictEqual(lc.canRoute(), false);
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-023: In production mode, ModelLifecycle rejects mockAdapter in runFullLifecycle', async () => {
@@ -362,9 +349,7 @@ test('LIFECYCLE-023: In production mode, ModelLifecycle rejects mockAdapter in r
     await assert.rejects(async () => { await lc.runFullLifecycle({ secret: MOCK_SECRET_KEY, mockAdapter: true }); }, (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403);
     assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
     assert.strictEqual(lc.canRoute(), false);
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-024: Tamper resistance - qualify cannot clear testOnly: true on mock-verified model', async () => {
@@ -383,9 +368,7 @@ test('LIFECYCLE-024: Tamper resistance - qualify cannot clear testOnly: true on 
     assert.throws(() => lc.activate(), (err) => err.errorCode === 'LIVE_INFERENCE_RECEIPT_REQUIRED' && err.statusCode === 403);
     assert.strictEqual(lc.state, ModelLifecycleState.QUALIFIED);
     assert.strictEqual(lc.canRoute(), false);
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  } finally { process.env.NODE_ENV = prevEnv; }
 });
 
 test('LIFECYCLE-025: assertReportLineage fails closed with AI_REPORT_CANDIDATE_SHA_MISMATCH on stale gitSha', async () => {
@@ -494,4 +477,17 @@ test('LIFECYCLE-031: Live qualification with partial model failures keeps unprov
     assert.strictEqual(d.canRoute, false);
     assert.strictEqual(d.errorCode, 'CAPABILITY_PROBE_FAILED');
   }
+});
+
+test('LIFECYCLE-032: Public AI barrel strictly prohibits minting exports and exposes only validation primitives', () => {
+  const aiBarrel = require('../../server/engine-core/dist/ai');
+  assert.strictEqual(aiBarrel.createTrustedLiveInferenceReceipt, undefined);
+  assert.strictEqual(aiBarrel.TrustedReceiptService?.createReceipt, undefined);
+  assert.strictEqual(aiBarrel.computeProvenanceSeal, undefined);
+  assert.strictEqual(aiBarrel.getProvenanceSigningKey, undefined);
+  assert.strictEqual(aiBarrel.getProvenanceSigningKeyInfo, undefined);
+  assert.strictEqual(typeof aiBarrel.TrustedReceiptService?.validateReceipt, 'function');
+  assert.strictEqual(typeof aiBarrel.TrustedReceiptService?.isTrustedReceipt, 'function');
+  assert.strictEqual(typeof aiBarrel.validateLiveInferenceReceipt, 'function');
+  assert.strictEqual(typeof aiBarrel.isTrustedLiveInferenceReceipt, 'function');
 });

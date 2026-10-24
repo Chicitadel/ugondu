@@ -176,6 +176,12 @@ describe('F-14, F-19 & F-20 Zero-Stub Production Composition & Dev-Key Isolation
         expect((lifecycleModule as any).createTrustedLiveInferenceReceipt).toBeUndefined();
     });
 
+    test('F-22: public AI barrel (index.ts) strictly does NOT export createTrustedLiveInferenceReceipt', async () => {
+        const aiBarrel = await import('../index');
+        expect((aiBarrel as any).createTrustedLiveInferenceReceipt).toBeUndefined();
+        expect((aiBarrel as any).TrustedReceiptService?.createReceipt).toBeUndefined();
+    });
+
     test('F-20: in non-production, development key fallback stamps keyId dev-key-local-only and testOnly true', () => {
         process.env.NODE_ENV = 'development';
         delete process.env.UGONDU_PROVENANCE_KEY;
