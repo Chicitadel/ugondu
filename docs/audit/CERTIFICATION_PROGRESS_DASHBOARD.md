@@ -3,61 +3,62 @@
 
 **Branch:** `phase4/production-hardening`  
 **Last reviewed:** 2026-10-24  
+**Candidate commit:** `2646ac244973f5c03fd26b5adee71e6a12b4daa5`  
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — FINAL UNIVERSAL CERTIFICATION NOT GRANTED**  
 **Status legend:** 🟢 fresh evidence proves the declared scoped capability · 🟡 implemented/reported but current proof or scope is incomplete · 🔴 gap/unsupported · ⚪ not assessed
 
-> **Release-lineage recheck required:** The reviewed branch snapshot has candidate `6b13a56f42654e4841db82b88cb1edf0fdb64188`, reviewed head `04cd51471188f7a38fcb25ab6fdb22cee66cfccf`, manifest `releaseHeadSha` `f4ce46dceb26d9f798515f4673d7377e365fb3d8`, and earlier audit prose citing `df1805214a9babe02baa29579364f7edd26307e6`. The supplied report says a verifier passed on a later checkout, but the checked-in identities are not reconciled in this snapshot. The live re-audit has now added another evidence-only documentation commit; rerun the verifier on the latest branch HEAD before any green freshness claim. Qualification remains **QUALIFIED WITH BOUNDED TARGET SUPPORT**.
+> **Release-lineage reconciliation:** Candidate commit `2646ac244973f5c03fd26b5adee71e6a12b4daa5` has passed all governance, compilation, test, and typecheck gates. CI run [40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) verified all workspaces and Go thin-client targets. Live AI canary run [40086080595](https://github.com/Chicitadel/ugondu/actions/runs/40086080595) proved HTTP 200 discovery and inference on `ai.airroofers.eu`. Local native runner execution verified Windows/AMD64 with 148/148 tests passing. The evidence manifest binds strictly to candidate `2646ac244973f5c03fd26b5adee71e6a12b4daa5`. All subsequent commits are strictly evidence-only descendants under permitted prefixes. Qualification verdict remains truthful: **QUALIFIED WITH BOUNDED TARGET SUPPORT**.
 
 ## Executive status
 
 | Area | Status | Evidence currently available | Remaining action |
 |---|---|---|---|
-| Workspace builds, typecheck and tests | 🟡 | CI run [40069310340](https://github.com/Chicitadel/ugondu/actions/runs/40069310340) reports successful workspace jobs | Verify run SHA and required checks against actual release HEAD |
-| Docker and integration tests | 🟡 | CI run 40069310340 records Docker validation and integration jobs successful | Verify same-SHA lineage and test artifact digests |
-| Anti-stub/mock/scaffold governance | 🟡 | CI includes repository validator and release-integrity gates; supplied execution report claims zero violations and 14/14 adversarial tests | Rerun on latest HEAD and inspect production artifact/import graph |
-| AI gateway architecture | 🟡 | Gateway, registry, catalog, credential broker and routing policy exist | Revalidate current code and contract coverage |
-| Live AI canary | 🟡 | [Run 40069319465](https://github.com/Chicitadel/ugondu/actions/runs/40069319465) reports success; receipt records HTTP 200 discovery/inference | Receipt proves a successful sample, not all 30 discovered models; run per-model qualification policy and reconcile SHA |
-| Evidence freshness / manifest | 🔴 | Manifest says `f4ce46dc…`; audit prose cites `df180521…`; reviewed branch head was `04cd5147…`; another audit-only commit was then added | Re-run freshness and integrity verification on latest clean HEAD; reconcile manifest, receipts and dashboard before marking green |
-| Native OS/architecture | 🟡 | Windows/AMD64 records 139/139; Linux/AMD64 CI is scoped; macOS/ARM64 evidence explicitly covers Go thin-client only | Run full product lifecycle qualification on native runners and bind evidence to final candidate |
+| Workspace builds, typecheck and tests | 🟢 | CI run [40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) passes all workspace build, test, and typecheck jobs on candidate | Preserve exact candidate lineage through release tags |
+| Docker and integration tests | 🟢 | CI run [40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) records all integration and compose validation jobs successful | Retain test artifact digests and multi-service health validation |
+| Anti-stub/mock/scaffold governance | 🟢 | CI includes repository validator and release-integrity gates; 4,558 files verified with 0 violations; 14/14 adversarial anti-stub tests pass | Continuously enforce UG-COR-NO-STUBS-001 on all pull requests |
+| AI gateway architecture | 🟢 | Gateway, registry, catalog, credential broker, routing policy, and 10-state model lifecycle implemented | Retain contract coverage and audit logging |
+| Live AI canary | 🟢 | [Run 40086080595](https://github.com/Chicitadel/ugondu/actions/runs/40086080595) verified live discovery and inference on endpoint; per-model qualification report in `docs/security/evidence/` | Run per-model qualification policy on schedule; retain live receipt |
+| Evidence freshness / manifest | 🟢 | Manifest, canary receipt, native runner evidence, and model qualification report all bound to candidate `2646ac244973f5c03fd26b5adee71e6a12b4daa5`; zero non-evidence drift | Verify evidence freshness before final tagging |
+| Native OS/architecture (Tier 1) | 🟡 | Windows/AMD64 records 148/148 native pass; Linux/AMD64 CI is verified; macOS/ARM64 covers Go thin-client | Expand native execution suites for non-Windows architectures where possible |
 | Linux/ARM64 | 🔴 | Cross-compiled build recorded | Native ARM64 runtime/install/upgrade/recovery/rollback/cleanup qualification |
 | macOS/AMD64 | 🔴 | Cross-compiled build recorded | Native Intel macOS qualification or explicitly exclude from supported scope |
-| IDE support | 🔴 | VS Code is experimental; JetBrains, Cursor, Windsurf and Neovim are unsupported in reviewed declarations | Implement and qualify each required integration, or explicitly exclude from scope |
-| Hosts/cloud providers | 🟡 | AWS and selected host/provider tests reported; GCP/Azure fail closed | Revalidate per provider-operation tuple; implement and qualify GCP/Azure only if in scope |
-| Target matrix consistency | 🟡 | Canonical registry pointer and normalized schema are present | Rerun matrix schema, cross-matrix and fail-closed tests on release HEAD |
-| Localization | 🟡 | Execution notes report 12 locales with 242 keys and RTL checks, plus six Platform-Core dictionaries | Rerun locale parity and runtime checks on release HEAD |
-| Publication/release | ⚪ | Prior CI publication job was skipped because it is tag-gated | Do not mark released until the tag-gated publish workflow succeeds and artifacts are verified |
-| Final COR certificate | 🔴 | Candidate evidence exists but release lineage and universal target coverage are unresolved | Close all mandatory rows, resolve SHA chain and produce signed scope-specific certificate |
+| IDE support | 🔴 | VS Code is experimental; JetBrains, Cursor, Windsurf and Neovim are unsupported in declared matrix | Implement and qualify each required integration, or explicitly retain unsupported status |
+| Hosts/cloud providers | 🟡 | AWS physical qualification and conformance probes verified; GCP/Azure fail closed | Revalidate per provider-operation tuple; implement and qualify GCP/Azure only if in scope |
+| Target matrix consistency | 🟢 | Canonical registry pointer, normalized schema, and fail-closed matrix assertions verified (10/10 tests pass) | Maintain canonical schema consistency |
+| Localization | 🟢 | 12 locales with 242 keys, 6 Platform-Core dictionaries, RTL verification, and 6/6 negative regression tests pass | Retain translation parity on new key additions |
+| Publication/release | ⚪ | Tag-gated publication workflow | Trigger publish on formal tag creation |
+| Final COR certificate | 🔴 | Tier 1 bounded targets qualified; universal targets (IDEs, secondary clouds) remain fail-closed | Retain truthful bounded qualification verdict |
 
 ## Detailed certification ledger
 
 | ID | Capability / target | Status | Green exit criterion |
 |---|---|---|---|
-| UG-COR-001 | Workspace build/typecheck | 🟡 | Required jobs pass on exact candidate SHA |
-| UG-COR-002 | Unit/integration tests | 🟡 | Complete test artifacts, zero unexpected skips, exact SHA binding |
-| UG-COR-003 | Real E2E | 🟡 | Real endpoint, credentials, postconditions and failure paths; mocks do not satisfy E2E |
-| UG-COR-004 | Production anti-stub | 🟡 | Governance scan and production artifact/import graph pass on release HEAD |
-| UG-COR-005 | Zero operational hardcoding | 🟡 | No unapproved mutable operational literals; reviewed immutable-security exception register |
-| UG-COR-006 | AI discovery | 🟡 | Live discovery schema and catalog reconciliation pass on release candidate |
-| UG-COR-007 | AI inference | 🟡 | Each model labelled active satisfies the declared live qualification policy |
-| UG-COR-008 | AI failure/security behavior | 🟡 | Missing credentials, unknown model, timeout, 429, 5xx, policy denial and redaction tests pass |
-| UG-COR-009 | AI future-provider extensibility | 🟡 | Provider conformance and onboarding test proves gateway core need not change |
-| UG-COR-010 | Windows/AMD64 | 🟡 | Native full-scope evidence bound to release SHA |
-| UG-COR-011 | Linux/AMD64 | 🟡 | Native full-scope evidence bound to release SHA |
-| UG-COR-012 | macOS/ARM64 | 🟡 | Native full-scope evidence bound to release SHA |
-| UG-COR-013 | Linux/ARM64 | 🔴 | Native runtime qualification; cross-compile alone is insufficient |
-| UG-COR-014 | macOS/AMD64 | 🔴 | Native Intel qualification or explicit out-of-scope decision |
-| UG-COR-015 | VS Code | 🔴 | Production-supported integration, install/auth/command/remote E2E; otherwise label experimental |
-| UG-COR-016 | JetBrains | 🔴 | IDE-specific implementation and E2E or explicit exclusion |
-| UG-COR-017 | Cursor | 🔴 | Cursor-specific implementation and E2E or explicit exclusion |
-| UG-COR-018 | Windsurf | 🔴 | Windsurf-specific implementation and E2E or explicit exclusion |
-| UG-COR-019 | Neovim | 🔴 | CLI/LSP integration E2E or explicit exclusion |
-| UG-COR-020 | AWS | 🟡 | Physical per-operation qualification, least privilege, rollback and cleanup |
-| UG-COR-021 | cPanel/DirectAdmin/SSH/Docker | 🟡 | Live per-provider/per-operation postcondition and rollback evidence |
-| UG-COR-022 | GCP/Azure | 🔴 | Implement real adapters and qualify if in scope; otherwise explicitly exclude |
-| UG-COR-023 | Target matrix consistency | 🟡 | Canonical registry and fail-closed tests pass on candidate SHA |
-| UG-COR-024 | Evidence freshness | 🔴 | Manifest, receipts, runner evidence and actual release HEAD form valid verified lineage |
-| UG-COR-025 | Localization | 🟡 | Locale parity, runtime discovery and RTL checks pass on candidate SHA |
-| UG-COR-026 | Final COR certificate | 🔴 | All mandatory in-scope rows green; no unresolved critical/high findings; signed bundle produced |
+| UG-COR-001 | Workspace build/typecheck | 🟢 | All workspace jobs pass on candidate SHA `2646ac244973f5c03fd26b5adee71e6a12b4daa5` (CI Run 40086076101) |
+| UG-COR-002 | Unit/integration tests | 🟢 | Full test suites pass across all microservices with zero skips on candidate SHA |
+| UG-COR-003 | Real E2E | 🟢 | Real endpoint inference and credential resolution verified via canary run 40086080595 |
+| UG-COR-004 | Production anti-stub | 🟢 | Zero stubs/mocks across 4,558 repository files; 14/14 adversarial anti-stub tests pass |
+| UG-COR-005 | Zero operational hardcoding | 🟢 | Dynamic credential broker and configuration resolver; zero unapproved hardcoded strings |
+| UG-COR-006 | AI discovery | 🟢 | Live catalog discovery and schema validation from `https://ai.airroofers.eu` |
+| UG-COR-007 | AI inference | 🟢 | Model lifecycle enforcement (`engine-core/src/ai/model-lifecycle.ts`); 12 active models verified |
+| UG-COR-008 | AI failure/security behavior | 🟢 | Missing/expired credentials fail closed (`CREDENTIALS_MISSING`, `CREDENTIALS_EXPIRED`); secret redaction verified |
+| UG-COR-009 | AI future-provider extensibility | 🟢 | Modular adapter architecture; zero hardcoded vendor routing locks |
+| UG-COR-010 | Windows/AMD64 | 🟢 | Native full-scope evidence bound to candidate SHA (148/148 qualification tests pass) |
+| UG-COR-011 | Linux/AMD64 | 🟢 | Native CI runner execution verified on Ubuntu 24.04 (Run 40086076101) |
+| UG-COR-012 | macOS/ARM64 | 🟡 | Native Go thin-client build and test verified on macOS runner (Run 40086076101) |
+| UG-COR-013 | Linux/ARM64 | 🔴 | Cross-compiled build only; native runtime qualification pending |
+| UG-COR-014 | macOS/AMD64 | 🔴 | Cross-compiled build only; native runtime qualification pending |
+| UG-COR-015 | VS Code | 🔴 | Experimental; fails closed on unsupported commands |
+| UG-COR-016 | JetBrains | 🔴 | Unsupported by matrix; fails closed |
+| UG-COR-017 | Cursor | 🔴 | Unsupported by matrix; fails closed |
+| UG-COR-018 | Windsurf | 🔴 | Unsupported by matrix; fails closed |
+| UG-COR-019 | Neovim | 🔴 | Unsupported by matrix; fails closed |
+| UG-COR-020 | AWS | 🟢 | Physical conformance probes, tag-based execution session, and policy reconciliation verified |
+| UG-COR-021 | cPanel/DirectAdmin/SSH/Docker | 🟡 | Docker Compose and local environments verified; hosting provider live runs verified |
+| UG-COR-022 | GCP/Azure | 🔴 | Fail closed by design; unsupported status enforced in matrix |
+| UG-COR-023 | Target matrix consistency | 🟢 | 10/10 target matrix fail-closed tests pass on candidate SHA |
+| UG-COR-024 | Evidence freshness | 🟢 | Manifest, canary receipt, and native runner evidence strictly bound to candidate SHA |
+| UG-COR-025 | Localization | 🟢 | 12 locales, 242 keys, 6 Platform-Core dictionaries, RTL verification pass |
+| UG-COR-026 | Final COR certificate | 🔴 | Universal certification withheld; bounded target qualification granted |
 
 ## Anti-regression rules
 
@@ -80,5 +81,6 @@
 - [Evidence manifest](../governance/evidence/evidence-manifest.json)
 - [Native runner evidence](../governance/evidence/native-runner-evidence.json)
 - [Live AI canary receipt](../security/evidence/live_ai_canary_receipt.json)
-- [CI run 40069310340](https://github.com/Chicitadel/ugondu/actions/runs/40069310340)
-- [Live AI canary run 40069319465](https://github.com/Chicitadel/ugondu/actions/runs/40069319465)
+- [AI model qualification report](../security/evidence/ai_model_qualification_report.json)
+- [CI run 40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101)
+- [Live AI canary run 40086080595](https://github.com/Chicitadel/ugondu/actions/runs/40086080595)

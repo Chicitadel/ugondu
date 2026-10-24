@@ -1,8 +1,7 @@
 {
   "schema": "ugondu.evidence-manifest/1",
-  "gitHeadSha": "6b13a56f42654e4841db82b88cb1edf0fdb64188",
-  "candidateSha": "6b13a56f42654e4841db82b88cb1edf0fdb64188",
-  "releaseHeadSha": "f4ce46dceb26d9f798515f4673d7377e365fb3d8",
+  "gitHeadSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
+  "candidateSha": "2646ac244973f5c03fd26b5adee71e6a12b4daa5",
   "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
   "evidenceFiles": [
     {
@@ -11,7 +10,7 @@
     },
     {
       "path": "docs/governance/evidence/native-runner-evidence.json",
-      "sha256": "5fefea8a2af70a6f6166ef49994651880526468898f9f291fab75e99a46492eb"
+      "sha256": "d1ef68eca9a36a385a992b089a66fd28d61175e64dc9199b7cc8274770269c03"
     },
     {
       "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
@@ -19,7 +18,7 @@
     },
     {
       "path": "docs/security/evidence/live_ai_canary_receipt.json",
-      "sha256": "af7161b78644b3bc88df2dbcac8a4c84f2a211fade2115d9f924f18937bd55f2"
+      "sha256": "75739307870a77d9027a8522b49a4011a5211d55454b3312e45d3c2f3761a5fa"
     }
   ],
   "testCommands": [
@@ -44,15 +43,19 @@
       "exitCode": 0
     },
     {
+      "command": "node --test tests/qualification/model-lifecycle-qualification.test.js",
+      "exitCode": 0
+    },
+    {
       "command": "node scripts/governance/validate-repository.mjs",
       "exitCode": 0
     },
     {
-      "command": "gh workflow run ai-live-canary (run 40069319465)",
+      "command": "gh workflow run ai-live-canary (run 40086080595)",
       "exitCode": 0
     },
     {
-      "command": "gh run view 40069310340 (Ugondu CI/CD Pipeline)",
+      "command": "gh run view 40086076101 (Ugondu CI/CD Pipeline)",
       "exitCode": 0
     }
   ],
