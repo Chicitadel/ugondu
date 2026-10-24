@@ -1,19 +1,19 @@
 {
   "receiptType": "AIRROOFERS_LIVE_AI_CANARY_RECEIPT",
   "version": "1.0.0",
-  "gitSha": "55447c495c1c086286774170f706fcbe9b6f6646",
+  "gitSha": "be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb",
   "endpoint": "https://ai.airroofers.eu",
   "hostname": "ai.airroofers.eu",
-  "timestamp": "2026-10-24T12:48:39.722Z",
+  "timestamp": "2026-10-24T13:46:32.725Z",
   "discoveryStatusCode": 200,
   "executionStatusCode": 200,
   "returnedModelId": "sentinel-guard-v1",
   "availableModelCount": 30,
-  "correlationId": "corr-canary-exec-43705167-36a6-4049-a0f2-fb11721af090",
+  "correlationId": "corr-canary-exec-c109a5e7-90c5-46ef-af19-19ed041d289e",
   "latencyMs": {
-    "discovery": 527,
-    "execution": 143,
-    "total": 670
+    "discovery": 206,
+    "execution": 62,
+    "total": 268
   },
   "outputDigestSha256": "53fb52b449ad016ac6984210069b004b4bc72685340e62030d5b01afb68b33ed",
   "verification": "AUTHENTIC_LIVE_INFERENCE_QUALIFIED"

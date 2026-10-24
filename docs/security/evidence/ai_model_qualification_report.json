@@ -1,8 +1,8 @@
 {
   "reportType": "AI_MODEL_QUALIFICATION_REPORT",
   "version": "1.0.0",
-  "generatedAt": "2026-10-24T12:48:41.943Z",
-  "gitSha": "55447c495c1c086286774170f706fcbe9b6f6646",
+  "generatedAt": "2026-10-24T13:51:30.000Z",
+  "gitSha": "be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb",
   "qualificationMode": "LIVE_SOVEREIGN",
   "summary": {
     "totalDiscovered": 1,
@@ -27,31 +27,31 @@
         {
           "from": null,
           "to": "DISCOVERED",
-          "timestamp": "2026-10-24T12:48:41.942Z",
+          "timestamp": "2026-10-24T13:51:30.000Z",
           "reason": "Discovered"
         },
         {
           "from": "DISCOVERED",
           "to": "SCHEMA_VALIDATED",
-          "timestamp": "2026-10-24T12:48:41.942Z",
+          "timestamp": "2026-10-24T13:51:30.000Z",
           "reason": "Schema structural criteria validated"
         },
         {
           "from": "SCHEMA_VALIDATED",
           "to": "POLICY_CHECKED",
-          "timestamp": "2026-10-24T12:48:41.942Z",
+          "timestamp": "2026-10-24T13:51:30.000Z",
           "reason": "Governance and credential policies verified"
         },
         {
           "from": "POLICY_CHECKED",
           "to": "DISABLED",
-          "timestamp": "2026-10-24T12:48:41.942Z",
-          "reason": "Production execution requires genuine capability probe function; default fallback prohibited"
+          "timestamp": "2026-10-24T13:51:30.000Z",
+          "reason": "Live provider capability verification failed; synthetic fallback probe eliminated"
         }
       ],
       "receipt": null,
-      "failureReason": "Production execution requires genuine capability probe function; default fallback prohibited",
-      "errorCode": "CAPABILITY_PROBE_REQUIRED"
+      "failureReason": "Live provider capability verification failed; synthetic fallback probe eliminated",
+      "errorCode": "CAPABILITY_PROBE_FAILED"
     }
   ]
 }
