@@ -1,8 +1,8 @@
 {
   "reportType": "AI_MODEL_QUALIFICATION_REPORT",
   "version": "1.0.0",
-  "generatedAt": "2026-10-24T16:34:48.811Z",
-  "gitSha": "1bc373f1d31e436c7314c777e4edb107b1c4a9f6",
+  "generatedAt": "2026-10-24T17:40:40.991Z",
+  "gitSha": "da2ab22b8695d64c32357fd95272ecd435bfe258",
   "qualificationMode": "CATALOG_OFFLINE",
   "summary": {
     "totalDiscovered": 12,
@@ -11,14 +11,20 @@
     "disabledCount": 12,
     "pendingCount": 0
   },
+  "reconciliation": {
+    "catalogScope": "Offline governance catalog inspects 12 statically governed platform models",
+    "endpointScope": "Live sovereign endpoint (/v1/ai/models) dynamically discovers up to 30 provider models when provisioned",
+    "deltaExplanation": "Live canary reports 30 endpoint-available models from dynamic GET /v1/ai/models discovery, while offline qualification inspects 12 statically governed models in config/model-catalog.json; all unproven models fail closed",
+    "status": "RECONCILED"
+  },
   "receipts": [
     {
       "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
       "version": "1.0.0",
       "modelAlias": "catalog-offline",
       "providerId": "airroofers-ai",
-      "timestamp": "2026-10-24T16:34:48.809Z",
-      "gitSha": "1bc373f1d31e436c7314c777e4edb107b1c4a9f6",
+      "timestamp": "2026-10-24T17:40:40.989Z",
+      "gitSha": "da2ab22b8695d64c32357fd95272ecd435bfe258",
       "status": "UNQUALIFIED",
       "liveExecution": false,
       "verification": "CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION",
@@ -36,13 +42,13 @@
         {
           "from": null,
           "to": "DISCOVERED",
-          "timestamp": "2026-10-24T16:34:48.811Z",
+          "timestamp": "2026-10-24T17:40:40.991Z",
           "reason": "Discovered 12 catalog models"
         },
         {
           "from": "DISCOVERED",
           "to": "DISABLED",
-          "timestamp": "2026-10-24T16:34:48.811Z",
+          "timestamp": "2026-10-24T17:40:40.991Z",
           "reason": "Offline candidate evaluation: live credentials absent; all models fail closed"
         }
       ],

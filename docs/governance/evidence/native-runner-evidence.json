@@ -4,8 +4,8 @@
   "evidenceType": "UGONDU_NATIVE_RUNNER_QUALIFICATION_EVIDENCE",
   "authority": "Ujomor Systems Engineering & Governance Authority",
   "organization": "Air Roofers SASU",
-  "generatedAt": "2026-10-24T16:38:29.607Z",
-  "gitHeadSha": "1bc373f1d31e436c7314c777e4edb107b1c4a9f6",
+  "generatedAt": "2026-10-24T17:43:52.729Z",
+  "gitHeadSha": "da2ab22b8695d64c32357fd95272ecd435bfe258",
   "verdict": "NATIVE_EXECUTION_VERIFIED_FOR_RECORDED_TARGETS_ONLY",
   "universalClaim": false,
   "tier1NativeRunners": [
@@ -15,9 +15,9 @@
       "classification": "NATIVE_EXECUTION_VERIFIED",
       "record": {
         "recordType": "UGONDU_NATIVE_EXECUTION_RECORD",
-        "gitSha": "1bc373f1d31e436c7314c777e4edb107b1c4a9f6",
-        "startedAt": "2026-10-24T16:35:21.360Z",
-        "finishedAt": "2026-10-24T16:37:29.470Z",
+        "gitSha": "da2ab22b8695d64c32357fd95272ecd435bfe258",
+        "startedAt": "2026-10-24T17:40:46.302Z",
+        "finishedAt": "2026-10-24T17:42:23.680Z",
         "host": {
           "platform": "win32",
           "arch": "x64",
@@ -31,31 +31,31 @@
         "ci": null,
         "suite": {
           "fileCount": 15,
-          "totalTests": 186,
-          "passingTests": 186,
+          "totalTests": 188,
+          "passingTests": 188,
           "failingTests": 0,
           "exitCode": 0,
           "status": "PASSED"
         }
       },
-      "verificationDigestSha256": "cb78528d94e89869be182ed2f379082f5a4ca74f46e858a11ee38a994e92090c"
+      "verificationDigestSha256": "0337a95b7658a75d31558589c4f65a387591756593200b4e885dd56772743cb0"
     },
     {
       "target": "linux/amd64",
       "scope": "go-thin-client & governance gates (ubuntu-latest — linux/amd64)",
       "classification": "NATIVE_EXECUTION_VERIFIED",
-      "ciRunId": "40111812439",
+      "ciRunId": "40117045222",
       "ciJob": "Build Go Thin-Client (ubuntu-latest — linux/amd64)",
-      "verificationDigestSha256": "4a0aa653069ebdc2935e61985cfd9d12615c127449b86e03560dc7321b2e0dab"
+      "verificationDigestSha256": "4de5a01547387971138003ecc8aaf2b9d60b592f13f134024882fe7ce7696ac4"
     },
     {
       "target": "darwin/arm64",
       "scope": "go-thin-client (go vet, go test, binary --help/version on macOS arm64 runner)",
       "classification": "NATIVE_EXECUTION_VERIFIED_THIN_CLIENT_ONLY",
-      "ciRunId": "40111812439",
+      "ciRunId": "40117045222",
       "ciJob": "Build Go Thin-Client (macos-latest — darwin/arm64)",
       "limitation": "The Node qualification suite was not executed on darwin/arm64; only the Go thin-client was.",
-      "verificationDigestSha256": "32c2af4ae9a5ca27cd61dccc5a509118a90f90272b52ef7f8e009bed7db682a0"
+      "verificationDigestSha256": "b2ece12b48ce88b66c95159fa91773630ee56a0f5c338bc9ed38c7394dcd3628"
     }
   ],
   "tier2CrossCompiledTargets": [
@@ -167,5 +167,5 @@
       "verificationDigestSha256": "df517f114a67f9b3f8fe47afb187c8f37993e77db78e844e71ea690ea59b8dff"
     }
   ],
-  "evidenceDigestSha256": "7d2855c994801d33ab87334124247dfcae62b3e350b480b20877522e4615cbe3"
+  "evidenceDigestSha256": "5582bbe6b228adc9537cf92108fe6328163d3102bcc3b82ac0f38ba41ad07f17"
 }
