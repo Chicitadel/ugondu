@@ -17,6 +17,17 @@ Release HEAD (evidence-sealed): `2bfa9f2ca1c192b3f6940feced8f113d8de0ca10`
 | Live AI canary on release HEAD | 40039094607 | success |
 | Live AI canary on candidate | 40034629106 | success |
 
+## Verification on commit `1f20f10c` (all release gates completed)
+
+| Gate | Run | Conclusion |
+|---|---|---|
+| COR Certification job | 40039228059 (job 120706102757) | success |
+| AWS Physical Qualification Gate | 40039228059 (job 120706103162) | success |
+| COR Final Release Gate | 40039228059 (job 120713375371) | success |
+| CI/CD push (all 15 workspaces & integration tests) | 40039227998 | success |
+| CI/CD pull_request | 40039234478 | success |
+| Brand Asset Integrity | 40039234420 | success |
+
 ## Notes
 - Docker image validation ran and passed on the push run (it is skipped only on pull_request events by design).
 - `Build & Publish Release` is gated on `refs/tags/v*` and was intentionally not executed; no publication is claimed.
