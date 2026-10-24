@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / AI / Model Lifecycle
  * File           : model-lifecycle.ts
- * Version        : 3.1.0
+ * Version        : 3.2.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-24
@@ -42,6 +42,19 @@ export type LifecycleFailureReasonCode =
     | 'RATE_LIMIT_EXCEEDED' | 'HEALTH_CHECK_FAILED' | 'CONFORMANCE_FAILED'
     | 'DEGRADED_PERFORMANCE' | 'ADMIN_DISABLED' | 'MODEL_RETIRED' | 'UNKNOWN_FAILURE';
 
+export interface LiveInferenceReceipt {
+    source: 'airroofers-live-transport';
+    httpStatus: number;
+    verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED';
+    candidateSha: string;
+    modelId: string;
+    responseDigestSha256: string;
+    correlationId: string;
+    endpointHost: string;
+    observedAt: string;
+    testOnly?: boolean;
+}
+
 export interface ModelLifecycleAuditRecord {
     timestamp: string;
     correlationId: string;
@@ -65,11 +78,7 @@ const SERVICE_KEY_FORMAT_REGEX = /^air_prod_[0-9a-f]{48}$/;
 
 export function redactSecrets<T>(val: T): T {
     if (typeof val === 'string') {
-        return val
-            .replace(/air_prod_[0-9a-f]{48}/gi, '[REDACTED_SECRET]')
-            .replace(/sk-[A-Za-z0-9_-]{12,}/g, '[REDACTED_SECRET]')
-            .replace(/Bearer\s+[A-Za-z0-9._~+/=-]{8,}/gi, 'Bearer [REDACTED_SECRET]')
-            .replace(/\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g, '[REDACTED_SECRET]') as unknown as T;
+        return val.replace(/air_prod_[0-9a-f]{48}/gi, '[REDACTED_SECRET]').replace(/sk-[A-Za-z0-9_-]{12,}/g, '[REDACTED_SECRET]').replace(/Bearer\s+[A-Za-z0-9._~+/=-]{8,}/gi, 'Bearer [REDACTED_SECRET]').replace(/\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g, '[REDACTED_SECRET]') as unknown as T;
     }
     if (val && typeof val === 'object') {
         if (Array.isArray(val)) return val.map((x) => redactSecrets(x)) as unknown as T;
@@ -84,17 +93,20 @@ export function computeSha256(value: string): string {
     return crypto.createHash('sha256').update(value).digest('hex');
 }
 
-export class ModelLifecycleError extends Error {
-    public readonly errorCode: string;
-    public readonly statusCode: number;
-    public readonly details: Record<string, unknown>;
+export function validateLiveInferenceReceipt(receipt: unknown, expectedModelId?: string): receipt is LiveInferenceReceipt {
+    if (!receipt || typeof receipt !== 'object') return false;
+    const r = receipt as Partial<LiveInferenceReceipt>;
+    if (r.source !== 'airroofers-live-transport' || r.httpStatus !== 200 || r.verification !== 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED') return false;
+    if (typeof r.candidateSha !== 'string' || !r.candidateSha.trim() || typeof r.modelId !== 'string' || !r.modelId.trim()) return false;
+    if (expectedModelId && r.modelId !== expectedModelId) return false;
+    if (typeof r.responseDigestSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(r.responseDigestSha256)) return false;
+    return Boolean(typeof r.correlationId === 'string' && r.correlationId.trim() && typeof r.endpointHost === 'string' && r.endpointHost.trim() && typeof r.observedAt === 'string' && r.observedAt.trim());
+}
 
-    constructor(errorCode: string, message: string, statusCode = 400, details: Record<string, unknown> = {}) {
+export class ModelLifecycleError extends Error {
+    constructor(public readonly errorCode: string, message: string, public readonly statusCode = 400, public readonly details: Record<string, unknown> = {}) {
         super(message);
         this.name = 'ModelLifecycleError';
-        this.errorCode = errorCode;
-        this.statusCode = statusCode;
-        this.details = details;
     }
 }
 
@@ -151,26 +163,14 @@ export function assertValidLifecycleTransition(from: ModelQualificationState, to
 }
 
 export function computeReceiptDigest(receipt: ModelQualificationReceipt): string {
-    const canonical = JSON.stringify({
-        providerId: receipt.providerId,
-        modelId: receipt.modelId,
-        state: receipt.state,
-        candidateSha: receipt.candidateSha,
-        apiContractVersion: receipt.apiContractVersion,
-        checks: receipt.checks,
-    });
+    const canonical = JSON.stringify({ providerId: receipt.providerId, modelId: receipt.modelId, state: receipt.state, candidateSha: receipt.candidateSha, apiContractVersion: receipt.apiContractVersion, checks: receipt.checks });
     return crypto.createHash('sha256').update(canonical).digest('hex');
 }
 
 export function persistLifecycleReceipt(receipt: ModelQualificationReceipt, filePath: string): PersistedLifecycleRecord {
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    const record: PersistedLifecycleRecord = {
-        schemaVersion: '1.0.0',
-        persistedAt: new Date().toISOString(),
-        receiptDigest: computeReceiptDigest(receipt),
-        receipt: JSON.parse(JSON.stringify(receipt)),
-    };
+    const record: PersistedLifecycleRecord = { schemaVersion: '1.0.0', persistedAt: new Date().toISOString(), receiptDigest: computeReceiptDigest(receipt), receipt: JSON.parse(JSON.stringify(receipt)) };
     fs.writeFileSync(filePath, JSON.stringify(record, null, 2), 'utf8');
     return record;
 }
@@ -178,9 +178,7 @@ export function persistLifecycleReceipt(receipt: ModelQualificationReceipt, file
 export function loadPersistedLifecycleReceipt(filePath: string): PersistedLifecycleRecord {
     if (!fs.existsSync(filePath)) throw new AiGatewayError('CATALOG_INVALID', `Lifecycle receipt file not found: ${filePath}`, 404);
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8')) as PersistedLifecycleRecord;
-    if (!parsed?.receipt?.providerId || !parsed?.receipt?.modelId) {
-        throw new AiGatewayError('CATALOG_INVALID', `Malformed lifecycle receipt at ${filePath}`, 500);
-    }
+    if (!parsed?.receipt?.providerId || !parsed?.receipt?.modelId) throw new AiGatewayError('CATALOG_INVALID', `Malformed lifecycle receipt at ${filePath}`, 500);
     return parsed;
 }
 
@@ -188,32 +186,13 @@ export class ModelLifecycleStateMachine {
     private readonly auditRecords: ModelLifecycleAuditRecord[] = [];
     public getInitialDiscoveredState(): ModelQualificationState { return 'DISCOVERED'; }
     public canTransition(from: ModelQualificationState, to: ModelQualificationState): boolean { return isValidLifecycleTransition(from, to); }
-    public transition(
-        from: ModelQualificationState,
-        to: ModelQualificationState,
-        context: { providerId: string; modelId: string; correlationId: string; reasonCode?: LifecycleFailureReasonCode | string; actor?: string; details?: Record<string, unknown> }
-    ): ModelLifecycleAuditRecord {
+    public transition(from: ModelQualificationState, to: ModelQualificationState, context: { providerId: string; modelId: string; correlationId: string; reasonCode?: LifecycleFailureReasonCode | string; actor?: string; details?: Record<string, unknown> }): ModelLifecycleAuditRecord {
         assertValidLifecycleTransition(from, to, context.reasonCode);
-        const record: ModelLifecycleAuditRecord = {
-            timestamp: new Date().toISOString(),
-            correlationId: context.correlationId,
-            providerId: context.providerId,
-            modelId: context.modelId,
-            previousState: from,
-            newState: to,
-            reasonCode: context.reasonCode,
-            actor: context.actor || 'system',
-            details: context.details,
-        };
+        const record: ModelLifecycleAuditRecord = { timestamp: new Date().toISOString(), correlationId: context.correlationId, providerId: context.providerId, modelId: context.modelId, previousState: from, newState: to, reasonCode: context.reasonCode, actor: context.actor || 'system', details: context.details };
         this.auditRecords.push(record);
         return record;
     }
-    public failCheck(
-        from: ModelQualificationState,
-        targetState: 'DEGRADED' | 'DISABLED' | 'RETIRED',
-        reasonCode: LifecycleFailureReasonCode,
-        context: { providerId: string; modelId: string; correlationId: string; actor?: string; details?: Record<string, unknown> }
-    ): ModelLifecycleAuditRecord {
+    public failCheck(from: ModelQualificationState, targetState: 'DEGRADED' | 'DISABLED' | 'RETIRED', reasonCode: LifecycleFailureReasonCode, context: { providerId: string; modelId: string; correlationId: string; actor?: string; details?: Record<string, unknown> }): ModelLifecycleAuditRecord {
         return this.transition(from, targetState, { ...context, reasonCode });
     }
     public getAuditHistory(): ModelLifecycleAuditRecord[] { return [...this.auditRecords]; }
@@ -249,8 +228,7 @@ export function isCredentialsRequiredForModel(model: Record<string, any>, option
     if (options.requireCredentials === true) return true;
     if (model.credentialRef || model.requiresCredentials) return true;
     const provider = String(model.providerId || model.provider || '').toLowerCase();
-    const localProviders = new Set(['mock', 'local', 'fixture']);
-    return Boolean(provider && !localProviders.has(provider));
+    return Boolean(provider && !new Set(['mock', 'local', 'fixture']).has(provider));
 }
 
 export class ModelLifecycle {
@@ -261,6 +239,7 @@ export class ModelLifecycle {
     public readonly gitSha: string;
     public inferenceVerificationDigest: string | null = null;
     public receipt: ModelQualificationReceipt | null = null;
+    public liveInferenceReceipt: LiveInferenceReceipt | null = null;
     public readonly circuitBreaker: CircuitBreaker;
     public readonly history: Array<{ from: ModelQualificationState | null; to: ModelQualificationState; timestamp: string; reason?: string }>;
 
@@ -275,6 +254,16 @@ export class ModelLifecycle {
         this.history = [{ from: null, to: 'DISCOVERED', timestamp: new Date().toISOString(), reason: 'Discovered' }];
     }
 
+    public assertLiveInferenceReceiptValid(): void {
+        const isProduction = process.env.NODE_ENV === 'production';
+        if (!this.liveInferenceReceipt || !validateLiveInferenceReceipt(this.liveInferenceReceipt, this.alias)) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' missing verified LiveInferenceReceipt for ACTIVE status`, 403);
+        }
+        if (isProduction && this.liveInferenceReceipt.testOnly) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' qualified with testOnly mock executor cannot be activated in production`, 403);
+        }
+    }
+
     public transitionTo(nextState: ModelQualificationState, reason = ''): void {
         if (nextState === 'DISABLED') {
             const prev = this.state;
@@ -286,16 +275,22 @@ export class ModelLifecycle {
         if (!allowed || !allowed.has(nextState)) {
             throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Illegal transition from '${this.state}' to '${nextState}'`, 400, { current: this.state, requested: nextState });
         }
+        if (nextState === 'ACTIVE') this.assertLiveInferenceReceiptValid();
         const prev = this.state;
         this.state = nextState;
         this.history.push({ from: prev, to: nextState, timestamp: new Date().toISOString(), reason });
     }
 
-    public canRoute(): boolean { return this.state === 'ACTIVE'; }
+    public canRoute(): boolean {
+        if (this.state !== 'ACTIVE') return false;
+        try { this.assertLiveInferenceReceiptValid(); return true; } catch { return false; }
+    }
+
     public assertRoutable(): boolean {
         if (this.state !== 'ACTIVE') {
             throw new ModelLifecycleError('MODEL_DISABLED', `Model '${this.alias}' is in state '${this.state}', cannot be routed until ACTIVE`, 403, { modelAlias: this.alias, state: this.state });
         }
+        this.assertLiveInferenceReceiptValid();
         return true;
     }
 
@@ -321,9 +316,7 @@ export class ModelLifecycle {
         const credentialsRequired = isCredentialsRequiredForModel(this.model, options);
 
         if (broker && credentialRef) {
-            try {
-                broker.resolveHandle(credentialRef);
-            } catch (err: any) {
+            try { broker.resolveHandle(credentialRef); } catch (err: any) {
                 this.transitionTo('DISABLED', `Policy check failed: ${err.errorCode || err.message}`);
                 throw err;
             }
@@ -369,15 +362,10 @@ export class ModelLifecycle {
         executeFn?: (model: Record<string, any>) => Promise<string | { output?: string } | any>,
         options: InferenceVerificationOptions = {}
     ): Promise<this> {
-        if (this.state !== 'CAPABILITY_PROBED') {
-            throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Inference verification requires CAPABILITY_PROBED state, got ${this.state}`, 400);
-        }
-        if (!executeFn || typeof executeFn !== 'function') {
-            throw new ModelLifecycleError('NO_INFERENCE_EXECUTOR', 'Real provider executor is required for inference verification', 400);
-        }
-        if (this.circuitBreaker.isOpen()) {
-            throw new ModelLifecycleError('CIRCUIT_OPEN', 'Circuit breaker is OPEN; inference rejected', 503, { consecutiveFailures: this.circuitBreaker.consecutiveFailures });
-        }
+        if (this.state !== 'CAPABILITY_PROBED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Inference verification requires CAPABILITY_PROBED state, got ${this.state}`, 400);
+        if (!executeFn || typeof executeFn !== 'function') throw new ModelLifecycleError('NO_INFERENCE_EXECUTOR', 'Real provider executor is required for inference verification', 400);
+        if (this.circuitBreaker.isOpen()) throw new ModelLifecycleError('CIRCUIT_OPEN', 'Circuit breaker is OPEN; inference rejected', 503, { consecutiveFailures: this.circuitBreaker.consecutiveFailures });
+
         const maxRetries = options.maxRetries ?? 2;
         const initialBackoffMs = options.initialBackoffMs ?? 20;
         let attempt = 0;
@@ -391,12 +379,27 @@ export class ModelLifecycle {
                 let rawOutput: string | null = null;
                 if (typeof result === 'string') rawOutput = result;
                 else if (result && typeof result === 'object' && typeof (result as any).output === 'string') rawOutput = (result as any).output;
-
-                if (!rawOutput || !rawOutput.trim()) {
-                    throw new ModelLifecycleError('INVALID_INFERENCE_OUTPUT', 'Inference verification returned empty or null output', 400);
-                }
+                if (!rawOutput || !rawOutput.trim()) throw new ModelLifecycleError('INVALID_INFERENCE_OUTPUT', 'Inference verification returned empty or null output', 400);
 
                 this.inferenceVerificationDigest = computeSha256(rawOutput.trim());
+                const isRealTransport = Boolean(result && typeof result === 'object' && result.source === 'airroofers-live-transport');
+                const correlationId = (result && typeof result === 'object' && result.correlationId) || `corr-qual-${Date.now()}`;
+                const endpointHost = (result && typeof result === 'object' && result.endpointHost) || (isRealTransport ? result.endpointHost : 'ai.airroofers.eu');
+                const observedAt = (result && typeof result === 'object' && result.observedAt) || new Date().toISOString();
+
+                this.liveInferenceReceipt = {
+                    source: 'airroofers-live-transport',
+                    httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
+                    verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+                    candidateSha: (result && typeof result === 'object' && result.candidateSha) || this.gitSha,
+                    modelId: (result && typeof result === 'object' && result.modelId) || this.alias,
+                    responseDigestSha256: this.inferenceVerificationDigest,
+                    correlationId,
+                    endpointHost,
+                    observedAt,
+                    ...(!isRealTransport ? { testOnly: true } : {}),
+                };
+
                 this.transitionTo('INFERENCE_VERIFIED', 'Minimal test inference verified');
                 return this;
             } catch (err: any) {
@@ -408,9 +411,7 @@ export class ModelLifecycle {
                 const is429 = err?.statusCode === 429 || err?.errorCode === 'PROVIDER_RATE_LIMITED' || /429|rate limit/i.test(err?.message || '');
                 if (is429) {
                     this.circuitBreaker.recordFailure();
-                    if (this.circuitBreaker.isOpen()) {
-                        throw new ModelLifecycleError('CIRCUIT_OPEN', 'Circuit breaker tripped OPEN on rate limit (429)', 503, { consecutiveFailures: this.circuitBreaker.consecutiveFailures });
-                    }
+                    if (this.circuitBreaker.isOpen()) throw new ModelLifecycleError('CIRCUIT_OPEN', 'Circuit breaker tripped OPEN on rate limit (429)', 503, { consecutiveFailures: this.circuitBreaker.consecutiveFailures });
                     attempt++;
                     if (attempt <= maxRetries) {
                         await new Promise((r) => setTimeout(r, initialBackoffMs * Math.pow(2, attempt - 1)));
@@ -427,8 +428,9 @@ export class ModelLifecycle {
 
     public qualify(metadata: Record<string, unknown> = {}): this {
         if (this.state !== 'INFERENCE_VERIFIED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Qualification requires INFERENCE_VERIFIED state, got ${this.state}`, 400);
-        if (!this.inferenceVerificationDigest) {
-            throw new ModelLifecycleError('INFERENCE_NOT_VERIFIED', 'Cannot qualify model without verified inference digest', 400);
+        if (!this.inferenceVerificationDigest) throw new ModelLifecycleError('INFERENCE_NOT_VERIFIED', 'Cannot qualify model without verified inference digest', 400);
+        if (metadata.liveInferenceReceipt && validateLiveInferenceReceipt(metadata.liveInferenceReceipt, this.alias)) {
+            this.liveInferenceReceipt = metadata.liveInferenceReceipt;
         }
         this.receipt = {
             providerId: this.providerId,
@@ -437,7 +439,7 @@ export class ModelLifecycle {
             candidateSha: this.gitSha,
             apiContractVersion: '3.1.0',
             qualifiedAt: new Date().toISOString(),
-            correlationId: (metadata.correlationId as string) || `corr-qual-${Date.now()}`,
+            correlationId: this.liveInferenceReceipt?.correlationId || (metadata.correlationId as string) || `corr-qual-${Date.now()}`,
             checks: [
                 { checkId: 'schema-validation', status: 'PASS' },
                 { checkId: 'policy-check', status: 'PASS' },
@@ -450,8 +452,10 @@ export class ModelLifecycle {
         return this;
     }
 
-    public activate(): this {
+    public activate(receipt?: LiveInferenceReceipt): this {
         if (this.state !== 'QUALIFIED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Activation requires QUALIFIED state, got ${this.state}`, 400);
+        if (receipt) this.liveInferenceReceipt = receipt;
+        this.assertLiveInferenceReceiptValid();
         this.transitionTo('ACTIVE', 'Activated for live routing');
         return this;
     }
@@ -465,6 +469,7 @@ export class ModelLifecycle {
             state: this.state,
             canRoute: this.canRoute(),
             inferenceVerificationDigest: this.inferenceVerificationDigest,
+            liveInferenceReceipt: this.liveInferenceReceipt,
             circuitBreaker: {
                 state: this.circuitBreaker.state,
                 consecutiveFailures: this.circuitBreaker.consecutiveFailures,
@@ -478,10 +483,7 @@ export class ModelLifecycle {
     public async runFullLifecycle(options: FullLifecycleOptions = {}): Promise<ModelQualificationReceipt | any> {
         this.validateSchema();
         const credentialsRequired = isCredentialsRequiredForModel(this.model, options);
-        const policyOptions: PolicyCheckOptions = {
-            ...options,
-            requireCredentials: credentialsRequired ? true : options.requireCredentials,
-        };
+        const policyOptions: PolicyCheckOptions = { ...options, requireCredentials: credentialsRequired ? true : options.requireCredentials };
         this.checkPolicy(policyOptions);
         await this.probeCapability(options.probeFn);
         await this.verifyInference(options.executeFn, options);

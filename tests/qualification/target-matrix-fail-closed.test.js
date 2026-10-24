@@ -125,6 +125,9 @@ class TargetMatrixGate {
       if (hostEntry.qualificationStatus === 'tested') {
         assert.ok(['supported', 'experimental'].includes(match.supportClaim), `Host provider ${hostEntry.provider} must declare valid claim`);
         assert.strictEqual(match.qualificationStatus, 'tested');
+      } else if (hostEntry.qualificationStatus === 'partial') {
+        assert.strictEqual(match.supportClaim, 'experimental', `Host provider ${hostEntry.provider} must declare experimental claim`);
+        assert.strictEqual(match.qualificationStatus, 'partial');
       } else if (hostEntry.qualificationStatus === 'unsupported') {
         assert.strictEqual(match.supportClaim, 'unsupported', `Host provider ${hostEntry.provider} must declare unsupported claim`);
         assert.strictEqual(match.qualificationStatus, 'unsupported');
@@ -186,7 +189,7 @@ class TargetMatrixGate {
    * Evaluates a host/cloud provider operation against the matrix.
    * Throws fail-closed error with UNSUPPORTED_CAPABILITY on unsupported providers or operations.
    */
-  evaluateProviderRequest(providerName, operation = 'provision') {
+  evaluateProviderRequest(providerName, operation = 'provision', evidence = {}) {
     const entry = this.getHostProvider(providerName);
     if (!entry) {
       const err = new Error(`Unsupported host provider: ${providerName}`);
@@ -204,6 +207,17 @@ class TargetMatrixGate {
     }
 
     const opStatus = entry.operations?.[operation];
+    if (entry.qualificationStatus === 'partial' || opStatus === 'receipts_pending') {
+      if (!evidence.disposableReceiptAttached) {
+        const err = new Error(`Operation ${operation} on partial provider ${providerName} requires verified disposable infrastructure receipts`);
+        err.code = this.matrix.defaultFailureCode;
+        err.provider = providerName;
+        err.operation = operation;
+        throw err;
+      }
+      return { allowed: true, provider: providerName, operation, status: 'receipts_verified' };
+    }
+
     if (opStatus !== 'tested') {
       const err = new Error(`Operation ${operation} on provider ${providerName} is unsupported`);
       err.code = this.matrix.defaultFailureCode;
@@ -289,26 +303,19 @@ test('QUAL-GATE-003: Tier 2 Cross-Compiled targets cannot claim Tier 1 native qu
     assert.strictEqual(target.qualificationStatus, 'cross-compiled-only');
 
     // Attempting to claim native qualification without verified native runner evidence fails closed
-    assert.throws(
-      () => gate.evaluateNativeQualificationClaim(triple, { nativeExecutionVerified: false }),
-      (err) => {
-        assert.strictEqual(err.code, 'UNSUPPORTED_TARGET_ENVIRONMENT');
-        assert.match(err.message, /cross-compiled only/);
-        return true;
-      }
-    );
+    assert.throws(() => gate.evaluateNativeQualificationClaim(triple, { nativeExecutionVerified: false }), (err) => {
+      assert.strictEqual(err.code, 'UNSUPPORTED_TARGET_ENVIRONMENT');
+      assert.match(err.message, /cross-compiled only/);
+      return true;
+    });
 
     // Cross-runner execution evidence (e.g., amd64 runner building for arm64) also fails closed
-    assert.throws(
-      () => gate.evaluateNativeQualificationClaim(triple, {
-        nativeExecutionVerified: true,
-        runnerTarget: 'linux/amd64' // Mismatched runner!
-      }),
-      (err) => {
-        assert.strictEqual(err.code, 'UNSUPPORTED_TARGET_ENVIRONMENT');
-        return true;
-      }
-    );
+    assert.throws(() => gate.evaluateNativeQualificationClaim(triple, {
+      nativeExecutionVerified: true, runnerTarget: 'linux/amd64'
+    }), (err) => {
+      assert.strictEqual(err.code, 'UNSUPPORTED_TARGET_ENVIRONMENT');
+      return true;
+    });
   }
 });
 
@@ -322,15 +329,12 @@ test('QUAL-GATE-004: Explicitly unsupported IDEs fail closed with UNSUPPORTED_CA
     assert.strictEqual(entry.status, 'unsupported');
     assert.strictEqual(entry.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
 
-    assert.throws(
-      () => gate.evaluateIdeRequest(ide, 'execute'),
-      (err) => {
-        assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
-        assert.strictEqual(err.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
-        assert.match(err.message, /explicitly unsupported/);
-        return true;
-      }
-    );
+    assert.throws(() => gate.evaluateIdeRequest(ide, 'execute'), (err) => {
+      assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+      assert.strictEqual(err.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
+      assert.match(err.message, /explicitly unsupported/);
+      return true;
+    });
   }
 });
 
@@ -341,20 +345,15 @@ test('QUAL-GATE-005: Experimental IDE (vscode) fails closed on unverified capabi
   assert.strictEqual(entry.status, 'experimental');
   assert.strictEqual(entry.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
 
-  // Whitelisted experimental probe passes
   const probe = gate.evaluateIdeRequest('vscode', 'preflight_probe');
   assert.strictEqual(probe.allowed, true);
   assert.strictEqual(probe.status, 'experimental');
 
-  // Unverified capability execution on experimental IDE fails closed
-  assert.throws(
-    () => gate.evaluateIdeRequest('vscode', 'arbitrary_runtime_mutation'),
-    (err) => {
-      assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
-      assert.strictEqual(err.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
-      return true;
-    }
-  );
+  assert.throws(() => gate.evaluateIdeRequest('vscode', 'arbitrary_runtime_mutation'), (err) => {
+    assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+    assert.strictEqual(err.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
+    return true;
+  });
 });
 
 test('QUAL-GATE-006: Explicitly unsupported cloud providers fail closed with UNSUPPORTED_CAPABILITY', () => {
@@ -369,45 +368,56 @@ test('QUAL-GATE-006: Explicitly unsupported cloud providers fail closed with UNS
 
     for (const op of operations) {
       assert.strictEqual(entry.operations[op], 'unsupported');
-
-      assert.throws(
-        () => gate.evaluateProviderRequest(provider, op),
-        (err) => {
-          assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
-          assert.strictEqual(err.provider, provider);
-          return true;
-        }
-      );
+      assert.throws(() => gate.evaluateProviderRequest(provider, op), (err) => {
+        assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+        assert.strictEqual(err.provider, provider);
+        return true;
+      });
     }
 
-    // Engine-core TargetAdapterRegistry integration parity check
-    assert.throws(
-      () => globalTargetAdapterRegistry.normalizePlatform(provider),
-      (err) => {
-        assert.ok(err instanceof UnsupportedPlatformError);
-        assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
-        assert.strictEqual(err.platform, provider);
-        return true;
-      }
-    );
+    assert.throws(() => globalTargetAdapterRegistry.normalizePlatform(provider), (err) => {
+      assert.ok(err instanceof UnsupportedPlatformError);
+      assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+      assert.strictEqual(err.platform, provider);
+      return true;
+    });
   }
 });
 
 test('QUAL-GATE-007: Tested host providers pass across all mandatory lifecycle operations', () => {
   const gate = new TargetMatrixGate();
-  const testedProviders = ['aws', 'directadmin', 'cpanel', 'ssh-vps', 'docker', 'kubernetes'];
+  const testedProviders = ['aws', 'docker'];
+  const partialProviders = ['directadmin', 'cpanel', 'ssh-vps', 'kubernetes'];
   const operations = ['discover', 'preflight', 'provision', 'verify', 'repair', 'rollback', 'cleanup'];
 
   for (const provider of testedProviders) {
     const entry = gate.getHostProvider(provider);
     assert.ok(entry, `Missing host provider: ${provider}`);
     assert.strictEqual(entry.qualificationStatus, 'tested');
-
     for (const op of operations) {
       assert.strictEqual(entry.operations[op], 'tested');
       const res = gate.evaluateProviderRequest(provider, op);
       assert.strictEqual(res.allowed, true);
       assert.strictEqual(res.status, 'tested');
+    }
+  }
+
+  for (const provider of partialProviders) {
+    const entry = gate.getHostProvider(provider);
+    assert.ok(entry, `Missing partial host provider: ${provider}`);
+    assert.strictEqual(entry.qualificationStatus, 'partial');
+    assert.strictEqual(entry.receiptStatus, 'receipts_pending');
+    for (const op of operations) {
+      assert.strictEqual(entry.operations[op], 'receipts_pending');
+      assert.throws(() => gate.evaluateProviderRequest(provider, op), (err) => {
+        assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+        assert.strictEqual(err.provider, provider);
+        assert.match(err.message, /requires verified disposable infrastructure receipts/);
+        return true;
+      });
+      const res = gate.evaluateProviderRequest(provider, op, { disposableReceiptAttached: true });
+      assert.strictEqual(res.allowed, true);
+      assert.strictEqual(res.status, 'receipts_verified');
     }
   }
 });
@@ -416,38 +426,26 @@ test('QUAL-GATE-008: Unknown/unlisted targets and platforms fail closed', () => 
   const gate = new TargetMatrixGate();
 
   // Unknown IDE fails closed
-  assert.throws(
-    () => gate.evaluateIdeRequest('emacs'),
-    (err) => {
-      assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
-      return true;
-    }
-  );
+  assert.throws(() => gate.evaluateIdeRequest('emacs'), (err) => {
+    assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+    return true;
+  });
 
-  // Unknown provider fails closed
-  assert.throws(
-    () => gate.evaluateProviderRequest('digitalocean', 'provision'),
-    (err) => {
-      assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
-      return true;
-    }
-  );
+  assert.throws(() => gate.evaluateProviderRequest('digitalocean', 'provision'), (err) => {
+    assert.strictEqual(err.code, 'UNSUPPORTED_CAPABILITY');
+    return true;
+  });
 
-  // Unknown architecture triple fails closed
-  assert.throws(
-    () => gate.evaluateNativeQualificationClaim('solaris/sparc'),
-    (err) => {
-      assert.strictEqual(err.code, 'UNSUPPORTED_TARGET_ENVIRONMENT');
-      return true;
-    }
-  );
+  assert.throws(() => gate.evaluateNativeQualificationClaim('solaris/sparc'), (err) => {
+    assert.strictEqual(err.code, 'UNSUPPORTED_TARGET_ENVIRONMENT');
+    return true;
+  });
 });
 
 test('QUAL-GATE-009: Universal support claim verification dispels universal green and fails closed', async () => {
   const pe = await getPlatformEvidenceApi();
   const realMatrix = JSON.parse(fs.readFileSync(PLATFORM_MATRIX_PATH, 'utf8'));
 
-  // Universal verification on real matrix without all-native evidence must fail closed
   const emptyDerived = { targets: {} };
   const uvResult = pe.verifyUniversalSupport(realMatrix, emptyDerived);
   assert.strictEqual(uvResult.verdict, 'claim-exceeds-evidence');
@@ -458,11 +456,9 @@ test('QUAL-GATE-010: Matrix mutation guard ensures tier invariants cannot be tam
   const gate = new TargetMatrixGate();
   const m = JSON.parse(JSON.stringify(gate.matrix));
 
-  // Adversarial tampering: attempt to set linux/arm64 to tested without verified native execution
   const armTarget = m.targets.osArchitectures.find((t) => t.target === 'linux/arm64');
-  armTarget.qualificationStatus = 'tested'; // Inconsistent with nativeExecutionVerified: false!
+  armTarget.qualificationStatus = 'tested';
 
-  // Validation detects inconsistency between status and native verification
   const isConsistent = m.targets.osArchitectures.every((t) => {
     if (t.qualificationStatus === 'tested') return t.nativeExecutionVerified === true;
     if (t.qualificationStatus === 'cross-compiled-only') return t.nativeExecutionVerified === false;
@@ -471,21 +467,17 @@ test('QUAL-GATE-010: Matrix mutation guard ensures tier invariants cannot be tam
 
   assert.strictEqual(isConsistent, false, 'Tampered target matrix must be detected as inconsistent');
 
-  // Cross-matrix tampering guard: verify that a mutated platform matrix with bogus claim is caught
   const tamperedDefs = JSON.parse(fs.readFileSync(PLATFORM_MATRIX_PATH, 'utf8'));
   const gcpTarget = tamperedDefs.targetDefinitions.find((d) => d.id === 'delivery-gcp-europe-west9');
-  gcpTarget.supportClaim = 'supported'; // GCP is unsupported in canonical registry!
+  gcpTarget.supportClaim = 'supported';
 
   const tmpTamperedPath = path.join(ROOT, 'tests/qualification/.tampered-platform-matrix.tmp.json');
   try {
     fs.writeFileSync(tmpTamperedPath, JSON.stringify(tamperedDefs));
-    assert.throws(
-      () => gate.validatePlatformMatrixConsistency(tmpTamperedPath),
-      (err) => {
-        assert.match(err.message, /Host provider gcp must declare unsupported claim/);
-        return true;
-      }
-    );
+    assert.throws(() => gate.validatePlatformMatrixConsistency(tmpTamperedPath), (err) => {
+      assert.match(err.message, /Host provider gcp must declare unsupported claim/);
+      return true;
+    });
   } finally {
     if (fs.existsSync(tmpTamperedPath)) fs.unlinkSync(tmpTamperedPath);
   }

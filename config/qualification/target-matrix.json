@@ -102,6 +102,7 @@
         "platformId": "delivery-aws-eu-west-3",
         "qualificationStatus": "tested",
         "supportClaim": "supported",
+        "physicalGateVerified": true,
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -115,53 +116,56 @@
       {
         "provider": "directadmin",
         "platformId": "delivery-directadmin-shared-hosting",
-        "qualificationStatus": "tested",
-        "supportClaim": "supported",
+        "qualificationStatus": "partial",
+        "supportClaim": "experimental",
+        "receiptStatus": "receipts_pending",
         "operations": {
-          "discover": "tested",
-          "preflight": "tested",
-          "provision": "tested",
-          "verify": "tested",
-          "repair": "tested",
-          "rollback": "tested",
-          "cleanup": "tested"
+          "discover": "receipts_pending",
+          "preflight": "receipts_pending",
+          "provision": "receipts_pending",
+          "verify": "receipts_pending",
+          "repair": "receipts_pending",
+          "rollback": "receipts_pending",
+          "cleanup": "receipts_pending"
         }
       },
       {
         "provider": "cpanel",
         "platformId": "delivery-cpanel-hosting",
-        "qualificationStatus": "tested",
-        "supportClaim": "supported",
+        "qualificationStatus": "partial",
+        "supportClaim": "experimental",
+        "receiptStatus": "receipts_pending",
         "operations": {
-          "discover": "tested",
-          "preflight": "tested",
-          "provision": "tested",
-          "verify": "tested",
-          "repair": "tested",
-          "rollback": "tested",
-          "cleanup": "tested"
+          "discover": "receipts_pending",
+          "preflight": "receipts_pending",
+          "provision": "receipts_pending",
+          "verify": "receipts_pending",
+          "repair": "receipts_pending",
+          "rollback": "receipts_pending",
+          "cleanup": "receipts_pending"
         }
       },
       {
         "provider": "ssh-vps",
         "platformId": "delivery-vps-private-host",
-        "qualificationStatus": "tested",
-        "supportClaim": "supported",
+        "qualificationStatus": "partial",
+        "supportClaim": "experimental",
+        "receiptStatus": "receipts_pending",
         "operations": {
-          "discover": "tested",
-          "preflight": "tested",
-          "provision": "tested",
-          "verify": "tested",
-          "repair": "tested",
-          "rollback": "tested",
-          "cleanup": "tested"
+          "discover": "receipts_pending",
+          "preflight": "receipts_pending",
+          "provision": "receipts_pending",
+          "verify": "receipts_pending",
+          "repair": "receipts_pending",
+          "rollback": "receipts_pending",
+          "cleanup": "receipts_pending"
         }
       },
       {
         "provider": "docker",
         "platformId": "delivery-docker-compose",
         "qualificationStatus": "tested",
-        "supportClaim": "supported",
+        "supportClaim": "experimental",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -175,16 +179,17 @@
       {
         "provider": "kubernetes",
         "platformId": "delivery-kubernetes",
-        "qualificationStatus": "tested",
-        "supportClaim": "supported",
+        "qualificationStatus": "partial",
+        "supportClaim": "experimental",
+        "receiptStatus": "receipts_pending",
         "operations": {
-          "discover": "tested",
-          "preflight": "tested",
-          "provision": "tested",
-          "verify": "tested",
-          "repair": "tested",
-          "rollback": "tested",
-          "cleanup": "tested"
+          "discover": "receipts_pending",
+          "preflight": "receipts_pending",
+          "provision": "receipts_pending",
+          "verify": "receipts_pending",
+          "repair": "receipts_pending",
+          "rollback": "receipts_pending",
+          "cleanup": "receipts_pending"
         }
       },
       {

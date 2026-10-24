@@ -6,7 +6,7 @@
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-23
- * Last Modified  : 2026-10-23
+ * Last Modified  : 2026-10-24
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -46,6 +46,7 @@ export const REQUIRED_EVIDENCE_FILES = [
   'docs/security/evidence/admin_portal_provisioning_receipt.json',
   'docs/security/evidence/live_ai_canary_receipt.json',
   'docs/governance/evidence/native-runner-evidence.json',
+  'docs/security/evidence/ai_model_qualification_report.json',
 ];
 
 // Items whose proof must exist as a file; absence => listed "unproven".
@@ -54,6 +55,8 @@ export const UNPROVEN_CANDIDATES = [
     reason: 'Live canary receipt absent' },
   { id: 'native-runner-evidence', path: 'docs/governance/evidence/native-runner-evidence.json',
     reason: 'Native runner evidence absent' },
+  { id: 'ai-model-qualification-report', path: 'docs/security/evidence/ai_model_qualification_report.json',
+    reason: 'AI model qualification report absent' },
 ];
 
 export class EvidenceManifestError extends Error {

@@ -82,7 +82,30 @@ test('NATIVE-001: evidence is built only from observed records and carries no un
   assert.equal(d.classification, 'NATIVE_EXECUTION_VERIFIED_THIN_CLIENT_ONLY');
   assert.ok(d.limitation);
   assert.ok(e.tier2CrossCompiledTargets.every((x) => x.nativeExecutionVerified === false));
-  assert.ok(e.hostProviders.filter((p) => p.matrixStatus === 'tested').every((p) => /RECEIPTS_NOT_ATTACHED/.test(p.classification)));
+
+  // AWS is tested with verified physical gate evidence
+  const aws = e.hostProviders.find((p) => p.provider === 'aws');
+  assert.equal(aws.matrixStatus, 'tested');
+  assert.equal(aws.classification, 'PHYSICAL_GATE_VERIFIED');
+
+  // Secondary host providers are partial / receipts_pending
+  const secondary = ['directadmin', 'cpanel', 'ssh-vps', 'kubernetes'];
+  for (const name of secondary) {
+    const prov = e.hostProviders.find((p) => p.provider === name);
+    assert.ok(prov, `Missing host provider in evidence: ${name}`);
+    assert.equal(prov.matrixStatus, 'partial');
+    assert.equal(prov.classification, 'PARTIAL_DISPOSABLE_RECEIPTS_PENDING');
+    assert.match(prov.limitation, /receipts are pending/);
+  }
+
+  // Unsupported cloud providers fail closed
+  const unsupported = ['gcp', 'azure'];
+  for (const name of unsupported) {
+    const prov = e.hostProviders.find((p) => p.provider === name);
+    assert.ok(prov, `Missing host provider in evidence: ${name}`);
+    assert.equal(prov.matrixStatus, 'unsupported');
+    assert.equal(prov.classification, 'UNSUPPORTED_FAIL_CLOSED_BY_MATRIX');
+  }
 });
 
 test('NATIVE-002: record bound to another SHA is rejected', async () => {

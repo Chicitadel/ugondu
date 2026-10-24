@@ -119,8 +119,9 @@ test('unproven contains native-runner-evidence when missing, and is empty when p
   const { generateManifest } = await import(GEN);
   const { dir } = makeRepo();
 
-  // Commit canary receipt so live-canary is proven
+  // Commit canary receipt and ai model qualification report so live-canary and ai-model are proven
   let sha = commitFile(dir, 'docs/security/evidence/live_ai_canary_receipt.json', '{"canary":"pass"}\n');
+  sha = commitFile(dir, 'docs/security/evidence/ai_model_qualification_report.json', '{"report":"pass"}\n');
 
   // native-runner-evidence.json is missing from directory
   const mMissing = generateManifest({
@@ -149,6 +150,44 @@ test('unproven contains native-runner-evidence when missing, and is empty when p
   assert.ok(mPresent.evidenceFiles.some((f) => f.path === 'docs/governance/evidence/native-runner-evidence.json'));
 });
 
+test('unproven contains ai-model-qualification-report when missing, and includes digest in evidenceFiles when present', async () => {
+  const { generateManifest, REQUIRED_EVIDENCE_FILES, UNPROVEN_CANDIDATES } = await import(GEN);
+  const { dir } = makeRepo();
+
+  assert.ok(REQUIRED_EVIDENCE_FILES.includes('docs/security/evidence/ai_model_qualification_report.json'));
+  assert.ok(UNPROVEN_CANDIDATES.some((c) => c.path === 'docs/security/evidence/ai_model_qualification_report.json'));
+
+  let sha = commitFile(dir, 'docs/security/evidence/live_ai_canary_receipt.json', '{"canary":"pass"}\n');
+  sha = commitFile(dir, 'docs/governance/evidence/native-runner-evidence.json', '{"runner":"native-pass"}\n');
+
+  // ai_model_qualification_report.json is missing from directory
+  const mMissing = generateManifest({
+    root: dir,
+    expectedSha: sha,
+    evidenceFiles: ['docs/a.md'],
+    commands: CMDS,
+    write: false,
+  });
+  assert.ok(mMissing.unproven.some((u) => u.id === 'ai-model-qualification-report'));
+  assert.equal(mMissing.evidenceFiles.some((f) => f.path === 'docs/security/evidence/ai_model_qualification_report.json'), false);
+
+  // Commit ai_model_qualification_report.json into directory
+  sha = commitFile(dir, 'docs/security/evidence/ai_model_qualification_report.json', '{"qualificationMode":"LIVE_SOVEREIGN","summary":{"activeCount":0}}\n');
+
+  const mPresent = generateManifest({
+    root: dir,
+    expectedSha: sha,
+    evidenceFiles: ['docs/a.md'],
+    commands: CMDS,
+    write: false,
+  });
+  assert.deepEqual(mPresent.unproven, []);
+  assert.equal(mPresent.unproven.length, 0);
+  const entry = mPresent.evidenceFiles.find((f) => f.path === 'docs/security/evidence/ai_model_qualification_report.json');
+  assert.ok(entry, 'Expected ai_model_qualification_report.json in evidenceFiles');
+  assert.match(entry.sha256, /^[0-9a-f]{64}$/);
+});
+
 test('unproven is empty and evidenceFiles contains all required files when present', async () => {
   const { generateManifest, REQUIRED_EVIDENCE_FILES } = await import(GEN);
   const { dir } = makeRepo();
@@ -156,6 +195,7 @@ test('unproven is empty and evidenceFiles contains all required files when prese
   commitFile(dir, 'docs/security/evidence/live_ai_canary_receipt.json', '{"canary":"ok"}\n');
   commitFile(dir, 'docs/governance/evidence/native-runner-evidence.json', '{"runner":"ok"}\n');
   commitFile(dir, 'docs/security/evidence/admin_portal_provisioning_receipt.json', '{"admin":"ok"}\n');
+  commitFile(dir, 'docs/security/evidence/ai_model_qualification_report.json', '{"ai":"ok"}\n');
   const sha = commitFile(dir, 'config/qualification/target-matrix.json', '{"targets":[]}\n');
 
   const m = generateManifest({

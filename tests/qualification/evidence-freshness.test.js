@@ -56,7 +56,7 @@ function commit(dir, msg) {
 }
 
 // Stage 1: candidate commit holding code + target matrix. Stage 2: evidence commit.
-function buildRelease({ canarySha, nativeSha } = {}) {
+function buildRelease({ canarySha, nativeSha, aiSha, aiReport } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'efr-'));
   sh(dir, 'init', '-q');
   sh(dir, 'config', 'user.email', 't@example.invalid');
@@ -70,6 +70,16 @@ function buildRelease({ canarySha, nativeSha } = {}) {
     gitSha: canarySha || candidate, discoveryStatusCode: 200, executionStatusCode: 200,
   });
   write(dir, 'docs/governance/evidence/native-runner-evidence.json', { gitHeadSha: nativeSha || candidate });
+  if (aiReport !== false) {
+    const reportData = typeof aiReport === 'function' ? aiReport(candidate) : (aiReport || {});
+    write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+      gitSha: aiSha || candidate,
+      qualificationMode: 'LIVE_SOVEREIGN',
+      summary: { totalDiscovered: 1, qualifiedCount: 1, activeCount: 1, disabledCount: 0 },
+      receipts: [{ modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true }],
+      ...reportData,
+    });
+  }
   commit(dir, 'evidence receipts');
   return { dir, candidate };
 }
@@ -230,29 +240,28 @@ test('FRESH-012: modifying docs/governance/evidence/foo.json post-candidate is a
 
 test('FRESH-013: AI qualification report bound to mismatched SHA is rejected', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
-  const { dir, candidate } = buildRelease();
-  await seal(dir, candidate);
-  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
-    gitSha: 'f'.repeat(40),
-    qualificationMode: 'CATALOG_OFFLINE',
-    summary: { activeCount: 0 },
-    receipts: [],
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      gitSha: 'f'.repeat(40),
+      qualificationMode: 'CATALOG_OFFLINE',
+      summary: { activeCount: 0 },
+      receipts: [],
+    },
   });
-  commit(dir, 'mismatched ai report');
+  await seal(dir, candidate);
   assert.throws(() => verifyEvidenceFreshness({ root: dir }), /AI model qualification report SHA/);
 });
 
 test('FRESH-014: AI qualification report with active models under offline mode is rejected', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
-  const { dir, candidate } = buildRelease();
-  await seal(dir, candidate);
-  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
-    gitSha: candidate,
-    qualificationMode: 'CATALOG_OFFLINE',
-    summary: { activeCount: 2 },
-    receipts: [{ status: 'ACTIVE', liveExecution: true }, { status: 'ACTIVE', liveExecution: true }],
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'CATALOG_OFFLINE',
+      summary: { activeCount: 2 },
+      receipts: [{ status: 'ACTIVE', liveExecution: true }, { status: 'ACTIVE', liveExecution: true }],
+    },
   });
-  commit(dir, 'offline report claiming active models');
+  await seal(dir, candidate);
   assert.throws(
     () => verifyEvidenceFreshness({ root: dir }),
     /Offline catalog reports cannot satisfy live AI qualification: active models require live execution/
@@ -261,15 +270,14 @@ test('FRESH-014: AI qualification report with active models under offline mode i
 
 test('FRESH-015: AI qualification report with active models lacking liveExecution === true is rejected', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
-  const { dir, candidate } = buildRelease();
-  await seal(dir, candidate);
-  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
-    gitSha: candidate,
-    qualificationMode: 'LIVE_SOVEREIGN',
-    summary: { activeCount: 1 },
-    receipts: [{ status: 'ACTIVE', liveExecution: false }],
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'LIVE_SOVEREIGN',
+      summary: { activeCount: 1 },
+      receipts: [{ status: 'ACTIVE', liveExecution: false }],
+    },
   });
-  commit(dir, 'live report with fake execution');
+  await seal(dir, candidate);
   assert.throws(
     () => verifyEvidenceFreshness({ root: dir }),
     /Receipts for all active models must have liveExecution === true/
@@ -278,15 +286,14 @@ test('FRESH-015: AI qualification report with active models lacking liveExecutio
 
 test('FRESH-016: AI qualification report where activeCount does not match live active receipts is rejected', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
-  const { dir, candidate } = buildRelease();
-  await seal(dir, candidate);
-  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
-    gitSha: candidate,
-    qualificationMode: 'LIVE_SOVEREIGN',
-    summary: { activeCount: 2 },
-    receipts: [{ status: 'ACTIVE', liveExecution: true }],
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'LIVE_SOVEREIGN',
+      summary: { activeCount: 2 },
+      receipts: [{ status: 'ACTIVE', liveExecution: true }],
+    },
   });
-  commit(dir, 'live report with count mismatch');
+  await seal(dir, candidate);
   assert.throws(
     () => verifyEvidenceFreshness({ root: dir }),
     /Active model count does not match real live qualification receipts/
@@ -295,37 +302,74 @@ test('FRESH-016: AI qualification report where activeCount does not match live a
 
 test('FRESH-017: AI qualification report with activeCount 0 under offline mode is accepted', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
-  const { dir, candidate } = buildRelease();
-  await seal(dir, candidate);
-  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
-    gitSha: candidate,
-    qualificationMode: 'CATALOG_OFFLINE',
-    summary: { totalDiscovered: 12, qualifiedCount: 0, activeCount: 0, disabledCount: 12 },
-    receipts: [{ status: 'DISABLED' }],
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'CATALOG_OFFLINE',
+      summary: { totalDiscovered: 12, qualifiedCount: 0, activeCount: 0, disabledCount: 12 },
+      receipts: [{ status: 'DISABLED' }],
+    },
   });
-  const aiHead = commit(dir, 'valid offline report');
+  const head = await seal(dir, candidate);
   const r = await verifyEvidenceFreshness({ root: dir });
   assert.equal(r.candidate, candidate);
-  assert.equal(r.head, aiHead);
+  assert.equal(r.head, head);
   assert.equal(r.descendant, true);
 });
 
 test('FRESH-018: AI qualification report with verified live execution receipts under LIVE_SOVEREIGN is accepted', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
-  const { dir, candidate } = buildRelease();
-  await seal(dir, candidate);
-  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
-    gitSha: candidate,
-    qualificationMode: 'LIVE_SOVEREIGN',
-    summary: { totalDiscovered: 2, qualifiedCount: 2, activeCount: 2, disabledCount: 0 },
-    receipts: [
-      { modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true },
-      { modelAlias: 'model-b', status: 'ACTIVE', liveExecution: true },
-    ],
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'LIVE_SOVEREIGN',
+      summary: { totalDiscovered: 2, qualifiedCount: 2, activeCount: 2, disabledCount: 0 },
+      receipts: [
+        { modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true },
+        { modelAlias: 'model-b', status: 'ACTIVE', liveExecution: true },
+      ],
+    },
   });
-  const aiHead = commit(dir, 'valid live report');
+  const head = await seal(dir, candidate);
   const r = await verifyEvidenceFreshness({ root: dir });
   assert.equal(r.candidate, candidate);
-  assert.equal(r.head, aiHead);
+  assert.equal(r.head, head);
   assert.equal(r.descendant, true);
+});
+
+test('FRESH-019: manifest omitting ai_model_qualification_report.json from evidenceFiles fails closed', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  const p = path.join(dir, 'docs/governance/evidence/evidence-manifest.json');
+  const m = JSON.parse(fs.readFileSync(p, 'utf8'));
+  m.evidenceFiles = m.evidenceFiles.filter((f) => f.path !== 'docs/security/evidence/ai_model_qualification_report.json');
+  fs.writeFileSync(p, JSON.stringify(m, null, 2));
+  commit(dir, 'omit ai model report from manifest');
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Manifest missing required evidence file: docs\/security\/evidence\/ai_model_qualification_report\.json/
+  );
+});
+
+test('FRESH-020: tampered ai_model_qualification_report.json digest causes verification to fail closed', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', { tampered: true });
+  commit(dir, 'tamper ai model report on disk');
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Digest mismatch for docs\/security\/evidence\/ai_model_qualification_report\.json/
+  );
+});
+
+test('FRESH-021: missing ai_model_qualification_report.json file causes verification to fail closed', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  fs.unlinkSync(path.join(dir, 'docs/security/evidence/ai_model_qualification_report.json'));
+  commit(dir, 'delete ai model report file');
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Evidence file missing or outside repository: docs\/security\/evidence\/ai_model_qualification_report\.json/
+  );
 });

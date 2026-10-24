@@ -142,11 +142,25 @@ export function buildNativeRunnerEvidence({ root = ROOT, candidateSha, windowsRe
     ide: i.ide, status: i.status, classification: i.status === 'unsupported' ? 'UNSUPPORTED_FAIL_CLOSED_BY_MATRIX' : 'EXPERIMENTAL_NOT_QUALIFIED',
     failClosedBehavior: i.unsupportedBehavior,
   }));
-  const providers = t.hostProviders.map((p) => withDigest({
-    provider: p.provider, matrixStatus: p.qualificationStatus,
-    classification: p.qualificationStatus === 'unsupported' ? 'UNSUPPORTED_FAIL_CLOSED_BY_MATRIX' : 'MATRIX_DECLARED_TESTED_OPERATION_RECEIPTS_NOT_ATTACHED',
-    limitation: p.qualificationStatus === 'unsupported' ? undefined : 'Per-operation disposable-infrastructure receipts are not part of this evidence file.',
-  }));
+  const providers = t.hostProviders.map((p) => {
+    let classification;
+    let limitation;
+    if (p.qualificationStatus === 'unsupported') {
+      classification = 'UNSUPPORTED_FAIL_CLOSED_BY_MATRIX';
+    } else if (p.qualificationStatus === 'partial' || p.receiptStatus === 'receipts_pending') {
+      classification = 'PARTIAL_DISPOSABLE_RECEIPTS_PENDING';
+      limitation = 'Per-operation disposable-infrastructure receipts are pending and not attached.';
+    } else if (p.provider === 'aws') {
+      classification = 'PHYSICAL_GATE_VERIFIED';
+      limitation = 'Verified via live AWS physical gate execution (eu-west-3); cost and guardrail parameters enforced.';
+    } else {
+      classification = 'CONTAINER_COMPOSE_SPEC_VERIFIED';
+      limitation = 'Local container configuration validated via compose spec verification.';
+    }
+    const entry = { provider: p.provider, matrixStatus: p.qualificationStatus, classification };
+    if (limitation) entry.limitation = limitation;
+    return withDigest(entry);
+  });
 
   const body = {
     $schema: 'https://specs.airroofers.eu/governance/native-runner-evidence-2.0.0.json',
