@@ -3,12 +3,12 @@
 
 **Audit date:** 2026-10-24  
 **Branch:** `phase4/production-hardening`  
-**Candidate SHA:** `2646ac244973f5c03fd26b5adee71e6a12b4daa5`  
+**Candidate SHA:** `d641981dd5a9e056dfc8ba59c54ab75da44ef271`  
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT**  
 **Governance baseline:** UAIGOS 3.0.0  
 **Purpose:** Single durable checklist for the COR findings, remediation state, evidence links, acceptance criteria and regression controls.
 
-> **Evidence lineage reconciled:** The evidence manifest binds strictly to candidate SHA `2646ac244973f5c03fd26b5adee71e6a12b4daa5`. Live canary run 40086080595, native runner execution (148/148 pass), AI model qualification report, and all evidence digests verify with zero non-evidence drift under `verify-evidence-freshness.mjs`. Bounded target qualification is fully verified. Universal certification remains withheld as experimental and out-of-scope targets (secondary IDEs, alternate clouds) fail closed by design.
+> **Evidence lineage reconciled:** The evidence manifest binds strictly to candidate SHA `d641981dd5a9e056dfc8ba59c54ab75da44ef271`. Live canary run 40089857840, native runner execution (158/158 pass), AI model qualification report, and all evidence digests verify with zero non-evidence drift under `verify-evidence-freshness.mjs`. Bounded target qualification is fully verified. Universal certification remains withheld as experimental and out-of-scope targets (secondary IDEs, alternate clouds) fail closed by design.
 
 ## 1. Certification legend
 
@@ -23,23 +23,23 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 
 | ID | Boundary | Remediation recorded | Evidence | State |
 |---|---|---|---|---|
-| F-02 / F-04 | Release SHA and live AI receipt | Live canary run on candidate `2646ac24`; receipt reports HTTP 200 discovery and inference on `ai.airroofers.eu` | [Live AI canary run 40086080595](https://github.com/Chicitadel/ugondu/actions/runs/40086080595), [receipt](../docs/security/evidence/live_ai_canary_receipt.json) | 🟢 Candidate-bound; HTTP 200 discovery and inference verified |
+| F-02 / F-04 | Release SHA and live AI receipt | Live canary run on candidate `d641981d`; receipt reports HTTP 200 discovery and inference on `ai.airroofers.eu` | [Live AI canary run 40089857840](https://github.com/Chicitadel/ugondu/actions/runs/40089857840), [receipt](../security/evidence/live_ai_canary_receipt.json) | 🟢 Candidate-bound; HTTP 200 discovery and inference verified |
 | F-03 | Qualification matrix harmonization | Canonical registry reference and normalized schema/review dates recorded; negative tests pass 10/10 and platform evidence tests 15/15 | [Target matrix](../config/qualification/target-matrix.json), [platform matrix](../config/qualification/platform-matrix.json), [fail-closed tests](../tests/qualification/target-matrix-fail-closed.test.js) | 🟢 Verified on candidate SHA |
 | F-06 | Operational hardcoding/security schema | Security tool schemas documented as immutable guards; extensible routing options verified; dynamic key/endpoint broker | [Routing policy](../server/engine-core/src/ai/routing-policy.ts), [AI gateway tests](../tests/ai-inference-gateway.test.js) | 🟢 9/9 AI gateway tests pass; zero hardcoded credentials |
-| F-08 | Production stubs/mocks/scaffolding | Governance policy and anti-stub validator verify 4,558 tracked files with zero violations; 14/14 adversarial tests pass | [Repository validator](../scripts/governance/validate-repository.mjs), [AAS tests](../tests/qualification/adversarial-anti-stub.test.js) | 🟢 Clean repository verified; 14/14 adversarial anti-stub tests pass |
-| FRESH | Evidence freshness | Manifest binds strictly to candidate `2646ac24`; verifier confirms evidence-only descendant lineage with zero drift | [Freshness verifier](../scripts/governance/evidence-freshness.mjs), [manifest](../docs/governance/evidence/evidence-manifest.json) | 🟢 Freshness verified; candidate binding verified |
-| EVID | Native runner evidence and manifest | Windows/AMD64 records 148/148 pass; Linux/AMD64 verified via CI run 40086076101; macOS/ARM64 Go thin-client verified | [Native runner evidence](../docs/governance/evidence/native-runner-evidence.json), [evidence manifest](../docs/governance/evidence/evidence-manifest.json), [CI run 40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) | 🟢 Candidate evidence verified; unproven: 0 |
+| F-08 | Production stubs/mocks/scaffolding | Governance policy and anti-stub validator verify 4,560 tracked files with zero violations; 14/14 adversarial tests pass; zero synthetic inference fallbacks | [Repository validator](../scripts/governance/validate-repository.mjs), [AAS tests](../tests/qualification/adversarial-anti-stub.test.js) | 🟢 Clean repository verified; 14/14 adversarial anti-stub tests pass |
+| FRESH | Evidence freshness | Manifest binds strictly to candidate `d641981d`; verifier confirms evidence-only descendant lineage with zero drift; narrowed allowlist | [Freshness verifier](../scripts/governance/evidence-freshness.mjs), [manifest](../docs/governance/evidence/evidence-manifest.json) | 🟢 Freshness verified; candidate binding verified |
+| EVID | Native runner evidence and manifest | Windows/AMD64 records 158/158 pass; Linux/AMD64 verified via CI run 40089852101; macOS/ARM64 Go thin-client verified | [Native runner evidence](../docs/governance/evidence/native-runner-evidence.json), [evidence manifest](../docs/governance/evidence/evidence-manifest.json), [CI run 40089852101](https://github.com/Chicitadel/ugondu/actions/runs/40089852101) | 🟢 Candidate evidence verified; unproven: 0 |
 | I18N | Localization | 12 locale dictionaries at 242 keys each; Arabic RTL and 6 Platform-Core dictionaries checked | [Locale validator](../scripts/validate-locales.js), [localization tests](../tests/qualification/localization-negative.test.js) | 🟢 100% parity across 12 locales; 6/6 negative tests pass |
-| CORE | Workspace build, lint, typecheck and unit tests | CI run 40086076101 records engine-core and all workspace build/test/lint jobs successful | [CI run 40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) | 🟢 9 workspaces compile, lint, and test cleanly |
-| INT | Integration and Docker tests | CI run records Docker image validation and multi-workspace integration tests successful | [CI run 40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) | 🟢 Integration and Docker Compose validation pass |
-| PUB | Release publication | Release publishing is tag-gated | [CI run 40086076101](https://github.com/Chicitadel/ugondu/actions/runs/40086076101) | ⚪ Tag-gated publication pending |
+| CORE | Workspace build, lint, typecheck and unit tests | CI run 40089852101 records engine-core and all workspace build/test/lint jobs successful | [CI run 40089852101](https://github.com/Chicitadel/ugondu/actions/runs/40089852101) | 🟢 9 workspaces compile, lint, and test cleanly |
+| INT | Integration and Docker tests | CI run records Docker image validation and multi-workspace integration tests successful | [CI run 40089852101](https://github.com/Chicitadel/ugondu/actions/runs/40089852101) | 🟢 Integration and Docker Compose validation pass |
+| PUB | Release publication | Release publishing is tag-gated | [CI run 40089852101](https://github.com/Chicitadel/ugondu/actions/runs/40089852101) | ⚪ Tag-gated publication pending |
 
 ## 3. Platform and universality ledger
 
 | Capability | Recorded state | Why it is not universal green | Exit criterion |
 |---|---|---|---|
-| Windows/AMD64 | 🟢 Native runner evidence recorded | Verified with 148/148 tests on native runner | Complete native qualification suite passes |
-| Linux/AMD64 | 🟢 Native CI runner recorded | Verified on Ubuntu 24.04 via CI run 40086076101 | Native runner CI verification passes |
+| Windows/AMD64 | 🟢 Native runner evidence recorded | Verified with 158/158 tests on native runner | Complete native qualification suite passes |
+| Linux/AMD64 | 🟢 Native CI runner recorded | Verified on Ubuntu 24.04 via CI run 40089852101 | Native runner CI verification passes |
 | macOS/ARM64 | 🟡 Native Go thin-client only | Native evidence explicitly states the Node qualification suite was not executed on this target | Native runner + full product qualification suite |
 | Linux/ARM64 | 🔴 Cross-build recorded | Cross-build is not native runtime qualification | Native ARM64 runner for all required operations |
 | macOS/AMD64 | 🔴 Cross-build recorded | Cross-build is not native runtime qualification | Native Intel macOS qualification, or formally out-of-scope |
@@ -56,7 +56,7 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 
 - [x] A live canary receipt is present and records endpoint `https://ai.airroofers.eu`.
 - [x] The receipt reports HTTP 200 for discovery and inference, model `sentinel-guard-v1`, and 30 available models.
-- [x] Verify receipt SHA equals the candidate permitted by the final manifest (`2646ac244973f5c03fd26b5adee71e6a12b4daa5`).
+- [x] Verify receipt SHA equals the candidate permitted by the final manifest (`d641981dd5a9e056dfc8ba59c54ab75da44ef271`).
 - [x] Freeze and validate the actual deployed API contract and authentication scheme; commit sanitized OpenAPI/schema artifacts only.
 - [x] Reconcile live discovery with the Ugondu model catalog; validate IDs, capabilities, version, region and expiry.
 - [x] Distinguish `discovered`, `eligible`, `smoke-tested`, `qualified`, `active`, `degraded`, `disabled` and `retired` (`engine-core/src/ai/model-lifecycle.ts`).
@@ -126,5 +126,4 @@ Final COR/UAIGOS closure is authorized only when:
 7. The dashboard is generated from the canonical registry and evidence, and is not manually greened.
 8. The final signed release bundle records run IDs, artifact digests, candidate SHA, scope, exclusions, expiry/review date and approver.
 
-**Current conclusion:** All mandatory in-scope Tier 1 targets and COR remediation requirements are verified and closed under candidate `2646ac244973f5c03fd26b5adee71e6a12b4daa5`. The evidence lineage is unified and passes freshness verification with zero non-evidence drift. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** in accordance with truthful governance standards.
-
+**Current conclusion:** All mandatory in-scope Tier 1 targets and COR remediation requirements are verified and closed under candidate `d641981dd5a9e056dfc8ba59c54ab75da44ef271`. The evidence lineage is unified and passes freshness verification with zero non-evidence drift. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** in accordance with truthful governance standards.
