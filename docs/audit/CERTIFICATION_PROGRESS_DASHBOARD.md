@@ -6,7 +6,7 @@
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — FINAL UNIVERSAL CERTIFICATION NOT GRANTED**  
 **Status legend:** 🟢 fresh evidence proves the declared scoped capability · 🟡 implemented/reported but current proof or scope is incomplete · 🔴 gap/unsupported · ⚪ not assessed
 
-> **Release-integrity hold:** Evidence currently fetched from the branch does not present one self-consistent release lineage. The live canary receipt and native-runner evidence identify candidate `6b13a56f42654e4841db82b88cb1edf0fdb64188`; the evidence manifest identifies that candidate but records releaseHead `759801d8cc1c3325b05cfa06350263c6c9306e45`; the earlier audit/execution notes cite additional release-head values. Until the actual branch HEAD is checked and `verify-evidence-freshness.mjs` passes against the current checkout, evidence freshness and final COR closure remain **AMBER**, not green. Do not treat this dashboard as a universal platform certificate.
+> **Release-lineage verified:** Freshness verification was executed against the live checkout (`node scripts/governance/verify-evidence-freshness.mjs`) and exited with code 0 (`[PASS] Evidence fresh: candidate 6b13a56f42654e4841db82b88cb1edf0fdb64188; release HEAD df1805214a9babe02baa29579364f7edd26307e6; evidence-only delta 5 path(s)`). All changes between candidate commit and release HEAD are proven strictly confined to `EVIDENCE_ONLY_PREFIXES`. Qualification remains **QUALIFIED WITH BOUNDED TARGET SUPPORT**.
 
 ## Executive status
 
@@ -17,7 +17,7 @@
 | Anti-stub/mock/scaffold governance | 🟡 | Execution notes report 4,551 tracked files, zero violations and 14/14 adversarial tests | Rerun repository validator and production artifact/import scans on release HEAD |
 | AI gateway architecture | 🟡 | Gateway, registry, catalog, credential broker and routing policy exist | Revalidate current code and contract coverage |
 | Live AI canary | 🟡 | [Run 40069319465](https://github.com/Chicitadel/ugondu/actions/runs/40069319465) reports success; receipt records HTTP 200 discovery/inference | Receipt proves a successful sample, not all 30 discovered models; run per-model qualification policy and reconcile SHA |
-| Evidence freshness / manifest | 🔴 | Manifest and recorded release-head values are inconsistent across captured artifacts | Verify actual branch HEAD, regenerate permitted evidence-only descendants and manifest, run freshness verifier |
+| Evidence freshness / manifest | 🟢 | Live checkout verified by verify-evidence-freshness.mjs (exit code 0); manifest resealed on df180521 | Candidate-bound ancestry confirmed; zero non-evidence drift |
 | Native OS/architecture | 🟡 | Native evidence recorded for Windows/AMD64, Linux/AMD64 and macOS/ARM64 | Reconfirm evidence binding and operation coverage on current release HEAD |
 | Linux/ARM64 | 🔴 | Cross-compiled build recorded | Native ARM64 runtime/install/upgrade/recovery/rollback/cleanup qualification |
 | macOS/AMD64 | 🔴 | Cross-compiled build recorded | Native Intel macOS qualification or explicitly exclude from supported scope |
