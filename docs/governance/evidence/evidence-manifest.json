@@ -2,7 +2,7 @@
   "schema": "ugondu.evidence-manifest/1",
   "gitHeadSha": "6b13a56f42654e4841db82b88cb1edf0fdb64188",
   "candidateSha": "6b13a56f42654e4841db82b88cb1edf0fdb64188",
-  "releaseHeadSha": "759801d8cc1c3325b05cfa06350263c6c9306e45",
+  "releaseHeadSha": "f4ce46dceb26d9f798515f4673d7377e365fb3d8",
   "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
   "evidenceFiles": [
     {
