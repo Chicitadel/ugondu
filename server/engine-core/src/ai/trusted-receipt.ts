@@ -32,6 +32,8 @@ import * as crypto from 'crypto';
 
 export const ALLOWLISTED_LIVE_ENDPOINT_HOST = 'ai.airroofers.eu';
 export const ALLOWLISTED_LIVE_ENDPOINT_PROTOCOL = 'https:';
+export const DEV_KEY_ID = 'dev-key-local-only';
+export const DEV_FALLBACK_KEY = 'ugondu_dev_ephemeral_provenance_key_0123456789abcdef0123456789abcdef';
 
 export class ProvenanceConfigurationError extends Error {
     public readonly errorCode: string;
@@ -39,7 +41,7 @@ export class ProvenanceConfigurationError extends Error {
     public readonly details: Record<string, unknown>;
 
     constructor(
-        errorCode: 'PROVENANCE_KEY_MISSING' | 'PROVENANCE_KEY_WEAK' | string,
+        errorCode: 'PROVENANCE_KEY_MISSING' | 'PROVENANCE_KEY_WEAK' | 'DEV_KEY_PROHIBITED_IN_PRODUCTION' | string,
         message: string,
         statusCode = 500,
         details: Record<string, unknown> = {}
@@ -62,7 +64,13 @@ export function isWeakProvenanceKey(key: string): boolean {
     return false;
 }
 
-export function getProvenanceSigningKey(explicitKey?: string): string {
+export interface ProvenanceKeyInfo {
+    key: string;
+    keyId: string;
+    isDevFallback: boolean;
+}
+
+export function getProvenanceSigningKeyInfo(explicitKey?: string): ProvenanceKeyInfo {
     const isProd = process.env.NODE_ENV === 'production';
     if (explicitKey !== undefined && explicitKey !== null) {
         if (typeof explicitKey !== 'string' || !explicitKey.trim()) {
@@ -71,7 +79,9 @@ export function getProvenanceSigningKey(explicitKey?: string): string {
         if (isWeakProvenanceKey(explicitKey)) {
             throw new ProvenanceConfigurationError('PROVENANCE_KEY_WEAK', 'Explicit provenance signing key is too weak (min 32 non-trivial characters required)', 500);
         }
-        return explicitKey.trim();
+        const trimmed = explicitKey.trim();
+        const isDev = trimmed === DEV_FALLBACK_KEY;
+        return { key: trimmed, keyId: isDev ? DEV_KEY_ID : 'configured-explicit-key', isDevFallback: isDev };
     }
 
     const envKey = process.env.UGONDU_PROVENANCE_KEY;
@@ -90,13 +100,28 @@ export function getProvenanceSigningKey(explicitKey?: string): string {
                 500
             );
         }
-        return envKey.trim();
+        const trimmed = envKey.trim();
+        if (trimmed === DEV_FALLBACK_KEY) {
+            throw new ProvenanceConfigurationError(
+                'DEV_KEY_PROHIBITED_IN_PRODUCTION',
+                'Development fallback key is strictly prohibited in production',
+                403
+            );
+        }
+        return { key: trimmed, keyId: 'ugondu-prod-provenance-key', isDevFallback: false };
     }
 
     if (envKey && typeof envKey === 'string' && envKey.trim()) {
-        return envKey.trim();
+        const trimmed = envKey.trim();
+        const isDev = trimmed === DEV_FALLBACK_KEY;
+        return { key: trimmed, keyId: isDev ? DEV_KEY_ID : 'ugondu-env-provenance-key', isDevFallback: isDev };
     }
-    return 'ugondu_dev_ephemeral_provenance_key_0123456789abcdef0123456789abcdef';
+
+    return { key: DEV_FALLBACK_KEY, keyId: DEV_KEY_ID, isDevFallback: true };
+}
+
+export function getProvenanceSigningKey(explicitKey?: string): string {
+    return getProvenanceSigningKeyInfo(explicitKey).key;
 }
 
 export interface LiveInferenceReceipt {
@@ -112,6 +137,7 @@ export interface LiveInferenceReceipt {
     signature?: string;
     provenanceSeal?: string;
     correlationId?: string;
+    keyId?: string;
     testOnly?: boolean;
 }
 
@@ -126,6 +152,7 @@ export interface LiveInferenceReceiptParams {
     correlationId?: string;
     responseDigestSha256: string;
     observedAt: string;
+    keyId?: string;
     testOnly?: boolean;
     output?: string;
 }
@@ -177,7 +204,18 @@ export function isTrustedLiveInferenceReceipt(
 ): receipt is LiveInferenceReceipt {
     if (!receipt || typeof receipt !== 'object') return false;
     const r = receipt as Partial<LiveInferenceReceipt>;
-    if (process.env.NODE_ENV === 'production' && r.testOnly === true) return false;
+    const isProd = process.env.NODE_ENV === 'production';
+
+    if (isProd) {
+        if (r.keyId === DEV_KEY_ID) {
+            throw new ProvenanceConfigurationError(
+                'DEV_KEY_PROHIBITED_IN_PRODUCTION',
+                'Development fallback key is strictly prohibited in production verification',
+                403
+            );
+        }
+        if (r.testOnly === true) return false;
+    }
 
     const sig = r.signature || r.provenanceSeal;
     if (typeof sig !== 'string' || !/^[0-9a-f]{64}$/i.test(sig)) return false;
@@ -198,6 +236,31 @@ export function isTrustedLiveInferenceReceipt(
         return false;
     }
 
+    const sigBuf = Buffer.from(sig.toLowerCase(), 'hex');
+    if (sigBuf.length !== 32) return false;
+
+    if (isProd) {
+        try {
+            const devSeal = computeProvenanceSeal({
+                candidateSha,
+                modelId,
+                endpointHost,
+                providerRequestId,
+                responseDigestSha256,
+            }, DEV_FALLBACK_KEY);
+            const devBuf = Buffer.from(devSeal.toLowerCase(), 'hex');
+            if (devBuf.length === 32 && crypto.timingSafeEqual(sigBuf, devBuf)) {
+                throw new ProvenanceConfigurationError(
+                    'DEV_KEY_PROHIBITED_IN_PRODUCTION',
+                    'Receipt signed with development fallback key is strictly prohibited in production verification',
+                    403
+                );
+            }
+        } catch (err) {
+            if (err instanceof ProvenanceConfigurationError) throw err;
+        }
+    }
+
     try {
         const expectedSeal = computeProvenanceSeal({
             candidateSha,
@@ -207,7 +270,6 @@ export function isTrustedLiveInferenceReceipt(
             responseDigestSha256,
         }, secretSignerOrKey);
 
-        const sigBuf = Buffer.from(sig.toLowerCase(), 'hex');
         const expBuf = Buffer.from(expectedSeal.toLowerCase(), 'hex');
         if (sigBuf.length !== expBuf.length || sigBuf.length !== 32) return false;
         return crypto.timingSafeEqual(sigBuf, expBuf);
@@ -225,6 +287,15 @@ export function validateLiveInferenceReceipt(
 ): receipt is LiveInferenceReceipt {
     if (!receipt || typeof receipt !== 'object') return false;
     const r = receipt as Partial<LiveInferenceReceipt>;
+    const isProd = process.env.NODE_ENV === 'production';
+
+    if (isProd && r.keyId === DEV_KEY_ID) {
+        throw new ProvenanceConfigurationError(
+            'DEV_KEY_PROHIBITED_IN_PRODUCTION',
+            'Development fallback key is strictly prohibited in production verification',
+            403
+        );
+    }
 
     if (r.source !== 'airroofers-live-transport') return false;
     if (r.httpStatus !== 200) return false;
@@ -252,7 +323,7 @@ export function validateLiveInferenceReceipt(
 
     if (!r.observedAt || typeof r.observedAt !== 'string' || !r.observedAt.trim()) return false;
 
-    if (process.env.NODE_ENV === 'production') {
+    if (isProd) {
         if (r.testOnly === true) return false;
         if (!isTrustedLiveInferenceReceipt(r, secretSignerOrKey)) return false;
     } else {
@@ -270,6 +341,17 @@ export function createTrustedLiveInferenceReceipt(
     if (!params || typeof params !== 'object') {
         throw new Error('Receipt parameters must be a valid object');
     }
+    const keyInfo = getProvenanceSigningKeyInfo(secretSignerOrKey);
+    const isDevFallback = keyInfo.isDevFallback || params.keyId === DEV_KEY_ID || secretSignerOrKey === DEV_FALLBACK_KEY;
+    const isProd = process.env.NODE_ENV === 'production';
+
+    if (isProd && isDevFallback) {
+        throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', 'Development fallback key cannot mint receipts in production', 403);
+    }
+    if (isProd && params.testOnly === true) {
+        throw new Error('testOnly mock receipt cannot be activated in production');
+    }
+
     if (params.source !== 'airroofers-live-transport') {
         throw new Error(`Invalid receipt source: expected 'airroofers-live-transport', got '${params.source}'`);
     }
@@ -298,9 +380,6 @@ export function createTrustedLiveInferenceReceipt(
     if (!params.observedAt || typeof params.observedAt !== 'string' || !params.observedAt.trim()) {
         throw new Error('Receipt requires non-empty observedAt');
     }
-    if (process.env.NODE_ENV === 'production' && params.testOnly === true) {
-        throw new Error('testOnly mock receipt cannot be activated in production');
-    }
 
     const seal = computeProvenanceSeal({
         candidateSha: params.candidateSha.trim(),
@@ -308,7 +387,10 @@ export function createTrustedLiveInferenceReceipt(
         endpointHost: ALLOWLISTED_LIVE_ENDPOINT_HOST,
         providerRequestId,
         responseDigestSha256: params.responseDigestSha256.trim().toLowerCase(),
-    }, secretSignerOrKey);
+    }, keyInfo.key);
+
+    const effectiveKeyId = isDevFallback ? DEV_KEY_ID : (params.keyId || keyInfo.keyId);
+    const effectiveTestOnly = isDevFallback ? true : Boolean(params.testOnly);
 
     const receipt: LiveInferenceReceipt = {
         source: 'airroofers-live-transport',
@@ -323,7 +405,8 @@ export function createTrustedLiveInferenceReceipt(
         signature: seal,
         provenanceSeal: seal,
         correlationId: params.correlationId ? params.correlationId.trim() : providerRequestId,
-        ...(params.testOnly ? { testOnly: true } : {}),
+        keyId: effectiveKeyId,
+        ...(effectiveTestOnly ? { testOnly: true } : {}),
     };
 
     return Object.freeze(receipt);

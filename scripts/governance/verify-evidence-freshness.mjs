@@ -70,6 +70,59 @@ export function writeDiagnosticReport(root, candidate, err) {
   return file;
 }
 
+export function assertReportLineage(report, candidate) {
+  if (!report || typeof report !== 'object') throw new EvidenceFreshnessError('AI qualification report must be an object', 'AI_REPORT_INVALID');
+  if (report.gitSha !== candidate) {
+    throw new EvidenceFreshnessError(`AI_REPORT_CANDIDATE_SHA_MISMATCH: AI model qualification report SHA ${report.gitSha} != candidate ${candidate}`, 'AI_REPORT_CANDIDATE_SHA_MISMATCH');
+  }
+  const summary = report.summary || {};
+  const activeCount = typeof summary.activeCount === 'number' ? summary.activeCount : 0;
+  const qualifiedCount = typeof summary.qualifiedCount === 'number' ? summary.qualifiedCount : 0;
+  const totalDiscovered = typeof summary.totalDiscovered === 'number' ? summary.totalDiscovered : 0;
+  const mode = report.qualificationMode;
+
+  if (activeCount > 0 && (mode === 'CATALOG_OFFLINE' || mode === 'OFFLINE' || (mode !== 'LIVE' && mode !== 'LIVE_SOVEREIGN'))) {
+    throw new EvidenceFreshnessError('Offline catalog reports cannot satisfy live AI qualification: active models require live execution', 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION');
+  }
+  if ((mode === 'CATALOG_OFFLINE' || mode === 'OFFLINE') && (activeCount !== 0 || qualifiedCount !== 0)) {
+    throw new EvidenceFreshnessError('CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION: Offline catalog reports cannot satisfy live AI qualification: active models require live execution', 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION');
+  }
+  if (summary.qualifiedCount !== undefined || summary.totalDiscovered !== undefined) {
+    if (activeCount < 0 || qualifiedCount < 0 || totalDiscovered < 0 || activeCount > qualifiedCount || qualifiedCount > totalDiscovered) {
+      throw new EvidenceFreshnessError(`AI_REPORT_COUNT_INVARIANT_FAILED: Summary count invariant violation: activeCount (${activeCount}) <= qualifiedCount (${qualifiedCount}) <= totalDiscovered (${totalDiscovered})`, 'AI_REPORT_COUNT_INVARIANT_FAILED');
+    }
+  }
+  if (activeCount > 0) {
+    const receipts = Array.isArray(report.receipts) ? report.receipts : [];
+    const activeReceipts = receipts.filter((r) => r.status === 'ACTIVE' || r.status === 'QUALIFIED');
+    if (activeReceipts.some((r) => r.liveExecution !== true)) {
+      throw new EvidenceFreshnessError('Receipts for all active models must have liveExecution === true', 'LIVE_EXECUTION_REQUIRED');
+    }
+    for (const r of activeReceipts) {
+      if (r.liveInferenceReceipt && r.liveInferenceReceipt.candidateSha && r.liveInferenceReceipt.candidateSha !== candidate) {
+        throw new EvidenceFreshnessError(`AI_REPORT_CANDIDATE_SHA_MISMATCH: Live inference receipt candidate SHA ${r.liveInferenceReceipt.candidateSha} != candidate ${candidate}`, 'AI_REPORT_CANDIDATE_SHA_MISMATCH');
+      }
+    }
+    const liveCandidateReceipts = activeReceipts.filter((r) =>
+      r.liveExecution === true &&
+      (!r.gitSha || r.gitSha === candidate) &&
+      (!r.liveInferenceReceipt || (r.liveInferenceReceipt.candidateSha === candidate && r.liveInferenceReceipt.verification === 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED'))
+    );
+    if (liveCandidateReceipts.length < activeCount) {
+      throw new EvidenceFreshnessError('Active model count does not match real live qualification receipts', 'ACTIVE_MODELS_WITHOUT_LIVE_RECEIPTS');
+    }
+  }
+  return true;
+}
+
+export function assertCurrentLiveReport(report, candidate) {
+  assertReportLineage(report, candidate);
+  if (report.qualificationMode !== 'LIVE_SOVEREIGN') {
+    throw new EvidenceFreshnessError('LIVE_AI_QUALIFICATION_REQUIRED: Live qualification report required; CATALOG_OFFLINE cannot be accepted', 'LIVE_AI_QUALIFICATION_REQUIRED');
+  }
+  return true;
+}
+
 export function verifyEvidenceFreshness(options = {}) {
   const root = options.root || ROOT;
   const expectedCandidateSha =
@@ -140,25 +193,7 @@ export function verifyEvidenceFreshness(options = {}) {
     }
 
     const report = readJson(root, AI_REPORT_PATH);
-    if (report.gitSha !== candidate) {
-      throw new EvidenceFreshnessError(`AI model qualification report SHA ${report.gitSha} != candidate ${candidate}`);
-    }
-    const activeCount = report.summary && typeof report.summary.activeCount === 'number' ? report.summary.activeCount : 0;
-    if (activeCount > 0) {
-      const mode = report.qualificationMode;
-      if (mode === 'CATALOG_OFFLINE' || mode === 'OFFLINE' || (mode !== 'LIVE' && mode !== 'LIVE_SOVEREIGN')) {
-        throw new EvidenceFreshnessError('Offline catalog reports cannot satisfy live AI qualification: active models require live execution');
-      }
-      const receipts = Array.isArray(report.receipts) ? report.receipts : [];
-      const activeReceipts = receipts.filter((r) => r.status === 'ACTIVE');
-      if (activeReceipts.some((r) => r.liveExecution !== true)) {
-        throw new EvidenceFreshnessError('Receipts for all active models must have liveExecution === true');
-      }
-      const liveActiveCount = receipts.filter((r) => r.status === 'ACTIVE' && r.liveExecution === true).length;
-      if (activeCount !== liveActiveCount) {
-        throw new EvidenceFreshnessError('Active model count does not match real live qualification receipts');
-      }
-    }
+    assertReportLineage(report, candidate);
 
     return { candidate, head: binding.head, descendant: binding.descendant, evidenceChangedPaths: binding.changedPaths };
   } catch (err) {

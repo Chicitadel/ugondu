@@ -53,9 +53,7 @@ export function redactSecrets(val) {
   }
   if (val && typeof val === 'object') {
     if (Array.isArray(val)) return val.map((x) => redactSecrets(x));
-    const out = {};
-    for (const [k, v] of Object.entries(val)) out[k] = redactSecrets(v);
-    return out;
+    const out = {}; for (const [k, v] of Object.entries(val)) out[k] = redactSecrets(v); return out;
   }
   return val;
 }
@@ -99,10 +97,67 @@ export function resolveGitCommitSha(repoRoot = ROOT) {
   return process.env.GIT_COMMIT_SHA || process.env.GITHUB_SHA || 'UNKNOWN_GIT_SHA';
 }
 
+export function resolveCandidateSha(repoRoot = ROOT) {
+  if (process.env.COR_CANDIDATE_SHA && /^[0-9a-f]{40}$/i.test(process.env.COR_CANDIDATE_SHA.trim())) return process.env.COR_CANDIDATE_SHA.trim();
+  const manifestPath = path.resolve(repoRoot, 'docs', 'governance', 'evidence', 'evidence-manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      if (manifest.candidateSha && /^[0-9a-f]{40}$/i.test(manifest.candidateSha)) return manifest.candidateSha;
+    } catch {}
+  }
+  return resolveGitCommitSha(repoRoot);
+}
+
+export function assertReportLineage(report, expectedCandidateSha) {
+  if (!report || typeof report !== 'object') throw new QualificationGatewayError('AI_REPORT_INVALID', 'AI qualification report must be an object', 400);
+  if (!report.gitSha || report.gitSha !== expectedCandidateSha) {
+    throw new QualificationGatewayError('AI_REPORT_CANDIDATE_SHA_MISMATCH', `AI_REPORT_CANDIDATE_SHA_MISMATCH: Report gitSha ${report.gitSha} != candidate ${expectedCandidateSha}`, 400);
+  }
+  const summary = report.summary || {};
+  const activeCount = typeof summary.activeCount === 'number' ? summary.activeCount : 0;
+  const qualifiedCount = typeof summary.qualifiedCount === 'number' ? summary.qualifiedCount : 0;
+  const totalDiscovered = typeof summary.totalDiscovered === 'number' ? summary.totalDiscovered : 0;
+  const mode = report.qualificationMode;
+
+  if (activeCount > 0 && (mode === 'CATALOG_OFFLINE' || mode === 'OFFLINE' || (mode !== 'LIVE' && mode !== 'LIVE_SOVEREIGN'))) {
+    throw new QualificationGatewayError('CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION', 'Offline catalog inspection can NEVER be used for model activation or release claims', 403);
+  }
+  if ((mode === 'CATALOG_OFFLINE' || mode === 'OFFLINE') && (activeCount !== 0 || qualifiedCount !== 0)) {
+    throw new QualificationGatewayError('CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION', 'Offline catalog inspection can NEVER be used for model activation or release claims (activeCount and qualifiedCount must be 0)', 403);
+  }
+  if ((summary.qualifiedCount !== undefined || summary.totalDiscovered !== undefined) &&
+      (activeCount < 0 || qualifiedCount < 0 || totalDiscovered < 0 || activeCount > qualifiedCount || qualifiedCount > totalDiscovered)) {
+    throw new QualificationGatewayError('AI_REPORT_COUNT_INVARIANT_FAILED', `AI_REPORT_COUNT_INVARIANT_FAILED: Invariant failed (activeCount ${activeCount} <= qualifiedCount ${qualifiedCount} <= totalDiscovered ${totalDiscovered})`, 400);
+  }
+  if (activeCount > 0) {
+    const receipts = Array.isArray(report.receipts) ? report.receipts : [];
+    for (const r of receipts) {
+      if ((r.status === 'QUALIFIED' || r.status === 'ACTIVE') && r.liveInferenceReceipt && r.liveInferenceReceipt.candidateSha && r.liveInferenceReceipt.candidateSha !== expectedCandidateSha) {
+        throw new QualificationGatewayError('AI_REPORT_CANDIDATE_SHA_MISMATCH', `AI_REPORT_CANDIDATE_SHA_MISMATCH: Live inference receipt candidate SHA ${r.liveInferenceReceipt.candidateSha} != candidate ${expectedCandidateSha}`, 400);
+      }
+    }
+    const validLive = receipts.filter((r) =>
+      (r.status === 'QUALIFIED' || r.status === 'ACTIVE') && r.liveExecution === true && (!r.gitSha || r.gitSha === expectedCandidateSha) &&
+      r.liveInferenceReceipt && (!r.liveInferenceReceipt.candidateSha || r.liveInferenceReceipt.candidateSha === expectedCandidateSha) &&
+      r.liveInferenceReceipt.verification === 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED'
+    );
+    if (validLive.length < activeCount) {
+      throw new QualificationGatewayError('ACTIVE_MODELS_WITHOUT_LIVE_RECEIPTS', 'Every active model must have a valid, candidate-bound live inference receipt', 403);
+    }
+  }
+  return true;
+}
+
+export function assertCurrentLiveReport(report, expectedCandidateSha) {
+  assertReportLineage(report, expectedCandidateSha);
+  if (report.qualificationMode !== 'LIVE_SOVEREIGN') throw new QualificationGatewayError('LIVE_AI_QUALIFICATION_REQUIRED', 'Live qualification report required; CATALOG_OFFLINE cannot be accepted', 403);
+  return true;
+}
+
 export class CircuitBreaker {
   constructor(options = {}) {
-    this.failureThreshold = options.failureThreshold ?? 3;
-    this.cooldownMs = options.cooldownMs ?? 30000;
+    this.failureThreshold = options.failureThreshold ?? 3; this.cooldownMs = options.cooldownMs ?? 30000;
     this.state = 'CLOSED'; this.consecutiveFailures = 0; this.openedAt = null;
   }
   recordSuccess() { this.consecutiveFailures = 0; this.state = 'CLOSED'; this.openedAt = null; }
@@ -111,24 +166,19 @@ export class CircuitBreaker {
     if (this.consecutiveFailures >= this.failureThreshold) { this.state = 'OPEN'; this.openedAt = Date.now(); }
     return this.state;
   }
-  isOpen() {
-    if (this.state === 'OPEN') return this.openedAt && Date.now() - this.openedAt >= this.cooldownMs ? ((this.state = 'HALF_OPEN'), false) : true;
-    return false;
-  }
+  isOpen() { return this.state === 'OPEN' ? (this.openedAt && Date.now() - this.openedAt >= this.cooldownMs ? ((this.state = 'HALF_OPEN'), false) : true) : false; }
   reset() { this.state = 'CLOSED'; this.consecutiveFailures = 0; this.openedAt = null; }
 }
 
 export class ModelLifecycle {
   constructor(model, options = {}) {
     if (!model || typeof model !== 'object') throw new QualificationGatewayError('INVALID_REQUEST', 'Model payload must be an object', 400);
-    this.model = { ...model };
-    this.alias = model.alias || model.id || 'unassigned-model';
-    this.providerId = model.providerId || 'airroofers-ai';
-    this.state = ModelLifecycleState.DISCOVERED;
+    this.model = { ...model }; this.alias = model.alias || model.id || 'unassigned-model';
+    this.providerId = model.providerId || 'airroofers-ai'; this.state = ModelLifecycleState.DISCOVERED;
     this.history = [{ from: null, to: ModelLifecycleState.DISCOVERED, timestamp: new Date().toISOString(), reason: 'Discovered' }];
     this.circuitBreaker = new CircuitBreaker(options.circuitBreakerOptions);
     this.receipt = null; this.liveInferenceReceipt = null;
-    this.gitSha = options.gitSha || resolveGitCommitSha();
+    this.gitSha = options.candidateSha || options.gitSha || resolveCandidateSha();
     this.inferenceDigestSha256 = null; this.lastInferenceMetadata = null;
   }
 
@@ -142,11 +192,9 @@ export class ModelLifecycle {
   transitionTo(nextState, reason = '') {
     if (nextState === ModelLifecycleState.DISABLED) {
       const prev = this.state; this.state = ModelLifecycleState.DISABLED;
-      this.history.push({ from: prev, to: ModelLifecycleState.DISABLED, timestamp: new Date().toISOString(), reason });
-      return;
+      this.history.push({ from: prev, to: ModelLifecycleState.DISABLED, timestamp: new Date().toISOString(), reason }); return;
     }
-    const curIdx = TRANSITION_ORDER.indexOf(this.state);
-    const nxtIdx = TRANSITION_ORDER.indexOf(nextState);
+    const curIdx = TRANSITION_ORDER.indexOf(this.state); const nxtIdx = TRANSITION_ORDER.indexOf(nextState);
     if (curIdx === -1 || nxtIdx === -1 || nxtIdx !== curIdx + 1) throw new QualificationGatewayError('INVALID_STATE_TRANSITION', `Illegal transition '${this.state}' -> '${nextState}'`, 400, { current: this.state, requested: nextState });
     if (nextState === ModelLifecycleState.ACTIVE) this.assertLiveReceiptValid();
     const prev = this.state; this.state = nextState;
@@ -197,11 +245,9 @@ export class ModelLifecycle {
       const capability = await probeFn(this.model);
       if (!capability || capability.ok !== true || capability.source !== 'airroofers-live-transport') {
         const reason = (capability && capability.reason) || 'Live provider capability verification failed';
-        this.transitionTo(ModelLifecycleState.DISABLED, reason);
-        throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', reason, 503);
+        this.transitionTo(ModelLifecycleState.DISABLED, reason); throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', reason, 503);
       }
-      this.transitionTo(ModelLifecycleState.CAPABILITY_PROBED, 'Capabilities probed and verified');
-      return this;
+      this.transitionTo(ModelLifecycleState.CAPABILITY_PROBED, 'Capabilities probed and verified'); return this;
     } catch (err) {
       if (this.state !== ModelLifecycleState.DISABLED) this.transitionTo(ModelLifecycleState.DISABLED, `Capability probe exception: ${err.message}`);
       throw err;
@@ -216,11 +262,8 @@ export class ModelLifecycle {
       throw new QualificationGatewayError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn or mock adapter injection: only genuine provider transport permitted', 403);
     }
     if (this.circuitBreaker.isOpen()) throw new QualificationGatewayError('CIRCUIT_OPEN', 'Circuit breaker is OPEN; inference rejected', 503, { consecutiveFailures: this.circuitBreaker.consecutiveFailures });
-
-    const maxRetries = options.maxRetries ?? 2;
-    const initialBackoffMs = options.initialBackoffMs ?? 20;
+    const maxRetries = options.maxRetries ?? 2; const initialBackoffMs = options.initialBackoffMs ?? 20;
     let attempt = 0; let lastError = null;
-
     while (attempt <= maxRetries) {
       try {
         const result = await executeFn(this.model);
@@ -229,19 +272,16 @@ export class ModelLifecycle {
         if (!rawOutput || rawOutput === '""' || rawOutput === '{}') throw new QualificationGatewayError('INFERENCE_OUTPUT_EMPTY', 'Provider inference returned empty output', 502);
         this.inferenceDigestSha256 = crypto.createHash('sha256').update(rawOutput).digest('hex');
         this.lastInferenceMetadata = { latencyMs: result?.latencyMs, correlationId: result?.correlationId };
-
         const isRealTransport = Boolean(result && typeof result === 'object' && result.source === 'airroofers-live-transport');
         const correlationId = (result && typeof result === 'object' && result.correlationId) || `corr-qual-${crypto.randomUUID()}`;
         const endpointHost = (result && typeof result === 'object' && result.endpointHost) || (isRealTransport ? result.endpointHost : 'ai.airroofers.eu');
         const observedAt = (result && typeof result === 'object' && result.observedAt) || new Date().toISOString();
-
         this.liveInferenceReceipt = {
           source: 'airroofers-live-transport', httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
           verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED', candidateSha: (result && typeof result === 'object' && result.candidateSha) || this.gitSha,
           modelId: (result && typeof result === 'object' && result.modelId) || this.alias, responseDigestSha256: this.inferenceDigestSha256,
           correlationId, endpointHost, observedAt, ...(!isRealTransport ? { testOnly: true } : {}),
         };
-
         this.transitionTo(ModelLifecycleState.INFERENCE_VERIFIED, 'Authentic live test inference verified');
         return this;
       } catch (err) {
@@ -265,8 +305,7 @@ export class ModelLifecycle {
     const digest = metadata.inferenceDigestSha256 || this.inferenceDigestSha256;
     if (!digest) throw new QualificationGatewayError('INFERENCE_DIGEST_REQUIRED', 'Model qualification requires verified live inference digest', 400);
     if (metadata.liveInferenceReceipt && validateLiveInferenceReceipt(metadata.liveInferenceReceipt, this.alias)) this.liveInferenceReceipt = metadata.liveInferenceReceipt;
-    const isMock = Boolean(this.liveInferenceReceipt?.testOnly);
-    const testOnly = isMock || Boolean(metadata.testOnly);
+    const isMock = Boolean(this.liveInferenceReceipt?.testOnly); const testOnly = isMock || Boolean(metadata.testOnly);
     this.receipt = redactSecrets({
       receiptType: 'AI_MODEL_QUALIFICATION_RECEIPT', version: '1.0.0', modelAlias: this.alias, providerId: this.providerId,
       timestamp: new Date().toISOString(), gitSha: this.gitSha, status: 'QUALIFIED',
@@ -274,10 +313,8 @@ export class ModelLifecycle {
       correlationId: metadata.correlationId ?? this.lastInferenceMetadata?.correlationId ?? this.liveInferenceReceipt?.correlationId,
       capabilities: this.model.capabilities || { modalities: ['text'], streaming: false, toolCalling: true },
       inferenceDigestSha256: digest, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-      liveInferenceReceipt: this.liveInferenceReceipt,
-      ...metadata,
-      liveExecution: metadata.liveExecution !== undefined ? Boolean(metadata.liveExecution) : true,
-      testOnly,
+      liveInferenceReceipt: this.liveInferenceReceipt, ...metadata,
+      liveExecution: metadata.liveExecution !== undefined ? Boolean(metadata.liveExecution) : true, testOnly,
     });
     this.transitionTo(ModelLifecycleState.QUALIFIED, 'Qualification receipt signed');
     return this;
@@ -288,8 +325,7 @@ export class ModelLifecycle {
       receiptType: 'AI_MODEL_QUALIFICATION_RECEIPT', version: '1.0.0', modelAlias: this.alias, providerId: this.providerId,
       timestamp: new Date().toISOString(), gitSha: this.gitSha, status: 'UNQUALIFIED', liveExecution: false,
       capabilities: this.model.capabilities || { modalities: ['text'], streaming: false, toolCalling: true },
-      verification: 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION', reason: 'Offline catalog inspection only; live execution prohibited',
-      ...metadata,
+      verification: 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION', reason: 'Offline catalog inspection only; live execution prohibited', ...metadata,
     });
     return this.receipt;
   }
@@ -317,19 +353,17 @@ export class ModelLifecycle {
       this.transitionTo(ModelLifecycleState.DISABLED, 'Mock adapter injection rejected in production');
       throw new QualificationGatewayError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn or mock adapter injection: only genuine provider transport permitted', 403);
     }
-    this.validateSchema();
-    this.checkPolicy(options);
+    this.validateSchema(); this.checkPolicy(options);
     await this.probeCapability(options.probeFn);
     await this.verifyInference(options.executeFn || options.executeProbe, options);
-    this.qualify(options.receiptMetadata);
-    this.activate();
+    this.qualify(options.receiptMetadata); this.activate();
     return this.getReceipt();
   }
 }
 
 export async function runModelQualification(options = {}) {
   const rootDir = options.rootDir || ROOT;
-  const gitSha = options.gitSha || resolveGitCommitSha(rootDir);
+  const gitSha = options.candidateSha || options.gitSha || resolveCandidateSha(rootDir);
   const liveKey = options.secret || process.env.AIRROOFERS_AI_API_KEY || process.env.UGONDU_AIRROOFERS_AI_KEY;
   const liveBaseUrl = options.baseUrl || process.env.AIRROOFERS_AI_ENDPOINT || process.env.UGONDU_AIRROOFERS_AI_BASE_URL;
   const provenanceKey = options.provenanceKey || process.env.UGONDU_PROVENANCE_KEY;
@@ -343,7 +377,6 @@ export async function runModelQualification(options = {}) {
     if (options.executeProbe || options.executeFn || options.mockAdapter) throw new QualificationGatewayError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production composition root rejects arbitrary executeFn or mock adapter injection: only genuine provider transport permitted', 403);
     if (options.discoveredModels && Array.isArray(options.discoveredModels)) throw new QualificationGatewayError('DISCOVERY_MOCK_PROHIBITED', 'Production runtime requires genuine live provider discovery: manual model injection is prohibited', 403);
   }
-
   let discoveredModels = [];
   if (qualificationMode === 'LIVE_SOVEREIGN') {
     const { endpoint, key } = validateEndpointAndCredentials(liveBaseUrl || 'https://ai.airroofers.eu', liveKey);
@@ -352,10 +385,7 @@ export async function runModelQualification(options = {}) {
     } else {
       let res;
       try {
-        const headers = {
-          accept: 'application/json', authorization: `Bearer ${key}`, 'x-correlation-id': `corr-qual-models-${crypto.randomUUID()}`,
-          ...(provenanceKey ? { 'x-provenance-key': provenanceKey } : {}),
-        };
+        const headers = { accept: 'application/json', authorization: `Bearer ${key}`, 'x-correlation-id': `corr-qual-models-${crypto.randomUUID()}`, ...(provenanceKey ? { 'x-provenance-key': provenanceKey } : {}) };
         res = await fetch(new URL('/v1/ai/models', endpoint), { headers, signal: AbortSignal.timeout(10000) });
       } catch (err) { throw new QualificationGatewayError('UPSTREAM_UNAVAILABLE', `Live model discovery failed: ${err.message}`, 503); }
       if (!res.ok) {
@@ -371,8 +401,7 @@ export async function runModelQualification(options = {}) {
   } else {
     const catalogPath = path.resolve(rootDir, 'config', 'model-catalog.json');
     if (!fs.existsSync(catalogPath)) throw new QualificationGatewayError('MODEL_CATALOG_UNAVAILABLE', `Model catalog file not found: ${catalogPath}`, 503);
-    let catalogDoc;
-    try { catalogDoc = JSON.parse(fs.readFileSync(catalogPath, 'utf8')); } catch (err) { throw new QualificationGatewayError('MODEL_CATALOG_UNAVAILABLE', `Failed to parse catalog: ${err.message}`, 503); }
+    let catalogDoc; try { catalogDoc = JSON.parse(fs.readFileSync(catalogPath, 'utf8')); } catch (err) { throw new QualificationGatewayError('MODEL_CATALOG_UNAVAILABLE', `Failed to parse catalog: ${err.message}`, 503); }
     discoveredModels = (catalogDoc.models || []).map((m) => ({ ...m }));
     if (discoveredModels.length === 0) throw new QualificationGatewayError('MODEL_CATALOG_UNAVAILABLE', 'Model catalog is empty or has no models', 503);
   }
@@ -385,28 +414,20 @@ export async function runModelQualification(options = {}) {
     if (qualificationMode === 'CATALOG_OFFLINE') {
       try { lifecycle.validateSchema(); } catch {}
       if (lifecycle.state !== ModelLifecycleState.DISABLED) lifecycle.transitionTo(ModelLifecycleState.DISABLED, 'Catalog offline mode: live qualification prohibited');
-      const receipt = lifecycle.recordOfflineReceipt();
-      modelDiagnostics.push(lifecycle.getDiagnostics());
-      receipts.push(receipt);
+      modelDiagnostics.push(lifecycle.getDiagnostics()); receipts.push(lifecycle.recordOfflineReceipt());
     } else {
       try {
         lifecycle.validateSchema();
         lifecycle.checkPolicy({ secret: liveKey, requireCredentials: true });
         let probeFn = options.probeFn;
         if (typeof probeFn !== 'function') {
-          if (hasLiveEnvCredentials) {
-            probeFn = async (m) => {
-              const { endpoint: ep, key: k } = validateEndpointAndCredentials(liveBaseUrl || 'https://ai.airroofers.eu', liveKey);
-              const pRes = await fetch(new URL('/v1/ai/models', ep), {
-                headers: { accept: 'application/json', authorization: `Bearer ${k}`, 'x-correlation-id': `corr-probe-${crypto.randomUUID()}`, ...(provenanceKey ? { 'x-provenance-key': provenanceKey } : {}) },
-                signal: AbortSignal.timeout(10000),
-              });
-              if (!pRes.ok) throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', `Live capability probe failed with HTTP ${pRes.status}`, 503);
-              return { ok: true, source: 'airroofers-live-transport', correlationId: `corr-probe-${crypto.randomUUID()}` };
-            };
-          } else {
-            throw new QualificationGatewayError('CAPABILITY_PROBE_REQUIRED', 'A genuine provider capability probe is required; no synthetic fallback is allowed', 503);
-          }
+          if (!hasLiveEnvCredentials) throw new QualificationGatewayError('CAPABILITY_PROBE_REQUIRED', 'A genuine provider capability probe is required; no synthetic fallback is allowed', 503);
+          probeFn = async (m) => {
+            const { endpoint: ep, key: k } = validateEndpointAndCredentials(liveBaseUrl || 'https://ai.airroofers.eu', liveKey);
+            const pRes = await fetch(new URL('/v1/ai/models', ep), { headers: { accept: 'application/json', authorization: `Bearer ${k}`, 'x-correlation-id': `corr-probe-${crypto.randomUUID()}`, ...(provenanceKey ? { 'x-provenance-key': provenanceKey } : {}) }, signal: AbortSignal.timeout(10000) });
+            if (!pRes.ok) throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', `Live capability probe failed with HTTP ${pRes.status}`, 503);
+            return { ok: true, source: 'airroofers-live-transport', correlationId: `corr-probe-${crypto.randomUUID()}` };
+          };
         }
         const capability = await probeFn(rawModel);
         if (!capability || capability.ok !== true || capability.source !== 'airroofers-live-transport') throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', 'Live provider capability verification failed', 503);
@@ -414,18 +435,12 @@ export async function runModelQualification(options = {}) {
 
         const executeProbe = options.executeProbe || (async (model) => {
           const { endpoint, key } = validateEndpointAndCredentials(liveBaseUrl || 'https://ai.airroofers.eu', liveKey);
-          const modelId = model.id || model.alias;
-          const correlationId = `corr-qual-exec-${crypto.randomUUID()}`;
-          const startMs = Date.now();
+          const modelId = model.id || model.alias; const correlationId = `corr-qual-exec-${crypto.randomUUID()}`; const startMs = Date.now();
           let res;
           try {
             res = await fetch(new URL('/v1/ai/execute', endpoint), {
               method: 'POST',
-              headers: {
-                'content-type': 'application/json', accept: 'application/json', authorization: `Bearer ${key}`,
-                'x-correlation-id': correlationId, 'x-request-id': `req-qual-${crypto.randomUUID()}`, 'x-tenant-id': 'tenant_ugondu',
-                ...(provenanceKey ? { 'x-provenance-key': provenanceKey } : {}),
-              },
+              headers: { 'content-type': 'application/json', accept: 'application/json', authorization: `Bearer ${key}`, 'x-correlation-id': correlationId, 'x-request-id': `req-qual-${crypto.randomUUID()}`, 'x-tenant-id': 'tenant_ugondu', ...(provenanceKey ? { 'x-provenance-key': provenanceKey } : {}) },
               body: JSON.stringify({ model_id: modelId, payload: { messages: [{ role: 'user', content: 'Ping live qualification probe' }], max_tokens: 16, task: 'chat' }, context: { tenant_id: 'tenant_ugondu', product_id: 'ugondu', environment: 'production', region: 'eu-west-3', correlation_id: correlationId, data_classification: 'public' } }),
               signal: AbortSignal.timeout(10000),
             });
@@ -435,8 +450,7 @@ export async function runModelQualification(options = {}) {
           if (res.status === 403) throw new QualificationGatewayError('AIRROOFERS_AI_ENDPOINT_DISALLOWED', 'Provider rejected request (403)', 403);
           if (res.status === 429) throw new QualificationGatewayError('PROVIDER_RATE_LIMITED', 'Rate limited (429)', 429);
           if (res.status !== 200) throw new QualificationGatewayError('UPSTREAM_UNAVAILABLE', `Live inference failed: HTTP ${res.status}`, res.status);
-          const data = await res.json();
-          const output = data?.output ?? data?.completion ?? data?.result ?? data?.text;
+          const data = await res.json(); const output = data?.output ?? data?.completion ?? data?.result ?? data?.text;
           if (!output) throw new QualificationGatewayError('MALFORMED_OUTPUT', 'Provider response missing completion output', 502);
           return { output, latencyMs, correlationId, modelId, source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED', endpointHost: endpoint.hostname, observedAt: new Date().toISOString() };
         });
@@ -457,22 +471,12 @@ export async function runModelQualification(options = {}) {
 
   const qualifiedCount = receipts.filter((r) => r.status === 'QUALIFIED' && r.liveExecution === true).length;
   const activeCount = modelDiagnostics.filter((m) => m.state === ModelLifecycleState.ACTIVE).length;
-  const disabledCount = modelDiagnostics.filter((m) => m.state === ModelLifecycleState.DISABLED).length;
-  const pendingCount = Math.max(0, discoveredModels.length - (qualifiedCount + disabledCount));
+  const disabledCount = modelDiagnostics.filter((m) => m.state === ModelLifecycleState.DISABLED).length, pendingCount = Math.max(0, discoveredModels.length - (qualifiedCount + disabledCount));
 
   const reportReceipts = qualificationMode === 'CATALOG_OFFLINE' && receipts.length > 1
-    ? [{ receiptType: 'AI_MODEL_QUALIFICATION_RECEIPT', version: '1.0.0', modelAlias: 'catalog-offline', providerId: 'airroofers-ai', timestamp: receipts[0].timestamp, gitSha, status: 'UNQUALIFIED', liveExecution: false, verification: 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION', reason: 'Offline catalog inspection only; live execution prohibited' }]
-    : receipts;
+    ? [{ receiptType: 'AI_MODEL_QUALIFICATION_RECEIPT', version: '1.0.0', modelAlias: 'catalog-offline', providerId: 'airroofers-ai', timestamp: receipts[0].timestamp, gitSha, status: 'UNQUALIFIED', liveExecution: false, verification: 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION', reason: 'Offline catalog inspection only; live execution prohibited' }] : receipts;
   const reportDiagnostics = qualificationMode === 'CATALOG_OFFLINE' && modelDiagnostics.length > 1
-    ? [{
-        alias: 'catalog-offline-fleet', providerId: 'airroofers-ai', state: ModelLifecycleState.DISABLED, canRoute: false,
-        liveInferenceReceipt: null,
-        history: [
-          { from: null, to: ModelLifecycleState.DISCOVERED, timestamp: new Date().toISOString(), reason: `Discovered ${discoveredModels.length} catalog models` },
-          { from: ModelLifecycleState.DISCOVERED, to: ModelLifecycleState.DISABLED, timestamp: new Date().toISOString(), reason: 'Offline candidate evaluation: live credentials absent; all models fail closed' },
-        ],
-        receipt: null, failureReason: 'Live credentials absent or offline mode active; zero models qualified or activated', errorCode: 'CREDENTIALS_ABSENT',
-      }] : modelDiagnostics;
+    ? [{ alias: 'catalog-offline-fleet', providerId: 'airroofers-ai', state: ModelLifecycleState.DISABLED, canRoute: false, liveInferenceReceipt: null, history: [{ from: null, to: ModelLifecycleState.DISCOVERED, timestamp: new Date().toISOString(), reason: `Discovered ${discoveredModels.length} catalog models` }, { from: ModelLifecycleState.DISCOVERED, to: ModelLifecycleState.DISABLED, timestamp: new Date().toISOString(), reason: 'Offline candidate evaluation: live credentials absent; all models fail closed' }], receipt: null, failureReason: 'Live credentials absent or offline mode active; zero models qualified or activated', errorCode: 'CREDENTIALS_ABSENT' }] : modelDiagnostics;
 
   const report = redactSecrets({
     reportType: 'AI_MODEL_QUALIFICATION_REPORT', version: '1.0.0', generatedAt: new Date().toISOString(), gitSha, qualificationMode,
@@ -480,17 +484,16 @@ export async function runModelQualification(options = {}) {
     receipts: reportReceipts, diagnostics: reportDiagnostics,
   });
 
-  const reportFullPath = path.resolve(rootDir, EVIDENCE_REPORT_RELATIVE_PATH);
-  fs.mkdirSync(path.dirname(reportFullPath), { recursive: true });
-  fs.writeFileSync(reportFullPath, JSON.stringify(report, null, 2) + '\n', 'utf8');
+  if (options.write !== undefined ? Boolean(options.write) : (options.persist === true || Boolean(options.outputPath))) {
+    const reportFullPath = options.outputPath ? path.resolve(options.outputPath) : path.resolve(rootDir, EVIDENCE_REPORT_RELATIVE_PATH);
+    fs.mkdirSync(path.dirname(reportFullPath), { recursive: true });
+    fs.writeFileSync(reportFullPath, JSON.stringify(report, null, 2) + '\n', 'utf8');
+  }
   return report;
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  runModelQualification()
+  runModelQualification({ persist: true })
     .then((report) => console.log(JSON.stringify({ result: 'QUALIFICATION_COMPLETE', summary: report.summary, gitSha: report.gitSha })))
-    .catch((err) => {
-      console.error(JSON.stringify({ result: 'QUALIFICATION_FAILED', error: redactSecrets(err.message) }));
-      process.exit(1);
-    });
+    .catch((err) => { console.error(JSON.stringify({ result: 'QUALIFICATION_FAILED', error: redactSecrets(err.message) })); process.exit(1); });
 }

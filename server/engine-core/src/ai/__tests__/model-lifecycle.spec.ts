@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / AI / Tests / Model Lifecycle
  * File           : model-lifecycle.spec.ts
- * Version        : 3.2.0
+ * Version        : 3.3.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-24
@@ -59,10 +59,7 @@ describe('Model Lifecycle State Machine & Catalog Governance', () => {
     });
 
     test('valid lifecycle pipeline transitions correctly from DISCOVERED to ACTIVE', () => {
-        const correlationId = 'corr-life-001';
-        const providerId = 'airroofers-ai';
-        const modelId = 'airroofers-sentinel-v1';
-
+        const correlationId = 'corr-life-001', providerId = 'airroofers-ai', modelId = 'airroofers-sentinel-v1';
         expect(isValidLifecycleTransition('DISCOVERED', 'SCHEMA_VALIDATED')).toBe(true);
         const r1 = sm.transition('DISCOVERED', 'SCHEMA_VALIDATED', { providerId, modelId, correlationId });
         expect(r1.newState).toBe('SCHEMA_VALIDATED');
@@ -224,7 +221,7 @@ describe('ModelLifecycle Zero-Stub Inference Verification & Qualification', () =
         expect(() => lifecycle.qualify()).toThrow(ModelLifecycleError);
     });
 
-    test('runFullLifecycle() succeeds with explicit executor and verified inference digest', async () => {
+    test('runFullLifecycle() succeeds with explicit executor and verified inference digest in non-prod', async () => {
         const lifecycle = new ModelLifecycle({ alias: 'full-cycle-model', providerId: 'airroofers-ai' });
         const receipt = await lifecycle.runFullLifecycle({
             secret: validSecret,
@@ -283,7 +280,8 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
         expect(() => lc.activate()).toThrow(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
-    test('in production mode, injected mock executor marks receipt testOnly and fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', async () => {
+    test('in non-production mode, injected mock executor marks receipt testOnly and fails closed in production with LIVE_INFERENCE_RECEIPT_REQUIRED', async () => {
+        process.env.NODE_ENV = 'development';
         const lc = new ModelLifecycle({ alias: 'prod-guard-model', providerId: 'airroofers-ai' });
         lc.validateSchema();
         lc.checkPolicy({ secret: validSecret });
@@ -291,27 +289,47 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
         await lc.verifyInference(async () => ({ output: 'test-mock-output', correlationId: 'corr-test', providerRequestId: 'req-mock' }));
         expect(lc.liveInferenceReceipt?.testOnly).toBe(true);
         lc.qualify({ liveExecution: true });
+        process.env.NODE_ENV = 'production';
         expect(() => lc.activate()).toThrow(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
-    test('in production mode, authentic live transport receipt activates model successfully', async () => {
+    test('in production mode, authentic live transport receipt activates model successfully', () => {
         const lc = new ModelLifecycle({ alias: 'prod-live-model', providerId: 'airroofers-ai' });
         lc.validateSchema();
         lc.checkPolicy({ secret: validSecret });
-        await lc.probeCapability(async () => ({ ok: true }));
         const rawOutput = 'genuine-live-inference-response';
         const authenticReceipt = createTrustedLiveInferenceReceipt({
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
             endpointHost: 'ai.airroofers.eu', providerRequestId: 'prov-live-prod-001', observedAt: new Date().toISOString(),
             candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256(rawOutput),
         });
-        await lc.verifyInference(async () => ({ output: rawOutput, ...authenticReceipt }));
+        lc.state = 'INFERENCE_VERIFIED';
+        lc.inferenceVerificationDigest = computeSha256(rawOutput);
+        lc.liveInferenceReceipt = authenticReceipt;
         expect(lc.liveInferenceReceipt?.testOnly).toBeUndefined();
         lc.qualify();
         lc.activate();
         expect(lc.state).toBe('ACTIVE');
         expect(lc.canRoute()).toBe(true);
         expect(lc.assertRoutable()).toBe(true);
+    });
+
+    test('adversarial: dev-key receipt in production fails closed with DEV_KEY_PROHIBITED_IN_PRODUCTION or LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
+        const lc = new ModelLifecycle({ alias: 'dev-key-replayed-model', providerId: 'airroofers-ai' });
+        lc.state = 'QUALIFIED';
+        process.env.NODE_ENV = 'development';
+        const devKeyReceipt = createTrustedLiveInferenceReceipt({
+            source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('dev-key-output'),
+            providerRequestId: 'prov-req-dev-001', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        }, 'ugondu_dev_ephemeral_provenance_key_0123456789abcdef0123456789abcdef');
+        expect(devKeyReceipt.keyId).toBe('dev-key-local-only');
+        expect(devKeyReceipt.testOnly).toBe(true);
+        process.env.NODE_ENV = 'production';
+        expect(() => lc.activate(devKeyReceipt)).toThrow(expect.objectContaining({
+            errorCode: expect.stringMatching(/DEV_KEY_PROHIBITED_IN_PRODUCTION|LIVE_INFERENCE_RECEIPT_REQUIRED/),
+            statusCode: 403,
+        }));
     });
 
     test('adversarial: forged source marker fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
@@ -322,9 +340,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('forged'),
             providerRequestId: 'req-forged', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         };
-        expect(() => lc.activate(forgedReceipt as any)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(forgedReceipt as any)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: fake HTTP 200 / non-200 status fails closed', () => {
@@ -336,9 +352,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             providerRequestId: 'req-status', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
             signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
         };
-        expect(() => lc.activate(fakeStatusReceipt as any)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(fakeStatusReceipt as any)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: mismatched model fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
@@ -349,9 +363,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             candidateSha: lc.gitSha, modelId: 'different-model-id', responseDigestSha256: computeSha256('out'),
             providerRequestId: 'req-model', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         });
-        expect(() => lc.activate(trustedOtherModel)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(trustedOtherModel)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: mismatched candidate SHA fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
@@ -362,9 +374,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             candidateSha: 'stale-or-different-sha', modelId: lc.alias, responseDigestSha256: computeSha256('out'),
             providerRequestId: 'req-sha', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         });
-        expect(() => lc.activate(trustedOtherSha)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(trustedOtherSha)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: altered output digest fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
@@ -376,9 +386,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             providerRequestId: 'req-digest', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         });
         const tampered = { ...authentic, responseDigestSha256: computeSha256('tampered') };
-        expect(() => lc.activate(tampered)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(tampered)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: disallowed host fails closed', () => {
@@ -396,9 +404,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             providerRequestId: 'req-host', endpointHost: 'attacker.evil-proxy.org', observedAt: new Date().toISOString(),
             signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
         };
-        expect(() => lc.activate(untrustedBadHost)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(untrustedBadHost)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: missing provider request ID fails closed', () => {
@@ -410,9 +416,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             providerRequestId: '', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
             signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
         };
-        expect(() => lc.activate(missingReqId)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(missingReqId)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: wrong signing key fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
@@ -423,9 +427,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('out'),
             providerRequestId: 'req-wrong-key', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         }, 'wrong_attacker_signing_key_0123456789abcdef01234567');
-        expect(() => lc.activate(receiptWithWrongKey)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(receiptWithWrongKey)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: absent production key fails closed with configuration error (500 or 403)', () => {
@@ -457,9 +459,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             providerRequestId: 'req-test', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(), testOnly: true,
             signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
         };
-        expect(() => lc.activate(testReceipt)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(testReceipt)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('adversarial: copied receipt across candidates fails closed', () => {
@@ -471,9 +471,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
         });
         const lc = new ModelLifecycle({ alias: 'target-model', providerId: 'airroofers-ai' }, { gitSha: 'candidate-sha-22222222222222222222222222222222' });
         lc.state = 'QUALIFIED';
-        expect(() => lc.activate(run1Receipt)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
+        expect(() => lc.activate(run1Receipt)).toThrowError(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('persisted receipts verify cryptographically across process restart without WeakSet reliance', () => {

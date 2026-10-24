@@ -416,3 +416,43 @@ test('LIFECYCLE-024: Tamper resistance - qualify cannot clear testOnly: true on 
     process.env.NODE_ENV = prevEnv;
   }
 });
+
+test('LIFECYCLE-025: assertReportLineage fails closed with AI_REPORT_CANDIDATE_SHA_MISMATCH on stale gitSha', async () => {
+  const { assertReportLineage } = await loadLifecycleModule();
+  const report = { gitSha: 'stale-sha-00000000000000000000000000000000', qualificationMode: 'CATALOG_OFFLINE', summary: { totalDiscovered: 1, qualifiedCount: 0, activeCount: 0 } };
+  assert.throws(() => assertReportLineage(report, 'expected-sha-1111111111111111111111111111111'), (err) => err.errorCode === 'AI_REPORT_CANDIDATE_SHA_MISMATCH' && err.statusCode === 400);
+});
+
+test('LIFECYCLE-026: assertReportLineage fails closed with AI_REPORT_COUNT_INVARIANT_FAILED on count mismatch', async () => {
+  const { assertReportLineage } = await loadLifecycleModule();
+  const sha = 'target-sha-2222222222222222222222222222222';
+  const badActive = { gitSha: sha, qualificationMode: 'LIVE_SOVEREIGN', summary: { totalDiscovered: 2, qualifiedCount: 1, activeCount: 2 } };
+  assert.throws(() => assertReportLineage(badActive, sha), (err) => err.errorCode === 'AI_REPORT_COUNT_INVARIANT_FAILED' && err.statusCode === 400);
+  const badQualified = { gitSha: sha, qualificationMode: 'LIVE_SOVEREIGN', summary: { totalDiscovered: 1, qualifiedCount: 2, activeCount: 0 } };
+  assert.throws(() => assertReportLineage(badQualified, sha), (err) => err.errorCode === 'AI_REPORT_COUNT_INVARIANT_FAILED' && err.statusCode === 400);
+});
+
+test('LIFECYCLE-027: assertReportLineage fails closed with CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION when offline report claims qualified/active', async () => {
+  const { assertReportLineage } = await loadLifecycleModule();
+  const sha = 'target-sha-3333333333333333333333333333333';
+  const report = { gitSha: sha, qualificationMode: 'CATALOG_OFFLINE', summary: { totalDiscovered: 5, qualifiedCount: 1, activeCount: 0 } };
+  assert.throws(() => assertReportLineage(report, sha), (err) => err.errorCode === 'CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION' && err.statusCode === 403);
+});
+
+test('LIFECYCLE-028: assertReportLineage fails closed with ACTIVE_MODELS_WITHOUT_LIVE_RECEIPTS when active model lacks candidate live receipt', async () => {
+  const { assertReportLineage } = await loadLifecycleModule();
+  const sha = 'target-sha-4444444444444444444444444444444';
+  const report = {
+    gitSha: sha, qualificationMode: 'LIVE_SOVEREIGN',
+    summary: { totalDiscovered: 1, qualifiedCount: 1, activeCount: 1 },
+    receipts: [{ status: 'QUALIFIED', liveExecution: true, gitSha: sha, liveInferenceReceipt: null }],
+  };
+  assert.throws(() => assertReportLineage(report, sha), (err) => err.errorCode === 'ACTIVE_MODELS_WITHOUT_LIVE_RECEIPTS' && err.statusCode === 403);
+});
+
+test('LIFECYCLE-029: assertCurrentLiveReport fails closed with LIVE_AI_QUALIFICATION_REQUIRED for offline reports', async () => {
+  const { assertCurrentLiveReport } = await loadLifecycleModule();
+  const sha = 'target-sha-5555555555555555555555555555555';
+  const offlineReport = { gitSha: sha, qualificationMode: 'CATALOG_OFFLINE', summary: { totalDiscovered: 5, qualifiedCount: 0, activeCount: 0, disabledCount: 5 } };
+  assert.throws(() => assertCurrentLiveReport(offlineReport, sha), (err) => err.errorCode === 'LIVE_AI_QUALIFICATION_REQUIRED' && err.statusCode === 403);
+});

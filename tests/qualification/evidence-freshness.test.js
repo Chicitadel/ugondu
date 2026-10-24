@@ -76,7 +76,14 @@ function buildRelease({ canarySha, nativeSha, aiSha, aiReport } = {}) {
       gitSha: aiSha || candidate,
       qualificationMode: 'LIVE_SOVEREIGN',
       summary: { totalDiscovered: 1, qualifiedCount: 1, activeCount: 1, disabledCount: 0 },
-      receipts: [{ modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true }],
+      receipts: [{
+        modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true, gitSha: aiSha || candidate,
+        liveInferenceReceipt: {
+          source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+          candidateSha: aiSha || candidate, modelId: 'model-a', responseDigestSha256: '0'.repeat(64),
+          correlationId: 'corr-default-live', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        },
+      }],
       ...reportData,
     });
   }
@@ -319,14 +326,20 @@ test('FRESH-017: AI qualification report with activeCount 0 under offline mode i
 test('FRESH-018: AI qualification report with verified live execution receipts under LIVE_SOVEREIGN is accepted', async () => {
   const { verifyEvidenceFreshness } = await import(VER);
   const { dir, candidate } = buildRelease({
-    aiReport: {
+    aiReport: (c) => ({
       qualificationMode: 'LIVE_SOVEREIGN',
       summary: { totalDiscovered: 2, qualifiedCount: 2, activeCount: 2, disabledCount: 0 },
       receipts: [
-        { modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true },
-        { modelAlias: 'model-b', status: 'ACTIVE', liveExecution: true },
+        {
+          modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true, gitSha: c,
+          liveInferenceReceipt: { source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED', candidateSha: c, modelId: 'model-a', responseDigestSha256: '0'.repeat(64), correlationId: 'c1', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString() },
+        },
+        {
+          modelAlias: 'model-b', status: 'ACTIVE', liveExecution: true, gitSha: c,
+          liveInferenceReceipt: { source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED', candidateSha: c, modelId: 'model-b', responseDigestSha256: '0'.repeat(64), correlationId: 'c2', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString() },
+        },
       ],
-    },
+    }),
   });
   const head = await seal(dir, candidate);
   const r = await verifyEvidenceFreshness({ root: dir });
@@ -429,4 +442,57 @@ test('FRESH-023: verification failure generates diagnostic report artifact in .c
   const customReport = JSON.parse(fs.readFileSync(customPath, 'utf8'));
   assert.equal(customReport.candidate, '3'.repeat(40));
   assert.equal(customReport.error, 'Simulated failure');
+});
+
+test('FRESH-024: AI qualification report with count mismatch fails closed with AI_REPORT_COUNT_INVARIANT_FAILED', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'LIVE_SOVEREIGN',
+      summary: { totalDiscovered: 1, qualifiedCount: 1, activeCount: 2, disabledCount: 0 },
+      receipts: [{ modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true }],
+    },
+  });
+  await seal(dir, candidate);
+  assert.throws(() => verifyEvidenceFreshness({ root: dir }), /AI_REPORT_COUNT_INVARIANT_FAILED/);
+});
+
+test('FRESH-025: AI qualification report under CATALOG_OFFLINE claiming qualifiedCount > 0 fails closed', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease({
+    aiReport: {
+      qualificationMode: 'CATALOG_OFFLINE',
+      summary: { totalDiscovered: 5, qualifiedCount: 1, activeCount: 0, disabledCount: 4 },
+      receipts: [{ status: 'UNQUALIFIED' }],
+    },
+  });
+  await seal(dir, candidate);
+  assert.throws(() => verifyEvidenceFreshness({ root: dir }), /CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION/);
+});
+
+test('FRESH-026: AI qualification report where live inference receipt candidateSha mismatches fails closed', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease({
+    aiReport: (c) => ({
+      qualificationMode: 'LIVE_SOVEREIGN',
+      summary: { totalDiscovered: 1, qualifiedCount: 1, activeCount: 1, disabledCount: 0 },
+      receipts: [{
+        modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true, gitSha: c,
+        liveInferenceReceipt: {
+          source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+          candidateSha: 'e'.repeat(40), modelId: 'model-a', responseDigestSha256: '0'.repeat(64),
+          correlationId: 'c-bad', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        },
+      }],
+    }),
+  });
+  await seal(dir, candidate);
+  assert.throws(() => verifyEvidenceFreshness({ root: dir }), /AI_REPORT_CANDIDATE_SHA_MISMATCH/);
+});
+
+test('FRESH-027: assertCurrentLiveReport rejects offline report with LIVE_AI_QUALIFICATION_REQUIRED', async () => {
+  const { assertCurrentLiveReport } = await import(VER);
+  const sha = 'd'.repeat(40);
+  const report = { gitSha: sha, qualificationMode: 'CATALOG_OFFLINE', summary: { totalDiscovered: 3, qualifiedCount: 0, activeCount: 0, disabledCount: 3 } };
+  assert.throws(() => assertCurrentLiveReport(report, sha), /LIVE_AI_QUALIFICATION_REQUIRED/);
 });

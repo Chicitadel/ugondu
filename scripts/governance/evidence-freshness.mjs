@@ -37,7 +37,11 @@
 import { execFileSync } from 'node:child_process';
 
 export class EvidenceFreshnessError extends Error {
-  constructor(message) { super(message); this.name = 'EvidenceFreshnessError'; }
+  constructor(message, errorCode = null) {
+    super(message);
+    this.name = 'EvidenceFreshnessError';
+    if (errorCode) this.errorCode = errorCode;
+  }
 }
 
 // Paths that may change between the candidate commit and the release HEAD.
