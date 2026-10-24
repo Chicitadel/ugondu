@@ -2,79 +2,83 @@
 # Ugondu Certification Progress Dashboard
 
 **Branch:** `phase4/production-hardening`  
-**Candidate Commit SHA:** `6b13a56f42654e4841db82b88cb1edf0fdb64188`  
-**Release HEAD SHA:** `6134af71436fd2dd69868194fee7a38636706f61`  
 **Last reviewed:** 2026-10-24  
-**Qualification Verdict:** `QUALIFIED WITH BOUNDED TARGET SUPPORT`  
-**Status semantics:** 🟢 qualified with fresh evidence · 🟡 implemented/reported · 🔴 explicitly unsupported/fail-closed · ⚪ not assessed
+**Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — FINAL UNIVERSAL CERTIFICATION NOT GRANTED**  
+**Status legend:** 🟢 fresh evidence proves the declared scoped capability · 🟡 implemented/reported but current proof or scope is incomplete · 🔴 gap/unsupported · ⚪ not assessed
 
-> This table is a governance control reflecting verified evidence bound to candidate SHA `6b13a56f42654e4841db82b88cb1edf0fdb64188` and verified by `verify-evidence-freshness.mjs`.
+> **Release-integrity hold:** Evidence currently fetched from the branch does not present one self-consistent release lineage. The live canary receipt and native-runner evidence identify candidate `6b13a56f42654e4841db82b88cb1edf0fdb64188`; the evidence manifest identifies that candidate but records releaseHead `759801d8cc1c3325b05cfa06350263c6c9306e45`; the earlier audit/execution notes cite additional release-head values. Until the actual branch HEAD is checked and `verify-evidence-freshness.mjs` passes against the current checkout, evidence freshness and final COR closure remain **AMBER**, not green. Do not treat this dashboard as a universal platform certificate.
 
 ## Executive status
 
-| Area | Status | What is currently supported | Verified evidence binding |
+| Area | Status | Evidence currently available | Remaining action |
 |---|---|---|---|
-| Core microservices/workspaces | 🟢 | 15 microservices built; 11 workspace test suites pass | GitHub Actions Run `40069310340` (18/18 jobs SUCCESS) |
-| Anti-stub/mock/scaffold | 🟢 | `UG-COR-NO-STUBS-001` enforced; 0 violations across 4,551 files | `validate-repository.mjs` + 14/14 `adversarial-anti-stub.test.js` |
-| AI gateway architecture | 🟢 | Central gateway, catalog, credential broker, fail-closed routing | 9/9 `ai-inference-gateway.test.js` + `security-regression.test.js` |
-| Live AI canary | 🟢 | HTTP 200 discovery, HTTP 200 execution, 311ms total latency | Run `40069319465` (`live_ai_canary_receipt.json`) |
-| Evidence freshness | 🟢 | Manifest bound to candidate with zero unproven items | `verify-evidence-freshness.mjs` PASS (`unproven: []`) |
-| OS/architecture | 🟢 | Tier 1 Native (`windows/amd64`, `linux/amd64`, `darwin/arm64`) verified | `native-runner-evidence.json` (host record + CI run `40069310340`) |
-| Cross-compiled isolation | 🟢 | Tier 2 (`linux/arm64`, `darwin/amd64`) isolated without false native claims | `target-matrix.json` (`cross-compiled-only`) |
-| IDEs | 🟢 | VS Code experimental fail-closed; JetBrains/Cursor/Windsurf/Neovim fail-closed | 10/10 `target-matrix-fail-closed.test.js` |
-| Hosts/cloud | 🟢 | AWS EU-West-3, DirectAdmin, cPanel, VPS, Docker, K8s tested; GCP/Azure fail-closed | Run `40069310340` + AWS Conformance Probes |
-| Target-matrix consistency | 🟢 | Canonical target registry synchronized with platform-matrix | `target-matrix.json` <-> `platform-matrix.json` (`2026-10-24`) |
-| Localization | 🟢 | 12 Ugondu locales (242 keys, 100% parity, RTL) + 6 Core dictionaries | `validate-locales.js` + `localization-negative.test.js` |
-| Publication/release | 🟢 | Immutable deployable artifacts; clean candidate-bound manifest | `evidence-manifest.json` sealed on `6b13a56f` |
+| Workspace builds, typecheck and tests | 🟡 | CI run [40069310340](https://github.com/Chicitadel/ugondu/actions/runs/40069310340) reports successful workspace jobs | Verify run SHA and required checks against actual release HEAD |
+| Docker and integration tests | 🟡 | CI run 40069310340 records Docker validation and integration jobs successful | Verify same-SHA lineage and test artifact digests |
+| Anti-stub/mock/scaffold governance | 🟡 | Execution notes report 4,551 tracked files, zero violations and 14/14 adversarial tests | Rerun repository validator and production artifact/import scans on release HEAD |
+| AI gateway architecture | 🟡 | Gateway, registry, catalog, credential broker and routing policy exist | Revalidate current code and contract coverage |
+| Live AI canary | 🟡 | [Run 40069319465](https://github.com/Chicitadel/ugondu/actions/runs/40069319465) reports success; receipt records HTTP 200 discovery/inference | Receipt proves a successful sample, not all 30 discovered models; run per-model qualification policy and reconcile SHA |
+| Evidence freshness / manifest | 🔴 | Manifest and recorded release-head values are inconsistent across captured artifacts | Verify actual branch HEAD, regenerate permitted evidence-only descendants and manifest, run freshness verifier |
+| Native OS/architecture | 🟡 | Native evidence recorded for Windows/AMD64, Linux/AMD64 and macOS/ARM64 | Reconfirm evidence binding and operation coverage on current release HEAD |
+| Linux/ARM64 | 🔴 | Cross-compiled build recorded | Native ARM64 runtime/install/upgrade/recovery/rollback/cleanup qualification |
+| macOS/AMD64 | 🔴 | Cross-compiled build recorded | Native Intel macOS qualification or explicitly exclude from supported scope |
+| IDE support | 🔴 | VS Code is experimental; JetBrains, Cursor, Windsurf and Neovim are unsupported in reviewed declarations | Implement and qualify each required integration, or explicitly exclude from scope |
+| Hosts/cloud providers | 🟡 | AWS and selected host/provider tests reported; GCP/Azure fail closed | Revalidate per provider-operation tuple; implement and qualify GCP/Azure only if in scope |
+| Target matrix consistency | 🟡 | Canonical registry pointer and normalized schema are present | Rerun matrix schema, cross-matrix and fail-closed tests on release HEAD |
+| Localization | 🟡 | Execution notes report 12 locales with 242 keys and RTL checks, plus six Platform-Core dictionaries | Rerun locale parity and runtime checks on release HEAD |
+| Publication/release | ⚪ | Prior CI publication job was skipped because it is tag-gated | Do not mark released until the tag-gated publish workflow succeeds and artifacts are verified |
+| Final COR certificate | 🔴 | Candidate evidence exists but release lineage and universal target coverage are unresolved | Close all mandatory rows, resolve SHA chain and produce signed scope-specific certificate |
 
 ## Detailed certification ledger
 
-| ID | Capability / target | Status | Evidence artifact / verification | Owner role |
-|---|---|---|---|---|
-| UG-COR-001 | Workspace build and typecheck | 🟢 | CI Run `40069310340` on `6b13a56f` | Release Engineering |
-| UG-COR-002 | Unit and integration tests | 🟢 | JUnit XML + 139/139 qualification tests pass | Runtime Engineering |
-| UG-COR-003 | E2E against real systems | 🟢 | Live AI endpoint `https://ai.airroofers.eu` HTTP 200 | Integration Engineering |
-| UG-COR-004 | Production anti-stub | 🟢 | 4,551 tracked files verified (0 violations) | Governance Engineering |
-| UG-COR-005 | Zero operational hardcoding | 🟢 | `IMMUTABLE_SECURITY_GUARD_TOOL_SCHEMAS` + extensibility | Architecture Authority |
-| UG-COR-006 | AI discovery | 🟢 | 30 models dynamically discovered in 230ms | AI Platform Engineering |
-| UG-COR-007 | AI inference | 🟢 | Real inference executed in 81ms (`sentinel-guard-v1`) | AI Platform Engineering |
-| UG-COR-008 | AI fail-closed/error handling | 🟢 | Missing/expired credentials fail closed (503/401) | AI/Security Engineering |
-| UG-COR-009 | AI scale/future providers | 🟢 | `AirRoofersAiProviderAdapter` dynamic onboarding | AI Architecture |
-| UG-COR-010 | Windows/AMD64 | 🟢 | Authentic host execution: 139/139 PASSED | Release Engineering |
-| UG-COR-011 | Linux/AMD64 | 🟢 | Authentic Ubuntu 24.04 runner: Run `40069310340` | Release Engineering |
-| UG-COR-012 | macOS/ARM64 | 🟢 | Authentic Apple Silicon runner: Run `40069310340` | Release Engineering |
-| UG-COR-013 | Linux/ARM64 | 🟢 | Tier 2 cross-compiled isolated (`cross-compiled-only`) | Release Engineering |
-| UG-COR-014 | macOS/AMD64 | 🟢 | Tier 2 cross-compiled isolated (`cross-compiled-only`) | Release Engineering |
-| UG-COR-015 | VS Code | 🟢 | Experimental mode fails closed on unverified caps | IDE Integration |
-| UG-COR-016 | JetBrains | 🔴 | Explicitly unsupported (`FAIL_CLOSED_UNSUPPORTED`) | IDE Integration |
-| UG-COR-017 | Cursor | 🔴 | Explicitly unsupported (`FAIL_CLOSED_UNSUPPORTED`) | IDE Integration |
-| UG-COR-018 | Windsurf | 🔴 | Explicitly unsupported (`FAIL_CLOSED_UNSUPPORTED`) | IDE Integration |
-| UG-COR-019 | Neovim | 🔴 | Explicitly unsupported (`FAIL_CLOSED_UNSUPPORTED`) | IDE Integration |
-| UG-COR-020 | AWS provider | 🟢 | Live conformance probes + physical gate | Cloud Qualification |
-| UG-COR-021 | cPanel / DirectAdmin / SSH / Docker | 🟢 | Tested provider deployment lifecycle verified | Host Integrations |
-| UG-COR-022 | GCP / Azure | 🔴 | Explicitly unsupported (`FAIL_CLOSED_UNSUPPORTED`) | Cloud Qualification |
-| UG-COR-023 | Target matrix consistency | 🟢 | 10/10 `target-matrix-fail-closed.test.js` pass | Architecture Governance |
-| UG-COR-024 | Evidence SHA freshness | 🟢 | 10/10 `evidence-freshness.test.js` pass | Release Engineering |
-| UG-COR-025 | Localization | 🟢 | 12 locales (242 keys), RTL safe, 6 core dicts (33 tokens) | Localization Governance |
-| UG-COR-026 | Final COR certificate | 🟢 | Sealed candidate manifest (`unproven: []`) | Certification Authority |
+| ID | Capability / target | Status | Green exit criterion |
+|---|---|---|---|
+| UG-COR-001 | Workspace build/typecheck | 🟡 | Required jobs pass on exact candidate SHA |
+| UG-COR-002 | Unit/integration tests | 🟡 | Complete test artifacts, zero unexpected skips, exact SHA binding |
+| UG-COR-003 | Real E2E | 🟡 | Real endpoint, credentials, postconditions and failure paths; mocks do not satisfy E2E |
+| UG-COR-004 | Production anti-stub | 🟡 | Governance scan and production artifact/import graph pass on release HEAD |
+| UG-COR-005 | Zero operational hardcoding | 🟡 | No unapproved mutable operational literals; reviewed immutable-security exception register |
+| UG-COR-006 | AI discovery | 🟡 | Live discovery schema and catalog reconciliation pass on release candidate |
+| UG-COR-007 | AI inference | 🟡 | Each model labelled active satisfies the declared live qualification policy |
+| UG-COR-008 | AI failure/security behavior | 🟡 | Missing credentials, unknown model, timeout, 429, 5xx, policy denial and redaction tests pass |
+| UG-COR-009 | AI future-provider extensibility | 🟡 | Provider conformance and onboarding test proves gateway core need not change |
+| UG-COR-010 | Windows/AMD64 | 🟡 | Native full-scope evidence bound to release SHA |
+| UG-COR-011 | Linux/AMD64 | 🟡 | Native full-scope evidence bound to release SHA |
+| UG-COR-012 | macOS/ARM64 | 🟡 | Native full-scope evidence bound to release SHA |
+| UG-COR-013 | Linux/ARM64 | 🔴 | Native runtime qualification; cross-compile alone is insufficient |
+| UG-COR-014 | macOS/AMD64 | 🔴 | Native Intel qualification or explicit out-of-scope decision |
+| UG-COR-015 | VS Code | 🔴 | Production-supported integration, install/auth/command/remote E2E; otherwise label experimental |
+| UG-COR-016 | JetBrains | 🔴 | IDE-specific implementation and E2E or explicit exclusion |
+| UG-COR-017 | Cursor | 🔴 | Cursor-specific implementation and E2E or explicit exclusion |
+| UG-COR-018 | Windsurf | 🔴 | Windsurf-specific implementation and E2E or explicit exclusion |
+| UG-COR-019 | Neovim | 🔴 | CLI/LSP integration E2E or explicit exclusion |
+| UG-COR-020 | AWS | 🟡 | Physical per-operation qualification, least privilege, rollback and cleanup |
+| UG-COR-021 | cPanel/DirectAdmin/SSH/Docker | 🟡 | Live per-provider/per-operation postcondition and rollback evidence |
+| UG-COR-022 | GCP/Azure | 🔴 | Implement real adapters and qualify if in scope; otherwise explicitly exclude |
+| UG-COR-023 | Target matrix consistency | 🟡 | Canonical registry and fail-closed tests pass on candidate SHA |
+| UG-COR-024 | Evidence freshness | 🔴 | Manifest, receipts, runner evidence and actual release HEAD form valid verified lineage |
+| UG-COR-025 | Localization | 🟡 | Locale parity, runtime discovery and RTL checks pass on candidate SHA |
+| UG-COR-026 | Final COR certificate | 🔴 | All mandatory in-scope rows green; no unresolved critical/high findings; signed bundle produced |
 
-## Rules that prevent regression
+## Anti-regression rules
 
-1. **No stale green:** Evidence is strictly bound to candidate SHA `6b13a56f` and enforced by `assertCandidateBinding`.
-2. **No inferred support:** Tier 2 cross-compiled targets are distinctly recorded as `CROSS_COMPILED_NOT_NATIVELY_QUALIFIED`.
-3. **No hidden unsupported state:** JetBrains, Cursor, Windsurf, Neovim, GCP, and Azure fail closed with `UNSUPPORTED_CAPABILITY`.
-4. **No evidence by declaration:** Matrix claims are validated by automated schema and cross-matrix consistency tests.
-5. **No skipped required gate:** Every mandatory gate is verified on native compute or GitHub Actions runners.
-6. **No manual certification edits without evidence:** Manifest contains SHA-256 digests matching git tree blobs.
-7. **Re-run dependency map:** Any non-evidence change automatically forces a new candidate commit and invalidates dependent evidence.
-8. **One SHA per release:** Native runner records, live canary receipt, and evidence manifest bind to candidate `6b13a56f`.
+1. **No stale green:** a source/configuration change invalidates evidence derived from the previous candidate unless the documented evidence-only descendant protocol explicitly permits it.
+2. **No inferred support:** compilation, cross-compilation, README mentions or adapter registration are not platform certification.
+3. **No hidden unsupported state:** unsupported IDEs, OS/architecture combinations and cloud providers remain red and fail closed.
+4. **No evidence by declaration:** derive statuses from validated registry entries and cryptographically verifiable evidence.
+5. **No skipped required gate:** missing secrets/infrastructure is BLOCKED/NOT RUN, never PASS.
+6. **No manual green status:** each green row must link to a workflow, receipt or manifest entry bound to the candidate SHA.
+7. **Dependency-triggered reruns:** AI code/catalog changes trigger AI contract and live canary; target-matrix changes trigger schema and fail-closed tests; provider adapter changes trigger provider E2E/rollback; governance/evidence changes trigger adversarial and freshness tests.
+8. **One verifiable release lineage:** reconcile candidate, release HEAD, receipts and manifest before final certification.
 
 ## Evidence sources
 
+- [Master COR remediation and certification checklist](./MASTER_COR_REMEDIATION_AND_CERTIFICATION_CHECKLIST.md)
 - [Main audit and remediation plan](./COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md)
+- [Execution runbook](./COR_REMEDIATION_EXECUTION_RUNBOOK.md)
 - [Target matrix](../../config/qualification/target-matrix.json)
 - [Platform matrix](../../config/qualification/platform-matrix.json)
-- [Evidence manifest](../../docs/governance/evidence/evidence-manifest.json)
-- [Native runner evidence](../../docs/governance/evidence/native-runner-evidence.json)
-- [Live AI canary receipt](../../docs/security/evidence/live_ai_canary_receipt.json)
-- [Admin portal provisioning receipt](../../docs/security/evidence/admin_portal_provisioning_receipt.json)
+- [Evidence manifest](../governance/evidence/evidence-manifest.json)
+- [Native runner evidence](../governance/evidence/native-runner-evidence.json)
+- [Live AI canary receipt](../security/evidence/live_ai_canary_receipt.json)
+- [CI run 40069310340](https://github.com/Chicitadel/ugondu/actions/runs/40069310340)
+- [Live AI canary run 40069319465](https://github.com/Chicitadel/ugondu/actions/runs/40069319465)
