@@ -31,7 +31,7 @@
 export type Modality = 'text' | 'image' | 'audio' | 'video' | 'embedding';
 
 export type DeploymentEnvironment = 'development' | 'test' | 'staging' | 'production';
-export type InferenceTask = 'chat' | 'code' | 'classification' | 'embedding' | 'structured';
+export type InferenceTask = 'chat' | 'code' | 'classification' | 'embedding' | 'structured' | 'qualification';
 export type DataClassification = 'public' | 'internal' | 'confidential' | 'restricted';
 export type ModelStatus = 'enabled' | 'disabled' | 'deprecated';
 export type ModelQualificationState =
@@ -276,7 +276,8 @@ export type AiErrorCode =
     | 'AIRROOFERS_AI_ENDPOINT_REQUIRED'
     | 'AIRROOFERS_AI_ENDPOINT_INSECURE'
     | 'AIRROOFERS_AI_ENDPOINT_MALFORMED'
-    | 'AIRROOFERS_AI_ENDPOINT_DISALLOWED';
+    | 'AIRROOFERS_AI_ENDPOINT_DISALLOWED'
+    | 'MOCK_ADAPTER_PROHIBITED';
 
 export type AiGatewayErrorCode = AiErrorCode;
 

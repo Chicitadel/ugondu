@@ -406,12 +406,20 @@ export class ProviderAdapterRegistry {
     }
 
     public setHttpTransport(customTransport: HttpTransport): void {
+        if (process.env.NODE_ENV === 'production') {
+            throw new AiGatewayError('MOCK_ADAPTER_PROHIBITED', 'Production composition root rejects custom transport injection; only genuine provider transport permitted', 403);
+        }
         this.transport = customTransport;
     }
 
     public registerAdapter(adapter: InferenceProvider): void {
         if (!adapter || !adapter.providerId) {
             throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.invalid_adapter_registration'), 400);
+        }
+        if (process.env.NODE_ENV === 'production') {
+            if ((adapter as any).isMock || /mock|stub|fake/i.test(adapter.providerId) || /mock|stub|fake/i.test(adapter.constructor?.name || '')) {
+                throw new AiGatewayError('MOCK_ADAPTER_PROHIBITED', 'Production composition root rejects mock adapter injection; only genuine provider transport permitted', 403);
+            }
         }
         this.adapters.set(adapter.providerId, adapter);
     }

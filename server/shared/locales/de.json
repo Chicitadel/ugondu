@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "Im KI-Inferenz-Gateway ist ein unerwarteter Fehler aufgetreten.",
       "unproven_verification": "Richtlinien- oder KI-Überprüfung unbewiesen: Read-After-Write-Bestätigung erforderlich.",
       "upstream_non_2xx": "Upstream-KI-Anbieter hat einen Nicht-2xx-HTTP-Statuscode zurückgegeben.",
-      "upstream_unavailable": "Dienst des Upstream-KI-Anbieters ist derzeit nicht verfügbar."
+      "upstream_unavailable": "Dienst des Upstream-KI-Anbieters ist derzeit nicht verfügbar.",
+      "immutable_tool_schema_override_prohibited": "Das Überschreiben des unveränderlichen Sicherheitsschemas für Tools ist strengstens untersagt.",
+      "invalid_lifecycle_transition": "Ungültiger Modellqualifizierungsübergang: Der Wechsel zu ACTIVE erfordert den vorherigen Status QUALIFIED.",
+      "model_alias_required_no_substitution": "Der Modell-Alias ist erforderlich und darf nicht stillschweigend ersetzt oder standardisiert werden.",
+      "model_not_qualified": "Der Wechsel zu ACTIVE erfordert den vorherigen Status QUALIFIED; neu entdeckte Modelle können nicht direkt aktiviert werden.",
+      "region_required_or_ambiguous": "Eine explizite Zielregion ist erforderlich. Mehrdeutige oder standardmäßige Regionen sind laut Governance unzulässig.",
+      "tool_schema_invalid": "Das bereitgestellte Tool-Parameterschema ist ungültig oder fehlerhaft."
+    },
+    "prompt": {
+      "explicit_region_required": "Wohin soll Ugondu diese Inferenzanfrage leiten? Geben Sie eine explizite Zielregion an (z. B. eu-west-3, af-south-1, eu-central-1, us-east-1). Automatische Standardwerte sind unter UAIGOS-Governance streng verboten.",
+      "ambiguous_region_specified": "Mehrdeutige Region angegeben. Automatische Standardregionen sind verboten. Bitte geben Sie eine explizite Region an (z. B. eu-west-3, af-south-1, eu-central-1, us-east-1)."
     }
   },
   "bootstrap": {

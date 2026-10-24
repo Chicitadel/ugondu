@@ -36,6 +36,7 @@ import {
     isTrustedLiveInferenceReceipt,
     LiveInferenceReceipt,
     LiveInferenceReceiptParams,
+    ProvenanceConfigurationError,
     TrustedReceiptService,
     validateLiveInferenceReceipt,
 } from './trusted-receipt';
@@ -76,6 +77,7 @@ export {
     ModelLifecycleError,
     ModelLifecycleStateMachine,
     persistLifecycleReceipt,
+    ProvenanceConfigurationError,
     TrustedReceiptService,
     VALID_LIFECYCLE_TRANSITIONS,
     validateLiveInferenceReceipt,
@@ -159,22 +161,29 @@ export class ModelLifecycle {
         if (!this.liveInferenceReceipt) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' missing verified LiveInferenceReceipt for ACTIVE status`, 403);
         }
-        if (!validateLiveInferenceReceipt(this.liveInferenceReceipt, this.alias, this.gitSha)) {
+        const r = this.liveInferenceReceipt;
+        if (!r.endpointHost || r.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' endpoint host '${r.endpointHost}' disallowed; strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`, 403);
+        }
+        if (!r.providerRequestId || typeof r.providerRequestId !== 'string' || !r.providerRequestId.trim()) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' receipt missing providerRequestId`, 403);
+        }
+        if (r.candidateSha !== this.gitSha) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' candidate SHA mismatch: receipt has '${r.candidateSha}', expected '${this.gitSha}'`, 403);
+        }
+        if (r.modelId !== this.alias) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' model ID mismatch: receipt has '${r.modelId}'`, 403);
+        }
+        if (this.inferenceVerificationDigest && r.responseDigestSha256 !== this.inferenceVerificationDigest) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' response digest mismatch: receipt has '${r.responseDigestSha256}', expected '${this.inferenceVerificationDigest}'`, 403);
+        }
+        if (!validateLiveInferenceReceipt(r, this.alias, this.gitSha)) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' missing verified LiveInferenceReceipt for ACTIVE status`, 403);
         }
-        if (isProduction && this.liveInferenceReceipt.testOnly) {
+        if (isProduction && (r.testOnly || (this.receipt && (this.receipt as any).testOnly))) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' qualified with testOnly mock executor cannot be activated in production`, 403);
         }
-        if (this.liveInferenceReceipt.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
-            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' endpoint host '${this.liveInferenceReceipt.endpointHost}' disallowed; strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`, 403);
-        }
-        if (this.liveInferenceReceipt.candidateSha !== this.gitSha) {
-            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' candidate SHA mismatch: receipt has '${this.liveInferenceReceipt.candidateSha}', expected '${this.gitSha}'`, 403);
-        }
-        if (this.liveInferenceReceipt.modelId !== this.alias) {
-            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' model ID mismatch: receipt has '${this.liveInferenceReceipt.modelId}'`, 403);
-        }
-        if (isProduction && !isTrustedLiveInferenceReceipt(this.liveInferenceReceipt)) {
+        if (isProduction && !isTrustedLiveInferenceReceipt(r)) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' live inference receipt failed provenance verification in production`, 403);
         }
     }
@@ -279,6 +288,10 @@ export class ModelLifecycle {
     ): Promise<this> {
         if (this.state !== 'CAPABILITY_PROBED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Inference verification requires CAPABILITY_PROBED state, got ${this.state}`, 400);
         if (!executeFn || typeof executeFn !== 'function') throw new ModelLifecycleError('NO_INFERENCE_EXECUTOR', 'Real provider executor is required for inference verification', 400);
+        if (process.env.NODE_ENV === 'production' && ((options as any).mockAdapter || (executeFn as any).isMock)) {
+            this.transitionTo('DISABLED', 'Mock adapter injection rejected in production');
+            throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn or mock adapter injection: only genuine provider transport permitted', 403);
+        }
         if (this.circuitBreaker.isOpen()) throw new ModelLifecycleError('CIRCUIT_OPEN', 'Circuit breaker is OPEN; inference rejected', 503, { consecutiveFailures: this.circuitBreaker.consecutiveFailures });
 
         const maxRetries = options.maxRetries ?? 2;
@@ -298,59 +311,44 @@ export class ModelLifecycle {
                 if (!rawOutput || !rawOutput.trim()) throw new ModelLifecycleError('INVALID_INFERENCE_OUTPUT', 'Inference verification returned empty or null output', 400);
 
                 this.inferenceVerificationDigest = computeSha256(rawOutput.trim());
-                const isRealTransport = Boolean(
-                    result && typeof result === 'object' &&
-                    result.source === 'airroofers-live-transport' &&
-                    result.httpStatus === 200 &&
-                    result.verification === 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' &&
-                    (!result.endpointHost || result.endpointHost === ALLOWLISTED_LIVE_ENDPOINT_HOST)
-                );
-                const correlationId = (result && typeof result === 'object' && result.correlationId) || `corr-qual-${Date.now()}`;
-                const endpointHost = (result && typeof result === 'object' && result.endpointHost) || ALLOWLISTED_LIVE_ENDPOINT_HOST;
-                const observedAt = (result && typeof result === 'object' && result.observedAt) || new Date().toISOString();
-                const candidateSha = (result && typeof result === 'object' && result.candidateSha) || this.gitSha;
-                const modelId = (result && typeof result === 'object' && result.modelId) || this.alias;
 
-                if (isRealTransport) {
-                    if (isTrustedLiveInferenceReceipt(result)) {
-                        this.liveInferenceReceipt = result;
-                    } else if (process.env.NODE_ENV !== 'production') {
-                        this.liveInferenceReceipt = createTrustedLiveInferenceReceipt({
-                            source: 'airroofers-live-transport',
-                            httpStatus: 200,
-                            verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-                            candidateSha,
-                            modelId,
-                            responseDigestSha256: this.inferenceVerificationDigest,
-                            correlationId,
-                            endpointHost,
-                            observedAt,
-                        });
-                    } else {
-                        this.liveInferenceReceipt = {
-                            source: 'airroofers-live-transport',
-                            httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
-                            verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-                            candidateSha,
-                            modelId,
-                            responseDigestSha256: this.inferenceVerificationDigest,
-                            correlationId,
-                            endpointHost,
-                            observedAt,
-                            testOnly: true,
-                        };
-                    }
+                const candidateReceipt = (result && typeof result === 'object' && result.receipt) ? result.receipt : result;
+                const isAuthentic = Boolean(
+                    candidateReceipt && typeof candidateReceipt === 'object' &&
+                    isTrustedLiveInferenceReceipt(candidateReceipt) &&
+                    validateLiveInferenceReceipt(candidateReceipt, this.alias, this.gitSha) &&
+                    candidateReceipt.responseDigestSha256 === this.inferenceVerificationDigest
+                );
+
+                if (isAuthentic) {
+                    this.liveInferenceReceipt = candidateReceipt;
+                } else if (process.env.NODE_ENV !== 'production') {
+                    const correlationId = (result && typeof result === 'object' && (result.correlationId || result.providerRequestId)) || `corr-qual-${Date.now()}`;
+                    this.liveInferenceReceipt = createTrustedLiveInferenceReceipt({
+                        source: 'airroofers-live-transport',
+                        httpStatus: 200,
+                        verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+                        candidateSha: this.gitSha,
+                        modelId: this.alias,
+                        endpointHost: ALLOWLISTED_LIVE_ENDPOINT_HOST,
+                        providerRequestId: (result && typeof result === 'object' && result.providerRequestId) || correlationId,
+                        responseDigestSha256: this.inferenceVerificationDigest,
+                        correlationId,
+                        observedAt: new Date().toISOString(),
+                    });
                 } else {
                     this.liveInferenceReceipt = {
                         source: 'airroofers-live-transport',
-                        httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
+                        httpStatus: (candidateReceipt && candidateReceipt.httpStatus) || 200,
                         verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-                        candidateSha,
-                        modelId,
+                        candidateSha: (candidateReceipt && candidateReceipt.candidateSha) || this.gitSha,
+                        modelId: (candidateReceipt && candidateReceipt.modelId) || this.alias,
+                        endpointHost: (candidateReceipt && candidateReceipt.endpointHost) || '',
+                        providerRequestId: (candidateReceipt && candidateReceipt.providerRequestId) || '',
                         responseDigestSha256: this.inferenceVerificationDigest,
-                        correlationId,
-                        endpointHost,
-                        observedAt,
+                        observedAt: (candidateReceipt && candidateReceipt.observedAt) || new Date().toISOString(),
+                        signature: '0'.repeat(64),
+                        provenanceSeal: '0'.repeat(64),
                         testOnly: true,
                     };
                 }
@@ -384,9 +382,13 @@ export class ModelLifecycle {
     public qualify(metadata: Record<string, unknown> = {}): this {
         if (this.state !== 'INFERENCE_VERIFIED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Qualification requires INFERENCE_VERIFIED state, got ${this.state}`, 400);
         if (!this.inferenceVerificationDigest) throw new ModelLifecycleError('INFERENCE_NOT_VERIFIED', 'Cannot qualify model without verified inference digest', 400);
-        if (metadata.liveInferenceReceipt && validateLiveInferenceReceipt(metadata.liveInferenceReceipt, this.alias, this.gitSha)) {
-            this.liveInferenceReceipt = metadata.liveInferenceReceipt;
+        if (metadata.liveInferenceReceipt) {
+            if (!validateLiveInferenceReceipt(metadata.liveInferenceReceipt, this.alias, this.gitSha)) {
+                throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', 'Provided receipt failed validation', 403);
+            }
+            this.liveInferenceReceipt = metadata.liveInferenceReceipt as LiveInferenceReceipt;
         }
+        const isMockExecutor = Boolean(this.liveInferenceReceipt?.testOnly);
         this.receipt = {
             providerId: this.providerId,
             modelId: this.alias,
@@ -394,7 +396,7 @@ export class ModelLifecycle {
             candidateSha: this.gitSha,
             apiContractVersion: '3.1.0',
             qualifiedAt: new Date().toISOString(),
-            correlationId: this.liveInferenceReceipt?.correlationId || (metadata.correlationId as string) || `corr-qual-${Date.now()}`,
+            correlationId: this.liveInferenceReceipt?.providerRequestId || this.liveInferenceReceipt?.correlationId || (metadata.correlationId as string) || `corr-qual-${Date.now()}`,
             checks: [
                 { checkId: 'schema-validation', status: 'PASS' },
                 { checkId: 'policy-check', status: 'PASS' },
@@ -402,6 +404,7 @@ export class ModelLifecycle {
                 { checkId: 'inference-verification', status: 'PASS', resultDigest: this.inferenceVerificationDigest },
             ],
             ...metadata,
+            ...(isMockExecutor ? { testOnly: true, liveExecution: false } : {}),
         };
         this.transitionTo('QUALIFIED', 'Qualification receipt signed');
         return this;
@@ -409,7 +412,12 @@ export class ModelLifecycle {
 
     public activate(receipt?: LiveInferenceReceipt): this {
         if (this.state !== 'QUALIFIED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Activation requires QUALIFIED state, got ${this.state}`, 400);
-        if (receipt) this.liveInferenceReceipt = receipt;
+        if (receipt) {
+            if (!validateLiveInferenceReceipt(receipt, this.alias, this.gitSha)) {
+                throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', 'Provided receipt failed validation', 403);
+            }
+            this.liveInferenceReceipt = receipt;
+        }
         this.assertLiveInferenceReceiptValid();
         this.transitionTo('ACTIVE', 'Activated for live routing');
         return this;
@@ -436,6 +444,10 @@ export class ModelLifecycle {
     }
 
     public async runFullLifecycle(options: FullLifecycleOptions = {}): Promise<ModelQualificationReceipt | any> {
+        if (process.env.NODE_ENV === 'production' && ((options as any).mockAdapter || (options.executeFn as any)?.isMock)) {
+            this.transitionTo('DISABLED', 'Mock adapter injection rejected in production');
+            throw new ModelLifecycleError('MOCK_ADAPTER_INJECTION_PROHIBITED', 'Production runtime rejects arbitrary executeFn or mock adapter injection: only genuine provider transport permitted', 403);
+        }
         this.validateSchema();
         const credentialsRequired = isCredentialsRequiredForModel(this.model, options);
         const policyOptions: PolicyCheckOptions = { ...options, requireCredentials: credentialsRequired ? true : options.requireCredentials };

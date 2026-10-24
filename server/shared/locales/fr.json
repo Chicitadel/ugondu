@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "Une erreur inattendue s'est produite dans la passerelle d'inférence IA.",
       "unproven_verification": "Vérification de la stratégie ou de l'IA non prouvée : confirmation de lecture après écriture requise.",
       "upstream_non_2xx": "Le fournisseur IA en amont a renvoyé un code d'état HTTP non-2xx.",
-      "upstream_unavailable": "Le service du fournisseur IA en amont est actuellement indisponible."
+      "upstream_unavailable": "Le service du fournisseur IA en amont est actuellement indisponible.",
+      "immutable_tool_schema_override_prohibited": "La substitution du schéma d'outil de protection de sécurité immuable est strictement interdite.",
+      "invalid_lifecycle_transition": "Transition d'état de qualification de modèle non valide : le passage à ACTIVE nécessite un statut QUALIFIED préalable.",
+      "model_alias_required_no_substitution": "L'alias du modèle est requis et ne peut pas être substitué ou défini par défaut silencieusement.",
+      "model_not_qualified": "Le passage à ACTIVE nécessite un statut QUALIFIED préalable ; les modèles nouvellement découverts ne peuvent pas être activés directement.",
+      "region_required_or_ambiguous": "Une région cible explicite est requise. Les régions ambiguës ou par défaut sont interdites par la gouvernance.",
+      "tool_schema_invalid": "Le schéma de paramètres de l'outil fourni est non valide ou mal formé."
+    },
+    "prompt": {
+      "explicit_region_required": "Où Ugondu doit-il router cette requête d'inférence ? Fournissez une région cible explicite (ex. eu-west-3, af-south-1, eu-central-1, us-east-1). L'assignation automatique par défaut est strictement interdite selon la gouvernance UAIGOS.",
+      "ambiguous_region_specified": "Région ambiguë spécifiée. L'assignation automatique d'une région par défaut est interdite. Veuillez spécifier une région explicite (ex. eu-west-3, af-south-1, eu-central-1, us-east-1)."
     }
   },
   "bootstrap": {

@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "Ocorreu um erro inesperado no gateway de inferência de IA.",
       "unproven_verification": "Verificação de política ou IA não comprovada: confirmação de leitura após gravação necessária.",
       "upstream_non_2xx": "O provedor de IA upstream retornou um código de status HTTP diferente de 2xx.",
-      "upstream_unavailable": "O serviço do provedor de IA upstream está indisponível no momento."
+      "upstream_unavailable": "O serviço do provedor de IA upstream está indisponível no momento.",
+      "immutable_tool_schema_override_prohibited": "A substituição do esquema de ferramenta de guarda de segurança imutável é estritamente proibida.",
+      "invalid_lifecycle_transition": "Transição de qualificação de modelo inválida: a transição para ACTIVE requer o status QUALIFIED prévio.",
+      "model_alias_required_no_substitution": "O alias do modelo é obrigatório e não pode ser substituído silenciosamente ou padronizado.",
+      "model_not_qualified": "A transição para ACTIVE requer o status QUALIFIED prévio; modelos recém-descobertos não podem ser ativados diretamente.",
+      "region_required_or_ambiguous": "Uma região de destino explícita é necessária. Regiões ambíguas ou padrão são proibidas pela governança.",
+      "tool_schema_invalid": "O esquema de parâmetros da ferramenta fornecido é inválido ou malformado."
+    },
+    "prompt": {
+      "explicit_region_required": "Para onde o Ugondu deve rotear esta solicitação de inferência? Forneça uma região de destino explícita (ex. eu-west-3, af-south-1, eu-central-1, us-east-1). O padrão automático é estritamente proibido sob a governança UAIGOS.",
+      "ambiguous_region_specified": "Região ambígua especificada. A definição automática de região padrão é proibida. Por favor, especifique uma região explícita (ex. eu-west-3, af-south-1, eu-central-1, us-east-1)."
     }
   },
   "bootstrap": {

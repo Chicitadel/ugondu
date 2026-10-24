@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "An unexpected error occurred in the AI inference gateway.",
       "unproven_verification": "Policy or AI verification unproven: read-after-write confirmation required.",
       "upstream_non_2xx": "Upstream AI provider returned a non-2xx HTTP status code.",
-      "upstream_unavailable": "Upstream AI provider service is currently unavailable."
+      "upstream_unavailable": "Upstream AI provider service is currently unavailable.",
+      "immutable_tool_schema_override_prohibited": "Immutable security guard tool schema override is strictly prohibited.",
+      "invalid_lifecycle_transition": "Invalid model qualification transition: transition to ACTIVE requires prior QUALIFIED status.",
+      "model_alias_required_no_substitution": "Model alias is required and cannot be silently substituted or defaulted.",
+      "model_not_qualified": "Transition to ACTIVE requires prior QUALIFIED status; newly discovered models cannot be activated directly.",
+      "region_required_or_ambiguous": "Explicit target region is required. Ambiguous or defaulted regions are prohibited by governance.",
+      "tool_schema_invalid": "Provided tool parameter schema is invalid or malformed."
+    },
+    "prompt": {
+      "explicit_region_required": "Where should Ugondu route this inference request? Provide an explicit target region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1). Automatic defaulting is strictly prohibited under UAIGOS governance.",
+      "ambiguous_region_specified": "Ambiguous region specified. Automatic region defaulting is prohibited. Please specify an explicit region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1)."
     }
   },
   "bootstrap": {

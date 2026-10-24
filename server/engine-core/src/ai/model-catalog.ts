@@ -343,7 +343,7 @@ export class ModelCatalog {
             if (model.qualificationState === 'DISCOVERED') {
                 throw new AiGatewayError(
                     'MODEL_DISABLED',
-                    __t('ai.error.model_not_qualified') || 'Transition to ACTIVE requires prior QUALIFIED status; newly discovered models cannot be activated directly.',
+                    __t('ai.error.model_not_qualified'),
                     409,
                     { alias, qualificationState: model.qualificationState }
                 );

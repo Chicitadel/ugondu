@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "Si è verificato un errore imprevisto nel gateway di inferenza IA.",
       "unproven_verification": "Verifica dei criteri o dell'IA non comprovata: richiesta conferma di lettura dopo scrittura.",
       "upstream_non_2xx": "Il provider IA a monte ha restituito un codice di stato HTTP non 2xx.",
-      "upstream_unavailable": "Il servizio del provider IA a monte non è attualmente disponibile."
+      "upstream_unavailable": "Il servizio del provider IA a monte non è attualmente disponibile.",
+      "immutable_tool_schema_override_prohibited": "La sostituzione dello schema di protezione di sicurezza immutabile dello strumento è severamente vietata.",
+      "invalid_lifecycle_transition": "Transizione di qualificazione modello non valida: il passaggio ad ACTIVE richiede il previo stato QUALIFIED.",
+      "model_alias_required_no_substitution": "L'alias del modello è obbligatorio e non può essere sostituito o impostato automaticamente in modo silente.",
+      "model_not_qualified": "Il passaggio ad ACTIVE richiede il previo stato QUALIFIED; i modelli appena rilevati non possono essere attivati direttamente.",
+      "region_required_or_ambiguous": "È richiesta una regione di destinazione esplicita. Regioni ambigue o predefinite sono proibite dalla governance.",
+      "tool_schema_invalid": "Lo schema dei parametri dello strumento fornito non è valido o non è ben formato."
+    },
+    "prompt": {
+      "explicit_region_required": "Dove deve instradare Ugondu questa richiesta di inferenza? Fornire una regione di destinazione esplicita (es. eu-west-3, af-south-1, eu-central-1, us-east-1). Il default automatico è severamente vietato dalla governance UAIGOS.",
+      "ambiguous_region_specified": "Regione ambigua specificata. L'assegnazione automatica della regione è vietata. Specificare una regione esplicita (es. eu-west-3, af-south-1, eu-central-1, us-east-1)."
     }
   },
   "bootstrap": {

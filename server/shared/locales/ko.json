@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "AI 추론 게이트웨이에서 예기치 않은 오류가 발생했습니다.",
       "unproven_verification": "정책 또는 AI 검증이 입증되지 않음: 쓰기 후 읽기 확인이 필요합니다.",
       "upstream_non_2xx": "업스트림 AI 공급자가 2xx가 아닌 HTTP 상태 코드를 반환했습니다.",
-      "upstream_unavailable": "업스트림 AI 공급자 서비스를 현재 사용할 수 없습니다."
+      "upstream_unavailable": "업스트림 AI 공급자 서비스를 현재 사용할 수 없습니다.",
+      "immutable_tool_schema_override_prohibited": "불변 보안 가드 도구 스키마 재정의는 엄격히 금지됩니다.",
+      "invalid_lifecycle_transition": "유효하지 않은 모델 자격 전환입니다. ACTIVE로 전환하려면 사전 QUALIFIED 상태가 필요합니다.",
+      "model_alias_required_no_substitution": "모델 별칭은 필수이며 암묵적으로 대체되거나 기본값으로 설정될 수 없습니다.",
+      "model_not_qualified": "ACTIVE로 전환하려면 사전 QUALIFIED 상태가 필요합니다. 새로 발견된 모델은 직접 활성화할 수 없습니다.",
+      "region_required_or_ambiguous": "명시적인 대상 리전이 필요합니다. 모호하거나 기본값으로 처리된 리전은 거버넌스 정책상 금지됩니다.",
+      "tool_schema_invalid": "제공된 도구 매개변수 스키마가 유효하지 않거나 형식이 잘못되었습니다."
+    },
+    "prompt": {
+      "explicit_region_required": "Ugondu가 이 추론 요청을 어디로 라우팅해야 합니까? 명시적인 대상 리전(예: eu-west-3, af-south-1, eu-central-1, us-east-1)을 제공하십시오. UAIGOS 거버넌스에 따라 자동 기본값 설정은 엄격히 금지됩니다.",
+      "ambiguous_region_specified": "모호한 리전이 지정되었습니다. 자동 리전 기본값 설정은 금지됩니다. 명시적인 리전(예: eu-west-3, af-south-1, eu-central-1, us-east-1)을 지정하십시오."
     }
   },
   "bootstrap": {

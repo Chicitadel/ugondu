@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "AI推論ゲートウェイで予期しないエラーが発生しました。",
       "unproven_verification": "ポリシーまたはAIの検証が未証明です: 書き込み後の読み取り確認が必要です。",
       "upstream_non_2xx": "アップストリームAIプロバイダーが非2xx HTTPステータスコードを返しました。",
-      "upstream_unavailable": "アップストリームAIプロバイダーサービスは現在利用できません。"
+      "upstream_unavailable": "アップストリームAIプロバイダーサービスは現在利用できません。",
+      "immutable_tool_schema_override_prohibited": "不変のセキュリティガードツールスキーマのオーバーライドは固く禁止されています。",
+      "invalid_lifecycle_transition": "無効なモデル認定遷移です。ACTIVEへの遷移には事前のQUALIFIEDステータスが必要です。",
+      "model_alias_required_no_substitution": "モデルエイリアスは必須であり、暗黙的に置換またはデフォルト設定することはできません。",
+      "model_not_qualified": "ACTIVEへの遷移には事前のQUALIFIEDステータスが必要です。新しく検出されたモデルを直接アクティブ化することはできません。",
+      "region_required_or_ambiguous": "明示的なターゲットリージョンが必要です。曖昧またはデフォルトのリージョンはガバナンスにより禁止されています。",
+      "tool_schema_invalid": "提供されたツールパラメータスキーマが無効または不正な形式です。"
+    },
+    "prompt": {
+      "explicit_region_required": "Ugonduはこの推論リクエストをどこにルーティングすべきですか？明示的なターゲットリージョン（例：eu-west-3、af-south-1、eu-central-1、us-east-1）を指定してください。UAIGOSガバナンスの下では、自動デフォルト設定は固く禁止されています。",
+      "ambiguous_region_specified": "曖昧なリージョンが指定されました。自動リージョンデフォルト設定は禁止されています。明示的なリージョン（例：eu-west-3、af-south-1、eu-central-1、us-east-1）を指定してください。"
     }
   },
   "bootstrap": {

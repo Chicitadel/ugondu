@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "Ocurrió un error inesperado en la pasarela de inferencia de IA.",
       "unproven_verification": "Verificación de política o IA no demostrada: se requiere confirmación de lectura tras escritura.",
       "upstream_non_2xx": "El proveedor de IA ascendente devolvió un código de estado HTTP distinto de 2xx.",
-      "upstream_unavailable": "El servicio del proveedor de IA ascendente no está disponible actualmente."
+      "upstream_unavailable": "El servicio del proveedor de IA ascendente no está disponible actualmente.",
+      "immutable_tool_schema_override_prohibited": "La anulación del esquema de herramienta de protección de seguridad inmutable está estrictamente prohibida.",
+      "invalid_lifecycle_transition": "Transición de calificación de modelo no válida: la transición a ACTIVE requiere el estado QUALIFIED previo.",
+      "model_alias_required_no_substitution": "El alias del modelo es obligatorio y no puede sustituirse ni asignarse por defecto silenciosamente.",
+      "model_not_qualified": "La transición a ACTIVE requiere el estado QUALIFIED previo; los modelos recién descubiertos no se pueden activar directamente.",
+      "region_required_or_ambiguous": "Se requiere una región de destino explícita. Las regiones ambiguas o predeterminadas están prohibidas por gobernanza.",
+      "tool_schema_invalid": "El esquema de parámetros de la herramienta proporcionado no es válido o está mal formado."
+    },
+    "prompt": {
+      "explicit_region_required": "¿A dónde debe dirigir Ugondu esta solicitud de inferencia? Proporcione una región de destino explícita (ej. eu-west-3, af-south-1, eu-central-1, us-east-1). El enrutamiento por defecto automático está estrictamente prohibido bajo la gobernanza UAIGOS.",
+      "ambiguous_region_specified": "Región ambigua especificada. El enrutamiento por defecto automático está prohibido. Por favor, especifique una región explícita (ej. eu-west-3, af-south-1, eu-central-1, us-east-1)."
     }
   },
   "bootstrap": {

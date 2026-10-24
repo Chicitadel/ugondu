@@ -288,3 +288,131 @@ test('LIFECYCLE-018: Live qualification with fake probeFn fails closed with CAPA
   assert.strictEqual(report.summary.disabledCount, 1);
   assert.strictEqual(report.diagnostics[0].errorCode, 'CAPABILITY_PROBE_FAILED');
 });
+
+test('LIFECYCLE-019: Decoupling between live canary receipt and fleet qualification with count reconciliation', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+  const canaryReceiptPath = path.resolve(__dirname, '../../docs/security/evidence/live_ai_canary_receipt.json');
+  if (fs.existsSync(canaryReceiptPath)) {
+    const canary = JSON.parse(fs.readFileSync(canaryReceiptPath, 'utf8'));
+    assert.strictEqual(canary.receiptType, 'AIRROOFERS_LIVE_AI_CANARY_RECEIPT');
+    assert.strictEqual(typeof canary.returnedModelId, 'string');
+    assert.ok(canary.availableModelCount > 0);
+  }
+
+  const report = await runModelQualification({ offline: true });
+  assert.strictEqual(report.reportType, 'AI_MODEL_QUALIFICATION_REPORT');
+  assert.strictEqual(report.qualificationMode, 'CATALOG_OFFLINE');
+  assert.strictEqual(report.summary.activeCount, 0);
+  assert.strictEqual(report.summary.qualifiedCount, 0);
+  assert.strictEqual(
+    report.summary.totalDiscovered,
+    report.summary.qualifiedCount + report.summary.disabledCount + report.summary.pendingCount
+  );
+  assert.ok(report.summary.disabledCount > 0);
+
+  const reportPath = path.resolve(__dirname, '../../docs/security/evidence/ai_model_qualification_report.json');
+  assert.ok(fs.existsSync(reportPath));
+  const loc = fs.readFileSync(reportPath, 'utf8').trim().split(/\r?\n/).length;
+  assert.ok(loc <= 500, `Report LOC (${loc}) must be strictly <= 500`);
+  assert.ok(loc >= 50 && loc <= 75, `Report LOC (${loc}) must follow compact diagnostic structure (50-70 LOC)`);
+});
+
+test('LIFECYCLE-020: In production mode, runModelQualification rejects arbitrary executeProbe injection with MOCK_ADAPTER_INJECTION_PROHIBITED', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    await assert.rejects(
+      async () => {
+        await runModelQualification({
+          mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
+          executeProbe: async () => ({ output: 'mocked' }),
+        });
+      },
+      (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403
+    );
+  } finally {
+    process.env.NODE_ENV = prevEnv;
+  }
+});
+
+test('LIFECYCLE-021: In production mode, runModelQualification rejects manual discoveredModels injection with DISCOVERY_MOCK_PROHIBITED', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    await assert.rejects(
+      async () => {
+        await runModelQualification({
+          mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
+          discoveredModels: [{ alias: 'injected-mock-model', providerId: 'airroofers-ai' }],
+        });
+      },
+      (err) => err.errorCode === 'DISCOVERY_MOCK_PROHIBITED' && err.statusCode === 403
+    );
+  } finally {
+    process.env.NODE_ENV = prevEnv;
+  }
+});
+
+test('LIFECYCLE-022: In production mode, ModelLifecycle rejects mockAdapter flag in verifyInference with MOCK_ADAPTER_INJECTION_PROHIBITED', async () => {
+  const { ModelLifecycle, ModelLifecycleState } = await loadLifecycleModule();
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const lc = new ModelLifecycle({ alias: 'prod-mock-guard', providerId: 'airroofers-ai' });
+    lc.validateSchema();
+    lc.checkPolicy({ secret: MOCK_SECRET_KEY });
+    await lc.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
+    await assert.rejects(
+      async () => {
+        await lc.verifyInference(async () => ({ output: 'output' }), { mockAdapter: true });
+      },
+      (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403
+    );
+    assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
+    assert.strictEqual(lc.canRoute(), false);
+  } finally {
+    process.env.NODE_ENV = prevEnv;
+  }
+});
+
+test('LIFECYCLE-023: In production mode, ModelLifecycle rejects mockAdapter in runFullLifecycle', async () => {
+  const { ModelLifecycle, ModelLifecycleState } = await loadLifecycleModule();
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const lc = new ModelLifecycle({ alias: 'prod-full-mock-guard', providerId: 'airroofers-ai' });
+    await assert.rejects(
+      async () => {
+        await lc.runFullLifecycle({ secret: MOCK_SECRET_KEY, mockAdapter: true });
+      },
+      (err) => err.errorCode === 'MOCK_ADAPTER_INJECTION_PROHIBITED' && err.statusCode === 403
+    );
+    assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
+    assert.strictEqual(lc.canRoute(), false);
+  } finally {
+    process.env.NODE_ENV = prevEnv;
+  }
+});
+
+test('LIFECYCLE-024: Tamper resistance - qualify cannot clear testOnly: true on mock-verified model', async () => {
+  const { ModelLifecycle, ModelLifecycleState } = await loadLifecycleModule();
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    const lc = new ModelLifecycle({ alias: 'tamper-guard', providerId: 'airroofers-ai' });
+    lc.validateSchema();
+    lc.checkPolicy({ secret: MOCK_SECRET_KEY });
+    await lc.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
+    await lc.verifyInference(async () => ({ output: 'mocked output' }));
+    assert.strictEqual(lc.liveInferenceReceipt?.testOnly, true);
+    lc.qualify({ testOnly: false, liveExecution: true });
+    assert.strictEqual(lc.getReceipt()?.testOnly, true);
+    assert.throws(() => lc.activate(), (err) => err.errorCode === 'LIVE_INFERENCE_RECEIPT_REQUIRED' && err.statusCode === 403);
+    assert.strictEqual(lc.state, ModelLifecycleState.QUALIFIED);
+    assert.strictEqual(lc.canRoute(), false);
+  } finally {
+    process.env.NODE_ENV = prevEnv;
+  }
+});

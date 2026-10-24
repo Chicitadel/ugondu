@@ -28,6 +28,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import * as crypto from 'crypto';
 import { __t } from '@ugondu/shared';
 import {
     AiGatewayError,
@@ -42,6 +43,11 @@ import {
 import { CredentialBroker } from './credential-broker';
 import { ModelCatalog } from './model-catalog';
 import { HttpTransport, HttpTransportRequest, HttpTransportResponse } from './provider-registry';
+import {
+    ALLOWLISTED_LIVE_ENDPOINT_HOST,
+    createTrustedLiveInferenceReceipt,
+    LiveInferenceReceipt,
+} from './trusted-receipt';
 
 const defaultHttpTransport: HttpTransport = async (req: HttpTransportRequest): Promise<HttpTransportResponse> => {
     const controller = new AbortController();
@@ -87,10 +93,19 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
             this.credentialBroker = arg2 as CredentialBroker;
             t = arg3;
         }
-        if (t) this.setHttpTransport(t);
+        if (t) {
+            this.isDefaultTransport = false;
+            this.transport = async (req: HttpTransportRequest): Promise<HttpTransportResponse> => {
+                const res = (t as any)(req);
+                return typeof res === 'function' ? await res(req) : await res;
+            };
+        }
     }
 
     public setHttpTransport(transport: HttpTransport | (() => HttpTransport)): void {
+        if (process.env.NODE_ENV === 'production') {
+            throw new AiGatewayError('MOCK_ADAPTER_PROHIBITED', 'Production composition root rejects custom transport injection; only genuine provider transport permitted', 403);
+        }
         this.isDefaultTransport = false;
         this.transport = async (req: HttpTransportRequest): Promise<HttpTransportResponse> => {
             const res = (transport as any)(req);
@@ -216,6 +231,49 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
         });
     }
 
+    public async verifyInferenceForQualification(
+        modelAlias: string,
+        candidateSha: string,
+        testPrompt = 'qualification-canary'
+    ): Promise<{ output: string; receipt: LiveInferenceReceipt }> {
+        const baseUrl = this.getBaseUrl();
+        const parsed = new URL(baseUrl);
+        if (parsed.protocol !== 'https:') {
+            throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_INSECURE' as any, 'HTTPS protocol required for transport qualification', 400);
+        }
+        if (parsed.hostname.toLowerCase() !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+            throw new AiGatewayError('AIRROOFERS_AI_ENDPOINT_DISALLOWED' as any, `Disallowed endpoint host: strictly requires ${ALLOWLISTED_LIVE_ENDPOINT_HOST}`, 403);
+        }
+        const reqId = `qual-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+        const res = await this.invoke({
+            requestId: reqId,
+            tenantId: 'system',
+            productId: 'ugondu',
+            environment: 'production',
+            task: 'qualification',
+            modelAlias,
+            region: 'eu-west-3',
+            dataClassification: 'public',
+            messages: [{ role: 'user', content: testPrompt }],
+            deadlineMs: 10000,
+            correlationId: `corr-${reqId}`,
+        });
+        const outputDigest = crypto.createHash('sha256').update(res.output.trim()).digest('hex');
+        const receipt = createTrustedLiveInferenceReceipt({
+            source: 'airroofers-live-transport',
+            httpStatus: 200,
+            verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+            candidateSha,
+            modelId: modelAlias,
+            endpointHost: ALLOWLISTED_LIVE_ENDPOINT_HOST,
+            providerRequestId: res.requestId,
+            responseDigestSha256: outputDigest,
+            observedAt: new Date().toISOString(),
+            testOnly: !this.isProductionTransport(),
+        });
+        return { output: res.output, receipt };
+    }
+
     public async invoke(request: InferenceRequest): Promise<InferenceResult> {
         const startedAt = Date.now();
         if (!request.region || typeof request.region !== 'string' || !request.region.trim()) {
@@ -223,7 +281,7 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
                 field: 'region',
                 errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
                 alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
-                prompt: 'Where should Ugondu route this inference request? Provide an explicit target region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1).',
+                prompt: __t('ai.prompt.explicit_region_required'),
             });
         }
         const normalizedRegion = request.region.trim().toLowerCase();
@@ -233,7 +291,7 @@ export class AirRoofersAiProviderAdapter implements InferenceProvider {
                 providedRegion: request.region,
                 errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
                 alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
-                prompt: 'Ambiguous region specified. Automatic region defaulting is prohibited. Please specify an explicit region.',
+                prompt: __t('ai.prompt.ambiguous_region_specified'),
             });
         }
         const provider = this.assertProviderEnabled();

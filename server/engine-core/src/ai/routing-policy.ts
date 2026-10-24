@@ -247,7 +247,7 @@ export class RoutingPolicyEngine {
         if (!request.modelAlias || typeof request.modelAlias !== 'string' || request.modelAlias.trim().length === 0) {
             throw new AiGatewayError('MODEL_NOT_FOUND', __t('ai.error.model_not_found'), 404, {
                 field: 'modelAlias', reason: 'MODEL_REQUIRED_NO_SILENT_SUBSTITUTION',
-                message: 'Model alias is required and cannot be silently substituted or defaulted.',
+                message: __t('ai.error.model_alias_required_no_substitution'),
             });
         }
 
@@ -256,7 +256,7 @@ export class RoutingPolicyEngine {
             throw new AiGatewayError('REGION_REQUIRED_OR_AMBIGUOUS', __t('ai.error.region_required_or_ambiguous'), 400, {
                 field: 'region', errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS', alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION',
                 reason: 'REGION_REQUIRED_MISSING', examples: ['eu-west-3', 'af-south-1', 'eu-central-1', 'us-east-1'],
-                prompt: 'Where should Ugondu route this inference request? Provide an explicit target region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1). Automatic defaulting is strictly prohibited under UAIGOS governance.',
+                prompt: __t('ai.prompt.explicit_region_required'),
             });
         }
 
@@ -267,7 +267,7 @@ export class RoutingPolicyEngine {
                 field: 'region', providedRegion: request.region, errorCode: 'REGION_REQUIRED_OR_AMBIGUOUS',
                 alternativeCode: 'UNSUPPORTED_OR_MISSING_REGION', reason: 'REGION_AMBIGUOUS',
                 examples: ['eu-west-3', 'af-south-1', 'eu-central-1', 'us-east-1'],
-                prompt: 'Ambiguous region specified. Automatic region defaulting is prohibited. Please specify an explicit region (e.g., eu-west-3, af-south-1, eu-central-1, us-east-1).',
+                prompt: __t('ai.prompt.ambiguous_region_specified'),
             });
         }
 

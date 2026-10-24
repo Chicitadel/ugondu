@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "AI推理网关发生意外错误。",
       "unproven_verification": "策略或人工智能验证未证实：需要写后读确认。",
       "upstream_non_2xx": "上游AI提供程序返回了非2xx HTTP状态码。",
-      "upstream_unavailable": "上游AI提供程序服务当前不可用。"
+      "upstream_unavailable": "上游AI提供程序服务当前不可用。",
+      "immutable_tool_schema_override_prohibited": "严禁覆盖不可变的安全防护工具模式。",
+      "invalid_lifecycle_transition": "无效的模型资格转换：转换为 ACTIVE 状态前必须先获得 QUALIFIED 状态。",
+      "model_alias_required_no_substitution": "模型别名是必填项，不能静默替换或默认设置。",
+      "model_not_qualified": "转换为 ACTIVE 状态前必须先获得 QUALIFIED 状态；新发现的模型不能直接激活。",
+      "region_required_or_ambiguous": "必须指定明确的目标区域。治理规范严禁使用模糊或默认区域。",
+      "tool_schema_invalid": "提供的工具参数模式无效或格式错误。"
+    },
+    "prompt": {
+      "explicit_region_required": "Ugondu 应将此推理请求路由到何处？请提供明确的目标区域（例如 eu-west-3、af-south-1、eu-central-1、us-east-1）。UAIGOS 治理严格禁止自动默认路由。",
+      "ambiguous_region_specified": "指定了不明确的区域。禁止自动默认分配区域。请指定明确的区域（例如 eu-west-3、af-south-1、eu-central-1、us-east-1）。"
     }
   },
   "bootstrap": {

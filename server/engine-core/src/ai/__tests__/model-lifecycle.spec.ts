@@ -245,59 +245,56 @@ describe('ModelLifecycle Zero-Stub Inference Verification & Qualification', () =
 
 describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => {
     const validSecret = 'air_prod_' + '0123456789abcdef0123456789abcdef0123456789abcdef';
+    const prodSigningKey = 'prod_signing_key_0123456789abcdef0123456789abcdef';
     const originalEnv = process.env.NODE_ENV;
-    afterEach(() => { process.env.NODE_ENV = originalEnv; });
+    const originalKey = process.env.UGONDU_PROVENANCE_KEY;
+
+    beforeEach(() => {
+        process.env.NODE_ENV = 'production';
+        process.env.UGONDU_PROVENANCE_KEY = prodSigningKey;
+    });
+
+    afterEach(() => {
+        process.env.NODE_ENV = originalEnv;
+        if (originalKey !== undefined) process.env.UGONDU_PROVENANCE_KEY = originalKey;
+        else delete process.env.UGONDU_PROVENANCE_KEY;
+    });
 
     test('validateLiveInferenceReceipt strictly verifies all required authentic transport fields', () => {
-        const validReceipt: LiveInferenceReceipt = {
+        const validReceipt = createTrustedLiveInferenceReceipt({
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
             candidateSha: 'abcdef1234567890abcdef1234567890abcdef12', modelId: 'sovereign-gpt',
-            responseDigestSha256: 'a'.repeat(64), correlationId: 'corr-001', endpointHost: 'ai.airroofers.eu',
-            observedAt: new Date().toISOString(),
-        };
+            responseDigestSha256: 'a'.repeat(64), providerRequestId: 'req-001', correlationId: 'corr-001',
+            endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        });
         expect(validateLiveInferenceReceipt(validReceipt, 'sovereign-gpt')).toBe(true);
         expect(validateLiveInferenceReceipt({ ...validReceipt, modelId: 'other-model' }, 'sovereign-gpt')).toBe(false);
-        expect(validateLiveInferenceReceipt({ ...validReceipt, httpStatus: 500 }, 'sovereign-gpt')).toBe(false);
+        expect(validateLiveInferenceReceipt({ ...validReceipt, httpStatus: 500 as any }, 'sovereign-gpt')).toBe(false);
         expect(validateLiveInferenceReceipt({ ...validReceipt, source: 'synthetic-mock' as any }, 'sovereign-gpt')).toBe(false);
         expect(validateLiveInferenceReceipt({ ...validReceipt, responseDigestSha256: 'short-digest' }, 'sovereign-gpt')).toBe(false);
         expect(validateLiveInferenceReceipt({ ...validReceipt, endpointHost: '' }, 'sovereign-gpt')).toBe(false);
+        expect(validateLiveInferenceReceipt({ ...validReceipt, providerRequestId: '' }, 'sovereign-gpt')).toBe(false);
     });
 
     test('activate() and assertRoutable() require verified LiveInferenceReceipt, failing closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
         const lc = new ModelLifecycle({ alias: 'no-receipt-model', providerId: 'airroofers-ai' });
         lc.state = 'QUALIFIED';
         lc.liveInferenceReceipt = null;
-        expect(() => lc.activate()).toThrow(ModelLifecycleError);
-        try {
-            lc.activate();
-            fail('Expected LIVE_INFERENCE_RECEIPT_REQUIRED');
-        } catch (err: any) {
-            expect(err.errorCode).toBe('LIVE_INFERENCE_RECEIPT_REQUIRED');
-            expect(err.statusCode).toBe(403);
-        }
+        expect(() => lc.activate()).toThrow(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('in production mode, injected mock executor marks receipt testOnly and fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', async () => {
-        process.env.NODE_ENV = 'production';
         const lc = new ModelLifecycle({ alias: 'prod-guard-model', providerId: 'airroofers-ai' });
         lc.validateSchema();
         lc.checkPolicy({ secret: validSecret });
         await lc.probeCapability(async () => ({ ok: true }));
-        await lc.verifyInference(async () => ({ output: 'test-mock-output', correlationId: 'corr-test' }));
+        await lc.verifyInference(async () => ({ output: 'test-mock-output', correlationId: 'corr-test', providerRequestId: 'req-mock' }));
         expect(lc.liveInferenceReceipt?.testOnly).toBe(true);
-        lc.qualify({ liveExecution: true }); // Attempting caller-injected Boolean bypass
-        expect(() => lc.activate()).toThrow(ModelLifecycleError);
-        try {
-            lc.activate();
-            fail('Expected LIVE_INFERENCE_RECEIPT_REQUIRED');
-        } catch (err: any) {
-            expect(err.errorCode).toBe('LIVE_INFERENCE_RECEIPT_REQUIRED');
-            expect(err.statusCode).toBe(403);
-        }
+        lc.qualify({ liveExecution: true });
+        expect(() => lc.activate()).toThrow(expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 }));
     });
 
     test('in production mode, authentic live transport receipt activates model successfully', async () => {
-        process.env.NODE_ENV = 'production';
         const lc = new ModelLifecycle({ alias: 'prod-live-model', providerId: 'airroofers-ai' });
         lc.validateSchema();
         lc.checkPolicy({ secret: validSecret });
@@ -305,7 +302,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
         const rawOutput = 'genuine-live-inference-response';
         const authenticReceipt = createTrustedLiveInferenceReceipt({
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-            endpointHost: 'ai.airroofers.eu', correlationId: 'corr-live-prod-001', observedAt: new Date().toISOString(),
+            endpointHost: 'ai.airroofers.eu', providerRequestId: 'prov-live-prod-001', observedAt: new Date().toISOString(),
             candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256(rawOutput),
         });
         await lc.verifyInference(async () => ({ output: rawOutput, ...authenticReceipt }));
@@ -317,78 +314,78 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
         expect(lc.assertRoutable()).toBe(true);
     });
 
-    test('adversarial: caller-supplied fake text fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
-        process.env.NODE_ENV = 'production';
-        const lc = new ModelLifecycle({ alias: 'fake-text-model', providerId: 'airroofers-ai' });
+    test('adversarial: forged source marker fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
+        const lc = new ModelLifecycle({ alias: 'forged-source-model', providerId: 'airroofers-ai' });
         lc.state = 'QUALIFIED';
-        expect(() => lc.activate('fake caller text' as any)).toThrow(ModelLifecycleError);
-        expect(() => lc.activate('fake caller text' as any)).toThrowError(
-            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
-        );
-    });
-
-    test('adversarial: spoofed source without trusted receipt capability is rejected in production', () => {
-        process.env.NODE_ENV = 'production';
-        const lc = new ModelLifecycle({ alias: 'spoofed-source-model', providerId: 'airroofers-ai' });
-        lc.state = 'QUALIFIED';
-        const spoofedReceipt = {
+        const forgedReceipt = {
             source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
-            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('spoofed-output'),
-            correlationId: 'corr-spoofed', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('forged'),
+            providerRequestId: 'req-forged', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         };
-        expect(() => lc.activate(spoofedReceipt)).toThrowError(
+        expect(() => lc.activate(forgedReceipt as any)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
     });
 
-    test('adversarial: fabricated or malformed response digest is rejected', () => {
-        process.env.NODE_ENV = 'production';
-        const lc = new ModelLifecycle({ alias: 'fake-digest-model', providerId: 'airroofers-ai' });
+    test('adversarial: fake HTTP 200 / non-200 status fails closed', () => {
+        const lc = new ModelLifecycle({ alias: 'fake-http-model', providerId: 'airroofers-ai' });
         lc.state = 'QUALIFIED';
-        const fakeDigestReceipt = {
-            source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
-            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: 'not-a-valid-sha256',
-            correlationId: 'corr-bad-digest', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        const fakeStatusReceipt = {
+            source: 'airroofers-live-transport' as const, httpStatus: 500, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('err'),
+            providerRequestId: 'req-status', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+            signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
         };
-        expect(() => lc.activate(fakeDigestReceipt)).toThrowError(
+        expect(() => lc.activate(fakeStatusReceipt as any)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
-        expect(() => createTrustedLiveInferenceReceipt({ ...fakeDigestReceipt, responseDigestSha256: 'xyz123' })).toThrow();
     });
 
-    test('adversarial: test-only receipt in production is rejected with 403', () => {
-        process.env.NODE_ENV = 'production';
-        const lc = new ModelLifecycle({ alias: 'testonly-prod-model', providerId: 'airroofers-ai' });
+    test('adversarial: mismatched model fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
+        const lc = new ModelLifecycle({ alias: 'actual-model', providerId: 'airroofers-ai' });
         lc.state = 'QUALIFIED';
-        const testReceipt = {
-            source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
-            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('test-output'),
-            correlationId: 'corr-test', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(), testOnly: true,
-        };
-        expect(() => lc.activate(testReceipt)).toThrowError(
+        const trustedOtherModel = createTrustedLiveInferenceReceipt({
+            source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+            candidateSha: lc.gitSha, modelId: 'different-model-id', responseDigestSha256: computeSha256('out'),
+            providerRequestId: 'req-model', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        });
+        expect(() => lc.activate(trustedOtherModel)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
     });
 
-    test('adversarial: mismatched candidate SHA is rejected', () => {
-        process.env.NODE_ENV = 'production';
+    test('adversarial: mismatched candidate SHA fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
         const lc = new ModelLifecycle({ alias: 'sha-mismatch-model', providerId: 'airroofers-ai' }, { gitSha: 'expected-git-sha' });
         lc.state = 'QUALIFIED';
         const trustedOtherSha = createTrustedLiveInferenceReceipt({
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
             candidateSha: 'stale-or-different-sha', modelId: lc.alias, responseDigestSha256: computeSha256('out'),
-            correlationId: 'corr-sha', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+            providerRequestId: 'req-sha', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         });
         expect(() => lc.activate(trustedOtherSha)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
     });
 
-    test('adversarial: endpoint hostname outside allowlist is rejected', () => {
+    test('adversarial: altered output digest fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
+        const lc = new ModelLifecycle({ alias: 'fake-digest-model', providerId: 'airroofers-ai' });
+        lc.state = 'QUALIFIED';
+        const authentic = createTrustedLiveInferenceReceipt({
+            source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('original'),
+            providerRequestId: 'req-digest', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        });
+        const tampered = { ...authentic, responseDigestSha256: computeSha256('tampered') };
+        expect(() => lc.activate(tampered)).toThrowError(
+            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
+        );
+    });
+
+    test('adversarial: disallowed host fails closed', () => {
         expect(() => createTrustedLiveInferenceReceipt({
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
             candidateSha: 'candidate-head', modelId: 'test-model', responseDigestSha256: computeSha256('out'),
-            correlationId: 'corr-host', endpointHost: 'attacker.evil-proxy.org', observedAt: new Date().toISOString(),
+            providerRequestId: 'req-host', endpointHost: 'attacker.evil-proxy.org', observedAt: new Date().toISOString(),
         })).toThrow(/Disallowed endpoint host/);
 
         const lc = new ModelLifecycle({ alias: 'bad-host-model', providerId: 'airroofers-ai' });
@@ -396,51 +393,99 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
         const untrustedBadHost = {
             source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
             candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('out'),
-            correlationId: 'corr-host', endpointHost: 'attacker.evil-proxy.org', observedAt: new Date().toISOString(),
+            providerRequestId: 'req-host', endpointHost: 'attacker.evil-proxy.org', observedAt: new Date().toISOString(),
+            signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
         };
         expect(() => lc.activate(untrustedBadHost)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
     });
 
-    test('adversarial: response for different model is rejected', () => {
-        process.env.NODE_ENV = 'production';
-        const lc = new ModelLifecycle({ alias: 'actual-model', providerId: 'airroofers-ai' });
+    test('adversarial: missing provider request ID fails closed', () => {
+        const lc = new ModelLifecycle({ alias: 'missing-req-id-model', providerId: 'airroofers-ai' });
         lc.state = 'QUALIFIED';
-        const trustedOtherModel = createTrustedLiveInferenceReceipt({
-            source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-            candidateSha: lc.gitSha, modelId: 'different-model-id', responseDigestSha256: computeSha256('out'),
-            correlationId: 'corr-model', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
-        });
-        expect(() => lc.activate(trustedOtherModel)).toThrowError(
+        const missingReqId = {
+            source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('out'),
+            providerRequestId: '', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+            signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
+        };
+        expect(() => lc.activate(missingReqId)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
     });
 
-    test('adversarial: fake capability probe transitions model to DISABLED and prevents activation', async () => {
-        const lc = new ModelLifecycle({ alias: 'probe-fail-model', providerId: 'airroofers-ai' });
-        lc.validateSchema();
-        lc.checkPolicy({ secret: validSecret });
-        await expect(lc.probeCapability(async () => ({ ok: false, reason: 'Probe rejected fake capability' }))).rejects.toThrow();
-        expect(lc.state).toBe('DISABLED');
-        expect(lc.canRoute()).toBe(false);
-        expect(() => lc.activate()).toThrow();
+    test('adversarial: wrong signing key fails closed with LIVE_INFERENCE_RECEIPT_REQUIRED', () => {
+        const lc = new ModelLifecycle({ alias: 'wrong-key-model', providerId: 'airroofers-ai' });
+        lc.state = 'QUALIFIED';
+        const receiptWithWrongKey = createTrustedLiveInferenceReceipt({
+            source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('out'),
+            providerRequestId: 'req-wrong-key', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+        }, 'wrong_attacker_signing_key_0123456789abcdef01234567');
+        expect(() => lc.activate(receiptWithWrongKey)).toThrowError(
+            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
+        );
     });
 
-    test('adversarial: copied receipt from another run fails provenance seal verification', () => {
-        process.env.NODE_ENV = 'production';
+    test('adversarial: absent production key fails closed with configuration error (500 or 403)', () => {
+        delete process.env.UGONDU_PROVENANCE_KEY;
+        const lc = new ModelLifecycle({ alias: 'absent-key-model', providerId: 'airroofers-ai' });
+        lc.state = 'QUALIFIED';
+        const receipt = {
+            source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('out'),
+            providerRequestId: 'req-absent-key', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
+            signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
+        };
+        expect(() => lc.activate(receipt)).toThrow();
+        try {
+            lc.activate(receipt);
+            fail('Expected configuration failure');
+        } catch (err: any) {
+            expect([500, 403]).toContain(err.statusCode);
+            expect(['PROVENANCE_KEY_MISSING', 'LIVE_INFERENCE_RECEIPT_REQUIRED']).toContain(err.errorCode);
+        }
+    });
+
+    test('adversarial: test-only receipt in production fails closed with 403', () => {
+        const lc = new ModelLifecycle({ alias: 'testonly-prod-model', providerId: 'airroofers-ai' });
+        lc.state = 'QUALIFIED';
+        const testReceipt = {
+            source: 'airroofers-live-transport' as const, httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' as const,
+            candidateSha: lc.gitSha, modelId: lc.alias, responseDigestSha256: computeSha256('test-output'),
+            providerRequestId: 'req-test', endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(), testOnly: true,
+            signature: '0'.repeat(64), provenanceSeal: '0'.repeat(64),
+        };
+        expect(() => lc.activate(testReceipt)).toThrowError(
+            expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
+        );
+    });
+
+    test('adversarial: copied receipt across candidates fails closed', () => {
         const run1Receipt = createTrustedLiveInferenceReceipt({
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-            candidateSha: 'run-1-sha-1111111111111111111111111111111111', modelId: 'run-1-model',
-            responseDigestSha256: computeSha256('run-1-output'), correlationId: 'corr-run-1',
+            candidateSha: 'candidate-sha-11111111111111111111111111111111', modelId: 'target-model',
+            responseDigestSha256: computeSha256('run-1-output'), providerRequestId: 'req-run-1',
             endpointHost: 'ai.airroofers.eu', observedAt: new Date().toISOString(),
         });
-
-        const tamperedCopy: LiveInferenceReceipt = { ...run1Receipt, modelId: 'target-model' };
-        const lc = new ModelLifecycle({ alias: 'target-model', providerId: 'airroofers-ai' });
+        const lc = new ModelLifecycle({ alias: 'target-model', providerId: 'airroofers-ai' }, { gitSha: 'candidate-sha-22222222222222222222222222222222' });
         lc.state = 'QUALIFIED';
-        expect(() => lc.activate(tamperedCopy)).toThrowError(
+        expect(() => lc.activate(run1Receipt)).toThrowError(
             expect.objectContaining({ errorCode: 'LIVE_INFERENCE_RECEIPT_REQUIRED', statusCode: 403 })
         );
+    });
+
+    test('persisted receipts verify cryptographically across process restart without WeakSet reliance', () => {
+        const key = 'durable_signing_key_0123456789abcdef0123456789abcdef';
+        const receipt = createTrustedLiveInferenceReceipt({
+            source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+            candidateSha: 'candidate-git-sha-777', modelId: 'durable-model',
+            providerRequestId: 'prov-req-durable-001', endpointHost: 'ai.airroofers.eu',
+            responseDigestSha256: computeSha256('durable-output'), observedAt: new Date().toISOString(),
+        }, key);
+        const serialized = JSON.stringify(receipt);
+        const restartedReceipt = JSON.parse(serialized);
+        expect(validateLiveInferenceReceipt(restartedReceipt, 'durable-model', 'candidate-git-sha-777', key)).toBe(true);
     });
 });

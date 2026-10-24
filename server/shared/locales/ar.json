@@ -1964,7 +1964,17 @@
       "unexpected_gateway_error": "حدث خطأ غير متوقع في بوابة استنتاج الذكاء الاصطناعي.",
       "unproven_verification": "لم يتم إثبات التحقق من السياسة أو الذكاء الاصطناعي: يلزم تأكيد القراءة بعد الكتابة.",
       "upstream_non_2xx": "أرجع موفر الذكاء الاصطناعي الأصلي رمز حالة HTTP بخلاف 2xx.",
-      "upstream_unavailable": "خدمة موفر الذكاء الاصطناعي الأصلي غير متوفرة حاليًا."
+      "upstream_unavailable": "خدمة موفر الذكاء الاصطناعي الأصلي غير متوفرة حاليًا.",
+      "immutable_tool_schema_override_prohibited": "تجاوز مخطط أداة الحراسة الأمنية غير القابل للتغيير محظور تماماً.",
+      "invalid_lifecycle_transition": "انتقال غير صالح لحالة تأهيل النموذج: يتطلب الانتقال إلى ACTIVE حالة QUALIFIED مسبقة.",
+      "model_alias_required_no_substitution": "الاسم المستعار للنموذج مطلوب ولا يمكن استبداله أو افتراضه بصمت.",
+      "model_not_qualified": "يتطلب الانتقال إلى ACTIVE حالة QUALIFIED مسبقة؛ لا يمكن تنشيط النماذج المكتشفة حديثاً مباشرة.",
+      "region_required_or_ambiguous": "المنطقة المستهدفة الصريحة مطلوبة. المناطق الغامضة أو الافتراضية محظورة بموجب الحوكمة.",
+      "tool_schema_invalid": "مخطط معلمات الأداة المقدم غير صالح أو مشوه."
+    },
+    "prompt": {
+      "explicit_region_required": "أين يجب أن يوجه Ugondu طلب الاستدلال هذا؟ يرجى تقديم منطقة هدف صريحة (مثل eu-west-3 أو af-south-1 أو eu-central-1 أو us-east-1). التوجيه التلقائي الافتراضي محظور تماماً تحت حوكمة UAIGOS.",
+      "ambiguous_region_specified": "تم تحديد منطقة غامضة. التعيين التلقائي للمنطقة محظور. يرجى تحديد منطقة صريحة (مثل eu-west-3 أو af-south-1 أو eu-central-1 أو us-east-1)."
     }
   },
   "bootstrap": {

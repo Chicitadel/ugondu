@@ -144,7 +144,7 @@ export function assertValidLifecycleTransition(
     if (!isValidLifecycleTransition(from, to)) {
         throw new AiGatewayError(
             'INVALID_REQUEST',
-            __t('ai.error.invalid_lifecycle_transition') || `Invalid model qualification transition from ${from} to ${to}: transition to ACTIVE requires prior QUALIFIED status.`,
+            __t('ai.error.invalid_lifecycle_transition'),
             400,
             { from, to, reasonCode }
         );
