@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Tests / Qualification — Public AI Barrel Export Qualification
  * File           : ai-barrel-export-qualification.test.js
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-24
@@ -31,6 +31,7 @@ const path = require('node:path');
 
 const publicAiBarrel = require('../../server/engine-core/dist/ai');
 const indexPath = path.resolve(__dirname, '../../server/engine-core/src/ai/index.ts');
+const dtsPath = path.resolve(__dirname, '../../server/engine-core/dist/ai/index.d.ts');
 
 test('BARREL-001: createTrustedLiveInferenceReceipt is strictly undefined in public AI barrel', () => {
   assert.strictEqual(
@@ -91,7 +92,7 @@ test('BARREL-004: Public AI barrel exposes only verification and gateway runtime
   assert.strictEqual(typeof publicAiBarrel.InferenceGateway, 'function');
 });
 
-test('BARREL-005: Source index.ts does not export minting or signing primitives', () => {
+test('BARREL-005: Source index.ts does not export minting or signing primitives or dev keys', () => {
   const indexSource = fs.readFileSync(indexPath, 'utf8');
   assert.strictEqual(
     indexSource.includes('createTrustedLiveInferenceReceipt'),
@@ -107,5 +108,82 @@ test('BARREL-005: Source index.ts does not export minting or signing primitives'
     indexSource.includes('getProvenanceSigningKey'),
     false,
     'src/ai/index.ts must not contain getProvenanceSigningKey in exports'
+  );
+  assert.strictEqual(
+    indexSource.includes('DEV_FALLBACK_KEY'),
+    false,
+    'src/ai/index.ts must not contain DEV_FALLBACK_KEY in exports'
+  );
+  assert.strictEqual(
+    indexSource.includes('DEV_KEY_ID'),
+    false,
+    'src/ai/index.ts must not contain DEV_KEY_ID in exports'
+  );
+});
+
+test('BARREL-006: DEV_FALLBACK_KEY and DEV_KEY_ID are strictly undefined and not in publicAiBarrel', () => {
+  assert.strictEqual(
+    publicAiBarrel.DEV_FALLBACK_KEY,
+    undefined,
+    'DEV_FALLBACK_KEY must be strictly undefined on public AI barrel'
+  );
+  assert.strictEqual(
+    'DEV_FALLBACK_KEY' in publicAiBarrel,
+    false,
+    'DEV_FALLBACK_KEY must not exist in public barrel keys'
+  );
+  assert.strictEqual(
+    publicAiBarrel.DEV_KEY_ID,
+    undefined,
+    'DEV_KEY_ID must be strictly undefined on public AI barrel'
+  );
+  assert.strictEqual(
+    'DEV_KEY_ID' in publicAiBarrel,
+    false,
+    'DEV_KEY_ID must not exist in public barrel keys'
+  );
+});
+
+test('BARREL-007: computeProvenanceSeal and getProvenanceSigningKey are strictly undefined', () => {
+  assert.strictEqual(
+    publicAiBarrel.computeProvenanceSeal,
+    undefined,
+    'computeProvenanceSeal must be strictly undefined on public AI barrel'
+  );
+  assert.strictEqual(
+    'computeProvenanceSeal' in publicAiBarrel,
+    false,
+    'computeProvenanceSeal must not be in public barrel'
+  );
+  assert.strictEqual(
+    publicAiBarrel.getProvenanceSigningKey,
+    undefined,
+    'getProvenanceSigningKey must be strictly undefined on public AI barrel'
+  );
+  assert.strictEqual(
+    'getProvenanceSigningKey' in publicAiBarrel,
+    false,
+    'getProvenanceSigningKey must not be in public barrel'
+  );
+});
+
+test('BARREL-008: Emitted declaration file server/engine-core/dist/ai/index.d.ts contains zero references to restricted symbols', () => {
+  assert.ok(fs.existsSync(dtsPath), 'server/engine-core/dist/ai/index.d.ts must exist on filesystem');
+  const dtsSource = fs.readFileSync(dtsPath, 'utf8');
+
+  assert.strictEqual(
+    dtsSource.includes('createTrustedLiveInferenceReceipt'),
+    false,
+    'dist/ai/index.d.ts must contain zero references to createTrustedLiveInferenceReceipt'
+  );
+  assert.strictEqual(
+    dtsSource.includes('DEV_FALLBACK_KEY'),
+    false,
+    'dist/ai/index.d.ts must contain zero references to DEV_FALLBACK_KEY'
+  );
+  assert.strictEqual(
+    dtsSource.includes('DEV_KEY_ID'),
+    false,
+    'dist/ai/index.d.ts must contain zero references to DEV_KEY_ID'
   );
 });

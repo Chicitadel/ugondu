@@ -171,15 +171,36 @@ describe('F-14, F-19 & F-20 Zero-Stub Production Composition & Dev-Key Isolation
         }
     });
 
-    test('F-19: model-lifecycle module strictly does NOT re-export createTrustedLiveInferenceReceipt', async () => {
+    test('F-19: model-lifecycle module strictly does NOT re-export createTrustedLiveInferenceReceipt, DEV_KEY_ID, or DEV_FALLBACK_KEY', async () => {
         const lifecycleModule = await import('../model-lifecycle');
         expect((lifecycleModule as any).createTrustedLiveInferenceReceipt).toBeUndefined();
+        expect((lifecycleModule as any).DEV_KEY_ID).toBeUndefined();
+        expect((lifecycleModule as any).DEV_FALLBACK_KEY).toBeUndefined();
     });
 
-    test('F-22: public AI barrel (index.ts) strictly does NOT export createTrustedLiveInferenceReceipt', async () => {
+    test('F-22: public AI barrel (index.ts) strictly does NOT export createTrustedLiveInferenceReceipt, DEV_KEY_ID, or DEV_FALLBACK_KEY', async () => {
         const aiBarrel = await import('../index');
         expect((aiBarrel as any).createTrustedLiveInferenceReceipt).toBeUndefined();
         expect((aiBarrel as any).TrustedReceiptService?.createReceipt).toBeUndefined();
+        expect((aiBarrel as any).DEV_KEY_ID).toBeUndefined();
+        expect((aiBarrel as any).DEV_FALLBACK_KEY).toBeUndefined();
+    });
+
+    test('F-23: resolveGovernedAiEndpointHost validates domain patterns and enforces fallback to ai.airroofers.eu', async () => {
+        const { resolveGovernedAiEndpointHost, isGovernedEndpointHost } = await import('../trusted-receipt');
+        expect(resolveGovernedAiEndpointHost()).toBe('ai.airroofers.eu');
+        expect(resolveGovernedAiEndpointHost('ai.airroofers.eu')).toBe('ai.airroofers.eu');
+        expect(resolveGovernedAiEndpointHost('inference-staging.airroofers.eu')).toBe('inference-staging.airroofers.eu');
+        // Malicious/invalid hosts rejected with fallback to approved sovereign host
+        expect(resolveGovernedAiEndpointHost('localhost')).toBe('ai.airroofers.eu');
+        expect(resolveGovernedAiEndpointHost('127.0.0.1')).toBe('ai.airroofers.eu');
+        expect(resolveGovernedAiEndpointHost('http://ai.airroofers.eu')).toBe('ai.airroofers.eu');
+        expect(resolveGovernedAiEndpointHost('evil.com/leak')).toBe('ai.airroofers.eu');
+        expect(resolveGovernedAiEndpointHost('')).toBe('ai.airroofers.eu');
+
+        expect(isGovernedEndpointHost('ai.airroofers.eu')).toBe(true);
+        expect(isGovernedEndpointHost('localhost')).toBe(false);
+        expect(isGovernedEndpointHost('169.254.169.254')).toBe(false);
     });
 
     test('F-20: in non-production, development key fallback stamps keyId dev-key-local-only and testOnly true', () => {

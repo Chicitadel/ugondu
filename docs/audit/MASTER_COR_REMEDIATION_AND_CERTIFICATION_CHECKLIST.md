@@ -1,20 +1,22 @@
 <!-- Project: Ugondu | Authority: Ujomor Systems Engineering & Governance Authority | Organization: Air Roofers SASU -->
 # Master COR Remediation, Unification and Proof-of-Certification Checklist
 
-**Audit snapshot:** 2026-10-24 18:59 UTC (PR #19 Documentation Reconciliation)  
+**Audit snapshot:** 2026-10-24 20:16 UTC (PR #19 Follow-up Audit & Candidate 318c0221 Reconciliation)  
 **Branch:** `phase4/production-hardening`  
-**Implementation candidate:** [`da2ab22b8695d64c32357fd95272ecd435bfe258`](https://github.com/Chicitadel/ugondu/commit/da2ab22b8695d64c32357fd95272ecd435bfe258)  
-**Evidence-sealed descendant:** [`c170aa77fd1121ed2694235fcd8c22b8fbc74d7f`](https://github.com/Chicitadel/ugondu/commit/c170aa77fd1121ed2694235fcd8c22b8fbc74d7f)  
-**CI/CD run:** [40117638878](https://github.com/Chicitadel/ugondu/actions/runs/40117638878)  
-**COR run:** [40117638901](https://github.com/Chicitadel/ugondu/actions/runs/40117638901)  
-**Live AI canary run:** [40117058390](https://github.com/Chicitadel/ugondu/actions/runs/40117058390)  
+**Implementation candidate:** [`318c022158b1dabf1d9c12c62ed497a837a692df`](https://github.com/Chicitadel/ugondu/commit/318c022158b1dabf1d9c12c62ed497a837a692df)  
+**Evidence-sealed descendant:** [`be549ffa6a2ddb1655c83f2b458dab56957aa0fb`](https://github.com/Chicitadel/ugondu/commit/be549ffa6a2ddb1655c83f2b458dab56957aa0fb)  
+**Candidate CI run:** [40125624489](https://github.com/Chicitadel/ugondu/actions/runs/40125624489)  
+**Release CI run:** [40126588874](https://github.com/Chicitadel/ugondu/actions/runs/40126588874)  
+**Release COR run:** [40126588895](https://github.com/Chicitadel/ugondu/actions/runs/40126588895)  
+**Live AI canary run:** [40125751718](https://github.com/Chicitadel/ugondu/actions/runs/40125751718)  
 **PR #18:** Closed without merge ([View pull request](https://github.com/Chicitadel/ugondu/pull/18)) — superseded by PR #19  
-**PR #19:** Active documentation reconciliation into `phase4/production-hardening`  
+**PR #19:** Active documentation & remediation reconciliation into `phase4/production-hardening` ([View pull request](https://github.com/Chicitadel/ugondu/pull/19))  
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED.**  
 **Governance baseline:** UAIGOS 3.0.0  
 **Purpose:** Single durable master checklist for all COR re-audit findings, remediation state, evidence links, acceptance criteria and regression controls.
 
 **Key audit documentation & lineage cross-references:**
+- **COR follow-up audit & commercial launch gaps — 20:16 UTC:** [COR Follow-up Audit — 20:16 UTC](./COR_FOLLOWUP_AUDIT_AND_LAUNCH_GAPS_2026-10-24_2016Z.md)
 - **Final COR reconciliation & commercial-launch gap audit — 18:59 UTC:** [COR Final Reconciliation — 18:59 UTC](./COR_FINAL_RECONCILIATION_2026-10-24_1859Z.md)
 - **Certification progress dashboard:** [COR Certification Progress Dashboard](./CERTIFICATION_PROGRESS_DASHBOARD.md)
 - **Full remediation & universality gap:** [COR Full Remediation, AI Activation and Universality Gap — 17:16 UTC](./COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md)
@@ -25,7 +27,7 @@
 - **Live re-audit baseline:** [COR Live Re-audit](./COR_LIVE_REAUDIT_2026-10-24.md)
 - **Baseline remediation plan:** [COR Release Re-audit and Full Remediation Plan](./COR_RELEASE_REAUDIT_AND_FULL_REMEDIATION_PLAN_2026-10-24.md)
 
-> **Evidence Lineage (18:59 UTC Snapshot / PR #19):** CI/CD run 40117638878 passed across 17 configured jobs (workspaces, thin-clients, Docker, integration, governance; release publish skipped). COR run 40117638901 completed certification, AWS Physical Qualification Gate, and COR Final Release Gate for candidate `da2ab22b...` and evidence descendant `c170aa77...`. Live AI canary run 40117058390 verified endpoint connectivity and inference for `sentinel-guard-v1` (HTTP 200). Universal certification remains withheld pending live AI fleet activation, receipt factory barrel export closure (F-22), complete native multi-target lifecycles, and commercial release authorization.
+> **Evidence Lineage (20:16 UTC Snapshot / PR #19):** Release CI run 40126588874 passed across 17 configured jobs (17 passed, `Build & Publish Release` skipped). Release COR run 40126588895 completed all 3 configured jobs: COR Certification, AWS Physical Qualification Gate, and COR Final Release Gate for candidate `318c0221...` and evidence-sealed release head `be549ffa...`. Live AI canary run 40125751718 verified endpoint connectivity and inference for `sentinel-guard-v1` (HTTP 200). Universal certification remains strictly withheld pending live AI fleet activation, compiled export elimination of dev constants (F-22 residual), complete native multi-target lifecycles, and commercial release authorization.
 
 ---
 
@@ -58,7 +60,7 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 | **F-19** | Lifecycle Test Seam & Injected Executor Isolation | Optional callback injection (`probeFn`, `executeFn`) in lifecycle permits mock insertion without `isMock`; exported receipt factory bypasses trusted transport | [`COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md`](./COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md), [`model-lifecycle.ts`](../../server/engine-core/src/ai/model-lifecycle.ts) | 🔴 OPEN / BLOCKED (P0); concrete provider adapter & private receipt issuer required |
 | **F-20** | Production Key Fail-Closed & Non-Prod Isolation | Production key fails closed on missing/weak key, but development key fallback must be strictly isolated to prevent acceptance in production | [`COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md`](./COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md), [`trusted-receipt.ts`](../../server/engine-core/src/ai/trusted-receipt.ts) | 🟡 IN PROGRESS (P0/P1); dev-key rejection, key rotation & restart verification required |
 | **F-21** | Target Matrix Scope vs. Universality | Five Go thin-client targets pass build/test; native runtime, install/update/rollback, IDE plugins, and multi-cloud hosting require target-specific receipts | [`COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md`](./COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md), [`target-matrix.json`](../../config/qualification/target-matrix.json) | 🟡 PARTIAL (P1); Tier 1 bounded pass; universal claim withheld |
-| **F-22** | Receipt Factory Barrel Export Elimination | Direct factory export removed from `model-lifecycle.ts`, but wildcard barrel `export * from './trusted-receipt'` in `ai/index.ts` leaves `createTrustedLiveInferenceReceipt` exposed | [`server/engine-core/src/ai/index.ts`](../../server/engine-core/src/ai/index.ts), [`COR_FINAL_RECONCILIATION_2026-10-24_1859Z.md`](./COR_FINAL_RECONCILIATION_2026-10-24_1859Z.md) | 🔴 OPEN / BLOCKED (P0); replace wildcard barrel with explicit allowlist and unexport signing primitives |
+| **F-22** | Receipt Factory Barrel Export & Residual Hardening | Candidate `318c0221...` replaced wildcard barrel with explicit allowlist; residual hardening requires eliminating dev constants from barrel, compiled export verification, and adversarial tests | [`server/engine-core/src/ai/index.ts`](../../server/engine-core/src/ai/index.ts), [`COR_FOLLOWUP_AUDIT_AND_LAUNCH_GAPS_2026-10-24_2016Z.md`](./COR_FOLLOWUP_AUDIT_AND_LAUNCH_GAPS_2026-10-24_2016Z.md) | 🟡 IN PROGRESS / RESIDUAL HARDENING (P0); verify compiled exports exclude dev keys/signing primitives; adversarial proof |
 
 ---
 
@@ -246,11 +248,45 @@ All items below must be satisfied and verified before Universal COR can be grant
   4. **Private Internal Module Custody:** Receipt minting must remain accessible only to internal trusted transport adapters after real authenticated provider responses.
   5. **Compile & Package API Proof:** Compile `engine-core` and verify `dist/index.js` and type declarations contain zero exports of `createTrustedLiveInferenceReceipt`.
   6. **Adversarial Boundary Tests:** Negative tests prove external package consumers cannot import or invoke receipt-minting functions to transition any model to `ACTIVE`.
-- **Status:** 🔴 OPEN / BLOCKED (P0)
+- **Status:** 🟡 IN PROGRESS / RESIDUAL HARDENING (P0)
 
 ---
 
-## 9. Platform and Universality Ledger
+## 9. 20:16 UTC Follow-up Audit & Finding F-22 Residual Hardening Acceptance Criteria
+
+### 20:16 UTC Audit Verification & Workflow Ledger
+- **Candidate & Evidence Baseline:** Implementation candidate [`318c022158b1dabf1d9c12c62ed497a837a692df`](https://github.com/Chicitadel/ugondu/commit/318c022158b1dabf1d9c12c62ed497a837a692df) and evidence-sealed release head [`be549ffa6a2ddb1655c83f2b458dab56957aa0fb`](https://github.com/Chicitadel/ugondu/commit/be549ffa6a2ddb1655c83f2b458dab56957aa0fb).
+- **Candidate CI run 40125624489:** Verified candidate pipeline run on candidate `318c0221...`.
+- **Release CI run 40126588874:** 18 jobs configured; 17 passed successfully (workspaces, thin-clients, Docker validation, integration, governance); `Build & Publish Release` job was skipped (signed distribution not established).
+- **Release COR run 40126588895:** All 3 configured jobs completed successfully: COR Certification, AWS Physical Qualification Gate, and COR Final Release Gate.
+- **Live AI canary run 40125751718:** Single live canary verified HTTP 200 connectivity and inference for `sentinel-guard-v1` against provisioned endpoint.
+- **Truthful Status Determination:** Configured COR gates pass for stated scope; Universal COR and unrestricted commercial launch remain **NOT GRANTED**.
+
+### Finding F-22 Residual Hardening Acceptance Criteria
+1. **Confirmed Improvement (Candidate `318c0221...`):**
+   - Wildcard export `export * from './trusted-receipt'` in `server/engine-core/src/ai/index.ts` eliminated and replaced with explicit allowlist.
+   - `createTrustedLiveInferenceReceipt` unexported from public AI barrel.
+   - `TrustedReceiptService` restricts interface to validation and trust checks, eliminating public receipt-minting methods.
+2. **Residual Hardening & Removal of Dev Constants:**
+   - **Dev Keys Elimination:** Public barrel `server/engine-core/src/ai/index.ts` must NOT export development key identifiers or fallback constants (`DEV_FALLBACK_KEY`, `DEV_KEY_ID`). All development signing material must remain strictly non-exported and isolated to internal test fixtures.
+   - **Endpoint Policy & SSRF Boundary:** Pinned host allowlist (`ai.airroofers.eu`) must be formally governed as an immutable security boundary invariant with documented anti-SSRF justification.
+3. **Compiled Package Export Verification:**
+   - Build-time assertion inspecting emitted declaration files (`dist/**/*.d.ts`) and compiled JavaScript artifacts (`dist/**/*.js`)—not merely TypeScript source files.
+   - Regression contract asserting `createTrustedLiveInferenceReceipt`, `computeProvenanceSeal`, `getProvenanceSigningKey`, and `DEV_FALLBACK_KEY` are strictly absent from emitted package exports.
+   - Packaging validation wired into CI build pipeline without silent skipping if build output is absent.
+4. **Concrete Production Composition Path:**
+   - Verify reachable production dependency graph instantiates only concrete HTTPS provider transport adapter without accepting arbitrary caller callback or transport injection.
+5. **Adversarial & Tamper Negative Suite:**
+   - Comprehensive automated adversarial tests covering:
+     - Production key rotation and multi-process restart verification.
+     - Revoked or unknown key rejection.
+     - Development-key rejection in production configuration.
+     - Replay attacks and stale candidate SHA rejection.
+     - Malformed receipt structure, tampered provenance signatures, and host allowlist mismatches.
+
+---
+
+## 10. Platform and Universality Ledger
 
 | Capability | Recorded State | Why it is not Universal Green | Exit Criterion |
 |---|---|---|---|
@@ -264,17 +300,17 @@ All items below must be satisfied and verified before Universal COR can be grant
 | Cursor | 🔴 Unsupported | Must not infer support from VS Code | Cursor-specific install, auth and workflow E2E |
 | Windsurf | 🔴 Unsupported | Must not infer support from VS Code | Windsurf-specific integration E2E |
 | Neovim | 🔴 Unsupported | No qualifying integration evidence | CLI/LSP integration, diagnostics and lifecycle E2E |
-| AWS | 🟢 Physical qualification verified | Physical conformance probes, OIDC credentials, and cleanup verified in run 40112953367 | Fresh operation-level physical qualification and artifacts |
+| AWS | 🟢 Physical qualification verified | Physical conformance probes, OIDC credentials, and cleanup verified in runs 40112953367 and 40126588895 | Fresh operation-level physical qualification and artifacts |
 | cPanel / DirectAdmin / SSH / Docker | 🟡 Target-dependent | Provider listing is not proof for every operation | Real provider-operation conformance and rollback/cleanup |
 | GCP / Azure | 🔴 Unsupported in reviewed scope | Fail-closed behavior is correct, but not universal support | Implement real adapters and qualify, or explicitly exclude |
 
 ---
 
-## 10. AI Platform Activation Checklist — ai.airroofers.eu
+## 11. AI Platform Activation Checklist — ai.airroofers.eu
 
-- [x] A live canary receipt is present and records endpoint `https://ai.airroofers.eu` (Run 40117058390; canary smoke test `sentinel-guard-v1`).
+- [x] A live canary receipt is present and records endpoint `https://ai.airroofers.eu` (Run 40125751718; canary smoke test `sentinel-guard-v1`).
 - [x] The receipt reports HTTP 200 for discovery and inference, model `sentinel-guard-v1`, and 30 available models.
-- [x] Candidate SHA lineage verified across live canary workflow, candidate checkout, and evidence manifest (`da2ab22b8695d64c32357fd95272ecd435bfe258`).
+- [x] Candidate SHA lineage verified across live canary workflow, candidate checkout, and evidence manifest (`318c022158b1dabf1d9c12c62ed497a837a692df`).
 - [x] Freeze and validate deployed API contracts; sanitized schemas and receipts committed.
 - [x] Reconcile live discovery with the Ugondu model catalog; validate IDs, capabilities, version, region and expiry (12 catalog entries vs 30 endpoint models).
 - [x] Distinguish `discovered`, `eligible`, `smoke-tested`, `qualified`, `active`, `degraded`, `disabled` and `retired` ([`model-lifecycle.ts`](../../server/engine-core/src/ai/model-lifecycle.ts)).
@@ -287,7 +323,7 @@ All items below must be satisfied and verified before Universal COR can be grant
 
 ---
 
-## 11. UAIGOS Zero-Hardcoding and Zero-Stub Policy
+## 12. UAIGOS Zero-Hardcoding and Zero-Stub Policy
 
 ### Zero operational hardcoding
 Prohibit unapproved hardcoded provider/model inventories, mutable endpoint URLs, region availability, credentials, tenant/product allowlists, host/IDE support declarations, operational quotas/retry settings, feature flags, environment-specific IDs and user-visible strings outside localization tokens. Immutable protocol/security invariants and validated schemas may remain in code only when documented, reviewed and tested. Do not weaken fail-closed controls to achieve configurability.
@@ -305,7 +341,7 @@ Production source, shipped bundles and release artifacts must contain no fake ad
 
 ---
 
-## 12. Release Certification Commands & Final Acceptance
+## 13. Release Certification Commands & Final Acceptance
 
 ```bash
 set -euo pipefail
@@ -327,7 +363,7 @@ node scripts/governance/verify-evidence-freshness.mjs
 ### Final Certificate Acceptance Criteria
 Final COR/UAIGOS closure is authorized only when:
 1. The actual release HEAD, candidate SHA, evidence manifest and canary receipt form one valid, verified lineage.
-2. Every required workflow has a successful conclusion on the candidate or an authorized evidence-only descendant (CI/CD run 40117638878 and COR run 40117638901; legacy candidate runs 40112953491/40112953367).
+2. Every required workflow has a successful conclusion on the candidate or an authorized evidence-only descendant (Release CI run 40126588874 and Release COR run 40126588895 on candidate `318c0221...` and release head `be549ffa...`).
 3. All mandatory in-scope targets and operations have fresh qualification evidence.
 4. Zero-hardcoding and anti-stub governance checks pass against source and release artifacts.
 5. No unresolved critical/high finding affects the release claim (F-08 through F-22 resolved or verified within bounded scope).
@@ -335,4 +371,4 @@ Final COR/UAIGOS closure is authorized only when:
 7. The dashboard is generated from the canonical registry and evidence, and is not manually greened.
 8. The final signed release bundle records run IDs, artifact digests, candidate SHA, scope, exclusions, expiry/review date and approver.
 
-**Current conclusion:** Configured CI/CD and COR workflow gates passed on candidate `da2ab22b8695d64c32357fd95272ecd435bfe258` and evidence-sealed descendant `c170aa77fd1121ed2694235fcd8c22b8fbc74d7f`. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** until findings F-12 through F-22 and universality gap exit criteria are completely satisfied.
+**Current conclusion:** Configured CI/CD and COR workflow gates passed on candidate `318c022158b1dabf1d9c12c62ed497a837a692df` and evidence-sealed release head `be549ffa6a2ddb1655c83f2b458dab56957aa0fb`. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** until findings F-12 through F-22 and universality gap exit criteria are completely satisfied.

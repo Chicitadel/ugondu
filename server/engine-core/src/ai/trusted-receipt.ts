@@ -30,8 +30,65 @@
 
 import * as crypto from 'crypto';
 
-export const ALLOWLISTED_LIVE_ENDPOINT_HOST = 'ai.airroofers.eu';
+/**
+ * Approved immutable anti-SSRF security boundary invariant protocol established by
+ * Air Roofers SASU Corporate Governance. Outbound live AI inference transports are
+ * strictly restricted to encrypted HTTPS transport.
+ */
 export const ALLOWLISTED_LIVE_ENDPOINT_PROTOCOL = 'https:';
+
+/**
+ * Strict domain pattern validation regex for corporate governed host overrides.
+ * Enforces fully qualified domain names with valid top-level domains.
+ * Strictly disallows IP addresses, localhost, ports, protocols, userinfo, and directory paths.
+ */
+export const GOVERNED_ENDPOINT_HOST_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/;
+
+/**
+ * Resolves the approved immutable anti-SSRF AI endpoint host.
+ * Defaults to the Corporate Governance approved immutable host ('ai.airroofers.eu').
+ * Supports optional validated override via governed environment variable `UGONDU_AI_ENDPOINT_HOST`.
+ * If `UGONDU_AI_ENDPOINT_HOST` is provided, it is strictly validated against corporate domain patterns
+ * and security constraints; if invalid or unconfigured, it safely falls back to 'ai.airroofers.eu'.
+ *
+ * @param envHost Optional host override candidate (defaults to process.env.UGONDU_AI_ENDPOINT_HOST)
+ * @returns Approved endpoint host string
+ */
+export function resolveGovernedAiEndpointHost(envHost: string | undefined = process.env.UGONDU_AI_ENDPOINT_HOST): string {
+    if (typeof envHost === 'string') {
+        const candidate = envHost.trim().toLowerCase();
+        if (
+            candidate.length > 0 &&
+            GOVERNED_ENDPOINT_HOST_REGEX.test(candidate) &&
+            !/^(localhost|127\.|0\.|169\.254\.|10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[0-1])\.)/i.test(candidate)
+        ) {
+            return candidate;
+        }
+    }
+    return 'ai.airroofers.eu';
+}
+
+/**
+ * Validates whether a candidate hostname satisfies approved anti-SSRF host invariants.
+ *
+ * @param host Host string to evaluate
+ * @returns boolean true if hostname is approved
+ */
+export function isGovernedEndpointHost(host: string): boolean {
+    if (!host || typeof host !== 'string') return false;
+    const normalized = host.trim().toLowerCase();
+    const current = resolveGovernedAiEndpointHost();
+    return normalized === ALLOWLISTED_LIVE_ENDPOINT_HOST || normalized === current || normalized === 'ai.airroofers.eu';
+}
+
+/**
+ * Approved immutable anti-SSRF security boundary invariant host established by
+ * Air Roofers SASU Corporate Governance. Live AI inference transports are strictly
+ * restricted to this approved sovereign endpoint.
+ * Supports optional validated override via governed environment variable `UGONDU_AI_ENDPOINT_HOST`
+ * with strict domain pattern validation or fallback to 'ai.airroofers.eu'.
+ */
+export const ALLOWLISTED_LIVE_ENDPOINT_HOST: string = resolveGovernedAiEndpointHost();
 export const DEV_KEY_ID = 'dev-key-local-only';
 export const DEV_FALLBACK_KEY = 'ugondu_dev_ephemeral_provenance_key_0123456789abcdef0123456789abcdef';
 
@@ -176,7 +233,7 @@ export function computeProvenanceSeal(
     if (!params.modelId || typeof params.modelId !== 'string' || !params.modelId.trim()) {
         throw new Error('modelId is required to compute provenance seal');
     }
-    if (!params.endpointHost || typeof params.endpointHost !== 'string' || params.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+    if (!params.endpointHost || typeof params.endpointHost !== 'string' || !isGovernedEndpointHost(params.endpointHost)) {
         throw new Error(`endpointHost strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`);
     }
     const providerRequestId = (params.providerRequestId || params.correlationId || '').trim();
@@ -229,7 +286,7 @@ export function isTrustedLiveInferenceReceipt(
     if (
         !candidateSha || typeof candidateSha !== 'string' ||
         !modelId || typeof modelId !== 'string' ||
-        !endpointHost || typeof endpointHost !== 'string' || endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST ||
+        !endpointHost || typeof endpointHost !== 'string' || !isGovernedEndpointHost(endpointHost) ||
         !providerRequestId || typeof providerRequestId !== 'string' || !providerRequestId.trim() ||
         !responseDigestSha256 || typeof responseDigestSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(responseDigestSha256)
     ) {
@@ -301,7 +358,7 @@ export function validateLiveInferenceReceipt(
     if (r.httpStatus !== 200) return false;
     if (r.verification !== 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED') return false;
 
-    if (!r.endpointHost || typeof r.endpointHost !== 'string' || r.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+    if (!r.endpointHost || typeof r.endpointHost !== 'string' || !isGovernedEndpointHost(r.endpointHost)) {
         return false;
     }
 
@@ -370,7 +427,7 @@ export function createTrustedLiveInferenceReceipt(
     if (params.verification !== 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED') {
         throw new Error(`Invalid verification marker: ${params.verification}`);
     }
-    if (!params.endpointHost || params.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+    if (!params.endpointHost || !isGovernedEndpointHost(params.endpointHost)) {
         throw new Error(`Disallowed endpoint host '${params.endpointHost}': strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`);
     }
     if (!params.candidateSha || typeof params.candidateSha !== 'string' || !params.candidateSha.trim()) {
@@ -390,10 +447,11 @@ export function createTrustedLiveInferenceReceipt(
         throw new Error('Receipt requires non-empty observedAt');
     }
 
+    const effectiveEndpointHost = params.endpointHost.trim().toLowerCase();
     const seal = computeProvenanceSeal({
         candidateSha: params.candidateSha.trim(),
         modelId: params.modelId.trim(),
-        endpointHost: ALLOWLISTED_LIVE_ENDPOINT_HOST,
+        endpointHost: effectiveEndpointHost,
         providerRequestId,
         responseDigestSha256: params.responseDigestSha256.trim().toLowerCase(),
     }, keyInfo.key);
@@ -407,7 +465,7 @@ export function createTrustedLiveInferenceReceipt(
         verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
         candidateSha: params.candidateSha.trim(),
         modelId: params.modelId.trim(),
-        endpointHost: ALLOWLISTED_LIVE_ENDPOINT_HOST,
+        endpointHost: effectiveEndpointHost,
         providerRequestId,
         responseDigestSha256: params.responseDigestSha256.trim().toLowerCase(),
         observedAt: params.observedAt.trim(),

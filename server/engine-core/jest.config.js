@@ -8,6 +8,7 @@ module.exports = {
   transformIgnorePatterns: ['node_modules/(?!canonicalize)/'],
   testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/src/**/*.test.ts', '<rootDir>/tests/recovery/*.spec.ts'],
   testTimeout: 10000,
+  forceExit: true,
   coverageDirectory: 'coverage',
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']

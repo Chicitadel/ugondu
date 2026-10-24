@@ -1,19 +1,21 @@
 <!-- Project: Ugondu | Organization: Air Roofers SASU | Governance: UAIGOS 3.0.0 -->
 # Ugondu COR Certification Progress Dashboard
 
-**Latest audit snapshot:** 2026-10-24 18:59 UTC  
+**Latest audit snapshot:** 2026-10-24 20:16 UTC  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
-**Implementation candidate:** [da2ab22b8695d64c32357fd95272ecd435bfe258](https://github.com/Chicitadel/ugondu/commit/da2ab22b8695d64c32357fd95272ecd435bfe258)  
-**Evidence-sealed release head:** [c170aa77fd1121ed2694235fcd8c22b8fbc74d7f](https://github.com/Chicitadel/ugondu/commit/c170aa77fd1121ed2694235fcd8c22b8fbc74d7f)  
-**CI/CD:** [40117638878](https://github.com/Chicitadel/ugondu/actions/runs/40117638878)  
-**COR:** [40117638901](https://github.com/Chicitadel/ugondu/actions/runs/40117638901)  
-**Live AI canary:** [40117058390](https://github.com/Chicitadel/ugondu/actions/runs/40117058390)  
-**PR #18:** [View pull request](https://github.com/Chicitadel/ugondu/pull/18) — current metadata says closed, not merged. Do not describe it as open/merged.  
+**Implementation candidate:** [318c022158b1dabf1d9c12c62ed497a837a692df](https://github.com/Chicitadel/ugondu/commit/318c022158b1dabf1d9c12c62ed497a837a692df)  
+**Evidence-sealed release head:** [be549ffa6a2ddb1655c83f2b458dab56957aa0fb](https://github.com/Chicitadel/ugondu/commit/be549ffa6a2ddb1655c83f2b458dab56957aa0fb)  
+**Candidate CI:** [40125624489](https://github.com/Chicitadel/ugondu/actions/runs/40125624489)  
+**Release CI:** [40126588874](https://github.com/Chicitadel/ugondu/actions/runs/40126588874)  
+**Release COR:** [40126588895](https://github.com/Chicitadel/ugondu/actions/runs/40126588895)  
+**Live AI canary:** [40125751718](https://github.com/Chicitadel/ugondu/actions/runs/40125751718)  
+**PR #19:** [View pull request](https://github.com/Chicitadel/ugondu/pull/19) — active documentation reconciliation into `phase4/production-hardening`  
 **Verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL COR NOT GRANTED.**
 
 ## Latest audit documentation
 
-- **[Final COR reconciliation and commercial-launch gap audit — 18:59 UTC](./COR_FINAL_RECONCILIATION_2026-10-24_1859Z.md)** — current source verification, findings F-22 onward, exact code snapshots, live AI qualification requirements, target-specific acceptance criteria and commercial release blockers.
+- **[COR follow-up audit and commercial launch gap reconciliation — 20:16 UTC](./COR_FOLLOWUP_AUDIT_AND_LAUNCH_GAPS_2026-10-24_2016Z.md)** — candidate `318c0221...` and release head `be549ffa...` baseline, release CI run 40126588874 (17 passed, `Build & Publish Release` skipped), release COR run 40126588895 (all 3 jobs passed: COR Certification, AWS Physical Gate, COR Final Release Gate), live canary run 40125751718 (HTTP 200, sentinel-guard-v1), Finding F-22 barrel allowlist progress and residual export hardening.
+- [Final COR reconciliation and commercial-launch gap audit — 18:59 UTC](./COR_FINAL_RECONCILIATION_2026-10-24_1859Z.md) — earlier baseline source verification, findings F-22 onward, live AI qualification requirements and target acceptance criteria.
 - [Full remediation and universality gap plan — 17:16 UTC](./COR_FULL_REMEDIATION_AND_UNIVERSALITY_GAP_2026-10-24_1716Z.md)
 - [Repository-head reconciliation — 15:54 UTC](./COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md)
 - [Detailed addendum — 16:43 UTC](./COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md)
@@ -28,16 +30,16 @@ Legend: 🟢 verified for exact scope stated · 🟡 partial/evidence incomplete
 
 | Area | Status | Verified scope / gap | Required exit condition |
 |---|---|---|---|
-| CI/CD run 40117638878 | 🟢 Scoped pass | 17 configured jobs succeeded; release-publishing job was skipped. | Fresh approved release pipeline, signed package and install-from-release E2E. |
-| COR run 40117638901 | 🟢 Configured gate pass | COR Certification, AWS Physical Qualification Gate and COR Final Release Gate succeeded. | Re-run after relevant source/config/policy/dependency/workflow/evidence change. |
-| AWS physical qualification | 🟢 Scoped pass | Configured AWS qualification succeeded. | Keep raw signed operation receipts, region, cost controls and teardown proof. |
-| Live AI canary 40117058390 | 🟢 Single canary | HTTP 200 discovery/inference; sentinel-guard-v1; endpoint reports 30 available models. | Claim only the tested canary until fleet qualification passes. |
+| Release CI run 40126588874 | 🟢 Scoped pass | 17 configured jobs succeeded; `Build & Publish Release` job was skipped. | Fresh approved release pipeline, signed package and install-from-release E2E. |
+| Release COR run 40126588895 | 🟢 Configured gate pass | All 3 configured jobs completed successfully: COR Certification, AWS Physical Qualification Gate, and COR Final Release Gate. | Re-run after relevant source/config/policy/dependency/workflow/evidence change. |
+| AWS physical qualification | 🟢 Scoped pass | Configured AWS qualification succeeded in release COR run 40126588895. | Keep raw signed operation receipts, region, cost controls and teardown proof. |
+| Live AI canary 40125751718 | 🟢 Single canary | HTTP 200 discovery/inference; sentinel-guard-v1; provisioned endpoint connectivity verified. | Claim only the tested canary until fleet qualification passes. |
 | AI catalog-count explanation | 🟢 Reconciled | 12 static governance catalog entries vs 30 endpoint-available models are explicitly distinguished. | Preserve scope distinction; catalog inventory is not live qualification. |
 | AI fleet qualification/activation | 🔴 Blocker | Report is CATALOG_OFFLINE: 12 discovered, 0 qualified, 0 active, 12 disabled. | Live-mode per-model probe/inference, trusted receipt, policy approval and activation on exact candidate. |
-| Receipt factory encapsulation | 🔴 Blocker | `model-lifecycle.ts` explicit export list omits factory, but `ai/index.ts` still wildcard-exports `trusted-receipt.ts`. | Replace wildcard export with reviewed allowlist; prove factory/signing helpers absent from built package API. |
+| Receipt factory encapsulation (F-22) | 🟡 Partial progress / residual hardening | Candidate `318c0221...` replaced wildcard barrel with explicit allowlist (`createTrustedLiveInferenceReceipt` unexported); residual dev constants (`DEV_FALLBACK_KEY`, `DEV_KEY_ID`) remain in barrel; compiled export and adversarial proof required. | Exclude dev keys from public barrel; verify compiled declarations/JS; add adversarial replay and dev-key rejection tests. |
 | Production callback/transport seams | 🟡 Partial | Production guards exist; complete public construction-path/dependency-graph proof remains outstanding. | Concrete production composition; adversarial injection/forgery/replay/stale-SHA tests. |
 | Provenance key rotation/revocation | 🟡 Partial | Missing/weak/dev keys are guarded in code; complete rotation/restart/revocation proof not established. | Fresh signed tests for rotation, restart, dev-key rejection, replay and revocation. |
-| Evidence lineage | 🟢 Configured / 🟡 independent proof | Candidate da2ab22b; release evidence-only descendant c170aa77. | Independently validate actual commit diff, every manifest hash, signature and exact artifact bytes. |
+| Evidence lineage | 🟢 Configured / 🟡 independent proof | Candidate `318c0221...`; release evidence-sealed head `be549ffa...`. | Independently validate actual commit diff, every manifest hash, signature and exact artifact bytes. |
 | Zero hardcoding/localization | 🟡 Partial | Reported 12-language parity; semantic zero-hardcoding proof incomplete. | AST scans, registry enforcement, runtime locale switching and all supported user journeys. |
 | Zero production mocks/stubs/scaffolding | 🟡 Partial | Configured governance tests pass; complete reachable-production-graph and negative-test proof required. | No no-op/synthetic paths in production; real provider tests and fail-closed failure injection. |
 | Windows/amd64 | 🟡 Bounded native scope | 188/188 Node qualification tests on Windows; full product lifecycle not evidenced. | Install/start/auth/AI/upgrade/rollback/uninstall tests on each claimed OS version. |
@@ -45,7 +47,7 @@ Legend: 🟢 verified for exact scope stated · 🟡 partial/evidence incomplete
 | macOS/arm64 | 🟡 Bounded native scope | Go thin-client only; Node qualification suite not run natively on this target. | Full native product E2E, signing/notarization and upgrade/rollback. |
 | Linux/arm64 and macOS/amd64 | 🔴 Native proof missing | Cross-compiled only; nativeExecutionVerified=false. | Execute full suite on native runners. |
 | IDE integrations | 🔴 Universal support not proven | VS Code experimental; JetBrains, Cursor, Windsurf and Neovim unsupported/fail-closed. | Implement and qualify every advertised IDE/version or narrow product claims. |
-| AWS | 🟢 Scoped | Physical gate verified for configured AWS scope. | Continue per-operation evidence and teardown checks. |
+| AWS | 🟢 Scoped | Physical gate verified for configured AWS scope in run 40126588895. | Continue per-operation evidence and teardown checks. |
 | cPanel, DirectAdmin, SSH/VPS, Kubernetes | 🟡 Partial | Matrix says receipts pending / partial. | Real disposable deployment, secrets, health, persistence, upgrade/rollback and teardown receipts. |
 | GCP and Azure | 🔴 Unsupported | Target matrix marks unsupported. | Implement and qualify before claiming support. |
 | Docker | 🟡 Limited | Evidence describes Compose-spec verification; not full runtime lifecycle proof. | Real build/run/upgrade/rollback/cleanup E2E on supported hosts. |

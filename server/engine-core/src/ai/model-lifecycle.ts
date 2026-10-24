@@ -34,8 +34,8 @@ import { ModelQualificationReceipt, ModelQualificationState } from './contracts'
 import {
     ALLOWLISTED_LIVE_ENDPOINT_HOST,
     createTrustedLiveInferenceReceipt,
-    DEV_FALLBACK_KEY,
     DEV_KEY_ID,
+    isGovernedEndpointHost,
     isTrustedLiveInferenceReceipt,
     LiveInferenceReceipt,
     LiveInferenceReceiptParams,
@@ -59,7 +59,7 @@ import {
 } from './lifecycle-state';
 
 export type { LifecycleFailureReasonCode, LiveInferenceReceipt, LiveInferenceReceiptParams, ModelLifecycleAuditRecord, ModelQualificationReceipt, ModelQualificationState, PersistedLifecycleRecord };
-export { ALLOWLISTED_LIVE_ENDPOINT_HOST, assertValidLifecycleTransition, CircuitBreaker, computeReceiptDigest, DEV_FALLBACK_KEY, DEV_KEY_ID, isTrustedLiveInferenceReceipt, isValidLifecycleTransition, loadPersistedLifecycleReceipt, ModelLifecycleError, ModelLifecycleStateMachine, persistLifecycleReceipt, ProvenanceConfigurationError, TrustedReceiptService, VALID_LIFECYCLE_TRANSITIONS, validateLiveInferenceReceipt };
+export { ALLOWLISTED_LIVE_ENDPOINT_HOST, assertValidLifecycleTransition, CircuitBreaker, computeReceiptDigest, isTrustedLiveInferenceReceipt, isValidLifecycleTransition, loadPersistedLifecycleReceipt, ModelLifecycleError, ModelLifecycleStateMachine, persistLifecycleReceipt, ProvenanceConfigurationError, TrustedReceiptService, VALID_LIFECYCLE_TRANSITIONS, validateLiveInferenceReceipt };
 
 const SERVICE_KEY_FORMAT_REGEX = /^air_prod_[0-9a-f]{48}$/;
 
@@ -162,7 +162,7 @@ export class ModelLifecycle {
         if (isProduction && (r.keyId === DEV_KEY_ID || r.testOnly || (this.receipt && (this.receipt as any).testOnly))) {
             throw new ModelLifecycleError(r.keyId === DEV_KEY_ID ? 'DEV_KEY_PROHIBITED_IN_PRODUCTION' : 'LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' qualified with dev-key or testOnly mock receipt cannot be activated in production`, 403);
         }
-        if (!r.endpointHost || r.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+        if (!r.endpointHost || (!isGovernedEndpointHost(r.endpointHost) && r.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST)) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' endpoint host '${r.endpointHost}' disallowed; strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`, 403);
         }
         if (!r.providerRequestId || typeof r.providerRequestId !== 'string' || !r.providerRequestId.trim()) {

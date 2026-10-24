@@ -486,8 +486,12 @@ test('LIFECYCLE-032: Public AI barrel strictly prohibits minting exports and exp
   assert.strictEqual(aiBarrel.computeProvenanceSeal, undefined);
   assert.strictEqual(aiBarrel.getProvenanceSigningKey, undefined);
   assert.strictEqual(aiBarrel.getProvenanceSigningKeyInfo, undefined);
+  assert.strictEqual(aiBarrel.DEV_FALLBACK_KEY, undefined);
+  assert.strictEqual(aiBarrel.DEV_KEY_ID, undefined);
   assert.strictEqual(typeof aiBarrel.TrustedReceiptService?.validateReceipt, 'function');
   assert.strictEqual(typeof aiBarrel.TrustedReceiptService?.isTrustedReceipt, 'function');
   assert.strictEqual(typeof aiBarrel.validateLiveInferenceReceipt, 'function');
   assert.strictEqual(typeof aiBarrel.isTrustedLiveInferenceReceipt, 'function');
 });
+
+require('./model-lifecycle-adversarial-qualification.test.js');
