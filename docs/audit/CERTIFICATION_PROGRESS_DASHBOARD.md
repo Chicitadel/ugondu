@@ -1,75 +1,45 @@
 <!-- Project: Ugondu | Authority: Ujomor Systems Engineering & Governance Authority | Organization: Air Roofers SASU -->
 # Ugondu COR Certification Progress Dashboard
 
-**Review date:** 2026-10-24  
-**Candidate SHA:** `be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb`  
-**Verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED**  
-**Latest addendum:** [COR Re-audit Addendum — 13:10 UTC Evidence Reconciliation](./COR_REAUDIT_ADDENDUM_2026-10-24_1310Z.md)  
-**Master checklist:** [Master COR Remediation and Certification Checklist](./MASTER_COR_REMEDIATION_AND_CERTIFICATION_CHECKLIST.md)  
-**Full remediation plan:** [COR Release Re-audit and Full Remediation Plan](./COR_RELEASE_REAUDIT_AND_FULL_REMEDIATION_PLAN_2026-10-24.md)
+**Review timestamp:** 2026-10-24 16:43 UTC  
+**Implementation candidate:** [`be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb`](https://github.com/Chicitadel/ugondu/commit/be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb)  
+**Evidence-sealed descendant:** [`01681cabaeaa270aa36863570805ceb51e5c1062`](https://github.com/Chicitadel/ugondu/commit/01681cabaeaa270aa36863570805ceb51e5c1062)  
+**Latest CI/CD:** [40100110885](https://github.com/Chicitadel/ugondu/actions/runs/40100110885)  
+**Latest COR:** [40100110895](https://github.com/Chicitadel/ugondu/actions/runs/40100110895)  
+**Verdict:** **Configured CI/COR/AWS workflow gates passed for recorded scope. UNIVERSAL COR NOT GRANTED.**
 
-Legend: 🟢 fresh evidence verifies the stated scope · 🟡 partial / scope or receipt incomplete · 🔴 gap / unsupported / blocked · ⚪ not assessed or tag-gated.
+**Latest evidence reconciliation:** [COR Re-audit Addendum — 16:43 UTC](./COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md)  
+**Earlier addendum (superseded):** [13:10 UTC addendum](./COR_REAUDIT_ADDENDUM_2026-10-24_1310Z.md)  
+**Full remediation plan (baseline; read with latest addendum):** [COR Release Re-audit and Full Remediation Plan](./COR_RELEASE_REAUDIT_AND_FULL_REMEDIATION_PLAN_2026-10-24.md)  
+**Master checklist:** [Master COR Remediation and Certification Checklist](./MASTER_COR_REMEDIATION_AND_CERTIFICATION_CHECKLIST.md)
 
-> **Governance rule:** A passing CI build proves compiler and test suite health; it does not substitute for native multi-target execution. A single live canary verifies API connectivity, not fleet-wide model activation. Matrix entries without operation receipts remain partial. Out-of-scope and experimental targets fail closed by contract.
+Legend: 🟢 verified for the exact scope stated · 🟡 partial / evidence scope incomplete · 🔴 gap, failing gate, or unsupported · ⚪ not assessed.
 
----
+> **Governance Principle:** Passing CI is not proof of every platform; a live canary is not model-fleet qualification; a cross-compiled binary is not native runtime evidence; and fail-closed unsupported behavior is not proof of support.
 
-## 1. Executive Status
+## Current Certification Table (Audit Findings F-12 Through F-17)
 
-| Area | Status | Verified Evidence & Current Scope | Next Action |
+| Area / Finding Ref | Status | Evidence-Based Assessment | Next Action / Green Criterion |
 |---|---|---|---|
-| CI/CD Pipeline [40099552052](https://github.com/Chicitadel/ugondu/actions/runs/40099552052) | 🟢 scoped CI pass | All 9 workspaces built; all 5 Go thin-clients compiled; Docker Compose validation and integration tests succeeded; release publishing skipped as tag-gated | Preserve candidate SHA lineage; publish only upon authorized production tag |
-| COR Certification [40096091974](https://github.com/Chicitadel/ugondu/actions/runs/40096091974) | 🟢 passed | Evidence freshness passed on candidate SHA; `ugondu-cor-evidence` artifact uploaded successfully; AWS Physical Qualification Gate passed (live EC2/Fargate/cleanup verified) | Retain sealed run evidence and physical receipts |
-| Live AI Canary [40099563698](https://github.com/Chicitadel/ugondu/actions/runs/40099563698) | 🟢 smoke pass | HTTP 200 discovery and execution against `https://ai.airroofers.eu`; receipt reports `sentinel-guard-v1` and 30 available models; bound to candidate SHA | Bound as connectivity/inference smoke test; distinct from model fleet qualification (F-11) |
-| AI Model Fleet Activation | 🟢 truthful offline | Candidate report records truthful offline validation: 1 discovered, 0 qualified, 0 active, 1 disabled; `activeCount` strictly 0 (never inflated) | Perform per-model live qualification with authorized secrets prior to fleet activation |
-| AI Trusted Transport Boundary (F-08) | 🟢 closed | Production activation path restricted to trusted transport (`airroofers-live-transport`); unforgeable `LiveInferenceReceipt` enforced; forged `source` strings and injected mocks fail closed | Retain contract coverage and transport encapsulation |
-| Capability Probe Fallback (F-09) | 🟢 closed | Default-success probe fallback `options.probeFn \|\| async () => ({ ok: true })` completely eliminated; genuine provider capability probe mandatory; fails closed with typed error | Enforce zero stubs / zero synthetic success |
-| Evidence Candidate Lineage (F-10) | 🟢 closed | Candidate SHA unified across workflow inputs, manifest candidate SHA, and freshness verifier; verifier supports `COR_CANDIDATE_SHA` and failure diagnostics | Exact-SHA candidate binding preserved |
-| AI Scope Separation (F-11) | 🟢 closed | Manifest digest-binds live canary receipt (smoke test) and model qualification report (truthful offline baseline) with clear scope distinction | Maintain strict scope boundaries |
-| Evidence Manifest Completeness | 🟢 closed | All required evidence files digest-bound; `testCommands` cited to CI/CD run 40099552052; `unproven` empty for Tier 1 bounded targets | Continuous digest and lineage checks |
-| Windows/AMD64 | 🟢 native pass | Native Node qualification suite 171/171 passed on native Windows runner | Retain exact-SHA test receipts |
-| Linux/AMD64 | 🟢 native CI pass | Go thin-client, Docker Compose, 9 workspaces, and integration tests passed in native CI runner (Ubuntu 24.04 via run 40099552052) | Maintain CI runner parity |
-| macOS/ARM64 | 🟡 partial | Native Go thin-client verified in CI run 40099552052; full native Node qualification suite pending | Tier 1 bounded support |
-| Linux/ARM64 | 🔴 cross-compiled | Cross-compiled Go thin-client binary built; native runtime suite pending | Tier 1 bounded support |
-| macOS/AMD64 (Intel) | 🔴 cross-compiled | Cross-compiled Go thin-client binary built; native runtime suite pending | Tier 1 bounded support |
-| AWS | 🟢 physical pass | Live physical qualification gate passed with real EC2/Fargate conformance probes and zero-resource cleanup | Retain physical qualification artifacts |
-| cPanel / DirectAdmin / SSH-VPS / Docker / K8s | 🟡 partial | Target matrix harmonized to `partial` (`receipts_pending`); fail closed on absent operation receipts | Attach disposable infrastructure receipts |
-| VS Code | 🔴 experimental | Declared experimental in canonical target matrix; fails closed on unverified capabilities | Bounded support; experimental range |
-| JetBrains / Cursor / Windsurf / Neovim | 🔴 unsupported | Declared unsupported in canonical target matrix; typed fail-closed errors enforced | Out of scope for Tier 1 qualification |
-| GCP / Azure | 🔴 unsupported | Declared unsupported in canonical target matrix; fail closed | Out of scope for Tier 1 qualification |
-| Credential & Secret Hygiene | 🟢 closed | Sample `raw_key` credentials in provisioning receipt sanitized to `"REDACTED"`; zero active secret leaks across repository | Enforce continuous secret scanning |
-| Release Publication | ⚪ tag-gated | CI publish job skipped as tag-gated; triggered only on authorized release tag | Require formal release tag and full gates |
-| Universal COR Certification | 🔴 withheld | Tier 1 bounded target support granted; universal certification withheld due to secondary IDE and alternate cloud boundaries | Maintain bounded qualification |
+| CI/CD run [40100110885](https://github.com/Chicitadel/ugondu/actions/runs/40100110885) | 🟢 Scoped pass | Workspace build/lint/type/test jobs, five Go thin-client jobs, Docker validation, integration tests and release-integrity gates report success. Release publish job was skipped (tag-gated). | Preserve run/artifact lineage; separately perform approved tag-gated publish. |
+| COR Certification run [40100110895](https://github.com/Chicitadel/ugondu/actions/runs/40100110895) | 🟢 Workflow job pass | Exact sealed descendant checked out; configured build, locale/I18N, architecture/import, type/test, remediation, evidence freshness, signing, final integrity and upload steps report success. | Re-run after any candidate source/config/policy change. |
+| AWS Physical Qualification Gate in 40100110895 | 🟢 Workflow job pass | Job reports success; logs include AWS policy-pack reconciliation and physical/ephemeral qualification work. | Retain independently verifiable raw receipts, region/account/resource inventory and cleanup proof. |
+| COR Final Release Gate in 40100110895 | 🟢 Workflow job pass | Mandatory-gate aggregator reports success. | Preserve signature and exact evidence lineage. |
+| Capability-probe fallback (F-09 resolved) | 🟢 Specific defect removed | Inspected qualification runner rejects missing probes; old implicit-success fallback is absent. | Enforce repository-wide regression check against future fallback reintroduction. |
+| **F-12 — Live AI Model Fleet Activation** | 🔴 Not complete | Candidate-bound report says 1 discovered, 0 qualified, 0 active, 1 disabled; receipts array empty; `CAPABILITY_PROBE_FAILED`. | Live discovery, policy, probe, inference and candidate-bound receipt for every intended active model. |
+| **F-13 — AI Transport Provenance Boundary** | 🔴 Needs hardening | Lifecycle accepts injected executor and derives transport from returned-object fields; receipt minting and process-random key fallback exposed in source. | Private trusted transport adapter; mandatory configured signer; candidate/model/host/output-digest binding; adversarial tests. |
+| **F-14 — Zero Production Mocks/Stubs Assurance** | 🟡 Partial assurance | Governance gate passes, but injected executor seams and production composition need independent enforcement. | Production dependency-graph scan, test-only adapter isolation and negative fail-closed tests. |
+| **F-15 — Universal Multi-Target Qualification** | 🟡 Partial | Build matrix passes 5 Go thin-client targets; latest records do not prove complete native install/runtime/upgrade/rollback/uninstall on every claimed target. | Native per-target E2E receipts for claimed OS/architecture, hosting providers, and IDEs; unsupported rows fail closed. |
+| **F-16 — Zero Hardcoding & Localization Proof** | 🟢 Configured gates pass; universal proof pending | COR locale and I18N steps pass. | Semantic AST scan, runtime locale tests and reviewed allowlist for invariant protocol/security constants. |
+| **F-17 — Evidence Chain & Lineage Freshness** | 🟢 Coherent checkout; continuous enforcement | Implementation candidate `be23e0f6...`; evidence-only descendant `01681cab...`; COR log confirms checkout of sealed descendant. | Manifest binds candidate, descendant, run IDs, signer, environment and all artifact digests. |
+| Real E2E and Failure Recovery | 🟡 Partial | CI integration and AWS qualification jobs pass their configured tests. | Complete provider/model/OS/IDE/host matrix, fault injection, rollback and zero-residual verification. |
+| **Universal COR Certification** | 🔴 **NOT GRANTED** | Zero active AI models and incomplete target-specific evidence are release blockers for the requested universal claim. | All mandatory target/model rows green with fresh signed evidence; no unsupported mandatory targets. |
 
----
+## Regression Policy
 
-## 2. Updated Gate Ledger
-
-| Gate | Finding Ref | Status | Exit Criterion & Closure Proof |
-|---|---|---|---|
-| G0 — AI Trusted Transport / Anti-Stub | F-08, F-09 | 🟢 CLOSED | Production activation strictly enforces unforgeable `LiveInferenceReceipt` from trusted transport (`airroofers-live-transport`); default-success probe `options.probeFn \|\| async () => ({ ok: true })` eliminated from all paths; caller-forged source strings and injected mocks fail closed. |
-| G1 — AI Model Fleet Scope Separation | F-11 | 🟢 CLOSED (Bounded) | Canary smoke test (run 40099563698) and offline qualification report scopes decoupled; report truthfully records 1 discovered, 0 qualified, 0 active, 1 disabled; `activeCount` derived strictly from verified receipts. |
-| G2 — Evidence Manifest Completeness | — | 🟢 CLOSED | Manifest digest-binds all required evidence files; testCommands updated to CI/CD run 40099552052; unproven array is empty for Tier 1 bounded targets. |
-| G3 — Candidate / Evidence Freshness Lineage | F-10 | 🟢 CLOSED | Candidate SHA lineage unified across workflow, manifest, and verifier; COR workflow run 40096091974 passed evidence freshness with zero non-evidence drift; verifier supports `COR_CANDIDATE_SHA`. |
-| G4 — AWS Physical Qualification | — | 🟢 CLOSED | Live physical qualification gate passed with real EC2/Fargate conformance probes and automated zero-resource cleanup. |
-| G5 — CI/CD Complete Pipeline | — | 🟢 CLOSED | CI/CD run 40099552052 passed all 9 workspaces, all 5 Go thin-clients, Docker Compose, and integration tests; tag-gated release publish skipped. |
-| G6 — Native OS / Architecture Matrix | — | 🟢 CLOSED (Tier 1 Bounded) | Windows/AMD64 native 171/171 pass, Linux/AMD64 CI pass, 5 cross-compiled Go thin-client binaries. Tier 1 bounded qualification granted. |
-| G7 — IDE Integration Bounds | — | 🔴 BOUNDED / OUT-OF-SCOPE | VS Code experimental; JetBrains, Cursor, Windsurf, Neovim unsupported with fail-closed typed errors. Universal IDE support withheld. |
-| G8 — Hosting & Provider Operations | — | 🟡 BOUNDED | AWS fully qualified; cPanel, DirectAdmin, SSH-VPS, Kubernetes harmonized to partial (`receipts_pending`); GCP/Azure unsupported. |
-| G9 — Secret Hygiene & Sanitization | — | 🟢 CLOSED | Provisioning receipt sample keys redacted; zero active secret leaks across codebase. |
-| G10 — Universal COR Certification | — | 🔴 WITHHELD | Universal certification withheld; truthful bounded qualification granted under UAIGOS 3.0.0. |
-
----
-
-## 3. Anti-Regression Controls
-
-1. Generate dashboard statuses strictly from canonical configuration registries and verified receipts; no manual row inflation.
-2. Missing credentials, unavailable infrastructure, or skipped required jobs are classified as blocked or not-run, never pass.
-3. Production AI activation requires an unforgeable trusted transport receipt; returned source strings and mock callbacks fail closed.
-4. Zero default-success probes in qualification or runtime paths; test doubles remain isolated in unit tests.
-5. Candidate SHA, manifest, canary receipt, native runner evidence, workflow inputs, and release HEAD must reconcile exactly.
-6. Cross-compilation proves compiler output only; native runtime execution is required for native platform support.
-7. Live canary validates only the exercised model and request; fleet active count derives strictly from verified per-model receipts.
-8. Provider matrix entries remain partial until disposable infrastructure operation receipts and zero-resource cleanup proofs are bound.
-9. Rerun affected test suites and regenerate evidence bundles upon source or configuration changes.
-10. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** until all mandatory out-of-scope targets are qualified.
+1. The dashboard must never be manually marked green when the underlying gate or receipt is red, stale, missing, or bound to another candidate.
+2. Any source, workflow, runtime configuration, policy or dependency change creates a new implementation candidate and invalidates previous certification evidence until the required gates are rerun.
+3. The evidence-only descendant may change only allowlisted evidence files. Freshness verification must reject source/config/workflow changes.
+4. New AI models default to disabled until policy and real qualification succeed.
+5. A supported target is green only when its own native/real execution receipt exists. Cross-compilation, docs, mocks, generic CI, and success of a different provider do not count.
+6. The latest detailed remediation, source snapshots, exact commands, E2E scenarios and acceptance gates are maintained in the [16:43 UTC addendum](./COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md).

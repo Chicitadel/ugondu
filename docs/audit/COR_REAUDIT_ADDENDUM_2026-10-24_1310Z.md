@@ -1,3 +1,5 @@
+<!-- SUPERSEDED NOTICE (2026-10-24 16:43 UTC): This addendum records an earlier 13:10 UTC snapshot. For the latest verified CI/COR run outcomes, candidate lineage, corrected capability-probe status, current AI fleet result and remediation plan, read [COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md](./COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md) and [CERTIFICATION_PROGRESS_DASHBOARD.md](./CERTIFICATION_PROGRESS_DASHBOARD.md). In particular, the old statement that the default-success probe remains in the runner is superseded: the specific fallback was absent from the later inspected candidate. Universal certification remains withheld. -->
+
 <!-- Project: Ugondu | Authority: Ujomor Systems Engineering & Governance Authority | Organization: Air Roofers SASU -->
 # COR Re-audit Addendum — 13:10 UTC Evidence Reconciliation
 

@@ -1,57 +1,54 @@
 {
   "reportType": "AI_MODEL_QUALIFICATION_REPORT",
   "version": "1.0.0",
-  "generatedAt": "2026-10-24T13:51:30.000Z",
-  "gitSha": "be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb",
-  "qualificationMode": "LIVE_SOVEREIGN",
+  "generatedAt": "2026-10-24T15:42:46.954Z",
+  "gitSha": "a0fba113632a90c04e6d13f2f4ee058c3dd2af32",
+  "qualificationMode": "CATALOG_OFFLINE",
   "summary": {
-    "totalDiscovered": 1,
+    "totalDiscovered": 12,
     "qualifiedCount": 0,
     "activeCount": 0,
-    "disabledCount": 1
+    "disabledCount": 12,
+    "pendingCount": 0
   },
-  "receipts": [],
+  "receipts": [
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "catalog-offline",
+      "providerId": "airroofers-ai",
+      "timestamp": "2026-10-24T15:42:46.952Z",
+      "gitSha": "a0fba113632a90c04e6d13f2f4ee058c3dd2af32",
+      "status": "UNQUALIFIED",
+      "liveExecution": false,
+      "verification": "CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION",
+      "reason": "Offline catalog inspection only; live execution prohibited"
+    }
+  ],
   "diagnostics": [
     {
-      "alias": "prod-probe-check",
+      "alias": "catalog-offline-fleet",
       "providerId": "airroofers-ai",
       "state": "DISABLED",
       "canRoute": false,
       "liveInferenceReceipt": null,
-      "circuitBreaker": {
-        "state": "CLOSED",
-        "consecutiveFailures": 0,
-        "openedAt": null
-      },
       "history": [
         {
           "from": null,
           "to": "DISCOVERED",
-          "timestamp": "2026-10-24T13:51:30.000Z",
-          "reason": "Discovered"
+          "timestamp": "2026-10-24T15:42:46.954Z",
+          "reason": "Discovered 12 catalog models"
         },
         {
           "from": "DISCOVERED",
-          "to": "SCHEMA_VALIDATED",
-          "timestamp": "2026-10-24T13:51:30.000Z",
-          "reason": "Schema structural criteria validated"
-        },
-        {
-          "from": "SCHEMA_VALIDATED",
-          "to": "POLICY_CHECKED",
-          "timestamp": "2026-10-24T13:51:30.000Z",
-          "reason": "Governance and credential policies verified"
-        },
-        {
-          "from": "POLICY_CHECKED",
           "to": "DISABLED",
-          "timestamp": "2026-10-24T13:51:30.000Z",
-          "reason": "Live provider capability verification failed; synthetic fallback probe eliminated"
+          "timestamp": "2026-10-24T15:42:46.954Z",
+          "reason": "Offline candidate evaluation: live credentials absent; all models fail closed"
         }
       ],
       "receipt": null,
-      "failureReason": "Live provider capability verification failed; synthetic fallback probe eliminated",
-      "errorCode": "CAPABILITY_PROBE_FAILED"
+      "failureReason": "Live credentials absent or offline mode active; zero models qualified or activated",
+      "errorCode": "CREDENTIALS_ABSENT"
     }
   ]
 }
