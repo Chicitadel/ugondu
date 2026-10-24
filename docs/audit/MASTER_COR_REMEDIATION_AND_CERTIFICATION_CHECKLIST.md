@@ -11,7 +11,14 @@
 **Governance baseline:** UAIGOS 3.0.0  
 **Purpose:** Single durable master checklist for all COR re-audit findings, remediation state, evidence links, acceptance criteria and regression controls.
 
-> **Evidence Lineage Reconciled:** The evidence manifest binds strictly to candidate SHA `be23e0f6...` and sealed descendant `01681cab...`. CI/CD run 40100110885 passed across all workspace build/lint/type/test jobs, Go thin-clients for 5 targets, Docker validation, and integration tests. COR run 40100110895 passed COR Certification, AWS Physical Qualification, and COR Final Release Gate. Tier 1 bounded qualification is verified; universal certification remains withheld due to inactive AI fleet models and pending multi-target E2E receipts.
+**Key audit documentation & lineage cross-references:**
+- **Head reconciliation:** [COR Repository-Head Reconciliation — 15:54 UTC](./COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md)
+- **Certification progress dashboard:** [COR Certification Progress Dashboard](./CERTIFICATION_PROGRESS_DASHBOARD.md)
+- **Detailed evidence re-audit addendum:** [COR Re-audit Addendum — 16:43 UTC](./COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md)
+- **Earlier addendum (superseded):** [13:10 UTC addendum](./COR_REAUDIT_ADDENDUM_2026-10-24_1310Z.md)
+- **Baseline remediation plan:** [COR Release Re-audit and Full Remediation Plan](./COR_RELEASE_REAUDIT_AND_FULL_REMEDIATION_PLAN_2026-10-24.md)
+
+> **Evidence Lineage Reconciled:** The evidence manifest binds strictly to candidate SHA `be23e0f6...` and sealed descendant `01681cab...`. CI/CD run 40100110885 passed across all workspace build/lint/type/test jobs, Go thin-clients for 5 targets, Docker validation, and integration tests. COR run 40100110895 passed COR Certification, AWS Physical Qualification, and COR Final Release Gate. Tier 1 bounded qualification is verified; universal certification remains withheld due to inactive AI fleet models, branch report lineage reconciliation, lifecycle test seam hardening, and pending multi-target E2E receipts.
 
 ---
 
@@ -40,6 +47,10 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 | **F-15** | Multi-Target Universality Matrix | CI run 40100110885 passed 5 Go thin-clients; full native runtime, installer, IDE, and hosting qualification pending per target | [`target-matrix.json`](../../config/qualification/target-matrix.json), [`platform-matrix.json`](../../config/qualification/platform-matrix.json) | 🟡 PARTIAL (P1); Tier 1 bounded pass; secondary targets fail closed |
 | **F-16** | Zero Hardcoding & Localization | COR locale and I18N steps pass; semantic AST proof and reviewed allowlist for immutable protocol constants required | [`validate-locales.js`](../../scripts/validate-locales.js), [`COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md`](./COR_REAUDIT_ADDENDUM_2026-10-24_1643Z.md) | 🟢 SCOPED PASS / 🟡 UNIVERSAL PROOF PENDING (P1) |
 | **F-17** | Evidence Chain & Lineage Controls | Exact checkout of sealed descendant `01681cab...` verified in run 40100110895; freshness verifier enforces candidate binding | [`verify-evidence-freshness.mjs`](../../scripts/governance/verify-evidence-freshness.mjs), [`evidence-manifest.json`](../governance/evidence/evidence-manifest.json) | 🟢 SCOPED PASS / CONTINUOUS ENFORCEMENT (P1) |
+| **F-18** | Branch Report Lineage & Offline State | Checked-in branch report carries `gitSha=a0fba...` and offline mode; must assert candidate SHA and bind via signed manifest | [`COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md`](./COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md), [`ai_model_qualification_report.json`](../security/evidence/ai_model_qualification_report.json) | 🔴 OPEN / BLOCKED (P0); candidate SHA assertion & signed manifest required |
+| **F-19** | Lifecycle Test Seam & Injected Executor Isolation | Optional callback injection (`probeFn`, `executeFn`) in lifecycle permits mock insertion without `isMock`; exported receipt factory bypasses trusted transport | [`COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md`](./COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md), [`model-lifecycle.ts`](../../server/engine-core/src/ai/model-lifecycle.ts) | 🔴 OPEN / BLOCKED (P0); concrete provider adapter & private receipt issuer required |
+| **F-20** | Production Key Fail-Closed & Non-Prod Isolation | Production key fails closed on missing/weak key, but development key fallback must be strictly isolated to prevent acceptance in production | [`COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md`](./COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md), [`trusted-receipt.ts`](../../server/engine-core/src/ai/trusted-receipt.ts) | 🟡 IN PROGRESS (P0/P1); dev-key rejection, key rotation & restart verification required |
+| **F-21** | Target Matrix Scope vs. Universality | Five Go thin-client targets pass build/test; native runtime, install/update/rollback, IDE plugins, and multi-cloud hosting require target-specific receipts | [`COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md`](./COR_REPOSITORY_HEAD_RECONCILIATION_2026-10-24_1554Z.md), [`target-matrix.json`](../../config/qualification/target-matrix.json) | 🟡 PARTIAL (P1); Tier 1 bounded pass; universal claim withheld |
 
 ---
 
@@ -154,7 +165,51 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 
 ---
 
-## 5. Platform and Universality Ledger
+## 5. Re-Audit Head Reconciliation Findings (F-18 through F-21) & Detailed Acceptance Criteria
+
+### F-18 — Current Branch AI Report Offline & Candidate SHA Mismatch
+- **Problem Statement:** The checked-in report on `phase4/production-hardening` (`docs/security/evidence/ai_model_qualification_report.json`) carries `gitSha=a0fba113632a90c04e6d13f2f4ee058c3dd2af32`, mode `CATALOG_OFFLINE`, 12 discovered, 0 qualified, 0 active, 12 disabled, and an offline inspection receipt (`liveExecution: false`). This older offline snapshot cannot demonstrate live AI activation and mismatches the candidate SHA.
+- **Detailed Acceptance Criteria:**
+  1. **Candidate SHA Assertion:** Add an automated validator comparing report `gitSha` to the exact implementation candidate SHA and manifest candidate SHA; fail closed on mismatch.
+  2. **Signed Provenance Manifest:** Bind report, receipt list, workflow run ID, evidence-sealed descendant, API endpoint host, policy version, and artifact digests in a cryptographically signed manifest.
+  3. **Offline Inventory Isolation:** If offline catalog inventory is intentionally committed, segregate it into dedicated offline inventory paths and prohibit it from serving as live qualification evidence.
+  4. **Genuine Live Report Generation:** Generate live qualification reports exclusively from authenticated live discovery, genuine capability probes, and real inference on the exact candidate.
+  5. **Fleet Count Invariants:** Enforce count invariant `activeCount <= qualifiedCount <= totalDiscovered`, with `activeCount` strictly equal to the number of verified live candidate-bound receipts.
+  6. **Regression Gate:** Add regression tests ensuring that reports with stale SHAs, `CATALOG_OFFLINE`, missing live receipts, or `liveExecution: false` fail release gates.
+- **Status:** 🔴 OPEN / BLOCKED (P0)
+
+### F-19 — AI Lifecycle Test Seam & Injected Executor Isolation
+- **Problem Statement:** The model lifecycle interface declared optional `probeFn` and `executeFn`. Caller-controlled `isMock` flags are not a secure trust boundary, and the receipt factory is exposed in exported modules, allowing unverified execution paths to synthesize responses.
+- **Detailed Acceptance Criteria:**
+  1. **Concrete Provider Adapter:** Production model lifecycle composition root must instantiate the concrete Air Roofers HTTPS transport adapter; arbitrary `executeFn`/probe callbacks are prohibited in production activation APIs.
+  2. **Dependency Injection Boundary:** Test seams and dependency injection must be isolated strictly to test-only exports/constructors unavailable to production bundles.
+  3. **Private Receipt Issuance:** Live receipts must be minted exclusively within the private provider adapter after genuine network communication, validating endpoint host, TLS/HTTP status, provider request ID, model ID, candidate SHA, and output digest.
+  4. **Unexported Receipt Factory:** Make receipt issuance non-public; enforce signature/MAC verification with the production provenance key; reject test-only receipts in production.
+  5. **Adversarial Negative Suite:** Adversarial tests must prove rejection of unnetworked executors, forged `isMock: false` markers, forged `source` strings, altered output digests, wrong models/candidates, and replayed receipts.
+- **Status:** 🔴 OPEN / BLOCKED (P0)
+
+### F-20 — Production Provenance Key Fail-Closed & Non-Production Isolation
+- **Problem Statement:** Source requires `UGONDU_PROVENANCE_KEY` in production and rejects weak/missing keys, but the development-key fallback must be strictly isolated to prevent development-key receipts from being accepted in production or formal qualification.
+- **Detailed Acceptance Criteria:**
+  1. **Non-Production Receipt Isolation:** Production verification must explicitly reject development-key signatures, enforcing distinct environment key IDs and non-production markers.
+  2. **Comprehensive Verification Tests:** Test production startup failure on missing/weak keys, test-key replay rejection, and key rotation.
+  3. **Secure Key Management:** Ensure production signing is backed by secure key management / KMS credentials with zero key exposure in logs or artifacts.
+  4. **Restart Verification:** Ensure persisted receipts remain verifiable after process restarts and across instances using durable constant-time MAC verification.
+- **Status:** 🟡 IN PROGRESS / PARTIAL (P0/P1)
+
+### F-21 — Target Matrix Scope vs. Universality Qualification
+- **Problem Statement:** Five Go thin-client build/test targets pass in CI run 40100110885, but thin-client compilation does not prove complete product runtime, native installation, update/rollback lifecycle, IDE extensions, or multi-cloud hosting operations.
+- **Detailed Acceptance Criteria:**
+  1. **Dedicated Target Manifest:** Maintain an explicit target manifest with individual verification rows for every claimed OS/version/architecture, IDE/version, and host/provider.
+  2. **Native OS Lifecycle Receipts:** Execute real native installation, launch, permissions, path handling, update, rollback, and clean uninstall on each supported target, capturing candidate-bound signed receipts.
+  3. **Real Disposable Hosting Tests:** Execute real disposable environment testing and cleanup receipts for all claimed hosting targets (cPanel, DirectAdmin, SSH/VPS, Kubernetes, AWS, GCP, Azure); unverified targets explicitly marked unsupported.
+  4. **Real IDE Integration Suites:** Execute real extension install, authentication, project detection, command execution, and update tests for each advertised IDE; build-only compilation cannot serve as platform qualification.
+  5. **Universal COR Exit Condition:** Universal COR remains withheld until every mandatory target row has verified native receipts.
+- **Status:** 🟡 PARTIAL (Tier 1 Bounded Pass; Universal Withheld) (P1)
+
+---
+
+## 6. Platform and Universality Ledger
 
 | Capability | Recorded State | Why it is not Universal Green | Exit Criterion |
 |---|---|---|---|
@@ -174,7 +229,7 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 
 ---
 
-## 6. AI Platform Activation Checklist — ai.airroofers.eu
+## 7. AI Platform Activation Checklist — ai.airroofers.eu
 
 - [x] A live canary receipt is present and records endpoint `https://ai.airroofers.eu`.
 - [x] The receipt reports HTTP 200 for discovery and inference, model `sentinel-guard-v1`, and 30 available models.
@@ -191,7 +246,7 @@ A source file existing, a target appearing in a matrix, a cross-compiled binary,
 
 ---
 
-## 7. UAIGOS Zero-Hardcoding and Zero-Stub Policy
+## 8. UAIGOS Zero-Hardcoding and Zero-Stub Policy
 
 ### Zero operational hardcoding
 Prohibit unapproved hardcoded provider/model inventories, mutable endpoint URLs, region availability, credentials, tenant/product allowlists, host/IDE support declarations, operational quotas/retry settings, feature flags, environment-specific IDs and user-visible strings outside localization tokens. Immutable protocol/security invariants and validated schemas may remain in code only when documented, reviewed and tested. Do not weaken fail-closed controls to achieve configurability.
@@ -209,7 +264,7 @@ Production source, shipped bundles and release artifacts must contain no fake ad
 
 ---
 
-## 8. Release Certification Commands & Final Acceptance
+## 9. Release Certification Commands & Final Acceptance
 
 ```bash
 set -euo pipefail
@@ -234,9 +289,9 @@ Final COR/UAIGOS closure is authorized only when:
 2. Every required workflow has a successful conclusion on the candidate or an authorized evidence-only descendant (CI/CD run 40100110885 and COR run 40100110895).
 3. All mandatory in-scope targets and operations have fresh qualification evidence.
 4. Zero-hardcoding and anti-stub governance checks pass against source and release artifacts.
-5. No unresolved critical/high finding affects the release claim (F-08 through F-17 resolved or verified within bounded scope).
+5. No unresolved critical/high finding affects the release claim (F-08 through F-21 resolved or verified within bounded scope).
 6. Unsupported IDEs/clouds remain explicitly excluded or are implemented and qualified.
 7. The dashboard is generated from the canonical registry and evidence, and is not manually greened.
 8. The final signed release bundle records run IDs, artifact digests, candidate SHA, scope, exclusions, expiry/review date and approver.
 
-**Current conclusion:** Configured CI/CD and COR workflow gates passed on candidate `be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb` and evidence-sealed descendant `01681cabaeaa270aa36863570805ceb51e5c1062`. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** until findings F-12 through F-17 exit criteria are completely satisfied.
+**Current conclusion:** Configured CI/CD and COR workflow gates passed on candidate `be23e0f6b7e1dae7acd9dc625ec5b4f08691d6fb` and evidence-sealed descendant `01681cabaeaa270aa36863570805ceb51e5c1062`. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** until findings F-12 through F-21 exit criteria are completely satisfied.

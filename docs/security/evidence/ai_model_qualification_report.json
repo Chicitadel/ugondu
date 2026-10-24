@@ -1,8 +1,8 @@
 {
   "reportType": "AI_MODEL_QUALIFICATION_REPORT",
   "version": "1.0.0",
-  "generatedAt": "2026-10-24T15:42:46.954Z",
-  "gitSha": "a0fba113632a90c04e6d13f2f4ee058c3dd2af32",
+  "generatedAt": "2026-10-24T16:34:48.811Z",
+  "gitSha": "1bc373f1d31e436c7314c777e4edb107b1c4a9f6",
   "qualificationMode": "CATALOG_OFFLINE",
   "summary": {
     "totalDiscovered": 12,
@@ -17,8 +17,8 @@
       "version": "1.0.0",
       "modelAlias": "catalog-offline",
       "providerId": "airroofers-ai",
-      "timestamp": "2026-10-24T15:42:46.952Z",
-      "gitSha": "a0fba113632a90c04e6d13f2f4ee058c3dd2af32",
+      "timestamp": "2026-10-24T16:34:48.809Z",
+      "gitSha": "1bc373f1d31e436c7314c777e4edb107b1c4a9f6",
       "status": "UNQUALIFIED",
       "liveExecution": false,
       "verification": "CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION",
@@ -36,13 +36,13 @@
         {
           "from": null,
           "to": "DISCOVERED",
-          "timestamp": "2026-10-24T15:42:46.954Z",
+          "timestamp": "2026-10-24T16:34:48.811Z",
           "reason": "Discovered 12 catalog models"
         },
         {
           "from": "DISCOVERED",
           "to": "DISABLED",
-          "timestamp": "2026-10-24T15:42:46.954Z",
+          "timestamp": "2026-10-24T16:34:48.811Z",
           "reason": "Offline candidate evaluation: live credentials absent; all models fail closed"
         }
       ],
