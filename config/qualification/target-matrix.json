@@ -2,6 +2,9 @@
   "schemaVersion": "1.0.0",
   "authority": "Ujomor Systems Engineering & Governance Authority",
   "organization": "Air Roofers SASU",
+  "classification": "ENTERPRISE",
+  "reviewCycle": "quarterly-governance-audit",
+  "reviewDate": "2026-10-24",
   "defaultFailureCode": "UNSUPPORTED_CAPABILITY",
   "targets": {
     "osArchitectures": [
@@ -9,69 +12,96 @@
         "target": "windows/amd64",
         "os": "windows",
         "arch": "amd64",
+        "platformId": "runtime-windows-amd64",
+        "tier": "tier-1-native",
         "nativeExecutionVerified": true,
-        "qualificationStatus": "tested"
+        "qualificationStatus": "tested",
+        "supportClaim": "supported"
       },
       {
         "target": "linux/amd64",
         "os": "linux",
         "arch": "amd64",
+        "platformId": "runtime-linux-amd64",
+        "tier": "tier-1-native",
         "nativeExecutionVerified": true,
-        "qualificationStatus": "tested"
+        "qualificationStatus": "tested",
+        "supportClaim": "supported"
       },
       {
         "target": "darwin/arm64",
         "os": "darwin",
         "arch": "arm64",
+        "platformId": "runtime-darwin-arm64",
+        "tier": "tier-1-native",
         "nativeExecutionVerified": true,
-        "qualificationStatus": "tested"
+        "qualificationStatus": "tested",
+        "supportClaim": "supported"
       },
       {
         "target": "linux/arm64",
         "os": "linux",
         "arch": "arm64",
+        "platformId": "runtime-linux-arm64",
+        "tier": "tier-2-cross-compiled",
         "nativeExecutionVerified": false,
-        "qualificationStatus": "cross-compiled-only"
+        "qualificationStatus": "cross-compiled-only",
+        "supportClaim": "experimental"
       },
       {
         "target": "darwin/amd64",
         "os": "darwin",
         "arch": "amd64",
+        "platformId": "runtime-darwin-amd64",
+        "tier": "tier-2-cross-compiled",
         "nativeExecutionVerified": false,
-        "qualificationStatus": "cross-compiled-only"
+        "qualificationStatus": "cross-compiled-only",
+        "supportClaim": "experimental"
       }
     ],
     "ideIntegrations": [
       {
         "ide": "vscode",
+        "platformId": "mode-ide-vscode",
         "status": "experimental",
+        "supportClaim": "experimental",
         "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
       },
       {
         "ide": "jetbrains",
+        "platformId": "mode-ide-jetbrains",
         "status": "unsupported",
+        "supportClaim": "unsupported",
         "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
       },
       {
         "ide": "cursor",
+        "platformId": "mode-ide-cursor",
         "status": "unsupported",
+        "supportClaim": "unsupported",
         "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
       },
       {
         "ide": "windsurf",
+        "platformId": "mode-ide-windsurf",
         "status": "unsupported",
+        "supportClaim": "unsupported",
         "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
       },
       {
         "ide": "neovim",
+        "platformId": "mode-ide-neovim",
         "status": "unsupported",
+        "supportClaim": "unsupported",
         "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY"
       }
     ],
     "hostProviders": [
       {
         "provider": "aws",
+        "platformId": "delivery-aws-eu-west-3",
         "qualificationStatus": "tested",
+        "supportClaim": "supported",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -84,7 +114,9 @@
       },
       {
         "provider": "directadmin",
+        "platformId": "delivery-directadmin-shared-hosting",
         "qualificationStatus": "tested",
+        "supportClaim": "supported",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -97,7 +129,9 @@
       },
       {
         "provider": "cpanel",
+        "platformId": "delivery-cpanel-hosting",
         "qualificationStatus": "tested",
+        "supportClaim": "supported",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -110,7 +144,9 @@
       },
       {
         "provider": "ssh-vps",
+        "platformId": "delivery-vps-private-host",
         "qualificationStatus": "tested",
+        "supportClaim": "supported",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -123,7 +159,9 @@
       },
       {
         "provider": "docker",
+        "platformId": "delivery-docker-compose",
         "qualificationStatus": "tested",
+        "supportClaim": "supported",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -136,7 +174,9 @@
       },
       {
         "provider": "kubernetes",
+        "platformId": "delivery-kubernetes",
         "qualificationStatus": "tested",
+        "supportClaim": "supported",
         "operations": {
           "discover": "tested",
           "preflight": "tested",
@@ -149,7 +189,9 @@
       },
       {
         "provider": "gcp",
+        "platformId": "delivery-gcp-europe-west9",
         "qualificationStatus": "unsupported",
+        "supportClaim": "unsupported",
         "operations": {
           "discover": "unsupported",
           "preflight": "unsupported",
@@ -162,7 +204,9 @@
       },
       {
         "provider": "azure",
+        "platformId": "delivery-azure-francecentral",
         "qualificationStatus": "unsupported",
+        "supportClaim": "unsupported",
         "operations": {
           "discover": "unsupported",
           "preflight": "unsupported",

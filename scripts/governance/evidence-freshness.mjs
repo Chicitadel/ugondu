@@ -44,6 +44,7 @@ export class EvidenceFreshnessError extends Error {
 export const EVIDENCE_ONLY_PREFIXES = [
   'docs/governance/evidence/',
   'docs/security/evidence/',
+  'docs/audit/',
   'docs/audits/',
   'docs/qualification/',
 ];

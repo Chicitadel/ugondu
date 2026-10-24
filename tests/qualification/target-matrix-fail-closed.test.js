@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Qualification — Target Matrix Fail-Closed Suite
  * File           : target-matrix-fail-closed.test.js
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-23
- * Last Modified  : 2026-10-23
+ * Last Modified  : 2026-10-24
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -35,11 +35,8 @@ const TARGET_MATRIX_PATH = path.join(ROOT, 'config/qualification/target-matrix.j
 const PLATFORM_MATRIX_PATH = path.join(ROOT, 'config/qualification/platform-matrix.json');
 
 // Import compiled TargetAdapterRegistry for engine-core parity checks
-const { globalTargetAdapterRegistry, UnsupportedPlatformError } = require(
-  path.join(ROOT, 'server/engine-core/dist/targets/target-adapter-contract.js')
-);
+const { globalTargetAdapterRegistry, UnsupportedPlatformError } = require(path.join(ROOT, 'server/engine-core/dist/targets/target-adapter-contract.js'));
 
-// Dynamic import for platform evidence verification engine
 let platformEvidenceModule = null;
 async function getPlatformEvidenceApi() {
   if (!platformEvidenceModule) {
@@ -51,7 +48,7 @@ async function getPlatformEvidenceApi() {
 
 /**
  * Deterministic Fail-Closed Target Matrix Gate
- * Enforces config/qualification/target-matrix.json boundaries at runtime.
+ * Enforces canonical target matrix boundaries and cross-matrix consistency.
  */
 class TargetMatrixGate {
   constructor(matrixPath = TARGET_MATRIX_PATH) {
@@ -66,10 +63,74 @@ class TargetMatrixGate {
     assert.strictEqual(m.authority, 'Ujomor Systems Engineering & Governance Authority');
     assert.strictEqual(m.organization, 'Air Roofers SASU');
     assert.strictEqual(m.defaultFailureCode, 'UNSUPPORTED_CAPABILITY');
+    assert.strictEqual(m.reviewCycle, 'quarterly-governance-audit');
+    assert.ok(m.reviewDate <= '2026-10-24', 'target matrix review date must not be future-dated');
     assert.ok(m.targets && typeof m.targets === 'object', 'targets object required');
     assert.ok(Array.isArray(m.targets.osArchitectures), 'osArchitectures must be array');
     assert.ok(Array.isArray(m.targets.ideIntegrations), 'ideIntegrations must be array');
     assert.ok(Array.isArray(m.targets.hostProviders), 'hostProviders must be array');
+    return true;
+  }
+
+  validatePlatformMatrixConsistency(platformMatrixPath = PLATFORM_MATRIX_PATH) {
+    const raw = fs.readFileSync(platformMatrixPath, 'utf8');
+    const pm = JSON.parse(raw);
+
+    assert.strictEqual(pm.schemaVersion, '2.0.0', 'Platform matrix schemaVersion must be 2.0.0');
+    assert.strictEqual(pm.authority, this.matrix.authority, 'Authority must match canonical target registry');
+    assert.strictEqual(pm.organization, this.matrix.organization, 'Organization must match canonical target registry');
+    assert.strictEqual(pm.canonicalRegistry, 'config/qualification/target-matrix.json');
+    assert.strictEqual(pm.reviewCycle, 'quarterly-governance-audit');
+    assert.match(pm.reviewDate, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(pm.reviewDate <= '2026-10-24', 'Review dates must not be future-dated relative to audit checkpoint');
+
+    const defs = pm.targetDefinitions;
+    assert.ok(Array.isArray(defs) && defs.length > 0, 'Platform matrix must contain target definitions');
+
+    // 1. OS / Architecture Harmonization
+    for (const osArch of this.matrix.targets.osArchitectures) {
+      const match = defs.find((d) => d.targetType === 'os-runtime' && d.os === osArch.os && d.architecture === osArch.arch);
+      assert.ok(match, `Missing platform matrix os-runtime definition for ${osArch.target}`);
+      assert.strictEqual(match.reviewCycle, 'quarterly-governance-audit');
+      assert.ok(match.reviewDate <= '2026-10-24', `Review date for ${match.id} must not be future-dated`);
+
+      if (osArch.qualificationStatus === 'tested') {
+        assert.strictEqual(match.supportClaim, 'supported', `${osArch.target} Tier 1 must declare supported claim`);
+        assert.strictEqual(match.minimumRequiredTier, 'tested');
+        assert.strictEqual(match.nativeExecutionVerified, true);
+        assert.strictEqual(match.tier, 'tier-1-native');
+      } else if (osArch.qualificationStatus === 'cross-compiled-only') {
+        assert.strictEqual(match.supportClaim, 'experimental', `${osArch.target} Tier 2 must declare experimental claim`);
+        assert.strictEqual(match.qualificationStatus, 'cross-compiled-only');
+        assert.strictEqual(match.nativeExecutionVerified, false);
+        assert.strictEqual(match.tier, 'tier-2-cross-compiled');
+      }
+    }
+
+    // 2. IDE Integrations Harmonization
+    for (const ideEntry of this.matrix.targets.ideIntegrations) {
+      const match = defs.find((d) => d.ide === ideEntry.ide);
+      assert.ok(match, `Missing platform matrix IDE definition for ${ideEntry.ide}`);
+      assert.strictEqual(match.supportClaim, ideEntry.status, `IDE ${ideEntry.ide} support claim must match target matrix`);
+      assert.strictEqual(match.status, ideEntry.status, `IDE ${ideEntry.ide} status must match target matrix`);
+      assert.strictEqual(match.unsupportedBehavior, 'FAIL_CLOSED_UNSUPPORTED_CAPABILITY');
+    }
+
+    // 3. Host / Cloud Providers Harmonization
+    for (const hostEntry of this.matrix.targets.hostProviders) {
+      const match = defs.find(
+        (d) => d.targetType === 'delivery-provider' && (d.provider === hostEntry.provider || d.canonicalProvider === hostEntry.provider)
+      );
+      assert.ok(match, `Missing platform matrix delivery definition for host provider ${hostEntry.provider}`);
+      if (hostEntry.qualificationStatus === 'tested') {
+        assert.strictEqual(match.supportClaim, 'supported', `Host provider ${hostEntry.provider} must declare supported claim`);
+        assert.strictEqual(match.qualificationStatus, 'tested');
+      } else if (hostEntry.qualificationStatus === 'unsupported') {
+        assert.strictEqual(match.supportClaim, 'unsupported', `Host provider ${hostEntry.provider} must declare unsupported claim`);
+        assert.strictEqual(match.qualificationStatus, 'unsupported');
+      }
+    }
+
     return true;
   }
 
@@ -189,6 +250,7 @@ class TargetMatrixGate {
 test('QUAL-GATE-001: Schema integrity and governance metadata validation', () => {
   const gate = new TargetMatrixGate();
   assert.ok(gate.validateSchema());
+  assert.ok(gate.validatePlatformMatrixConsistency());
 
   const m = gate.matrix;
   assert.strictEqual(m.targets.osArchitectures.length, 5);
@@ -400,9 +462,6 @@ test('QUAL-GATE-010: Matrix mutation guard ensures tier invariants cannot be tam
   const armTarget = m.targets.osArchitectures.find((t) => t.target === 'linux/arm64');
   armTarget.qualificationStatus = 'tested'; // Inconsistent with nativeExecutionVerified: false!
 
-  const inconsistentGate = new TargetMatrixGate();
-  inconsistentGate.matrix = m;
-
   // Validation detects inconsistency between status and native verification
   const isConsistent = m.targets.osArchitectures.every((t) => {
     if (t.qualificationStatus === 'tested') return t.nativeExecutionVerified === true;
@@ -411,4 +470,23 @@ test('QUAL-GATE-010: Matrix mutation guard ensures tier invariants cannot be tam
   });
 
   assert.strictEqual(isConsistent, false, 'Tampered target matrix must be detected as inconsistent');
+
+  // Cross-matrix tampering guard: verify that a mutated platform matrix with bogus claim is caught
+  const tamperedDefs = JSON.parse(fs.readFileSync(PLATFORM_MATRIX_PATH, 'utf8'));
+  const gcpTarget = tamperedDefs.targetDefinitions.find((d) => d.id === 'delivery-gcp-europe-west9');
+  gcpTarget.supportClaim = 'supported'; // GCP is unsupported in canonical registry!
+
+  const tmpTamperedPath = path.join(ROOT, 'tests/qualification/.tampered-platform-matrix.tmp.json');
+  try {
+    fs.writeFileSync(tmpTamperedPath, JSON.stringify(tamperedDefs));
+    assert.throws(
+      () => gate.validatePlatformMatrixConsistency(tmpTamperedPath),
+      (err) => {
+        assert.match(err.message, /Host provider gcp must declare unsupported claim/);
+        return true;
+      }
+    );
+  } finally {
+    if (fs.existsSync(tmpTamperedPath)) fs.unlinkSync(tmpTamperedPath);
+  }
 });

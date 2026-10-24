@@ -41,7 +41,7 @@ const GEN = pathToFileURL(path.join(GOV, 'generate-evidence-manifest.mjs')).href
 const VER = pathToFileURL(path.join(GOV, 'verify-evidence-freshness.mjs')).href;
 const CMDS = [{ command: 'node tests/x.test.js', exitCode: 0 }];
 
-const sh = (dir, ...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' }).trim();
+const sh = (dir, ...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
 function write(dir, rel, content) {
   const abs = path.join(dir, rel);
@@ -153,4 +153,33 @@ test('FRESH-008: generator refuses a candidate with non-evidence drift', async (
   write(dir, 'src/app.js', 'module.exports = 3;\n');
   commit(dir, 'drift');
   assert.throws(() => generateManifest({ root: dir, expectedSha: candidate, commands: CMDS, write: false }), /Stale evidence/);
+});
+
+test('FRESH-009: docs/audit/ changes after candidate are accepted as valid evidence-only changes', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/audit/CERTIFICATION_PROGRESS_DASHBOARD.md', '# Certification Progress\n');
+  write(dir, 'docs/audit/COR_REMEDIATION_EXECUTION_RUNBOOK.md', '# Runbook\n');
+  write(dir, 'docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md', '# Audit Plan\n');
+  const auditHead = commit(dir, 'audit documentation updates');
+  const r = await verifyEvidenceFreshness({ root: dir });
+  assert.equal(r.candidate, candidate);
+  assert.equal(r.head, auditHead);
+  assert.equal(r.descendant, true);
+  assert.ok(r.evidenceChangedPaths.includes('docs/audit/CERTIFICATION_PROGRESS_DASHBOARD.md'));
+  assert.ok(r.evidenceChangedPaths.includes('docs/audit/COR_REMEDIATION_EXECUTION_RUNBOOK.md'));
+  assert.ok(r.evidenceChangedPaths.includes('docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md'));
+});
+
+test('FRESH-010: isEvidenceOnlyPath recognizes docs/audit/ and docs/audits/ prefixes', async () => {
+  const { isEvidenceOnlyPath, EVIDENCE_ONLY_PREFIXES } = await import(pathToFileURL(path.join(GOV, 'evidence-freshness.mjs')).href);
+  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/audit/'));
+  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/audits/'));
+  assert.equal(isEvidenceOnlyPath('docs/audit/CERTIFICATION_PROGRESS_DASHBOARD.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs/audit/COR_REMEDIATION_EXECUTION_RUNBOOK.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs\\audit\\windows-path.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs/audits/legacy-report.md'), true);
+  assert.equal(isEvidenceOnlyPath('src/audit/tampered.js'), false);
 });

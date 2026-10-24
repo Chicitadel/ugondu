@@ -3,6 +3,9 @@
   "product": "@airroofers/ugondu-platform",
   "organization": "Air Roofers SASU",
   "authority": "Ujomor Systems Engineering & Governance Authority",
+  "reviewCycle": "quarterly-governance-audit",
+  "reviewDate": "2026-10-24",
+  "canonicalRegistry": "config/qualification/target-matrix.json",
   "targetDefinitions": [
     {
       "id": "runtime-linux-amd64",
@@ -12,12 +15,16 @@
       "runtimeVersion": "node>=20.0.0,go>=1.22",
       "provider": "local-posix",
       "mode": "headless-ci",
+      "tier": "tier-1-native",
+      "nativeExecutionVerified": true,
+      "qualificationStatus": "tested",
       "minimumRequiredTier": "tested",
-      "supportClaim": "experimental",
+      "supportClaim": "supported",
       "command": ["node", "tests/cor-remediation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml", "runtime/health-readiness.json"],
       "supportOwner": "Ujomor Platform Runtime Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "runtime-linux-arm64",
@@ -27,12 +34,16 @@
       "runtimeVersion": "node>=20.0.0,go>=1.22",
       "provider": "local-posix",
       "mode": "headless-ci",
+      "tier": "tier-2-cross-compiled",
+      "nativeExecutionVerified": false,
+      "qualificationStatus": "cross-compiled-only",
       "minimumRequiredTier": "tested",
       "supportClaim": "experimental",
       "command": ["node", "tests/cor-remediation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml", "runtime/health-readiness.json"],
       "supportOwner": "Ujomor Platform Runtime Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "runtime-windows-amd64",
@@ -42,12 +53,16 @@
       "runtimeVersion": "node>=20.0.0,go>=1.22",
       "provider": "local-win32",
       "mode": "headless-ci",
+      "tier": "tier-1-native",
+      "nativeExecutionVerified": true,
+      "qualificationStatus": "tested",
       "minimumRequiredTier": "tested",
       "supportClaim": "supported",
       "command": ["node", "tests/cor-remediation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml", "runtime/health-readiness.json"],
       "supportOwner": "Ujomor Platform Runtime Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "runtime-darwin-amd64",
@@ -57,12 +72,16 @@
       "runtimeVersion": "node>=20.0.0,go>=1.22",
       "provider": "local-posix",
       "mode": "headless-ci",
+      "tier": "tier-2-cross-compiled",
+      "nativeExecutionVerified": false,
+      "qualificationStatus": "cross-compiled-only",
       "minimumRequiredTier": "tested",
       "supportClaim": "experimental",
       "command": ["node", "tests/cor-remediation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml", "runtime/health-readiness.json"],
       "supportOwner": "Ujomor Platform Runtime Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "runtime-darwin-arm64",
@@ -72,12 +91,16 @@
       "runtimeVersion": "node>=20.0.0,go>=1.22",
       "provider": "local-posix",
       "mode": "headless-ci",
+      "tier": "tier-1-native",
+      "nativeExecutionVerified": true,
+      "qualificationStatus": "tested",
       "minimumRequiredTier": "tested",
-      "supportClaim": "experimental",
+      "supportClaim": "supported",
       "command": ["node", "tests/cor-remediation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml", "runtime/health-readiness.json"],
       "supportOwner": "Ujomor Platform Runtime Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-aws-eu-west-3",
@@ -87,12 +110,14 @@
       "runtimeVersion": "node>=20.0.0",
       "provider": "aws",
       "mode": "headless-ci",
-      "minimumRequiredTier": "qualified",
-      "supportClaim": "experimental",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "supported",
+      "qualificationStatus": "tested",
       "command": ["node", "scripts/aws-conformance/run-aws-conformance.mjs"],
       "expectedArtifacts": ["tests/aws-conformance-results.json"],
       "supportOwner": "Ujomor Cloud Infrastructure Authority",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-gcp-europe-west9",
@@ -102,12 +127,14 @@
       "runtimeVersion": "node>=20.0.0",
       "provider": "gcp",
       "mode": "headless-ci",
-      "minimumRequiredTier": "qualified",
-      "supportClaim": "experimental",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "unsupported",
+      "qualificationStatus": "unsupported",
       "command": ["node", "tests/provider-compilation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Cloud Infrastructure Authority",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-azure-francecentral",
@@ -117,12 +144,14 @@
       "runtimeVersion": "node>=20.0.0",
       "provider": "azure",
       "mode": "headless-ci",
-      "minimumRequiredTier": "qualified",
-      "supportClaim": "experimental",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "unsupported",
+      "qualificationStatus": "unsupported",
       "command": ["node", "tests/provider-compilation.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Cloud Infrastructure Authority",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-docker-compose",
@@ -131,13 +160,16 @@
       "architecture": "amd64",
       "runtimeVersion": "docker-compose>=2.20",
       "provider": "docker-compose",
+      "canonicalProvider": "docker",
       "mode": "headless-ci",
       "minimumRequiredTier": "tested",
-      "supportClaim": "experimental",
+      "supportClaim": "supported",
+      "qualificationStatus": "tested",
       "command": ["docker", "compose", "config"],
       "expectedArtifacts": ["runtime/health-readiness.json"],
       "supportOwner": "Ujomor Container Delivery Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-directadmin-shared-hosting",
@@ -148,11 +180,13 @@
       "provider": "directadmin",
       "mode": "automation",
       "minimumRequiredTier": "tested",
-      "supportClaim": "experimental",
+      "supportClaim": "supported",
+      "qualificationStatus": "tested",
       "command": ["node", "tests/deployment-lifecycle.test.js"],
       "expectedArtifacts": ["tests/e2e-results.xml"],
       "supportOwner": "Ujomor Edge & Shared Hosting Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-cpanel-hosting",
@@ -163,11 +197,13 @@
       "provider": "cpanel",
       "mode": "automation",
       "minimumRequiredTier": "tested",
-      "supportClaim": "experimental",
+      "supportClaim": "supported",
+      "qualificationStatus": "tested",
       "command": ["node", "tests/deployment-lifecycle.test.js"],
       "expectedArtifacts": ["tests/e2e-results.xml"],
       "supportOwner": "Ujomor Edge & Shared Hosting Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "delivery-vps-private-host",
@@ -176,13 +212,34 @@
       "architecture": "amd64",
       "runtimeVersion": "node>=20.0.0",
       "provider": "vps-private-host",
+      "canonicalProvider": "ssh-vps",
       "mode": "automation",
       "minimumRequiredTier": "tested",
-      "supportClaim": "experimental",
+      "supportClaim": "supported",
+      "qualificationStatus": "tested",
       "command": ["node", "tests/deployment-lifecycle.test.js"],
       "expectedArtifacts": ["tests/e2e-results.xml"],
       "supportOwner": "Ujomor Edge & Shared Hosting Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
+    },
+    {
+      "id": "delivery-kubernetes",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "kubernetes>=1.28",
+      "provider": "kubernetes",
+      "canonicalProvider": "kubernetes",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "supported",
+      "qualificationStatus": "tested",
+      "command": ["kubectl", "version", "--client"],
+      "expectedArtifacts": ["runtime/health-readiness.json"],
+      "supportOwner": "Ujomor Container Delivery Team",
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "repo-github",
@@ -197,7 +254,8 @@
       "command": ["node", "tests/repository-adapter.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Repository Integration Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "repo-gitlab",
@@ -212,7 +270,8 @@
       "command": ["node", "tests/repository-adapter.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Repository Integration Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "repo-bitbucket",
@@ -227,7 +286,8 @@
       "command": ["node", "tests/repository-adapter.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Repository Integration Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "repo-aws-codecommit",
@@ -242,7 +302,8 @@
       "command": ["node", "tests/repository-adapter.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Repository Integration Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "mode-cli",
@@ -257,7 +318,8 @@
       "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Mode Parity & UX Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "mode-gui-electron",
@@ -272,7 +334,8 @@
       "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Mode Parity & UX Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "mode-ide-vscode",
@@ -282,12 +345,92 @@
       "runtimeVersion": "node>=20.0.0",
       "provider": "local-posix",
       "mode": "ide-vscode",
+      "ide": "vscode",
+      "status": "experimental",
       "minimumRequiredTier": "tested",
       "supportClaim": "experimental",
+      "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
       "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Mode Parity & UX Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
+    },
+    {
+      "id": "mode-ide-jetbrains",
+      "targetType": "ide-integration",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "local-posix",
+      "mode": "ide-jetbrains",
+      "ide": "jetbrains",
+      "status": "unsupported",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "unsupported",
+      "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
+      "expectedArtifacts": ["tests/integration-results.xml"],
+      "supportOwner": "Ujomor Mode Parity & UX Team",
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
+    },
+    {
+      "id": "mode-ide-cursor",
+      "targetType": "ide-integration",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "local-posix",
+      "mode": "ide-cursor",
+      "ide": "cursor",
+      "status": "unsupported",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "unsupported",
+      "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
+      "expectedArtifacts": ["tests/integration-results.xml"],
+      "supportOwner": "Ujomor Mode Parity & UX Team",
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
+    },
+    {
+      "id": "mode-ide-windsurf",
+      "targetType": "ide-integration",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "local-posix",
+      "mode": "ide-windsurf",
+      "ide": "windsurf",
+      "status": "unsupported",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "unsupported",
+      "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
+      "expectedArtifacts": ["tests/integration-results.xml"],
+      "supportOwner": "Ujomor Mode Parity & UX Team",
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
+    },
+    {
+      "id": "mode-ide-neovim",
+      "targetType": "ide-integration",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "local-posix",
+      "mode": "ide-neovim",
+      "ide": "neovim",
+      "status": "unsupported",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "unsupported",
+      "unsupportedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
+      "expectedArtifacts": ["tests/integration-results.xml"],
+      "supportOwner": "Ujomor Mode Parity & UX Team",
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "mode-headless-ci",
@@ -302,7 +445,8 @@
       "command": ["node", "tests/qualification/entrypoint-process-parity.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Mode Parity & UX Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "mode-model-assisted",
@@ -317,7 +461,8 @@
       "command": ["node", "tests/qualification/shared-execution-and-mode-parity.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Mode Parity & UX Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     },
     {
       "id": "mode-non-model-assisted",
@@ -332,7 +477,8 @@
       "command": ["node", "tests/qualification/shared-execution-and-mode-parity.test.js"],
       "expectedArtifacts": ["tests/integration-results.xml"],
       "supportOwner": "Ujomor Mode Parity & UX Team",
-      "reviewDate": "2027-04-20"
+      "reviewCycle": "quarterly-governance-audit",
+      "reviewDate": "2026-10-24"
     }
   ]
 }
