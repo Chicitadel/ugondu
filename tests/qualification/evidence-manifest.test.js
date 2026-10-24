@@ -68,7 +68,13 @@ test('generates manifest bound to HEAD with hashes', async () => {
   const { dir, sha } = makeRepo();
   const m = generateManifest({ root: dir, expectedSha: sha, evidenceFiles: ['docs/a.md'], commands: CMDS });
   assert.equal(m.gitHeadSha, sha);
+  assert.equal(m.candidateSha, sha);
+  assert.equal(m.releaseHeadSha, undefined);
   assert.match(m.evidenceFiles[0].sha256, /^[0-9a-f]{64}$/);
+  const saved = JSON.parse(fs.readFileSync(path.join(dir, 'docs/governance/evidence/evidence-manifest.json'), 'utf8'));
+  assert.equal(saved.releaseHeadSha, undefined);
+  assert.equal(saved.candidateSha, sha);
+  assert.equal(saved.gitHeadSha, sha);
   assert.ok(fs.existsSync(path.join(dir, 'docs/governance/evidence/evidence-manifest.json')));
 });
 

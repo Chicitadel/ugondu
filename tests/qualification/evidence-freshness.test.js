@@ -87,7 +87,8 @@ test('FRESH-001: manifest binds to candidate and release HEAD verifies as eviden
   assert.notEqual(head, candidate);
   const m = JSON.parse(fs.readFileSync(path.join(dir, 'docs/governance/evidence/evidence-manifest.json'), 'utf8'));
   assert.equal(m.gitHeadSha, candidate);
-  assert.notEqual(m.releaseHeadSha, candidate);
+  assert.equal(m.candidateSha, candidate);
+  assert.equal(m.releaseHeadSha, undefined);
   assert.equal(m.bindingProtocol, 'CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT');
   assert.deepEqual(m.unproven, []);
   const r = await verifyEvidenceFreshness({ root: dir });
@@ -172,14 +173,37 @@ test('FRESH-009: docs/audit/ changes after candidate are accepted as valid evide
   assert.ok(r.evidenceChangedPaths.includes('docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md'));
 });
 
-test('FRESH-010: isEvidenceOnlyPath recognizes docs/audit/ and docs/audits/ prefixes', async () => {
+test('FRESH-010: isEvidenceOnlyPath recognizes docs/governance/, docs/audit/ and docs/audits/ prefixes', async () => {
   const { isEvidenceOnlyPath, EVIDENCE_ONLY_PREFIXES } = await import(pathToFileURL(path.join(GOV, 'evidence-freshness.mjs')).href);
+  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/governance/'));
+  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/security/evidence/'));
   assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/audit/'));
   assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/audits/'));
+  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/qualification/'));
+  assert.equal(isEvidenceOnlyPath('docs/governance/GOVERNANCE_CHARTER.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs/governance/evidence/evidence-manifest.json'), true);
+  assert.equal(isEvidenceOnlyPath('docs\\governance\\audit-summary.md'), true);
   assert.equal(isEvidenceOnlyPath('docs/audit/CERTIFICATION_PROGRESS_DASHBOARD.md'), true);
   assert.equal(isEvidenceOnlyPath('docs/audit/COR_REMEDIATION_EXECUTION_RUNBOOK.md'), true);
   assert.equal(isEvidenceOnlyPath('docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md'), true);
   assert.equal(isEvidenceOnlyPath('docs\\audit\\windows-path.md'), true);
   assert.equal(isEvidenceOnlyPath('docs/audits/legacy-report.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs/qualification/matrix.json'), true);
+  assert.equal(isEvidenceOnlyPath('src/governance/tampered.js'), false);
   assert.equal(isEvidenceOnlyPath('src/audit/tampered.js'), false);
+});
+
+test('FRESH-011: docs/governance/ changes after candidate are accepted as valid evidence-only changes', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/governance/GOVERNANCE_CHARTER.md', '# Governance Charter\n');
+  write(dir, 'docs/governance/SECURITY_CONTROLS.md', '# Security Controls\n');
+  const govHead = commit(dir, 'governance documentation updates');
+  const r = await verifyEvidenceFreshness({ root: dir });
+  assert.equal(r.candidate, candidate);
+  assert.equal(r.head, govHead);
+  assert.equal(r.descendant, true);
+  assert.ok(r.evidenceChangedPaths.includes('docs/governance/GOVERNANCE_CHARTER.md'));
+  assert.ok(r.evidenceChangedPaths.includes('docs/governance/SECURITY_CONTROLS.md'));
 });

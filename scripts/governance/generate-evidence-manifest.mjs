@@ -144,7 +144,6 @@ export function generateManifest({ root = ROOT, expectedSha, evidenceFiles, comm
     schema: 'ugondu.evidence-manifest/1',
     gitHeadSha: head,
     candidateSha: head,
-    releaseHeadSha: binding.head,
     bindingProtocol: 'CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT',
     evidenceFiles: files,
     testCommands: cmds,

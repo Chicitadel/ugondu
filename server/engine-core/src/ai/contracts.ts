@@ -34,6 +34,35 @@ export type DeploymentEnvironment = 'development' | 'test' | 'staging' | 'produc
 export type InferenceTask = 'chat' | 'code' | 'classification' | 'embedding' | 'structured';
 export type DataClassification = 'public' | 'internal' | 'confidential' | 'restricted';
 export type ModelStatus = 'enabled' | 'disabled' | 'deprecated';
+export type ModelQualificationState =
+    | 'DISCOVERED'
+    | 'SCHEMA_VALIDATED'
+    | 'POLICY_CHECKED'
+    | 'CAPABILITY_PROBED'
+    | 'INFERENCE_VERIFIED'
+    | 'QUALIFIED'
+    | 'ACTIVE'
+    | 'DEGRADED'
+    | 'DISABLED'
+    | 'RETIRED';
+
+export interface ModelQualificationReceipt {
+    providerId: string;
+    modelId: string;
+    state: ModelQualificationState;
+    candidateSha: string;
+    apiContractVersion: string;
+    qualifiedAt: string | null;
+    correlationId: string;
+    checks: Array<{
+        checkId: string;
+        status: 'PASS' | 'FAIL' | 'SKIP';
+        reasonCode?: string;
+        durationMs?: number;
+        resultDigest?: string;
+    }>;
+}
+
 export type FinishReason = 'stop' | 'length' | 'tool_call' | 'blocked' | 'error';
 
 export interface ModelCapability {
@@ -171,6 +200,7 @@ export interface CatalogModelEntry {
     providerModelIdRef: string;
     credentialRef: string;
     status: ModelStatus;
+    qualificationState?: ModelQualificationState;
     environments: DeploymentEnvironment[];
     allowedRegions: string[];
     dataClassifications: DataClassification[];

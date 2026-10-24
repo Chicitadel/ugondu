@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 export * from './contracts';
+export * from './model-lifecycle';
 export * from './credential-broker';
 export * from './model-catalog';
 export * from './provider-registry';
@@ -37,5 +38,4 @@ export * from './quota-guard';
 export * from './inference-gateway';
 export * from './cost';
 export * from './guardrail';
-export * from './airroofers-provider';
 export * from './airroofers-provider';

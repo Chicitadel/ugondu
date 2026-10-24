@@ -145,6 +145,7 @@ export class RoutingPolicyEngine {
 
         if (
             model.status !== 'enabled' ||
+            (model.qualificationState && model.qualificationState !== 'ACTIVE') ||
             this.catalog.isModelScopedDisabled(model.alias, {
                 productId: request.productId, environment: request.environment,
                 region: request.region, tenantId: request.tenantId,
@@ -179,7 +180,7 @@ export class RoutingPolicyEngine {
         for (const fallbackAlias of fallbackAliases) {
             if (fallbackAlias === primaryModel.alias) continue;
             const candidate = this.catalog.getModel(fallbackAlias);
-            if (!candidate || candidate.status !== 'enabled') continue;
+            if (!candidate || candidate.status !== 'enabled' || (candidate.qualificationState && candidate.qualificationState !== 'ACTIVE')) continue;
             if (this.catalog.isModelScopedDisabled(candidate.alias, {
                 productId: request.productId, environment: request.environment,
                 region: request.region, tenantId: request.tenantId,

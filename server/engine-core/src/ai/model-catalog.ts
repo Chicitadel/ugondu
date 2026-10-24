@@ -4,9 +4,9 @@
  * File           : model-catalog.ts
  * Version        : 3.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-24
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -25,7 +25,7 @@
  * - Governance Authority   : Air Roofers Corporate Governance
  * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import * as fs from 'fs';
@@ -41,6 +41,10 @@ import {
     ModelStatus,
 } from './contracts';
 import { CredentialBroker } from './credential-broker';
+import {
+    assertValidLifecycleTransition,
+    ModelQualificationState,
+} from './model-lifecycle';
 
 export interface ModelStatusScope {
     productId?: string;
@@ -109,6 +113,12 @@ export class ModelCatalog {
 
         ModelCatalog.validateCatalogDocument(parsed);
 
+        // Preserve qualification lifecycle states across reloads
+        const existingStates = new Map<string, ModelQualificationState>();
+        for (const [alias, m] of this.modelsByAlias.entries()) {
+            if (m.qualificationState) existingStates.set(alias, m.qualificationState);
+        }
+
         this.document = parsed;
         this.providersById.clear();
         this.modelsByAlias.clear();
@@ -118,7 +128,14 @@ export class ModelCatalog {
             this.providersById.set(provider.providerId, { ...provider });
         }
         for (const model of parsed.models) {
-            this.modelsByAlias.set(model.alias, JSON.parse(JSON.stringify(model)));
+            const entry: CatalogModelEntry = JSON.parse(JSON.stringify(model));
+            const preserved = existingStates.get(model.alias);
+            if (preserved) {
+                entry.qualificationState = preserved;
+            } else if (!entry.qualificationState) {
+                entry.qualificationState = entry.status === 'enabled' ? 'ACTIVE' : (entry.status === 'deprecated' ? 'RETIRED' : 'DISABLED');
+            }
+            this.modelsByAlias.set(model.alias, entry);
         }
     }
 
@@ -142,20 +159,10 @@ export class ModelCatalog {
                 throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_provider_id_invalid'), 500);
             }
             if (seenProviders.has(provider.providerId)) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_duplicate_provider'),
-                    500,
-                    { providerId: provider.providerId }
-                );
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_duplicate_provider'), 500, { providerId: provider.providerId });
             }
             if (!CredentialBroker.isValidCredentialRef(provider.credentialRef)) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_invalid_credential_ref'),
-                    500,
-                    { providerId: provider.providerId }
-                );
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_invalid_credential_ref'), 500, { providerId: provider.providerId });
             }
             seenProviders.add(provider.providerId);
         }
@@ -166,86 +173,33 @@ export class ModelCatalog {
                 throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_model_alias_invalid'), 500);
             }
             if (seenAliases.has(model.alias)) {
-                throw new AiGatewayError(
-                    'CATALOG_DUPLICATE_ALIAS',
-                    __t('ai.error.catalog_duplicate_alias'),
-                    500,
-                    { alias: model.alias }
-                );
+                throw new AiGatewayError('CATALOG_DUPLICATE_ALIAS', __t('ai.error.catalog_duplicate_alias'), 500, { alias: model.alias });
             }
             seenAliases.add(model.alias);
 
             if (!seenProviders.has(model.providerId)) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_unknown_provider_for_model'),
-                    500,
-                    { alias: model.alias, providerId: model.providerId }
-                );
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_unknown_provider_for_model'), 500, { alias: model.alias, providerId: model.providerId });
             }
-            if (
-                typeof model.providerModelIdRef !== 'string' ||
-                !model.providerModelIdRef.startsWith('secretless-registry://')
-            ) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_invalid_model_id_ref'),
-                    500,
-                    { alias: model.alias }
-                );
+            if (typeof model.providerModelIdRef !== 'string' || !model.providerModelIdRef.startsWith('secretless-registry://')) {
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_invalid_model_id_ref'), 500, { alias: model.alias });
             }
             if (!CredentialBroker.isValidCredentialRef(model.credentialRef)) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_invalid_credential_ref'),
-                    500,
-                    { alias: model.alias }
-                );
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_invalid_credential_ref'), 500, { alias: model.alias });
             }
             if (!['enabled', 'disabled', 'deprecated'].includes(model.status)) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_invalid_status'),
-                    500,
-                    { alias: model.alias, status: model.status }
-                );
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_invalid_status'), 500, { alias: model.alias, status: model.status });
             }
-            if (
-                !Array.isArray(model.allowedRegions) ||
-                model.allowedRegions.length === 0 ||
-                !Array.isArray(model.dataClassifications) ||
-                model.dataClassifications.length === 0 ||
-                !Array.isArray(model.environments) ||
-                model.environments.length === 0
-            ) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_missing_policy_arrays'),
-                    500,
-                    { alias: model.alias }
-                );
+            if (!Array.isArray(model.allowedRegions) || model.allowedRegions.length === 0 ||
+                !Array.isArray(model.dataClassifications) || model.dataClassifications.length === 0 ||
+                !Array.isArray(model.environments) || model.environments.length === 0) {
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_missing_policy_arrays'), 500, { alias: model.alias });
             }
-            if (
-                !model.policy ||
-                typeof model.policy.timeoutMs !== 'number' ||
-                model.policy.timeoutMs <= 0 ||
-                typeof model.policy.maxOutputTokens !== 'number' ||
-                model.policy.maxOutputTokens <= 0
-            ) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_invalid_policy_limits'),
-                    500,
-                    { alias: model.alias }
-                );
+            if (!model.policy || typeof model.policy.timeoutMs !== 'number' || model.policy.timeoutMs <= 0 ||
+                typeof model.policy.maxOutputTokens !== 'number' || model.policy.maxOutputTokens <= 0) {
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_invalid_policy_limits'), 500, { alias: model.alias });
             }
             if (!model.governance || !model.governance.owner || !model.governance.approver) {
-                throw new AiGatewayError(
-                    'CATALOG_INVALID',
-                    __t('ai.error.catalog_missing_governance'),
-                    500,
-                    { alias: model.alias }
-                );
+                throw new AiGatewayError('CATALOG_INVALID', __t('ai.error.catalog_missing_governance'), 500, { alias: model.alias });
             }
         }
     }
@@ -282,8 +236,58 @@ export class ModelCatalog {
         }
         return all.filter(m => {
             const prov = this.providersById.get(m.providerId);
-            return m.status === 'enabled' && prov?.status === 'enabled';
+            return m.status === 'enabled' && m.qualificationState === 'ACTIVE' && prov?.status === 'enabled';
         });
+    }
+
+    public isModelRoutable(alias: string): boolean {
+        const model = this.modelsByAlias.get(alias);
+        if (!model) return false;
+        const prov = this.providersById.get(model.providerId);
+        return model.status === 'enabled' && model.qualificationState === 'ACTIVE' && prov?.status === 'enabled';
+    }
+
+    public getActiveModel(alias: string): CatalogModelEntry | undefined {
+        const model = this.getModel(alias);
+        return (model && model.status === 'enabled' && model.qualificationState === 'ACTIVE') ? model : undefined;
+    }
+
+    public registerDiscoveredModel(model: CatalogModelEntry): void {
+        const entry: CatalogModelEntry = JSON.parse(JSON.stringify(model));
+        entry.qualificationState = 'DISCOVERED';
+        entry.status = 'disabled';
+        this.modelsByAlias.set(entry.alias, entry);
+    }
+
+    public transitionModelLifecycle(
+        alias: string,
+        newState: ModelQualificationState,
+        auth?: AdminAuthContext,
+        reason?: string
+    ): AdminCatalogChangeEvent {
+        if (auth) this.assertAdminAuthorized(auth);
+        const model = this.modelsByAlias.get(alias);
+        if (!model) {
+            throw new AiGatewayError('MODEL_NOT_FOUND', __t('ai.error.model_not_found'), 404, { alias });
+        }
+        const previousState = model.qualificationState || 'DISCOVERED';
+        assertValidLifecycleTransition(previousState, newState);
+        model.qualificationState = newState;
+        if (newState === 'ACTIVE') model.status = 'enabled';
+        else if (newState === 'DISABLED') model.status = 'disabled';
+        else if (newState === 'RETIRED') model.status = 'deprecated';
+
+        const event: AdminCatalogChangeEvent = {
+            timestamp: new Date().toISOString(),
+            actorId: auth?.actorId || 'system',
+            targetType: 'model',
+            targetId: alias,
+            previousStatus: model.status,
+            newStatus: model.status,
+            reason: reason || `Lifecycle transition: ${previousState} -> ${newState}`,
+        };
+        this.changeHistory.push(event);
+        return event;
     }
 
     public listProviders(): CatalogProviderEntry[] {
@@ -336,6 +340,14 @@ export class ModelCatalog {
 
         const provider = this.providersById.get(model.providerId);
         if (status === 'enabled') {
+            if (model.qualificationState === 'DISCOVERED') {
+                throw new AiGatewayError(
+                    'MODEL_DISABLED',
+                    __t('ai.error.model_not_qualified') || 'Transition to ACTIVE requires prior QUALIFIED status; newly discovered models cannot be activated directly.',
+                    409,
+                    { alias, qualificationState: model.qualificationState }
+                );
+            }
             if (!provider || provider.status !== 'enabled') {
                 throw new AiGatewayError(
                     'PROVIDER_DISABLED',
@@ -376,6 +388,9 @@ export class ModelCatalog {
             }
         } else {
             model.status = status;
+            if (status === 'disabled') model.qualificationState = 'DISABLED';
+            else if (status === 'deprecated') model.qualificationState = 'RETIRED';
+            else if (status === 'enabled') model.qualificationState = 'ACTIVE';
         }
 
         const event: AdminCatalogChangeEvent = {
