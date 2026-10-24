@@ -192,14 +192,16 @@ export class ModelLifecycle {
 
   async probeCapability(probeFn) {
     if (this.state !== ModelLifecycleState.POLICY_CHECKED) throw new QualificationGatewayError('INVALID_STATE_TRANSITION', `Capability probe requires POLICY_CHECKED, got ${this.state}`, 400);
+    if (typeof probeFn !== 'function') {
+      this.transitionTo(ModelLifecycleState.DISABLED, 'A genuine provider capability probe is required; no synthetic fallback is allowed');
+      throw new QualificationGatewayError('CAPABILITY_PROBE_REQUIRED', 'A genuine provider capability probe is required; no synthetic fallback is allowed', 503);
+    }
     try {
-      if (typeof probeFn === 'function') {
-        const probeResult = await probeFn(this.model);
-        if (probeResult === false || (probeResult && probeResult.ok === false)) {
-          const reason = probeResult?.reason || 'Capability probe reported unsupported status';
-          this.transitionTo(ModelLifecycleState.DISABLED, reason);
-          throw new QualificationGatewayError('CAPABILITY_UNSUPPORTED', reason, 400);
-        }
+      const capability = await probeFn(this.model);
+      if (!capability || capability.ok !== true || capability.source !== 'airroofers-live-transport') {
+        const reason = (capability && capability.reason) || 'Live provider capability verification failed';
+        this.transitionTo(ModelLifecycleState.DISABLED, reason);
+        throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', reason, 503);
       }
       this.transitionTo(ModelLifecycleState.CAPABILITY_PROBED, 'Capabilities probed and verified');
       return this;
@@ -377,8 +379,10 @@ export async function runModelQualification(options = {}) {
       try {
         lifecycle.validateSchema();
         lifecycle.checkPolicy({ secret: liveKey, requireCredentials: true });
-        if (isProduction && !options.probeFn) throw new QualificationGatewayError('CAPABILITY_PROBE_REQUIRED', 'Production execution requires genuine capability probe function; default fallback prohibited', 400);
-        await lifecycle.probeCapability(options.probeFn || (async () => ({ ok: true })));
+        if (typeof options.probeFn !== 'function') throw new QualificationGatewayError('CAPABILITY_PROBE_REQUIRED', 'A genuine provider capability probe is required; no synthetic fallback is allowed', 503);
+        const capability = await options.probeFn(rawModel);
+        if (!capability || capability.ok !== true || capability.source !== 'airroofers-live-transport') throw new QualificationGatewayError('CAPABILITY_PROBE_FAILED', 'Live provider capability verification failed', 503);
+        await lifecycle.probeCapability(async () => capability);
 
         const executeProbe = options.executeProbe || (async (model) => {
           const { endpoint, key } = validateEndpointAndCredentials(liveBaseUrl || 'https://ai.airroofers.eu', liveKey);

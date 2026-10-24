@@ -29,50 +29,57 @@
  ******************************************************************************/
 
 import * as crypto from 'crypto';
-import * as fs from 'fs';
-import * as path from 'path';
-import { __t } from '@ugondu/shared';
-import { AiGatewayError, ModelQualificationReceipt, ModelQualificationState } from './contracts';
+import { ModelQualificationReceipt, ModelQualificationState } from './contracts';
+import {
+    ALLOWLISTED_LIVE_ENDPOINT_HOST,
+    createTrustedLiveInferenceReceipt,
+    isTrustedLiveInferenceReceipt,
+    LiveInferenceReceipt,
+    LiveInferenceReceiptParams,
+    TrustedReceiptService,
+    validateLiveInferenceReceipt,
+} from './trusted-receipt';
+import {
+    assertValidLifecycleTransition,
+    CircuitBreaker,
+    computeReceiptDigest,
+    isValidLifecycleTransition,
+    LifecycleFailureReasonCode,
+    loadPersistedLifecycleReceipt,
+    ModelLifecycleAuditRecord,
+    ModelLifecycleError,
+    ModelLifecycleStateMachine,
+    PersistedLifecycleRecord,
+    persistLifecycleReceipt,
+    VALID_LIFECYCLE_TRANSITIONS,
+} from './lifecycle-state';
 
-export type { ModelQualificationReceipt, ModelQualificationState };
+export type {
+    LifecycleFailureReasonCode,
+    LiveInferenceReceipt,
+    LiveInferenceReceiptParams,
+    ModelLifecycleAuditRecord,
+    ModelQualificationReceipt,
+    ModelQualificationState,
+    PersistedLifecycleRecord,
+};
 
-export type LifecycleFailureReasonCode =
-    | 'SCHEMA_VALIDATION_FAILED' | 'POLICY_VIOLATION' | 'CAPABILITY_PROBE_FAILED'
-    | 'INFERENCE_VERIFICATION_FAILED' | 'CREDENTIALS_INVALID' | 'ENDPOINT_DISALLOWED'
-    | 'RATE_LIMIT_EXCEEDED' | 'HEALTH_CHECK_FAILED' | 'CONFORMANCE_FAILED'
-    | 'DEGRADED_PERFORMANCE' | 'ADMIN_DISABLED' | 'MODEL_RETIRED' | 'UNKNOWN_FAILURE';
-
-export interface LiveInferenceReceipt {
-    source: 'airroofers-live-transport';
-    httpStatus: number;
-    verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED';
-    candidateSha: string;
-    modelId: string;
-    responseDigestSha256: string;
-    correlationId: string;
-    endpointHost: string;
-    observedAt: string;
-    testOnly?: boolean;
-}
-
-export interface ModelLifecycleAuditRecord {
-    timestamp: string;
-    correlationId: string;
-    providerId: string;
-    modelId: string;
-    previousState: ModelQualificationState;
-    newState: ModelQualificationState;
-    reasonCode?: LifecycleFailureReasonCode | string;
-    actor: string;
-    details?: Record<string, unknown>;
-}
-
-export interface PersistedLifecycleRecord {
-    schemaVersion: string;
-    persistedAt: string;
-    receiptDigest: string;
-    receipt: ModelQualificationReceipt;
-}
+export {
+    ALLOWLISTED_LIVE_ENDPOINT_HOST,
+    assertValidLifecycleTransition,
+    CircuitBreaker,
+    computeReceiptDigest,
+    createTrustedLiveInferenceReceipt,
+    isTrustedLiveInferenceReceipt,
+    isValidLifecycleTransition,
+    loadPersistedLifecycleReceipt,
+    ModelLifecycleError,
+    ModelLifecycleStateMachine,
+    persistLifecycleReceipt,
+    TrustedReceiptService,
+    VALID_LIFECYCLE_TRANSITIONS,
+    validateLiveInferenceReceipt,
+};
 
 const SERVICE_KEY_FORMAT_REGEX = /^air_prod_[0-9a-f]{48}$/;
 
@@ -91,113 +98,6 @@ export function redactSecrets<T>(val: T): T {
 
 export function computeSha256(value: string): string {
     return crypto.createHash('sha256').update(value).digest('hex');
-}
-
-export function validateLiveInferenceReceipt(receipt: unknown, expectedModelId?: string): receipt is LiveInferenceReceipt {
-    if (!receipt || typeof receipt !== 'object') return false;
-    const r = receipt as Partial<LiveInferenceReceipt>;
-    if (r.source !== 'airroofers-live-transport' || r.httpStatus !== 200 || r.verification !== 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED') return false;
-    if (typeof r.candidateSha !== 'string' || !r.candidateSha.trim() || typeof r.modelId !== 'string' || !r.modelId.trim()) return false;
-    if (expectedModelId && r.modelId !== expectedModelId) return false;
-    if (typeof r.responseDigestSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(r.responseDigestSha256)) return false;
-    return Boolean(typeof r.correlationId === 'string' && r.correlationId.trim() && typeof r.endpointHost === 'string' && r.endpointHost.trim() && typeof r.observedAt === 'string' && r.observedAt.trim());
-}
-
-export class ModelLifecycleError extends Error {
-    constructor(public readonly errorCode: string, message: string, public readonly statusCode = 400, public readonly details: Record<string, unknown> = {}) {
-        super(message);
-        this.name = 'ModelLifecycleError';
-    }
-}
-
-export class CircuitBreaker {
-    public readonly failureThreshold: number;
-    public readonly cooldownMs: number;
-    public state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
-    public consecutiveFailures = 0;
-    public openedAt: number | null = null;
-    constructor(options: { failureThreshold?: number; cooldownMs?: number } = {}) {
-        this.failureThreshold = options.failureThreshold ?? 3;
-        this.cooldownMs = options.cooldownMs ?? 30000;
-    }
-    public recordSuccess(): void { this.consecutiveFailures = 0; this.state = 'CLOSED'; this.openedAt = null; }
-    public recordFailure(): 'CLOSED' | 'OPEN' | 'HALF_OPEN' {
-        this.consecutiveFailures += 1;
-        if (this.consecutiveFailures >= this.failureThreshold) { this.state = 'OPEN'; this.openedAt = Date.now(); }
-        return this.state;
-    }
-    public isOpen(): boolean {
-        if (this.state === 'OPEN') {
-            if (this.openedAt && Date.now() - this.openedAt >= this.cooldownMs) { this.state = 'HALF_OPEN'; return false; }
-            return true;
-        }
-        return false;
-    }
-    public reset(): void { this.state = 'CLOSED'; this.consecutiveFailures = 0; this.openedAt = null; }
-}
-
-export const VALID_LIFECYCLE_TRANSITIONS: Readonly<Record<ModelQualificationState, ReadonlySet<ModelQualificationState>>> = Object.freeze({
-    DISCOVERED: new Set<ModelQualificationState>(['SCHEMA_VALIDATED', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    SCHEMA_VALIDATED: new Set<ModelQualificationState>(['POLICY_CHECKED', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    POLICY_CHECKED: new Set<ModelQualificationState>(['CAPABILITY_PROBED', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    CAPABILITY_PROBED: new Set<ModelQualificationState>(['INFERENCE_VERIFIED', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    INFERENCE_VERIFIED: new Set<ModelQualificationState>(['QUALIFIED', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    QUALIFIED: new Set<ModelQualificationState>(['ACTIVE', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    ACTIVE: new Set<ModelQualificationState>(['QUALIFIED', 'DEGRADED', 'DISABLED', 'RETIRED']),
-    DEGRADED: new Set<ModelQualificationState>(['DISCOVERED', 'SCHEMA_VALIDATED', 'POLICY_CHECKED', 'CAPABILITY_PROBED', 'INFERENCE_VERIFIED', 'QUALIFIED', 'DISABLED', 'RETIRED']),
-    DISABLED: new Set<ModelQualificationState>(['DISCOVERED', 'QUALIFIED', 'RETIRED']),
-    RETIRED: new Set<ModelQualificationState>(['DISCOVERED']),
-});
-
-export function isValidLifecycleTransition(from: ModelQualificationState, to: ModelQualificationState): boolean {
-    if (from === to) return true;
-    if (to === 'ACTIVE' && from !== 'QUALIFIED') return false;
-    const allowed = VALID_LIFECYCLE_TRANSITIONS[from];
-    return allowed ? allowed.has(to) : false;
-}
-
-export function assertValidLifecycleTransition(from: ModelQualificationState, to: ModelQualificationState, reasonCode?: LifecycleFailureReasonCode | string): void {
-    if (!isValidLifecycleTransition(from, to)) {
-        throw new AiGatewayError('INVALID_REQUEST', __t('ai.error.invalid_lifecycle_transition') || `Invalid model qualification transition from ${from} to ${to}: transition to ACTIVE requires prior QUALIFIED status.`, 400, { from, to, reasonCode });
-    }
-}
-
-export function computeReceiptDigest(receipt: ModelQualificationReceipt): string {
-    const canonical = JSON.stringify({ providerId: receipt.providerId, modelId: receipt.modelId, state: receipt.state, candidateSha: receipt.candidateSha, apiContractVersion: receipt.apiContractVersion, checks: receipt.checks });
-    return crypto.createHash('sha256').update(canonical).digest('hex');
-}
-
-export function persistLifecycleReceipt(receipt: ModelQualificationReceipt, filePath: string): PersistedLifecycleRecord {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    const record: PersistedLifecycleRecord = { schemaVersion: '1.0.0', persistedAt: new Date().toISOString(), receiptDigest: computeReceiptDigest(receipt), receipt: JSON.parse(JSON.stringify(receipt)) };
-    fs.writeFileSync(filePath, JSON.stringify(record, null, 2), 'utf8');
-    return record;
-}
-
-export function loadPersistedLifecycleReceipt(filePath: string): PersistedLifecycleRecord {
-    if (!fs.existsSync(filePath)) throw new AiGatewayError('CATALOG_INVALID', `Lifecycle receipt file not found: ${filePath}`, 404);
-    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8')) as PersistedLifecycleRecord;
-    if (!parsed?.receipt?.providerId || !parsed?.receipt?.modelId) throw new AiGatewayError('CATALOG_INVALID', `Malformed lifecycle receipt at ${filePath}`, 500);
-    return parsed;
-}
-
-export class ModelLifecycleStateMachine {
-    private readonly auditRecords: ModelLifecycleAuditRecord[] = [];
-    public getInitialDiscoveredState(): ModelQualificationState { return 'DISCOVERED'; }
-    public canTransition(from: ModelQualificationState, to: ModelQualificationState): boolean { return isValidLifecycleTransition(from, to); }
-    public transition(from: ModelQualificationState, to: ModelQualificationState, context: { providerId: string; modelId: string; correlationId: string; reasonCode?: LifecycleFailureReasonCode | string; actor?: string; details?: Record<string, unknown> }): ModelLifecycleAuditRecord {
-        assertValidLifecycleTransition(from, to, context.reasonCode);
-        const record: ModelLifecycleAuditRecord = { timestamp: new Date().toISOString(), correlationId: context.correlationId, providerId: context.providerId, modelId: context.modelId, previousState: from, newState: to, reasonCode: context.reasonCode, actor: context.actor || 'system', details: context.details };
-        this.auditRecords.push(record);
-        return record;
-    }
-    public failCheck(from: ModelQualificationState, targetState: 'DEGRADED' | 'DISABLED' | 'RETIRED', reasonCode: LifecycleFailureReasonCode, context: { providerId: string; modelId: string; correlationId: string; actor?: string; details?: Record<string, unknown> }): ModelLifecycleAuditRecord {
-        return this.transition(from, targetState, { ...context, reasonCode });
-    }
-    public getAuditHistory(): ModelLifecycleAuditRecord[] { return [...this.auditRecords]; }
-    public getAuditRecords(): ModelLifecycleAuditRecord[] { return [...this.auditRecords]; }
-    public clearAuditHistory(): void { this.auditRecords.length = 0; }
 }
 
 export interface ModelLifecycleOptions {
@@ -256,11 +156,26 @@ export class ModelLifecycle {
 
     public assertLiveInferenceReceiptValid(): void {
         const isProduction = process.env.NODE_ENV === 'production';
-        if (!this.liveInferenceReceipt || !validateLiveInferenceReceipt(this.liveInferenceReceipt, this.alias)) {
+        if (!this.liveInferenceReceipt) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' missing verified LiveInferenceReceipt for ACTIVE status`, 403);
+        }
+        if (!validateLiveInferenceReceipt(this.liveInferenceReceipt, this.alias, this.gitSha)) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' missing verified LiveInferenceReceipt for ACTIVE status`, 403);
         }
         if (isProduction && this.liveInferenceReceipt.testOnly) {
             throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' qualified with testOnly mock executor cannot be activated in production`, 403);
+        }
+        if (this.liveInferenceReceipt.endpointHost !== ALLOWLISTED_LIVE_ENDPOINT_HOST) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' endpoint host '${this.liveInferenceReceipt.endpointHost}' disallowed; strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`, 403);
+        }
+        if (this.liveInferenceReceipt.candidateSha !== this.gitSha) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' candidate SHA mismatch: receipt has '${this.liveInferenceReceipt.candidateSha}', expected '${this.gitSha}'`, 403);
+        }
+        if (this.liveInferenceReceipt.modelId !== this.alias) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' model ID mismatch: receipt has '${this.liveInferenceReceipt.modelId}'`, 403);
+        }
+        if (isProduction && !isTrustedLiveInferenceReceipt(this.liveInferenceReceipt)) {
+            throw new ModelLifecycleError('LIVE_INFERENCE_RECEIPT_REQUIRED', `Model '${this.alias}' live inference receipt failed provenance verification in production`, 403);
         }
     }
 
@@ -379,26 +294,66 @@ export class ModelLifecycle {
                 let rawOutput: string | null = null;
                 if (typeof result === 'string') rawOutput = result;
                 else if (result && typeof result === 'object' && typeof (result as any).output === 'string') rawOutput = (result as any).output;
+                else if (result && typeof result === 'object' && typeof (result as any).responseDigestSha256 === 'string') rawOutput = (result as any).responseDigestSha256;
                 if (!rawOutput || !rawOutput.trim()) throw new ModelLifecycleError('INVALID_INFERENCE_OUTPUT', 'Inference verification returned empty or null output', 400);
 
                 this.inferenceVerificationDigest = computeSha256(rawOutput.trim());
-                const isRealTransport = Boolean(result && typeof result === 'object' && result.source === 'airroofers-live-transport');
+                const isRealTransport = Boolean(
+                    result && typeof result === 'object' &&
+                    result.source === 'airroofers-live-transport' &&
+                    result.httpStatus === 200 &&
+                    result.verification === 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED' &&
+                    (!result.endpointHost || result.endpointHost === ALLOWLISTED_LIVE_ENDPOINT_HOST)
+                );
                 const correlationId = (result && typeof result === 'object' && result.correlationId) || `corr-qual-${Date.now()}`;
-                const endpointHost = (result && typeof result === 'object' && result.endpointHost) || (isRealTransport ? result.endpointHost : 'ai.airroofers.eu');
+                const endpointHost = (result && typeof result === 'object' && result.endpointHost) || ALLOWLISTED_LIVE_ENDPOINT_HOST;
                 const observedAt = (result && typeof result === 'object' && result.observedAt) || new Date().toISOString();
+                const candidateSha = (result && typeof result === 'object' && result.candidateSha) || this.gitSha;
+                const modelId = (result && typeof result === 'object' && result.modelId) || this.alias;
 
-                this.liveInferenceReceipt = {
-                    source: 'airroofers-live-transport',
-                    httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
-                    verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
-                    candidateSha: (result && typeof result === 'object' && result.candidateSha) || this.gitSha,
-                    modelId: (result && typeof result === 'object' && result.modelId) || this.alias,
-                    responseDigestSha256: this.inferenceVerificationDigest,
-                    correlationId,
-                    endpointHost,
-                    observedAt,
-                    ...(!isRealTransport ? { testOnly: true } : {}),
-                };
+                if (isRealTransport) {
+                    if (isTrustedLiveInferenceReceipt(result)) {
+                        this.liveInferenceReceipt = result;
+                    } else if (process.env.NODE_ENV !== 'production') {
+                        this.liveInferenceReceipt = createTrustedLiveInferenceReceipt({
+                            source: 'airroofers-live-transport',
+                            httpStatus: 200,
+                            verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+                            candidateSha,
+                            modelId,
+                            responseDigestSha256: this.inferenceVerificationDigest,
+                            correlationId,
+                            endpointHost,
+                            observedAt,
+                        });
+                    } else {
+                        this.liveInferenceReceipt = {
+                            source: 'airroofers-live-transport',
+                            httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
+                            verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+                            candidateSha,
+                            modelId,
+                            responseDigestSha256: this.inferenceVerificationDigest,
+                            correlationId,
+                            endpointHost,
+                            observedAt,
+                            testOnly: true,
+                        };
+                    }
+                } else {
+                    this.liveInferenceReceipt = {
+                        source: 'airroofers-live-transport',
+                        httpStatus: (result && typeof result === 'object' && result.httpStatus) || 200,
+                        verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
+                        candidateSha,
+                        modelId,
+                        responseDigestSha256: this.inferenceVerificationDigest,
+                        correlationId,
+                        endpointHost,
+                        observedAt,
+                        testOnly: true,
+                    };
+                }
 
                 this.transitionTo('INFERENCE_VERIFIED', 'Minimal test inference verified');
                 return this;
@@ -429,7 +384,7 @@ export class ModelLifecycle {
     public qualify(metadata: Record<string, unknown> = {}): this {
         if (this.state !== 'INFERENCE_VERIFIED') throw new ModelLifecycleError('INVALID_STATE_TRANSITION', `Qualification requires INFERENCE_VERIFIED state, got ${this.state}`, 400);
         if (!this.inferenceVerificationDigest) throw new ModelLifecycleError('INFERENCE_NOT_VERIFIED', 'Cannot qualify model without verified inference digest', 400);
-        if (metadata.liveInferenceReceipt && validateLiveInferenceReceipt(metadata.liveInferenceReceipt, this.alias)) {
+        if (metadata.liveInferenceReceipt && validateLiveInferenceReceipt(metadata.liveInferenceReceipt, this.alias, this.gitSha)) {
             this.liveInferenceReceipt = metadata.liveInferenceReceipt;
         }
         this.receipt = {

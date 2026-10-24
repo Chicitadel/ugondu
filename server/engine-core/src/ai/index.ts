@@ -29,6 +29,8 @@
  ******************************************************************************/
 
 export * from './contracts';
+export * from './trusted-receipt';
+export * from './lifecycle-state';
 export * from './model-lifecycle';
 export * from './credential-broker';
 export * from './model-catalog';

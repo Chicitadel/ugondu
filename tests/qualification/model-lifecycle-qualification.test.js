@@ -52,7 +52,7 @@ test('LIFECYCLE-001: Newly discovered model defaults to DISCOVERED and cannot ro
   assert.strictEqual(lifecycle.state, ModelLifecycleState.SCHEMA_VALIDATED);
   lifecycle.checkPolicy();
   assert.strictEqual(lifecycle.state, ModelLifecycleState.POLICY_CHECKED);
-  await lifecycle.probeCapability(async () => ({ ok: true }));
+  await lifecycle.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
   assert.strictEqual(lifecycle.state, ModelLifecycleState.CAPABILITY_PROBED);
   await lifecycle.verifyInference(async () => ({ output: 'test-inference-response' }));
   assert.strictEqual(lifecycle.state, ModelLifecycleState.INFERENCE_VERIFIED);
@@ -101,7 +101,10 @@ test('LIFECYCLE-005: Negative path - capability probe failure transitions to DIS
   const lifecycle = new ModelLifecycle({ alias: 'unsupported-capability-model', providerId: 'airroofers-ai' });
   lifecycle.validateSchema();
   lifecycle.checkPolicy();
-  await assert.rejects(async () => { await lifecycle.probeCapability(async () => ({ ok: false, reason: 'Modalities unsupported on sovereign edge' })); }, (err) => err.errorCode === 'CAPABILITY_UNSUPPORTED');
+  await assert.rejects(
+    async () => { await lifecycle.probeCapability(async () => ({ ok: false, reason: 'Modalities unsupported on sovereign edge' })); },
+    (err) => err.errorCode === 'CAPABILITY_PROBE_FAILED' && err.statusCode === 503
+  );
   assert.strictEqual(lifecycle.state, ModelLifecycleState.DISABLED);
   assert.strictEqual(lifecycle.canRoute(), false);
 });
@@ -111,7 +114,7 @@ test('LIFECYCLE-006: 429 rate limit backoff and circuit breaking trips to OPEN o
   const lifecycle = new ModelLifecycle({ alias: 'rate-limited-model', providerId: 'airroofers-ai' }, { circuitBreakerOptions: { failureThreshold: 2, cooldownMs: 5000 } });
   lifecycle.validateSchema();
   lifecycle.checkPolicy();
-  await lifecycle.probeCapability(async () => ({ ok: true }));
+  await lifecycle.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
   const mock429 = async () => { throw new QualificationGatewayError('PROVIDER_RATE_LIMITED', 'Upstream provider rate limited (429)', 429); };
   await assert.rejects(async () => { await lifecycle.verifyInference(mock429, { maxRetries: 2, initialBackoffMs: 10 }); }, (err) => err.errorCode === 'CIRCUIT_OPEN' || err.errorCode === 'PROVIDER_RATE_LIMITED');
   assert.strictEqual(lifecycle.circuitBreaker.isOpen(), true);
@@ -124,7 +127,12 @@ test('LIFECYCLE-007: Secret redaction in all receipts, diagnostics, and error me
   broker.registerWorkloadSecret(SECRET_REF, MOCK_SECRET_KEY);
   const rawModel = { alias: 'secret-protected-model', providerId: 'airroofers-ai', credentialRef: SECRET_REF, capabilities: { modalities: ['text'], streaming: false, toolCalling: true } };
   const lifecycle = new ModelLifecycle(rawModel);
-  await lifecycle.runFullLifecycle({ credentialBroker: broker, receiptMetadata: { diagnosticOutput: `Verified with Bearer ${MOCK_SECRET_KEY}` }, executeFn: async () => ({ output: `Verified with Bearer ${MOCK_SECRET_KEY}` }) });
+  await lifecycle.runFullLifecycle({
+    credentialBroker: broker,
+    probeFn: async () => ({ ok: true, source: 'airroofers-live-transport' }),
+    receiptMetadata: { diagnosticOutput: `Verified with Bearer ${MOCK_SECRET_KEY}` },
+    executeFn: async () => ({ output: `Verified with Bearer ${MOCK_SECRET_KEY}` }),
+  });
   const receiptStr = JSON.stringify(lifecycle.getReceipt());
   assert.strictEqual(receiptStr.includes(MOCK_SECRET_KEY), false);
   assert.ok(receiptStr.includes('[REDACTED_SECRET]'));
@@ -155,7 +163,7 @@ test('LIFECYCLE-009: Attempting to mark a model ACTIVE without real live executi
   const lifecycle = new ModelLifecycle({ alias: 'sentinel-fake-active', providerId: 'airroofers-ai' });
   lifecycle.validateSchema();
   lifecycle.checkPolicy();
-  await lifecycle.probeCapability(async () => ({ ok: true }));
+  await lifecycle.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
   await assert.rejects(async () => { await lifecycle.verifyInference(null); }, (err) => err.errorCode === 'EXECUTION_FUNCTION_REQUIRED');
   await assert.rejects(async () => { await lifecycle.verifyInference(async () => ({ output: '' })); }, (err) => err.errorCode === 'INFERENCE_OUTPUT_EMPTY');
   await lifecycle.verifyInference(async () => ({ output: 'authentic-probe-output', latencyMs: 35, correlationId: 'corr-fake-active-01' }));
@@ -170,9 +178,11 @@ test('LIFECYCLE-009: Attempting to mark a model ACTIVE without real live executi
 test('LIFECYCLE-010: Live qualification passes when valid credentials and executor are provided', async () => {
   const { runModelQualification } = await loadLifecycleModule();
   const mockExecutor = async (model) => ({ output: `Authentic live probe output for ${model.alias}`, latencyMs: 42, correlationId: 'corr-test-live-qual-001' });
+  const mockProbe = async (model) => ({ ok: true, source: 'airroofers-live-transport' });
   const report = await runModelQualification({
     mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
     discoveredModels: [{ alias: 'sentinel-guard-v1', providerId: 'airroofers-ai', capabilities: { modalities: ['text'], streaming: false, toolCalling: true } }],
+    probeFn: mockProbe,
     executeProbe: mockExecutor,
   });
   assert.ok(report);
@@ -207,23 +217,16 @@ test('LIFECYCLE-012: Missing catalog throws MODEL_CATALOG_UNAVAILABLE instead of
   );
 });
 
-test('LIFECYCLE-013: Production mode without genuine capability probe fails closed with CAPABILITY_PROBE_REQUIRED', async () => {
+test('LIFECYCLE-013: Live sovereign mode without genuine capability probe fails closed with CAPABILITY_PROBE_REQUIRED', async () => {
   const { runModelQualification } = await loadLifecycleModule();
-  const prevEnv = process.env.NODE_ENV;
-  process.env.NODE_ENV = 'production';
-  try {
-    const report = await runModelQualification({
-      mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
-      discoveredModels: [{ alias: 'prod-probe-check', providerId: 'airroofers-ai' }],
-      executeProbe: async () => ({ output: 'ok' }),
-    });
-    // In production without probeFn, model qualification fails capability probe check and defaults to DISABLED
-    assert.strictEqual(report.summary.activeCount, 0);
-    assert.strictEqual(report.summary.disabledCount, 1);
-    assert.strictEqual(report.diagnostics[0].errorCode, 'CAPABILITY_PROBE_REQUIRED');
-  } finally {
-    process.env.NODE_ENV = prevEnv;
-  }
+  const report = await runModelQualification({
+    mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
+    discoveredModels: [{ alias: 'missing-probe-check', providerId: 'airroofers-ai' }],
+    executeProbe: async () => ({ output: 'ok' }),
+  });
+  assert.strictEqual(report.summary.activeCount, 0);
+  assert.strictEqual(report.summary.disabledCount, 1);
+  assert.strictEqual(report.diagnostics[0].errorCode, 'CAPABILITY_PROBE_REQUIRED');
 });
 
 test('LIFECYCLE-014: Endpoint and credential validation throws typed errors (400, 403, 503)', async () => {
@@ -243,7 +246,7 @@ test('LIFECYCLE-015: In production mode, injected mock executor marks receipt te
     const lc = new ModelLifecycle({ alias: 'prod-guard', providerId: 'airroofers-ai' });
     lc.validateSchema();
     lc.checkPolicy({ secret: MOCK_SECRET_KEY });
-    await lc.probeCapability(async () => ({ ok: true }));
+    await lc.probeCapability(async () => ({ ok: true, source: 'airroofers-live-transport' }));
     await lc.verifyInference(async () => ({ output: 'mocked output' }));
     assert.strictEqual(lc.liveInferenceReceipt?.testOnly, true);
     lc.qualify({ liveExecution: true }); // Caller-injected Boolean flag must be disallowed
@@ -253,4 +256,35 @@ test('LIFECYCLE-015: In production mode, injected mock executor marks receipt te
   } finally {
     process.env.NODE_ENV = prevEnv;
   }
+});
+
+test('LIFECYCLE-016: Missing probeFn in probeCapability throws CAPABILITY_PROBE_REQUIRED (503)', async () => {
+  const { ModelLifecycle, ModelLifecycleState } = await loadLifecycleModule();
+  const lc = new ModelLifecycle({ alias: 'probe-missing-fn-guard', providerId: 'airroofers-ai' });
+  lc.validateSchema();
+  lc.checkPolicy();
+  await assert.rejects(async () => { await lc.probeCapability(null); }, (err) => err.errorCode === 'CAPABILITY_PROBE_REQUIRED' && err.statusCode === 503);
+  assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
+});
+
+test('LIFECYCLE-017: Fake probeFn without source: airroofers-live-transport throws CAPABILITY_PROBE_FAILED (503)', async () => {
+  const { ModelLifecycle, ModelLifecycleState } = await loadLifecycleModule();
+  const lc = new ModelLifecycle({ alias: 'probe-fake-source-guard', providerId: 'airroofers-ai' });
+  lc.validateSchema();
+  lc.checkPolicy();
+  await assert.rejects(async () => { await lc.probeCapability(async () => ({ ok: true })); }, (err) => err.errorCode === 'CAPABILITY_PROBE_FAILED' && err.statusCode === 503);
+  assert.strictEqual(lc.state, ModelLifecycleState.DISABLED);
+});
+
+test('LIFECYCLE-018: Live qualification with fake probeFn fails closed with CAPABILITY_PROBE_FAILED', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+  const report = await runModelQualification({
+    mode: 'LIVE_SOVEREIGN', secret: MOCK_SECRET_KEY, baseUrl: 'https://ai.airroofers.eu',
+    discoveredModels: [{ alias: 'synthetic-probe-model', providerId: 'airroofers-ai' }],
+    probeFn: async () => ({ ok: true }), // Missing source: airroofers-live-transport
+    executeProbe: async () => ({ output: 'ok' }),
+  });
+  assert.strictEqual(report.summary.activeCount, 0);
+  assert.strictEqual(report.summary.disabledCount, 1);
+  assert.strictEqual(report.diagnostics[0].errorCode, 'CAPABILITY_PROBE_FAILED');
 });

@@ -373,3 +373,60 @@ test('FRESH-021: missing ai_model_qualification_report.json file causes verifica
     /Evidence file missing or outside repository: docs\/security\/evidence\/ai_model_qualification_report\.json/
   );
 });
+
+test('FRESH-022: mismatched expected candidate SHA fails closed', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+
+  const mismatchedSha = '1'.repeat(40);
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir, expectedCandidateSha: mismatchedSha }),
+    new RegExp(`Candidate SHA mismatch: manifest ${candidate} != expected ${mismatchedSha}`)
+  );
+
+  const prevEnv = process.env.COR_CANDIDATE_SHA;
+  try {
+    process.env.COR_CANDIDATE_SHA = mismatchedSha;
+    assert.throws(
+      () => verifyEvidenceFreshness({ root: dir }),
+      new RegExp(`Candidate SHA mismatch: manifest ${candidate} != expected ${mismatchedSha}`)
+    );
+
+    process.env.COR_CANDIDATE_SHA = candidate;
+    const r = verifyEvidenceFreshness({ root: dir });
+    assert.equal(r.candidate, candidate);
+  } finally {
+    if (prevEnv === undefined) {
+      delete process.env.COR_CANDIDATE_SHA;
+    } else {
+      process.env.COR_CANDIDATE_SHA = prevEnv;
+    }
+  }
+});
+
+test('FRESH-023: verification failure generates diagnostic report artifact in .cor_evidence', async () => {
+  const { verifyEvidenceFreshness, writeDiagnosticReport } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+
+  const mismatchedSha = '2'.repeat(40);
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir, expectedCandidateSha: mismatchedSha, writeDiagnosticOnFailure: true }),
+    /Candidate SHA mismatch/
+  );
+
+  const diagPath = path.join(dir, '.cor_evidence', 'diagnostic-report.json');
+  assert.ok(fs.existsSync(diagPath), 'Diagnostic report must exist in .cor_evidence upon failure');
+  const report = JSON.parse(fs.readFileSync(diagPath, 'utf8'));
+  assert.ok(report.timestamp, 'Diagnostic report must contain timestamp');
+  assert.equal(report.candidate, candidate);
+  assert.match(report.error, /Candidate SHA mismatch/);
+  assert.ok(report.stack, 'Diagnostic report must contain stack trace');
+
+  const customPath = writeDiagnosticReport(dir, '3'.repeat(40), new Error('Simulated failure'));
+  assert.ok(fs.existsSync(customPath));
+  const customReport = JSON.parse(fs.readFileSync(customPath, 'utf8'));
+  assert.equal(customReport.candidate, '3'.repeat(40));
+  assert.equal(customReport.error, 'Simulated failure');
+});
