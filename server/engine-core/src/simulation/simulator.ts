@@ -14,6 +14,11 @@
 
 import { ExecutionGraphDAG } from '../compiler/dag';
 
+/**
+ * @interface SimulationResult
+ * @description Corporate Governed interface implementation for SimulationResult
+ * @classification ENTERPRISE
+ */
 export interface SimulationResult {
     riskScore: number; // 0.0 (zero risk) to 1.0 (extreme risk)
     riskCategory: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -24,6 +29,11 @@ export interface SimulationResult {
     policyViolations: string[];
 }
 
+/**
+ * @class DeploymentSimulator
+ * @description Corporate Governed class implementation for DeploymentSimulator
+ * @classification ENTERPRISE
+ */
 export class DeploymentSimulator {
     public static simulateExecution(dag: ExecutionGraphDAG, targetEnvironment: string): SimulationResult {
         let riskScore = 0.1; // Base nominal risk

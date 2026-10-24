@@ -1,0 +1,60 @@
+# Project: Ugondu Platform | Module: Qualification — AI Live Canary
+# Author: Ujomor Systems Engineering & Governance Authority
+# Organization: Air Roofers SASU
+# Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
+#
+# Runs ONLY on manual dispatch or push to protected branches.
+# Never triggered by pull_request, so forks cannot reach the secret.
+name: ai-live-canary
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, 'release/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-live-canary-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  live-canary:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: '20'
+
+      - name: Require credential secret
+        env:
+          UGONDU_AIRROOFERS_AI_KEY: ${{ secrets.UGONDU_AIRROOFERS_AI_KEY }}
+        run: |
+          if [ -z "${UGONDU_AIRROOFERS_AI_KEY}" ]; then
+            echo "::error::UGONDU_AIRROOFERS_AI_KEY is not configured; failing closed"
+            exit 1
+          fi
+
+      - name: Run live canary
+        env:
+          UGONDU_AIRROOFERS_AI_KEY: ${{ secrets.UGONDU_AIRROOFERS_AI_KEY }}
+          UGONDU_AIRROOFERS_AI_BASE_URL: https://ai.airroofers.eu
+        run: node scripts/qualification/airroofers-ai-live-canary.mjs
+
+      - name: Upload redacted receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ai-live-canary-receipt
+          path: docs/security/evidence/live_ai_canary_receipt.json
+          if-no-files-found: error
+          retention-days: 90

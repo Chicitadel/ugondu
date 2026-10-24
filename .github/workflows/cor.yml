@@ -1,0 +1,326 @@
+name: COR Certification
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - phase4/production-hardening
+      - 'phase4/**'
+      - 'audit/**'
+  pull_request:
+    branches:
+      - main
+      - phase4/production-hardening
+      - 'phase4/**'
+      - 'audit/**'
+
+concurrency:
+  group: cor-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cor:
+    name: COR Certification
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      NODE_VERSION: "20"
+      COR_SIGNING_KEY: ${{ secrets.COR_SIGNING_KEY }}
+      COR_PUBLIC_KEY: ${{ secrets.COR_PUBLIC_KEY }}
+      UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+      UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
+
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Assert EXACT SHA
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Assert clean checkout
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain)"
+
+      - name: Setup Node
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate locales
+        run: node scripts/validate-locales.js
+
+      - name: I18N audit
+        run: node scripts/i18n_audit.js
+
+      - name: Architecture depth scan
+        run: node scripts/depth_scan.js
+
+      - name: Import scan
+        run: node scripts/import_scan.js
+
+      - name: Type check
+        run: npm exec --workspaces -- tsc --noEmit --skipLibCheck
+
+      - name: Workspace tests
+        run: npm run test --workspaces
+      
+      - name: Run COR remediation regression suite
+        env:
+          UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+          UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
+        run: |
+          node tests/cor-remediation.test.js
+          node tests/qualification/evidence-pipeline-adversarial.test.js
+          node tests/qualification/shared-execution-and-mode-parity.test.js
+          node tests/qualification/cor-workflow-gates.test.js
+
+      - name: Verify externally pinned AWS policy-pack signature
+        env:
+          UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+          UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
+        run: node scripts/governance/verify-policy-pack-digests.mjs
+
+      - name: Verify externally pinned release evidence bundle
+        env:
+          UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+          UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
+        run: node scripts/release/verify-evidence-bundle.mjs --verify
+
+      - name: Verify evidence freshness (candidate-bound, evidence-only descendant)
+        run: |
+          node --test tests/qualification/evidence-freshness.test.js
+          node scripts/governance/verify-evidence-freshness.mjs
+
+      - name: Release integrity
+        run: npm run verify:release-integrity
+
+      - name: Verify COR signing trust root
+        if: github.event_name != 'pull_request'
+        run: node scripts/ci/verify-trust-root.js
+
+      - name: Validate stream registry
+        run: node scripts/check-cor-stream-registry.js
+
+      - name: Run fresh COR qualification
+        run: node scripts/cor-engine.js
+
+      - name: Independently finalize COR
+        run: node scripts/cor-finalize.js
+
+      - name: Sign final COR authority
+        if: github.event_name != 'pull_request'
+        run: node scripts/cor-signer.js
+
+      - name: Final candidate integrity check
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -z "$(git status --porcelain)"
+
+      - name: Upload COR evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ugondu-cor-evidence-${{ github.sha }}
+          path: .cor_evidence/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  aws-physical-gate:
+    name: AWS Physical Qualification Gate
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Compile scripts
+        run: npx tsc server/engine-core/physical-certification.ts server/engine-core/physical-fargate-certification.ts scripts/ci/residual-scanner.ts --noEmit --skipLibCheck --target ES2022 --moduleResolution node --downlevelIteration --esModuleInterop
+
+      - name: Verify AWS Region Configuration
+        shell: bash
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          if [ -z "${AWS_REGION}" ]; then
+            echo "::error::AWS_REGION_MISSING: AWS certification region is not configured."
+            exit 1
+          fi
+          echo "AWS certification region: ${AWS_REGION}"
+
+      - name: Configure Base OIDC Credentials
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_OIDC_BASE }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Reconcile AWS COR V9 Policy Pack (Bootstrap Provision)
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_EVIDENCE_INPUT_DIR: .cor_evidence/raw
+        run: node scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs --phase bootstrap-provision
+
+      - name: Assume Tagged Execution Session
+        shell: bash
+        env:
+          EXECUTION_ROLE_ARN: ${{ secrets.AWS_ROLE_TO_ASSUME_EXECUTION }}
+          TX_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          # Tagged assumption is mandatory (UG-COR-AWS-TAGGED-SESSION). There is
+          # intentionally no untagged fallback: any failure aborts before mutation.
+          if [ -z "${EXECUTION_ROLE_ARN}" ]; then
+            echo "::error::AWS_EXECUTION_ROLE_MISSING: execution role is not configured."
+            exit 1
+          fi
+          CREDS=$(aws sts assume-role \
+            --role-arn "$EXECUTION_ROLE_ARN" \
+            --role-session-name "$TX_ID" \
+            --tags "Key=UgonduTransactionId,Value=$TX_ID" "Key=UgonduCOR,Value=true" \
+            --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+            --output text)
+
+          read -r AK SK ST <<< "$CREDS"
+          if [ -z "${AK}" ] || [ -z "${SK}" ] || [ -z "${ST}" ]; then
+            echo "::error::AWS_TAGGED_SESSION_EMPTY: tagged assume-role returned no credentials."
+            exit 1
+          fi
+          echo "::add-mask::$AK"
+          echo "::add-mask::$SK"
+          echo "::add-mask::$ST"
+
+          # Verify the resulting identity is the tagged session for this run
+          # before any credential is exported to later (mutating) steps.
+          ARN=$(AWS_ACCESS_KEY_ID="$AK" AWS_SECRET_ACCESS_KEY="$SK" AWS_SESSION_TOKEN="$ST" \
+            aws sts get-caller-identity --query Arn --output text)
+          case "$ARN" in
+            *":assumed-role/"*"/${TX_ID}") ;;
+            *)
+              echo "::error::AWS_SESSION_IDENTITY_MISMATCH: caller identity is not the tagged session for run ${TX_ID}."
+              exit 1
+              ;;
+          esac
+
+          {
+            echo "AWS_ACCESS_KEY_ID=$AK"
+            echo "AWS_SECRET_ACCESS_KEY=$SK"
+            echo "AWS_SESSION_TOKEN=$ST"
+          } >> "$GITHUB_ENV"
+          echo "Tagged execution session established and verified."
+
+      - name: Verify Reconciled AWS COR V9 Effective Permissions
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_EVIDENCE_INPUT_DIR: .cor_evidence/raw
+        run: node scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs --phase verify-effective
+
+      - name: Run fail-closed AWS read-only conformance probes
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_EVIDENCE_INPUT_DIR: .cor_evidence/raw
+        run: node scripts/aws-conformance/run-aws-conformance.mjs
+      
+      - name: Upload live AWS conformance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ugondu-aws-conformance-${{ github.sha }}
+          path: |
+            .cor_evidence/raw/tests/aws-policy-reconciliation-results.json
+            .cor_evidence/raw/tests/aws-conformance-results.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Run physical certification
+        env:
+          UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_TRANSACTION_ID: ${{ github.run_id }}
+        run: npx ts-node -T server/engine-core/physical-certification.ts
+
+      - name: Run physical fargate certification
+        env:
+          UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_TRANSACTION_ID: ${{ github.run_id }}
+        run: npx ts-node -T server/engine-core/physical-fargate-certification.ts
+
+      - name: Assert zero residual resources cleanup verification
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_CERT_REGION: ${{ vars.AWS_REGION }}
+          UGONDU_TRANSACTION_ID: ${{ github.run_id }}
+        run: npx ts-node -T --project scripts/tsconfig.json scripts/ci/residual-scanner.ts
+
+
+  cor-final-release-gate:
+    name: COR Final Release Gate
+    runs-on: ubuntu-latest
+    # Authoritative release decision. Must run even when a child gate fails,
+    # fails or is skipped, so that a green companion job can never stand in
+    # for a failed mandatory qualification.
+    if: always()
+    needs:
+      - cor
+      - aws-physical-gate
+    permissions:
+      contents: read
+    steps:
+      - name: Require every mandatory gate to have succeeded
+        shell: bash
+        env:
+          COR_RESULT: ${{ needs.cor.result }}
+          AWS_RESULT: ${{ needs.aws-physical-gate.result }}
+          EVENT_NAME: ${{ github.event_name }}
+          CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          echo "candidate=${CANDIDATE_SHA} event=${EVENT_NAME}"
+          echo "cor=${COR_RESULT} aws-physical-gate=${AWS_RESULT}"
+          fail=0
+          for gate in "cor:${COR_RESULT}" "aws-physical-gate:${AWS_RESULT}"; do
+            name="${gate%%:*}"; result="${gate#*:}"
+            if [ "${result}" != "success" ]; then
+              echo "::error::COR_GATE_NOT_SUCCESS: mandatory gate '${name}' result is '${result}' (failure, skipped, cancelled and missing all block certification)."
+              fail=1
+            fi
+          done
+          if [ "${fail}" -ne 0 ]; then
+            echo "::error::COR NOT CERTIFIED for ${CANDIDATE_SHA}."
+            exit 1
+          fi
+          echo "All mandatory COR gates succeeded for ${CANDIDATE_SHA}."

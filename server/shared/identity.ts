@@ -30,7 +30,7 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
-import { randomBytes, sign, verify } from 'crypto';
+import { randomBytes, sign, verify, createPrivateKey } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { __t } from './i18n';
@@ -195,8 +195,8 @@ export function signServiceIdentity(issuer: string, audience: string, scope: str
     
     const payload = Buffer.from(JSON.stringify(payloadObj)).toString('base64url');
     const pem = privateKeyPem || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY;
-    if (!pem) throw new Error('UGONDU_SERVICE_IDENTITY_PRIVATE_KEY is required for service-token signing');
-    const privateKeyObj = require('crypto').createPrivateKey(pem);
+    if (!pem) throw new Error(__t('messages.error.ugondu_service_identity_private_key_is_requir'));
+    const privateKeyObj = createPrivateKey(pem);
     
     const signature = sign(null, Buffer.from(`${header}.${payload}`), privateKeyObj).toString('base64url');
     return `${header}.${payload}.${signature}`;
@@ -210,17 +210,17 @@ export function verifyServiceIdentityToken(
     try {
         const [headerB64, payloadB64, signatureB64] = token.split('.');
         if (!headerB64 || !payloadB64 || !signatureB64) {
-            return { valid: false, error: 'MALFORMED_SERVICE_TOKEN', status: 401 };
+            return { valid: false, error: __t('ui.responses.malformed_service_token'), status: 401 };
         }
 
         const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf8'));
         if (header.alg !== 'EdDSA') {
-            return { valid: false, error: 'INVALID_ALGORITHM', status: 401 };
+            return { valid: false, error: __t('ui.responses.invalid_algorithm'), status: 401 };
         }
 
         const keyId = header.kid;
         if (!keyId) {
-            return { valid: false, error: 'MISSING_KEY_ID', status: 401 };
+            return { valid: false, error: __t('ui.responses.missing_key_id'), status: 401 };
         }
 
         try {
@@ -239,61 +239,61 @@ export function verifyServiceIdentityToken(
         );
 
         if (!isValid) {
-            return { valid: false, error: 'INVALID_SERVICE_SIGNATURE', status: 401 };
+            return { valid: false, error: __t('ui.responses.invalid_service_signature'), status: 401 };
         }
 
         const decodedPayload: ServiceTokenPayload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
 
         // Header / Payload KeyId Consistency (OWASP ASVS 5.0 V9.1)
         if (header.kid !== decodedPayload.keyId) {
-            return { valid: false, error: 'KEY_ID_MISMATCH', status: 401 };
+            return { valid: false, error: __t('ui.responses.key_id_mismatch'), status: 401 };
         }
 
         // Subject / Issuer Binding Enforcement (OWASP ASVS 5.0 V9.2)
         if (decodedPayload.iss !== decodedPayload.sub) {
-            return { valid: false, error: 'SUBJECT_ISSUER_MISMATCH', status: 401 };
+            return { valid: false, error: __t('ui.responses.subject_issuer_mismatch'), status: 401 };
         }
 
         // Issuer Allowlist Enforcement (COR-08 / OWASP ASVS V9.2)
         if (!ALLOWED_SERVICE_ISSUERS.has(decodedPayload.iss)) {
-            return { valid: false, error: 'ISSUER_NOT_ALLOWED', status: 403 };
+            return { valid: false, error: __t('ui.responses.issuer_not_allowed'), status: 403 };
         }
 
         if (decodedPayload.aud !== expectedAudience) {
-            return { valid: false, error: 'AUDIENCE_MISMATCH', status: 403 };
+            return { valid: false, error: __t('ui.responses.audience_mismatch'), status: 403 };
         }
 
         if (requiredScope && decodedPayload.scope !== requiredScope) {
-            return { valid: false, error: 'SCOPE_MISMATCH', status: 403 };
+            return { valid: false, error: __t('ui.responses.scope_mismatch'), status: 403 };
         }
 
         const now = Math.floor(Date.now() / 1000);
         if (now < decodedPayload.nbf) {
-            return { valid: false, error: 'TOKEN_NOT_YET_VALID', status: 401 };
+            return { valid: false, error: __t('ui.responses.token_not_yet_valid'), status: 401 };
         }
 
         if (now > decodedPayload.exp) {
-            return { valid: false, error: 'TOKEN_EXPIRED', status: 401 };
+            return { valid: false, error: __t('ui.responses.token_expired'), status: 401 };
         }
 
         // Composite Replay Authority Check & Atomic Persistence (COR-07 / OWASP ASVS V9.1)
         const compositeKey = `${decodedPayload.iss}:${decodedPayload.keyId}:${decodedPayload.aud}:${decodedPayload.jti}`;
         const recorded = activeReplayAuthority.atomicRecordIfUnseen(compositeKey, decodedPayload.exp);
         if (!recorded) {
-            return { valid: false, error: 'TOKEN_REPLAYED', status: 401 };
+            return { valid: false, error: __t('ui.responses.token_replayed'), status: 401 };
         }
 
         return { valid: true, payload: decodedPayload };
     } catch {
-        return { valid: false, error: 'MALFORMED_SERVICE_TOKEN', status: 401 };
+        return { valid: false, error: __t('ui.responses.malformed_service_token'), status: 401 };
     }
 }
 
 export function requireServiceIdentity(expectedAudience: string, requiredScope?: string) {
     return (req: any, res: any, next: any) => {
         const auth = req.headers.authorization;
-        if (!auth || !auth.startsWith('Bearer ')) {
-            return res.status(401).json({ error: 'MISSING_SERVICE_TOKEN', message: __t('auth_service_token_missing') });
+        if (!auth || !auth.startsWith(__t('bearer'))) {
+            return res.status(401).json({ error: __t('ui.responses.missing_service_token'), message: __t('auth_service_token_missing') });
         }
         
         const token = auth.substring(7);

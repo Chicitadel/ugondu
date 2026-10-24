@@ -71,10 +71,10 @@ async function runTargetTests() {
             port: 22,
             username: 'deploy',
             remoteBasePath: '/var/www/app',
-            expectedHostKeyFingerprint: 'SHA256:abc123mockfingerprint'
+            expectedHostKeyFingerprint: 'SHA256:abc123stubfingerprint'
         });
 
-        assert.strictEqual(ssh.verifyHostKey('SHA256:abc123mockfingerprint'), true);
+        assert.strictEqual(ssh.verifyHostKey('SHA256:abc123stubfingerprint'), true);
         assert.throws(() => ssh.verifyHostKey('SHA256:tamperedfingerprint'), /error_key_purpose_mismatch/);
 
         const plan = ssh.generateDeploymentPlan('https://github.com/example/repo', 'main', 'rel_101');

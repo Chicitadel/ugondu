@@ -1,0 +1,72 @@
+{
+  "schema": "ugondu.evidence-manifest/1",
+  "gitHeadSha": "318c022158b1dabf1d9c12c62ed497a837a692df",
+  "candidateSha": "318c022158b1dabf1d9c12c62ed497a837a692df",
+  "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
+  "evidenceFiles": [
+    {
+      "path": "config/qualification/target-matrix.json",
+      "sha256": "871318a028429784438a0e2ebab758d8530a2257493c6a757905188ff38c24ca"
+    },
+    {
+      "path": "docs/governance/evidence/native-runner-evidence.json",
+      "sha256": "92f65f0b58e9fc5cc4a4d7fd0d99d36459298a9d039d54c5314ce91068675937"
+    },
+    {
+      "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
+      "sha256": "6f9b3ecefb3d2604d54483be9c537d996e22c6f423894214aaeb390b830be7fb"
+    },
+    {
+      "path": "docs/security/evidence/ai_model_qualification_report.json",
+      "sha256": "5c1192be4eeab779ce984579dc1ee5bc795a9c69bd25e602f868925b12e87c2b"
+    },
+    {
+      "path": "docs/security/evidence/live_ai_canary_receipt.json",
+      "sha256": "a02327b5ef3902e5ae3636947cac0c2f7f0fc47b359334a55a26d91da565e1fe"
+    }
+  ],
+  "testCommands": [
+    {
+      "command": "node --test tests/qualification/airroofers-ai-credential-canary.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/evidence-manifest.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/target-matrix-fail-closed.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/native-runner-evidence.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/evidence-freshness.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/model-lifecycle-qualification.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/ai-barrel-export-qualification.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/governance/validate-repository.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "gh workflow run ai-live-canary (run 40125751718)",
+      "exitCode": 0
+    },
+    {
+      "command": "gh run view 40125624489 (Ugondu CI/CD Pipeline)",
+      "exitCode": 0
+    }
+  ],
+  "allTestCommandsPassed": true,
+  "unproven": []
+}

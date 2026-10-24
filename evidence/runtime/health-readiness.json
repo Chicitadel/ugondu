@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0.0",
+  "evaluatedAt": "2026-10-20T19:30:36.907Z",
+  "executionId": "exec-qual-1792524571571-724432c4",
+  "commitHash": "50ca98b6dd3672ef473b425d74e66e60e163470d",
+  "treeHash": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3",
+  "service": "repository-adapter",
+  "endpoint": "/health/ready",
+  "httpStatus": 200,
+  "payload": {
+    "status": "ready",
+    "service": "repository-adapter",
+    "version": "2.0.0",
+    "ready": true,
+    "checks": {
+      "ssrfPolicy": "operational",
+      "adapters": [
+        {
+          "providerId": "github",
+          "status": "healthy",
+          "latencyMs": 1,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.874Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GITHUB_TOKEN"
+          }
+        },
+        {
+          "providerId": "gitlab",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.874Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GITLAB_TOKEN"
+          }
+        },
+        {
+          "providerId": "bitbucket",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.874Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_BITBUCKET_TOKEN"
+          }
+        },
+        {
+          "providerId": "azure-devops",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.874Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_AZURE_DEVOPS_TOKEN"
+          }
+        },
+        {
+          "providerId": "aws-codecommit",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.874Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "AWS_ROLE_ARN"
+          }
+        },
+        {
+          "providerId": "gitea",
+          "status": "healthy",
+          "latencyMs": 1,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.875Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GITEA_TOKEN"
+          }
+        },
+        {
+          "providerId": "gogs",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "implemented",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.875Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GOGS_TOKEN"
+          }
+        },
+        {
+          "providerId": "generic-git",
+          "status": "healthy",
+          "latencyMs": 0,
+          "capabilities": {
+            "detect": "tested",
+            "authenticate": "tested",
+            "metadata": "tested",
+            "refs": "tested",
+            "fetch": "tested",
+            "webhook": "unavailable",
+            "deployment": "implemented"
+          },
+          "checkedAt": "2026-10-20T19:30:36.875Z",
+          "details": {
+            "ssrfPolicyEnforced": true,
+            "credentialKey": "UGONDU_GIT_TOKEN"
+          }
+        }
+      ]
+    },
+    "timestamp": "2026-10-20T19:30:36.877Z",
+    "correlationId": "aee1f9d5a5a7017f44cfecd4d3fc237e"
+  },
+  "livenessHttpStatus": 200,
+  "metadataHttpStatus": 200,
+  "status": "PASS"
+}

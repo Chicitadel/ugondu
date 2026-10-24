@@ -14,12 +14,22 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface TechRelationship
+ * @description Corporate Governed interface implementation for TechRelationship
+ * @classification ENTERPRISE
+ */
 export interface TechRelationship {
     source: string;
     target: string;
     type: 'requires' | 'supports' | 'depends-on' | 'conflicts-with' | 'compatible-with' | 'optimized-for';
 }
 
+/**
+ * @class TechnologyKnowledgeGraph
+ * @description Corporate Governed class implementation for TechnologyKnowledgeGraph
+ * @classification ENTERPRISE
+ */
 export class TechnologyKnowledgeGraph {
     private relationships: TechRelationship[] = [];
 

@@ -1,9 +1,9 @@
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
- * Module         : Server / Shared / Enterprise RBAC & ABAC
+ * Module         : Server / Shared / SOVEREIGN RBAC & ABAC
  * File           : rbac.ts
  * Version        : 2.0.0
- * Author         : Enterprise Identity & Access Control Authority
+ * Author         : SOVEREIGN Identity & Access Control Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
  * Classification : ENTERPRISE | INTERNAL
@@ -14,14 +14,14 @@
 
 import { __t } from '../i18n';
 
-export type EnterpriseRole = 'ADMIN' | 'OPERATOR' | 'DEVELOPER' | 'AUDITOR';
+export type SOVEREIGNRole = 'ADMIN' | 'OPERATOR' | 'DEVELOPER' | 'AUDITOR';
 
-export interface EnterprisePrincipal {
+export interface SOVEREIGNPrincipal {
     id: string;
     email: string;
     tenantId: string;
     workspaceId: string;
-    roles: EnterpriseRole[];
+    roles: SOVEREIGNRole[];
     mfaVerified: boolean;
     ipAddress: string;
 }
@@ -40,15 +40,15 @@ export interface ScimUserRecord {
     roles: string[];
 }
 
-export class EnterpriseAccessControl {
-    private static readonly ROLE_PERMISSIONS: Record<EnterpriseRole, Set<string>> = {
+export class SOVEREIGNAccessControl {
+    private static readonly ROLE_PERMISSIONS: Record<SOVEREIGNRole, Set<string>> = {
         ADMIN: new Set(['DEPLOY', 'ROLLBACK', 'VIEW_LOGS', 'CONFIGURE_POLICY', 'MANAGE_USERS']),
         OPERATOR: new Set(['DEPLOY', 'ROLLBACK', 'VIEW_LOGS']),
         DEVELOPER: new Set(['DEPLOY_NON_PROD', 'VIEW_LOGS']),
         AUDITOR: new Set(['VIEW_LOGS', 'VIEW_AUDIT_TRAIL', 'EXPORT_EVIDENCE'])
     };
 
-    public static evaluateAccess(principal: EnterprisePrincipal, context: AccessContext): boolean {
+    public static evaluateAccess(principal: SOVEREIGNPrincipal, context: AccessContext): boolean {
         // Enforce MFA for sensitive production operations
         if (context.environmentId === 'production' && !principal.mfaVerified) {
             return false;

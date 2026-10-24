@@ -3,7 +3,7 @@
  * Module         : Server / Shared / Policy & Fleet Management
  * File           : policy.ts
  * Version        : 2.0.0
- * Author         : Enterprise Policy & Fleet Orchestration Authority
+ * Author         : SOVEREIGN Policy & Fleet Orchestration Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
  * Classification : ENTERPRISE | INTERNAL
@@ -42,7 +42,7 @@ export interface FleetBatchPlan {
     }>;
 }
 
-export class EnterprisePolicyEngine {
+export class SOVEREIGNPolicyEngine {
     public static createApprovalRequest(
         requesterPrincipalId: string,
         environmentId: string,

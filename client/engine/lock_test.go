@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : lock_test.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -34,6 +34,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"encoding/json"
 	"errors"
 	"os"
@@ -58,7 +59,7 @@ func TestTransactionLock(t *testing.T) {
 		t.Fatalf("AcquireTransactionLock failed: %v", err)
 	}
 	if lock1 == nil {
-		t.Fatalf("Expected valid lock, got nil")
+		t.Fatalf(i18n.T("expected_valid_lock_got_nil"))
 	}
 
 	// Verify lock file exists
@@ -78,7 +79,7 @@ func TestTransactionLock(t *testing.T) {
 		t.Fatalf("ReleaseTransactionLock failed: %v", err)
 	}
 	if _, err := os.Stat(lockPath); !os.IsNotExist(err) {
-		t.Errorf("Lock file should have been removed after release")
+		t.Errorf(i18n.T("lock_file_should_have_been_rem"))
 	}
 
 	// Test 4: Stale lock (older than 30 minutes) should be acquired cleanly
@@ -101,7 +102,7 @@ func TestTransactionLock(t *testing.T) {
 		t.Fatalf("Failed to acquire stale lock: %v", err)
 	}
 	if lock2 == nil {
-		t.Fatalf("Expected valid lock after recovering stale lock")
+		t.Fatalf(i18n.T("expected_valid_lock_after_reco"))
 	}
 	_ = ReleaseTransactionLock(lock2)
 }

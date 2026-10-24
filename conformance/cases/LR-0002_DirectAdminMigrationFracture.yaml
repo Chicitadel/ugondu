@@ -1,0 +1,30 @@
+name: DirectAdminMigrationFracture
+id: LR-0002
+classification: PROTECTED_PRODUCTION_RECOVERY
+
+environment:
+  platform: DirectAdmin
+  operating_system: Linux
+  hosting_model: Shared Hosting
+  access_contract: SSH_Discovery_First
+
+observed_problem:
+  description: Shared repository missing and ZDD symlink chains broken after cPanel to DirectAdmin migration.
+  symptoms:
+    - HTTP 500 on application domains
+    - Missing shared platform-core repository
+    - Broken symlinks from public_html to current release
+    - Composer autoload fails
+
+context:
+  migration_history: cPanel to DirectAdmin
+
+actual_cause:
+  description: Shared repositories were not migrated and ZDD backup directories were orphaned.
+
+recovery_objective:
+  - Reconstruct missing shared repositories via PathRepositoryReconstruction
+  - Repair ZDD topology via ZddTopologyRepair
+  - Restore environment configuration via EnvConfigurationInjection
+  - Rebuild Composer autoload via ComposerIntegrityValidation
+  - Verify HTTP health via FrontendValidation

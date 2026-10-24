@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface CPanelTargetConfig
+ * @description Corporate Governed interface implementation for CPanelTargetConfig
+ * @classification ENTERPRISE
+ */
 export interface CPanelTargetConfig {
     targetId: string;
     serverHostname: string;
@@ -23,6 +28,11 @@ export interface CPanelTargetConfig {
     useQuotaSync: boolean;
 }
 
+/**
+ * @interface CPanelDeploymentPlan
+ * @description Corporate Governed interface implementation for CPanelDeploymentPlan
+ * @classification ENTERPRISE
+ */
 export interface CPanelDeploymentPlan {
     strategy: 'quota-sync';
     targetPath: string;
@@ -30,12 +40,17 @@ export interface CPanelDeploymentPlan {
     requiresPhpRestart: boolean;
 }
 
+/**
+ * @class CPanelTargetAdapter
+ * @description Corporate Governed class implementation for CPanelTargetAdapter
+ * @classification ENTERPRISE
+ */
 export class CPanelTargetAdapter {
     private config: CPanelTargetConfig;
 
     constructor(config: CPanelTargetConfig) {
         if (!config.targetId || !config.serverHostname || !config.username) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
         this.config = {
             ...config,

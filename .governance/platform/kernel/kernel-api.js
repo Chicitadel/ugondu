@@ -54,7 +54,7 @@ function createKernelApi() {
     const router = express.Router();
 
     // Middleware to enforce Internal-Service / Admin read roles
-    // We mock this slightly for the example
+    // We stub this slightly for the example
     router.use('/kernel/v1/*', (req, res, next) => {
         const auth = req.headers.authorization;
         if (!auth) {

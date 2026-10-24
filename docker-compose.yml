@@ -1,15 +1,21 @@
-# =============================================================================
-# Ugondu Platform — Docker Compose Orchestration
-# Air Roofers Ltd — Ujomor Systems Engineering Authority
-# Version: 1.0.0 | Classification: COMMERCIAL | INTERNAL
-#
-# Usage:
-#   docker compose up -d                  # Start all services
-#   docker compose logs -f engine-core    # Stream logs
-#   docker compose down                   # Teardown
-# =============================================================================
-
-version: "3.9"
+# /******************************************************************************
+#  * Project        : Ugondu Platform
+#  * Module         : Docker Compose Orchestration
+#  * File           : docker-compose.yml
+#  * Version        : 1.1.0
+#  * Author         : Ujomor Systems Engineering & Governance Authority
+#  * Organization   : Air Roofers Ltd / Ujomor Systems
+#  * Created Date   : 2026-10-18
+#  * Last Modified  : 2026-10-18
+#  * Classification : COMMERCIAL | INTERNAL
+#  *
+#  * Governance:
+#  * - Corporate Policy Governed
+#  * - Security Reviewed
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - Modularization Enforced
+#  ******************************************************************************/
 
 networks:
   ugondu-internal:
@@ -25,21 +31,24 @@ services:
   # ────────────────────────────────────────────────────
   billing-gateway:
     build:
-      context: ./server/billing-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/billing-gateway/Dockerfile
     container_name: ugondu-billing-gateway
     restart: unless-stopped
     networks:
       - ugondu-internal
     environment:
       - PORT=4002
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
       - IDENTITY_AUTHORITY_URL=${IDENTITY_AUTHORITY_URL:-https://identity.airroofers.eu/api/v1}
       - BILLING_AUTHORITY_URL=${BILLING_AUTHORITY_URL:-https://billing.airroofers.eu/api/v1}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4002/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4002/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -51,8 +60,8 @@ services:
   # ────────────────────────────────────────────────────
   engine-core:
     build:
-      context: ./server/engine-core
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/engine-core/Dockerfile
     container_name: ugondu-engine-core
     restart: unless-stopped
     networks:
@@ -62,16 +71,22 @@ services:
       - "4001:4001"
     environment:
       - PORT=4001
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
+      - UGONDU_MODEL_CATALOG_PATH=/usr/src/app/config/model-catalog.json
       - BILLING_GATEWAY_URL=http://billing-gateway:4002/v1
-      - UGONDU_PRIVATE_KEY=${UGONDU_PRIVATE_KEY}
+      - UGONDU_RECIPE_PRIVATE_KEY=${UGONDU_RECIPE_PRIVATE_KEY:-}
+      - UGONDU_KEY_REF=${UGONDU_KEY_REF:-}
+      - UGONDU_PRIVATE_KEY=${UGONDU_PRIVATE_KEY:-}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     depends_on:
       billing-gateway:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4001/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4001/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -83,22 +98,25 @@ services:
   # ────────────────────────────────────────────────────
   plugin-manager:
     build:
-      context: ./server/plugin-manager
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/plugin-manager/Dockerfile
     container_name: ugondu-plugin-manager
     restart: unless-stopped
     networks:
       - ugondu-internal
     volumes:
-      - ./plugins:/app/plugins:ro    # [en] Plugin directory mounted read-only
+      - ./plugins:/usr/src/app/plugins:ro    # [en] Plugin directory mounted read-only
     environment:
       - PORT=4003
-      - PLUGINS_DIR=/app/plugins
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
+      - PLUGINS_DIR=/usr/src/app/plugins
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4003/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4003/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -110,19 +128,22 @@ services:
   # ────────────────────────────────────────────────────
   repository-adapter:
     build:
-      context: ./server/repository-adapter
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/repository-adapter/Dockerfile
     container_name: ugondu-repository-adapter
     restart: unless-stopped
     networks:
       - ugondu-internal
     environment:
       - PORT=4005
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4005/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4005/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
@@ -134,19 +155,22 @@ services:
   # ────────────────────────────────────────────────────
   event-bus:
     build:
-      context: ./server/event-bus
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./server/event-bus/Dockerfile
     container_name: ugondu-event-bus
     restart: unless-stopped
     networks:
       - ugondu-internal
     environment:
       - PORT=4004
+      - GOVERNANCE_ROOT=/usr/src/app/.governance
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:4004/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4004/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     logging:
       driver: "json-file"
       options:

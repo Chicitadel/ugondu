@@ -3,13 +3,14 @@
  * Module         : Server / Shared / Language Packs
  * File           : packs.ts
  * Version        : 2.3.0
- * Author         : Server & Cryptography Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-01, LP-05, LP-08)
  * - Cryptographic Supply-Chain Assurance (OWASP ASVS 5.0 V9.1 / V9.2)
  * - Zero String Hardcoding
@@ -23,10 +24,30 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
+// @ts-ignore
+import { __t } from './i18n';
+
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import canonicalize from 'canonicalize';
+function canonicalizeSafe(data: any): string {
+    try {
+        const mod = require('canonicalize');
+        const fn = mod && mod.default ? mod.default : mod;
+        if (typeof fn === 'function') {
+            const out = fn(data);
+            if (typeof out === 'string') return out;
+        }
+    } catch {}
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const sorted: Record<string, any> = {};
+        for (const k of Object.keys(data).sort()) {
+            sorted[k] = data[k];
+        }
+        return JSON.stringify(sorted);
+    }
+    return JSON.stringify(data);
+}
 import { globalTrustRegistry } from './trust_registry';
 
 export interface LanguagePack {
@@ -87,13 +108,13 @@ export function computePackManifestPayload(pack: Partial<LanguagePack>): string 
         schemaVersion: pack.schemaVersion || '1',
         version: pack.version || ''
     };
-    return (canonicalize as any)(canonicalManifest) || JSON.stringify(canonicalManifest);
+    return canonicalizeSafe(canonicalManifest);
 }
 
 export function signLanguagePackManifest(pack: Partial<LanguagePack>, privateKeyPem?: string): string {
     const payload = computePackManifestPayload(pack);
     const pem = privateKeyPem || process.env.UGONDU_LANGPACK_PRIVATE_KEY;
-    if (!pem) throw new Error('UGONDU_LANGPACK_PRIVATE_KEY is required for language-pack signing');
+    if (!pem) throw new Error(__t('messages.error.ugondu_langpack_private_key_is_required_for_l'));
     const privKey = crypto.createPrivateKey(pem);
     return crypto.sign(null, Buffer.from(payload, 'utf8'), privKey).toString('base64');
 }
@@ -106,7 +127,7 @@ export function verifyLanguagePackSignature(pack: LanguagePack, publicKeyPem?: s
             ? crypto.createPublicKey(publicKeyPem)
             : (() => {
                 const key = globalTrustRegistry.getActiveKeyByPurpose('language-pack');
-                if (!key) throw new Error('No active language-pack key found');
+                if (!key) throw new Error(__t('messages.error.no_active_language_pack_key_found'));
                 return globalTrustRegistry.getPublicKeyObject(key.keyId);
             })();
 
@@ -117,30 +138,85 @@ export function verifyLanguagePackSignature(pack: LanguagePack, publicKeyPem?: s
     }
 }
 
-export function validateLanguagePackIntegrity(pack: LanguagePack, publicKeyPem?: string): { valid: boolean; error?: string } {
+function parseSemverBound(ver: string, isMax: boolean): [number, number, number] | null {
+    const cleaned = String(ver || '').trim().replace(/^v/i, '');
+    if (!cleaned) return null;
+    const parts = cleaned.split('.');
+    if (parts.length < 1 || parts.length > 3) return null;
+    const nums: [number, number, number] = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+        const part = parts[i];
+        if (part === undefined || part === 'x' || part === 'X' || part === '*') {
+            nums[i] = isMax ? Number.MAX_SAFE_INTEGER : 0;
+        } else {
+            if (!/^\d+$/.test(part)) return null;
+            const parsed = Number.parseInt(part, 10);
+            if (Number.isNaN(parsed) || parsed < 0) return null;
+            nums[i] = parsed;
+        }
+    }
+    return nums;
+}
+
+function compareSemver(a: [number, number, number], b: [number, number, number]): number {
+    for (let i = 0; i < 3; i++) {
+        if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1;
+    }
+    return 0;
+}
+
+export function validateLanguagePackIntegrity(
+    pack: LanguagePack,
+    publicKeyPem?: string,
+    coreVersion: string = process.env.UGONDU_CORE_VERSION || '1.1.0'
+): { valid: boolean; error?: string } {
     if (!pack.packId || !pack.locale || !pack.version) {
-        return { valid: false, error: 'Incomplete pack manifest' };
+        return { valid: false, error: __t('ui.responses.incomplete_pack_manifest') };
     }
 
     if (pack.schemaVersion !== '1') {
-        return { valid: false, error: `Unsupported schema version: ${pack.schemaVersion}` };
+        return { valid: false, error: __t('messages.error.unsupported_schema_version', { schemaVersion: pack.schemaVersion }) };
+    }
+
+    // Semver compatibility enforcement (COR-020: minCoreVersion .. maxCoreVersion)
+    const activeCoreTuple = parseSemverBound(coreVersion, false);
+    if (!activeCoreTuple) {
+        return { valid: false, error: __t('incompatible_version') };
+    }
+    if (pack.minCoreVersion) {
+        const minTuple = parseSemverBound(pack.minCoreVersion, false);
+        if (!minTuple || compareSemver(activeCoreTuple, minTuple) < 0) {
+            return {
+                valid: false,
+                error: `${__t('incompatible_version')}: core ${coreVersion} is below minCoreVersion ${pack.minCoreVersion}`
+            };
+        }
+    }
+    if (pack.maxCoreVersion) {
+        const maxTuple = parseSemverBound(pack.maxCoreVersion, true);
+        if (!maxTuple || compareSemver(activeCoreTuple, maxTuple) > 0) {
+            return {
+                valid: false,
+                error: `${__t('incompatible_version')}: core ${coreVersion} exceeds maxCoreVersion ${pack.maxCoreVersion}`
+            };
+        }
     }
 
     // 1. Digest check over tokens
     const calculatedDigest = computePackArtifactDigest(pack.tokens || {});
     if (calculatedDigest !== pack.artifactDigest) {
-        return { valid: false, error: `Digest mismatch: expected ${pack.artifactDigest}, got ${calculatedDigest}` };
+        return { valid: false, error: __t('messages.error.digest_mismatch', { expected: pack.artifactDigest, got: calculatedDigest }) };
     }
 
     // 2. ED25519 signature check over complete canonical manifest
     if (!verifyLanguagePackSignature(pack, publicKeyPem)) {
-        return { valid: false, error: 'Cryptographic signature verification failed' };
+        return { valid: false, error: __t('ui.responses.cryptographic_signature_verification_failed') };
     }
 
     // 3. Completeness check on critical security tokens
     for (const key of CriticalTokens) {
         if (!pack.tokens || !pack.tokens[key]) {
-            return { valid: false, error: `Critical security token missing: ${key}` };
+            return { valid: false, error: __t('messages.error.critical_token_missing', { key }) };
         }
     }
 

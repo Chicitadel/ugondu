@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : actions_test.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -35,6 +35,9 @@ package engine
 
 import (
 	"testing"
+
+	"ugondu/client/engine/adapters"
+	"ugondu/client/i18n"
 )
 
 func TestActionsRegistry(t *testing.T) {
@@ -50,6 +53,10 @@ func TestActionsRegistry(t *testing.T) {
 		"UPSELL_NOTICE",
 		"NODE_INSTALL",
 		"COMPOSER_INSTALL",
+		"COPY_FILE",
+		"CREATE_DIRECTORY",
+		"SYMLINK",
+		"SERVICE_RESTART",
 	}
 
 	for _, act := range expectedActions {
@@ -85,7 +92,7 @@ func TestPayloadValidators(t *testing.T) {
 	}
 	_, err = ValidateFetchRepositoryPayload(map[string]interface{}{"url": ""})
 	if err == nil {
-		t.Errorf("Expected validation error for empty URL")
+		t.Errorf(i18n.T("expected_validation_error_for_"))
 	}
 	pFetch, err := ValidateFetchRepositoryPayload(map[string]interface{}{"url": "https://example.com/repo.git"})
 	if err != nil || pFetch.Branch != "main" {
@@ -95,10 +102,34 @@ func TestPayloadValidators(t *testing.T) {
 	// SyncEnvironmentPayload validation
 	_, err = ValidateSyncEnvironmentPayload(map[string]interface{}{"strategy": "invalid-strategy"})
 	if err == nil {
-		t.Errorf("Expected validation error for invalid strategy")
+		t.Errorf(i18n.T("expected_validation_error_for_"))
 	}
 	pSync, err := ValidateSyncEnvironmentPayload(map[string]interface{}{"strategy": "quota-sync"})
 	if err != nil || pSync.Strategy != "quota-sync" {
 		t.Errorf("Expected valid strategy quota-sync, err: %v", err)
+	}
+}
+
+func TestGitAdapterArgSanitization(t *testing.T) {
+	adapter := adapters.NewGitAdapter()
+	err := adapter.Pull("https://github.com/repo.git", "../../../etc/passwd", ".", "")
+	if err == nil {
+		t.Errorf(i18n.T("expected_error_for_branch_name"))
+	}
+	err = adapter.Pull("file:///etc/passwd", "main", ".", "")
+	if err == nil {
+		t.Errorf(i18n.T("expected_error_for_invalid_rep"))
+	}
+}
+
+func TestServiceAdapterNameValidation(t *testing.T) {
+	adapter := adapters.NewServiceRestartAdapter()
+	err := adapter.Restart("my-service; rm -rf /")
+	if err == nil {
+		t.Errorf(i18n.T("expected_error_for_service_nam"))
+	}
+	err = adapter.Restart(i18n.T("my_service"))
+	if err == nil {
+		t.Errorf(i18n.T("expected_error_for_service_nam"))
 	}
 }
