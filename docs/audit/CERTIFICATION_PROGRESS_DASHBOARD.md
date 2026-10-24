@@ -6,7 +6,7 @@
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — FINAL UNIVERSAL CERTIFICATION NOT GRANTED**  
 **Status legend:** 🟢 fresh evidence proves the declared scoped capability · 🟡 implemented/reported but current proof or scope is incomplete · 🔴 gap/unsupported · ⚪ not assessed
 
-> **Release-lineage verified:** Freshness verification was executed against the live checkout (`node scripts/governance/verify-evidence-freshness.mjs`) and exited with code 0 (`[PASS] Evidence fresh: candidate 6b13a56f42654e4841db82b88cb1edf0fdb64188; release HEAD df1805214a9babe02baa29579364f7edd26307e6; evidence-only delta 5 path(s)`). All changes between candidate commit and release HEAD are proven strictly confined to `EVIDENCE_ONLY_PREFIXES`. Qualification remains **QUALIFIED WITH BOUNDED TARGET SUPPORT**.
+> **Release-lineage recheck required:** The reviewed branch snapshot has candidate `6b13a56f42654e4841db82b88cb1edf0fdb64188`, reviewed head `04cd51471188f7a38fcb25ab6fdb22cee66cfccf`, manifest `releaseHeadSha` `f4ce46dceb26d9f798515f4673d7377e365fb3d8`, and earlier audit prose citing `df1805214a9babe02baa29579364f7edd26307e6`. The supplied report says a verifier passed on a later checkout, but the checked-in identities are not reconciled in this snapshot. The live re-audit has now added another evidence-only documentation commit; rerun the verifier on the latest branch HEAD before any green freshness claim. Qualification remains **QUALIFIED WITH BOUNDED TARGET SUPPORT**.
 
 ## Executive status
 
@@ -14,11 +14,11 @@
 |---|---|---|---|
 | Workspace builds, typecheck and tests | 🟡 | CI run [40069310340](https://github.com/Chicitadel/ugondu/actions/runs/40069310340) reports successful workspace jobs | Verify run SHA and required checks against actual release HEAD |
 | Docker and integration tests | 🟡 | CI run 40069310340 records Docker validation and integration jobs successful | Verify same-SHA lineage and test artifact digests |
-| Anti-stub/mock/scaffold governance | 🟡 | Execution notes report 4,551 tracked files, zero violations and 14/14 adversarial tests | Rerun repository validator and production artifact/import scans on release HEAD |
+| Anti-stub/mock/scaffold governance | 🟡 | CI includes repository validator and release-integrity gates; supplied execution report claims zero violations and 14/14 adversarial tests | Rerun on latest HEAD and inspect production artifact/import graph |
 | AI gateway architecture | 🟡 | Gateway, registry, catalog, credential broker and routing policy exist | Revalidate current code and contract coverage |
 | Live AI canary | 🟡 | [Run 40069319465](https://github.com/Chicitadel/ugondu/actions/runs/40069319465) reports success; receipt records HTTP 200 discovery/inference | Receipt proves a successful sample, not all 30 discovered models; run per-model qualification policy and reconcile SHA |
-| Evidence freshness / manifest | 🟢 | Live checkout verified by verify-evidence-freshness.mjs (exit code 0); manifest resealed on df180521 | Candidate-bound ancestry confirmed; zero non-evidence drift |
-| Native OS/architecture | 🟡 | Native evidence recorded for Windows/AMD64, Linux/AMD64 and macOS/ARM64 | Reconfirm evidence binding and operation coverage on current release HEAD |
+| Evidence freshness / manifest | 🔴 | Manifest says `f4ce46dc…`; audit prose cites `df180521…`; reviewed branch head was `04cd5147…`; another audit-only commit was then added | Re-run freshness and integrity verification on latest clean HEAD; reconcile manifest, receipts and dashboard before marking green |
+| Native OS/architecture | 🟡 | Windows/AMD64 records 139/139; Linux/AMD64 CI is scoped; macOS/ARM64 evidence explicitly covers Go thin-client only | Run full product lifecycle qualification on native runners and bind evidence to final candidate |
 | Linux/ARM64 | 🔴 | Cross-compiled build recorded | Native ARM64 runtime/install/upgrade/recovery/rollback/cleanup qualification |
 | macOS/AMD64 | 🔴 | Cross-compiled build recorded | Native Intel macOS qualification or explicitly exclude from supported scope |
 | IDE support | 🔴 | VS Code is experimental; JetBrains, Cursor, Windsurf and Neovim are unsupported in reviewed declarations | Implement and qualify each required integration, or explicitly exclude from scope |
