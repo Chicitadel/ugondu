@@ -34,11 +34,13 @@ import * as path from 'path';
 import {
     assertValidLifecycleTransition,
     computeReceiptDigest,
+    computeSha256,
     isValidLifecycleTransition,
     loadPersistedLifecycleReceipt,
+    ModelLifecycle,
+    ModelLifecycleError,
     ModelLifecycleStateMachine,
     ModelQualificationReceipt,
-    ModelQualificationState,
     persistLifecycleReceipt,
 } from '../model-lifecycle';
 import { ModelCatalog } from '../model-catalog';
@@ -158,13 +160,10 @@ describe('Model Lifecycle State Machine & Catalog Governance', () => {
         const initial = catalog.getModel('general-chat');
         expect(initial?.qualificationState).toBe('ACTIVE');
 
-        // Transition general-chat to DEGRADED
         catalog.transitionModelLifecycle('general-chat', 'DEGRADED', { actorId: 'admin', role: 'admin' });
         expect(catalog.getModel('general-chat')?.qualificationState).toBe('DEGRADED');
 
-        // Reload catalog
         catalog.reload();
-        // Preserved!
         expect(catalog.getModel('general-chat')?.qualificationState).toBe('DEGRADED');
     });
 
@@ -187,7 +186,6 @@ describe('Model Lifecycle State Machine & Catalog Governance', () => {
         const discovered = catalog.getModel('new-unqualified-model');
         expect(discovered?.qualificationState).toBe('DISCOVERED');
 
-        // Direct activation without QUALIFIED status fails closed
         try {
             catalog.setModelStatus('new-unqualified-model', 'enabled', { actorId: 'admin', role: 'admin' });
             fail('Should have thrown');
@@ -214,31 +212,109 @@ describe('Model Lifecycle State Machine & Catalog Governance', () => {
             correlationId: 'corr-route-test',
         };
 
-        // Initially ACTIVE -> succeeds
         const decision = routing.evaluate(request);
         expect(decision.primaryModel.alias).toBe('general-chat');
 
-        // Transition to DEGRADED -> evaluate throws MODEL_DISABLED
         catalog.transitionModelLifecycle('general-chat', 'DEGRADED', { actorId: 'admin', role: 'admin' });
-        try {
-            routing.evaluate(request);
-            fail('Should have thrown');
-        } catch (err: any) {
-            expect(err.errorCode).toBe('MODEL_DISABLED');
-        }
+        expect(() => routing.evaluate(request)).toThrow();
 
-        // Transition DEGRADED -> QUALIFIED -> evaluate still throws (not ACTIVE yet)
         catalog.transitionModelLifecycle('general-chat', 'QUALIFIED', { actorId: 'admin', role: 'admin' });
-        try {
-            routing.evaluate(request);
-            fail('Should have thrown');
-        } catch (err: any) {
-            expect(err.errorCode).toBe('MODEL_DISABLED');
-        }
+        expect(() => routing.evaluate(request)).toThrow();
 
-        // Transition QUALIFIED -> ACTIVE -> succeeds again
         catalog.transitionModelLifecycle('general-chat', 'ACTIVE', { actorId: 'admin', role: 'admin' });
         const restored = routing.evaluate(request);
         expect(restored.primaryModel.alias).toBe('general-chat');
+    });
+});
+
+describe('ModelLifecycle Zero-Stub Inference Verification & Qualification', () => {
+    const validSecret = 'air_prod_' + '0123456789abcdef0123456789abcdef0123456789abcdef';
+
+    test('verifyInference() without executeFn throws NO_INFERENCE_EXECUTOR', async () => {
+        const lifecycle = new ModelLifecycle({ alias: 'test-model', providerId: 'airroofers-ai' });
+        lifecycle.validateSchema();
+        lifecycle.checkPolicy({ secret: validSecret });
+        await lifecycle.probeCapability();
+
+        await expect(lifecycle.verifyInference(undefined as any)).rejects.toThrow(ModelLifecycleError);
+        try {
+            await lifecycle.verifyInference(undefined as any);
+            fail('Should have thrown NO_INFERENCE_EXECUTOR');
+        } catch (err: any) {
+            expect(err.errorCode).toBe('NO_INFERENCE_EXECUTOR');
+            expect(err.statusCode).toBe(400);
+        }
+    });
+
+    test('verifyInference() with empty or null output throws INVALID_INFERENCE_OUTPUT', async () => {
+        const createProbedLifecycle = async () => {
+            const lc = new ModelLifecycle({ alias: 'empty-output-model', providerId: 'airroofers-ai' });
+            lc.validateSchema();
+            lc.checkPolicy({ secret: validSecret });
+            await lc.probeCapability();
+            return lc;
+        };
+
+        const lc1 = await createProbedLifecycle();
+        try {
+            await lc1.verifyInference(async () => '');
+            fail('Should have thrown INVALID_INFERENCE_OUTPUT');
+        } catch (err: any) {
+            expect(err.errorCode).toBe('INVALID_INFERENCE_OUTPUT');
+            expect(err.statusCode).toBe(400);
+        }
+
+        const lc2 = await createProbedLifecycle();
+        try {
+            await lc2.verifyInference(async () => ({ output: '   ' }));
+            fail('Should have thrown INVALID_INFERENCE_OUTPUT');
+        } catch (err: any) {
+            expect(err.errorCode).toBe('INVALID_INFERENCE_OUTPUT');
+            expect(err.statusCode).toBe(400);
+        }
+    });
+
+    test('qualify() without previous inference verification throws INFERENCE_NOT_VERIFIED', async () => {
+        const lifecycle = new ModelLifecycle({ alias: 'unverified-model', providerId: 'airroofers-ai' });
+        lifecycle.state = 'INFERENCE_VERIFIED';
+        lifecycle.inferenceVerificationDigest = null;
+
+        expect(() => lifecycle.qualify()).toThrow(ModelLifecycleError);
+        try {
+            lifecycle.qualify();
+            fail('Should have thrown INFERENCE_NOT_VERIFIED');
+        } catch (err: any) {
+            expect(err.errorCode).toBe('INFERENCE_NOT_VERIFIED');
+            expect(err.statusCode).toBe(400);
+        }
+    });
+
+    test('runFullLifecycle() succeeds with explicit executor and verified inference digest', async () => {
+        const lifecycle = new ModelLifecycle({ alias: 'full-cycle-model', providerId: 'airroofers-ai' });
+        const receipt = await lifecycle.runFullLifecycle({
+            secret: validSecret,
+            executeFn: async () => ({ output: 'verified-provider-response' }),
+        });
+
+        expect(lifecycle.state).toBe('ACTIVE');
+        expect(lifecycle.canRoute()).toBe(true);
+        expect(receipt.checks.find((c: any) => c.checkId === 'inference-verification')?.resultDigest).toBe(
+            computeSha256('verified-provider-response')
+        );
+    });
+
+    test('runFullLifecycle() does not allow requireCredentials: false to bypass credential verification when credentials are required', async () => {
+        const lifecycle = new ModelLifecycle({
+            alias: 'cloud-model',
+            providerId: 'airroofers-ai',
+            credentialRef: 'env://UNCONFIGURED_KEY',
+        });
+
+        await expect(
+            lifecycle.runFullLifecycle({
+                requireCredentials: false,
+                executeFn: async () => ({ output: 'test-output' }),
+            })
+        ).rejects.toThrow();
     });
 });

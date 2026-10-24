@@ -42,7 +42,7 @@ export class EvidenceFreshnessError extends Error {
 
 // Paths that may change between the candidate commit and the release HEAD.
 export const EVIDENCE_ONLY_PREFIXES = [
-  'docs/governance/',
+  'docs/governance/evidence/',
   'docs/security/evidence/',
   'docs/audit/',
   'docs/audits/',

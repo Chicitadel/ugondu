@@ -2,7 +2,7 @@
  * Project        : Ugondu Platform
  * Module         : Governance — Evidence Freshness Verifier
  * File           : verify-evidence-freshness.mjs
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-24
@@ -23,10 +23,11 @@
  * - NIST
  *
  * Notice:
- * Fails closed unless the committed evidence manifest, live canary receipt and
- * native runner evidence all bind to one candidate SHA, the release HEAD is that
- * candidate or an evidence-only descendant, every digest matches the committed
- * blob, and no item is listed as unproven.
+ * Fails closed unless the committed evidence manifest, live canary receipt,
+ * native runner evidence, and AI model qualification report all bind to one
+ * candidate SHA, the release HEAD is that candidate or an evidence-only
+ * descendant, every digest matches the committed blob, and no item is listed
+ * as unproven. Active AI models require verified live execution receipts.
  *
  * Copyright (c) 2026 Air Roofers SASU
  * All Rights Reserved.
@@ -42,6 +43,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 export const MANIFEST_PATH = 'docs/governance/evidence/evidence-manifest.json';
 const CANARY_PATH = 'docs/security/evidence/live_ai_canary_receipt.json';
 const NATIVE_PATH = 'docs/governance/evidence/native-runner-evidence.json';
+export const AI_REPORT_PATH = 'docs/security/evidence/ai_model_qualification_report.json';
 
 function readJson(root, rel) {
   const abs = path.resolve(root, rel);
@@ -92,6 +94,31 @@ export function verifyEvidenceFreshness({ root = ROOT } = {}) {
   const native = readJson(root, NATIVE_PATH);
   if (native.gitHeadSha !== candidate) {
     throw new EvidenceFreshnessError(`Native runner evidence SHA ${native.gitHeadSha} != candidate ${candidate}`);
+  }
+
+  const aiReportAbs = path.resolve(root, AI_REPORT_PATH);
+  const inEvidenceFiles = Array.isArray(manifest.evidenceFiles) && manifest.evidenceFiles.some((f) => f.path === AI_REPORT_PATH);
+  if (inEvidenceFiles || fs.existsSync(aiReportAbs)) {
+    const report = readJson(root, AI_REPORT_PATH);
+    if (report.gitSha !== candidate) {
+      throw new EvidenceFreshnessError(`AI model qualification report SHA ${report.gitSha} != candidate ${candidate}`);
+    }
+    const activeCount = report.summary && typeof report.summary.activeCount === 'number' ? report.summary.activeCount : 0;
+    if (activeCount > 0) {
+      const mode = report.qualificationMode;
+      if (mode === 'CATALOG_OFFLINE' || mode === 'OFFLINE' || (mode !== 'LIVE' && mode !== 'LIVE_SOVEREIGN')) {
+        throw new EvidenceFreshnessError('Offline catalog reports cannot satisfy live AI qualification: active models require live execution');
+      }
+      const receipts = Array.isArray(report.receipts) ? report.receipts : [];
+      const activeReceipts = receipts.filter((r) => r.status === 'ACTIVE');
+      if (activeReceipts.some((r) => r.liveExecution !== true)) {
+        throw new EvidenceFreshnessError('Receipts for all active models must have liveExecution === true');
+      }
+      const liveActiveCount = receipts.filter((r) => r.status === 'ACTIVE' && r.liveExecution === true).length;
+      if (activeCount !== liveActiveCount) {
+        throw new EvidenceFreshnessError('Active model count does not match real live qualification receipts');
+      }
+    }
   }
 
   return { candidate, head: binding.head, descendant: binding.descendant, evidenceChangedPaths: binding.changedPaths };

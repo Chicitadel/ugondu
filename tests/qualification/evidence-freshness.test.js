@@ -173,16 +173,21 @@ test('FRESH-009: docs/audit/ changes after candidate are accepted as valid evide
   assert.ok(r.evidenceChangedPaths.includes('docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md'));
 });
 
-test('FRESH-010: isEvidenceOnlyPath recognizes docs/governance/, docs/audit/ and docs/audits/ prefixes', async () => {
+test('FRESH-010: isEvidenceOnlyPath recognizes docs/governance/evidence/, denies non-evidence governance paths', async () => {
   const { isEvidenceOnlyPath, EVIDENCE_ONLY_PREFIXES } = await import(pathToFileURL(path.join(GOV, 'evidence-freshness.mjs')).href);
-  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/governance/'));
+  assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/governance/evidence/'));
+  assert.ok(!EVIDENCE_ONLY_PREFIXES.includes('docs/governance/'));
   assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/security/evidence/'));
   assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/audit/'));
   assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/audits/'));
   assert.ok(EVIDENCE_ONLY_PREFIXES.includes('docs/qualification/'));
-  assert.equal(isEvidenceOnlyPath('docs/governance/GOVERNANCE_CHARTER.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs/governance/evidence/xyz.json'), true);
   assert.equal(isEvidenceOnlyPath('docs/governance/evidence/evidence-manifest.json'), true);
-  assert.equal(isEvidenceOnlyPath('docs\\governance\\audit-summary.md'), true);
+  assert.equal(isEvidenceOnlyPath('docs\\governance\\evidence\\xyz.json'), true);
+  assert.equal(isEvidenceOnlyPath('docs/governance/policy.md'), false);
+  assert.equal(isEvidenceOnlyPath('docs/governance/GOVERNANCE_CHARTER.md'), false);
+  assert.equal(isEvidenceOnlyPath('docs\\governance\\policy.md'), false);
+  assert.equal(isEvidenceOnlyPath('docs/governance/policies/security.md'), false);
   assert.equal(isEvidenceOnlyPath('docs/audit/CERTIFICATION_PROGRESS_DASHBOARD.md'), true);
   assert.equal(isEvidenceOnlyPath('docs/audit/COR_REMEDIATION_EXECUTION_RUNBOOK.md'), true);
   assert.equal(isEvidenceOnlyPath('docs/audit/COR_UAIGOS_REAUDIT_AND_REMEDIATION_PLAN.md'), true);
@@ -193,17 +198,134 @@ test('FRESH-010: isEvidenceOnlyPath recognizes docs/governance/, docs/audit/ and
   assert.equal(isEvidenceOnlyPath('src/audit/tampered.js'), false);
 });
 
-test('FRESH-011: docs/governance/ changes after candidate are accepted as valid evidence-only changes', async () => {
+test('FRESH-011: modifying a non-evidence governance doc like docs/governance/policy.md post-candidate causes assertCandidateBinding to fail closed', async () => {
+  const { assertCandidateBinding } = await import(pathToFileURL(path.join(GOV, 'evidence-freshness.mjs')).href);
   const { verifyEvidenceFreshness } = await import(VER);
   const { dir, candidate } = buildRelease();
   await seal(dir, candidate);
-  write(dir, 'docs/governance/GOVERNANCE_CHARTER.md', '# Governance Charter\n');
-  write(dir, 'docs/governance/SECURITY_CONTROLS.md', '# Security Controls\n');
-  const govHead = commit(dir, 'governance documentation updates');
+  write(dir, 'docs/governance/policy.md', '# Enterprise Security Policy\n');
+  commit(dir, 'governance policy update post-candidate');
+  assert.throws(
+    () => assertCandidateBinding(dir, candidate),
+    /Stale evidence: 1 non-evidence path\(s\) changed.*docs\/governance\/policy\.md/
+  );
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Stale evidence: 1 non-evidence path\(s\) changed.*docs\/governance\/policy\.md/
+  );
+});
+
+test('FRESH-012: modifying docs/governance/evidence/foo.json post-candidate is accepted as an evidence-only descendant', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/governance/evidence/foo.json', { auditNote: 'post-candidate-proof' });
+  const evidenceHead = commit(dir, 'evidence documentation updates');
   const r = await verifyEvidenceFreshness({ root: dir });
   assert.equal(r.candidate, candidate);
-  assert.equal(r.head, govHead);
+  assert.equal(r.head, evidenceHead);
   assert.equal(r.descendant, true);
-  assert.ok(r.evidenceChangedPaths.includes('docs/governance/GOVERNANCE_CHARTER.md'));
-  assert.ok(r.evidenceChangedPaths.includes('docs/governance/SECURITY_CONTROLS.md'));
+  assert.ok(r.evidenceChangedPaths.includes('docs/governance/evidence/foo.json'));
+});
+
+test('FRESH-013: AI qualification report bound to mismatched SHA is rejected', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+    gitSha: 'f'.repeat(40),
+    qualificationMode: 'CATALOG_OFFLINE',
+    summary: { activeCount: 0 },
+    receipts: [],
+  });
+  commit(dir, 'mismatched ai report');
+  assert.throws(() => verifyEvidenceFreshness({ root: dir }), /AI model qualification report SHA/);
+});
+
+test('FRESH-014: AI qualification report with active models under offline mode is rejected', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+    gitSha: candidate,
+    qualificationMode: 'CATALOG_OFFLINE',
+    summary: { activeCount: 2 },
+    receipts: [{ status: 'ACTIVE', liveExecution: true }, { status: 'ACTIVE', liveExecution: true }],
+  });
+  commit(dir, 'offline report claiming active models');
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Offline catalog reports cannot satisfy live AI qualification: active models require live execution/
+  );
+});
+
+test('FRESH-015: AI qualification report with active models lacking liveExecution === true is rejected', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+    gitSha: candidate,
+    qualificationMode: 'LIVE_SOVEREIGN',
+    summary: { activeCount: 1 },
+    receipts: [{ status: 'ACTIVE', liveExecution: false }],
+  });
+  commit(dir, 'live report with fake execution');
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Receipts for all active models must have liveExecution === true/
+  );
+});
+
+test('FRESH-016: AI qualification report where activeCount does not match live active receipts is rejected', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+    gitSha: candidate,
+    qualificationMode: 'LIVE_SOVEREIGN',
+    summary: { activeCount: 2 },
+    receipts: [{ status: 'ACTIVE', liveExecution: true }],
+  });
+  commit(dir, 'live report with count mismatch');
+  assert.throws(
+    () => verifyEvidenceFreshness({ root: dir }),
+    /Active model count does not match real live qualification receipts/
+  );
+});
+
+test('FRESH-017: AI qualification report with activeCount 0 under offline mode is accepted', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+    gitSha: candidate,
+    qualificationMode: 'CATALOG_OFFLINE',
+    summary: { totalDiscovered: 12, qualifiedCount: 0, activeCount: 0, disabledCount: 12 },
+    receipts: [{ status: 'DISABLED' }],
+  });
+  const aiHead = commit(dir, 'valid offline report');
+  const r = await verifyEvidenceFreshness({ root: dir });
+  assert.equal(r.candidate, candidate);
+  assert.equal(r.head, aiHead);
+  assert.equal(r.descendant, true);
+});
+
+test('FRESH-018: AI qualification report with verified live execution receipts under LIVE_SOVEREIGN is accepted', async () => {
+  const { verifyEvidenceFreshness } = await import(VER);
+  const { dir, candidate } = buildRelease();
+  await seal(dir, candidate);
+  write(dir, 'docs/security/evidence/ai_model_qualification_report.json', {
+    gitSha: candidate,
+    qualificationMode: 'LIVE_SOVEREIGN',
+    summary: { totalDiscovered: 2, qualifiedCount: 2, activeCount: 2, disabledCount: 0 },
+    receipts: [
+      { modelAlias: 'model-a', status: 'ACTIVE', liveExecution: true },
+      { modelAlias: 'model-b', status: 'ACTIVE', liveExecution: true },
+    ],
+  });
+  const aiHead = commit(dir, 'valid live report');
+  const r = await verifyEvidenceFreshness({ root: dir });
+  assert.equal(r.candidate, candidate);
+  assert.equal(r.head, aiHead);
+  assert.equal(r.descendant, true);
 });

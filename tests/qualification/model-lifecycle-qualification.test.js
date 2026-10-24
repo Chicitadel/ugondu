@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Tests / Qualification — Model Lifecycle Qualification Test Suite
  * File           : model-lifecycle-qualification.test.js
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-24
@@ -17,13 +17,14 @@
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST
  *
- * Copyright (c) 2026 Air Roofers SASU
- * All Rights Reserved.
+ * Notice:
+ * Rigorous qualification test suite verifying model lifecycle transitions,
+ * zero synthetic inference enforcement, fail-closed offline activation guards,
+ * circuit breaking, secret redaction, and authentic live qualification.
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 'use strict';
@@ -267,7 +268,7 @@ test('LIFECYCLE-007: Secret redaction in all receipts, diagnostics, and error me
   assert.strictEqual(sanitized, 'Authorization: Bearer [REDACTED_SECRET] with api_key [REDACTED_SECRET]');
 });
 
-test('LIFECYCLE-008: End-to-end qualification report generation into docs/security/evidence', async () => {
+test('LIFECYCLE-008: Offline qualification produces 0 active models and records liveExecution: false', async () => {
   const { runModelQualification } = await loadLifecycleModule();
 
   const report = await runModelQualification({ offline: true });
@@ -275,7 +276,16 @@ test('LIFECYCLE-008: End-to-end qualification report generation into docs/securi
   assert.strictEqual(report.reportType, 'AI_MODEL_QUALIFICATION_REPORT');
   assert.strictEqual(report.qualificationMode, 'CATALOG_OFFLINE');
   assert.ok(report.summary.totalDiscovered >= 1);
-  assert.ok(report.summary.qualifiedCount >= 1);
+  assert.strictEqual(report.summary.qualifiedCount, 0, 'Offline mode must produce 0 qualified models');
+  assert.strictEqual(report.summary.activeCount, 0, 'Offline mode must produce 0 active models');
+  assert.ok(report.summary.disabledCount >= 1, 'Offline models must be transitioned to DISABLED');
+
+  assert.ok(Array.isArray(report.receipts));
+  assert.ok(report.receipts.length > 0);
+  for (const receipt of report.receipts) {
+    assert.strictEqual(receipt.liveExecution, false, 'Every offline receipt must record liveExecution: false');
+    assert.strictEqual(receipt.status, 'UNQUALIFIED');
+  }
 
   // Evidence file must be created on disk
   const evidencePath = path.resolve(__dirname, '../../docs/security/evidence/ai_model_qualification_report.json');
@@ -285,7 +295,101 @@ test('LIFECYCLE-008: End-to-end qualification report generation into docs/securi
   assert.strictEqual(onDiskContent.includes(MOCK_SECRET_KEY), false, 'Evidence report on disk must contain zero secrets');
 
   const parsed = JSON.parse(onDiskContent);
-  assert.strictEqual(parsed.reportType, 'AI_MODEL_QUALIFICATION_REPORT');
-  assert.ok(Array.isArray(parsed.receipts));
-  assert.ok(parsed.receipts.length > 0);
+  assert.strictEqual(parsed.qualificationMode, 'CATALOG_OFFLINE');
+  assert.strictEqual(parsed.summary.activeCount, 0);
+  assert.strictEqual(parsed.summary.qualifiedCount, 0);
+});
+
+test('LIFECYCLE-009: Attempting to mark a model ACTIVE without real live execution fails closed', async () => {
+  const { ModelLifecycle, ModelLifecycleState } = await loadLifecycleModule();
+
+  const rawModel = { alias: 'sentinel-fake-active', providerId: 'airroofers-ai' };
+  const lifecycle = new ModelLifecycle(rawModel);
+
+  lifecycle.validateSchema();
+  lifecycle.checkPolicy();
+  await lifecycle.probeCapability(async () => ({ ok: true }));
+
+  // Case A: Missing verifyInference executor must throw EXECUTION_FUNCTION_REQUIRED
+  await assert.rejects(
+    async () => {
+      await lifecycle.verifyInference(null);
+    },
+    (err) => err.errorCode === 'EXECUTION_FUNCTION_REQUIRED'
+  );
+
+  // Case B: Empty inference output must throw INFERENCE_OUTPUT_EMPTY
+  await assert.rejects(
+    async () => {
+      await lifecycle.verifyInference(async () => ({ output: '' }));
+    },
+    (err) => err.errorCode === 'INFERENCE_OUTPUT_EMPTY'
+  );
+
+  // Complete inference verification with valid output
+  await lifecycle.verifyInference(async () => ({ output: 'authentic-probe-output', latencyMs: 35, correlationId: 'corr-fake-active-01' }));
+  assert.strictEqual(lifecycle.state, ModelLifecycleState.INFERENCE_VERIFIED);
+
+  // Case C: qualify with liveExecution: false explicitly
+  lifecycle.qualify({ liveExecution: false });
+  assert.strictEqual(lifecycle.state, ModelLifecycleState.QUALIFIED);
+
+  // Attempting to activate a model whose receipt has liveExecution: false must throw LIVE_EXECUTION_REQUIRED
+  assert.throws(
+    () => lifecycle.activate(),
+    (err) => err.errorCode === 'LIVE_EXECUTION_REQUIRED' && err.statusCode === 403
+  );
+  assert.strictEqual(lifecycle.state, ModelLifecycleState.QUALIFIED);
+  assert.strictEqual(lifecycle.canRoute(), false);
+});
+
+test('LIFECYCLE-010: Live qualification passes when valid credentials and executor are provided', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+
+  const mockExecutor = async (model) => ({
+    output: `Authentic live probe output for ${model.alias}`,
+    latencyMs: 42,
+    correlationId: 'corr-test-live-qual-001',
+  });
+
+  const report = await runModelQualification({
+    mode: 'LIVE_SOVEREIGN',
+    secret: MOCK_SECRET_KEY,
+    baseUrl: 'https://ai.airroofers.eu',
+    discoveredModels: [
+      { alias: 'sentinel-guard-v1', providerId: 'airroofers-ai', capabilities: { modalities: ['text'], streaming: false, toolCalling: true } },
+    ],
+    executeProbe: mockExecutor,
+  });
+
+  assert.ok(report);
+  assert.strictEqual(report.qualificationMode, 'LIVE_SOVEREIGN');
+  assert.strictEqual(report.summary.totalDiscovered, 1);
+  assert.strictEqual(report.summary.qualifiedCount, 1);
+  assert.strictEqual(report.summary.activeCount, 1);
+  assert.strictEqual(report.summary.disabledCount, 0);
+
+  const receipt = report.receipts[0];
+  assert.strictEqual(receipt.status, 'QUALIFIED');
+  assert.strictEqual(receipt.liveExecution, true);
+  assert.strictEqual(receipt.verification, 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED');
+  assert.ok(receipt.inferenceDigestSha256);
+  assert.strictEqual(receipt.inferenceDigestSha256.length, 64);
+});
+
+test('LIFECYCLE-011: Production qualification in offline mode fails closed with LIVE_QUALIFICATION_REQUIRED', async () => {
+  const { runModelQualification } = await loadLifecycleModule();
+  const prevEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+
+  try {
+    await assert.rejects(
+      async () => {
+        await runModelQualification({ offline: true });
+      },
+      (err) => err.errorCode === 'LIVE_QUALIFICATION_REQUIRED' && /LIVE_QUALIFICATION_REQUIRED/.test(err.message)
+    );
+  } finally {
+    process.env.NODE_ENV = prevEnv;
+  }
 });
