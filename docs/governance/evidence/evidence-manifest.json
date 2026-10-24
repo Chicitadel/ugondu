@@ -1,7 +1,7 @@
 {
   "schema": "ugondu.evidence-manifest/1",
-  "gitHeadSha": "318c022158b1dabf1d9c12c62ed497a837a692df",
-  "candidateSha": "318c022158b1dabf1d9c12c62ed497a837a692df",
+  "gitHeadSha": "870aac95cfd8b183ac434e61fe8aa023b4606e91",
+  "candidateSha": "870aac95cfd8b183ac434e61fe8aa023b4606e91",
   "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
   "evidenceFiles": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "path": "docs/governance/evidence/native-runner-evidence.json",
-      "sha256": "92f65f0b58e9fc5cc4a4d7fd0d99d36459298a9d039d54c5314ce91068675937"
+      "sha256": "205e1456a09d962da236ad651c5c8ed897190d7b00233e0c8741498e2c7cb701"
     },
     {
       "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
@@ -18,11 +18,11 @@
     },
     {
       "path": "docs/security/evidence/ai_model_qualification_report.json",
-      "sha256": "5c1192be4eeab779ce984579dc1ee5bc795a9c69bd25e602f868925b12e87c2b"
+      "sha256": "973ebaea30bae23fd29046848f964422d6fe2146b3286fc219bb8753df64f125"
     },
     {
       "path": "docs/security/evidence/live_ai_canary_receipt.json",
-      "sha256": "a02327b5ef3902e5ae3636947cac0c2f7f0fc47b359334a55a26d91da565e1fe"
+      "sha256": "dda0e7a0ffdb820acc747d3f3545d514c6f87b435838465b8c9ba8189b6c487a"
     }
   ],
   "testCommands": [
@@ -51,6 +51,10 @@
       "exitCode": 0
     },
     {
+      "command": "node --test tests/qualification/model-lifecycle-adversarial-qualification.test.js",
+      "exitCode": 0
+    },
+    {
       "command": "node --test tests/qualification/ai-barrel-export-qualification.test.js",
       "exitCode": 0
     },
@@ -59,11 +63,11 @@
       "exitCode": 0
     },
     {
-      "command": "gh workflow run ai-live-canary (run 40125751718)",
+      "command": "gh workflow run ai-live-canary (run 40137776829)",
       "exitCode": 0
     },
     {
-      "command": "gh run view 40125624489 (Ugondu CI/CD Pipeline)",
+      "command": "gh run view 40137696382 (Ugondu CI/CD Pipeline)",
       "exitCode": 0
     }
   ],
