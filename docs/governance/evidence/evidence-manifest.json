@@ -1,24 +1,28 @@
 {
   "schema": "ugondu.evidence-manifest/1",
-  "gitHeadSha": "d641981dd5a9e056dfc8ba59c54ab75da44ef271",
-  "candidateSha": "d641981dd5a9e056dfc8ba59c54ab75da44ef271",
+  "gitHeadSha": "55447c495c1c086286774170f706fcbe9b6f6646",
+  "candidateSha": "55447c495c1c086286774170f706fcbe9b6f6646",
   "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
   "evidenceFiles": [
     {
       "path": "config/qualification/target-matrix.json",
-      "sha256": "3a3478d7331d3c22a80986113cd57c930fdfb53cb46ea6d90d24972b1d3bfeff"
+      "sha256": "871318a028429784438a0e2ebab758d8530a2257493c6a757905188ff38c24ca"
     },
     {
       "path": "docs/governance/evidence/native-runner-evidence.json",
-      "sha256": "5369baa207843bc1f30a79e3b458a394977088dd9a2122b309ed6603ed29799e"
+      "sha256": "c312e7f3f5f1bfdd173714dd82f5cc5393289229ccd080cab597bd2c66884914"
     },
     {
       "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
-      "sha256": "38012bca46376bd2f8b85a71421cf81777e15b1dad0bf1b1c8320011283f1c7f"
+      "sha256": "6f9b3ecefb3d2604d54483be9c537d996e22c6f423894214aaeb390b830be7fb"
+    },
+    {
+      "path": "docs/security/evidence/ai_model_qualification_report.json",
+      "sha256": "8446f953bb90d49c5529c705d20148aeaa8b8f59d99fe66ee713eeb7845b7a9f"
     },
     {
       "path": "docs/security/evidence/live_ai_canary_receipt.json",
-      "sha256": "1af3d9aa29fdbc20cc1a9e3f58ca3adee09dab7c3a3dba1bcde100e7da19878d"
+      "sha256": "259110c7147b27d85fba9c0c6a0c6f3f1635ded6ba0fa5aae5ba268eccd70292"
     }
   ],
   "testCommands": [
@@ -51,11 +55,11 @@
       "exitCode": 0
     },
     {
-      "command": "gh workflow run ai-live-canary (run 40089857840)",
+      "command": "gh workflow run ai-live-canary (run 40095440577)",
       "exitCode": 0
     },
     {
-      "command": "gh run view 40089852101 (Ugondu CI/CD Pipeline)",
+      "command": "gh run view 40095423217 (Ugondu CI/CD Pipeline)",
       "exitCode": 0
     }
   ],
