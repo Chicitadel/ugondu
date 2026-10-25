@@ -119,3 +119,15 @@ The T03/T04 integration-pending labels do not reopen the previously closed F-23/
 - **Direct fix:** `.github/workflows/cor.yml` now distinguishes PR validation from release certification. PRs require the COR job to pass and the AWS job to be skipped, and the gate prints `NOT RELEASE CERTIFIED`. Push/workflow-dispatch runs still require both COR and AWS physical gates to succeed. Regression test `COR-WF-017` added to `tests/qualification/cor-workflow-gates.test.js`.
 - **Validation pending:** CI/CD #512 [40219829697](https://github.com/Chicitadel/ugondu/actions/runs/40219829697) and COR #399 [40219829698](https://github.com/Chicitadel/ugondu/actions/runs/40219829698) were still in progress at the time of this snapshot. The workflow source change invalidates the old candidate binding; run approved candidate qualification and regenerate evidence before any release certification.
 - **Release status:** PR #24 remains draft. Universal commercial release is **NOT GRANTED**. AI fleet report remains offline with zero qualified and zero active models; non-AWS target and immutable artifact lifecycle evidence remain incomplete.
+
+
+## PR validation versus release certification — updated 2026-10-25
+
+The COR workflow was corrected on the remediation branch after run #398 showed a successful COR Certification job but a failed final gate because AWS physical qualification is intentionally skipped on pull requests.
+
+- On PRs, candidate-bound evidence freshness is deferred because unmerged code is expected to differ from the frozen release candidate. The PR still executes build/typecheck/locale/I18N/architecture/import/workspace/governance/COR checks. The final gate requires COR success and AWS skipped and explicitly labels the outcome **NOT RELEASE CERTIFIED**.
+- On push/workflow-dispatch release qualification, candidate-bound evidence freshness remains mandatory, and both COR and AWS physical qualification must succeed. A skipped physical gate is never accepted for release certification.
+- Regression tests `COR-WF-017` and `COR-WF-018` cover these semantics. The final current-head CI result remains the acceptance evidence.
+- The prior manifest candidate is still `45b07518e82c9089d68a38d87b4566b0dd0bcba9`; it is not evidence for the newly changed workflow. Regenerate candidate-bound evidence only through approved tooling after the implementation candidate is frozen.
+
+Universal commercial release remains **NOT GRANTED**.
