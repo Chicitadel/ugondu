@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { isPathWithinDirectory } from '../scripts/governance/workspace-boundary.mjs';
 import { loadRequiredDictionary } from '../scripts/governance/required-dictionary.mjs';
+import { isWorkspacePathWithinRoot } from '../scripts/governance/validate-test-coverage.mjs';
 
 test('T04 regression: workspace sibling sharing a path prefix is outside the boundary', () => {
   const root = path.join(os.tmpdir(), 'ugondu-boundary-fixture');
@@ -13,6 +14,17 @@ test('T04 regression: workspace sibling sharing a path prefix is outside the bou
   assert.equal(isPathWithinDirectory(path.join(root, 'server', 'shared'), path.join(root, 'server', 'engine-core', 'src', 'index.ts')), false);
   assert.equal(isPathWithinDirectory(path.join(root, 'server', 'shared'), path.join(root, 'server', 'shared', '..', 'engine-core', 'src', 'index.ts')), false);
   assert.equal(isPathWithinDirectory(path.join(root, 'server', 'shared'), path.join(root, 'server', 'shared')), true);
+});
+
+test('governance regression: workspace declarations cannot escape the repository root', () => {
+  const root = path.join(os.tmpdir(), 'ugondu-repository-root');
+  assert.equal(isWorkspacePathWithinRoot(root, 'server/shared'), true);
+  assert.equal(isWorkspacePathWithinRoot(root, 'server/shared2'), true);
+  assert.equal(isWorkspacePathWithinRoot(root, '../outside-workspace'), false);
+  assert.equal(isWorkspacePathWithinRoot(root, 'server/../../outside-workspace'), false);
+  assert.equal(isWorkspacePathWithinRoot(root, path.join(root, 'external-workspace')), false);
+  assert.equal(isWorkspacePathWithinRoot(root, ''), false);
+  assert.equal(isWorkspacePathWithinRoot(root, null), false);
 });
 
 test('T03 regression: required locale dictionary fails closed when missing', () => {
