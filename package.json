@@ -37,7 +37,9 @@
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
-    "verify:release-integrity": "node scripts/verify-release-integrity.js"
+    "verify:release-integrity": "node scripts/verify-release-integrity.js",
+    "verify:t03": "node scripts/governance/verify-tokenization-t03.mjs",
+    "verify:t04": "node scripts/governance/verify-microservices-t04.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

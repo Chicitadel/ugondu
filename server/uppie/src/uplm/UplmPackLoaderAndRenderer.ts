@@ -111,10 +111,10 @@ export class UplmPackLoaderAndRenderer {
     const schemaPath = path.join(packDir, 'schema', 'policy-pack.schema.json');
 
     if (!fs.existsSync(packYamlPath)) {
-      throw new Error(__t('uplm.error.missing_pack_yaml', { packYamlPath }));
+      throw new Error(__t('uplm.error.missing_pack_yaml', { path: packYamlPath }));
     }
     if (!fs.existsSync(schemaPath)) {
-      throw new Error(__t('uplm.error.missing_pack_schema', { schemaPath }));
+      throw new Error(__t('uplm.error.missing_pack_schema', { path: schemaPath }));
     }
 
     const packYamlContent = fs.readFileSync(packYamlPath, 'utf8');

@@ -222,7 +222,7 @@ export class SAMLAdapter {
     }
 
     if (!signatureVerified) {
-      throw new Error(__t('token_verification_failed') + 'SAML_SIGNATURE_INVALID');
+      throw new Error(__t('token_verification_failed'));
     }
 
     // 6. Extract verified tenantId from attribute statement or derive from verified issuer

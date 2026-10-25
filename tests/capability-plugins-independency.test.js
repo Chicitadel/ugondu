@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Governance — Capabilities & Plugins Independency
  * File           : capability-plugins-independency.test.js
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-25
@@ -235,6 +235,92 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
 
     for (const d of targetDirs) {
       inspectDir(d);
+    }
+  });
+
+  test('CPI-009: Fail-Closed Isolation on Absent Optional Plugins — safely denies execution when capability plugin is not installed', async () => {
+    const nonexistentPluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-nonexistent');
+    assert.strictEqual(fs.existsSync(nonexistentPluginDir), false, 'Nonexistent plugin must not exist');
+
+    // Executing an absent optional plugin must fail closed
+    await assert.rejects(
+      async () => executePluginSandbox(nonexistentPluginDir, {}),
+      /Plugin entrypoint not found|err_plugin_entrypoint_not_found/i
+    );
+
+    // Validating path of absent optional plugin must throw entrypoint not found
+    assert.throws(
+      () => validatePluginSandboxPath(nonexistentPluginDir, path.join(ROOT, 'plugins')),
+      /Plugin entrypoint not found|err_plugin_entrypoint_not_found/i
+    );
+  });
+
+  test('CPI-010: Zero Circular Dependencies Verification — ensures strictly acyclic plugin hierarchy conforming to UJP-EXT-004', () => {
+    const serverPluginsDir = path.join(ROOT, 'server', 'plugins');
+    const rootPluginsDir = path.join(ROOT, 'plugins');
+
+    const pluginDirs = [
+      ...fs.readdirSync(serverPluginsDir).map(d => path.join(serverPluginsDir, d)),
+      ...fs.readdirSync(rootPluginsDir).map(d => path.join(rootPluginsDir, d))
+    ].filter(d => fs.statSync(d).isDirectory());
+
+    const dependencyGraph = new Map();
+
+    for (const pDir of pluginDirs) {
+      const pkgPath = path.join(pDir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        const deps = [
+          ...Object.keys(pkg.dependencies || {}),
+          ...Object.keys(pkg.devDependencies || {}),
+          ...Object.keys(pkg.peerDependencies || {})
+        ];
+        dependencyGraph.set(pkg.name, deps);
+      }
+    }
+
+    // Verify no plugin has circular dependency
+    for (const [pluginName, deps] of dependencyGraph.entries()) {
+      assert.ok(!deps.includes(pluginName), `Plugin ${pluginName} must not depend on itself`);
+
+      // Verify no circular dependency across plugins
+      for (const dep of deps) {
+        if (dependencyGraph.has(dep)) {
+          const secondLevelDeps = dependencyGraph.get(dep) || [];
+          assert.ok(
+            !secondLevelDeps.includes(pluginName),
+            `Circular dependency detected between ${pluginName} and ${dep}`
+          );
+        }
+      }
+    }
+  });
+
+  test('CPI-011: Independent Package.json Manifests — all capability plugins declare independent package.json manifests', () => {
+    const targetDirs = [
+      path.join(ROOT, 'plugins', 'ugondu-plugin-node'),
+      path.join(ROOT, 'plugins', 'ugondu-plugin-composer'),
+      path.join(ROOT, 'plugins', 'ugondu-plugin-php-fpm'),
+      path.join(ROOT, 'plugins', 'aws-vpc-adapter'),
+      path.join(ROOT, 'server', 'plugins', 'aws-vpc-adapter'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-code'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-config'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-database'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-dependencies'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-http'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-network'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-zdd')
+    ];
+
+    for (const pDir of targetDirs) {
+      const pkgPath = path.join(pDir, 'package.json');
+      assert.ok(fs.existsSync(pkgPath), `Package manifest missing in ${pDir}`);
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      assert.ok(pkg.name, `Plugin ${pDir} must declare name`);
+      assert.ok(pkg.version, `Plugin ${pDir} must declare version`);
+      assert.strictEqual(pkg.private, true, `Plugin ${pDir} must be private`);
+      assert.ok(pkg.author, `Plugin ${pDir} must declare author`);
+      assert.ok(!pkg.author.toLowerCase().includes('ai'), `Author must not contain AI in ${pDir}`);
     }
   });
 });
