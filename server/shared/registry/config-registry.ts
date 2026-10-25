@@ -344,7 +344,7 @@ export class ConfigRegistry {
 
   public validateTimeout(timeoutMs: number, fieldName: string = 'timeoutMs'): number {
     if (typeof timeoutMs !== 'number' || !Number.isFinite(timeoutMs)) {
-      throw new Error(`${fieldName} must be a finite number.`);
+      throw new Error(__t('err_field_must_be_finite_number', { fieldName }));
     }
     if (timeoutMs < MIN_TIMEOUT_MS || timeoutMs > MAX_TIMEOUT_MS) {
       throw new Error(
@@ -394,7 +394,7 @@ export class ConfigRegistry {
 
       if (trimmed === '*' || trimmed.includes('*')) {
         if (allowCredentials) {
-          throw new Error('CORS policy violation: wildcard origin (*) is prohibited when credentials are enabled.');
+          throw new Error(__t('err_cors_wildcard_with_credentials_prohibited'));
         }
         if (environment === 'production' || environment === 'staging') {
           throw new Error(`CORS policy violation: wildcard origin (*) is prohibited in '${environment}' environment.`);

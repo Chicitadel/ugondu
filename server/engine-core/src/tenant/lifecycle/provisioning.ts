@@ -58,7 +58,7 @@ export class TenantProvisioner {
             throw new Error(__t('msg_tenant_id_required_for_provisioning_exec'));
         }
         // Allocate resources, setup isolated database schemas, initialize root key
-        Logger.info(`Provisioning tenant ${context.tenantId} at tier ${context.tier}`);
+        Logger.info(__t('tenant_lifecycle_provisioning', { tenantId: context.tenantId, tier: context.tier }));
         return { status: 'success' };
     }
 }

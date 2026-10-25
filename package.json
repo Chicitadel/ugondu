@@ -38,6 +38,7 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "verify:release-integrity": "node scripts/verify-release-integrity.js",
+    "verify:attribution": "node scripts/governance/verify-ai-attribution.mjs",
     "verify:t03": "node scripts/governance/verify-tokenization-t03.mjs",
     "verify:t04": "node scripts/governance/verify-microservices-t04.mjs",
     "test:governance": "node --test tests/governance-verifiers.test.mjs"

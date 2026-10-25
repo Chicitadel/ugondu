@@ -134,7 +134,7 @@ export class SAMLAdapter {
         : undefined
     );
     if (trustedIssuers && trustedIssuers.length > 0 && !trustedIssuers.includes(issuer)) {
-      throw new Error(`SAML_UNTRUSTED_ISSUER: ${issuer}`);
+      throw new Error(__t('saml_untrusted_issuer', { issuer }));
     }
 
     // 2. Extract and validate NameID
@@ -222,7 +222,7 @@ export class SAMLAdapter {
     }
 
     if (!signatureVerified) {
-      throw new Error(__t('token_verification_failed') + 'SAML_SIGNATURE_INVALID');
+      throw new Error(__t('token_verification_failed'));
     }
 
     // 6. Extract verified tenantId from attribute statement or derive from verified issuer

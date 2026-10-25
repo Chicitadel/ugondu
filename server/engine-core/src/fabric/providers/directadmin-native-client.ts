@@ -1,3 +1,4 @@
+import { __t } from '@ugondu/shared';
 import { NodeSSH } from 'node-ssh';
 import { IDirectAdminClient } from './directadmin';
 import { Logger } from '@ugondu/shared';
@@ -17,7 +18,7 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
 
   private async ensureConnection(): Promise<void> {
     if (!this.connected) {
-      Logger.info(`[DirectAdmin] Connecting to SSH ${this.username}@${this.host}:${this.port}...`);
+      Logger.info(__t('directadmin_connecting_ssh', { username: this.username, host: this.host, port: this.port }));
       await this.ssh.connect({
         host: this.host,
         port: this.port,
@@ -37,8 +38,8 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
     await this.ensureConnection();
     const result = await this.ssh.execCommand(cmd);
     if (result.code !== 0) {
-      Logger.error(`[DirectAdmin] SSH Command failed: ${cmd}`, { stderr: result.stderr });
-      throw new Error(`Command failed with code ${result.code}: ${result.stderr}`);
+      Logger.error(__t('directadmin_ssh_command_failed', { cmd }), { stderr: result.stderr });
+      throw new Error(__t('directadmin_command_failed_code_stderr', { code: result.code, stderr: result.stderr }));
     }
     return result.stdout;
   }

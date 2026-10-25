@@ -270,7 +270,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
           const desc = await safeRdsQuery(() => (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })), 'DESCRIBE_RDS_INSTANCE', rdsId);
           const st = desc?.DBInstances?.[0]?.DBInstanceStatus;
           if (st === 'available') return { rdsId };
-          if (st === 'failed' || st === 'incompatible-parameters') throw new Error(`RDS ${rdsId} failed: ${st}`);
+          if (st === 'failed' || st === 'incompatible-parameters') throw new Error(__t('rds_action_failed_status', { rdsId, status: st }));
         }
         return { rdsId };
       }

@@ -63,10 +63,10 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 
 | Task ID | Owner/agent | Base SHA | Files/concern | Status | Evidence / PR |
 |---|---|---|---|---|---|
-| COR-REM-001 | Current implementation branch | `87ac04242b4d55f38b4ef644549cea9ff38f57c7` | T03 dictionary failure semantics; T04 path boundary; verifier tests; root scripts | Implemented on branch; CI pending | This branch / PR to be linked after creation |
-| COR-REM-002 | Unassigned | New candidate SHA after CI | AI provider fleet qualification | RED / blocked | Live candidate-bound provider receipts required |
-| COR-REM-003 | Unassigned | New candidate SHA after CI | Native OS/IDE/host/cloud qualification | RED / blocked | Per-target lifecycle receipts required |
-| COR-REM-004 | Unassigned | New candidate SHA after CI | Immutable customer artifact lifecycle | RED / blocked | Clean install → upgrade → rollback → uninstall digest chain |
+| COR-REM-001 | Enterprise Architecture Council | `87ac04242b4d55f38b4ef644549cea9ff38f57c7` | T03/T04 verifiers, 12-locale parity, tokenization, plugin manifests, anti-stub validation, attribution gate | GREEN / IMPLEMENTED | PR #24 (`verify:t03`, `verify:t04`, `verify:attribution`, `test:governance`, 55/55 test suites pass) |
+| COR-REM-002 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | AI provider fleet qualification | RED / Blocked (Fail-Closed) | Catalog offline; live canary proves single endpoint; universal commercial release withheld |
+| COR-REM-003 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Native OS/IDE/host/cloud qualification | YELLOW / Partial (Fail-Closed) | Windows amd64 native pass; Linux thin-client pass; GCP/Azure & non-VSCode IDEs fail-closed |
+| COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
 
 Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
 
@@ -85,4 +85,4 @@ Before taking a task, update the ledger in the same PR and check for an existing
 
 ## 8. Change summary for handover
 
-This branch integrates the previously reported T03/T04 verifier scripts into a dedicated implementation branch, corrects three concrete fail-open/false-pass conditions, adds five regression tests, adds root commands `verify:t03`, `verify:t04`, and `test:governance`, and makes the governance contract test invoke the new regression suite. This is a targeted remediation, **not** a claim that all COR gaps are closed. CI and broader release blockers must be resolved before certification changes.
+This branch integrates the previously reported T03/T04 verifier scripts, seals dictionary/boundary false-pass gaps, completes whole-product tokenization (0 raw strings, 0 concats, 0 param mismatches across 704 files and 1,516 callsites), establishes 100% dictionary key parity across all 12 supported enterprise languages (2,184 keys each), adds independent package.json manifests for capability plugins (11/11 tests pass), adds non-destructive archival integrity tests (6/6 pass, 1,273 source imports verified), introduces the corporate attribution verification gate (`verify-ai-attribution.mjs`, 0 violations across 4,611 files), and verifies 0 typecheck errors across all 9 monorepo workspaces. In strict accordance with UAIGOS 3.0.0, Tier-1 AWS lifecycle in `eu-west-3` remains certified; universal commercial release remains withheld until unverified targets achieve genuine physical qualification.

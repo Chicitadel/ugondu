@@ -276,6 +276,7 @@ async function runCorRemediationTests() {
         assert.ok(contract.includes('export interface CorResourceOwnership'));
         assert.ok(contract.includes('export class CorResourceManifest'));
         assert.ok(contract.includes('export class CorCleanupExecutionError'));
+        assert.ok(contract.includes('export class CorVpcDependencyTimeoutError'));
         assert.ok(contract.includes('export async function cleanupOwnedCorVpcs'));
     });
 

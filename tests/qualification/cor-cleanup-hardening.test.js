@@ -54,6 +54,7 @@ function loadCorContract() {
 
 const {
     CorCleanupExecutionError,
+    CorVpcDependencyTimeoutError,
     CorResourceManifest,
     cleanupOwnedCorVpcs
 } = loadCorContract();
@@ -116,7 +117,9 @@ test('F-23 Hardened VPC Cleanup: Provider describe error halts cleanup and throw
             await cleanupOwnedCorVpcs(mockEc2DescribeSgsTimeout, activeRunId);
         },
         (err) => {
-            assert.ok(err instanceof CorCleanupExecutionError);
+            assert.ok(err instanceof CorCleanupExecutionError, `Expected CorCleanupExecutionError, got ${err.name}`);
+            assert.ok(err instanceof CorVpcDependencyTimeoutError, `Expected CorVpcDependencyTimeoutError, got ${err.name}`);
+            assert.strictEqual(err.name, 'CorVpcDependencyTimeoutError');
             assert.strictEqual(err.operation, 'DescribeSecurityGroups');
             assert.strictEqual(err.resourceId, 'vpc-stale-002');
             return true;

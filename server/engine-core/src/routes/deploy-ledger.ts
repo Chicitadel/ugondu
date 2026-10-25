@@ -27,6 +27,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Request } from 'express';
@@ -70,7 +71,7 @@ export class DeploymentLifecycleStateMachine {
   public transitionTo(nextPhase: DeploymentLifecyclePhase): void {
     const targetIndex = DEPLOYMENT_LIFECYCLE_PHASES.indexOf(nextPhase);
     if (targetIndex === -1) {
-      throw new Error(`INVALID_LIFECYCLE_PHASE: ${nextPhase}`);
+      throw new Error(__t('invalid_lifecycle_phase', { phase: nextPhase }));
     }
     if (targetIndex !== this.currentIndex + 1) {
       const currentName = this.currentIndex >= 0 ? DEPLOYMENT_LIFECYCLE_PHASES[this.currentIndex] : 'UNINITIALIZED';
@@ -145,7 +146,7 @@ export class DurableDeploymentLedger {
         }
       }
     } catch {
-      Logger.warn(`Deploy ledger load error at ${this.ledgerPath}; falling back to fresh ledger`);
+      Logger.warn(__t('deploy_ledger_load_error_fallback', { ledgerPath: this.ledgerPath }));
     }
     return {
       schemaVersion: 1,
@@ -281,7 +282,7 @@ export function safeResolveRecipeKey(keyState: KeyState): {
       };
     }
   } catch {
-    Logger.warn('Trust registry key resolution warning; falling back to explicit keyState');
+    Logger.warn(__t('trust_registry_key_resolution_warning'));
   }
   const pubPem =
     keyState.publicKeyPem ||
