@@ -122,3 +122,12 @@ This separation does not weaken release certification: the release event still r
   - `Build Microservices & Workspaces` (all 9 workspaces): ✓ Passed.
   - `Integration Tests` (11 test suites): ✓ Passed in 1m9s.
 - **Fail-Closed Release Boundary:** Universal commercial release remains strictly withheld. Only Tier-1 AWS lifecycle in `eu-west-3` is certified under candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9` / evidence descendant `fb8f66d34ef66fa253452d19d5079a892d35925d`. Unverified targets remain fail-closed until physical qualification receipts are produced.
+
+
+## Latest-head verification update — 2026-10-25 20:25 UTC
+
+- **Observed PR head:** `a5f978e177c54762daccdc5d785c772abc372339` (PR #24 remains open, draft, unmerged).
+- **COR workflow:** [run 40230376169](https://github.com/Chicitadel/ugondu/actions/runs/40230376169) completed successfully. Its COR Certification job passed; the AWS Physical Qualification Gate was intentionally skipped for the PR; the final gate passed with the explicit notice `NOT RELEASE CERTIFIED`.
+- **CI/CD pipeline:** [run 40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160) completed successfully. All 16 substantive build, governance, workspace and integration jobs passed; Docker validation and release publishing were skipped.
+- **Regression evidence from COR job logs:** COR remediation suite 24/24, adversarial evidence suite 19/19, mode-parity suite 6/6, workflow gate suite 18/18. Both `COR-WF-017` and `COR-WF-018` passed on this run's tested PR merge candidate `ecfec790d411bbffec270f1d700350bb3f26243c`.
+- **Scope limitation:** These are PR validation results, not a fresh non-PR AWS physical qualification or universal commercial release certification. Existing AI fleet, native target and customer artifact lifecycle blockers remain open.
