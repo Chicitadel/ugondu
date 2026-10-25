@@ -2,14 +2,14 @@
 # Ugondu COR Certification Progress Dashboard
 
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
-**Snapshot:** 2026-10-25 11:45 UTC  
+**Snapshot:** 2026-10-25 15:00 UTC (reconciliation snapshot)  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
 **Implementation candidate:** [`294c869c250b3f065d55d674ac352eec10f3557d`](https://github.com/Chicitadel/ugondu/commit/294c869c250b3f065d55d674ac352eec10f3557d)  
-**Evidence-only descendant:** [`dc39cd42f4ce511091fd0355d9ecad05d5852432`](https://github.com/Chicitadel/ugondu/commit/dc39cd42f4ce511091fd0355d9ecad05d5852432) (Head of `phase4/production-hardening`)  
+**Certified workflow descendant:** [`dc39cd42f4ce511091fd0355d9ecad05d5852432`](https://github.com/Chicitadel/ugondu/commit/dc39cd42f4ce511091fd0355d9ecad05d5852432) (final-gate head in run 40183694886)  \n**Latest observed evidence-only descendant at reconciliation:** [`ef0c3f4ee4813b59276bf0d087427af51caaf67d`](https://github.com/Chicitadel/ugondu/commit/ef0c3f4ee4813b59276bf0d087427af51caaf67d) (five commits/eight paths after candidate; GitHub compare showed audit/evidence paths only)  
 **Candidate CI:** [40183694906](https://github.com/Chicitadel/ugondu/actions/runs/40183694906) (🟢 15/15 jobs successful across microservices, Go thin-client matrix, integration tests, Docker images)  
 **Latest Certified COR + AWS Run Record:** [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) (🟢 UNIFIED RUN: COR Certification 1m50s, AWS Physical Gate 23m47s, Final Release Gate 2s)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
-**Latest detailed audit:** [Whole-Product COR Gap Audit & Production Release Plan](./WHOLE_PRODUCT_COR_GAP_AUDIT_AND_PRODUCTION_RELEASE_PLAN_2026-10-25.md)  
+**Latest detailed audit:** [Whole-Product COR Gap Audit & Production Release Plan](./WHOLE_PRODUCT_COR_GAP_AUDIT_AND_PRODUCTION_RELEASE_PLAN_2026-10-25.md)  \n**Post-execution evidence reconciliation:** [Subagent findings, production-branch proof gaps and status reconciliation](./POST_EXECUTION_EVIDENCE_RECONCILIATION_2026-10-25.md)  \n**Master execution checklist:** [Whole-Product COR Execution Plan & Master Checklist](./WHOLE_PRODUCT_COR_EXECUTION_AND_MASTER_CHECKLIST.md)  
 **COR/AWS resolution evidence:** [Post-Merge Resolution & Final Certification](./COR_POST_MERGE_AUDIT_RESOLUTION_AND_FINAL_CERTIFICATION_2026-10-25.md)  
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TIER-1 AWS CLOUD TARGET SUPPORT — UNIVERSAL COMMERCIAL RELEASE NOT GRANTED**  
 **Release state:** **CERTIFIED FOR TIER-1 AWS INFRASTRUCTURE LIFECYCLE ON CANDIDATE 294c869c / EVIDENCE DESCENDANT dc39cd42. POST-COR-001 (evidence baseline drift) resolved by freezing fresh implementation candidate 294c869c and binding evidence manifest; POST-COR-002 (AWS residual scanner least privilege) resolved via manifest-based HeadBucket verification with verified zero-residual cleanup; POST-COR-003 resolved via refreshed dashboard snapshot; F-23 (VPC cleanup contract & manifest) and F-24 (S3 tag fail-closed negative proof) verified in automated regression suites and live physical execution.**
@@ -94,3 +94,20 @@ The latest successful COR/AWS workflow is **bounded evidence**, not a declaratio
 | **Universal commercial release** | 🔴 **NOT GRANTED** | One candidate lineage; every advertised capability qualified; no open P0/P1; release authority approval |
 
 **Status semantics:** Green is scoped to the evidence, not a blanket product claim. A source/policy/dependency/configuration/workflow change invalidates relevant evidence until the required gates pass again. A failed or skipped mandatory gate keeps release status red.
+
+## Post-execution evidence reconciliation — 2026-10-25 15:00 UTC
+
+The supplied specialist execution log reports passing checks for localization, tokenization, microservice boundaries, plugin independency, semantic anti-stub review, product registry, archival, error handling, anti-drift and evidence freshness. The [reconciliation report](./POST_EXECUTION_EVIDENCE_RECONCILIATION_2026-10-25.md) distinguishes those reported outcomes from artifacts that are actually present on the production branch.
+
+| Reconciled item | Status | Current interpretation |
+|---|---|---|
+| COR + AWS Tier-1 lifecycle | 🟢 Scoped pass | Run 40183694886 remains the recorded successful three-gate lineage |
+| PR #22 and whole-product docs | 🟢 Merged | Audit, dashboard and master checklist are present on production branch |
+| T03 tokenization verifier/receipt | 🟡 Integration pending | Submitted log says verifier/receipt are on feature branch; exact files were not found on reviewed production branch |
+| T04 microservice verifier | 🟡 Integration pending | Submitted log says verifier is on feature branch; exact file was not found on reviewed production branch |
+| Locale/tokenization counts | 🟡 Reconcile denominators | 1,420 keys, 2,062 dictionary tokens, 423 tokens, 1,459 call sites and 796 unique tokens must be separately defined |
+| AI fleet | 🔴 Not certified | Committed AI report is offline mode with 0 qualified and 0 active models |
+| Native universality | 🔴 Not granted | Cross-compiled targets, experimental IDEs and partial host providers remain uncertified |
+| Universal commercial COR | 🔴 Not granted | Exact immutable artifact lifecycle and all advertised target lifecycles remain required |
+
+The T03/T04 integration-pending labels do not reopen the previously closed F-23/F-24 AWS safety findings. They constrain the claim to what is reproducibly available on the production candidate. Do not change implementation code or weaken evidence freshness on the existing certified candidate merely to attach new scripts; integrate source/script changes into a new candidate and rerun certification.
