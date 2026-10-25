@@ -37,6 +37,17 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const REQUIRED_WORKSPACE_SCRIPTS = ['build', 'lint', 'typecheck', 'test'];
 const PROHIBITED_FLAGS = ['--if-present', '--passWithNoTests'];
 
+/** Reject workspace declarations that escape the repository root. */
+export function isWorkspacePathWithinRoot(root, workspacePath) {
+  if (typeof workspacePath !== 'string' || !workspacePath.trim() || path.isAbsolute(workspacePath)) {
+    return false;
+  }
+  const resolvedRoot = path.resolve(root);
+  const resolvedWorkspace = path.resolve(resolvedRoot, workspacePath);
+  const relative = path.relative(resolvedRoot, resolvedWorkspace);
+  return relative !== '' && relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+}
+
 export function runTestCoverageValidation() {
   const violations = [];
   const rootPkgPath = path.join(ROOT, 'package.json');
@@ -82,6 +93,10 @@ export function runTestCoverageValidation() {
   }
 
   for (const wsRel of workspaces) {
+    if (!isWorkspacePathWithinRoot(ROOT, wsRel)) {
+      violations.push(`Workspace path must be a non-empty repository-relative path contained within the repository root: ${String(wsRel)}`);
+      continue;
+    }
     const wsPkgPath = path.join(ROOT, wsRel, 'package.json');
     if (!fs.existsSync(wsPkgPath)) {
       violations.push(`Workspace "${wsRel}" is missing package.json at ${wsRel}/package.json`);
