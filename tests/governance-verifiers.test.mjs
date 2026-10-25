@@ -3,11 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { isPathWithinDirectory } from '../scripts/governance/workspace-boundary.mjs';
 import { loadRequiredDictionary } from '../scripts/governance/required-dictionary.mjs';
-
-const here = path.dirname(fileURLToPath(import.meta.url));
 
 test('T04 regression: workspace sibling sharing a path prefix is outside the boundary', () => {
   const root = path.join(os.tmpdir(), 'ugondu-boundary-fixture');
