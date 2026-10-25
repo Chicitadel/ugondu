@@ -191,11 +191,6 @@ export function verifyOrCreateRdsSlr(aws, pack, region) {
 }
 
 function failClosedOperation(pack, region, reportPath, reason, errorCode = 'UG-BOOTSTRAP-MUTATION-FAILED', detail = '') {
-  const missingRequiredPolicies = pack.policies.map((p) => p.physicalName).filter((name) => !attachedSet.has(name));
-  if (!listConfirmed || missingRequiredPolicies.length > 0) {
-    return failClosedOperation(pack, region, reportPath, `Required policy attachment verification incomplete: ${missingRequiredPolicies.join(', ') || 'initial attachment inventory unavailable'}`, 'UG-BOOTSTRAP-ATTACHMENT-UNVERIFIED');
-  }
-
   const report = {
     schemaVersion: '1.0.0', packId: pack.packId, phase: 'bootstrap-provision', evaluatedAt: new Date().toISOString(),
     awsAccountId: pack.target.accountId, awsRegion: region, executionRoleArn: pack.executionRole.arn, runnerRoleArn: pack.runnerRole.arn,
@@ -363,6 +358,11 @@ export function runBootstrapProvisionPhase(options = {}) {
     preliminaryState = (listConfirmed && alreadyAttachedCount > 0 && alreadyAttachedCount < 5)
       ? BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED
       : BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED;
+  }
+
+  const missingRequiredPolicies = pack.policies.map((p) => p.physicalName).filter((name) => !attachedSet.has(name));
+  if (!listConfirmed || missingRequiredPolicies.length > 0) {
+    return failClosedOperation(pack, region, reportPath, `Required policy attachment verification incomplete: ${missingRequiredPolicies.join(', ') || 'initial attachment inventory unavailable'}`, 'UG-BOOTSTRAP-ATTACHMENT-UNVERIFIED');
   }
 
   const report = {
