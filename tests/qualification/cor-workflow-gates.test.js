@@ -439,3 +439,15 @@ test('COR-WF-016 starter bootstrap policy template is account-agnostic and uses 
   assert.ok(Array.isArray(createStmt.Resource) && createStmt.Resource.length === 5, 'iam:CreatePolicy must scope 5 canonical policy ARNs in Resource');
   assert.equal(createStmt.Condition?.StringEquals?.['iam:PolicyName'], undefined, 'iam:PolicyName condition key must be absent');
 });
+
+
+test('COR-WF-017 pull-request validation does not misclassify the intentionally skipped AWS gate as certification', () => {
+  const run = step(jobs['cor-final-release-gate'], 'Require every mandatory gate to have succeeded').run;
+  assert.match(run, /EVENT_NAME.*pull_request/);
+  assert.match(run, /PR validation requires COR result success/);
+  assert.match(run, /AWS_RESULT.*skipped/);
+  assert.match(run, /PR VALIDATION PASSED/);
+  assert.match(run, /NOT RELEASE CERTIFIED/);
+  assert.match(run, /if \[ "\\${EVENT_NAME}" != "pull_request" \]/);
+  assert.match(run, /failure, skipped, cancelled and missing all block certification/);
+});
