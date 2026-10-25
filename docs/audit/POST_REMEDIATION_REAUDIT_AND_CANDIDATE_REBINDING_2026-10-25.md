@@ -83,3 +83,14 @@ The AI qualification report at the baseline says `qualificationMode: CATALOG_OFF
 | Universal 100% COR closure | NOT CERTIFIED | Mandatory gates and scopes remain unresolved |
 
 **Final disposition:** Keep PR #24 draft. Continue with a new, genuinely qualified candidate and candidate-bound receipts. The correct outcome is honest, reproducible certification—not a green status manufactured by relaxing governance.
+
+
+## 8. Latest workflow reconciliation — 2026-10-25 (run #507 / #394)
+
+This section supersedes the earlier statement that runs #507 and #394 were still in progress.
+
+- **PR head tested by the PR workflows:** `34f0895b956032db75f31fdacadd10635b5bf73b`.
+- **CI/CD run #507:** PASS. GitHub Actions run [40212776288](https://github.com/Chicitadel/ugondu/actions/runs/40212776288) completed successfully. Recorded passing jobs include Release Integrity & Governance Gates, the workspace build/typecheck/unit-test matrix, thin-client builds for Windows amd64, Linux amd64/arm64 and macOS amd64/arm64, and Integration Tests. These checks are CI evidence, not proof of physical native qualification for every target.
+- **COR Certification run #394:** FAIL. GitHub Actions run [40212776298](https://github.com/Chicitadel/ugondu/actions/runs/40212776298) checked out merge candidate `c2b13190ddccd3b60a55d6f8fbb2d8663d133257`. Build, locale validation, I18N audit, architecture depth scan, import scan, type check, workspace tests, COR remediation regression suite, externally pinned AWS policy-pack signature, and externally pinned release evidence bundle passed. The freshness step then failed because five listed non-evidence paths had changed since candidate `294c869c250b3f065d55d674ac352eec10f3557d`: `docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md`, `package.json`, `scripts/governance/required-dictionary.mjs`, `scripts/governance/verify-microservices-t04.mjs`, and `scripts/governance/verify-tokenization-t03.mjs`. The workflow's final release gate failed; release-integrity, COR signing, stream registry, fresh COR qualification, finalization/signing and final candidate-integrity steps were skipped; AWS Physical Qualification Gate was skipped.
+- **Interpretation:** This is the intended fail-closed result for a code-changing candidate whose evidence remains bound to the old candidate. Do not broaden the evidence-only allowlist, hand-edit receipts, or rebind the manifest by assertion. Freeze a code candidate, execute fresh qualification, generate authentic candidate-bound receipts using approved tooling, then run the two-stage evidence-only descendant protocol.
+- **Latest status:** CI/CD is green for the recorded run, but COR certification is not green. Universal commercial release remains **NOT CERTIFIED**. The source-bound AI report still records `CATALOG_OFFLINE`, zero qualified models, and zero active models. The prior AI-attribution policy check exit code 1 remains an open item until an exact passing rerun is attached.
