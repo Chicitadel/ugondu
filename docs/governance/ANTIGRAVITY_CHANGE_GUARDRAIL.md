@@ -45,7 +45,8 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 
 ## 4. Current verified defects addressed by this branch
 
-- **T03 dictionary false-pass path:** The prior verifier silently returned an empty dictionary when a required locale file was absent or malformed. That could suppress placeholder mismatch detection while still allowing a PASS. This branch changes missing/malformed/non-object dictionaries into a fail-closed error and includes regression tests.
+- **T03 dictionary false-pass path:** The prior verifier silently returned an empty dictionary when a required locale file was absent or malformed. That could suppress placeholder mismatch detection while still allowing a PASS. This branch changes missing/malformed/non-object dictionaries into a fail-closed error.
+- **T03 unknown-token false-pass:** The prior verifier did not require each statically extracted token key to exist in the merged canonical dictionaries. This branch reports missing dictionary tokens and exits non-zero.
 - **T04 workspace prefix boundary flaw:** The prior verifier used `resolvedPath.startsWith(wsDir)`; a sibling such as `server/shared2` can share the prefix `server/shared` and be incorrectly accepted. This branch uses canonical `path.relative` containment and adds adversarial tests.
 - **Production-branch integration gap:** The prior production branch did not contain the reported T03/T04 verifiers. This branch brings reviewed verifier scripts into the implementation candidate and wires explicit root scripts. Their results must be executed on CI before they can be treated as certification evidence.
 
@@ -84,4 +85,4 @@ Before taking a task, update the ledger in the same PR and check for an existing
 
 ## 8. Change summary for handover
 
-This branch integrates the previously reported T03/T04 verifier scripts into a dedicated implementation branch, corrects two concrete fail-open/false-pass conditions, adds four regression tests, adds root commands `verify:t03`, `verify:t04`, and `test:governance`, and makes the governance contract test invoke the new regression suite. This is a targeted remediation, **not** a claim that all COR gaps are closed. CI and broader release blockers must be resolved before certification changes.
+This branch integrates the previously reported T03/T04 verifier scripts into a dedicated implementation branch, corrects three concrete fail-open/false-pass conditions, adds five regression tests, adds root commands `verify:t03`, `verify:t04`, and `test:governance`, and makes the governance contract test invoke the new regression suite. This is a targeted remediation, **not** a claim that all COR gaps are closed. CI and broader release blockers must be resolved before certification changes.
