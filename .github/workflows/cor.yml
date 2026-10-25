@@ -105,7 +105,12 @@ jobs:
           UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
         run: node scripts/release/verify-evidence-bundle.mjs --verify
 
+      # Candidate-bound freshness is a release qualification gate. A PR is
+      # expected to differ from the prior frozen candidate, so validating that
+      # older manifest against the unmerged PR would reject all legitimate fixes.
+      # Keep the check mandatory for push/workflow_dispatch release attempts.
       - name: Verify evidence freshness (candidate-bound, evidence-only descendant)
+        if: github.event_name != 'pull_request'
         run: |
           node --test tests/qualification/evidence-freshness.test.js
           node scripts/governance/verify-evidence-freshness.mjs
