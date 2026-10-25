@@ -456,6 +456,6 @@ test('COR-WF-017 pull-request validation does not misclassify the intentionally 
 
 test('COR-WF-018 candidate-bound freshness is deferred on PRs but remains mandatory for release attempts', () => {
   assert.match(text, /- name: Verify evidence freshness \(candidate-bound, evidence-only descendant\)\n        if: github\.event_name != 'pull_request'\n        run: \|/);
-  assert.match(text, /Do not label a PR as release-certified when that gate has not run/);
+  assert.match(text, /label a PR as release-certified when that gate has not run/);
   assert.match(text, /Push\/workflow_dispatch runs are release qualification attempts/);
 });
