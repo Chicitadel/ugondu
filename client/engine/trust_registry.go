@@ -3,13 +3,14 @@
  * Module         : Client Engine
  * File           : trust_registry.go
  * Version        : 3.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -33,6 +34,7 @@
 package engine
 
 import (
+	"ugondu/client/i18n"
 	"errors"
 )
 
@@ -80,10 +82,10 @@ func init() {
 }
 
 var (
-	ErrKeyNotFound = errors.New("ERR_KEY_NOT_FOUND")
-	ErrKeyRevoked  = errors.New("ERR_KEY_REVOKED")
-	ErrKeyRotated  = errors.New("ERR_KEY_ROTATED")
-	ErrKeyPurpose  = errors.New("ERR_PURPOSE_MISMATCH")
+	ErrKeyNotFound = errors.New(i18n.T("ERR_KEY_NOT_FOUND"))
+	ErrKeyRevoked  = errors.New(i18n.T("ERR_KEY_REVOKED"))
+	ErrKeyRotated  = errors.New(i18n.T("ERR_KEY_ROTATED"))
+	ErrKeyPurpose  = errors.New(i18n.T("ERR_PURPOSE_MISMATCH"))
 )
 
 func (r *TrustRegistry) RegisterKey(keyId string, status KeyStatus, purpose KeyPurpose) {

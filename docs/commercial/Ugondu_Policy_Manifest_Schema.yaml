@@ -1,0 +1,152 @@
+# /******************************************************************************
+#  * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+#  * Module         : Policy Authority & Architecture
+#  * File           : EAORCS_Policy_Manifest_Schema.yaml
+#  * Version        : 1.0.0
+#  * Author         : Ignatus Chika Ujomor | Founder & System Architect
+#  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
+#  * Created Date   : 2026-09-25
+#  * Last Modified  : 2026-09-25
+#  * Classification : PUBLIC | MACHINE-READABLE SCHEMA SPECIFICATION
+#  *
+#  * Governance:
+#  * - Corporate Governance Baseline — Pending Formal Legal Review
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  *
+#  * Standards:
+#  * - JSON Schema Draft 2020-12
+#  * - RFC 8785 (JSON Canonicalization Scheme)
+#  *
+#  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
+#  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
+#  ******************************************************************************/
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://policies.airroofers.eu/schemas/policy-manifest-v1.json"
+title: "AirRoofersPolicyManifest"
+description: "Authoritative schema for the federated policy manifest published at policies.airroofers.eu/manifest.json"
+type: "object"
+required:
+  - "manifestVersion"
+  - "publicationTimestamp"
+  - "publisher"
+  - "policies"
+  - "integrity"
+
+properties:
+  manifestVersion:
+    type: "string"
+    pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    description: "Semantic version of the manifest format"
+    example: "1.0.0"
+
+  publicationTimestamp:
+    type: "string"
+    format: "date-time"
+    description: "ISO-8601 UTC timestamp of manifest minting"
+
+  publisher:
+    type: "object"
+    required:
+      - "name"
+      - "rcs"
+      - "seat"
+      - "authorityHost"
+    properties:
+      name:
+        type: "string"
+        const: "AIR ROOFERS"
+      legalForm:
+        type: "string"
+        const: "Société par actions simplifiée (Société à associé unique)"
+      rcs:
+        type: "string"
+        const: "943 432 534 R.C.S. Paris"
+      vat:
+        type: "string"
+        const: "FR89943432534"
+      seat:
+        type: "string"
+        const: "229 rue Saint-Honoré, 75001 Paris, France"
+      authorityHost:
+        type: "string"
+        const: "https://policies.airroofers.eu"
+
+  policies:
+    type: "array"
+    description: "List of published policies across the federated estate"
+    items:
+      type: "object"
+      required:
+        - "id"
+        - "name"
+        - "class"
+        - "version"
+        - "effectiveDate"
+        - "status"
+        - "uri"
+        - "sha256"
+      properties:
+        id:
+          type: "string"
+          pattern: "^POL-[A-Z0-9_-]+$"
+          description: "Unique policy identifier"
+          example: "POL-EULA"
+        name:
+          type: "string"
+          description: "Canonical human-readable title"
+          example: "End User License Agreement"
+        class:
+          type: "string"
+          enum: ["CLASS_A", "CLASS_B", "CLASS_C", "INTERNAL"]
+          description: "Operational taxonomy classification"
+        version:
+          type: "string"
+          description: "Document version string"
+          example: "0.3.0-draft"
+        effectiveDate:
+          type: "string"
+          format: "date"
+          description: "Effective date of this version"
+        status:
+          type: "string"
+          enum: ["DRAFT", "ACTIVE", "SCHEDULED", "SUPERSEDED", "ARCHIVED"]
+          description: "Lifecycle state"
+        uri:
+          type: "string"
+          format: "uri"
+          description: "Canonical HTTPS URL to retrieve the policy document"
+          example: "https://policies.airroofers.eu/v/0.3.0/eula.md"
+        sha256:
+          type: "string"
+          pattern: "^[a-f0-9]{64}$"
+          description: "Hex-encoded SHA-256 hash of the canonical UTF-8 document content"
+        languages:
+          type: "array"
+          items:
+            type: "string"
+            pattern: "^[a-z]{2}$"
+          default: ["en"]
+
+  integrity:
+    type: "object"
+    required:
+      - "sha256ManifestDigest"
+      - "signatureAlgorithm"
+      - "sealedSignature"
+      - "signingKeyThumbprint"
+    properties:
+      sha256ManifestDigest:
+        type: "string"
+        pattern: "^[a-f0-9]{64}$"
+        description: "SHA-256 digest of canonicalized manifest payload excluding the integrity block"
+      signatureAlgorithm:
+        type: "string"
+        enum: ["RS256", "Ed25519"]
+      sealedSignature:
+        type: "string"
+        description: "Base64-encoded cryptographic signature by the Policy Authority private key"
+      signingKeyThumbprint:
+        type: "string"
+        description: "Key identifier / thumbprint of the active Policy Authority signing key"

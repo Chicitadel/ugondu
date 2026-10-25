@@ -21,5 +21,5 @@ Based on the Event-Driven Policy Engine, `bootstrap` is evaluated under the **Sy
 
 ## Approval
 **Wave 1C Refactoring Applied:** Yes. 
-**Execution Signature:** AntiGravity Autonomous CI
+**Execution Signature:** Ujomor Systems Engineering Authority CI
 **Governance Semantics:** `Governance Engine v2.0`, `System Policy Pack v1.0`

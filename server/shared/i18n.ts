@@ -3,13 +3,14 @@
  * Module         : Server / Shared / Localization Engine
  * File           : i18n.ts
  * Version        : 2.1.0
- * Author         : Ujomor Systems Engineering Authority
- * Organization   : Air Roofers Ltd
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-23
  * Classification : COMMERCIAL | INTERNAL
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard
  * - Zero String Hardcoding Law (Tokenized Dictionaries)
  * - Dynamic [lang] Drop-in Locale Architecture
@@ -20,8 +21,16 @@
  * - OWASP ASVS
  * - NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
+
+/** Structured stderr emitter (dependency-free; mirrors the Logger envelope). */
+function emitStructured(level: 'WARN' | 'ERROR', message: string): void {
+    if (process.env.NODE_ENV === 'test') return;
+    process.stderr.write(JSON.stringify({ level, timestamp: new Date().toISOString(), message }) + '\n');
+}
+
+
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -29,7 +38,7 @@ import * as path from 'path';
 export type LocaleCode = string;
 
 let currentLocale: LocaleCode = (process.env.UGONDU_LOCALE || 'en').toLowerCase();
-const dictionaries: Record<string, Record<string, string>> = {};
+var dictionaries: Record<string, Record<string, string>> = {};
 
 export function getLocalesDirectories(): string[] {
     const candidatePaths = [
@@ -38,6 +47,7 @@ export function getLocalesDirectories(): string[] {
         path.resolve(__dirname, '../locales'),
         path.resolve(__dirname, '../../locales'),
         path.resolve(__dirname, '../../../locales'),
+        path.resolve(__dirname, 'locales'),
         path.resolve(process.cwd(), 'server/shared/locales')
     ].filter(Boolean) as string[];
 
@@ -56,6 +66,22 @@ export function getLocalesDirectories(): string[] {
     }
 
     return dirs;
+}
+
+/**
+ * Flattens nested locale objects into dotted tokens (e.g. { messages: { error: { x: 'y' } } }
+ * becomes 'messages.error.x'), so tokenized lookups resolve regardless of file nesting.
+ */
+function flattenDictionary(source: Record<string, unknown>, prefix = '', target: Record<string, string> = {}): Record<string, string> {
+    for (const [key, value] of Object.entries(source)) {
+        const token = prefix ? `${prefix}.${key}` : key;
+        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+            flattenDictionary(value as Record<string, unknown>, token, target);
+        } else {
+            target[token] = String(value);
+        }
+    }
+    return target;
 }
 
 /**
@@ -84,9 +110,9 @@ export function reloadLocales(): void {
                         if (!dictionaries[langCode]) {
                             dictionaries[langCode] = {};
                         }
-                        Object.assign(dictionaries[langCode], parsed);
+                        Object.assign(dictionaries[langCode], flattenDictionary(parsed));
                     } catch (err: any) {
-                        console.error(`[i18n] Error loading locale file ${filePath}: ${err.message}`);
+                        emitStructured('ERROR', __t('messages.system.i18n_error_loading_locale_file', { 'filePath': filePath, 'err_message': err.message }));
                     }
                 }
             }
@@ -121,7 +147,7 @@ export function setLocale(locale: string): void {
     if (dictionaries[normalized]) {
         currentLocale = normalized;
     } else {
-        console.warn(`[i18n] Locale '${locale}' not found in dynamic directory. Remaining on '${currentLocale}'.`);
+        emitStructured('WARN', __t('messages.system.i18n_locale_not_found_in_dynamic_directory_re', { 'locale': locale, 'currentLocale': currentLocale }));
     }
 }
 
@@ -133,14 +159,13 @@ export function getLocale(): string {
 }
 
 /**
- * Tokenized dictionary lookup with [lang] token prefix per Air Roofers Global Localization Standard.
- * Supports printf-style format verbs (%s, %d, %v) and named parameters ({param}).
+ * Tokenized dictionary lookup per Air Roofers Global Localization Standard.
+ * Supports printf-style format verbs (%s, %d, %v) and named parameters ({param}, %{param}, {{param}}).
  *
  * Rules:
  * 1. Resolves token in active locale dictionary.
  * 2. Falls back to base 'en' dictionary if key is missing in active locale.
  * 3. Falls back to token name if missing in all dictionaries (zero crash guarantee).
- * 4. Injects mandatory active language token prefix [lang].
  */
 export function __t(key: string, ...args: any[]): string {
     const dict = dictionaries[currentLocale] || {};
@@ -156,11 +181,12 @@ export function __t(key: string, ...args: any[]): string {
 
     let formatted = template;
 
-    // Support object parameters: {paramName}
+    // Support object parameters: {paramName}, %{paramName}, {{paramName}}
     if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null && !Array.isArray(args[0])) {
         const params = args[0];
-        formatted = formatted.replace(/\{(\w+)\}/g, (_, varName) => {
-            return params[varName] !== undefined ? String(params[varName]) : `{${varName}}`;
+        formatted = formatted.replace(/\{\{(\w+)\}\}|%\{(\w+)\}|\{(\w+)\}/g, (match, p1, p2, p3) => {
+            const varName = p1 || p2 || p3;
+            return params[varName] !== undefined ? String(params[varName]) : match;
         });
     } else if (args.length > 0) {
         // Support positional format verbs: %s, %d, %v
@@ -173,7 +199,7 @@ export function __t(key: string, ...args: any[]): string {
         });
     }
 
-    return `[${currentLocale}] ${formatted}`;
+    return formatted;
 }
 
 export const t = __t;

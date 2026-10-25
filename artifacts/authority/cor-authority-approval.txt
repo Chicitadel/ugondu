@@ -1,0 +1,29 @@
+====================================================
+ UGONDU COR AUTHORITY REQUEST (V2)
+====================================================
+Status: APPROVED_FOR_INSTALL
+
+Provider: AWS
+Region: us-east-1
+Account: 971671216490
+Role: UgonduCORRunner
+
+Risk: STRICTLY BOUNDED
+Credential model: GitHub OIDC → short-lived STS credentials
+====================================================
+ CRYPTOGRAPHIC BINDING
+====================================================
+Repository Commit: 449e64c9e8611922610e7c7176ba0cb0fb8d08fb
+Generator Version: 1.2.0
+Map Version      : 1.2.0
+Account          : 971671216490
+Region           : us-east-1
+Role Name        : UgonduCORRunner
+
+COR Graph Hash   : 2c1aa941173959e99680040713ba75c09508e90bec80e67717e3c5519e692ea2
+Manifest Hash    : 98605c9b01b6d41a58d32397c7fe7a8459b716f30243a5fd9ef3ce990a0c8218
+Execution Policy : a5792a3fb5e7186899353fbd12c1ad935cef3d328be077c0542e8883eff12527
+
+This cryptographically binds the approved execution
+policy strictly to the exact COR execution graph.
+====================================================

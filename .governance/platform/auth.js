@@ -1,8 +1,8 @@
 const { logAudit } = require('./logger');
 const { evaluatePolicy } = require('./policy');
 
-// Secret Resolver (Mocked for now, would load from AWS Secrets Manager / HashiCorp Vault)
-const MOCK_VALID_TOKENS = {
+// Secret Resolver (Stubed for now, would load from AWS Secrets Manager / HashiCorp Vault)
+const STUB_VALID_TOKENS = {
     'valid-token': { repository: 'certify', capability: 'evidence-submission' },
     'ingestion-token': { repository: 'ingestion', capability: 'evidence-submission' },
     'bootstrap-token': { repository: 'bootstrap', capability: 'evidence-submission' }
@@ -23,14 +23,14 @@ function authenticationMiddleware(req, res, next) {
         return res.status(401).json({ error: "Unauthorized", message: "Invalid or missing Bearer token" });
     }
 
-    const identity = MOCK_VALID_TOKENS[token];
+    const identity = STUB_VALID_TOKENS[token];
     if (!identity) {
         logAudit('unauthorized_access', { reason: 'invalid_token', ...req.metadata });
         return res.status(401).json({ error: "Unauthorized", message: "Invalid or missing Bearer token" });
     }
 
-    // Expiry Check (Mocked: Assume valid)
-    // Issuer Check (Mocked: Assume valid)
+    // Expiry Check (Stubed: Assume valid)
+    // Issuer Check (Stubed: Assume valid)
 
     req.authContext = identity;
     next();

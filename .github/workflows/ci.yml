@@ -1,77 +1,148 @@
-# =============================================================================
-# Ugondu Platform — CI/CD Pipeline
-# Air Roofers Ltd — Ujomor Systems Engineering Authority
-# Classification: COMMERCIAL | INTERNAL
-#
-# Triggered on: push to main/develop, pull requests, manual dispatch
-# =============================================================================
+# /******************************************************************************
+#  * Project        : Ugondu Platform
+#  * Module         : CI/CD Pipeline
+#  * File           : ci.yml
+#  * Version        : 1.2.0
+#  * Author         : Ujomor Systems Engineering & Governance Authority
+#  * Organization   : Air Roofers SASU / Ujomor Systems
+#  * Created Date   : 2026-10-18
+#  * Last Modified  : 2026-10-20
+#  * Classification : COMMERCIAL | INTERNAL
+#  *
+#  * Governance:
+#  * - Corporate Policy Governed
+#  * - Security Reviewed
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - Modularization Enforced
+#  ******************************************************************************/
 
 name: Ugondu CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop, 'release/**']
+    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**', 'audit/**']
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'release/**', 'phase*/**', 'stabilization/**', 'audit/**']
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   NODE_VERSION: '20'
-  GO_VERSION: '1.22'
+  GO_VERSION: '1.24'
   REGISTRY: ghcr.io
   IMAGE_BASE: ${{ github.repository_owner }}/ugondu
 
 jobs:
 
   # ─────────────────────────────────────────────────────────────────
-  # [en] Build and Lint all TypeScript microservices
+  # [en] Build, Lint, Typecheck, and Test all TypeScript workspaces
   # ─────────────────────────────────────────────────────────────────
   build-services:
-    name: Build Microservices
+    name: Build Microservices & Workspaces (${{ matrix.service }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
+      fail-fast: false
       matrix:
-        service: [engine-core, billing-gateway, plugin-manager, event-bus]
+        service:
+          - engine-core
+          - billing-gateway
+          - plugin-manager
+          - event-bus
+          - repository-adapter
+          - shared
+          - uppie
+          - capabilities
+          - tests
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: server/${{ matrix.service }}/package-lock.json
 
-      - name: Install dependencies — ${{ matrix.service }}
-        working-directory: server/${{ matrix.service }}
+      - name: Install workspace dependencies
         run: npm ci
+
+      - name: Build foundational workspace dependencies
+        run: npm run build
 
       - name: Build TypeScript — ${{ matrix.service }}
         working-directory: server/${{ matrix.service }}
         run: npm run build
 
+      - name: Lint — ${{ matrix.service }}
+        working-directory: server/${{ matrix.service }}
+        run: npm run lint
+
+      - name: Type Check — ${{ matrix.service }}
+        working-directory: server/${{ matrix.service }}
+        run: npm run typecheck
+
+      - name: Run Workspace Unit Tests — ${{ matrix.service }}
+        working-directory: server/${{ matrix.service }}
+        run: npm run test
+
+      - name: Type Check (All Workspaces)
+        run: npm exec --workspaces -- tsc --noEmit --skipLibCheck
+
+      - name: Run Tests (All Workspaces)
+        run: npm run test --workspaces
+
       - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dist-${{ matrix.service }}
           path: server/${{ matrix.service }}/dist/
+          if-no-files-found: ignore
           retention-days: 1
 
   # ─────────────────────────────────────────────────────────────────
-  # [en] Build and vet Go thin-client
+  # [en] Build, Vet, and Test Go thin-client across OS and targets
   # ─────────────────────────────────────────────────────────────────
   build-client:
-    name: Build Go Thin-Client
-    runs-on: ubuntu-latest
+    name: Build Go Thin-Client (${{ matrix.os }} — ${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Go ${{ env.GO_VERSION }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
@@ -81,83 +152,164 @@ jobs:
         working-directory: client
         run: go vet ./...
 
-      - name: Build ugondu client binary (linux/amd64)
+      - name: Test Go thin-client
         working-directory: client
+        run: go test -v ./...
+
+      - name: Build ugondu client binary (${{ matrix.goos }}/${{ matrix.goarch }})
+        working-directory: client
+        shell: bash
         env:
-          GOOS: linux
-          GOARCH: amd64
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: '0'
-        run: go build -ldflags="-s -w" -o ugondu-linux-amd64 .
+        run: |
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXT=".exe"
+          else
+            EXT=""
+          fi
+          go build -ldflags="-s -w" -o ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT .
+          if [ "${{ matrix.goos }}/${{ matrix.goarch }}" = "linux/amd64" ] || [ "${{ matrix.goos }}/${{ matrix.goarch }}" = "darwin/arm64" ] || [ "${{ matrix.goos }}/${{ matrix.goarch }}" = "windows/amd64" ]; then
+            ./ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT --help
+            ./ugondu-${{ matrix.goos }}-${{ matrix.goarch }}$EXT version
+          fi
 
       - name: Upload client binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ugondu-client-linux-amd64
-          path: client/ugondu-linux-amd64
+          name: ugondu-client-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: client/ugondu-${{ matrix.goos }}-${{ matrix.goarch }}*
           retention-days: 7
 
-
   # ─────────────────────────────────────────────────────────────────
-  # Release integrity — no repository-held signing secrets/artifacts
+  # [en] Release integrity & Policy-as-Code Governance Gates
   # ─────────────────────────────────────────────────────────────────
   release-integrity:
-    name: Release Integrity
+    name: Release Integrity & Governance Gates
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+      UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Verify release integrity
         run: node scripts/verify-release-integrity.js
 
+      - name: Validate repository policy (UG-COR-NO-STUBS-001)
+        run: node scripts/governance/validate-repository.mjs
+
+      - name: Validate capability & product registries
+        run: node scripts/governance/validate-capability-registry.mjs
+
+      - name: Validate workspace gate & test coverage
+        run: node scripts/governance/validate-test-coverage.mjs
+
+      - name: Verify externally pinned AWS policy-pack signature
+        run: node scripts/governance/verify-policy-pack-digests.mjs
+
+      - name: Verify externally pinned release evidence bundle
+        run: node scripts/release/verify-evidence-bundle.mjs --verify
+
   # ─────────────────────────────────────────────────────────────────
-  # [en] Integration Tests — Services must be running
+  # [en] Integration Tests — All 5 microservices verified via /health/ready
   # ─────────────────────────────────────────────────────────────────
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: [build-services]
+    permissions:
+      contents: read
+    needs: [build-services, release-integrity]
+    env:
+      UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
+      UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Download all dist artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: dist-*
           merge-multiple: false
 
-      - name: Install service dependencies
-        run: |
-          cd server/billing-gateway && npm ci --omit=dev
-          cd ../engine-core && npm ci --omit=dev
-          cd ../plugin-manager && npm ci --omit=dev
-          cd ../event-bus && npm ci --omit=dev
+      - name: Install workspace runtime dependencies
+        run: npm ci
 
-      - name: Start services in background
+      - name: Build all microservice workspaces
+        run: npm run build
+
+      - name: Generate ephemeral Ed25519 signing keypair
+        run: |
+          node -e "
+            const crypto = require('crypto');
+            const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
+            const privB64 = Buffer.from(privateKey.export({ type: 'pkcs8', format: 'der' })).toString('base64');
+            const pubB64 = Buffer.from(publicKey.export({ type: 'spki', format: 'der' })).toString('base64');
+            const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+            const pubPem = publicKey.export({ type: 'spki', format: 'pem' });
+            const fs = require('fs');
+            const delim = 'DELIM_' + Date.now();
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_RECIPE_PRIVATE_KEY=' + privB64 + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_PRIVATE_KEY=' + privB64 + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_PUBLIC_KEY=' + pubB64 + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_KEY_REF=ephemeral://ci-ed25519\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_SERVICE_IDENTITY_PRIVATE_KEY<<' + delim + '\n' + privPem + '\n' + delim + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_SERVICE_TEST_PUBKEY<<' + delim + '\n' + pubPem + '\n' + delim + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_SERVICE_TEST_KEY_ID=key_service_test_v1\n');
+          "
+
+      - name: Start all 5 microservices and wait for /health/ready
         env:
           IDENTITY_AUTHORITY_URL: https://identity.airroofers.eu/api/v1
-          UGONDU_PRIVATE_KEY: ci-test-key-not-for-production
+          BILLING_AUTHORITY_URL: https://billing.airroofers.eu/api/v1
+          ALLOWED_ORIGINS: https://console.airroofers.eu
         run: |
-          node server/billing-gateway/dist/index.js &
-          sleep 2
-          BILLING_GATEWAY_URL=http://localhost:4002/v1 node server/engine-core/dist/index.js &
-          node server/plugin-manager/dist/index.js &
-          node server/event-bus/dist/index.js &
-          sleep 3
+          wait_http() {
+            local url="$1"
+            local attempts="${2:-30}"
+            local i=1
+            while [ "$i" -le "$attempts" ]; do
+              if curl -fsS "$url" >/dev/null 2>&1; then
+                echo "[READY] $url"
+                return 0
+              fi
+              i=$((i + 1))
+              sleep 1
+            done
+            echo "[TIMEOUT] Service failed readiness check: $url" >&2
+            return 1
+          }
+
+          PORT=4002 node server/billing-gateway/dist/index.js &
+          wait_http "http://127.0.0.1:4002/health/ready" 30
+
+          PORT=4001 BILLING_GATEWAY_URL=http://127.0.0.1:4002/v1 node server/engine-core/dist/index.js &
+          PORT=4003 node server/plugin-manager/dist/index.js &
+          PORT=4004 node server/event-bus/dist/index.js &
+          PORT=4005 node server/repository-adapter/dist/index.js &
+
+          wait_http "http://127.0.0.1:4001/health/ready" 30
+          wait_http "http://127.0.0.1:4003/health/ready" 30
+          wait_http "http://127.0.0.1:4004/health/ready" 30
+          wait_http "http://127.0.0.1:4005/health/ready" 30
 
       - name: Run Billing Gateway tests
         run: node tests/billing-gateway.test.js
@@ -168,25 +320,144 @@ jobs:
       - name: Run Plugin Manager tests
         run: node tests/plugin-manager.test.js
 
+      - name: Run Event Bus tests
+        run: node tests/event-bus.test.js
+
+      - name: Run Repository Adapter tests
+        run: node tests/repository-adapter.test.js
+
+      - name: Run COR Remediation tests
+        run: node tests/cor-remediation.test.js
+
+      - name: Run Evidence Pipeline Adversarial tests
+        run: node tests/qualification/evidence-pipeline-adversarial.test.js
+
+      - name: Run Shared Execution & Mode Parity tests
+        run: node tests/qualification/shared-execution-and-mode-parity.test.js
+
+      - name: Run Language Packs tests
+        run: node tests/language-packs.test.js
+
+      - name: Run AI Inference Gateway tests
+        run: node tests/ai-inference-gateway.test.js
+
+      - name: Run UPLM Conformance tests
+        run: node tests/uplm-conformance.test.js
+
   # ─────────────────────────────────────────────────────────────────
-  # [en] Docker Build Validation (no push on PRs)
+  # [en] Docker Build & Readiness Validation (no push on PRs)
   # ─────────────────────────────────────────────────────────────────
   docker-validate:
     name: Validate Docker Images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [build-services]
     if: github.event_name != 'pull_request'
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Generate ephemeral Ed25519 signing keypair for Compose validation
+        run: |
+          node -e "
+            const crypto = require('crypto');
+            const { privateKey } = crypto.generateKeyPairSync('ed25519');
+            const privB64 = Buffer.from(privateKey.export({ type: 'pkcs8', format: 'der' })).toString('base64');
+            const fs = require('fs');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_RECIPE_PRIVATE_KEY=' + privB64 + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_PRIVATE_KEY=' + privB64 + '\n');
+            fs.appendFileSync(process.env.GITHUB_ENV, 'UGONDU_KEY_REF=ephemeral://compose-ed25519\n');
+          "
 
       - name: Build all images via Compose
         run: docker compose build
 
-      - name: Smoke test compose up
+      - name: Smoke test compose up with bounded readiness checks
         run: |
-          UGONDU_PRIVATE_KEY=ci-key docker compose up -d
-          sleep 10
+          wait_http() {
+            local url="$1"
+            local attempts="${2:-30}"
+            local i=1
+            while [ "$i" -le "$attempts" ]; do
+              if curl -fsS "$url" >/dev/null 2>&1; then
+                echo "[READY] $url"
+                return 0
+              fi
+              i=$((i + 1))
+              sleep 1
+            done
+            echo "[TIMEOUT] Readiness probe failed: $url" >&2
+            echo "=== DOCKER COMPOSE LOGS ON FAILURE ==="
+            docker compose logs
+            return 1
+          }
+
+          if ! docker compose up -d; then
+            echo "=== DOCKER COMPOSE LOGS ON FAILURE ==="
+            docker compose logs
+            exit 1
+          fi
+          wait_http "http://127.0.0.1:4001/health/ready" 60
+          for svc in billing-gateway engine-core plugin-manager event-bus repository-adapter; do
+            docker compose exec -T "$svc" sh -c 'wget -qO- http://127.0.0.1:${PORT}/health/ready >/dev/null'
+          done
           docker compose ps
           docker compose down
+
+  # ─────────────────────────────────────────────────────────────────
+  # [en] Release Packaging & Cryptographic Assurance (SBoM, Sigstore)
+  # ─────────────────────────────────────────────────────────────────
+  release:
+    name: Build & Publish Release
+    needs: [build-client, integration-tests, release-integrity]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+        with:
+          cosign-release: 'v2.2.3'
+
+      - name: Install Syft (SBoM Generation)
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+
+      - name: Docker Login
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run GoReleaser (Publish Homebrew, APT, RPM, Docker)
+        uses: goreleaser/goreleaser-action@5742e2a039330cbb23ebf35f046f814d4c6ff811 # v5.1.0
+        with:
+          distribution: goreleaser
+          version: v1.25.1
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}

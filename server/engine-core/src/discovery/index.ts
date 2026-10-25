@@ -13,8 +13,13 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
-import { __t } from '@ugondu/shared';
+import { __t, Logger } from '@ugondu/shared';
 
+/**
+ * @interface DiscoveryEvidence
+ * @description Corporate Governed interface implementation for DiscoveryEvidence
+ * @classification ENTERPRISE
+ */
 export interface DiscoveryEvidence {
     technology: string;
     category: 'language' | 'framework' | 'package-manager' | 'service' | 'ci' | 'port';
@@ -23,6 +28,11 @@ export interface DiscoveryEvidence {
     confidence: 'DEFINITIVE' | 'EVIDENCE_BACKED' | 'HEURISTIC';
 }
 
+/**
+ * @interface DiscoveredProject
+ * @description Corporate Governed interface implementation for DiscoveredProject
+ * @classification ENTERPRISE
+ */
 export interface DiscoveredProject {
     schemaVersion: '1.0.0';
     repositoryUrl: string;
@@ -38,6 +48,11 @@ export interface DiscoveredProject {
     evidence: DiscoveryEvidence[];
 }
 
+/**
+ * @class DiscoveryEngine
+ * @description Corporate Governed class implementation for DiscoveryEngine
+ * @classification ENTERPRISE
+ */
 export class DiscoveryEngine {
     public static inspectFileMap(
         repositoryUrl: string,
@@ -46,7 +61,7 @@ export class DiscoveryEngine {
         fileContents?: Record<string, string>
     ): DiscoveredProject {
         if (!repositoryUrl || !branch) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
 
         const languages = new Set<string>();
@@ -98,7 +113,9 @@ export class DiscoveryEngine {
                             frameworks.add('fastify');
                             evidence.push({ technology: 'fastify', category: 'framework', sourceFile: file, matchedPattern: 'dependencies.fastify', confidence: 'DEFINITIVE' });
                         }
-                    } catch {}
+                    } catch (err) {
+                        Logger.warn('Failed to parse package.json content during discovery', { file, error: err instanceof Error ? err.message : String(err) });
+                    }
                 } else {
                     // Fallback to convention
                     entrypoints.push('index.js');
@@ -119,7 +136,9 @@ export class DiscoveryEngine {
                             frameworks.add('laravel');
                             evidence.push({ technology: 'laravel', category: 'framework', sourceFile: file, matchedPattern: 'require.laravel/framework', confidence: 'DEFINITIVE' });
                         }
-                    } catch {}
+                    } catch (err) {
+                        Logger.warn('Failed to parse composer.json content during discovery', { file, error: err instanceof Error ? err.message : String(err) });
+                    }
                 }
             }
 

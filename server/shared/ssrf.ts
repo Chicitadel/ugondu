@@ -36,6 +36,7 @@ import * as net from 'net';
 import * as http from 'http';
 import * as https from 'https';
 import { __t } from './i18n';
+import { Logger } from './logger';
 
 export class NetworkDestinationPolicy {
     static isDisallowedIPv4(ip: string): boolean {
@@ -178,7 +179,7 @@ export class NetworkDestinationPolicy {
 
 export function validateDestination(targetUrl: string): boolean {
     if (!NetworkDestinationPolicy.isAllowed(targetUrl)) {
-        throw new Error('SSRF_DESTINATION_PROHIBITED');
+        throw new Error(__t('messages.error.ssrf_destination_prohibited'));
     }
     return true;
 }
@@ -227,8 +228,16 @@ export async function safeFetch(url: string, options: any = {}): Promise<any> {
                 return;
             }
 
+            const MAX_BYTES = 10 * 1024 * 1024; // 10MB limit
             let data = '';
-            res.on('data', (chunk) => { data += chunk; });
+            res.on('error', reject);
+            res.on('data', (chunk) => { 
+                data += chunk; 
+                if (data.length > MAX_BYTES) {
+                    req.destroy();
+                    reject(new Error(__t('response_size_exceeded_limit')));
+                }
+            });
             res.on('end', () => {
                 resolve({
                     status: res.statusCode,

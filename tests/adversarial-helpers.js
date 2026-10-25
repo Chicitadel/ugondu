@@ -94,9 +94,19 @@ class TransactionLockManager {
   }
 }
 
+function createTempHttpServer(handler) {
+  const http = require('http');
+  const server = http.createServer(handler);
+  server.listen(0, '127.0.0.1');
+  const port = server.address().port;
+  const close = () => new Promise(resolve => server.close(resolve));
+  return { port, close };
+}
+
 module.exports = {
   MemoryReplayLedger,
   SafePathValidator,
   ArchiveSecurityChecker,
-  TransactionLockManager
+  TransactionLockManager,
+  createTempHttpServer
 };

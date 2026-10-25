@@ -87,7 +87,7 @@ export class ProviderCertificationHarness {
         if (!probe.rejectsRawShell) {
             status = 'REJECTED';
         } else if (score >= 85) {
-            status = 'CERTIFIED_L2'; // Enterprise / Sovereign Grade
+            status = 'CERTIFIED_L2'; // SOVEREIGN / Sovereign Grade
         } else if (score >= 60) {
             status = 'CERTIFIED_L1'; // Standard Cloud / Host Grade
         }

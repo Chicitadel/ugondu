@@ -1,0 +1,12 @@
+{
+  "name": "@ugondu/plugin-recovery-dependencies",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Composer & Path Repository Integrity Recovery Capability Plugin",
+  "main": "src/composer-integrity-validation.ts",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@ugondu/shared": "^1.0.0"
+  }
+}

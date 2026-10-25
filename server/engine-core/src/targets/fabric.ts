@@ -2,10 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Targets / Fabric
  * File           : fabric.ts
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Target Fabric Engineering Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE | INTERNAL
  *
  * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
@@ -14,11 +15,17 @@
 
 import { __t } from '@ugondu/shared';
 import { CPanelTargetAdapter } from './cpanel';
+import { DirectAdminTargetAdapter } from './directadmin';
 import { SshTargetAdapter } from './ssh';
 import { DockerTargetAdapter } from './docker';
 
 export type TargetEnvironmentType = 'cpanel' | 'directadmin' | 'ssh' | 'docker' | 'kubernetes' | 'cloud' | 'baremetal';
 
+/**
+ * @interface TargetDescriptor
+ * @description Corporate Governed interface implementation for TargetDescriptor
+ * @classification ENTERPRISE
+ */
 export interface TargetDescriptor {
     targetId: string;
     environmentType: TargetEnvironmentType;
@@ -27,6 +34,11 @@ export interface TargetDescriptor {
     capabilities: string[];
 }
 
+/**
+ * @class TargetFabric
+ * @description Corporate Governed class implementation for TargetFabric
+ * @classification ENTERPRISE
+ */
 export class TargetFabric {
     private registeredTargets: Map<string, TargetDescriptor> = new Map();
 
@@ -44,13 +56,14 @@ export class TargetFabric {
             throw new Error(__t('error_key_not_found'));
         }
         if (target.status !== 'ONLINE') {
-            throw new Error(__t('blocked'));
+            throw new Error(__t('msg_deployment_blocked_by_billing_gateway_li'));
         }
 
         switch (target.environmentType) {
             case 'cpanel':
-            case 'directadmin':
                 return new CPanelTargetAdapter(config as any);
+            case 'directadmin':
+                return new DirectAdminTargetAdapter(config as any);
             case 'ssh':
             case 'baremetal':
                 return new SshTargetAdapter(config as any);

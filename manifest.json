@@ -1,0 +1,13 @@
+{
+  "physicalCertification": "NOT_RUN",
+  "remoteSha": "6b7a2cba4561a47af82f5a633ed1adbe877e8a54",
+  "remoteReleasePipeline": "NOT_CHECKED",
+  "candidateSha": "6b7a2cba4561a47af82f5a633ed1adbe877e8a54",
+  "lint": "PASS",
+  "tag": null,
+  "branch": "phase4/production-hardening",
+  "build": "PASS",
+  "workingTreeClean": true,
+  "diffCheck": "PASS",
+  "test": "PASS"
+}
