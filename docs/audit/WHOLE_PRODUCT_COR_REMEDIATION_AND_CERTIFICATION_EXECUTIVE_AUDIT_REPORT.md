@@ -144,3 +144,16 @@ This update closes the previous **latest-head PR regression verification pending
 **Verification state:** Implementation is committed to the remediation branch; latest-head CI acceptance is pending. Do not call this finding GREEN until the workflow executes the new steps on the latest PR merge candidate and all pass. This remediation does not alter the old AI qualification report or evidence manifest and does not close the AI fleet, native target, IDE/host/cloud, or immutable artifact lifecycle gaps.
 
 **Release decision remains: NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE.** PR #24 remains draft and unmerged; `master` and `phase4/production-hardening` remain untouched.
+
+
+## Re-audit finding COR-REM-007 — T04 clean-runner build prerequisite
+
+**CI evidence:** PR CI run `40235932762` / run #533 failed in the Release Integrity & Governance Gates job. The new attribution step passed and T03 passed, but T04 failed with `Missing dist/ directory` for eight runtime workspaces because that job checked out a clean repository and had not generated build artifacts. The governance regression step was consequently skipped. This is a pipeline ordering defect, not a reason to weaken T04.
+
+**Direct remediation on the dedicated branch:**
+- `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`: aggregate `governance:validate` now builds workspaces before T04.
+- `5313447ccecae303b75f2d2fc1ce2b7d49128c69`: CI installs locked dependencies and builds workspaces immediately before T04.
+- `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`: regression test asserts build-before-T04 ordering in both aggregate command and CI workflow.
+- `532078b337cf60dae93880e65a86253be8bade2b`: canonical guardrail records the finding.
+
+**Verification state:** Latest-head CI rerun pending. Keep the finding YELLOW until T04 and the governance regression suite pass on the new PR merge candidate. No release evidence was hand-edited; universal commercial release remains **NOT CERTIFIED**.
