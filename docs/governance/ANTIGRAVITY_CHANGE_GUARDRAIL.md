@@ -49,6 +49,7 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 - **T03 unknown-token false-pass:** The prior verifier did not require each statically extracted token key to exist in the merged canonical dictionaries. This branch reports missing dictionary tokens and exits non-zero.
 - **T04 workspace prefix boundary flaw:** The prior verifier used `resolvedPath.startsWith(wsDir)`; a sibling such as `server/shared2` can share the prefix `server/shared` and be incorrectly accepted. This branch uses canonical `path.relative` containment and adds adversarial tests.
 - **Production-branch integration gap:** The prior production branch did not contain the reported T03/T04 verifiers. This branch brings reviewed verifier scripts into the implementation candidate and wires explicit root scripts. Their results must be executed on CI before they can be treated as certification evidence.
+- **Governance gate wiring gap:** The attribution, T03, and T04 verifier commands existed as standalone package scripts but were not invoked by the aggregate `governance:validate` command or the CI release-integrity job. The remediation branch now wires them into both places and adds a regression test to prevent future removal. This finding is only GREEN after the latest-head CI run proves those exact steps pass.
 
 ## 5. Current release blockers — do not paper over
 
@@ -68,6 +69,7 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 | COR-REM-003 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Native OS/IDE/host/cloud qualification | YELLOW / Partial (Fail-Closed) | Windows amd64 native pass; Linux thin-client pass; GCP/Azure & non-VSCode IDEs fail-closed |
 | COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
 | COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | GREEN / PR VALIDATION VERIFIED | PR #24 (COR run #408: 40223142347 passed with PR validation notice; CI/CD run #521: 40223142249 passed 16/16 jobs; COR-WF-017 & COR-WF-018 verified passing in CI; Universal release remains fail-closed) |
+| COR-REM-006 | Systems Engineering & Governance Authority | `8d5c9858f3c7c56bc0efa34d4a102f4625b89314` | Mandatory attribution/T03/T04 verifier CI wiring (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | YELLOW / Awaiting latest-head CI | Commit `a6d68c9`, `414c689`, `a843ff1`; CI workflow now invokes all three verifiers and regression tests assert wiring; latest-head Actions evidence pending |
 
 Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
 
@@ -131,3 +133,15 @@ This separation does not weaken release certification: the release event still r
 - **CI/CD pipeline:** [run 40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160) completed successfully. All 16 substantive build, governance, workspace and integration jobs passed; Docker validation and release publishing were skipped.
 - **Regression evidence from COR job logs:** COR remediation suite 24/24, adversarial evidence suite 19/19, mode-parity suite 6/6, workflow gate suite 18/18. Both `COR-WF-017` and `COR-WF-018` passed on this run's tested PR merge candidate `ecfec790d411bbffec270f1d700350bb3f26243c`.
 - **Scope limitation:** These are PR validation results, not a fresh non-PR AWS physical qualification or universal commercial release certification. Existing AI fleet, native target and customer artifact lifecycle blockers remain open.
+
+
+## Latest re-audit addendum — mandatory governance verifier wiring
+
+**Finding COR-REM-006 (confirmed):** `package.json` exposed `verify:attribution`, `verify:t03`, and `verify:t04`, but the aggregate `governance:validate` command did not execute them and `.github/workflows/ci.yml` did not invoke them in the Release Integrity & Governance Gates job. Thus a green existing CI run could not prove these standalone policy checks were enforced in CI.
+
+**Direct code remediation on this branch:**
+- `package.json`: `governance:validate` now runs attribution, T03, and T04 verifiers before the remaining governance validators.
+- `.github/workflows/ci.yml`: added explicit required steps for attribution, T03, T04, and `test:governance`.
+- `tests/governance-verifiers.test.mjs`: added a regression test asserting that both aggregate command wiring and CI workflow steps remain present.
+
+**Acceptance state:** YELLOW until a CI run on the resulting PR merge candidate passes these steps and the expanded regression suite. No evidence manifests were edited or rebound. No direct change to `master` or `phase4/production-hardening`.
