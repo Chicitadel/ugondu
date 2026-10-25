@@ -164,7 +164,7 @@ export function formatBootstrapRemediationDiagnostic(pack, denialDetail) {
 export function verifyOrCreateRdsSlr(aws, pack, region) {
   let roleRes = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
   const isRds = (r) => {
-    if (!r?.Role) return true;
+    if (!r?.Role) return false;
     const doc = r.Role.AssumeRolePolicyDocument, s = typeof doc === 'string' ? decodeURIComponent(doc) : JSON.stringify(doc || {});
     return s.includes('rds.amazonaws.com') || String(r.Role.Arn || '').includes('rds.amazonaws.com');
   };
@@ -187,7 +187,6 @@ export function verifyOrCreateRdsSlr(aws, pack, region) {
     return { ok: true };
   }
   return { ok: false, detail: reverify.stderr || 'AWSServiceRoleForRDS could not be verified after create/already-exists response' };
-  return { ok: false, detail: createRes.stderr || roleRes.stderr || 'AWSServiceRoleForRDS missing or inaccessible' };
 }
 
 function failClosedOperation(pack, region, reportPath, reason, errorCode = 'UG-BOOTSTRAP-MUTATION-FAILED', detail = '') {
