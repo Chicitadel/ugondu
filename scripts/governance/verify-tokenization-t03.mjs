@@ -37,7 +37,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadRequiredDictionary } from './required-dictionary.mjs';
+import { hasDictionaryToken, loadRequiredDictionary } from './required-dictionary.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -101,6 +101,7 @@ for (const ws of productionWorkspaces) {
   const rawStringViolations = [];
   const concatenationViolations = [];
   const paramMismatchViolations = [];
+  const missingTokenViolations = [];
 
   function walk(currentDir) {
     if (!fs.existsSync(currentDir)) return;
@@ -136,6 +137,10 @@ for (const ws of productionWorkspaces) {
       const tokenKey = m[2];
       const paramBlock = m[3];
       uniqueTokens.add(tokenKey);
+      if (!hasDictionaryToken(mergedEn, tokenKey)) {
+        const line = content.slice(0, m.index).split('\\n').length;
+        missingTokenViolations.push({ file: rel, line, token: tokenKey });
+      }
 
       // Namespace segmentation
       const parts = tokenKey.split('.');
@@ -230,7 +235,8 @@ for (const ws of productionWorkspaces) {
     rawStringViolations,
     concatenationViolations,
     paramMismatchViolations,
-    status: (rawStringViolations.length === 0 && concatenationViolations.length === 0 && paramMismatchViolations.length === 0) ? 'PASS' : 'FAIL'
+    missingTokenViolations,
+    status: (rawStringViolations.length === 0 && concatenationViolations.length === 0 && paramMismatchViolations.length === 0 && missingTokenViolations.length === 0) ? 'PASS' : 'FAIL'
   });
 }
 
@@ -246,6 +252,7 @@ let grandTotalTokenCalls = 0;
 let grandTotalRawViolations = 0;
 let grandTotalConcatViolations = 0;
 let grandTotalParamMismatches = 0;
+let grandTotalMissingTokens = 0;
 
 for (const res of auditResults) {
   grandTotalFiles += res.files;
@@ -254,6 +261,7 @@ for (const res of auditResults) {
   grandTotalRawViolations += res.rawStringViolations.length;
   grandTotalConcatViolations += res.concatenationViolations.length;
   grandTotalParamMismatches += res.paramMismatchViolations.length;
+  grandTotalMissingTokens += res.missingTokenViolations.length;
 
   console.log(`[WORKSPACE] ${res.module}`);
   console.log(`  Status                  : [${res.status}]`);
@@ -275,6 +283,10 @@ for (const res of auditResults) {
   if (res.paramMismatchViolations.length > 0) {
     res.paramMismatchViolations.forEach(v => console.log(`    - Line ${v.line}: ${v.token} missing ${v.needed}`));
   }
+  console.log(`  Missing Dictionary Tokens: ${res.missingTokenViolations.length}`);
+  if (res.missingTokenViolations.length > 0) {
+    res.missingTokenViolations.forEach(v => console.log(`    - [${v.file}:${v.line}]: ${v.token}`));
+  }
   console.log('');
 }
 
@@ -287,8 +299,9 @@ console.log(`  Total Token Call Sites  : ${grandTotalTokenCalls}`);
 console.log(`  Raw String Violations   : ${grandTotalRawViolations}`);
 console.log(`  String Concat Violations: ${grandTotalConcatViolations}`);
 console.log(`  Parameter Mismatches    : ${grandTotalParamMismatches}`);
+console.log(`  Missing Dictionary Tokens: ${grandTotalMissingTokens}`);
 console.log(`  Required Dictionary Errors: ${dictionaryErrors.length}`);
 if (dictionaryErrors.length > 0) dictionaryErrors.forEach((error) => console.error(`  - ${error}`));
-console.log(`  Overall Track T03 Status: ${dictionaryErrors.length === 0 && grandTotalRawViolations === 0 && grandTotalConcatViolations === 0 && grandTotalParamMismatches === 0 ? 'COMPLIANT (PASS)' : 'NON-COMPLIANT (FAIL)'}`);
-if (dictionaryErrors.length > 0 || grandTotalRawViolations > 0 || grandTotalConcatViolations > 0 || grandTotalParamMismatches > 0) process.exitCode = 1;
+console.log(`  Overall Track T03 Status: ${dictionaryErrors.length === 0 && grandTotalRawViolations === 0 && grandTotalConcatViolations === 0 && grandTotalParamMismatches === 0 && grandTotalMissingTokens === 0 ? 'COMPLIANT (PASS)' : 'NON-COMPLIANT (FAIL)'}`);
+if (dictionaryErrors.length > 0 || grandTotalRawViolations > 0 || grandTotalConcatViolations > 0 || grandTotalParamMismatches > 0 || grandTotalMissingTokens > 0) process.exitCode = 1;
 console.log('================================================================================');
