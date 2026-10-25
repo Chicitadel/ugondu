@@ -117,3 +117,12 @@ This section supersedes the earlier statement that runs #507 and #394 were still
 ### Status and required next action
 
 The workflow defect is implemented, but its new regression and current workflow candidate are pending final CI results. Since `.github/workflows/cor.yml` is a non-evidence path changed after the current candidate, evidence freshness must be re-established through the approved two-stage process. Keep PR #24 draft. The intended result of a passing PR gate is **PR validation only**, not universal COR certification. Universal commercial release remains **NOT CERTIFIED** while AI fleet, native platform/IDE/host/cloud, and immutable customer artifact lifecycle requirements remain unqualified.
+
+
+## 10. COR PR/release gate follow-up — 2026-10-25 18:10 UTC
+
+The direct workflow fix was extended after confirming that candidate-bound freshness was also running on unmerged PRs. That was incompatible with PR validation because the PR necessarily contains source/workflow changes after the prior frozen candidate. The freshness step is now conditional on `github.event_name != 'pull_request'`; it remains mandatory for push/workflow-dispatch release qualification. The PR still runs its code/test/governance/COR checks and must report `NOT RELEASE CERTIFIED` because it has not run physical AWS qualification.
+
+New regression `COR-WF-018` verifies that the freshness step is release-only. `COR-WF-017` verifies PR final-gate semantics. The final tests must pass on the latest branch head. The candidate-bound evidence manifest remains bound to the older candidate until approved release tooling generates fresh receipts after candidate freeze; do not hand-edit it.
+
+This is a workflow semantics fix, not an AWS qualification. It does not close the AI fleet, native platform, IDE, host/cloud or immutable artifact lifecycle blockers.
