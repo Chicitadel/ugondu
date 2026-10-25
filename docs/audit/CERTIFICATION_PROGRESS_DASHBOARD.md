@@ -4,7 +4,7 @@
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
 **Snapshot:** 2026-10-25 15:00 UTC (reconciliation snapshot)  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
-**Implementation candidate:** [`45b075185935efbe720a4b3f54516ff8d5bf305a`](https://github.com/Chicitadel/ugondu/commit/45b075185935efbe720a4b3f54516ff8d5bf305a)  
+**Implementation candidate:** [`45b07518e82c9089d68a38d87b4566b0dd0bcba9`](https://github.com/Chicitadel/ugondu/commit/45b07518e82c9089d68a38d87b4566b0dd0bcba9)  
 **Candidate CI:** [40216812646](https://github.com/Chicitadel/ugondu/actions/runs/40216812646) (🟢 16/16 jobs successful across microservices, Go thin-client matrix, integration tests)  
 **Latest Certified COR + AWS Run Record:** [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) (🟢 UNIFIED RUN: COR Certification 1m50s, AWS Physical Gate 23m47s, Final Release Gate 2s)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
@@ -110,3 +110,12 @@ The supplied specialist execution log reports passing checks for localization, t
 | Universal commercial COR | 🔴 Not granted | Exact immutable artifact lifecycle and all advertised target lifecycles remain required |
 
 The T03/T04 integration-pending labels do not reopen the previously closed F-23/F-24 AWS safety findings. They constrain the claim to what is reproducibly available on the production candidate. Do not change implementation code or weaken evidence freshness on the existing certified candidate merely to attach new scripts; integrate source/script changes into a new candidate and rerun certification.
+
+## Latest PR re-audit — 2026-10-25 18:07 UTC
+
+- **Correct candidate reference:** `45b07518e82c9089d68a38d87b4566b0dd0bcba9` as recorded by `docs/governance/evidence/evidence-manifest.json` and the COR #398 freshness log. The prior header SHA `45b075185935efbe720a4b3f54516ff8d5bf305a` did not resolve in the GitHub commit lookup and is not used as evidence.
+- **CI/CD #511:** [40218667623](https://github.com/Chicitadel/ugondu/actions/runs/40218667623) passed its recorded jobs, including integration tests.
+- **COR #398:** [40218667670](https://github.com/Chicitadel/ugondu/actions/runs/40218667670) passed the COR Certification job and candidate/evidence freshness check, but the overall workflow failed at the final release gate because the AWS physical gate was intentionally skipped for a PR. This does not establish a fresh physical AWS pass for this implementation candidate.
+- **Direct fix:** `.github/workflows/cor.yml` now distinguishes PR validation from release certification. PRs require the COR job to pass and the AWS job to be skipped, and the gate prints `NOT RELEASE CERTIFIED`. Push/workflow-dispatch runs still require both COR and AWS physical gates to succeed. Regression test `COR-WF-017` added to `tests/qualification/cor-workflow-gates.test.js`.
+- **Validation pending:** CI/CD #512 [40219829697](https://github.com/Chicitadel/ugondu/actions/runs/40219829697) and COR #399 [40219829698](https://github.com/Chicitadel/ugondu/actions/runs/40219829698) were still in progress at the time of this snapshot. The workflow source change invalidates the old candidate binding; run approved candidate qualification and regenerate evidence before any release certification.
+- **Release status:** PR #24 remains draft. Universal commercial release is **NOT GRANTED**. AI fleet report remains offline with zero qualified and zero active models; non-AWS target and immutable artifact lifecycle evidence remain incomplete.
