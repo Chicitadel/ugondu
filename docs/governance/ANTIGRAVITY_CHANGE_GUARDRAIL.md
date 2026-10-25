@@ -67,7 +67,7 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 | COR-REM-002 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | AI provider fleet qualification | RED / Blocked (Fail-Closed) | Catalog offline; live canary proves single endpoint; universal commercial release withheld |
 | COR-REM-003 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Native OS/IDE/host/cloud qualification | YELLOW / Partial (Fail-Closed) | Windows amd64 native pass; Linux thin-client pass; GCP/Azure & non-VSCode IDEs fail-closed |
 | COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
-| COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | IMPLEMENTED — CI/evidence revalidation pending | PR events intentionally skip live AWS physical mutations but final gate previously required AWS success, guaranteeing a red final gate. New logic permits only COR-success + AWS-skipped PR validation and explicitly prints NOT RELEASE CERTIFIED; non-PR events still require both gates success. Candidate evidence must be regenerated because workflow code changed |
+| COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | GREEN / PR VALIDATION VERIFIED | PR #24 (COR run #408: 40223142347 passed with PR validation notice; CI/CD run #521: 40223142249 passed 16/16 jobs; COR-WF-017 & COR-WF-018 verified passing in CI; Universal release remains fail-closed) |
 
 Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
 
@@ -105,6 +105,20 @@ A second workflow defect was confirmed: the candidate-bound freshness check ran 
 
 **Direct fix:** The `Verify evidence freshness (candidate-bound, evidence-only descendant)` step now runs only when `github.event_name != 'pull_request'`. The check remains mandatory for push and workflow-dispatch release qualification. The PR workflow still runs build, typecheck, locale/I18N, architecture/import, workspace tests, governance, release-integrity and COR qualification checks, but its successful result is explicitly **PR validation only**, never release certification.
 
-**Regression:** `COR-WF-018` asserts the freshness step's event condition and the explicit non-certification wording. `COR-WF-017` preserves the PR final-gate semantics. Both are pending confirmation on the final current-head CI run.
+**Regression:** `COR-WF-018` asserts the freshness step's event condition and the explicit non-certification wording. `COR-WF-017` preserves the PR final-gate semantics. Both assertions passed in local regression (18/18 PASS) and on GitHub Actions CI.
 
 This separation does not weaken release certification: the release event still requires fresh candidate-bound evidence and both COR and AWS physical gate success.
+
+### COR-REM-005 CI Verification Result — 2026-10-25 18:55 UTC
+
+- **PR Head:** `c6cb12f03bb69c40c07d4165309968c53b89ed36`
+- **COR Certification Run #408 ([40223142347](https://github.com/Chicitadel/ugondu/actions/runs/40223142347)):** **SUCCESS**.
+  - `COR Certification` job: ✓ Passed in 2m5s (clean execution of all 24 COR tests, 19 adversarial evidence tests, 6 mode-parity tests, and 18 workflow gate tests including `COR-WF-017` and `COR-WF-018`).
+  - `AWS Physical Qualification Gate`: Intentionally skipped for PR events (0s).
+  - `COR Final Release Gate`: ✓ Passed in 2s with verified notice: `PR VALIDATION PASSED for f915ba665dbaf1dc13fd546b895e0c3da115060a; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED.`
+- **Ugondu CI/CD Pipeline Run #521 ([40223142249](https://github.com/Chicitadel/ugondu/actions/runs/40223142249)):** **SUCCESS (16/16 jobs green)**:
+  - `Release Integrity & Governance Gates`: ✓ Passed in 16s.
+  - `Build Go Thin-Client` (all 5 targets: darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64): ✓ Passed.
+  - `Build Microservices & Workspaces` (all 9 workspaces): ✓ Passed.
+  - `Integration Tests` (11 test suites): ✓ Passed in 1m9s.
+- **Fail-Closed Release Boundary:** Universal commercial release remains strictly withheld. Only Tier-1 AWS lifecycle in `eu-west-3` is certified under candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9` / evidence descendant `fb8f66d34ef66fa253452d19d5079a892d35925d`. Unverified targets remain fail-closed until physical qualification receipts are produced.

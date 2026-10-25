@@ -126,3 +126,30 @@ The direct workflow fix was extended after confirming that candidate-bound fresh
 New regression `COR-WF-018` verifies that the freshness step is release-only. `COR-WF-017` verifies PR final-gate semantics. The final tests must pass on the latest branch head. The candidate-bound evidence manifest remains bound to the older candidate until approved release tooling generates fresh receipts after candidate freeze; do not hand-edit it.
 
 This is a workflow semantics fix, not an AWS qualification. It does not close the AI fleet, native platform, IDE, host/cloud or immutable artifact lifecycle blockers.
+
+
+## 11. Final current-head CI verification & re-audit — 2026-10-25 18:55 UTC
+
+- **Branch Head:** `c6cb12f03bb69c40c07d4165309968c53b89ed36`
+- **COR Certification Run #408 ([40223142347](https://github.com/Chicitadel/ugondu/actions/runs/40223142347)):** **SUCCESS**.
+  - `COR Certification` job: ✓ Passed in 2m5s (clean execution of all 24 COR remediation tests, 19 adversarial evidence tests, 6 shared-execution mode-parity tests, and 18 workflow gate tests including `COR-WF-017` and `COR-WF-018`).
+  - `AWS Physical Qualification Gate`: Intentionally skipped for PR events (0s) to prevent mutating physical cloud resources on unmerged code.
+  - `COR Final Release Gate`: ✓ Passed in 2s with verified notice:
+    > `PR VALIDATION PASSED for f915ba665dbaf1dc13fd546b895e0c3da115060a; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED.`
+- **Ugondu CI/CD Pipeline Run #521 ([40223142249](https://github.com/Chicitadel/ugondu/actions/runs/40223142249)):** **SUCCESS (16/16 jobs green)**:
+  - `Release Integrity & Governance Gates`: ✓ Passed in 16s.
+  - `Build Go Thin-Client` (5 platform matrix: darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64): ✓ Passed.
+  - `Build Microservices & Workspaces` (all 9 monorepo workspaces): ✓ Passed.
+  - `Integration Tests` (11 test suites): ✓ Passed in 1m9s.
+- **Local Governance & Attribution Verification:**
+  - `npm run verify:attribution`: [PASS] 0 prohibited AI phrases across 4,617 tracked files.
+  - `npm run verify:t03`: COMPLIANT [PASS] (0 raw strings, 0 concats, 0 param mismatches, 0 missing tokens across 704 files and 1,515 call sites).
+  - `npm run verify:t04`: 5/5 GATES PASSED (CONFORMANT) across all 9 workspaces.
+  - `npm run verify:release-integrity`: PASS (0 tracked keys, 0 CI bypasses).
+- **Candidate Lineage & Rebinding Rule:**
+  - True candidate commit: `45b07518e82c9089d68a38d87b4566b0dd0bcba9`.
+  - Evidence descendant commit: `fb8f66d34ef66fa253452d19d5079a892d35925d`.
+  - For future merge to `phase4/production-hardening` or a full production release qualification run, the two-stage protocol mandates: implementation candidate frozen first; fresh candidate-bound qualification receipts generated second in an evidence-only descendant commit.
+- **Final Release Posture:**
+  - **NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE.**
+  - Tier-1 AWS lifecycle in `eu-west-3` remains certified; universal commercial release remains withheld until unverified targets (GCP, Azure, non-VSCode IDEs, AI model fleet) produce authentic physical receipts. PR #24 remains in draft.
