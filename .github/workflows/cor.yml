@@ -314,6 +314,25 @@ jobs:
           set -euo pipefail
           echo "candidate=${CANDIDATE_SHA} event=${EVENT_NAME}"
           echo "cor=${COR_RESULT} aws-physical-gate=${AWS_RESULT}"
+          # Pull requests are non-production validation only. The AWS physical
+          # gate is deliberately disabled for pull_request events to prevent
+          # live infrastructure mutation from an unmerged candidate. Do not
+          # label a PR as release-certified when that gate has not run.
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            if [ "${COR_RESULT}" != "success" ]; then
+              echo "::error::COR_GATE_NOT_SUCCESS: PR validation requires COR result success; got '${COR_RESULT}'."
+              exit 1
+            fi
+            if [ "${AWS_RESULT}" != "skipped" ]; then
+              echo "::error::COR_PR_GATE_STATE_UNEXPECTED: AWS physical gate must be skipped for pull_request events; got '${AWS_RESULT}'."
+              exit 1
+            fi
+            echo "::notice::PR VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED."
+            exit 0
+          fi
+
+          # Push/workflow_dispatch runs are release qualification attempts:
+          # every mandatory gate must succeed. Skipped is never success.
           fail=0
           for gate in "cor:${COR_RESULT}" "aws-physical-gate:${AWS_RESULT}"; do
             name="${gate%%:*}"; result="${gate#*:}"
