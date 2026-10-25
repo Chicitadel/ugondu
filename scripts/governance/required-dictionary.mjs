@@ -22,3 +22,8 @@ export function loadRequiredDictionary(filePath, flattenDictionary) {
   }
   return flattenDictionary(parsed);
 }
+
+/** True when a statically referenced token exists in the merged canonical dictionaries. */
+export function hasDictionaryToken(dictionary, tokenKey) {
+  return Object.prototype.hasOwnProperty.call(dictionary, tokenKey);
+}
