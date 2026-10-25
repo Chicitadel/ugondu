@@ -4,10 +4,8 @@
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
 **Snapshot:** 2026-10-25 15:00 UTC (reconciliation snapshot)  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
-**Implementation candidate:** [`294c869c250b3f065d55d674ac352eec10f3557d`](https://github.com/Chicitadel/ugondu/commit/294c869c250b3f065d55d674ac352eec10f3557d)  
-**Certified workflow descendant:** [`dc39cd42f4ce511091fd0355d9ecad05d5852432`](https://github.com/Chicitadel/ugondu/commit/dc39cd42f4ce511091fd0355d9ecad05d5852432) (final-gate head in run 40183694886)  
-**Latest observed evidence-only descendant at reconciliation:** [`ef0c3f4ee4813b59276bf0d087427af51caaf67d`](https://github.com/Chicitadel/ugondu/commit/ef0c3f4ee4813b59276bf0d087427af51caaf67d) (five commits/eight paths after candidate; GitHub compare showed audit/evidence paths only)  
-**Candidate CI:** [40183694906](https://github.com/Chicitadel/ugondu/actions/runs/40183694906) (🟢 15/15 jobs successful across microservices, Go thin-client matrix, integration tests, Docker images)  
+**Implementation candidate:** [`45b075185935efbe720a4b3f54516ff8d5bf305a`](https://github.com/Chicitadel/ugondu/commit/45b075185935efbe720a4b3f54516ff8d5bf305a)  
+**Candidate CI:** [40216812646](https://github.com/Chicitadel/ugondu/actions/runs/40216812646) (🟢 16/16 jobs successful across microservices, Go thin-client matrix, integration tests)  
 **Latest Certified COR + AWS Run Record:** [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) (🟢 UNIFIED RUN: COR Certification 1m50s, AWS Physical Gate 23m47s, Final Release Gate 2s)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
 **Latest detailed audit:** [Whole-Product COR Gap Audit & Production Release Plan](./WHOLE_PRODUCT_COR_GAP_AUDIT_AND_PRODUCTION_RELEASE_PLAN_2026-10-25.md)  \n**Post-execution evidence reconciliation:** [Subagent findings, production-branch proof gaps and status reconciliation](./POST_EXECUTION_EVIDENCE_RECONCILIATION_2026-10-25.md)  \n**Master execution checklist:** [Whole-Product COR Execution Plan & Master Checklist](./WHOLE_PRODUCT_COR_EXECUTION_AND_MASTER_CHECKLIST.md)  
