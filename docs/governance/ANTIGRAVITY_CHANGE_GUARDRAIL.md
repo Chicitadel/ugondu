@@ -70,6 +70,7 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 | COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
 | COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | GREEN / PR VALIDATION VERIFIED | PR #24 (COR run #408: 40223142347 passed with PR validation notice; CI/CD run #521: 40223142249 passed 16/16 jobs; COR-WF-017 & COR-WF-018 verified passing in CI; Universal release remains fail-closed) |
 | COR-REM-006 | Systems Engineering & Governance Authority | `8d5c9858f3c7c56bc0efa34d4a102f4625b89314` | Mandatory attribution/T03/T04 verifier CI wiring (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | YELLOW / Awaiting latest-head CI | Commit `a6d68c9`, `414c689`, `a843ff1`; CI workflow now invokes all three verifiers and regression tests assert wiring; latest-head Actions evidence pending |
+| COR-REM-007 | Systems Engineering & Governance Authority | `440c13acae49a920f42511a6ea753fe8328d7ec8` | T04 CI build prerequisite (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | YELLOW / Awaiting latest-head CI | Run #533 exposed clean-runner failure because T04 requires `dist/` artifacts before they were built; fix commits `8841996`, `5313447`, `8b637c4` build first and test ordering |
 
 Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
 
@@ -145,3 +146,15 @@ This separation does not weaken release certification: the release event still r
 - `tests/governance-verifiers.test.mjs`: added a regression test asserting that both aggregate command wiring and CI workflow steps remain present.
 
 **Acceptance state:** YELLOW until a CI run on the resulting PR merge candidate passes these steps and the expanded regression suite. No evidence manifests were edited or rebound. No direct change to `master` or `phase4/production-hardening`.
+
+
+## Latest re-audit addendum — T04 clean-runner build prerequisite
+
+**Finding COR-REM-007 (confirmed by CI run #533, 40235932762):** The T04 verifier requires generated `dist/` artifacts, but the isolated Release Integrity & Governance Gates job invoked `verify:t04` on a clean checkout before building workspaces. T04 therefore failed with `Missing dist/ directory` for eight runtime workspaces. Attribution and T03 passed; the governance regression suite was skipped because the job stopped at T04.
+
+**Direct remediation on the dedicated branch:**
+- `package.json` commit `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`: aggregate `governance:validate` now builds workspaces before T04.
+- `.github/workflows/ci.yml` commit `5313447ccecae303b75f2d2fc1ce2b7d49128c69`: added `npm ci && npm run build` immediately before T04 in the same CI job.
+- `tests/governance-verifiers.test.mjs` commit `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`: asserts aggregate build-before-T04 ordering and the CI build prerequisite step.
+
+**Acceptance state:** YELLOW until latest-head CI confirms dependency installation/build succeeds, T04 passes, and the expanded regression suite runs and passes. Do not skip T04 or weaken its dist-artifact requirement. Keep the release fail-closed; universal commercial release remains not certified.
