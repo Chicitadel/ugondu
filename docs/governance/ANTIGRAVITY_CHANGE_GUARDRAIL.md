@@ -98,3 +98,13 @@ This branch integrates the previously reported T03/T04 verifier scripts, seals d
 **Regression protection:** Added `COR-WF-017` in `tests/qualification/cor-workflow-gates.test.js` to assert the explicit PR-only branch and non-certification notice. The test assertion was corrected in the follow-up commit to match the actual shell condition.
 
 **Evidence boundary:** The workflow and test were changed after the candidate recorded in the current evidence manifest. The existing candidate-bound evidence is therefore stale for this new workflow code until the approved candidate-freeze/requalification/evidence-descendant process completes. Do not treat the upcoming CI result as final COR certification.
+
+### COR-REM-005 follow-up: release-only evidence freshness
+
+A second workflow defect was confirmed: the candidate-bound freshness check ran on unmerged pull requests even though PR code is expected to differ from the last frozen release candidate. This caused the PR to fail the release evidence-binding step before the PR-specific final-gate semantics could be exercised.
+
+**Direct fix:** The `Verify evidence freshness (candidate-bound, evidence-only descendant)` step now runs only when `github.event_name != 'pull_request'`. The check remains mandatory for push and workflow-dispatch release qualification. The PR workflow still runs build, typecheck, locale/I18N, architecture/import, workspace tests, governance, release-integrity and COR qualification checks, but its successful result is explicitly **PR validation only**, never release certification.
+
+**Regression:** `COR-WF-018` asserts the freshness step's event condition and the explicit non-certification wording. `COR-WF-017` preserves the PR final-gate semantics. Both are pending confirmation on the final current-head CI run.
+
+This separation does not weaken release certification: the release event still requires fresh candidate-bound evidence and both COR and AWS physical gate success.
