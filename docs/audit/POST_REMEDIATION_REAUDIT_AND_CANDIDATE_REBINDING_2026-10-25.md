@@ -164,3 +164,19 @@ The previous pending-validation statement above is superseded for PR validation 
 - COR job log confirms regression counts of 24 COR remediation, 19 adversarial evidence, 6 mode-parity, and 18 workflow-gate tests passed, including COR-WF-017 and COR-WF-018.
 
 This evidence resolves the specific pending latest-head **PR regression-test** status for the tested merge candidate, but not final release qualification. Because documentation changed afterward, these runs do not test the later documentation commits as a release candidate. The two-stage candidate freeze/evidence-only descendant protocol remains mandatory. Universal commercial release remains **NOT CERTIFIED**; AI fleet, fresh non-PR AWS physical qualification, universal target and customer artifact lifecycle evidence remain blockers.
+
+
+## 12. Latest code re-audit — COR-REM-006 governance gate wiring
+
+**Finding:** The standalone package commands `verify:attribution`, `verify:t03`, and `verify:t04` existed but were not part of the aggregate `governance:validate` command or the CI `Release Integrity & Governance Gates` job. A green prior run could therefore pass without running these three checks.
+
+**Direct fix commits on the dedicated branch:**
+- `a6d68c950e912637dd3c716ec75db3e361d6795a` — aggregate governance command now invokes attribution/T03/T04.
+- `414c68958768cc3b220f93759c78a413da67011d` — CI now runs all three verifier commands and the governance regression suite.
+- `a843ff1555dc440c9f6d8e4a1091c07a86e07670` — regression test prevents removal of the aggregate or CI wiring.
+- `b4d242519c5562f5deb9b217ce3da90e3935a197` and `b26f3a15718071807267731067388342e5af6b27` — canonical guardrail and executive report updated.
+- `19f6b9a5a7176d758d9b3c0949d5259d6b4befd5` — certification dashboard updated.
+
+**Acceptance state:** Implemented; latest-head workflow evidence not yet confirmed in this re-audit. Keep YELLOW until the new CI steps and expanded test suite pass on the latest PR merge candidate. Do not modify evidence manifest/receipts to rebind them. This finding does not resolve AI fleet qualification or universal OS/IDE/host/cloud/artifact lifecycle gaps.
+
+**Release posture:** PR #24 remains open/draft/unmerged. No direct change to `master` or `phase4/production-hardening`. Universal commercial release remains **NOT CERTIFIED**.
