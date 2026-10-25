@@ -109,3 +109,11 @@ The COR workflow now explicitly separates PR validation from release certificati
 2. The PR final gate requires COR success and the intentionally skipped AWS physical job, prints `NOT RELEASE CERTIFIED`, and returns a PR-validation success. Non-PR release qualification still requires both mandatory gates to succeed.
 
 Regression tests `COR-WF-017` and `COR-WF-018` cover the new conditions. This is a direct code/workflow remediation; final CI evidence on the latest head is still required. It does not establish AWS physical qualification for the new candidate, qualify the AI fleet, or close universal OS/IDE/host/cloud and artifact lifecycle gaps.
+
+## 10. Regression-run reconciliation — 2026-10-25 18:12 UTC
+
+COR run #399 ([40219829698](https://github.com/Chicitadel/ugondu/actions/runs/40219829698)) executed an earlier revision of the new `COR-WF-017` assertion and failed the regression suite because the assertion still expected the previous shell condition (`EVENT_NAME != pull_request`) after the implementation had correctly changed it to an explicit `EVENT_NAME = pull_request` branch. The failing assertion was corrected in commit `95707c27937de167aeec4a8eb51a4bc695807cee`.
+
+After that, `COR-WF-018` and the workflow condition that defers candidate freshness on PRs were added in commits `a7645270ae4f0db63cf76ae316494cc5ffda764b` and `b584f7bc2d254fd3bf07c96bbbaa85c351d16551`. The audit/guardrail/dashboard/report were then updated, with latest observed branch head `c908853d903e4a341b2e5d95c28f2954806c7886`.
+
+**Important:** Run #399 is not a passing test of the corrected assertion or the new WF-018 test; it tested the earlier version. At this audit point, no completed workflow result tied to the latest head was available. The new test suite and final workflow semantics remain **implementation complete, latest-head CI verification pending**. Do not claim the PR gate fix has passed CI until a run checks out the latest commit and all regression tests pass.
