@@ -39,6 +39,13 @@ describe('PolicyDigest', () => {
     expect(() => digest.generate({ invalid: undefined })).toThrow();
   });
 
+  it('rejects circular and non-finite policy values', () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    expect(() => digest.generate(circular)).toThrow(/circular/i);
+    expect(() => digest.generate({ cost: Number.NaN })).toThrow(/non-finite/i);
+  });
+
   it('hashes Buffer input by its exact bytes', () => {
     const input = Buffer.from('policy bytes');
     expect(digest.generate(input)).toBe(createHash('sha256').update(input).digest('hex'));
