@@ -38,16 +38,17 @@ export class UniversalDeliveryEngine {
 
         // 5. Transfer & Deploy
         Logger.info(__t('msg_executing_payload_transfer_to_destinatio'));
+        let targetStatus: any;
         try {
-            const targetStatus = await destinationAdapter.getInstanceStatus('ugondu_site');
-            if (!targetStatus || targetStatus.state === 'failed') {
-                throw new Error(__t('msg_deployment_failed_target_state_is_unstab'));
-            }
-            Logger.info(__t('transaction_successful_target_status', { status: targetStatus.state }));
-            return true;
+            targetStatus = await destinationAdapter.getInstanceStatus('ugondu_site');
         } catch (error: any) {
             Logger.error(__t('error_during_artifact_transfer', { error: error.message }));
             throw new Error(__t('deployment_aborted_destination_adapter_failure', { error: error.message }));
         }
+        if (!targetStatus || targetStatus.state === 'failed') {
+            throw new Error(__t('msg_deployment_failed_target_state_is_unstab'));
+        }
+        Logger.info(__t('transaction_successful_target_status', { status: targetStatus.state }));
+        return true;
     }
 }

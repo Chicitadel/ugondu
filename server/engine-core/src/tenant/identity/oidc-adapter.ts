@@ -180,7 +180,10 @@ export class OIDCAdapter {
         true
       );
     } catch (error) {
-      throw new Error(__t('token_verification_failed', { error: String(error) }));
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(__t('token_verification_failed'));
     }
   }
 }

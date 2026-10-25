@@ -134,7 +134,7 @@ export class SAMLAdapter {
         : undefined
     );
     if (trustedIssuers && trustedIssuers.length > 0 && !trustedIssuers.includes(issuer)) {
-      throw new Error(__t('saml_untrusted_issuer', { issuer }));
+      throw new Error(`SAML_UNTRUSTED_ISSUER:${issuer}`);
     }
 
     // 2. Extract and validate NameID
