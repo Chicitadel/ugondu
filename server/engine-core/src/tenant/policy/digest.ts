@@ -63,6 +63,38 @@ export class PolicyDigest {
   }
 
   private canonicalizeJsonValue(value: unknown): string {
+    const ancestors = new Set<object>();
+    const validate = (current: unknown): void => {
+      if (current === null || typeof current === 'string' || typeof current === 'boolean') return;
+      if (typeof current === 'number') {
+        if (!Number.isFinite(current)) {
+          throw new TypeError('Policy content cannot contain non-finite numbers.');
+        }
+        return;
+      }
+      if (Array.isArray(current)) {
+        if (ancestors.has(current)) throw new TypeError('Policy content cannot contain circular references.');
+        ancestors.add(current);
+        for (const item of current) validate(item);
+        ancestors.delete(current);
+        return;
+      }
+      if (typeof current === 'object') {
+        const object = current as Record<string, unknown>;
+        const prototype = Object.getPrototypeOf(object);
+        if (prototype !== Object.prototype && prototype !== null) {
+          throw new TypeError('Policy content must contain only plain JSON objects.');
+        }
+        if (ancestors.has(object)) throw new TypeError('Policy content cannot contain circular references.');
+        ancestors.add(object);
+        for (const item of Object.values(object)) validate(item);
+        ancestors.delete(object);
+        return;
+      }
+      throw new TypeError('Policy content must be a JSON-compatible value.');
+    };
+
+    validate(value);
     const canonical = canonicalize(value as never);
     if (typeof canonical !== 'string') {
       throw new TypeError('Policy content must be a JSON-compatible value.');
