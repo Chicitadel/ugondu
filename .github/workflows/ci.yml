@@ -228,6 +228,9 @@ jobs:
       - name: Verify T03 tokenization conformance
         run: npm run verify:t03
 
+      - name: Build workspace artifacts required by T04
+        run: npm ci && npm run build
+
       - name: Verify T04 microservice workspace boundaries
         run: npm run verify:t04
 
