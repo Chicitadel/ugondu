@@ -139,3 +139,16 @@ Universal commercial release remains **NOT GRANTED**.
 - CI/CD [40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160): 16 substantive jobs passed; Docker validation and release publishing skipped.
 - Regression suites: 24 + 19 + 6 + 18 tests passed, including COR-WF-017 and COR-WF-018. Tested PR merge candidate: `ecfec790d411bbffec270f1d700350bb3f26243c`.
 - **Release decision unchanged:** NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE. A fresh non-PR candidate-bound qualification and successful AWS physical gate remain required; AI fleet and universal target/artifact lifecycle evidence remain incomplete.
+
+
+## 2026-10-25 re-audit delta — COR-REM-006
+
+| Control | State | Evidence / next action |
+|---|---|---|
+| Attribution verifier CI enforcement | YELLOW — implemented, CI pending | Added `npm run verify:attribution` to aggregate governance and CI release-integrity gate; require latest-head run pass |
+| T03 tokenization verifier CI enforcement | YELLOW — implemented, CI pending | Added `npm run verify:t03` to aggregate governance and CI; require latest-head run pass |
+| T04 workspace boundary verifier CI enforcement | YELLOW — implemented, CI pending | Added `npm run verify:t04` to aggregate governance and CI; require latest-head run pass |
+| Governance wiring regression test | YELLOW — implemented, CI pending | Added test assertions for aggregate script and workflow step presence |
+| Universal commercial release | RED — not certified | AI fleet qualification, native target/IDE/host/cloud scope, immutable artifact lifecycle and non-PR AWS physical qualification remain outstanding |
+
+Commits: `a6d68c950e912637dd3c716ec75db3e361d6795a`, `414c68958768cc3b220f93759c78a413da67011d`, `a843ff1555dc440c9f6d8e4a1091c07a86e07670`, `b4d242519c5562f5deb9b217ce3da90e3935a197`, `b26f3a15718071807267731067388342e5af6b27`.
