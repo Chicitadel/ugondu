@@ -180,3 +180,14 @@ This evidence resolves the specific pending latest-head **PR regression-test** s
 **Acceptance state:** Implemented; latest-head workflow evidence not yet confirmed in this re-audit. Keep YELLOW until the new CI steps and expanded test suite pass on the latest PR merge candidate. Do not modify evidence manifest/receipts to rebind them. This finding does not resolve AI fleet qualification or universal OS/IDE/host/cloud/artifact lifecycle gaps.
 
 **Release posture:** PR #24 remains open/draft/unmerged. No direct change to `master` or `phase4/production-hardening`. Universal commercial release remains **NOT CERTIFIED**.
+
+
+## 13. CI-discovered T04 prerequisite defect and direct fix
+
+Run #533 (`40235932762`) failed after the attribution and T03 steps passed: T04 reported absent `dist/` directories for eight runtime workspaces on the isolated clean checkout. The regression suite was skipped after this fail-closed result. The T04 verifier was not weakened.
+
+- `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`: `governance:validate` now runs `npm run build` before `verify:t04`.
+- `5313447ccecae303b75f2d2fc1ce2b7d49128c69`: CI runs `npm ci && npm run build` before T04.
+- `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`: tests assert build-before-T04 ordering.
+
+Acceptance remains YELLOW until a new CI run passes the build prerequisite, T04, and governance regression suite. Latest docs-only commits also need to be included in the final observed head. Universal release remains NOT CERTIFIED; no evidence receipt was edited.
