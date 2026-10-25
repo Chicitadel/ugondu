@@ -32,6 +32,50 @@ import { DeploymentRepairEngine } from './src/deise/engine/repair-engine';
 import { EnvironmentTwin } from './src/deise/twin/environment-twin';
 import { __t } from '@ugondu/shared';
 import { getProviderAdapter } from './src/assurance/provider/certification-provider-factory';
+import {
+    EC2Client,
+    DescribeVpcsCommand,
+    DescribeSubnetsCommand,
+    DescribeSecurityGroupsCommand,
+    DeleteSecurityGroupCommand,
+    DeleteSubnetCommand,
+    DeleteVpcCommand
+} from '@aws-sdk/client-ec2';
+
+async function cleanupStaleTestVpcs(region: string, currentTxId: string): Promise<void> {
+    try {
+        const ec2 = new EC2Client({ region });
+        const vpcs = await ec2.send(new DescribeVpcsCommand({
+            Filters: [{ Name: 'tag:UgonduCOR', Values: ['true'] }]
+        })).catch(() => null);
+        for (const vpc of vpcs?.Vpcs || []) {
+            if (!vpc.VpcId) continue;
+            const tags = vpc.Tags || [];
+            const txTag = tags.find(t => t.Key === 'UgonduTransactionId')?.Value;
+            if (txTag && txTag !== currentTxId) {
+                const sgs = await ec2.send(new DescribeSecurityGroupsCommand({
+                    Filters: [{ Name: 'vpc-id', Values: [vpc.VpcId] }]
+                })).catch(() => null);
+                for (const sg of sgs?.SecurityGroups || []) {
+                    if (sg.GroupId && sg.GroupName !== 'default') {
+                        await ec2.send(new DeleteSecurityGroupCommand({ GroupId: sg.GroupId })).catch(() => null);
+                    }
+                }
+                const subs = await ec2.send(new DescribeSubnetsCommand({
+                    Filters: [{ Name: 'vpc-id', Values: [vpc.VpcId] }]
+                })).catch(() => null);
+                for (const sub of subs?.Subnets || []) {
+                    if (sub.SubnetId) {
+                        await ec2.send(new DeleteSubnetCommand({ SubnetId: sub.SubnetId })).catch(() => null);
+                    }
+                }
+                await ec2.send(new DeleteVpcCommand({ VpcId: vpc.VpcId })).catch(() => null);
+            }
+        }
+    } catch {
+        // Non-blocking fail-safe pre-clean
+    }
+}
 
 async function runCertification() {
     console.log(__t('cert.fargate.start'));
@@ -52,6 +96,7 @@ async function runCertification() {
     const amiId = await providerAdapter.resolveDefaultAmi();
 
     try {
+        await cleanupStaleTestVpcs(region, txId);
         console.log(__t('cert.phase.creating_vpc'));
         const vpcRes = await registry.getAction('network:vpc:create')!.execute({ transactionId: txId, cidr: '10.0.0.0/16' });
         const vpcId = vpcRes?.outputs?.vpcId || vpcRes?.vpcId;
@@ -97,9 +142,6 @@ async function runCertification() {
         const s3Client = (awsObs as any).s3;
         const tagResponse: any = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => {
             if (err.name === 'NoSuchTagSet') return { TagSet: [] };
-            if (err.name === 'AccessDenied' || err.Code === 'AccessDenied') {
-                return { TagSet: [{ Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: txId }] };
-            }
             throw err;
         });
         const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');

@@ -150,6 +150,9 @@ jobs:
     name: AWS Physical Qualification Gate
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    concurrency:
+      group: ugondu-physical-cor-${{ vars.AWS_REGION || 'eu-west-3' }}
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read

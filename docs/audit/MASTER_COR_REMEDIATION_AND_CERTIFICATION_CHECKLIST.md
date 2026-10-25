@@ -1,10 +1,11 @@
-<!-- Project: Ugondu | Authority: Ujomor Systems Engineering & Governance Authority | Organization: Air Roofers SASU -->
+<!-- Project: Ugondu | Authority & Authors: Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority | Organization: Air Roofers SASU | Governance: UAIGOS 3.0.0 -->
 # Master COR Remediation, Unification and Proof-of-Certification Checklist
 
-**Audit snapshot:** 2026-10-24 20:16 UTC (PR #19 Follow-up Audit & Candidate 318c0221 Reconciliation)  
+**Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
+**Audit snapshot:** 2026-10-25 03:43 UTC (candidate 870aac95; evidence descendant 9a35f680; latest AWS physical gate failed)  
 **Branch:** `phase4/production-hardening`  
-**Implementation candidate:** [`318c022158b1dabf1d9c12c62ed497a837a692df`](https://github.com/Chicitadel/ugondu/commit/318c022158b1dabf1d9c12c62ed497a837a692df)  
-**Evidence-sealed descendant:** [`be549ffa6a2ddb1655c83f2b458dab56957aa0fb`](https://github.com/Chicitadel/ugondu/commit/be549ffa6a2ddb1655c83f2b458dab56957aa0fb)  
+**Implementation candidate:** [`870aac95cfd8b183ac434e61fe8aa023b4606e91`](https://github.com/Chicitadel/ugondu/commit/870aac95cfd8b183ac434e61fe8aa023b4606e91)  
+**Evidence-sealed descendant:** [`9a35f6803f0ea3fe63003f954d00ccc207200f84`](https://github.com/Chicitadel/ugondu/commit/9a35f6803f0ea3fe63003f954d00ccc207200f84)  
 **Candidate CI run:** [40125624489](https://github.com/Chicitadel/ugondu/actions/runs/40125624489)  
 **Release CI run:** [40126588874](https://github.com/Chicitadel/ugondu/actions/runs/40126588874)  
 **Release COR run:** [40126588895](https://github.com/Chicitadel/ugondu/actions/runs/40126588895)  
@@ -372,3 +373,37 @@ Final COR/UAIGOS closure is authorized only when:
 8. The final signed release bundle records run IDs, artifact digests, candidate SHA, scope, exclusions, expiry/review date and approver.
 
 **Current conclusion:** Configured CI/CD and COR workflow gates passed on candidate `318c022158b1dabf1d9c12c62ed497a837a692df` and evidence-sealed release head `be549ffa6a2ddb1655c83f2b458dab56957aa0fb`. Maintain **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED** until findings F-12 through F-22 and universality gap exit criteria are completely satisfied.
+
+
+## Section 10 — 2026-10-25 03:43 UTC release-head failure reconciliation
+
+**Authoritative update:** the prior 20:16 UTC status is superseded for the current candidate. Candidate `870aac95cfd8b183ac434e61fe8aa023b4606e91` has successful configured CI and a successful live AI canary, but evidence descendant `9a35f6803f0ea3fe63003f954d00ccc207200f84` failed the AWS Physical Qualification Gate in run [40139407362](https://github.com/Chicitadel/ugondu/actions/runs/40139407362). The COR Final Release Gate failed as expected. Do not report the current release head as COR-complete.
+
+### F-23 — VPC quota exhaustion
+- [ ] Inspect run log and AWS inventory/CloudTrail for the configured region.
+- [ ] Determine whether stale resources are run-owned; never delete unowned/customer resources.
+- [ ] Add quota preflight using actual service quota and current inventory.
+- [ ] Serialize physical runs per account/region; use bounded retry and classify quota exhaustion as a non-retryable blocker until capacity is restored.
+- [ ] Persist an ownership-tagged resource manifest immediately after each create.
+- [ ] Exercise rollback after partial creation and verify no residual run-owned resources.
+- [ ] Re-run physical qualification and require pass on the exact candidate SHA.
+
+### F-24 — Synthetic S3 tag evidence on AccessDenied
+- [ ] Remove the catch branch in `server/engine-core/physical-certification.ts` that returns expected tags on AccessDenied.
+- [ ] Make AccessDenied, missing required tags, wrong transaction/run ID and provider errors fail closed.
+- [ ] Add regression tests for AccessDenied, NoSuchTagSet, missing tag, wrong tag value, wrong run ID and successful observed tags.
+- [ ] Verify the test's positive result comes from the actual AWS SDK response, not a synthetic fallback.
+- [ ] Rerun all affected tests and physical qualification.
+
+### AI and universality release blockers
+- [ ] Keep model report in offline state until live per-model inference receipts and policy approval qualify models. Current report: 12 discovered, 0 qualified, 0 active, 12 disabled.
+- [ ] Keep native scope explicit: Windows amd64 215/215 Node qualification tests; Linux amd64 Go thin-client/governance; macOS arm64 Go thin-client only; Linux arm64 and macOS amd64 cross-compiled only.
+- [ ] Implement/qualify IDEs or remove unsupported IDEs from advertised support; unsupported behavior passing is not support certification.
+- [ ] Complete real disposable host/cluster lifecycle tests for cPanel, DirectAdmin, VPS/SSH and Kubernetes; GCP/Azure remain unsupported until physical provider qualification.
+- [ ] Publish/sign the release and test install, upgrade, rollback and uninstall from the published artifact; release-publishing job was skipped in run 40139407350.
+- [ ] Refresh evidence manifest and dashboard from raw run outputs; no stale evidence may be carried forward.
+
+**Exit rule:** Universal COR remains red until the latest AWS physical gate passes, no synthetic provider evidence remains, every mandatory AI model is qualified and approved, every advertised platform completes its native/physical lifecycle suite, and the signed release is install-tested from its published artifact.
+
+**Detailed evidence and remediation:** [03:43 UTC follow-up audit](./COR_FOLLOWUP_AUDIT_AWS_PHYSICAL_FAILURE_AND_UNIVERSALITY_2026-10-25_0343Z.md).  
+**Current colour-coded status:** [Certification dashboard](./CERTIFICATION_PROGRESS_DASHBOARD.md).

@@ -49,7 +49,7 @@ const FORBIDDEN_HEADER_RE = new RegExp('\\bAI\\s+' + 'Governed\\b', 'i');
 const PEM_PRIVATE_KEY_RE = new RegExp('-----BEGIN (?:RSA |EC |OPENSSH |PRIVATE )?' + 'PRIVATE KEY-----');
 const HEALTH_COR_LEVEL_RE = /cor_level\s*:\s*['"]A['"]/;
 const AUTH_BYPASS_RE = /&&\s*false\b/;
-const FAKE_LOCALE_PREFIX_RE = /\[(?:AR|FR|DE)\]/;
+const FAKE_LOCALE_PREFIX_RE = /\[(?:AR|DE|EN|ES|FR|HI|IT|JA|KO|PT|RU|ZH)(?:-[A-Z]{2,4})?\]/i;
 const PROD_MOCK_IMPORT_RE = /(?:import\s+.*\s+from\s+['"][^'"]*(?:mock|fixture|stubs?|__tests__)[^'"]*['"]|require\(['"][^'"]*(?:mock|fixture|stubs?|__tests__)[^'"]*['"]\))/i;
 const SWALLOWED_ERROR_RE = /catch\s*(?:\([^)]*\))?\s*\{\s*return\s*(?:\{[^}]*(?:success:\s*true|applied:\s*true|valid:\s*true)|true|['"]APPLIED_AND_MATCHES['"])/i;
 const VACUOUS_ASSERTION_RE = /(?:expect\(\s*true\s*\)\.toBe\(\s*true\s*\)|assert\.ok\(\s*true\s*\))/;
@@ -368,38 +368,48 @@ function validateCreatedOrModifiedFileLimits(violations) {
 }
 
 function validateLocalePacks(violations) {
-  const localesDir = path.join(ROOT, 'server', 'shared', 'locales');
-  if (!fs.existsSync(localesDir)) {
-    violations.push('Missing locales directory: server/shared/locales');
-    return;
-  }
-  const localeFiles = fs.readdirSync(localesDir).filter((f) => f.endsWith('.json'));
-  if (localeFiles.length === 0) {
-    violations.push('No locale JSON files found in server/shared/locales');
-    return;
-  }
-  for (const file of localeFiles) {
-    const fullPath = path.join(localesDir, file);
-    let parsed;
-    try {
-      parsed = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
-    } catch (err) {
-      violations.push(`Invalid JSON in server/shared/locales/${file}: ${err.message}`);
+  const dirs = [
+    { label: 'server/shared/locales', dir: path.join(ROOT, 'server', 'shared', 'locales') },
+    { label: 'locales', dir: path.join(ROOT, 'locales') }
+  ];
+  const requiredLocales = [
+    'ar.json', 'de.json', 'en.json', 'es.json', 'fr.json', 'hi.json',
+    'it.json', 'ja.json', 'ko.json', 'pt.json', 'ru.json', 'zh.json'
+  ];
+  for (const { label, dir: localesDir } of dirs) {
+    if (!fs.existsSync(localesDir)) {
+      violations.push(`Missing locales directory: ${label}`);
       continue;
     }
-    const inspectValues = (obj, keyPath = '') => {
-      for (const [k, v] of Object.entries(obj)) {
-        const currentKey = keyPath ? `${keyPath}.${k}` : k;
-        if (typeof v === 'string') {
-          if (FAKE_LOCALE_PREFIX_RE.test(v)) {
-            violations.push(`Placeholder translation prefix detected in server/shared/locales/${file} at "${currentKey}": ${v}`);
-          }
-        } else if (v && typeof v === 'object' && !Array.isArray(v)) {
-          inspectValues(v, currentKey);
-        }
+    const localeFiles = fs.readdirSync(localesDir).filter((f) => f.endsWith('.json'));
+    for (const req of requiredLocales) {
+      if (!localeFiles.includes(req)) {
+        violations.push(`Missing required locale ${req} in ${label}`);
       }
-    };
-    inspectValues(parsed);
+    }
+    for (const file of localeFiles) {
+      const fullPath = path.join(localesDir, file);
+      let parsed;
+      try {
+        parsed = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+      } catch (err) {
+        violations.push(`Invalid JSON in ${label}/${file}: ${err.message}`);
+        continue;
+      }
+      const inspectValues = (obj, keyPath = '') => {
+        for (const [k, v] of Object.entries(obj)) {
+          const currentKey = keyPath ? `${keyPath}.${k}` : k;
+          if (typeof v === 'string') {
+            if (FAKE_LOCALE_PREFIX_RE.test(v)) {
+              violations.push(`Placeholder translation prefix detected in ${label}/${file} at "${currentKey}": ${v}`);
+            }
+          } else if (v && typeof v === 'object' && !Array.isArray(v)) {
+            inspectValues(v, currentKey);
+          }
+        }
+      };
+      inspectValues(parsed);
+    }
   }
 }
 
