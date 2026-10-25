@@ -2,7 +2,7 @@
 # Master COR Remediation, Unification and Proof-of-Certification Checklist
 
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
-**Audit snapshot:** 2026-10-25 03:43 UTC (candidate 870aac95; evidence descendant 9a35f680; latest AWS physical gate failed)  
+**Audit snapshot:** 2026-10-25 04:41 UTC (candidate 1f05cccb; evidence descendant 162b4589; AWS pass exists in run 40160710161 but its COR evidence-freshness/final gate failed; run 40161212443 COR passed while AWS physical gate was still running at inspection)  
 **Branch:** `phase4/production-hardening`  
 **Implementation candidate:** [`870aac95cfd8b183ac434e61fe8aa023b4606e91`](https://github.com/Chicitadel/ugondu/commit/870aac95cfd8b183ac434e61fe8aa023b4606e91)  
 **Evidence-sealed descendant:** [`9a35f6803f0ea3fe63003f954d00ccc207200f84`](https://github.com/Chicitadel/ugondu/commit/9a35f6803f0ea3fe63003f954d00ccc207200f84)  
@@ -407,3 +407,66 @@ Final COR/UAIGOS closure is authorized only when:
 
 **Detailed evidence and remediation:** [03:43 UTC follow-up audit](./COR_FOLLOWUP_AUDIT_AWS_PHYSICAL_FAILURE_AND_UNIVERSALITY_2026-10-25_0343Z.md).  
 **Current colour-coded status:** [Certification dashboard](./CERTIFICATION_PROGRESS_DASHBOARD.md).
+
+
+## Section 11 — 2026-10-25 04:41 UTC follow-up: quota recovery, run-lineage split and cleanup hardening
+
+**Authoritative latest report:** [COR Follow-up Audit — VPC Recovery and Release Lineage, 04:41 UTC](./COR_FOLLOWUP_AUDIT_VPC_RECOVERY_AND_RELEASE_LINEAGE_2026-10-25_0441Z.md).  
+**Dashboard:** [Certification Progress Dashboard](./CERTIFICATION_PROGRESS_DASHBOARD.md).  
+**Candidate:** [`1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82`](https://github.com/Chicitadel/ugondu/commit/1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82).  
+**Evidence-only descendant:** [`162b45898591546b66b789a433b069abe838338b`](https://github.com/Chicitadel/ugondu/commit/162b45898591546b66b789a433b069abe838338b).
+
+### Current evidence reconciliation
+
+| Evidence | Result at 04:41 UTC | Status meaning |
+|---|---|---|
+| Candidate CI run 40160710160 | Reported configured 18 jobs successful | 🟢 Scoped CI pass |
+| AWS physical job 121071472638 in run 40160710161 | Passed physical certification, Fargate certification and residual scan | 🟢 Scoped physical pass |
+| COR Certification in run 40160710161 | Evidence-freshness step failed; downstream release steps skipped | 🔴 That run is not release-green |
+| Final gate in run 40160710161 | Failed | 🔴 Correct fail-closed outcome |
+| COR Certification in run 40161212443 | Passed including evidence freshness, release integrity, trust root, fresh qualification and signing | 🟢 Scoped COR pass |
+| AWS physical job in run 40161212443 | Still in progress at inspection | 🟡 Do not infer completion |
+| Universal COR | Not proven | 🔴 Not granted |
+
+**Mandatory rule:** Do not combine the physical pass from run 40160710161 with the COR pass from run 40161212443 as if one workflow run had passed every mandatory gate. Recheck the latest run after the physical job and final gate terminate. Confirm exact SHA, manifest hashes, receipt hashes and evidence-only diff. Any source/config/policy/workflow/dependency drift invalidates affected proof.
+
+### F-23 status: quota incident recovered, cleanup safety still needs hardening
+
+- [x] A later AWS physical job passed after the VPC quota incident.
+- [ ] Resolve evidence-freshness failure from run 40160710161.
+- [ ] Close run 40161212443 and record actual AWS physical/final gate conclusions.
+- [ ] Harden `cleanupStaleTestVpcs`: require unique run UUID, owner marker, candidate SHA, creation timestamp/lease and durable resource manifest.
+- [ ] Do not swallow DescribeVpcs/DescribeSubnets/DescribeSecurityGroups or delete failures; incomplete inventory or failed cleanup must block COR.
+- [ ] Delete only resources proven owned by the expired run; never use `UgonduCOR=true` plus “different transaction ID” as the sole deletion authorization.
+- [ ] Add active-run lease/concurrency protection, bounded retries, paginated inventory, idempotent cleanup and explicit residual resource IDs.
+- [ ] Test permission denied, timeout, partial creation, deletion failure, incomplete pagination, active lease and unrelated-resource preservation.
+
+### F-24 status: synthetic S3 fallback absent in inspected source; negative proof still required
+
+- [x] Inspected current source no longer returns synthetic expected tags for AccessDenied.
+- [x] `NoSuchTagSet` becomes an empty observation and required-tag assertions fail closed.
+- [ ] Add/verify direct negative tests for AccessDenied, NoSuchTagSet, missing/wrong tags, stale transaction/run ID, timeout and 5xx.
+- [ ] Confirm the positive case relies on the actual provider-observed SDK response.
+- [ ] Run the tests and physical gate on the exact final candidate lineage.
+
+### AI fleet activation
+
+- [x] Live canary receipt records `https://ai.airroofers.eu`, discovery/execution HTTP 200, `sentinel-guard-v1`, and 30 endpoint-available models for candidate `1f05cccb...`.
+- [ ] Do not infer fleet qualification or activation from endpoint discovery count.
+- [ ] For every intended active model, perform authenticated live inference and validate endpoint identity, model/version, request ID, output digest, policy, region/data class, quotas and response schema.
+- [ ] Issue a trusted signed receipt bound to candidate SHA and policy version for each qualified model.
+- [ ] Require explicit policy approval before activation; unknown/stale/revoked/failed models remain disabled.
+- [ ] Test credential rotation/expiry, replay, stale SHA, 401/403, 429, 5xx, timeout, DNS/TLS failure, malformed responses and secret redaction.
+
+### Universal support and commercial release
+
+- [ ] Windows amd64 full product lifecycle beyond 215/215 scoped Node tests.
+- [ ] Linux amd64 and macOS arm64 full native product lifecycle.
+- [ ] Linux arm64 and macOS amd64 native execution; cross-build alone is insufficient.
+- [ ] IDE-specific E2E for every advertised IDE, or remove unqualified IDEs from support claims.
+- [ ] Real disposable host/cluster lifecycle receipts for cPanel, DirectAdmin, SSH/VPS, Kubernetes and every advertised Docker host.
+- [ ] Implement and physically qualify GCP/Azure or explicitly exclude them from support claims.
+- [ ] Publish/sign an immutable release and test clean install, upgrade, rollback and uninstall from the actual published artifact.
+- [ ] Generate the certification dashboard from verified machine-readable evidence and block release on any mandatory red/yellow/skipped row.
+
+**Current conclusion:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED.** The quota-related physical job success is meaningful progress, but evidence-freshness failure on run 40160710161 and the still-running physical job in run 40161212443 mean there was no fully verified all-gates-green release at the time of this snapshot.
