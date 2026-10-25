@@ -6,6 +6,7 @@ import path from 'node:path';
 import { isPathWithinDirectory } from '../scripts/governance/workspace-boundary.mjs';
 import { loadRequiredDictionary } from '../scripts/governance/required-dictionary.mjs';
 import { isWorkspacePathWithinRoot } from '../scripts/governance/validate-test-coverage.mjs';
+import { resolvePolicyTemplatePath } from '../scripts/governance/verify-policy-pack-digests.mjs';
 
 test('T04 regression: workspace sibling sharing a path prefix is outside the boundary', () => {
   const root = path.join(os.tmpdir(), 'ugondu-boundary-fixture');
@@ -25,6 +26,31 @@ test('governance regression: workspace declarations cannot escape the repository
   assert.equal(isWorkspacePathWithinRoot(root, path.join(root, 'external-workspace')), false);
   assert.equal(isWorkspacePathWithinRoot(root, ''), false);
   assert.equal(isWorkspacePathWithinRoot(root, null), false);
+});
+
+test('security regression: policy templates cannot escape the pack root', () => {
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-policy-pack-boundary-'));
+  const pack = path.join(parent, 'pack');
+  const outside = path.join(parent, 'outside.txt');
+  fs.mkdirSync(pack);
+  fs.writeFileSync(path.join(pack, 'policy.json'), '{"Version":"2012-10-17"}', 'utf8');
+  fs.writeFileSync(outside, 'external content', 'utf8');
+  try {
+    assert.equal(resolvePolicyTemplatePath(pack, 'policy.json').file, fs.realpathSync(path.join(pack, 'policy.json')));
+    assert.match(resolvePolicyTemplatePath(pack, '../outside.txt').error, /escapes policy pack directory/);
+    assert.match(resolvePolicyTemplatePath(pack, outside).error, /invalid or absolute/);
+    assert.match(resolvePolicyTemplatePath(pack, 'missing.json').error, /missing/);
+
+    const link = path.join(pack, 'external-link.json');
+    try {
+      fs.symlinkSync(outside, link);
+      assert.match(resolvePolicyTemplatePath(pack, 'external-link.json').error, /resolves outside policy pack directory/);
+    } catch (error) {
+      if (!['EPERM', 'EACCES', 'ENOTSUP'].includes(error.code)) throw error;
+    }
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
 });
 
 test('T03 regression: required locale dictionary fails closed when missing', () => {
