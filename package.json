@@ -21,7 +21,7 @@
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces",
     "test": "npm run test --workspaces",
-    "test:contract": "node tests/schema-validation.test.js && node tests/uplm-conformance.test.js",
+    "test:contract": "node tests/schema-validation.test.js && node tests/uplm-conformance.test.js && npm run test:governance",
     "test:integration": "node tests/billing-gateway.test.js && node tests/engine-core.test.js && node tests/plugin-manager.test.js && node tests/event-bus.test.js && node tests/repository-adapter.test.js && node tests/cor-remediation.test.js && node tests/language-packs.test.js && node tests/ai-inference-gateway.test.js && node tests/uplm-conformance.test.js",
     "test:e2e": "npm --workspace=server/tests run test",
     "test:security": "node tests/security-regression.test.js && node tests/ssrf-execution.test.js && node tests/passport-cryptography.test.js",
@@ -37,7 +37,10 @@
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
-    "verify:release-integrity": "node scripts/verify-release-integrity.js"
+    "verify:release-integrity": "node scripts/verify-release-integrity.js",
+    "verify:t03": "node scripts/governance/verify-tokenization-t03.mjs",
+    "verify:t04": "node scripts/governance/verify-microservices-t04.mjs",
+    "test:governance": "node --test tests/governance-verifiers.test.mjs"
   },
   "engines": {
     "node": ">=20.0.0",
