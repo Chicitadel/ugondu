@@ -191,3 +191,12 @@ Run #533 (`40235932762`) failed after the attribution and T03 steps passed: T04 
 - `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`: tests assert build-before-T04 ordering.
 
 Acceptance remains YELLOW until a new CI run passes the build prerequisite, T04, and governance regression suite. Latest docs-only commits also need to be included in the final observed head. Universal release remains NOT CERTIFIED; no evidence receipt was edited.
+
+
+## 14. Documentation-location reconciliation
+
+A fresh lookup on the current remediation branch confirms that both previously cited audit artifacts do exist at shared repository paths:
+- `docs/audit/WHOLE_PRODUCT_COR_REMEDIATION_AND_DEFECT_ELIMINATION_CHECKLIST.md`
+- `docs/audit/T06_STUBS_MOCKS_SCAFFOLDING_ELIMINATION_AUDIT_2026-10-25.md`
+
+This supersedes the earlier statement in Section 4 that those exact files were not found on the reviewed branch. The current native-runner evidence file is `docs/governance/evidence/native-runner-evidence.json` (not `docs/security/evidence/native-runner-evidence.json`). The files are shared and reviewable, but their evidence snapshots still bind to candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`; their presence does not qualify the current remediation head. Fresh candidate-bound receipts remain required after implementation freeze. The prior audit observation about local file URLs was valid as a provenance limitation: shared repo paths, not local machine URLs, are the auditable references.
