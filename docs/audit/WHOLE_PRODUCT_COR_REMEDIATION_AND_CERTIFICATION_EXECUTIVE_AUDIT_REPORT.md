@@ -99,3 +99,13 @@ The local executive report supplied for this audit claims the following 12 track
 - **Universal commercial release:** **WITHHELD / FAIL-CLOSED**.
 
 PR #24 remains draft and unmerged. No direct changes were made to `master` or `phase4/production-hardening`.
+
+
+## 9. Workflow follow-up — 2026-10-25 18:10 UTC
+
+The COR workflow now explicitly separates PR validation from release certification in two places:
+
+1. Candidate-bound evidence freshness is skipped only on `pull_request`; it remains mandatory for push/workflow-dispatch release qualification.
+2. The PR final gate requires COR success and the intentionally skipped AWS physical job, prints `NOT RELEASE CERTIFIED`, and returns a PR-validation success. Non-PR release qualification still requires both mandatory gates to succeed.
+
+Regression tests `COR-WF-017` and `COR-WF-018` cover the new conditions. This is a direct code/workflow remediation; final CI evidence on the latest head is still required. It does not establish AWS physical qualification for the new candidate, qualify the AI fleet, or close universal OS/IDE/host/cloud and artifact lifecycle gaps.
