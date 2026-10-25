@@ -129,3 +129,18 @@ The earlier statement in Section 7 that latest-head CI verification was pending 
 - **Exact tested PR merge candidate:** `ecfec790d411bbffec270f1d700350bb3f26243c`, as reported by the COR engine and final gate. This is distinct from the source branch head and must not be substituted for a frozen release candidate.
 
 This update closes the previous **latest-head PR regression verification pending** status only. It does not close candidate-bound release evidence, fresh physical AWS qualification, AI fleet qualification, universal native-target coverage, or customer artifact lifecycle gaps. Universal commercial release remains **NOT CERTIFIED**.
+
+
+## Re-audit finding COR-REM-006 — governance verifier enforcement
+
+**Observed:** On branch head `8d5c9858f3c7c56bc0efa34d4a102f4625b89314`, root scripts exposed `verify:attribution`, `verify:t03`, and `verify:t04`, but `governance:validate` omitted them and the CI `Release Integrity & Governance Gates` job did not invoke them. Existing green CI evidence therefore did not prove those three verifiers were enforced by the required pipeline.
+
+**Direct implementation on the dedicated branch:**
+- Commit `a6d68c950e912637dd3c716ec75db3e361d6795a`: wired all three verifiers into `governance:validate`.
+- Commit `414c68958768cc3b220f93759c78a413da67011d`: added explicit attribution, T03, T04, and governance regression-test steps to `.github/workflows/ci.yml`.
+- Commit `a843ff1555dc440c9f6d8e4a1091c07a86e07670`: added regression assertions for aggregate and CI gate wiring.
+- Commit `b4d242519c5562f5deb9b217ce3da90e3935a197`: recorded the finding and acceptance state in the canonical Antigravity guardrail.
+
+**Verification state:** Implementation is committed to the remediation branch; latest-head CI acceptance is pending. Do not call this finding GREEN until the workflow executes the new steps on the latest PR merge candidate and all pass. This remediation does not alter the old AI qualification report or evidence manifest and does not close the AI fleet, native target, IDE/host/cloud, or immutable artifact lifecycle gaps.
+
+**Release decision remains: NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE.** PR #24 remains draft and unmerged; `master` and `phase4/production-hardening` remain untouched.
