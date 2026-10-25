@@ -69,8 +69,8 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 | COR-REM-003 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Native OS/IDE/host/cloud qualification | YELLOW / Partial (Fail-Closed) | Windows amd64 native pass; Linux thin-client pass; GCP/Azure & non-VSCode IDEs fail-closed |
 | COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
 | COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | GREEN / PR VALIDATION VERIFIED | PR #24 (COR run #408: 40223142347 passed with PR validation notice; CI/CD run #521: 40223142249 passed 16/16 jobs; COR-WF-017 & COR-WF-018 verified passing in CI; Universal release remains fail-closed) |
-| COR-REM-006 | Systems Engineering & Governance Authority | `8d5c9858f3c7c56bc0efa34d4a102f4625b89314` | Mandatory attribution/T03/T04 verifier CI wiring (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | YELLOW / Awaiting latest-head CI | Commit `a6d68c9`, `414c689`, `a843ff1`; CI workflow now invokes all three verifiers and regression tests assert wiring; latest-head Actions evidence pending |
-| COR-REM-007 | Systems Engineering & Governance Authority | `440c13acae49a920f42511a6ea753fe8328d7ec8` | T04 CI build prerequisite (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | YELLOW / Awaiting latest-head CI | Run #533 exposed clean-runner failure because T04 requires `dist/` artifacts before they were built; fix commits `8841996`, `5313447`, `8b637c4` build first and test ordering |
+| COR-REM-006 | Systems Engineering & Governance Authority | `3267d637b1473ab02aff906e697aefafb297040e` | Mandatory attribution/T03/T04 verifier CI wiring (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | GREEN / PR CI verified | CI/CD run #541 `40236147953`: attribution PASS, T03 PASS, T04 PASS, governance verifier regression suite 8/8 PASS; COR run #428 `40236147971` passed PR validation only; AWS gate skipped as required for PR |
+| COR-REM-007 | Systems Engineering & Governance Authority | `3267d637b1473ab02aff906e697aefafb297040e` | T04 CI build prerequisite (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | GREEN / PR CI verified | Run #533 failure reproduced and fixed; CI/CD run #541 `40236147953` proves locked install/build prerequisite, T04 5/5 gates PASS, regression suite 8/8 PASS |
 
 Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
 
@@ -158,3 +158,17 @@ This separation does not weaken release certification: the release event still r
 - `tests/governance-verifiers.test.mjs` commit `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`: asserts aggregate build-before-T04 ordering and the CI build prerequisite step.
 
 **Acceptance state:** YELLOW until latest-head CI confirms dependency installation/build succeeds, T04 passes, and the expanded regression suite runs and passes. Do not skip T04 or weaken its dist-artifact requirement. Keep the release fail-closed; universal commercial release remains not certified.
+
+
+## Latest-head verification — 2026-10-25 21:35 UTC
+
+**Observed PR source head:** `3267d637b1473ab02aff906e697aefafb297040e`. PR #24 remains draft/open/unmerged. The latest CI/CD run [#541 / `40236147953`](https://github.com/Chicitadel/ugondu/actions/runs/40236147953) and COR run [#428 / `40236147971`](https://github.com/Chicitadel/ugondu/actions/runs/40236147971) completed successfully for PR validation.
+
+- Attribution verifier: PASS.
+- T03 tokenization: PASS.
+- Workspace build prerequisite before T04: PASS.
+- T04 microservice/workspace conformance: `ALL 5/5 GATES PASSED`.
+- Governance verifier regression suite: `8 tests, 8 pass, 0 fail`.
+- COR certification tests passed; the AWS Physical Qualification Gate was intentionally skipped on the PR event; the final gate explicitly says `PR VALIDATION PASSED ... NOT RELEASE CERTIFIED`.
+
+This closes the CI acceptance state for COR-REM-006 and COR-REM-007 on this PR validation run. It does **not** certify universal commercial release or rebind the older evidence manifest. AI model qualification remains `CATALOG_OFFLINE` (0 qualified, 0 active, 12 disabled); broader native target/IDE/host/cloud support and immutable artifact lifecycle qualification remain open. No evidence receipts or manifests were manually edited. Do not merge until the release authority's remaining gates and candidate-freeze protocol are satisfied.
