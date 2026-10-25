@@ -164,3 +164,15 @@ Commits: `a6d68c950e912637dd3c716ec75db3e361d6795a`, `414c68958768cc3b220f93759c
 | Universal commercial release | RED — not certified | AI fleet qualification, native target/IDE/host/cloud scope, immutable artifact lifecycle and non-PR AWS physical qualification remain outstanding. |
 
 Fix commits: `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`, `5313447ccecae303b75f2d2fc1ce2b7d49128c69`, `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`.
+
+
+## Latest-head verification — 2026-10-25 21:35 UTC (supersedes earlier pending states)
+
+Observed PR source head: `3267d637b1473ab02aff906e697aefafb297040e`. PR #24 remains open, draft, and unmerged.
+
+- CI/CD run [#541 / `40236147953`](https://github.com/Chicitadel/ugondu/actions/runs/40236147953): **SUCCESS**. The Release Integrity & Governance Gates job passed attribution, T03, workspace build prerequisite, T04, and governance verifier regression tests.
+- T04 output: `CONFORMANCE STATUS: ALL 5/5 GATES PASSED (GRADE: PASS / CONFORMANT)`.
+- Governance verifier regression suite: **8/8 passed, 0 failed**.
+- COR run [#428 / `40236147971`](https://github.com/Chicitadel/ugondu/actions/runs/40236147971): **SUCCESS for PR validation**. COR tests and final PR gate passed; AWS Physical Qualification Gate was intentionally skipped for PR events. The final gate states `NOT RELEASE CERTIFIED`.
+
+COR-REM-006 and COR-REM-007 are GREEN for PR-CI acceptance on this run. They do not close candidate-bound release evidence freshness or broader release blockers. The evidence manifest and AI/native receipts still bind to candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`, not the current remediation head. AI model qualification remains offline with 0 qualified, 0 active, 12 disabled; native target/IDE/host/cloud and immutable artifact lifecycle qualification remain incomplete. Universal commercial release remains **NOT CERTIFIED**.
