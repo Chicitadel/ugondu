@@ -131,3 +131,11 @@ The COR workflow was corrected on the remediation branch after run #398 showed a
 - The prior manifest candidate is still `45b07518e82c9089d68a38d87b4566b0dd0bcba9`; it is not evidence for the newly changed workflow. Regenerate candidate-bound evidence only through approved tooling after the implementation candidate is frozen.
 
 Universal commercial release remains **NOT GRANTED**.
+
+## Latest PR verification snapshot — 2026-10-25 20:25 UTC
+
+- PR #24 source head: `a5f978e177c54762daccdc5d785c772abc372339`; open, draft, unmerged.
+- COR PR validation [40230376169](https://github.com/Chicitadel/ugondu/actions/runs/40230376169): COR passed; AWS physical gate skipped by PR policy; final gate passed while stating `NOT RELEASE CERTIFIED`.
+- CI/CD [40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160): 16 substantive jobs passed; Docker validation and release publishing skipped.
+- Regression suites: 24 + 19 + 6 + 18 tests passed, including COR-WF-017 and COR-WF-018. Tested PR merge candidate: `ecfec790d411bbffec270f1d700350bb3f26243c`.
+- **Release decision unchanged:** NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE. A fresh non-PR candidate-bound qualification and successful AWS physical gate remain required; AI fleet and universal target/artifact lifecycle evidence remain incomplete.
