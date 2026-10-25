@@ -58,3 +58,19 @@ test('T03 regression: token lookup rejects inherited prototype properties', asyn
   assert.equal(hasDictionaryToken({}, 'valueOf'), false);
   assert.equal(hasDictionaryToken({}, '__proto__'), false);
 });
+
+test('governance regression: attribution, T03, and T04 verifiers are mandatory in both aggregate and CI gates', () => {
+  const root = process.cwd();
+  const packageJson = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  const aggregate = packageJson.scripts['governance:validate'];
+  assert.match(aggregate, /npm run verify:attribution/);
+  assert.match(aggregate, /npm run verify:t03/);
+  assert.match(aggregate, /npm run verify:t04/);
+  assert.match(aggregate, /npm run test:governance/);
+
+  const workflow = fs.readFileSync(path.join(root, '.github/workflows/ci.yml'), 'utf8');
+  assert.match(workflow, /name: Verify corporate AI attribution policy\n        run: npm run verify:attribution/);
+  assert.match(workflow, /name: Verify T03 tokenization conformance\n        run: npm run verify:t03/);
+  assert.match(workflow, /name: Verify T04 microservice workspace boundaries\n        run: npm run verify:t04/);
+  assert.match(workflow, /name: Run governance verifier regression tests\n        run: npm run test:governance/);
+});
