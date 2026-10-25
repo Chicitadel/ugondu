@@ -448,6 +448,6 @@ test('COR-WF-017 pull-request validation does not misclassify the intentionally 
   assert.match(run, /AWS_RESULT.*skipped/);
   assert.match(run, /PR VALIDATION PASSED/);
   assert.match(run, /NOT RELEASE CERTIFIED/);
-  assert.match(run, /if \[ "\\${EVENT_NAME}" != "pull_request" \]/);
+  assert.match(run, /if \[ "\$\{EVENT_NAME\}" = "pull_request" \]/);
   assert.match(run, /failure, skipped, cancelled and missing all block certification/);
 });
