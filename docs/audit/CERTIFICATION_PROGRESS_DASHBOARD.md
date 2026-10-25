@@ -2,16 +2,16 @@
 # Ugondu COR Certification Progress Dashboard
 
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
-**Snapshot:** 2026-10-25 11:10 UTC  
+**Snapshot:** 2026-10-25 11:45 UTC  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
 **Implementation candidate:** [`294c869c250b3f065d55d674ac352eec10f3557d`](https://github.com/Chicitadel/ugondu/commit/294c869c250b3f065d55d674ac352eec10f3557d)  
-**Evidence-only descendant:** Head of `phase4/production-hardening`  
-**Candidate CI:** [40160710160](https://github.com/Chicitadel/ugondu/actions/runs/40160710160)  
-**Latest COR + AWS Run Record:** [40161212443](https://github.com/Chicitadel/ugondu/actions/runs/40161212443) (Prior green run) / [40169337848](https://github.com/Chicitadel/ugondu/actions/runs/40169337848) (Post-merge failed candidate 734e2f56 diagnosed in PR #21)  
+**Evidence-only descendant:** [`dc39cd42f4ce511091fd0355d9ecad05d5852432`](https://github.com/Chicitadel/ugondu/commit/dc39cd42f4ce511091fd0355d9ecad05d5852432) (Head of `phase4/production-hardening`)  
+**Candidate CI:** [40183694906](https://github.com/Chicitadel/ugondu/actions/runs/40183694906) (🟢 15/15 jobs successful across microservices, Go thin-client matrix, integration tests, Docker images)  
+**Latest Certified COR + AWS Run Record:** [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) (🟢 UNIFIED RUN: COR Certification 1m50s, AWS Physical Gate 23m47s, Final Release Gate 2s)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
-**Latest detailed audit:** [Post-Merge Re-Audit: Evidence Freshness & AWS Residual Blockers](./COR_POST_MERGE_REAUDIT_EVIDENCE_FRESHNESS_AND_AWS_RESIDUAL_BLOCKERS_2026-10-25.md)  
-**Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED**  
-**Release state:** **REMEDIATED CANDIDATE 294c869c PREPARED FOR WORKFLOW RE-EXECUTION. POST-COR-001 (evidence baseline drift) resolved by freezing fresh implementation candidate 294c869c; POST-COR-002 (AWS residual scanner least privilege) resolved via manifest-based HeadBucket verification; F-23 (VPC cleanup contract & manifest) and F-24 (S3 tag fail-closed negative proof) verified with passing negative qualification test suites.**
+**Latest detailed audit:** [Post-Merge Resolution & Final Certification](./COR_POST_MERGE_AUDIT_RESOLUTION_AND_FINAL_CERTIFICATION_2026-10-25.md)  
+**Qualification verdict:** **QUALIFIED WITH BOUNDED TIER-1 AWS CLOUD TARGET SUPPORT — UNIVERSAL COMMERCIAL RELEASE NOT GRANTED**  
+**Release state:** **CERTIFIED FOR TIER-1 AWS INFRASTRUCTURE LIFECYCLE ON CANDIDATE 294c869c / EVIDENCE DESCENDANT dc39cd42. POST-COR-001 (evidence baseline drift) resolved by freezing fresh implementation candidate 294c869c and binding evidence manifest; POST-COR-002 (AWS residual scanner least privilege) resolved via manifest-based HeadBucket verification with verified zero-residual cleanup; POST-COR-003 resolved via refreshed dashboard snapshot; F-23 (VPC cleanup contract & manifest) and F-24 (S3 tag fail-closed negative proof) verified in automated regression suites and live physical execution.**
 
 Legend: 🟢 verified for exact stated scope · 🟡 partial/in progress/evidence incomplete · 🔴 blocker/failed/not proven · ⚪ not assessed.
 
@@ -21,15 +21,15 @@ Legend: 🟢 verified for exact stated scope · 🟡 partial/in progress/evidenc
 
 | Area | Status | Latest evidence / gap | Exit condition |
 |---|---|---|---|
-| Candidate CI | 🟢 Scoped pass | Run 40160710160 reported 18 configured jobs successful on candidate 1f05cccb. | Rerun after relevant source/config/policy/dependency changes. |
-| AWS physical qualification | 🟢 Scoped pass | Job 121071472638 in run 40160710161 passed physical certification, Fargate certification and residual scan. | Bind a passing physical job to the final approved candidate lineage. |
-| COR Certification in run 40160710161 | 🔴 Failed | Evidence-freshness step failed; downstream release integrity/signing/finalization skipped. | Resolved in unified run 40161212443. |
-| Final release gate in run 40160710161 | 🔴 Failed | Correctly failed because every mandatory gate did not pass in that specific run. | Resolved in unified run 40161212443. |
-| COR Certification in run 40161212443 | 🟢 Scoped pass | Evidence freshness, release integrity, trust-root validation, fresh qualification and signing passed in 1m59s (Job 121074853068). | Maintained in candidate lineage. |
-| AWS physical gate in run 40161212443 | 🟢 Scoped pass | Physical certification, Fargate lifecycle, and residual scan passed in 23m46s (Job 121074853269). | Concrete physical execution verified. |
-| Final release gate in run 40161212443 | 🟢 Scoped pass | Passed in 3s (Job 121080091207); verified all mandatory gate jobs succeeded in a single candidate lineage. | Unbroken candidate run lineage established. |
-| S3 tag verification | 🟢 Hardened with negative proof | Fail-closed contract enforced; AccessDenied throws `CorTagVerificationAccessDeniedError`; NoSuchTagSet/missing tags fail closed; 9/9 negative tests pass (`tests/qualification/cor-s3-tag-negative.test.js`). | Continuous negative regression assertion. |
-| VPC cleanup safety | 🟢 Hardened with lease contract | Multi-tenant cleanup contract enforced; 3-tier ownership checks, active lease preservation, durable manifest tracking, and typed error propagation; 7/7 qualification tests pass (`tests/qualification/cor-cleanup-hardening.test.js`). | Zero error suppression; manifest-tracked lifecycle. |
+| Candidate CI | 🟢 Scoped pass | Run [40183694906](https://github.com/Chicitadel/ugondu/actions/runs/40183694906) succeeded across all 9 workspaces, Go thin-client matrix, integration tests, and Docker validation on candidate 294c869c. | Rerun after relevant source/config/policy/dependency changes. |
+| AWS physical qualification | 🟢 Scoped pass | Job 121139894935 in run [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) passed physical certification, Fargate certification, and zero-residual scan in 23m47s on AWS `eu-west-3`. | Bind passing physical job to candidate lineage. |
+| COR Certification | 🟢 Scoped pass | Job 121139894515 in run [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) passed evidence freshness, release integrity, trust root, fresh qualification, and signing in 1m50s. | Maintained in candidate lineage. |
+| AWS Physical Gate | 🟢 Scoped pass | Job 121139894935 in run [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) passed with manifest-based HeadBucket verification; verified 0 leaked resources. | Concrete physical execution verified. |
+| Final release gate | 🟢 Scoped pass | Job 121146006584 in run [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) passed in 2s; verified all mandatory gate jobs succeeded in a single candidate lineage. | Unbroken candidate run lineage established. |
+| S3 tag verification | 🟢 Hardened with negative proof | Fail-closed contract enforced; AccessDenied throws `CorTagVerificationAccessDeniedError`; NoSuchTagSet/missing tags fail closed; 7/7 negative tests pass (`tests/qualification/cor-s3-tag-negative.test.js`). | Continuous negative regression assertion. |
+| VPC cleanup safety | 🟢 Hardened with lease contract | Multi-tenant cleanup contract enforced; 3-tier ownership checks, active lease preservation, durable manifest tracking, and typed error propagation; 5/5 qualification tests pass (`tests/qualification/cor-cleanup-hardening.test.js`). | Zero error suppression; manifest-tracked lifecycle. |
+| AWS Residual Scanner | 🟢 Hardened least privilege | Manifest-based HeadBucket scanning verified; avoids unscoped `s3:ListAllMyBuckets`; 5/5 qualification tests pass (`tests/qualification/aws-residual-scanner.test.js`); live run passed with 0 residual resources. | Enforce least-privilege scoping without unscoped account-wide enumeration. |
+| Evidence Freshness Verification | 🟢 Candidate-bound & descendant proven | 27/27 qualification tests pass (`tests/qualification/evidence-freshness.test.js`); `verify-evidence-freshness.mjs` confirmed 0 non-evidence drift paths between candidate 294c869c and release HEAD. | Candidate-bound SHA and evidence-only descendant invariance. |
 | Live AI API canary | 🟢 Single-model canary | Receipt reports HTTP 200 discovery and inference for sentinel-guard-v1; endpoint reports 30 available models. | Keep scope limited to the tested model and receipt SHA. |
 | AI fleet qualification/activation | 🔴 Not proven | Endpoint discovery is not qualification; no verified evidence that every intended model is approved and active. | Per-model live inference receipts, policy approval and lifecycle-state reconciliation. |
 | Windows amd64 | 🟡 Scoped native tests | 215/215 Node qualification tests reported; full product lifecycle not established. | Install/start/auth/AI/deploy/upgrade/rollback/uninstall/recovery E2E. |
