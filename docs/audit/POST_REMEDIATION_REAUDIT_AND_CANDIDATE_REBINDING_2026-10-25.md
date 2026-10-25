@@ -200,3 +200,13 @@ A fresh lookup on the current remediation branch confirms that both previously c
 - `docs/audit/T06_STUBS_MOCKS_SCAFFOLDING_ELIMINATION_AUDIT_2026-10-25.md`
 
 This supersedes the earlier statement in Section 4 that those exact files were not found on the reviewed branch. The current native-runner evidence file is `docs/governance/evidence/native-runner-evidence.json` (not `docs/security/evidence/native-runner-evidence.json`). The files are shared and reviewable, but their evidence snapshots still bind to candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`; their presence does not qualify the current remediation head. Fresh candidate-bound receipts remain required after implementation freeze. The prior audit observation about local file URLs was valid as a provenance limitation: shared repo paths, not local machine URLs, are the auditable references.
+
+
+## 15. Latest-head CI verification closure for COR-REM-006 and COR-REM-007
+
+The pending CI acceptance statements in Sections 12–13 are superseded for PR-CI acceptance by completed runs against PR source head `3267d637b1473ab02aff906e697aefafb297040e`:
+
+- CI/CD run [#541 / `40236147953`](https://github.com/Chicitadel/ugondu/actions/runs/40236147953) completed SUCCESS. Attribution PASS; T03 PASS; `npm ci && npm run build` prerequisite PASS; T04 all 5/5 gates PASS; governance verifier regression suite 8/8 PASS, 0 failed.
+- COR run [#428 / `40236147971`](https://github.com/Chicitadel/ugondu/actions/runs/40236147971) completed SUCCESS for PR validation. AWS Physical Qualification Gate was intentionally skipped; final gate correctly reported `NOT RELEASE CERTIFIED`.
+
+Both findings are GREEN for PR-CI acceptance. The remediation did not mutate `master` or `phase4/production-hardening`; PR #24 remains draft and unmerged. No evidence manifest or receipt was hand-edited. The evidence manifest, AI qualification report and native-runner report still bind to the earlier candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`, so a frozen candidate and approved candidate-bound evidence regeneration remain necessary. AI qualification remains offline (0 qualified, 0 active, 12 disabled); broader native/IDE/host/cloud and immutable artifact lifecycle qualification remain incomplete. Universal commercial release remains **NOT CERTIFIED**.
