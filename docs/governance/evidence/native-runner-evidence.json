@@ -5,7 +5,7 @@
   "authority": "Ujomor Systems Engineering & Governance Authority",
   "organization": "Air Roofers SASU",
   "generatedAt": "2026-10-25T04:11:54.179Z",
-  "gitHeadSha": "1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82",
+  "gitHeadSha": "294c869c250b3f065d55d674ac352eec10f3557d",
   "verdict": "NATIVE_EXECUTION_VERIFIED_FOR_RECORDED_TARGETS_ONLY",
   "universalClaim": false,
   "tier1NativeRunners": [
@@ -15,7 +15,7 @@
       "classification": "NATIVE_EXECUTION_VERIFIED",
       "record": {
         "recordType": "UGONDU_NATIVE_EXECUTION_RECORD",
-        "gitSha": "1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82",
+        "gitSha": "294c869c250b3f065d55d674ac352eec10f3557d",
         "startedAt": "2026-10-25T04:09:00.452Z",
         "finishedAt": "2026-10-25T04:10:41.011Z",
         "host": {

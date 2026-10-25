@@ -1,7 +1,7 @@
 {
   "schema": "ugondu.evidence-manifest/1",
-  "gitHeadSha": "1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82",
-  "candidateSha": "1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82",
+  "gitHeadSha": "294c869c250b3f065d55d674ac352eec10f3557d",
+  "candidateSha": "294c869c250b3f065d55d674ac352eec10f3557d",
   "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
   "evidenceFiles": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "path": "docs/governance/evidence/native-runner-evidence.json",
-      "sha256": "78180e5f1b5757817ddbd645ea300c4937fb99602a133e6038ac7f0e32ba4bde"
+      "sha256": "d85254fa0aa9467f2d04f91b6c03fc8397cd9999548aedc0584999faf785668f"
     },
     {
       "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
@@ -18,11 +18,11 @@
     },
     {
       "path": "docs/security/evidence/ai_model_qualification_report.json",
-      "sha256": "00964830b42181f28d6b619ef9b3222ae45e76280e941db810942a6158e7cd35"
+      "sha256": "0c6233fdc4ba97975692bceff6b1accd29a58173654afbe39594505431350aa6"
     },
     {
       "path": "docs/security/evidence/live_ai_canary_receipt.json",
-      "sha256": "9877f78bb67e199b29d296f12e5a3db3e939fee1f14c232d2f11df096e238087"
+      "sha256": "c47a647649d65904f3e6916ff2830ecf661992e2423c6142a455ac262225f1af"
     }
   ],
   "testCommands": [

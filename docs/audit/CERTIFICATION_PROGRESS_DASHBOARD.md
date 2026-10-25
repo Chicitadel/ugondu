@@ -2,17 +2,16 @@
 # Ugondu COR Certification Progress Dashboard
 
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
-**Snapshot:** 2026-10-25 06:15 UTC  
+**Snapshot:** 2026-10-25 11:10 UTC  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
-**Implementation candidate:** [`1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82`](https://github.com/Chicitadel/ugondu/commit/1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82)  
-**Evidence-only descendant:** [`162b45898591546b66b789a433b069abe838338b`](https://github.com/Chicitadel/ugondu/commit/162b45898591546b66b789a433b069abe838338b)  
+**Implementation candidate:** [`294c869c250b3f065d55d674ac352eec10f3557d`](https://github.com/Chicitadel/ugondu/commit/294c869c250b3f065d55d674ac352eec10f3557d)  
+**Evidence-only descendant:** Head of `phase4/production-hardening`  
 **Candidate CI:** [40160710160](https://github.com/Chicitadel/ugondu/actions/runs/40160710160)  
-**AWS physical pass (scoped):** [40160710161 / job 121071472638](https://github.com/Chicitadel/ugondu/actions/runs/40160710161/job/121071472638)  
-**Reconciled COR + AWS Run:** [40161212443](https://github.com/Chicitadel/ugondu/actions/runs/40161212443) (All 3 gate jobs completed green: COR Certification, AWS Physical Qualification Gate, COR Final Release Gate)  
+**Latest COR + AWS Run Record:** [40161212443](https://github.com/Chicitadel/ugondu/actions/runs/40161212443) (Prior green run) / [40169337848](https://github.com/Chicitadel/ugondu/actions/runs/40169337848) (Post-merge failed candidate 734e2f56 diagnosed in PR #21)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
-**Latest detailed audit:** [04:41 UTC VPC recovery, release lineage and universality audit](./COR_FOLLOWUP_AUDIT_VPC_RECOVERY_AND_RELEASE_LINEAGE_2026-10-25_0441Z.md)  
+**Latest detailed audit:** [Post-Merge Re-Audit: Evidence Freshness & AWS Residual Blockers](./COR_POST_MERGE_REAUDIT_EVIDENCE_FRESHNESS_AND_AWS_RESIDUAL_BLOCKERS_2026-10-25.md)  
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TARGET SUPPORT — UNIVERSAL CERTIFICATION NOT GRANTED**  
-**Release state:** **BOUNDED QUALIFICATION GREEN FOR TIER 1 AWS / NODE RUNNER SCOPE. Single-run lineage is reconciled in run 40161212443; F-23 (VPC cleanup contract & manifest) and F-24 (S3 tag fail-closed negative proof) are fully remediated and verified with negative qualification test suites.**
+**Release state:** **REMEDIATED CANDIDATE 294c869c PREPARED FOR WORKFLOW RE-EXECUTION. POST-COR-001 (evidence baseline drift) resolved by freezing fresh implementation candidate 294c869c; POST-COR-002 (AWS residual scanner least privilege) resolved via manifest-based HeadBucket verification; F-23 (VPC cleanup contract & manifest) and F-24 (S3 tag fail-closed negative proof) verified with passing negative qualification test suites.**
 
 Legend: 🟢 verified for exact stated scope · 🟡 partial/in progress/evidence incomplete · 🔴 blocker/failed/not proven · ⚪ not assessed.
 

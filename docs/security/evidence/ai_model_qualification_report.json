@@ -2,7 +2,7 @@
   "reportType": "AI_MODEL_QUALIFICATION_REPORT",
   "version": "1.0.0",
   "generatedAt": "2026-10-25T04:12:24.414Z",
-  "gitSha": "1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82",
+  "gitSha": "294c869c250b3f065d55d674ac352eec10f3557d",
   "qualificationMode": "CATALOG_OFFLINE",
   "summary": {
     "totalDiscovered": 12,
@@ -24,7 +24,7 @@
       "modelAlias": "catalog-offline",
       "providerId": "airroofers-ai",
       "timestamp": "2026-10-25T04:12:24.412Z",
-      "gitSha": "1f05cccb4a0148a91ec2f177dd0ecd5af11e7b82",
+      "gitSha": "294c869c250b3f065d55d674ac352eec10f3557d",
       "status": "UNQUALIFIED",
       "liveExecution": false,
       "verification": "CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION",
