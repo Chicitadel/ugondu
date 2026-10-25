@@ -54,6 +54,24 @@ test('service-linked role create success is not accepted without a valid role re
   assert.equal(getRoleCalls, 2);
 });
 
+test('successful but malformed role read-back is not treated as an existing service-linked role', () => {
+  let getRoleCalls = 0;
+  const aws = (args) => {
+    if (args[0] === 'iam' && args[1] === 'get-role') {
+      getRoleCalls += 1;
+      return { status: 0, json: {} };
+    }
+    if (args[0] === 'iam' && args[1] === 'create-service-linked-role') {
+      return { status: 1, stderr: 'InvalidInput: service-linked role already exists' };
+    }
+    throw new Error(`Unexpected AWS command: ${args.join(' ')}`);
+  };
+
+  const result = verifyOrCreateRdsSlr(aws, {}, 'eu-west-3');
+  assert.equal(result.ok, false);
+  assert.equal(getRoleCalls, 2);
+});
+
 test('non-access-denied attach mutation failure returns non-zero and a FAIL report', () => {
   const evidenceDir = makeEvidenceDir();
   try {
