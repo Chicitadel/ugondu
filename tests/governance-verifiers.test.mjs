@@ -80,9 +80,11 @@ test('governance regression: attribution, T03, and T04 verifiers are mandatory i
   assert.match(aggregate, /npm run build/);
   assert.ok(aggregate.indexOf('npm run build') < aggregate.indexOf('npm run verify:t04'), 'aggregate validation must build workspace artifacts before T04');
   assert.match(aggregate, /npm run verify:t04/);
+  assert.match(aggregate, /npm run test:policy-pack-boundary/);
   assert.match(aggregate, /npm run test:governance/);
 
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/ci.yml'), 'utf8');
+  assert.match(workflow, /name: Test policy-pack template path containment\n        run: npm run test:policy-pack-boundary/);
   assert.match(workflow, /name: Verify corporate AI attribution policy\n        run: npm run verify:attribution/);
   assert.match(workflow, /name: Verify T03 tokenization conformance\n        run: npm run verify:t03/);
   assert.match(workflow, /name: Build workspace artifacts required by T04\n        run: npm ci && npm run build/);

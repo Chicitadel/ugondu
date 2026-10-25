@@ -193,3 +193,14 @@ The workspace coverage verifier joined each `package.json` workspace declaration
 - Source and regression test changes are committed on the dedicated branch; CI execution is required to establish test PASS.
 - Do not mark this finding GREEN until the workflow run checks out the exact branch head and the governance regression suite passes.
 - This targeted verifier fix does not close AI fleet, native OS/IDE/host/cloud, immutable artifact lifecycle, or universal commercial qualification gaps. Overall release remains **NOT CERTIFIED** until the current candidate and all mandatory scope evidence pass.
+
+## 2026-10-26 Task Ledger: UG-COR-SEC-012 — Policy-pack template path containment
+
+- **Task ID:** UG-COR-SEC-012
+- **Concern:** Policy-pack verifier (`scripts/governance/verify-policy-pack-digests.mjs`) allowed `templatePath` entries to escape policy-pack directory via traversal (`../`), absolute paths, or symlinks.
+- **Owning Subagent / Authority:** Lead System Architect Ignatus Chika UJOMOR & Enterprise Architecture Council.
+- **Code Changes:** Implemented `resolvePolicyTemplatePath()` with lexical containment, realpath containment, and regular file validation in `scripts/governance/verify-policy-pack-digests.mjs`.
+- **Regression Tests:** Added `tests/policy-pack-path-containment.test.mjs` (3/3 tests pass).
+- **Gate Wiring:** Added `npm run test:policy-pack-boundary` to `package.json` (`governance:validate`) and `.github/workflows/ci.yml`.
+- **Status:** PASS locally (3/3 tests). Pushed to PR #24 branch for whole-product validation. Universal commercial release remains **NOT CERTIFIED**.
+
