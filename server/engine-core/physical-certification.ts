@@ -217,7 +217,7 @@ export async function runCertification() {
         console.log(__t('cert.phase.residual_scan'));
         const residualScanner = providerAdapter.getResidualScanner();
         
-        const leaked = await residualScanner.scanForLeakedResources({ transactionId: txId });
+        const leaked = await residualScanner.scanForLeakedResources({ transactionId: txId, manifest });
         
         if (leaked) {
             console.error(__t('error.cert.residual_scan_failed'));

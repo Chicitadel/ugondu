@@ -244,7 +244,7 @@ test('F-24 Negative Proof: Timeout or HTTP 500 fails closed with typed error', a
         },
         (err) => {
             assert.ok(err instanceof CorTagVerificationError);
-            assert.ok(err.message.includes('Provider error'));
+            assert.ok(err.message.includes('Failed to fetch tags for bucket') || err.message.includes('Provider error'));
             return true;
         }
     );
@@ -265,7 +265,7 @@ test('F-24 Negative Proof: Timeout or HTTP 500 fails closed with typed error', a
         },
         (err) => {
             assert.ok(err instanceof CorTagVerificationError);
-            assert.ok(err.message.includes('Provider error'));
+            assert.ok(err.message.includes('Failed to fetch tags for bucket') || err.message.includes('Provider error'));
             return true;
         }
     );

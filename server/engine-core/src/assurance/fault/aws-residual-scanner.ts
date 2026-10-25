@@ -31,6 +31,12 @@ import { RDS } from '@aws-sdk/client-rds';
 import { S3 } from '@aws-sdk/client-s3';
 import { translateProviderError } from '@ugondu/shared';
 
+export interface ScanResidualParams {
+    transactionId: string;
+    manifest?: any;
+    bucketNames?: string[];
+}
+
 export class AwsResidualScanner {
     private ec2: EC2;
     private rds: RDS;
@@ -42,9 +48,10 @@ export class AwsResidualScanner {
         this.s3 = new S3({ region });
     }
 
-    public async scanForLeakedResources(params: { transactionId: string }): Promise<boolean> {
+    public async scanForLeakedResources(params: string | ScanResidualParams): Promise<boolean> {
         let leakedCount = 0;
-        const txTag = params.transactionId;
+        const normalizedParams: ScanResidualParams = typeof params === 'string' ? { transactionId: params } : params;
+        const txTag = normalizedParams.transactionId;
 
         try {
             // Perform live describeVpcs verification
@@ -71,9 +78,45 @@ export class AwsResidualScanner {
                 db.DBInstanceIdentifier?.includes(txTag) && db.DBInstanceStatus !== 'deleting'
             );
 
-            // Perform live listBuckets verification
-            const s3Res = await this.s3.listBuckets({});
-            const s3Residuals = (s3Res?.Buckets || []).filter(b => b.Name?.includes(txTag));
+            // S3 Residual Verification:
+            // Prefer manifest-based and parameter-based known bucket verification via HeadBucket
+            // to avoid issuing unscoped account-wide s3:ListAllMyBuckets which is prohibited by least privilege.
+            const s3Residuals: string[] = [];
+            const manifestBuckets: string[] = [];
+            if (normalizedParams.manifest) {
+                const m = normalizedParams.manifest;
+                if (typeof m.listResources === 'function') {
+                    for (const r of m.listResources()) {
+                        if (r && r.type === 's3' && r.id) manifestBuckets.push(r.id);
+                    }
+                } else if (Array.isArray(m.resources)) {
+                    for (const r of m.resources) {
+                        if (r && r.type === 's3' && r.id) manifestBuckets.push(r.id);
+                    }
+                }
+            }
+            if (Array.isArray(normalizedParams.bucketNames)) {
+                manifestBuckets.push(...normalizedParams.bucketNames);
+            }
+
+            if (manifestBuckets.length > 0) {
+                for (const b of manifestBuckets) {
+                    try {
+                        await this.s3.headBucket({ Bucket: b });
+                        // Bucket still exists -> leaked!
+                        s3Residuals.push(b);
+                    } catch (headErr: any) {
+                        const status = headErr?.$metadata?.httpStatusCode || headErr?.statusCode || headErr?.status;
+                        const name = headErr?.name || headErr?.Code;
+                        if (status === 404 || name === 'NotFound' || name === 'NoSuchBucket') {
+                            // Bucket cleanly deleted
+                        } else {
+                            // Fail-closed on unauthorized, 5xx, or network failure
+                            throw headErr;
+                        }
+                    }
+                }
+            }
 
             leakedCount = vpcResiduals.length + subnetResiduals.length + instanceResiduals.length + rdsResiduals.length + s3Residuals.length;
         } catch (err: unknown) {
