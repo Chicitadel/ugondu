@@ -28,7 +28,7 @@
     "test:compatibility": "node tests/language-packs.test.js && node tests/provider-compilation.test.js",
     "test:locales": "node scripts/validate-locales.js",
     "test:aws": "node scripts/run-cor-gates.js",
-    "governance:validate": "node scripts/verify-release-integrity.js && node scripts/governance/validate-repository.mjs && node scripts/governance/validate-capability-registry.mjs && node scripts/governance/validate-test-coverage.mjs && node scripts/governance/verify-policy-pack-digests.mjs && npm run test:governance",
+    "governance:validate": "node scripts/verify-release-integrity.js && npm run verify:attribution && npm run verify:t03 && npm run verify:t04 && node scripts/governance/validate-repository.mjs && node scripts/governance/validate-capability-registry.mjs && node scripts/governance/validate-test-coverage.mjs && node scripts/governance/verify-policy-pack-digests.mjs && npm run test:governance",
     "start:engine": "cd server/engine-core && node dist/index.js",
     "start:billing": "cd server/billing-gateway && node dist/index.js",
     "start:plugins": "cd server/plugin-manager && node dist/index.js",
