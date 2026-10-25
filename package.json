@@ -25,6 +25,7 @@
     "test:integration": "node tests/billing-gateway.test.js && node tests/engine-core.test.js && node tests/plugin-manager.test.js && node tests/event-bus.test.js && node tests/repository-adapter.test.js && node tests/cor-remediation.test.js && node tests/language-packs.test.js && node tests/ai-inference-gateway.test.js && node tests/uplm-conformance.test.js",
     "test:e2e": "npm --workspace=server/tests run test",
     "test:security": "node tests/security-regression.test.js && node tests/ssrf-execution.test.js && node tests/passport-cryptography.test.js",
+    "test:policy-pack-boundary": "node --test tests/policy-pack-path-containment.test.mjs",
     "test:compatibility": "node tests/language-packs.test.js && node tests/provider-compilation.test.js",
     "test:locales": "node scripts/validate-locales.js",
     "test:aws": "node scripts/run-cor-gates.js",
