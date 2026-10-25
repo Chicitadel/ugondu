@@ -152,3 +152,15 @@ Universal commercial release remains **NOT GRANTED**.
 | Universal commercial release | RED — not certified | AI fleet qualification, native target/IDE/host/cloud scope, immutable artifact lifecycle and non-PR AWS physical qualification remain outstanding |
 
 Commits: `a6d68c950e912637dd3c716ec75db3e361d6795a`, `414c68958768cc3b220f93759c78a413da67011d`, `a843ff1555dc440c9f6d8e4a1091c07a86e07670`, `b4d242519c5562f5deb9b217ce3da90e3935a197`, `b26f3a15718071807267731067388342e5af6b27`.
+
+
+## COR-REM-007 — T04 build prerequisite (2026-10-25)
+
+| Control | State | Evidence / next action |
+|---|---|---|
+| T04 artifact availability in isolated CI | YELLOW — fix committed, rerun pending | Run #533 / `40235932762` failed because `dist/` was absent in the clean governance job. CI now runs `npm ci && npm run build` before T04; aggregate governance command also builds first. |
+| Attribution and T03 in newly wired CI | GREEN for run #533 | Attribution and T03 steps passed before T04 failed. |
+| Governance regression suite | YELLOW — rerun pending | Skipped in run #533 due T04 failure; latest run must execute it. |
+| Universal commercial release | RED — not certified | AI fleet qualification, native target/IDE/host/cloud scope, immutable artifact lifecycle and non-PR AWS physical qualification remain outstanding. |
+
+Fix commits: `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`, `5313447ccecae303b75f2d2fc1ce2b7d49128c69`, `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`.
