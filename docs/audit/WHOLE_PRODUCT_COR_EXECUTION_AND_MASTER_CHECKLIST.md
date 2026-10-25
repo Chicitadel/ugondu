@@ -7,8 +7,11 @@
 **Repository:** `Chicitadel/ugondu`  
 **Production Branch:** `phase4/production-hardening`  
 **Implementation Candidate:** `294c869c250b3f065d55d674ac352eec10f3557d`  
-**Certified Descendant HEAD:** `c4676fba369dbbaeb3a8ce85b0afa8e32d22f40e`  
+**Observed evidence-only descendant at reconciliation snapshot:** `ef0c3f4ee4813b59276bf0d087427af51caaf67d` (subsequent documentation/evidence commits may advance HEAD)  
 **Governing Policies:** UAIGOS 3.0.0 | CONST-000 | CONST-040 | CONST-043 | CONST-044 | CONST-INV | CONST-DEBT | UJP-UIX-007 | UJP-EXT-002 | UJP-EXT-004 | AR-GOV-REG-002 | ADR-0042 | ISO 27001:2022 | SOC 2 Type II | OWASP ASVS v4.0.3 | NIST SP 800-53 Rev. 5  
+
+
+> **Evidence interpretation / anti-regression addendum (2026-10-25):** The checked boxes below record verification tasks reported as executed in the submitted specialist audit log; they do not grant universal certification to every platform, IDE, host or AI model. The current production-branch support boundary is defined by the [Certification Progress Dashboard](./CERTIFICATION_PROGRESS_DASHBOARD.md), and production-branch artifact gaps are recorded in the [Post-Execution Evidence Reconciliation](./POST_EXECUTION_EVIDENCE_RECONCILIATION_2026-10-25.md). In particular, the T03 tokenization verifier/receipt and T04 microservice verifier were reported on a feature branch but were not found at the exact paths on the reviewed production branch. Treat those claims as reported audit results until the verifier code is reviewed, integrated into a new implementation candidate, and candidate-bound certification is rerun. This is not a reopening of closed F-23/F-24 AWS safety findings.
 
 ---
 
