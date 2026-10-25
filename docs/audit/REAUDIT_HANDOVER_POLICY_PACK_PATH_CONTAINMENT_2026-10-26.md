@@ -33,6 +33,8 @@ Added `npm run test:policy-pack-boundary` and wired it as a mandatory step in `.
 
 ## Required verification
 
+**Local isolated logic check:** Node.js v22.16.0 executed a temporary fixture harness containing the same resolver logic and three cases (valid contained file; traversal/absolute/missing/root references; symlink escape): **3 passed, 0 failed, 0 skipped**. This is a focused logic check, not a substitute for running the committed repository test file and complete CI against the candidate SHA.
+
 Run against the exact PR head:
 
 ```bash
@@ -44,7 +46,7 @@ npm run test:security
 npm run test:integration
 ```
 
-Capture exit codes, logs, workflow URLs, exact SHA and any skipped checks. The source and regression suite have been committed through the GitHub repository interface, but this environment has not executed the Node suite directly; the finding remains YELLOW until CI passes on the exact head. Do not rewrite or reuse older receipts as evidence for this commit.
+Capture exit codes, logs, workflow URLs, exact SHA and any skipped checks. The committed repository test file and full repository suites have not yet been executed locally. GitHub Actions COR run 40244796251 and CI run 40244796289 were observed in progress for candidate `bceb9ae65b96650b38fba2afd963bbade14f6b9f`; the finding remains YELLOW until the committed test and required gates pass on the exact final head. Do not rewrite or reuse older receipts as evidence for this commit.
 
 ## Antigravity agent guardrails
 
