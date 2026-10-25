@@ -138,7 +138,7 @@ for (const ws of productionWorkspaces) {
       const paramBlock = m[3];
       uniqueTokens.add(tokenKey);
       if (!hasDictionaryToken(mergedEn, tokenKey)) {
-        const line = content.slice(0, m.index).split('\\n').length;
+        const line = content.slice(0, m.index).split('\n').length;
         missingTokenViolations.push({ file: rel, line, token: tokenKey });
       }
 
