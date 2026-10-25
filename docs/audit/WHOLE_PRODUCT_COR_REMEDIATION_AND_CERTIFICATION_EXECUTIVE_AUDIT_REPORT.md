@@ -117,3 +117,15 @@ COR run #399 ([40219829698](https://github.com/Chicitadel/ugondu/actions/runs/40
 After that, `COR-WF-018` and the workflow condition that defers candidate freshness on PRs were added in commits `a7645270ae4f0db63cf76ae316494cc5ffda764b` and `b584f7bc2d254fd3bf07c96bbbaa85c351d16551`. The audit/guardrail/dashboard/report were then updated, with latest observed branch head `c908853d903e4a341b2e5d95c28f2954806c7886`.
 
 **Important:** Run #399 is not a passing test of the corrected assertion or the new WF-018 test; it tested the earlier version. At this audit point, no completed workflow result tied to the latest head was available. The new test suite and final workflow semantics remain **implementation complete, latest-head CI verification pending**. Do not claim the PR gate fix has passed CI until a run checks out the latest commit and all regression tests pass.
+
+
+## 8. Latest-head verification reconciliation — 2026-10-25 20:25 UTC
+
+The earlier statement in Section 7 that latest-head CI verification was pending is superseded by the following verified results. PR #24 is still open, draft, and unmerged; its observed source head is `a5f978e177c54762daccdc5d785c772abc372339`.
+
+- **COR workflow [40230376169](https://github.com/Chicitadel/ugondu/actions/runs/40230376169):** all three jobs completed; COR Certification succeeded, AWS Physical Qualification Gate was skipped as designed for pull requests, and COR Final Release Gate succeeded with the explicit `NOT RELEASE CERTIFIED` notice.
+- **CI/CD pipeline [40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160):** all 16 substantive governance/build/workspace/integration jobs succeeded. Docker image validation and release publishing were skipped, so those operations are not claimed as verified by this run.
+- **Regression counts in COR job log:** 24 COR remediation tests, 19 adversarial evidence tests, 6 execution/mode-parity tests, and 18 workflow gate tests passed. `COR-WF-017` and `COR-WF-018` both report `ok`.
+- **Exact tested PR merge candidate:** `ecfec790d411bbffec270f1d700350bb3f26243c`, as reported by the COR engine and final gate. This is distinct from the source branch head and must not be substituted for a frozen release candidate.
+
+This update closes the previous **latest-head PR regression verification pending** status only. It does not close candidate-bound release evidence, fresh physical AWS qualification, AI fleet qualification, universal native-target coverage, or customer artifact lifecycle gaps. Universal commercial release remains **NOT CERTIFIED**.
