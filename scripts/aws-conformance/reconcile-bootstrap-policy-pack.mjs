@@ -310,7 +310,10 @@ export function runBootstrapProvisionPhase(options = {}) {
         if (upRes.status === 0) {
           const newVerId = upRes.json?.PolicyVersion?.VersionId || metaRes.json.Policy.DefaultVersionId;
           const verCheck = aws(['iam', 'get-policy-version', '--policy-arn', pol.arn, '--version-id', newVerId], region);
-          if (verCheck.status === 0) reconciledPolicyVersions.push(pol.physicalName);
+          if (verCheck.status !== 0 || !verCheck.json?.PolicyVersion?.Document) {
+            return failClosedOperation(pack, region, reportPath, `Policy version update for ${pol.physicalName} returned success but could not be verified`, 'UG-BOOTSTRAP-READBACK-FAILED', verCheck.stderr || `get-policy-version exited ${verCheck.status}`);
+          }
+          reconciledPolicyVersions.push(pol.physicalName);
         } else if (/AccessDenied|Access Denied|not authorized/i.test(upRes.stderr || '')) {
           return failClosedAuth(pack, region, reportPath, `iam:CreatePolicyVersion denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, upRes.stderr));
         } else {
@@ -326,7 +329,9 @@ export function runBootstrapProvisionPhase(options = {}) {
       const createRes = aws(['iam', 'create-policy', '--policy-name', pol.physicalName, '--policy-document', targetCompactJson, '--tags', 'Key=UgonduCOR,Value=true'], region);
       if (createRes.status === 0) {
         const polCheck = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
-        if (polCheck.status !== 0) console.warn(`[WARN] Created policy ${pol.physicalName} re-read warning: ${polCheck.stderr}`);
+        if (polCheck.status !== 0 || !polCheck.json?.Policy?.Arn) {
+          return failClosedOperation(pack, region, reportPath, `Policy ${pol.physicalName} was created but its existence could not be verified; attachment is blocked`, 'UG-BOOTSTRAP-READBACK-FAILED', polCheck.stderr || `get-policy exited ${polCheck.status}`);
+        }
         attachRes = aws(['iam', 'attach-role-policy', '--role-name', execRoleName, '--policy-arn', pol.arn], region);
       } else if (/AccessDenied|Access Denied|not authorized/i.test(createRes.stderr || '')) {
         return failClosedAuth(pack, region, reportPath, `iam:CreatePolicy denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, createRes.stderr));
