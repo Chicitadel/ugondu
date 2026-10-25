@@ -42,7 +42,8 @@ import {
     verifyServiceIdentityToken,
     ALLOWED_SERVICE_ISSUERS,
     globalTrustRegistry,
-    Logger
+    Logger,
+    ProductRegistry
 } from '@ugondu/shared';
 import { pluginStore, PluginExecutionReceipt } from './db';
 import { executePluginSandbox } from './sandbox';
@@ -538,7 +539,7 @@ app.post('/v1/plugins/:pluginName/execute', requireServiceIdentity(SERVICE_NAME)
 });
 
 if (require.main === module) {
-    const PORT = process.env.PORT || 4003;
+    const PORT = process.env.PORT || ProductRegistry.getServiceConfig('plugin_manager').port;
     app.listen(Number(PORT), '0.0.0.0', () => {
         Logger.info(__t('listening_port', __t('plugin_manager_sandbox'), PORT));
     });

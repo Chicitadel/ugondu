@@ -59,10 +59,9 @@ const {
     cleanupOwnedCorVpcs
 } = loadCorContract();
 
-test('F-23 Hardened VPC Cleanup: Provider describe error halts cleanup and throws CorCleanupExecutionError', async () => {
+test('F-23 Hardened VPC Cleanup: Provider describe error (AccessDenied) halts cleanup and throws CorCleanupExecutionError', async () => {
     const activeRunId = 'run-active-001';
 
-    // Sub-case A: DescribeVpcsCommand fails with AccessDenied
     const mockEc2DescribeVpcsDenied = {
         send: async (cmd) => {
             if (cmd.constructor.name === 'DescribeVpcsCommand' || cmd.input?.Filters) {
@@ -86,8 +85,11 @@ test('F-23 Hardened VPC Cleanup: Provider describe error halts cleanup and throw
             return true;
         }
     );
+});
 
-    // Sub-case B: DescribeSecurityGroupsCommand fails with timeout
+test('F-23 Hardened VPC Cleanup: Provider dependency timeout throws CorVpcDependencyTimeoutError', async () => {
+    const activeRunId = 'run-active-002-timeout';
+
     const mockEc2DescribeSgsTimeout = {
         send: async (cmd) => {
             const cmdName = cmd.constructor.name;
@@ -125,6 +127,56 @@ test('F-23 Hardened VPC Cleanup: Provider describe error halts cleanup and throw
             return true;
         }
     );
+});
+
+test('F-23 Hardened VPC Cleanup: Incomplete pagination or partial discovery failure halts cleanup before VPC deletion', async () => {
+    const activeRunId = 'run-active-002-part';
+    const staleVpcId = 'vpc-stale-partial-discovery';
+    const deletedCommands = [];
+
+    const mockEc2 = {
+        send: async (cmd) => {
+            const cmdName = cmd.constructor.name;
+            if (cmdName === 'DescribeVpcsCommand') {
+                return {
+                    Vpcs: [{
+                        VpcId: staleVpcId,
+                        Tags: [
+                            { Key: 'UgonduOwner', Value: 'ugondu-cor' },
+                            { Key: 'UgonduRunId', Value: 'run-stale-part-002' },
+                            { Key: 'UgonduLeaseExpiresAt', Value: new Date(Date.now() - 60000).toISOString() }
+                        ]
+                    }]
+                };
+            }
+            if (cmdName === 'DescribeSecurityGroupsCommand') {
+                return { SecurityGroups: [] };
+            }
+            if (cmdName === 'DescribeSubnetsCommand') {
+                const err = new Error('Incomplete pagination / DescribeSubnets throttled');
+                err.name = 'ThrottlingException';
+                throw err;
+            }
+            if (cmdName.startsWith('Delete')) {
+                deletedCommands.push(cmdName);
+            }
+            return {};
+        }
+    };
+
+    await assert.rejects(
+        async () => {
+            await cleanupOwnedCorVpcs(mockEc2, activeRunId);
+        },
+        (err) => {
+            assert.ok(err instanceof CorCleanupExecutionError);
+            assert.strictEqual(err.operation, 'DescribeSubnets');
+            assert.strictEqual(err.resourceId, staleVpcId);
+            return true;
+        }
+    );
+
+    assert.strictEqual(deletedCommands.length, 0, 'No delete commands must be issued when inventory is partial');
 });
 
 test('F-23 Hardened VPC Cleanup: Unowned VPC is never deleted', async () => {

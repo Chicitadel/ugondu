@@ -47,3 +47,14 @@ test('T03 regression: unknown static token is not treated as dictionary-complian
   assert.equal(hasDictionaryToken({ 'profile.title': 'Title' }, 'profile.title'), true);
   assert.equal(hasDictionaryToken({ 'profile.title': 'Title' }, 'profile.missing'), false);
 });
+
+test('T03 regression: dictionary flattener requires function argument', () => {
+  assert.throws(() => loadRequiredDictionary('locales/en.json', null), /flattenDictionary must be a function/);
+});
+
+test('T03 regression: token lookup rejects inherited prototype properties', async () => {
+  const { hasDictionaryToken } = await import('../scripts/governance/required-dictionary.mjs');
+  assert.equal(hasDictionaryToken({}, 'toString'), false);
+  assert.equal(hasDictionaryToken({}, 'valueOf'), false);
+  assert.equal(hasDictionaryToken({}, '__proto__'), false);
+});

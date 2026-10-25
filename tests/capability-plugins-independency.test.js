@@ -369,7 +369,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     }
   });
 
-  test('CPI-011: Independent Package.json Manifests — all capability plugins declare independent package.json manifests', () => {
+  test('CPI-011: Independent Package.json & Plugin Manifest Declarations — all 12 capability plugins declare isolated manifests', () => {
     const targetDirs = [
       path.join(ROOT, 'plugins', 'ugondu-plugin-node'),
       path.join(ROOT, 'plugins', 'ugondu-plugin-composer'),
@@ -386,14 +386,27 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     ];
 
     for (const pDir of targetDirs) {
+      // 1. Independent package.json
       const pkgPath = path.join(pDir, 'package.json');
       assert.ok(fs.existsSync(pkgPath), `Package manifest missing in ${pDir}`);
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-      assert.ok(pkg.name, `Plugin ${pDir} must declare name`);
-      assert.ok(pkg.version, `Plugin ${pDir} must declare version`);
+      assert.ok(pkg.name, `Plugin ${pDir} must declare name in package.json`);
+      assert.ok(pkg.version, `Plugin ${pDir} must declare version in package.json`);
       assert.strictEqual(pkg.private, true, `Plugin ${pDir} must be private`);
-      assert.ok(pkg.author, `Plugin ${pDir} must declare author`);
+      assert.ok(pkg.author, `Plugin ${pDir} must declare author in package.json`);
       assert.ok(!pkg.author.toLowerCase().includes('ai'), `Author must not contain AI in ${pDir}`);
+
+      // 2. Isolated plugin.manifest.json or manifest.json
+      const pluginManifestPath = path.join(pDir, 'plugin.manifest.json');
+      const standardManifestPath = path.join(pDir, 'manifest.json');
+      const manifestFile = fs.existsSync(pluginManifestPath) ? pluginManifestPath : standardManifestPath;
+      assert.ok(fs.existsSync(manifestFile), `Capability manifest missing in ${pDir}`);
+
+      const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+      assert.ok(manifest.name, `Plugin ${pDir} must declare name in manifest`);
+      assert.ok(manifest.version, `Plugin ${pDir} must declare version in manifest`);
+      assert.ok(manifest.author, `Plugin ${pDir} must declare author in manifest`);
+      assert.ok(!manifest.author.toLowerCase().includes('ai'), `Manifest author must not contain AI in ${pDir}`);
     }
   });
 });
