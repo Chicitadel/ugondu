@@ -41,3 +41,9 @@ test('T03 regression: non-object locale dictionary roots are rejected', () => {
     fs.rmSync(temp, { recursive: true, force: true });
   }
 });
+
+test('T03 regression: unknown static token is not treated as dictionary-compliant', async () => {
+  const { hasDictionaryToken } = await import('../scripts/governance/required-dictionary.mjs');
+  assert.equal(hasDictionaryToken({ 'profile.title': 'Title' }, 'profile.title'), true);
+  assert.equal(hasDictionaryToken({ 'profile.title': 'Title' }, 'profile.missing'), false);
+});
