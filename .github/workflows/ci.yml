@@ -222,6 +222,18 @@ jobs:
       - name: Verify externally pinned release evidence bundle
         run: node scripts/release/verify-evidence-bundle.mjs --verify
 
+      - name: Verify corporate AI attribution policy
+        run: npm run verify:attribution
+
+      - name: Verify T03 tokenization conformance
+        run: npm run verify:t03
+
+      - name: Verify T04 microservice workspace boundaries
+        run: npm run verify:t04
+
+      - name: Run governance verifier regression tests
+        run: npm run test:governance
+
   # ─────────────────────────────────────────────────────────────────
   # [en] Integration Tests — All 5 microservices verified via /health/ready
   # ─────────────────────────────────────────────────────────────────
