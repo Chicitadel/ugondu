@@ -9,7 +9,8 @@
 **Candidate CI:** [40183694906](https://github.com/Chicitadel/ugondu/actions/runs/40183694906) (🟢 15/15 jobs successful across microservices, Go thin-client matrix, integration tests, Docker images)  
 **Latest Certified COR + AWS Run Record:** [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) (🟢 UNIFIED RUN: COR Certification 1m50s, AWS Physical Gate 23m47s, Final Release Gate 2s)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
-**Latest detailed audit:** [Post-Merge Resolution & Final Certification](./COR_POST_MERGE_AUDIT_RESOLUTION_AND_FINAL_CERTIFICATION_2026-10-25.md)  
+**Latest detailed audit:** [Whole-Product COR Gap Audit & Production Release Plan](./WHOLE_PRODUCT_COR_GAP_AUDIT_AND_PRODUCTION_RELEASE_PLAN_2026-10-25.md)  
+**COR/AWS resolution evidence:** [Post-Merge Resolution & Final Certification](./COR_POST_MERGE_AUDIT_RESOLUTION_AND_FINAL_CERTIFICATION_2026-10-25.md)  
 **Qualification verdict:** **QUALIFIED WITH BOUNDED TIER-1 AWS CLOUD TARGET SUPPORT — UNIVERSAL COMMERCIAL RELEASE NOT GRANTED**  
 **Release state:** **CERTIFIED FOR TIER-1 AWS INFRASTRUCTURE LIFECYCLE ON CANDIDATE 294c869c / EVIDENCE DESCENDANT dc39cd42. POST-COR-001 (evidence baseline drift) resolved by freezing fresh implementation candidate 294c869c and binding evidence manifest; POST-COR-002 (AWS residual scanner least privilege) resolved via manifest-based HeadBucket verification with verified zero-residual cleanup; POST-COR-003 resolved via refreshed dashboard snapshot; F-23 (VPC cleanup contract & manifest) and F-24 (S3 tag fail-closed negative proof) verified in automated regression suites and live physical execution.**
 
@@ -73,3 +74,23 @@ Legend: 🟢 verified for exact stated scope · 🟡 partial/in progress/evidenc
 - A skipped publish job blocks claims of a published release.
 - Relevant source/config/policy/dependency/workflow changes invalidate affected evidence until rerun.
 - Dashboard status must be generated from machine-readable evidence; no manual promotion to green.
+
+
+## Whole-product release boundary — 2026-10-25
+
+The latest successful COR/AWS workflow is **bounded evidence**, not a declaration of universal commercial readiness. Refer to the [whole-product gap audit and implementation plan](./WHOLE_PRODUCT_COR_GAP_AUDIT_AND_PRODUCTION_RELEASE_PLAN_2026-10-25.md) for feature-level remediation and closure contracts.
+
+| Whole-product area | Status | Anti-regression rule |
+|---|---|---|
+| Bounded COR + AWS lifecycle in the recorded `eu-west-3` scope | 🟢 Scoped pass | Preserve exact candidate, run lineage and receipts; re-run after relevant changes |
+| Static repository anti-stub scan | 🟡 Static evidence only | Never equate zero pattern matches with semantic proof of no stubs/fake behavior |
+| Zero user-facing hardcoding | 🟡 Not fully proven | Locale parity is necessary but not sufficient; verify all runtime UI/CLI/API surfaces |
+| AI model fleet activation | 🔴 Not certified fleet-wide | Each active model requires explicit approval and fresh target-bound qualification receipt |
+| Provider operation support | 🟡 Partial | `implemented` / `tested` / `live-certified` / `supported` must remain distinct |
+| Native OS/architecture lifecycles | 🟡 / 🔴 By target | Cross-compilation does not certify native install/upgrade/rollback/recovery/uninstall |
+| IDEs and hosting providers | 🟡 / 🔴 By target | Unsupported or experimental targets must not be shown as certified |
+| UI/UX, accessibility and performance | ⚪ / 🟡 | Do not mark green until full screen matrix, accessibility checks and measured SLOs exist |
+| Immutable published artifact lifecycle | 🔴 Not proven | Test the exact signed artifact digest from clean install through upgrade, rollback and uninstall |
+| **Universal commercial release** | 🔴 **NOT GRANTED** | One candidate lineage; every advertised capability qualified; no open P0/P1; release authority approval |
+
+**Status semantics:** Green is scoped to the evidence, not a blanket product claim. A source/policy/dependency/configuration/workflow change invalidates relevant evidence until the required gates pass again. A failed or skipped mandatory gate keeps release status red.
