@@ -153,3 +153,14 @@ This is a workflow semantics fix, not an AWS qualification. It does not close th
 - **Final Release Posture:**
   - **NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE.**
   - Tier-1 AWS lifecycle in `eu-west-3` remains certified; universal commercial release remains withheld until unverified targets (GCP, Azure, non-VSCode IDEs, AI model fleet) produce authentic physical receipts. PR #24 remains in draft.
+
+
+## Current-head validation reconciliation — 2026-10-25 20:25 UTC
+
+The previous pending-validation statement above is superseded for PR validation by the completed runs below. The observed source branch head before this documentation-only reconciliation was `a5f978e177c54762daccdc5d785c772abc372339`; this audit note and companion handover/dashboard updates then advanced the branch head. The completed CI jobs tested the PR merge candidate `ecfec790d411bbffec270f1d700350bb3f26243c`.
+
+- COR [40230376169](https://github.com/Chicitadel/ugondu/actions/runs/40230376169): COR Certification succeeded; AWS physical gate skipped for PR; final gate succeeded and explicitly emitted `NOT RELEASE CERTIFIED`.
+- CI/CD [40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160): all 16 substantive governance/build/workspace/integration jobs succeeded; Docker validation and release publishing were skipped.
+- COR job log confirms regression counts of 24 COR remediation, 19 adversarial evidence, 6 mode-parity, and 18 workflow-gate tests passed, including COR-WF-017 and COR-WF-018.
+
+This evidence resolves the specific pending latest-head **PR regression-test** status for the tested merge candidate, but not final release qualification. Because documentation changed afterward, these runs do not test the later documentation commits as a release candidate. The two-stage candidate freeze/evidence-only descendant protocol remains mandatory. Universal commercial release remains **NOT CERTIFIED**; AI fleet, fresh non-PR AWS physical qualification, universal target and customer artifact lifecycle evidence remain blockers.
