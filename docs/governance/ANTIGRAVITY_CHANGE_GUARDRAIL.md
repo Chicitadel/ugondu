@@ -67,6 +67,7 @@ Overall release readiness is the least-ready mandatory dimension. A green AWS li
 | COR-REM-002 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | AI provider fleet qualification | RED / Blocked (Fail-Closed) | Catalog offline; live canary proves single endpoint; universal commercial release withheld |
 | COR-REM-003 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Native OS/IDE/host/cloud qualification | YELLOW / Partial (Fail-Closed) | Windows amd64 native pass; Linux thin-client pass; GCP/Azure & non-VSCode IDEs fail-closed |
 | COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
+| COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | IMPLEMENTED — CI/evidence revalidation pending | PR events intentionally skip live AWS physical mutations but final gate previously required AWS success, guaranteeing a red final gate. New logic permits only COR-success + AWS-skipped PR validation and explicitly prints NOT RELEASE CERTIFIED; non-PR events still require both gates success. Candidate evidence must be regenerated because workflow code changed |
 
 Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
 
@@ -86,3 +87,14 @@ Before taking a task, update the ledger in the same PR and check for an existing
 ## 8. Change summary for handover
 
 This branch integrates the previously reported T03/T04 verifier scripts, seals dictionary/boundary false-pass gaps, completes whole-product tokenization (0 raw strings, 0 concats, 0 param mismatches across 704 files and 1,516 callsites), establishes 100% dictionary key parity across all 12 supported enterprise languages (2,184 keys each), adds independent package.json manifests for capability plugins (11/11 tests pass), adds non-destructive archival integrity tests (6/6 pass, 1,273 source imports verified), introduces the corporate attribution verification gate (`verify-ai-attribution.mjs`, 0 violations across 4,611 files), and verifies 0 typecheck errors across all 9 monorepo workspaces. In strict accordance with UAIGOS 3.0.0, Tier-1 AWS lifecycle in `eu-west-3` remains certified; universal commercial release remains withheld until unverified targets achieve genuine physical qualification.
+
+
+## 9. Newly confirmed CI orchestration defect — COR-REM-005
+
+**Root cause:** `.github/workflows/cor.yml` intentionally skips `aws-physical-gate` on `pull_request` events to avoid live infrastructure mutation from unmerged code, while `cor-final-release-gate` unconditionally required both `cor` and `aws-physical-gate` to be `success`. Consequently, a pull request could pass the COR Certification job and still fail the final release gate solely because the AWS job was deliberately skipped. This made PR validation and release certification semantics inconsistent.
+
+**Direct implementation:** The final gate now has an explicit `pull_request` branch. It requires COR result `success` and AWS result `skipped`, emits a notice stating that this is PR validation only and **NOT RELEASE CERTIFIED**, then exits successfully. For push/workflow-dispatch release qualification, both COR and AWS physical gates must still be `success`; skipped/failure/cancelled/missing remain failures.
+
+**Regression protection:** Added `COR-WF-017` in `tests/qualification/cor-workflow-gates.test.js` to assert the explicit PR-only branch and non-certification notice. The test assertion was corrected in the follow-up commit to match the actual shell condition.
+
+**Evidence boundary:** The workflow and test were changed after the candidate recorded in the current evidence manifest. The existing candidate-bound evidence is therefore stale for this new workflow code until the approved candidate-freeze/requalification/evidence-descendant process completes. Do not treat the upcoming CI result as final COR certification.
