@@ -172,3 +172,24 @@ This separation does not weaken release certification: the release event still r
 - COR certification tests passed; the AWS Physical Qualification Gate was intentionally skipped on the PR event; the final gate explicitly says `PR VALIDATION PASSED ... NOT RELEASE CERTIFIED`.
 
 This closes the CI acceptance state for COR-REM-006 and COR-REM-007 on this PR validation run. It does **not** certify universal commercial release or rebind the older evidence manifest. AI model qualification remains `CATALOG_OFFLINE` (0 qualified, 0 active, 12 disabled); broader native target/IDE/host/cloud support and immutable artifact lifecycle qualification remain open. No evidence receipts or manifests were manually edited. Do not merge until the release authority's remaining gates and candidate-freeze protocol are satisfied.
+
+
+## 16. Re-audit addendum — workspace coverage validator path containment (2026-10-25)
+
+**Task:** UG-GOV-PATH-001  
+**Implementation branch:** `fix/cor-workspace-coverage-path-containment-2026-10-25`  
+**Scope:** `scripts/governance/validate-test-coverage.mjs` and `tests/governance-verifiers.test.mjs` only.
+
+### Confirmed defect
+The workspace coverage verifier joined each `package.json` workspace declaration to the repository root without first proving the resolved workspace path remained inside that root. A malformed or adversarial declaration such as `../outside-workspace` could make the verifier inspect a package manifest outside the repository and report on it as if it were an in-repository workspace. This undermined the verifier's repository-boundary contract.
+
+### Direct remediation
+- Added exported `isWorkspacePathWithinRoot(root, workspacePath)` using canonical `path.resolve` and `path.relative` containment.
+- Rejects empty/non-string paths, absolute paths, parent traversal and any resolved path outside the root before reading a workspace manifest.
+- Added regression coverage for valid relative paths, traversal, absolute paths, empty values and null values.
+- No production branch or `master` was modified. No existing workspace architecture or script contract was replaced.
+
+### Verification and release boundary
+- Source and regression test changes are committed on the dedicated branch; CI execution is required to establish test PASS.
+- Do not mark this finding GREEN until the workflow run checks out the exact branch head and the governance regression suite passes.
+- This targeted verifier fix does not close AI fleet, native OS/IDE/host/cloud, immutable artifact lifecycle, or universal commercial qualification gaps. Overall release remains **NOT CERTIFIED** until the current candidate and all mandatory scope evidence pass.
