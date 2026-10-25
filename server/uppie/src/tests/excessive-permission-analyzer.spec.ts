@@ -12,8 +12,7 @@
  ******************************************************************************/
 
 import { ExcessivePermissionAnalyzer } from '../core/analyzer/ExcessivePermissionAnalyzer';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

@@ -1,12 +1,12 @@
 /******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System
- * Module         : Reconciliation Engine
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Engine Core / Reconciliation Pipeline
  * File           : arr-pipeline.ts
  * Version        : 1.0.0
- * Author         : Architecture Authority
- * Organization   : UAIGOS
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-08
- * Last Modified  : 2026-10-08
+ * Last Modified  : 2026-10-25
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -17,23 +17,19 @@
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
  *
  * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 UAIGOS
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { SafetyGatesValidator, ActionClassification } from '../safety/safety-gates';
-import { ResourceClassification } from '../../../shared/protocols/resource.protocol';
+import { ResourceClassification } from '@ugondu/shared';
 
 export interface ResourceState {
     id: string;

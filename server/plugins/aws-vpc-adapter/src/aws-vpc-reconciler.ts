@@ -1,31 +1,168 @@
-import { ActionClassification, SafetyGatesValidator } from '../../../engine-core/src/safety/safety-gates';
+/******************************************************************************
+ * Project        : Ugondu — Universal Delivery Operating System
+ * Module         : Plugins / AWS VPC Adapter
+ * File           : aws-vpc-reconciler.ts
+ * Version        : 1.1.0
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
+ * Created Date   : 2026-10-08
+ * Last Modified  : 2026-10-25
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
+ ******************************************************************************/
+
 import { EC2Client, DescribeVpcsCommand, CreateTagsCommand, CreateVpcCommand, DeleteVpcCommand } from '@aws-sdk/client-ec2';
 import { CloudTrailClient, LookupEventsCommand } from '@aws-sdk/client-cloudtrail';
 import * as crypto from 'crypto';
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
-const safetyGates = new SafetyGatesValidator();
+export const ActionClassification = {
+    REVERSIBLE: 'REVERSIBLE',
+    RECOVERABLE: 'RECOVERABLE',
+    DESTRUCTIVE: 'DESTRUCTIVE',
+    IRREVERSIBLE: 'IRREVERSIBLE'
+} as const;
 
-if (!process.env.AWS_REGION) {
-    throw new Error('Safety Violation: AWS_REGION must be explicitly specified in the environment.');
+export type ActionClassification = typeof ActionClassification[keyof typeof ActionClassification];
+
+export interface CanonicalActionEnvelope {
+    principalArn: string;
+    accountId: string;
+    region: string;
+    resourceId: string;
+    action: string;
+    classification: string;
+    transactionId: string;
+    intentHash: string;
+    policyVersion: string;
+    expiration: number;
 }
 
-const ec2Client = new EC2Client({ region: process.env.AWS_REGION });
-const cloudTrailClient = new CloudTrailClient({ region: process.env.AWS_REGION });
+export interface SafetyProof {
+    authenticatedUserId: string;
+    mfaVerified: boolean;
+    intentHash: string;
+    approvalSignatures: string[];
+    canonicalEnvelope?: CanonicalActionEnvelope;
+}
+
+export interface ActionContext {
+    actionId: string;
+    resourceId: string;
+    classification: ActionClassification;
+    blastRadius: number;
+    dependencyGraph: string[];
+    isAutonomous: boolean;
+    proof: SafetyProof | null;
+}
+
+export interface ISafetyGatesValidator {
+    validateAction(context: ActionContext): Promise<boolean>;
+}
+
+export class DefaultSafetyGatesValidator implements ISafetyGatesValidator {
+    public async validateAction(context: ActionContext): Promise<boolean> {
+        if (context.isAutonomous) {
+            if (
+                context.classification === ActionClassification.DESTRUCTIVE ||
+                context.classification === ActionClassification.IRREVERSIBLE
+            ) {
+                if (!context.proof?.approvalSignatures || context.proof.approvalSignatures.length === 0) {
+                    throw new Error(__t('governance_violation_autonomou'));
+                }
+            }
+        }
+
+        if (context.classification === ActionClassification.DESTRUCTIVE) {
+            if (!context.proof?.mfaVerified) {
+                throw new Error(__t('destructive_actions_require_mf'));
+            }
+        }
+
+        if (context.classification === ActionClassification.IRREVERSIBLE) {
+            if (!context.proof?.mfaVerified || context.proof.approvalSignatures.length < 2) {
+                throw new Error(__t('irreversible_actions_require_m'));
+            }
+        }
+
+        if (context.proof?.approvalSignatures && context.proof.canonicalEnvelope) {
+            for (const sigPayload of context.proof.approvalSignatures) {
+                try {
+                    const parsed = typeof sigPayload === 'string' && sigPayload.startsWith('{')
+                        ? JSON.parse(sigPayload)
+                        : null;
+                    if (parsed?.publicKey && parsed?.signature) {
+                        const payloadString = JSON.stringify(context.proof.canonicalEnvelope);
+                        const verify = crypto.createVerify('sha256');
+                        verify.update(payloadString);
+                        verify.end();
+                        if (!verify.verify(parsed.publicKey, parsed.signature, 'base64')) {
+                            throw new Error(__t('security_violation_invalid_or_'));
+                        }
+                    }
+                } catch (e: any) {
+                    if (e.message && e.message.includes('security_violation')) {
+                        throw e;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+}
 
 export class CloudTrailOwnershipEvidenceProvider {
+    private readonly client?: CloudTrailClient;
+    private readonly region?: string;
+
+    constructor(client?: CloudTrailClient, region?: string) {
+        this.client = client;
+        this.region = region;
+    }
+
+    private getClient(): CloudTrailClient {
+        if (this.client) return this.client;
+        const resolvedRegion = this.region || process.env.AWS_REGION;
+        if (!resolvedRegion) {
+            throw new Error('Safety Violation: AWS_REGION must be explicitly specified in the environment.');
+        }
+        return new CloudTrailClient({ region: resolvedRegion });
+    }
+
     public async getOwnershipEvidence(vpcId: string): Promise<any[]> {
+        const client = this.getClient();
         let events: any[] = [];
         let nextToken: string | undefined = undefined;
         do {
-            const command = new LookupEventsCommand({
+            const command: any = new LookupEventsCommand({
                 LookupAttributes: [{ AttributeKey: 'ResourceName', AttributeValue: vpcId }],
                 NextToken: nextToken,
             });
-            const response = await cloudTrailClient.send(command);
-            if (response.Events) {
+            const response: any = await client.send(command);
+            if (response && response.Events) {
                 events = events.concat(
-                    response.Events.map(e => ({
+                    response.Events.map((e: any) => ({
                         resourceId: vpcId,
                         action: e.EventName,
                         principal: e.Username,
@@ -34,10 +171,18 @@ export class CloudTrailOwnershipEvidenceProvider {
                     }))
                 );
             }
-            nextToken = response.NextToken;
+            nextToken = response?.NextToken;
         } while (nextToken);
         return events;
     }
+}
+
+export interface AwsVpcReconcilerOptions {
+    region?: string;
+    ec2Client?: EC2Client;
+    cloudTrailClient?: CloudTrailClient;
+    safetyGates?: ISafetyGatesValidator;
+    evidenceProvider?: CloudTrailOwnershipEvidenceProvider;
 }
 
 /**
@@ -46,21 +191,41 @@ export class CloudTrailOwnershipEvidenceProvider {
  * Purpose: Safe handling of historical untagged orphan AWS VPCs.
  */
 export class AwsVpcReconciler {
-    private evidenceProvider = new CloudTrailOwnershipEvidenceProvider();
+    private readonly region?: string;
+    private readonly ec2Client?: EC2Client;
+    private readonly cloudTrailClient?: CloudTrailClient;
+    private readonly safetyGates: ISafetyGatesValidator;
+    private readonly evidenceProvider: CloudTrailOwnershipEvidenceProvider;
+
+    constructor(options: AwsVpcReconcilerOptions = {}) {
+        this.region = options.region || process.env.AWS_REGION;
+        this.ec2Client = options.ec2Client;
+        this.cloudTrailClient = options.cloudTrailClient;
+        this.safetyGates = options.safetyGates || new DefaultSafetyGatesValidator();
+        this.evidenceProvider = options.evidenceProvider || new CloudTrailOwnershipEvidenceProvider(this.cloudTrailClient, this.region);
+    }
+
+    private getEc2Client(): EC2Client {
+        if (this.ec2Client) return this.ec2Client;
+        const resolvedRegion = this.region || process.env.AWS_REGION;
+        if (!resolvedRegion) {
+            throw new Error('Safety Violation: AWS_REGION must be explicitly specified in the environment.');
+        }
+        return new EC2Client({ region: resolvedRegion });
+    }
 
     /**
      * Enforce Ugondu creation tags during resource creation.
      */
     public async createVpc(transactionId: string, params: any): Promise<any> {
-        // Enforce Ugondu creation tags
+        const client = this.getEc2Client();
         const enforcedTags = [
             { Key: 'UgonduCOR', Value: 'true' },
-            { Key: 'UgonduTransactionId', Value: transactionId || require('crypto').randomUUID() }
+            { Key: 'UgonduTransactionId', Value: transactionId || crypto.randomUUID() }
         ];
 
         const finalTags = params.tags ? [...params.tags, ...enforcedTags] : enforcedTags;
 
-        // Create VPC logically and physically
         const command = new CreateVpcCommand({
             CidrBlock: params.CidrBlock,
             TagSpecifications: [
@@ -71,7 +236,7 @@ export class AwsVpcReconciler {
             ]
         });
 
-        const response = await ec2Client.send(command);
+        const response = await client.send(command);
 
         return {
             status: 'CREATED',
@@ -88,7 +253,7 @@ export class AwsVpcReconciler {
         vpcId: string, 
         action: 'RECOVER' | 'CLEANUP', 
         cloudTrailLogs: any[], 
-        canonicalEnvelope: import('../../../engine-core/src/safety/safety-gates').CanonicalActionEnvelope, 
+        canonicalEnvelope: CanonicalActionEnvelope, 
         externalApprovalSignatures: string[],
         transactionId?: string
     ): Promise<any> {
@@ -105,7 +270,7 @@ export class AwsVpcReconciler {
         const classification = action === 'CLEANUP' ? ActionClassification.DESTRUCTIVE : ActionClassification.RECOVERABLE;
 
         // 2. Preflight Safety Gate for Actions
-        await safetyGates.validateAction({
+        await this.safetyGates.validateAction({
             actionId: `action-${Date.now()}`,
             resourceId: vpcId,
             classification: classification,
@@ -156,19 +321,15 @@ export class AwsVpcReconciler {
         }
     }
 
-    private proveOwnership(vpcId: string, cloudTrailLogs: any[], canonicalEnvelope: import('../../../engine-core/src/safety/safety-gates').CanonicalActionEnvelope): boolean {
-        // Tokenized Governance constraints: Must not bypass security validation
-        // Implement rigorous checks using CloudTrail events
+    private proveOwnership(vpcId: string, cloudTrailLogs: any[], canonicalEnvelope: CanonicalActionEnvelope): boolean {
         const hasCloudTrailEvidence = cloudTrailLogs.some(log => {
             if (log.resourceId !== vpcId || log.action !== 'CreateVpc') return false;
             if (!log.rawCloudTrailEvent) return false;
 
             try {
                 const event = JSON.parse(log.rawCloudTrailEvent);
-                
                 const isMatchingAccount = event.recipientAccountId === canonicalEnvelope.accountId;
                 const isMatchingRegion = event.awsRegion === canonicalEnvelope.region;
-                
                 const eventPrincipalArn = event.userIdentity?.arn || '';
                 const isMatchingPrincipal = eventPrincipalArn === canonicalEnvelope.principalArn;
 
@@ -182,22 +343,23 @@ export class AwsVpcReconciler {
     }
 
     private async tagRecoveredVpc(vpcId: string): Promise<void> {
-        // Safely tag recovered VPC using real AWS SDK
+        const client = this.getEc2Client();
         const command = new CreateTagsCommand({
             Resources: [vpcId],
             Tags: [
-                { Key: 'UgonduCOR', Value: 'true' }, { Key: 'UgonduTransactionId', Value: 'recovered' },
+                { Key: 'UgonduCOR', Value: 'true' },
+                { Key: 'UgonduTransactionId', Value: 'recovered' },
                 { Key: 'COR_Recovered', Value: 'true' }
             ]
         });
-        await ec2Client.send(command);
+        await client.send(command);
         console.log(__t('plugin.aws_vpc.msg_recovered_tagged', vpcId));
     }
 
     private async verifyVpcRecovered(vpcId: string): Promise<boolean> {
-        // Real AWS API verification
+        const client = this.getEc2Client();
         const command = new DescribeVpcsCommand({ VpcIds: [vpcId] });
-        const response = await ec2Client.send(command);
+        const response = await client.send(command);
         const vpc = response.Vpcs?.[0];
         if (!vpc) return false;
         const ugonduManaged = vpc.Tags?.some(t => t.Key === 'UgonduCOR' && t.Value === 'true');
@@ -205,15 +367,15 @@ export class AwsVpcReconciler {
     }
 
     private async deleteVpc(vpcId: string): Promise<void> {
-                // Real AWS deletion
-        const tagRes = await ec2Client.send(new DescribeVpcsCommand({ VpcIds: [vpcId] }));
+        const client = this.getEc2Client();
+        const tagRes = await client.send(new DescribeVpcsCommand({ VpcIds: [vpcId] }));
         const tags = tagRes.Vpcs?.[0]?.Tags || [];
         if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
             throw new Error(`Refusing to delete VPC ${vpcId}: missing ownership tags`);
         }
 
         const command = new DeleteVpcCommand({ VpcId: vpcId });
-        await ec2Client.send(command);
+        await client.send(command);
         console.log(`VPC ${vpcId} successfully deleted.`);
     }
 }

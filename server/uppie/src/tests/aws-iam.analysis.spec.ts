@@ -13,8 +13,7 @@
 
 import { AwsIamPolicyAdapter } from '../adapters/aws-iam/AwsIamPolicyAdapter';
 import { fakeIam, ARN, ctx, rule } from './support/awsFakeIam';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

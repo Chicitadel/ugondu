@@ -14,8 +14,7 @@
 import { LinuxAclAdapter, SUDOERS_TARGET } from '../adapters/linux-acl/LinuxAclAdapter';
 import { parseGetfacl, effectivePerms, isSafePath } from '../adapters/linux-acl/LinuxAclParser';
 import type { AclSystem } from '../adapters/linux-acl/LinuxAclSystem';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any;
 declare var it: any;

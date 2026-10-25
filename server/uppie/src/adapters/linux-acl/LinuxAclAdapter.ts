@@ -28,8 +28,7 @@
  ******************************************************************************/
 
 import { createHash } from 'crypto';
-// @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import type {
   IPolicyProviderAdapter, AdapterContext, AdapterCapabilityDeclaration, ProviderNativePolicy,
@@ -290,7 +289,7 @@ export class LinuxAclAdapter implements IPolicyProviderAdapter {
   }
 
   async detectUnused(_context: AdapterContext, _thresholdDays: number): Promise<UsageObservation[]> {
-    throw new Error('NOT_OBSERVABLE: Kernel keeps no per-ACL access history');
+    throw new Error(__t('uppie.adapter.linux.not_observable'));
   }
 
   async findDependencies(policyId: string, _context: AdapterContext): Promise<DependencyReport> {

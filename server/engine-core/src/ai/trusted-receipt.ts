@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 import * as crypto from 'crypto';
+import { __t } from '@ugondu/shared';
 
 /**
  * Approved immutable anti-SSRF security boundary invariant protocol established by
@@ -131,10 +132,10 @@ export function getProvenanceSigningKeyInfo(explicitKey?: string): ProvenanceKey
     const isProd = process.env.NODE_ENV === 'production';
     if (explicitKey !== undefined && explicitKey !== null) {
         if (typeof explicitKey !== 'string' || !explicitKey.trim()) {
-            throw new ProvenanceConfigurationError('PROVENANCE_KEY_MISSING', 'Explicit provenance signing key is empty', 500);
+            throw new ProvenanceConfigurationError('PROVENANCE_KEY_MISSING', __t('ai.error.provenance_key_empty'), 500);
         }
         if (isWeakProvenanceKey(explicitKey)) {
-            throw new ProvenanceConfigurationError('PROVENANCE_KEY_WEAK', 'Explicit provenance signing key is too weak (min 32 non-trivial characters required)', 500);
+            throw new ProvenanceConfigurationError('PROVENANCE_KEY_WEAK', __t('ai.error.provenance_key_weak'), 500);
         }
         const trimmed = explicitKey.trim();
         const isDev = trimmed === DEV_FALLBACK_KEY;
@@ -144,26 +145,14 @@ export function getProvenanceSigningKeyInfo(explicitKey?: string): ProvenanceKey
     const envKey = process.env.UGONDU_PROVENANCE_KEY;
     if (isProd) {
         if (!envKey || typeof envKey !== 'string' || !envKey.trim()) {
-            throw new ProvenanceConfigurationError(
-                'PROVENANCE_KEY_MISSING',
-                'Mandatory production provenance signing key (UGONDU_PROVENANCE_KEY) is unconfigured',
-                500
-            );
+            throw new ProvenanceConfigurationError('PROVENANCE_KEY_MISSING', __t('ai.error.provenance_key_unconfigured'), 500);
         }
         if (isWeakProvenanceKey(envKey)) {
-            throw new ProvenanceConfigurationError(
-                'PROVENANCE_KEY_WEAK',
-                'Production provenance signing key (UGONDU_PROVENANCE_KEY) is too weak',
-                500
-            );
+            throw new ProvenanceConfigurationError('PROVENANCE_KEY_WEAK', __t('ai.error.provenance_key_prod_weak'), 500);
         }
         const trimmed = envKey.trim();
         if (trimmed === DEV_FALLBACK_KEY) {
-            throw new ProvenanceConfigurationError(
-                'DEV_KEY_PROHIBITED_IN_PRODUCTION',
-                'Development fallback key is strictly prohibited in production',
-                403
-            );
+            throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', __t('ai.error.dev_key_prohibited_in_production'), 403);
         }
         return { key: trimmed, keyId: 'ugondu-prod-provenance-key', isDevFallback: false };
     }
@@ -228,20 +217,20 @@ export function computeProvenanceSeal(
 ): string {
     const key = getProvenanceSigningKey(signerKey);
     if (!params.candidateSha || typeof params.candidateSha !== 'string' || !params.candidateSha.trim()) {
-        throw new Error('candidateSha is required to compute provenance seal');
+        throw new Error(__t('ai.error.candidatesha_required'));
     }
     if (!params.modelId || typeof params.modelId !== 'string' || !params.modelId.trim()) {
-        throw new Error('modelId is required to compute provenance seal');
+        throw new Error(__t('ai.error.modelid_required'));
     }
     if (!params.endpointHost || typeof params.endpointHost !== 'string' || !isGovernedEndpointHost(params.endpointHost)) {
-        throw new Error(`endpointHost strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`);
+        throw new Error(__t('ai.error.endpoint_host_required', { host: ALLOWLISTED_LIVE_ENDPOINT_HOST }));
     }
     const providerRequestId = (params.providerRequestId || params.correlationId || '').trim();
     if (!providerRequestId) {
-        throw new Error('providerRequestId is required to compute provenance seal');
+        throw new Error(__t('ai.error.provider_request_id_required'));
     }
     if (!params.responseDigestSha256 || typeof params.responseDigestSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(params.responseDigestSha256)) {
-        throw new Error('responseDigestSha256 must be a 64-hex SHA-256 digest');
+        throw new Error(__t('ai.error.digest_sha256_format_invalid'));
     }
 
     const canonical = [
@@ -265,11 +254,7 @@ export function isTrustedLiveInferenceReceipt(
 
     if (isProd) {
         if (r.keyId === DEV_KEY_ID) {
-            throw new ProvenanceConfigurationError(
-                'DEV_KEY_PROHIBITED_IN_PRODUCTION',
-                'Development fallback key is strictly prohibited in production verification',
-                403
-            );
+            throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', __t('ai.error.receipt_dev_key_verification_prohibited'), 403);
         }
         if (r.testOnly === true) return false;
     }
@@ -307,11 +292,7 @@ export function isTrustedLiveInferenceReceipt(
             }, DEV_FALLBACK_KEY);
             const devBuf = Buffer.from(devSeal.toLowerCase(), 'hex');
             if (devBuf.length === 32 && crypto.timingSafeEqual(sigBuf, devBuf)) {
-                throw new ProvenanceConfigurationError(
-                    'DEV_KEY_PROHIBITED_IN_PRODUCTION',
-                    'Receipt signed with development fallback key is strictly prohibited in production verification',
-                    403
-                );
+                throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', __t('ai.error.receipt_signed_dev_fallback_prohibited'), 403);
             }
         } catch (err) {
             if (err instanceof ProvenanceConfigurationError) throw err;
@@ -347,11 +328,7 @@ export function validateLiveInferenceReceipt(
     const isProd = process.env.NODE_ENV === 'production';
 
     if (isProd && r.keyId === DEV_KEY_ID) {
-        throw new ProvenanceConfigurationError(
-            'DEV_KEY_PROHIBITED_IN_PRODUCTION',
-            'Development fallback key is strictly prohibited in production verification',
-            403
-        );
+        throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', __t('ai.error.receipt_dev_key_verification_prohibited'), 403);
     }
 
     if (r.source !== 'airroofers-live-transport') return false;
@@ -405,46 +382,46 @@ export function createTrustedLiveInferenceReceipt(
     secretSignerOrKey?: string
 ): LiveInferenceReceipt {
     if (!params || typeof params !== 'object') {
-        throw new Error('Receipt parameters must be a valid object');
+        throw new Error(__t('ai.error.receipt_params_invalid'));
     }
     const keyInfo = getProvenanceSigningKeyInfo(secretSignerOrKey);
     const isDevFallback = keyInfo.isDevFallback || params.keyId === DEV_KEY_ID || secretSignerOrKey === DEV_FALLBACK_KEY;
     const isProd = process.env.NODE_ENV === 'production';
 
     if (isProd && isDevFallback) {
-        throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', 'Development fallback key cannot mint receipts in production', 403);
+        throw new ProvenanceConfigurationError('DEV_KEY_PROHIBITED_IN_PRODUCTION', __t('ai.error.receipt_dev_key_prohibited'), 403);
     }
     if (isProd && params.testOnly === true) {
-        throw new Error('testOnly mock receipt cannot be activated in production');
+        throw new Error(__t('ai.error.receipt_test_only_prohibited'));
     }
 
     if (params.source !== 'airroofers-live-transport') {
-        throw new Error(`Invalid receipt source: expected 'airroofers-live-transport', got '${params.source}'`);
+        throw new Error(__t('ai.error.receipt_source_invalid', { source: params.source }));
     }
     if (params.httpStatus !== 200) {
-        throw new Error(`Invalid HTTP status: expected 200, got ${params.httpStatus}`);
+        throw new Error(__t('ai.error.receipt_status_invalid', { status: params.httpStatus }));
     }
     if (params.verification !== 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED') {
-        throw new Error(`Invalid verification marker: ${params.verification}`);
+        throw new Error(__t('ai.error.receipt_verification_invalid', { marker: params.verification }));
     }
     if (!params.endpointHost || !isGovernedEndpointHost(params.endpointHost)) {
-        throw new Error(`Disallowed endpoint host '${params.endpointHost}': strictly requires '${ALLOWLISTED_LIVE_ENDPOINT_HOST}'`);
+        throw new Error(__t('ai.error.receipt_endpoint_disallowed', { host: params.endpointHost, requiredHost: ALLOWLISTED_LIVE_ENDPOINT_HOST }));
     }
     if (!params.candidateSha || typeof params.candidateSha !== 'string' || !params.candidateSha.trim()) {
-        throw new Error('Receipt requires non-empty candidateSha');
+        throw new Error(__t('ai.error.receipt_candidate_sha_required'));
     }
     if (!params.modelId || typeof params.modelId !== 'string' || !params.modelId.trim()) {
-        throw new Error('Receipt requires non-empty modelId');
+        throw new Error(__t('ai.error.receipt_model_id_required'));
     }
     const providerRequestId = (params.providerRequestId || params.correlationId || '').trim();
     if (!providerRequestId) {
-        throw new Error('Receipt requires non-empty providerRequestId');
+        throw new Error(__t('ai.error.receipt_provider_request_id_required'));
     }
     if (!params.responseDigestSha256 || typeof params.responseDigestSha256 !== 'string' || !/^[0-9a-f]{64}$/i.test(params.responseDigestSha256)) {
-        throw new Error('Receipt requires valid 64-hex SHA-256 responseDigestSha256');
+        throw new Error(__t('ai.error.receipt_digest_format_invalid'));
     }
     if (!params.observedAt || typeof params.observedAt !== 'string' || !params.observedAt.trim()) {
-        throw new Error('Receipt requires non-empty observedAt');
+        throw new Error(__t('ai.error.receipt_observed_at_required'));
     }
 
     const effectiveEndpointHost = params.endpointHost.trim().toLowerCase();

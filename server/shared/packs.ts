@@ -26,6 +26,7 @@
 
 // @ts-ignore
 import { __t } from './i18n';
+import { Logger } from './logger';
 
 import * as crypto from 'crypto';
 import * as fs from 'fs';
@@ -38,7 +39,9 @@ function canonicalizeSafe(data: any): string {
             const out = fn(data);
             if (typeof out === 'string') return out;
         }
-    } catch {}
+    } catch (err) {
+        // Fallback to deterministic key sorting
+    }
     if (data && typeof data === 'object' && !Array.isArray(data)) {
         const sorted: Record<string, any> = {};
         for (const k of Object.keys(data).sort()) {

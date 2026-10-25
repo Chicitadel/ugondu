@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : UAIGOS
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Engine Core - Discovery
  * File           : provider-discovery.ts
  * Version        : 1.0.0

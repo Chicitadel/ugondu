@@ -1,12 +1,12 @@
 /******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System
- * Module         : Safety Gates Validator
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Engine Core / Safety Gates
  * File           : safety-gates.ts
  * Version        : 1.0.0
- * Author         : Corporate Policy Governed
- * Organization   : UAIGOS
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-08
- * Last Modified  : 2026-10-08
+ * Last Modified  : 2026-10-25
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -17,26 +17,17 @@
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
  *
  * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 UAIGOS
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
-// We import the Universal Resource schemas from shared components as requested.
-// @ts-ignore
-import { ResourceClassification, ResourceOwnership } from '../../../shared/schemas/resource-classification.schema';
-// @ts-ignore
-import { ResourceProtocol } from '../../../shared/protocols/resource.protocol';
 import * as crypto from 'crypto';
 
 import * as fs from 'fs';
@@ -171,7 +162,7 @@ export class SafetyGatesValidator {
     // 1. Dependency Graph Evaluation & Blast Radius Validation
     const computedRadius = this.evaluateDependencyGraph(context.dependencyGraph);
     if (computedRadius > context.blastRadius) {
-      throw new Error(`Blast radius limit exceeded. Expected <= ${context.blastRadius}, got ${computedRadius}`);
+      throw new Error(__t('safety.error.blast_radius_exceeded', { expected: context.blastRadius, computed: computedRadius }));
     }
 
     // Verify external cryptographic signatures using canonical envelope

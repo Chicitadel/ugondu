@@ -23,8 +23,7 @@
  ******************************************************************************/
 
 import { createHash } from 'crypto';
-// @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import type { AuthorizationRule } from '../../types/index';
 import type { AwsPolicyDocument, AwsStatement, AwsPrincipalKind } from './AwsIamClient';
 import { compileConditions } from './AwsIamConditions';

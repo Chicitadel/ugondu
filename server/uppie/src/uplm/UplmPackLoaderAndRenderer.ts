@@ -17,6 +17,7 @@
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { __t } from '@ugondu/shared';
 import type { ResolvedEnvironment } from './UplmTypes';
 
 export interface PolicyPackPolicyEntry {
@@ -110,15 +111,15 @@ export class UplmPackLoaderAndRenderer {
     const schemaPath = path.join(packDir, 'schema', 'policy-pack.schema.json');
 
     if (!fs.existsSync(packYamlPath)) {
-      throw new Error(`PACK_UNTRUSTED: Missing pack.yaml at '${packYamlPath}'.`);
+      throw new Error(__t('uplm.error.missing_pack_yaml', { packYamlPath }));
     }
     if (!fs.existsSync(schemaPath)) {
-      throw new Error(`PACK_UNTRUSTED: Missing policy-pack.schema.json at '${schemaPath}'.`);
+      throw new Error(__t('uplm.error.missing_pack_schema', { schemaPath }));
     }
 
     const packYamlContent = fs.readFileSync(packYamlPath, 'utf8');
     if (!packYamlContent.includes('apiVersion: uplm.ugondu.io/v1') || !packYamlContent.includes('kind: PolicyPack')) {
-      throw new Error('PACK_UNTRUSTED: Invalid apiVersion or kind in pack.yaml.');
+      throw new Error(__t('uplm.error.invalid_api_version'));
     }
 
     const pack: LoadedPolicyPack = {
@@ -262,7 +263,7 @@ export class UplmPackLoaderAndRenderer {
       const digest = createHash('sha256').update(raw).digest('hex');
       if (digest !== role.sha256) {
         throw new Error(
-          `PACK_UNTRUSTED: SHA-256 mismatch for role template '${role.templatePath}'. Expected ${role.sha256}, got ${digest}.`
+          __t('uplm.error.role_sha_mismatch', { templatePath: role.templatePath, expected: role.sha256, actual: digest })
         );
       }
     }
@@ -273,29 +274,29 @@ export class UplmPackLoaderAndRenderer {
       const digest = createHash('sha256').update(raw).digest('hex');
       if (digest !== policy.sha256) {
         throw new Error(
-          `PACK_UNTRUSTED: SHA-256 mismatch for policy template '${policy.templatePath}'. Expected ${policy.sha256}, got ${digest}.`
+          __t('uplm.error.policy_sha_mismatch', { templatePath: policy.templatePath, expected: policy.sha256, actual: digest })
         );
       }
       const parsed = JSON.parse(raw) as { Version: string; Statement: Array<{ Sid: string }> };
       const compactLen = JSON.stringify(parsed).length;
       if (compactLen !== policy.compactCharLength) {
         throw new Error(
-          `PACK_UNTRUSTED: Compact length mismatch for '${policy.physicalName}': expected ${policy.compactCharLength}, got ${compactLen}.`
+          __t('uplm.error.compact_length_mismatch', { physicalName: policy.physicalName, expected: policy.compactCharLength, actual: compactLen })
         );
       }
       if (compactLen > pack.quotas.maxManagedPolicySizeChars) {
         throw new Error(
-          `QUOTA_EXCEEDED: Policy '${policy.physicalName}' compact length (${compactLen}) exceeds AWS IAM limit (${pack.quotas.maxManagedPolicySizeChars}).`
+          __t('uplm.error.policy_size_exceeded', { physicalName: policy.physicalName, actual: compactLen, limit: pack.quotas.maxManagedPolicySizeChars })
         );
       }
       if (parsed.Statement.length !== policy.statementCount) {
         throw new Error(
-          `PACK_UNTRUSTED: Statement count mismatch for '${policy.physicalName}': expected ${policy.statementCount}, got ${parsed.Statement.length}.`
+          __t('uplm.error.statement_count_mismatch', { physicalName: policy.physicalName, expected: policy.statementCount, actual: parsed.Statement.length })
         );
       }
       for (const stmt of parsed.Statement) {
         if (seenSids.has(stmt.Sid)) {
-          throw new Error(`PACK_UNTRUSTED: Duplicate Sid '${stmt.Sid}' across split policies.`);
+          throw new Error(__t('uplm.error.duplicate_sid', { sid: stmt.Sid }));
         }
         seenSids.add(stmt.Sid);
       }
@@ -304,7 +305,7 @@ export class UplmPackLoaderAndRenderer {
 
     if (totalStatements !== pack.quotas.totalStatementsInPack) {
       throw new Error(
-        `PACK_UNTRUSTED: Total statement count (${totalStatements}) does not equal expected ${pack.quotas.totalStatementsInPack}.`
+        __t('uplm.error.total_statements_mismatch', { actual: totalStatements, expected: pack.quotas.totalStatementsInPack })
       );
     }
   }
@@ -318,24 +319,24 @@ export class UplmPackLoaderAndRenderer {
     if (expectedScope) {
       if (env.accountId !== expectedScope.accountId) {
         throw new Error(
-          `IDENTITY_MISMATCH: Environment accountId '${env.accountId}' does not match pack target accountId '${expectedScope.accountId}'.`
+          __t('uplm.error.account_mismatch', { actual: env.accountId, expected: expectedScope.accountId })
         );
       }
       if (env.region !== expectedScope.region) {
         throw new Error(
-          `IDENTITY_MISMATCH: Environment region '${env.region}' does not match pack target region '${expectedScope.region}'.`
+          __t('uplm.error.region_mismatch', { actual: env.region, expected: expectedScope.region })
         );
       }
     }
 
     if (!env.transactionId || !/^[a-zA-Z0-9_-]{3,64}$/.test(env.transactionId)) {
-      throw new Error(`VALIDATION_FAILED: Invalid or missing transactionId '${env.transactionId}'.`);
+      throw new Error(__t('uplm.error.invalid_transaction_id', { transactionId: env.transactionId }));
     }
 
     const availableSlots = env.quotas.maxManagedPoliciesPerRole - env.quotas.currentAttachedManagedPolicies;
     if (availableSlots < 5) {
       throw new Error(
-        `QUOTA_EXCEEDED: Target role has only ${availableSlots} managed policy attachment slots remaining; 5 are required.`
+        __t('uplm.error.slots_remaining', { availableSlots })
       );
     }
 
@@ -351,28 +352,28 @@ export class UplmPackLoaderAndRenderer {
     const transformValue = (val: unknown): unknown => {
       if (typeof val === 'string') {
         if (SECRET_DETECTION_REGEX.test(val)) {
-          throw new Error('SECURITY_VIOLATION: Secrets or credentials must never appear in policy templates.');
+          throw new Error(__t('uplm.error.secrets_prohibited'));
         }
 
         const resolved = val.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, varName: string) => {
           if (!ALLOWED_TEMPLATE_VARIABLES.has(varName)) {
-            throw new Error(`UNRESOLVED_PLACEHOLDER: Unknown template variable '{{${varName}}}'.`);
+            throw new Error(__t('uplm.error.unknown_template_variable', { varName }));
           }
           const replacement = variableValues[varName];
           if (!replacement) {
-            throw new Error(`UNRESOLVED_PLACEHOLDER: Variable '{{${varName}}}' has no resolved value.`);
+            throw new Error(__t('uplm.error.variable_no_value', { varName }));
           }
           return replacement;
         });
 
         if (resolved.includes('{{') || resolved.includes('}}')) {
-          throw new Error(`UNRESOLVED_PLACEHOLDER: Malformed or unresolved mustache placeholder in '${resolved}'.`);
+          throw new Error(__t('uplm.error.malformed_mustache', { resolved }));
         }
 
         const dollarMatches = resolved.match(/\$\{[^}]*\}/g) ?? [];
         for (const dm of dollarMatches) {
           if (!ALLOWED_IAM_RUNTIME_VARIABLES.has(dm)) {
-            throw new Error(`UNRESOLVED_PLACEHOLDER: Disallowed or unresolved expression '${dm}'.`);
+            throw new Error(__t('uplm.error.disallowed_expression', { expression: dm }));
           }
         }
 
@@ -393,7 +394,7 @@ export class UplmPackLoaderAndRenderer {
     const canonicalJson = JSON.stringify(rendered);
     if (canonicalJson.length > env.quotas.maxManagedPolicySizeChars) {
       throw new Error(
-        `QUOTA_EXCEEDED: Rendered policy size (${canonicalJson.length}) exceeds maxManagedPolicySizeChars (${env.quotas.maxManagedPolicySizeChars}).`
+        __t('uplm.error.rendered_policy_size_exceeded', { actual: canonicalJson.length, limit: env.quotas.maxManagedPolicySizeChars })
       );
     }
 

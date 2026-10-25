@@ -28,6 +28,7 @@
  ******************************************************************************/
 
 import { createHash } from 'crypto';
+import { __t } from '@ugondu/shared';
 import { type CanonicalCapabilityId, type UplmRiskClass, canonicalCapabilityRegistry } from './CanonicalCapabilityContract';
 
 export type GraphicalViewId =
@@ -359,19 +360,19 @@ export function computeExpertPlanHash(
 export function editExpertPlan(currentPlan: ExpertPlanState, edit: ExpertPlanEditRequest): ExpertPlanState {
   const validationErrors: string[] = [];
   if (edit.attemptOverrideDeniedActionIds && edit.attemptOverrideDeniedActionIds.length > 0) {
-    throw new Error(`Security violation: Cannot turn a denied operation into an allowed one via UI settings: [${edit.attemptOverrideDeniedActionIds.join(', ')}]`);
+    throw new Error(__t('capabilities.error.cannot_override_denied_actions', { actions: edit.attemptOverrideDeniedActionIds.join(', ') }));
   }
   const updatedActions = currentPlan.actions.map((action) => {
     let selected = action.selected;
     if (edit.deselectActionIds?.includes(action.actionId)) {
       if (action.mandatorySecurityControl) {
-        throw new Error(`Security violation: Cannot deselect mandatory security control action '${action.actionId}'.`);
+        throw new Error(__t('messages.error.action_deselect_mandatory_prohibited', { actionId: action.actionId }));
       }
       selected = false;
     }
     if (edit.selectActionIds?.includes(action.actionId)) {
       if (!action.allowedByPolicy) {
-        throw new Error(`Security violation: Cannot select policy-denied action '${action.actionId}'.`);
+        throw new Error(__t('messages.error.action_policy_denied', { actionId: action.actionId }));
       }
       selected = true;
     }
@@ -382,9 +383,9 @@ export function editExpertPlan(currentPlan: ExpertPlanState, edit: ExpertPlanEdi
   });
 
   const nextTimeoutMs = edit.timeoutMs ?? currentPlan.timeoutMs;
-  if (nextTimeoutMs < 1000 || nextTimeoutMs > 300000) validationErrors.push('timeoutMs must be between 1000 and 300000 ms.');
+  if (nextTimeoutMs < 1000 || nextTimeoutMs > 300000) validationErrors.push(__t('messages.error.timeout_range_invalid'));
   const nextConcurrency = edit.concurrencyLimit ?? currentPlan.concurrencyLimit;
-  if (nextConcurrency < 1 || nextConcurrency > 10) validationErrors.push('concurrencyLimit must be between 1 and 10.');
+  if (nextConcurrency < 1 || nextConcurrency > 10) validationErrors.push(__t('capabilities.error.concurrency_range_invalid'));
 
   const draft = {
     planId: currentPlan.planId, target: currentPlan.target, packId: currentPlan.packId,

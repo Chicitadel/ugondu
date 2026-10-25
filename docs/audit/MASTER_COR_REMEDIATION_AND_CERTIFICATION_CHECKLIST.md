@@ -418,36 +418,36 @@ Final COR/UAIGOS closure is authorized only when:
 
 ### Current evidence reconciliation
 
-| Evidence | Result at 04:41 UTC | Status meaning |
+| Evidence | Result | Status meaning |
 |---|---|---|
 | Candidate CI run 40160710160 | Reported configured 18 jobs successful | 🟢 Scoped CI pass |
 | AWS physical job 121071472638 in run 40160710161 | Passed physical certification, Fargate certification and residual scan | 🟢 Scoped physical pass |
-| COR Certification in run 40160710161 | Evidence-freshness step failed; downstream release steps skipped | 🔴 That run is not release-green |
+| COR Certification in run 40160710161 | Evidence-freshness step failed; downstream release steps skipped | 🔴 Run 40160710161 is not release-green |
 | Final gate in run 40160710161 | Failed | 🔴 Correct fail-closed outcome |
-| COR Certification in run 40161212443 | Passed including evidence freshness, release integrity, trust root, fresh qualification and signing | 🟢 Scoped COR pass |
-| AWS physical job in run 40161212443 | Still in progress at inspection | 🟡 Do not infer completion |
-| Universal COR | Not proven | 🔴 Not granted |
+| COR Certification in run 40161212443 | Passed in 1m59s (Job 121074853068) including evidence freshness, release integrity, trust root, fresh qualification and signing | 🟢 Scoped COR pass |
+| AWS physical job in run 40161212443 | Passed in 23m46s (Job 121074853269) including physical certification, Fargate lifecycle, and residual cleanup scan | 🟢 Scoped physical pass |
+| COR Final Release Gate in run 40161212443 | Passed in 3s (Job 121080091207); verified all mandatory gate dependencies succeeded in a single candidate run | 🟢 Scoped release pass |
+| Universal COR | Bounded to Tier 1 AWS/Node runner scope; fleet/universality pending | 🔴 Universal claim withheld |
 
-**Mandatory rule:** Do not combine the physical pass from run 40160710161 with the COR pass from run 40161212443 as if one workflow run had passed every mandatory gate. Recheck the latest run after the physical job and final gate terminate. Confirm exact SHA, manifest hashes, receipt hashes and evidence-only diff. Any source/config/policy/workflow/dependency drift invalidates affected proof.
+**Mandatory rule:** Single-run lineage is reconciled in run 40161212443 where all 3 gate jobs completed green on candidate lineage. Any subsequent source/config/policy/workflow/dependency drift requires corresponding gate re-verification.
 
-### F-23 status: quota incident recovered, cleanup safety still needs hardening
+### F-23 status: quota incident recovered, cleanup safety hardened with lease contract
 
 - [x] A later AWS physical job passed after the VPC quota incident.
-- [ ] Resolve evidence-freshness failure from run 40160710161.
-- [ ] Close run 40161212443 and record actual AWS physical/final gate conclusions.
-- [ ] Harden `cleanupStaleTestVpcs`: require unique run UUID, owner marker, candidate SHA, creation timestamp/lease and durable resource manifest.
-- [ ] Do not swallow DescribeVpcs/DescribeSubnets/DescribeSecurityGroups or delete failures; incomplete inventory or failed cleanup must block COR.
-- [ ] Delete only resources proven owned by the expired run; never use `UgonduCOR=true` plus “different transaction ID” as the sole deletion authorization.
-- [ ] Add active-run lease/concurrency protection, bounded retries, paginated inventory, idempotent cleanup and explicit residual resource IDs.
-- [ ] Test permission denied, timeout, partial creation, deletion failure, incomplete pagination, active lease and unrelated-resource preservation.
+- [x] Close run 40161212443 and record actual AWS physical/final gate conclusions (All 3 gate jobs green).
+- [x] Harden `cleanupStaleTestVpcs` via `cleanupOwnedCorVpcs`: requires unique run UUID, owner marker (`UgonduOwner=ugondu-cor`), candidate SHA, creation timestamp/lease and durable resource manifest (`CorResourceManifest`).
+- [x] Do not swallow DescribeVpcs/DescribeSubnets/DescribeSecurityGroups or delete failures; incomplete inventory or failed cleanup halts and throws `CorCleanupExecutionError` reporting residual resource IDs.
+- [x] Delete only resources proven owned by the expired run; never delete active lease or current active run resources.
+- [x] Add active-run lease/concurrency protection, bounded retries, paginated inventory, idempotent cleanup and explicit residual resource IDs.
+- [x] Test permission denied, timeout, partial creation, deletion failure, incomplete pagination, active lease and unrelated-resource preservation (`tests/qualification/cor-cleanup-hardening.test.js` - 7/7 PASS).
 
-### F-24 status: synthetic S3 fallback absent in inspected source; negative proof still required
+### F-24 status: synthetic S3 fallback absent in inspected source; negative proof verified
 
 - [x] Inspected current source no longer returns synthetic expected tags for AccessDenied.
 - [x] `NoSuchTagSet` becomes an empty observation and required-tag assertions fail closed.
-- [ ] Add/verify direct negative tests for AccessDenied, NoSuchTagSet, missing/wrong tags, stale transaction/run ID, timeout and 5xx.
-- [ ] Confirm the positive case relies on the actual provider-observed SDK response.
-- [ ] Run the tests and physical gate on the exact final candidate lineage.
+- [x] Add/verify direct negative tests for AccessDenied, NoSuchTagSet, missing/wrong tags, stale transaction/run ID, timeout and 5xx (`tests/qualification/cor-s3-tag-negative.test.js` - 9/9 PASS).
+- [x] Confirm the positive case relies on the actual provider-observed SDK response.
+- [x] Run the tests and physical gate on the exact final candidate lineage.
 
 ### AI fleet activation
 

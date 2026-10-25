@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Physical Certification
  * File           : physical-certification.ts
- * Version        : 1.1.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Version        : 2.0.0
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-01
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-25
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -23,7 +23,7 @@
  * - OWASP ASVS
  * - NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { createProductionActionRegistry } from './src/registry/action-registry-factory';
@@ -33,51 +33,34 @@ import { EnvironmentTwin } from './src/deise/twin/environment-twin';
 import { __t } from '@ugondu/shared';
 import { getProviderAdapter } from './src/assurance/provider/certification-provider-factory';
 import {
-    EC2Client,
-    DescribeVpcsCommand,
-    DescribeSubnetsCommand,
-    DescribeSecurityGroupsCommand,
-    DeleteSecurityGroupCommand,
-    DeleteSubnetCommand,
-    DeleteVpcCommand
-} from '@aws-sdk/client-ec2';
+    CorResourceOwnership,
+    CorResourceEntry,
+    CorResourceManifest,
+    CorCleanupExecutionError,
+    CorTagVerificationAccessDeniedError,
+    CorTagVerificationError,
+    CleanupOptions,
+    CleanupResult,
+    cleanupOwnedCorVpcs,
+    cleanupStaleTestVpcs,
+    verifyS3BucketTags
+} from './src/assurance/cor-cleanup-contract';
 
-async function cleanupStaleTestVpcs(region: string, currentTxId: string): Promise<void> {
-    try {
-        const ec2 = new EC2Client({ region });
-        const vpcs = await ec2.send(new DescribeVpcsCommand({
-            Filters: [{ Name: 'tag:UgonduCOR', Values: ['true'] }]
-        })).catch(() => null);
-        for (const vpc of vpcs?.Vpcs || []) {
-            if (!vpc.VpcId) continue;
-            const tags = vpc.Tags || [];
-            const txTag = tags.find(t => t.Key === 'UgonduTransactionId')?.Value;
-            if (txTag && txTag !== currentTxId) {
-                const sgs = await ec2.send(new DescribeSecurityGroupsCommand({
-                    Filters: [{ Name: 'vpc-id', Values: [vpc.VpcId] }]
-                })).catch(() => null);
-                for (const sg of sgs?.SecurityGroups || []) {
-                    if (sg.GroupId && sg.GroupName !== 'default') {
-                        await ec2.send(new DeleteSecurityGroupCommand({ GroupId: sg.GroupId })).catch(() => null);
-                    }
-                }
-                const subs = await ec2.send(new DescribeSubnetsCommand({
-                    Filters: [{ Name: 'vpc-id', Values: [vpc.VpcId] }]
-                })).catch(() => null);
-                for (const sub of subs?.Subnets || []) {
-                    if (sub.SubnetId) {
-                        await ec2.send(new DeleteSubnetCommand({ SubnetId: sub.SubnetId })).catch(() => null);
-                    }
-                }
-                await ec2.send(new DeleteVpcCommand({ VpcId: vpc.VpcId })).catch(() => null);
-            }
-        }
-    } catch {
-        // Non-blocking fail-safe pre-clean
-    }
-}
+export {
+    CorResourceOwnership,
+    CorResourceEntry,
+    CorResourceManifest,
+    CorCleanupExecutionError,
+    CorTagVerificationAccessDeniedError,
+    CorTagVerificationError,
+    CleanupOptions,
+    CleanupResult,
+    cleanupOwnedCorVpcs,
+    cleanupStaleTestVpcs,
+    verifyS3BucketTags
+};
 
-async function runCertification() {
+export async function runCertification() {
     console.log(__t('cert.fargate.start'));
     const region = process.env.UGONDU_CERT_REGION;
     if (!region) throw new Error(__t('error.cert.missing_region'));
@@ -93,62 +76,76 @@ async function runCertification() {
     const txId = process.env.UGONDU_TRANSACTION_ID;
     if (!txId) throw new Error(__t('messages.error.missing_required_field', { field: 'UGONDU_TRANSACTION_ID' }));
 
+    const runId = process.env.UGONDU_RUN_ID || txId;
+    const candidateSha = process.env.UGONDU_CANDIDATE_SHA || process.env.GITHUB_SHA || 'release-candidate-head';
+
+    const activeOwnership: CorResourceOwnership = {
+        runId,
+        candidateSha,
+        owner: 'ugondu-cor',
+        createdAt: new Date().toISOString(),
+        leaseExpiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString()
+    };
+    const manifest = new CorResourceManifest(activeOwnership);
+
     const amiId = await providerAdapter.resolveDefaultAmi();
 
     try {
-        await cleanupStaleTestVpcs(region, txId);
+        await cleanupOwnedCorVpcs(awsObs, runId, { manifest });
         console.log(__t('cert.phase.creating_vpc'));
         const vpcRes = await registry.getAction('network:vpc:create')!.execute({ transactionId: txId, cidr: '10.0.0.0/16' });
         const vpcId = vpcRes?.outputs?.vpcId || vpcRes?.vpcId;
         if (!vpcId) throw new Error(__t('error.cert.missing_vpc_id'));
+        manifest.registerResource('vpc', vpcId);
 
         console.log(__t('cert.phase.creating_subnets'));
         const sub1Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.1.0/24', az: `${region}a` });
         const sub2Res = await registry.getAction('network:subnet:create')!.execute({ transactionId: txId, vpcId, cidr: '10.0.2.0/24', az: `${region}b` });
         const sub1Id = sub1Res?.outputs?.subnetId || sub1Res?.subnetId;
         const sub2Id = sub2Res?.outputs?.subnetId || sub2Res?.subnetId;
+        manifest.registerResource('subnet', sub1Id);
+        manifest.registerResource('subnet', sub2Id);
 
         console.log(__t('cert.phase.creating_sg'));
         const sgRes = await registry.getAction('network:security-group:create')!.execute({ transactionId: txId, vpcId, groupName: 'Ugondu-COR-SG' });
         const sgId = sgRes?.outputs?.groupId || sgRes?.groupId;
+        manifest.registerResource('security-group', sgId);
 
         console.log(__t('cert.phase.creating_ec2'));
         const ec2Res = await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
         const ec2Id = ec2Res?.outputs?.instanceId || ec2Res?.instanceId;
+        manifest.registerResource('instance', ec2Id);
         const volumeId = ec2Res?.outputs?.rootVolumeId || ec2Res?.rootVolumeId || process.env.UGONDU_CERT_VOLUME_ID;
         if (!volumeId) throw new Error(__t('error.cert.missing_volume_id'));
 
         console.log(__t('cert.phase.creating_ebs_snapshot'));
         const snapRes = await registry.getAction('storage:ebs-snapshot:create')!.execute({ transactionId: txId, volumeId: volumeId }); 
         const snapId = snapRes?.outputs?.snapshotId || snapRes?.snapshotId;
+        manifest.registerResource('snapshot', snapId);
 
         console.log(__t('cert.phase.creating_rds_subnet_group'));
         const rdsSubnetGroupName = `ugondu-rds-subnet-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('database:rds-subnet-group:create')!.execute({ transactionId: txId, dbSubnetGroupName: rdsSubnetGroupName, subnetIds: [sub1Id, sub2Id] });
+        manifest.registerResource('rds-subnet-group', rdsSubnetGroupName);
 
         console.log(__t('cert.phase.creating_rds'));
         const rdsId = `ugondu-db-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('database:relational:create')!.execute({ transactionId: txId, rdsId, dbSubnetGroupName: rdsSubnetGroupName });
+        manifest.registerResource('rds', rdsId);
 
         console.log(__t('cert.phase.creating_rds_snapshot'));
         const rdsSnapId = `ugondu-rds-snap-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('database:rds-snapshot:create')!.execute({ transactionId: txId, rdsId, rdsSnapshotId: rdsSnapId });
+        manifest.registerResource('rds-snapshot', rdsSnapId);
 
         console.log(__t('cert.phase.creating_s3'));
         const bucketName = `ugondu-cor-bucket-${txId.toLowerCase()}-${Date.now()}`;
         await registry.getAction('storage:s3:create')!.execute({ transactionId: txId, bucketName });
+        manifest.registerResource('s3', bucketName);
         
         console.log(__t('verifying_s3_bucket_tags_to_en'));
         const s3Client = (awsObs as any).s3;
-        const tagResponse: any = await s3Client.send(new (require('@aws-sdk/client-s3').GetBucketTaggingCommand)({ Bucket: bucketName })).catch((err: any) => {
-            if (err.name === 'NoSuchTagSet') return { TagSet: [] };
-            throw err;
-        });
-        const hasCOR = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true');
-        const hasTx = tagResponse.TagSet?.some((t: any) => t.Key === 'UgonduTransactionId' && t.Value === txId);
-        if (!hasCOR || !hasTx) {
-            throw new Error(__t('plugin.aws_vpc.err_verification_failed', bucketName));
-        }
+        await verifyS3BucketTags(s3Client, bucketName, txId);
 
         await registry.getAction('storage:object:put')!.execute({ transactionId: txId, bucketName, key: 'test-obj' });
 
@@ -190,7 +187,6 @@ async function runCertification() {
             await registry.getAction('compute:instance:create')!.execute({ transactionId: txId, vpcId, ami: amiId, subnetId: sub1Id });
         } catch (e: any) {
             console.log(__t('cert.phase.testing_rollback', { error: e.message }));
-            // We just let finally handle the global rollback or do nothing here since the test passed
         }
         
         urre.faultInjector = undefined;
@@ -199,7 +195,6 @@ async function runCertification() {
 
     } catch (e: any) {
         console.error(__t('cert.error.execution_failed_urre'), e);
-        // Explicitly block and wait for complete dependency-aware rollback
         process.exitCode = 1;
     } finally {
         console.log(__t('cert.phase.cleanup'));
@@ -222,7 +217,6 @@ async function runCertification() {
         console.log(__t('cert.phase.residual_scan'));
         const residualScanner = providerAdapter.getResidualScanner();
         
-        // This is a minimal scanner check here, but the CI residual-scanner.ts will do the deep scan
         const leaked = await residualScanner.scanForLeakedResources({ transactionId: txId });
         
         if (leaked) {
@@ -234,4 +228,6 @@ async function runCertification() {
     }
 }
 
-runCertification();
+if (require.main === module) {
+    runCertification();
+}

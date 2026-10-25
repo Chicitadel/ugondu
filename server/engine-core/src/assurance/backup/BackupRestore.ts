@@ -1,10 +1,10 @@
 /******************************************************************************
- * Project        : UAIGOS-Core
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : BackupAssurance
  * File           : BackupRestore.ts
  * Version        : 1.0.0
  * Author         : Backup Encryption Specialist
- * Organization   : Universal AI Operations
+ * Organization   : Air Roofers SASU / Ujomor Systems
  * Created Date   : 2026-10-08
  * Last Modified  : 2026-10-08
  * Classification : ENTERPRISE
@@ -28,7 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Universal AI Operations
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  * All Rights Reserved.
  ******************************************************************************/
 

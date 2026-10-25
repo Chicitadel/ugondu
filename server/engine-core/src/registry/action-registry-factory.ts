@@ -22,7 +22,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-import { __t } from '@ugondu/shared';
+import { __t, translateProviderError, Logger } from '@ugondu/shared';
 import { URREngine } from '../urre/execution/urre-engine';
 import { DagNode } from '../urre/transaction/transaction-dag';
 import { UniversalActionRegistry } from './action-registry';
@@ -45,6 +45,14 @@ function recordCompensation(aws: any, node: DagNode, compensatingAction: string,
     aws.compensationLedger.push(entry);
   }
 }
+
+const safeRdsQuery = async (fn: () => Promise<any>, action: string, resourceId?: string) => {
+  try { return await fn(); }
+  catch (err: any) {
+    if (/NotFound|DBInstanceNotFoundFault|DBSnapshotNotFoundFault/i.test(String(err?.name || '') + String(err?.message || ''))) return null;
+    throw translateProviderError('AWS', err, { action, resourceId });
+  }
+};
 
 export function createProductionActionRegistry(adapter: any): UniversalActionRegistry {
   const urre = new URREngine();
@@ -259,7 +267,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
         }));
         for (let r = 0; r < 60; r++) {
           await sleep(15000);
-          const desc = await (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })).catch(() => null);
+          const desc = await safeRdsQuery(() => (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })), 'DESCRIBE_RDS_INSTANCE', rdsId);
           const st = desc?.DBInstances?.[0]?.DBInstanceStatus;
           if (st === 'available') return { rdsId };
           if (st === 'failed' || st === 'incompatible-parameters') throw new Error(`RDS ${rdsId} failed: ${st}`);
@@ -283,7 +291,7 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
           const { DescribeDBInstancesCommand } = require('@aws-sdk/client-rds');
           for (let w = 0; w < 60; w++) {
             await sleep(15000);
-            const chk = await (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })).catch(() => null);
+            const chk = await safeRdsQuery(() => (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })), 'VERIFY_RDS_DELETION', rdsId);
             if (!chk || !chk.DBInstances?.length) break;
           }
         }
@@ -304,8 +312,8 @@ export function createProductionActionRegistry(adapter: any): UniversalActionReg
         const { DescribeDBSnapshotsCommand, DescribeDBInstancesCommand } = require('@aws-sdk/client-rds');
         for (let w = 0; w < 45; w++) {
           await sleep(10000);
-          const sDesc = await (aws as any).rds.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: actualSnapId })).catch(() => null);
-          const iDesc = rdsId ? await (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })).catch(() => null) : null;
+          const sDesc = await safeRdsQuery(() => (aws as any).rds.send(new DescribeDBSnapshotsCommand({ DBSnapshotIdentifier: actualSnapId })), 'DESCRIBE_RDS_SNAPSHOT', actualSnapId);
+          const iDesc = rdsId ? await safeRdsQuery(() => (aws as any).rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: rdsId })), 'DESCRIBE_RDS_INSTANCE', rdsId) : null;
           if (sDesc?.DBSnapshots?.[0]?.Status === 'available' && (!rdsId || iDesc?.DBInstances?.[0]?.DBInstanceStatus === 'available')) break;
         }
       }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : UAIGOS
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Engine Core - Discovery
  * File           : kubernetes-adapter.ts
  * Version        : 2.0.0

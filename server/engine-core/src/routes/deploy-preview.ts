@@ -74,7 +74,7 @@ export function createPreviewHandler(
           res.status(409).json({
             error: 'IDEMPOTENCY_CONFLICT',
             code: 'IDEMPOTENCY_CONFLICT',
-            message: 'Idempotency-Key already used with a different preview payload.',
+            message: __t('messages.error.idempotency_key_preview_conflict'),
           });
           return;
         }

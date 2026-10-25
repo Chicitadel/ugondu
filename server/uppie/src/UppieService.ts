@@ -29,7 +29,7 @@
 import type { AdapterContext, ProviderType } from './adapters/IPolicyProviderAdapter';
 import type { IPolicyProviderAdapter }        from './adapters/IPolicyProviderAdapter';
 import { AdapterRegistry }                    from './adapters/AdapterRegistry';
-import { __t }                              from '../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 import {
   evaluateAuthorizationReadiness,

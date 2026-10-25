@@ -1,3 +1,31 @@
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Engine Core / DEISE / AWS Physical Repair Executor
+ * File           : aws-physical-repair-executor.ts
+ * Version        : 2.1.0
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
+ * Created Date   : 2026-09-30
+ * Last Modified  : 2026-10-25
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ * - Zero String Hardcoding
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
+ ******************************************************************************/
+
 import { Logger, __t } from '@ugondu/shared';
 import { RepairPlan } from './repair-engine';
 import { DriftCategory } from '../model/drift';
@@ -20,7 +48,7 @@ export class AwsPhysicalRepairExecutor {
             return true;
         }
 
-        Logger.info(`Executing Physical Repair for AWS Infrastructure Drift...`);
+        Logger.info(__t('deise.aws_repair.executing'));
 
         const region = process.env.UGONDU_CERT_REGION;
         if (!region) {
@@ -30,47 +58,60 @@ export class AwsPhysicalRepairExecutor {
         for (const diag of plan.diagnoses) {
             if (diag.category === DriftCategory.INFRASTRUCTURE_DRIFT) {
                 const drift = diag as import('../model/drift').InfrastructureDriftDiagnostic;
-                Logger.info(`Repairing Infrastructure Drift: ${drift.provider} ${drift.resourceType} ${drift.resourceId}`);
+                Logger.info(__t('deise.aws_repair.repairing_drift', {
+                    provider: drift.provider,
+                    resourceType: drift.resourceType,
+                    resourceId: drift.resourceId
+                }));
 
                 try {
                     if (drift.repairOperation === 'ec2:CreateTags') {
-                        Logger.info(`DISCOVER -> DIAGNOSE -> AUTHORIZE -> MUTATE -> CAPTURE PROVIDER RESPONSE -> READ ACTUAL STATE -> COMPARE EXPECTED vs ACTUAL -> EVIDENCE -> PASS / FAIL`);
-                        Logger.info(`Diagnosis: Drift detected on EC2 instance tags.`);
-                        Logger.info(`Authorization: Executing repair under Policy Governance Engine limits.`);
-                        Logger.info(`Mutation: Dispatching ec2:CreateTags for ${drift.resourceId}`);
+                        Logger.info(__t('deise.aws_repair.pipeline_steps'));
+                        Logger.info(__t('deise.aws_repair.diagnosis_ec2_tags'));
+                        Logger.info(__t('deise.aws_repair.auth_limits'));
+                        Logger.info(__t('deise.aws_repair.dispatch_ec2_tags', { resourceId: drift.resourceId }));
                         await this.awsClient.setEc2Tags(drift.resourceId, { [drift.attribute]: drift.expectedValue });
-                        Logger.info(`Provider Response: Tags successfully applied to ${drift.resourceId}`);
+                        Logger.info(__t('deise.aws_repair.ec2_tags_applied', { resourceId: drift.resourceId }));
                         
-                        Logger.info(`Read Actual State: Fetching tags for ${drift.resourceId}`);
+                        Logger.info(__t('deise.aws_repair.fetching_ec2_tags', { resourceId: drift.resourceId }));
                         const actualTags = await this.awsClient.getEc2Tags(drift.resourceId);
                         const actualValue = actualTags[drift.attribute];
                         
-                        Logger.info(`Compare Expected vs Actual: Expected '${drift.expectedValue}', Actual '${actualValue}'`);
+                        Logger.info(__t('deise.aws_repair.compare_expected_actual', {
+                            expected: drift.expectedValue,
+                            actual: actualValue
+                        }));
                         if (actualValue !== drift.expectedValue) {
-                            Logger.error(`Evidence: Tag ${drift.attribute} did not match expected value. Fail.`);
+                            Logger.error(__t('deise.aws_repair.ec2_tag_mismatch', { attribute: drift.attribute }));
                             return false;
                         }
-                        Logger.info(`Evidence: Physical verification passed for ${drift.resourceId}. Pass.`);
+                        Logger.info(__t('deise.aws_repair.ec2_passed', { resourceId: drift.resourceId }));
                     } else if (drift.repairOperation === 'rds:ModifyDBInstance') {
-                        Logger.info(`DISCOVER -> DIAGNOSE -> AUTHORIZE -> MUTATE -> CAPTURE PROVIDER RESPONSE -> READ ACTUAL STATE -> COMPARE EXPECTED vs ACTUAL -> EVIDENCE -> PASS / FAIL`);
-                        Logger.info(`Diagnosis: Drift detected on RDS instance attributes.`);
-                        Logger.info(`Authorization: Executing repair under Policy Governance Engine limits.`);
-                        Logger.info(`Mutation: Dispatching rds:ModifyDBInstance for ${drift.resourceId}`);
+                        Logger.info(__t('deise.aws_repair.pipeline_steps'));
+                        Logger.info(__t('deise.aws_repair.diagnosis_rds_attrs'));
+                        Logger.info(__t('deise.aws_repair.auth_limits'));
+                        Logger.info(__t('deise.aws_repair.dispatch_rds_modify', { resourceId: drift.resourceId }));
                         await this.awsClient.modifyRdsInstance(drift.resourceId, { [drift.attribute]: drift.expectedValue });
-                        Logger.info(`Provider Response: Attribute successfully modified on ${drift.resourceId}`);
+                        Logger.info(__t('deise.aws_repair.rds_modified', { resourceId: drift.resourceId }));
                         
-                        Logger.info(`Read Actual State: Fetching attribute ${drift.attribute} for ${drift.resourceId}`);
+                        Logger.info(__t('deise.aws_repair.fetching_rds_attr', {
+                            attribute: drift.attribute,
+                            resourceId: drift.resourceId
+                        }));
                         const actualValue = await this.awsClient.getRdsAttribute(drift.resourceId, drift.attribute);
                         
-                        Logger.info(`Compare Expected vs Actual: Expected '${drift.expectedValue}', Actual '${actualValue}'`);
+                        Logger.info(__t('deise.aws_repair.compare_expected_actual', {
+                            expected: drift.expectedValue,
+                            actual: actualValue
+                        }));
                         if (String(actualValue) !== String(drift.expectedValue)) {
-                            Logger.error(`Evidence: RDS attribute ${drift.attribute} did not match expected value. Fail.`);
+                            Logger.error(__t('deise.aws_repair.rds_attr_mismatch', { attribute: drift.attribute }));
                             return false;
                         }
-                        Logger.info(`Evidence: Physical verification passed for ${drift.resourceId}. Pass.`);
+                        Logger.info(__t('deise.aws_repair.rds_passed', { resourceId: drift.resourceId }));
                     }
                 } catch (err: any) {
-                    Logger.error(`Physical repair failed: ${err.message}`);
+                    Logger.error(__t('deise.aws_repair.failed', { error: err.message }));
                     return false;
                 }
             }

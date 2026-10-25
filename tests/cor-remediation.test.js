@@ -268,6 +268,26 @@ async function runCorRemediationTests() {
         assert.ok(collector.includes("scanner: 'npm-audit'"), 'Collector must run real npm-audit dependency scan');
     });
 
+    // Re-audit F-23: Safe Multi-Tenant VPC Cleanup Contract
+    check('REAUDIT-F23', 'Safe Multi-Tenant VPC Cleanup contract and qualification suite exist', () => {
+        assert.ok(fs.existsSync(path.join(ROOT, 'server/engine-core/src/assurance/cor-cleanup-contract.ts')), 'Missing cor-cleanup-contract.ts');
+        assert.ok(fs.existsSync(path.join(ROOT, 'tests/qualification/cor-cleanup-hardening.test.js')), 'Missing cor-cleanup-hardening.test.js');
+        const contract = fs.readFileSync(path.join(ROOT, 'server/engine-core/src/assurance/cor-cleanup-contract.ts'), 'utf8');
+        assert.ok(contract.includes('export interface CorResourceOwnership'));
+        assert.ok(contract.includes('export class CorResourceManifest'));
+        assert.ok(contract.includes('export class CorCleanupExecutionError'));
+        assert.ok(contract.includes('export async function cleanupOwnedCorVpcs'));
+    });
+
+    // Re-audit F-24: S3 Tag Verification Fail-Closed Contract & Negative Proof
+    check('REAUDIT-F24', 'S3 Tag Verification Fail-Closed contract and negative qualification suite exist', () => {
+        assert.ok(fs.existsSync(path.join(ROOT, 'tests/qualification/cor-s3-tag-negative.test.js')), 'Missing cor-s3-tag-negative.test.js');
+        const contract = fs.readFileSync(path.join(ROOT, 'server/engine-core/src/assurance/cor-cleanup-contract.ts'), 'utf8');
+        assert.ok(contract.includes('export class CorTagVerificationAccessDeniedError'));
+        assert.ok(contract.includes('export class CorTagVerificationError'));
+        assert.ok(contract.includes('export async function verifyS3BucketTags'));
+    });
+
     console.log('══════════════════════════════════════════════════════════════');
     console.log(` COR Remediation Audit Results: ${passed} passed, ${failed} failed `);
     console.log('══════════════════════════════════════════════════════════════');

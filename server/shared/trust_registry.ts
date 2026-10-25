@@ -35,6 +35,7 @@ import { KeyObject, createPublicKey, createPrivateKey, createHash } from 'crypto
 import * as fs from 'fs';
 import * as path from 'path';
 import { __t } from './i18n';
+import { Logger } from './logger';
 
 export type KeyStatus = 'ACTIVE' | 'ROTATED' | 'REVOKED';
 export type KeyPurpose = 'recipe' | 'plugin' | 'language-pack' | 'service-identity' | 'evidence';
@@ -162,8 +163,10 @@ export class TrustRegistry {
                     publicKey: pubPem.trim(),
                     privateKey: normalizedPem.trim()
                 });
-            } catch {
-                // Handled by KeyLoader at service bootstrap
+            } catch (err) {
+                Logger.warn('Failed to register envRecipeKey into trust registry during bootstrap', {
+                    error: err instanceof Error ? err.message : String(err)
+                });
             }
         }
 

@@ -24,6 +24,8 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
+
 export type CapabilityStatus = 'SUPPORTED' | 'UNSUPPORTED' | 'CONDITIONAL' | 'UNKNOWN';
 
 export interface ProviderCapability {
@@ -235,7 +237,7 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
   readonly adapterVersion: string = '1.0.0';
 
   public async discoverIdentity(): Promise<ProviderIdentity> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: discoverIdentity must be implemented by provider adapter');
+    throw new Error(__t('capabilities.error.discover_identity_required'));
   }
 
   public async negotiateCapabilities(): Promise<ProviderCapability[]> {
@@ -245,30 +247,30 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
   public abstract inspectPolicy(policyId: string): Promise<NativePolicySnapshot | any>;
 
   public async planPolicyReconciliation(_input: unknown): Promise<unknown> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: planPolicyReconciliation requires provider implementation');
+    throw new Error(__t('capabilities.error.plan_reconciliation_required'));
   }
 
   public async applyPolicyReconciliation(_plan: unknown): Promise<unknown> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: applyPolicyReconciliation requires provider implementation');
+    throw new Error(__t('capabilities.error.apply_reconciliation_required'));
   }
 
   public async verifyPolicyReconciliation(evidence: any): Promise<ReconcileOutcome> {
     if (!evidence || evidence.verification !== 'VERIFIED' || !evidence.observedDigest || evidence.observedDigest !== evidence.expectedDigest) {
-      throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: read-after-write verification failed');
+      throw new Error(__t('capabilities.error.read_after_write_failed'));
     }
     return 'APPLIED_AND_MATCHES';
   }
 
   public async inspectAttachments(_targetId: string): Promise<unknown> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: inspectAttachments requires provider implementation');
+    throw new Error(__t('capabilities.error.inspect_attachments_required'));
   }
 
   public async attachPolicy(_targetId: string, _policyId: string): Promise<void> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: attachPolicy requires provider implementation');
+    throw new Error(__t('capabilities.error.attach_policy_required'));
   }
 
   public async rollback(_evidence: unknown): Promise<unknown> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: rollback requires provider implementation');
+    throw new Error(__t('capabilities.error.rollback_required'));
   }
 
   /**
@@ -287,56 +289,56 @@ export abstract class BasePolicyPermissionAdapter implements PolicyPermissionAda
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async inspectPrincipal(_ref: PrincipalRef): Promise<PrincipalSnapshot> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: inspectPrincipal requires provider implementation');
+    throw new Error(__t('capabilities.error.inspect_principal_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async listPolicyBindings(_p: PrincipalRef): Promise<PolicyBinding[]> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: listPolicyBindings requires provider implementation');
+    throw new Error(__t('capabilities.error.list_policy_bindings_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async validateNativePolicy(_d: unknown): Promise<ValidationReport> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: validateNativePolicy requires provider implementation');
+    throw new Error(__t('capabilities.error.validate_native_policy_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async renderPolicy(_t: unknown, _c: Record<string, unknown>): Promise<RenderedPolicy> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: renderPolicy requires provider implementation');
+    throw new Error(__t('capabilities.error.render_policy_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public diffPolicy(_exp: RenderedPolicy, _obs: NativePolicySnapshot): PolicyDiff {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: diffPolicy requires provider implementation');
+    throw new Error(__t('capabilities.error.diff_policy_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async planPolicyMutation(_diff: PolicyDiff): Promise<MutationPlan> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: planPolicyMutation requires provider implementation');
+    throw new Error(__t('capabilities.error.plan_mutation_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async applyApprovedPolicyPlan(_plan: ApprovedPlan): Promise<MutationResult> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: applyApprovedPolicyPlan requires provider implementation');
+    throw new Error(__t('capabilities.error.apply_plan_required'));
   }
 
   /**
    * @deprecated Deprecated since v1.2.0. Legacy mutation contract.
    */
   public async verifyPolicyMutation(_result: MutationResult): Promise<ValidationReport> {
-    throw new Error('COR_POLICY_VERIFICATION_UNPROVEN: verifyPolicyMutation requires provider implementation');
+    throw new Error(__t('capabilities.error.verify_mutation_required'));
   }
 }
 
@@ -345,7 +347,7 @@ export class AdapterRegistry {
 
   public static registerAdapter(adapter: PolicyPermissionAdapter): void {
     if (!adapter || !adapter.providerId) {
-      throw new Error('Adapter registration failed: missing providerId');
+      throw new Error(__t('capabilities.error.adapter_missing_provider_id'));
     }
 
     const normativeMethods = [
@@ -365,7 +367,7 @@ export class AdapterRegistry {
     if (!hasNormative && !hasLegacy) {
       const missingMethod = (typeof (adapter as any).discoverIdentity === 'function' ? normativeMethods : legacyMethods)
         .find((m) => typeof (adapter as any)[m] !== 'function');
-      throw new Error(`Adapter for provider '${adapter.providerId}' is non-compliant: missing required method '${missingMethod}'`);
+      throw new Error(__t('capabilities.error.adapter_non_compliant', { providerId: adapter.providerId, method: missingMethod }));
     }
 
     if (hasLegacy && !hasNormative) {
@@ -385,7 +387,7 @@ export class AdapterRegistry {
   public static getRequiredAdapter(providerId: string): PolicyPermissionAdapter {
     const adapter = this.adapters.get(providerId);
     if (!adapter) {
-      throw new Error(`Provider adapter '${providerId}' is not registered or supported.`);
+      throw new Error(__t('capabilities.error.adapter_not_registered', { providerId }));
     }
     return adapter;
   }

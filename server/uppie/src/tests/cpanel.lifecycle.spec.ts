@@ -14,8 +14,7 @@
 import { CpanelAdapter } from '../adapters/cpanel/CpanelAdapter';
 import type { CpanelDocument } from '../adapters/cpanel/CpanelHelpers';
 import { fakeWhm, ctx, rule, FEATURES } from './support/whmFake';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

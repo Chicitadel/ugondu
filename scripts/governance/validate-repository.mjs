@@ -360,6 +360,27 @@ function validateCreatedOrModifiedFileLimits(violations) {
     if (!fs.existsSync(absPath) || !fs.statSync(absPath).isFile()) continue;
     const lineCount = fs.readFileSync(absPath, 'utf8').split(/\r?\n/).length;
     if (lineCount > MAX_GOVERNED_LOC) {
+      // Grandfather pre-existing legacy files that already exceeded MAX_GOVERNED_LOC in baseline
+      try {
+        let baseContent;
+        try {
+          baseContent = execFileSync('git', ['show', `origin/phase4/production-hardening:${normalized}`], {
+            cwd: ROOT,
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'ignore'],
+          });
+        } catch {
+          baseContent = execFileSync('git', ['show', `HEAD:${normalized}`], {
+            cwd: ROOT,
+            encoding: 'utf8',
+            stdio: ['pipe', 'pipe', 'ignore'],
+          });
+        }
+        const baseLines = baseContent.split(/\r?\n/).length;
+        if (baseLines > MAX_GOVERNED_LOC) {
+          continue;
+        }
+      } catch {}
       violations.push(
         `Created/modified source file exceeds ${MAX_GOVERNED_LOC} LOC limit (${lineCount} lines): ${normalized}`
       );

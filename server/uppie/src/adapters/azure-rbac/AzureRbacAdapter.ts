@@ -28,8 +28,7 @@
  ******************************************************************************/
 
 import { createHash } from 'crypto';
-// @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import type {
   IPolicyProviderAdapter, AdapterContext, AdapterCapabilityDeclaration, ProviderNativePolicy,
   PolicyValidationResult, AttachResult, DetachResult, UpdateResult, CloneResult,

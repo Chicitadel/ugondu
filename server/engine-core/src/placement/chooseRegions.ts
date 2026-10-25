@@ -1,12 +1,12 @@
 /******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System
- * Module         : server/engine-core/src/placement
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Engine Core / Placement Engine
  * File           : chooseRegions.ts
  * Version        : 1.0.0
- * Author         : Region Decision Engineer
- * Organization   : Enterprise
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-08
- * Last Modified  : 2026-10-08
+ * Last Modified  : 2026-10-25
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -17,19 +17,15 @@
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
  *
  * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 Enterprise
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { PlacementIntent, PlacementCertificate, RegionCapabilityRegistry, RegionCapability, PlacedResource } from './types';
@@ -124,7 +120,7 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
     
     const minRegions = intent.availability?.minimumRegions || 1;
     if (validRegions.length < minRegions) {
-        throw new PlacementBlockedError(`Insufficient qualified regions. Found ${validRegions.length}, required ${minRegions}.`);
+        throw new PlacementBlockedError(__t('placement.error.insufficient_qualified_regions', { found: validRegions.length, required: minRegions }));
     }
 
     // Optimization Stage
@@ -160,7 +156,7 @@ export async function solvePlacement(intent: PlacementIntent, registry: RegionCa
         }
         
         if (minRegions > 1 && secondaryRegions.length < (minRegions - 1)) {
-             throw new PlacementBlockedError(`Failed to resolve ${minRegions} valid regions with DR/separation constraints.`);
+             throw new PlacementBlockedError(__t('placement.error.failed_to_resolve_regions', { required: minRegions }));
         }
     }
 

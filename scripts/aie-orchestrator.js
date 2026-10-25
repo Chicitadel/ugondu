@@ -116,7 +116,9 @@ async function orchestrate() {
             GH_PROMPT_DISABLED: '1',
             // Pass value via stdin
         });
-    } catch(e) {}
+    } catch(e) {
+        log(`Warning: Failed to set GitHub Actions Secret via gh CLI: ${e.message}`);
+    }
 }
 
 orchestrate().catch(console.error);

@@ -30,7 +30,7 @@
 
 import { generateKeyPairSync, createHash } from 'crypto';
 import path from 'path';
-import { globalTrustRegistry } from '@ugondu/shared';
+import { globalTrustRegistry, Logger } from '@ugondu/shared';
 import {
   KeyLoader,
   KeyState,
@@ -62,8 +62,11 @@ function syncRecipeKeyToTrustRegistry(state: KeyState): void {
       publicKey: state.publicKeyPem.trim(),
       privateKey: privPem.trim(),
     });
-  } catch {
-    // Non-fatal if trust registry registration encounters an isolated test mock
+  } catch (err: unknown) {
+    Logger.warn('Trust registry key synchronization non-fatal warning', {
+      keyId: state.keyId,
+      error: err instanceof Error ? err.message : String(err)
+    });
   }
 }
 

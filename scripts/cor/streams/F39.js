@@ -72,10 +72,12 @@ async function verifyObjective(context, observations, artifacts) {
         }
     };
     
+    let expectedAtomicError = null;
     try {
         await orchestrator.executeAtomically(plan, adapter2, scope);
     } catch(e) {
-        // Throws 'atomic_execution_failed_and_wa' or equivalent
+        expectedAtomicError = e;
+        observations.push(`Captured expected atomic failure exception: ${e.message}`);
     }
 
     if (!executionRefused) throw new Error("F39_EXECUTION_NOT_REFUSED: Did not refuse execution on drift");

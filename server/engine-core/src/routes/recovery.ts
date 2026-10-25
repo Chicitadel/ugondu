@@ -123,7 +123,7 @@ export async function executeGovernedRecovery(
     expectedRevision?: number
 ) {
     if (!process.env.UGONDU_UPM_SECRET) {
-        throw new Error('UGONDU_UPM_SECRET missing. Policy gate failed closed.');
+        throw new Error(__t('messages.error.upm_secret_missing'));
     }
 
     const pureIntent = canonicalIntent(intent);
@@ -147,7 +147,7 @@ export async function executeGovernedRecovery(
 
     if (!capability) {
         throw new Error(
-            `Capability ${pureIntent.capabilityId} not registered or unsupported.`
+            __t('messages.error.capability_unsupported', { capabilityId: pureIntent.capabilityId })
         );
     }
 

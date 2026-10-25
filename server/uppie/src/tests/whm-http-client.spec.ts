@@ -13,8 +13,7 @@
 
 import { WhmApiError } from '../adapters/cpanel/CpanelClient';
 import { createHttpWhmClient, parseAccounts, parseFeatureListNames, parseFeatures, parsePackages } from '../adapters/cpanel/WhmHttpClient';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

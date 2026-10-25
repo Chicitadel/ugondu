@@ -27,8 +27,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-// @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import type {
   IPolicyProviderAdapter, AdapterContext, AdapterCapabilityDeclaration, ProviderNativePolicy,
   PolicyValidationResult, AttachResult, DetachResult, UpdateResult, CloneResult,
@@ -261,7 +260,7 @@ export class KubernetesRbacAdapter implements IPolicyProviderAdapter {
   }
 
   async detectUnused(_context: AdapterContext, _thresholdDays: number): Promise<UsageObservation[]> {
-    throw new Error('NOT_OBSERVABLE: Kubernetes RBAC does not provide usage history');
+    throw new Error(__t('uppie.adapter.k8s.not_observable'));
   }
 
   async findDependencies(policyId: string, _context: AdapterContext): Promise<DependencyReport> {

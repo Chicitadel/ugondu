@@ -367,7 +367,7 @@ export function createRepositoryAdapterApp(
 
             if (!adapter) {
                 res.status(400).json({
-                    error: 'A valid repositoryUrl or providerId is required to validate credentials.',
+                    error: __t('repository.error.url_or_provider_required'),
                     code: 'INVALID_PROVIDER',
                     correlationId: req.correlationId
                 });

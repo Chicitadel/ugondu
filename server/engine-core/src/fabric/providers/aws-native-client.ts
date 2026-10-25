@@ -1,14 +1,34 @@
 /******************************************************************************
- * Project        : Ugondu Platform
+ * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Provider Fabric - Native AWS SDK Client
  * File           : aws-native-client.ts
- * Version        : 2.1.0
- * Author         : Air Roofers Ltd
+ * Version        : 3.0.0
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-04
- * Classification : ENTERPRISE
+ * Last Modified  : 2026-10-25
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
+ *
+ * Signatures:
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
-import { Logger, __t } from '@ugondu/shared';
+import { Logger, __t, translateProviderError } from '@ugondu/shared';
 import * as crypto from 'crypto';
 import { IAwsClient } from './aws';
 import { resolveSecret } from '../engine/SecretGuard';
@@ -114,7 +134,7 @@ export class AwsNativeClient implements IAwsClient {
         this.ecr = new ECRClient(config);
         this.cw = new CloudWatchLogsClient(config);
         this.iam = new IAMClient(config);
-        Logger.info(`AwsNativeClient natively instantiated for region: ${region}`);
+        Logger.info(__t('aws.client.instantiated', { region }));
     }
 
     public setTransactionId(txId: string): void {
@@ -134,11 +154,11 @@ export class AwsNativeClient implements IAwsClient {
     
     public async deleteSubnet(params: any): Promise<any> {
         const subnetId = typeof params === 'string' ? params : params?.SubnetId;
-        if (!subnetId) throw new Error('SubnetId is required to delete subnet');
+        if (!subnetId) throw new Error(__t('aws.error.subnet_id_required'));
         const tagRes = await this.ec2.send(new DescribeSubnetsCommand({ SubnetIds: [subnetId] }));
         const tags = tagRes.Subnets?.[0]?.Tags || [];
         if (!tags.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some((t: any) => t.Key === 'UgonduTransactionId')) {
-            throw new Error(`Refusing to delete Subnet ${subnetId}: missing ownership tags`);
+            throw new Error(__t('aws.error.subnet_missing_tags', { subnetId }));
         }
         let retries = 0;
         while (retries < 15) {
@@ -146,7 +166,7 @@ export class AwsNativeClient implements IAwsClient {
                 return await this.ec2.send(new DeleteSubnetCommand({ SubnetId: subnetId }));
             } catch (err: any) {
                 if (err.name === 'DependencyViolation') {
-                    Logger.info(`Subnet ${subnetId} has dependencies, retrying...`);
+                    Logger.info(__t('aws.client.subnet_dependencies_retry', { subnetId }));
                     await this.sleep(10000);
                     retries++;
                 } else {
@@ -154,7 +174,7 @@ export class AwsNativeClient implements IAwsClient {
                 }
             }
         }
-        throw new Error(`Timeout waiting for Subnet ${subnetId} dependencies to clear.`);
+        throw new Error(__t('aws.error.subnet_dependencies_timeout', { subnetId }));
     }
     public async modifyInstanceSecurityGroups(instanceId: string, securityGroupIds: string[]): Promise<any> { return this.ec2.send(new ModifyInstanceAttributeCommand({ InstanceId: instanceId, Groups: securityGroupIds })); }
     public async describeInstanceVolumes(instanceId: string): Promise<string[]> {
@@ -175,7 +195,17 @@ export class AwsNativeClient implements IAwsClient {
         try {
             const res = await this.ecs.send(new DescribeServicesCommand({ cluster, services }));
             if (res.services && res.services.length > 0) return res;
-        } catch {}
+        } catch (err: unknown) {
+            if (this.fargateSimulationState) {
+                Logger.warn('DescribeServices AWS call failed; falling back to fargate simulation state', {
+                    cluster,
+                    services,
+                    error: err instanceof Error ? err.message : String(err)
+                });
+            } else {
+                throw translateProviderError('AWS', err, { action: 'describeServices', cluster, services });
+            }
+        }
         if (this.fargateSimulationState) {
             return {
                 services: [{
@@ -234,7 +264,7 @@ export class AwsNativeClient implements IAwsClient {
         const id = instance.InstanceId;
 
         // P0-4 Waiter Implementation
-        Logger.info(`Waiting for EC2 instance ${id} to reach 'running' state...`);
+        Logger.info(__t('aws.client.ec2_waiting_running', { id }));
         let ip = 'pending';
         let retries = 0;
         while (retries < 30) {
@@ -247,13 +277,13 @@ export class AwsNativeClient implements IAwsClient {
                     return { id, ip, state: 'running' };
                 }
                 if (inst.State?.Name === 'terminated' || inst.State?.Name === 'shutting-down') {
-                    throw new Error(`Instance ${id} terminated unexpectedly during creation.`);
+                    throw new Error(__t('aws.error.instance_terminated_creation', { id }));
                 }
             }
             retries++;
         }
 
-        throw new Error(`Timeout waiting for instance ${id} to run.`);
+        throw new Error(__t('aws.error.instance_timeout_running', { id }));
     }
 
     public async terminateInstances(id: string): Promise<void> {
@@ -261,13 +291,13 @@ export class AwsNativeClient implements IAwsClient {
         const tagRes = await this.ec2.send(new DescribeInstancesCommand({ InstanceIds: [id] }));
         const tags = tagRes.Reservations?.[0]?.Instances?.[0]?.Tags || [];
         if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
-            throw new Error(`Refusing to terminate instance ${id}: missing ownership tags`);
+            throw new Error(__t('aws.error.instance_missing_tags', { id }));
         }
 
         const cmd = new TerminateInstancesCommand({ InstanceIds: [id] });
         await this.ec2.send(cmd);
         
-        Logger.info(`Waiting for EC2 instance ${id} to reach 'terminated' state...`);
+        Logger.info(__t('aws.client.ec2_waiting_terminated', { id }));
         let retries = 0;
         while (retries < 30) {
             await this.sleep(10000);
@@ -278,7 +308,7 @@ export class AwsNativeClient implements IAwsClient {
             }
             retries++;
         }
-        throw new Error(`Timeout waiting for instance ${id} to terminate.`);
+        throw new Error(__t('aws.error.instance_timeout_terminated', { id }));
     }
 
     public async createVpc(cidr: string, name: string): Promise<string> {
@@ -299,12 +329,12 @@ export class AwsNativeClient implements IAwsClient {
         const tagRes = await this.ec2.send(new DescribeVpcsCommand({ VpcIds: [id] }));
         const tags = tagRes.Vpcs?.[0]?.Tags || [];
         if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
-            throw new Error(`Refusing to delete VPC ${id}: missing ownership tags`);
+            throw new Error(__t('aws.error.vpc_missing_tags', { id }));
         }
 
         const cmd = new DeleteVpcCommand({ VpcId: id });
         
-        Logger.info(`Deleting VPC ${id}...`);
+        Logger.info(__t('aws.client.vpc_deleting', { id }));
         let retries = 0;
         while (retries < 10) {
             try {
@@ -312,7 +342,7 @@ export class AwsNativeClient implements IAwsClient {
                 return;
             } catch (err: any) {
                 if (err.name === 'DependencyViolation') {
-                    Logger.info(`VPC ${id} has dependencies, retrying...`);
+                    Logger.info(__t('aws.client.vpc_dependencies_retry', { id }));
                     await this.sleep(10000);
                     retries++;
                 } else {
@@ -320,7 +350,7 @@ export class AwsNativeClient implements IAwsClient {
                 }
             }
         }
-        throw new Error(`Timeout waiting for VPC ${id} dependencies to clear.`);
+        throw new Error(__t('aws.error.vpc_dependencies_timeout', { id }));
     }
 
     public async discoverAvailabilityZones(): Promise<string[]> {
@@ -359,7 +389,7 @@ export class AwsNativeClient implements IAwsClient {
         const tagRes = await this.ec2.send(new DescribeSecurityGroupsCommand({ GroupIds: [id] }));
         const tags = (tagRes as any).SecurityGroups?.[0]?.Tags || [];
         if (!tags.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some((t: any) => t.Key === 'UgonduTransactionId')) {
-            throw new Error(`Refusing to delete Security Group ${id}: missing ownership tags`);
+            throw new Error(__t('aws.error.sg_missing_tags', { id }));
         }
 
         let retries = 0;
@@ -369,7 +399,7 @@ export class AwsNativeClient implements IAwsClient {
                 return;
             } catch (err: any) {
                 if (err.name === 'DependencyViolation') {
-                    Logger.info(`Security Group ${id} has dependencies, retrying...`);
+                    Logger.info(__t('aws.client.sg_dependencies_retry', { id }));
                     await this.sleep(10000);
                     retries++;
                 } else {
@@ -377,7 +407,7 @@ export class AwsNativeClient implements IAwsClient {
                 }
             }
         }
-        throw new Error(`Timeout waiting for Security Group ${id} dependencies to clear.`);
+        throw new Error(__t('aws.error.sg_dependencies_timeout', { id }));
     }
 
     public async createDBSubnetGroup(name: string, subnetIds: string[]): Promise<string> {
@@ -400,7 +430,7 @@ export class AwsNativeClient implements IAwsClient {
                 return;
             } catch (err: any) {
                 if (err.name === 'InvalidDBSubnetGroupStateFault') {
-                    Logger.info(`DB Subnet Group ${name} is in use, retrying...`);
+                    Logger.info(__t('aws.client.db_subnet_group_in_use_retry', { name }));
                     await this.sleep(10000);
                     retries++;
                 } else if (err.name === 'DBSubnetGroupNotFoundFault') {
@@ -410,7 +440,7 @@ export class AwsNativeClient implements IAwsClient {
                 }
             }
         }
-        throw new Error(`Timeout waiting for DB Subnet Group ${name} to clear.`);
+        throw new Error(__t('aws.error.db_subnet_group_timeout', { name }));
     }
 
     public async createRds(name: string, engine: string, capacity: number, securityGroupId?: string, credentialsRef?: string, dbSubnetGroupName?: string): Promise<{ id: string; endpoint: string }> {
@@ -440,7 +470,7 @@ export class AwsNativeClient implements IAwsClient {
         const id = res.DBInstance.DBInstanceIdentifier;
 
         // P0-4 Waiter Implementation
-        Logger.info(`Waiting for RDS instance ${id} to become 'available'...`);
+        Logger.info(__t('aws.client.rds_waiting_available', { id }));
         let retries = 0;
         while (retries < 60) { // Can take up to 10-15 mins
             await this.sleep(15000);
@@ -454,13 +484,13 @@ export class AwsNativeClient implements IAwsClient {
                     };
                 }
                 if (inst.DBInstanceStatus === 'failed' || inst.DBInstanceStatus === 'incompatible-parameters') {
-                    throw new Error(`RDS ${id} entered failed state: ${inst.DBInstanceStatus}`);
+                    throw new Error(__t('aws.error.rds_failed_state', { id, status: inst.DBInstanceStatus }));
                 }
             }
             retries++;
         }
 
-        throw new Error(`Timeout waiting for RDS ${id} to become available.`);
+        throw new Error(__t('aws.error.rds_timeout_available', { id }));
     }
 
     public async deleteRds(id: string): Promise<void> {
@@ -468,7 +498,7 @@ export class AwsNativeClient implements IAwsClient {
         const tagRes = await this.rds.send(new DescribeDBInstancesCommand({ DBInstanceIdentifier: id }));
         const tags = tagRes.DBInstances?.[0]?.TagList || [];
         if (!tags.some(t => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some(t => t.Key === 'UgonduTransactionId')) {
-            throw new Error(`Refusing to delete RDS ${id}: missing ownership tags`);
+            throw new Error(__t('aws.error.rds_missing_tags', { id }));
         }
 
         const cmd = new DeleteDBInstanceCommand({ DBInstanceIdentifier: id, SkipFinalSnapshot: true });
@@ -503,15 +533,17 @@ export class AwsNativeClient implements IAwsClient {
             const tagRes = await this.s3.send(new GetBucketTaggingCommand({ Bucket: id }));
             const tags = (tagRes as any).TagSet || [];
             if (!tags.some((t: any) => t.Key === 'UgonduCOR' && t.Value === 'true') || !tags.some((t: any) => t.Key === 'UgonduTransactionId')) {
-                throw new Error(`Refusing to delete S3 bucket ${id}: missing ownership tags`);
+                throw new Error(__t('aws.error.s3_missing_tags', { id }));
             }
         } catch (e: any) {
             if (e.name === 'NoSuchTagSet' || e.name === 'NoSuchTagSetError' || e.name === 'NoSuchTagSetException') {
-                throw new Error(`Refusing to delete S3 bucket ${id}: missing ownership tags`);
+                throw new Error(__t('aws.error.s3_missing_tags', { id }));
             }
-            if (e.message && e.message.includes(__t('missing_ownership_tags'))) {
+            if (e.message && (e.message.includes(__t('missing_ownership_tags')) || e.message.includes('missing ownership tags'))) {
                 throw e;
             }
+            // Fail closed: re-throw AccessDenied or any provider tagging error
+            throw e;
         }
 
         const cmd = new DeleteBucketCommand({ Bucket: id });
@@ -561,7 +593,7 @@ export class AwsNativeClient implements IAwsClient {
             if (!res.ImageId) throw new Error(__t('ec2_ami_snapshot_creation_fail'));
             return res.ImageId;
         }
-        throw new Error(`Unsupported AWS snapshot resourceType: ${type}`);
+        throw new Error(__t('aws.error.snapshot_unsupported_resource_type', { type }));
     }
     public async createEcsCluster(name: string): Promise<string> {
         const res = await this.ecs.send(new CreateClusterCommand({ clusterName: name, tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: this.getTransactionId() }] }));
@@ -654,7 +686,7 @@ export class AwsNativeClient implements IAwsClient {
         const decision = engine.evaluateIntent('aws', execIntent, `fargate-${taskName}`);
 
         if (decision.decision !== 'ALLOW') {
-            throw new Error(`Governance Policy Denied: ${decision.reason}`);
+            throw new Error(__t('aws.error.governance_policy_denied', { reason: decision.reason }));
         }
 
         const execRoleName = `${taskName}-ExecRole-${Date.now()}`;
@@ -730,7 +762,7 @@ export class AwsNativeClient implements IAwsClient {
         const cmd = new DescribeDBInstancesCommand({ DBInstanceIdentifier: instanceId });
         const res = await this.rds.send(cmd);
         const inst = res.DBInstances?.[0];
-        if (!inst) throw new Error(`RDS instance ${instanceId} not found`);
+        if (!inst) throw new Error(__t('aws.error.rds_instance_not_found', { instanceId }));
         return (inst as any)[attribute];
     }
 
@@ -742,7 +774,14 @@ export class AwsNativeClient implements IAwsClient {
     }
     public async deleteContainerRegistry(name: string): Promise<void> {
         const { DeleteRepositoryCommand } = require('@aws-sdk/client-ecr');
-        await this.ecr.send(new DeleteRepositoryCommand({ repositoryName: name, force: true })).catch(() => {});
+        try {
+            await this.ecr.send(new DeleteRepositoryCommand({ repositoryName: name, force: true }));
+        } catch (err: any) {
+            if (/RepositoryNotFoundException|NotFound/i.test(String(err?.name || '') + String(err?.message || ''))) {
+                return;
+            }
+            throw translateProviderError('AWS', err, { action: 'deleteContainerRegistry', repositoryName: name });
+        }
     }
     public async buildContainerImage(dockerfile: string, tag: string): Promise<{ id: string }> {
         const digest = crypto.createHash('sha256').update(`${dockerfile}:${tag}`).digest('hex');

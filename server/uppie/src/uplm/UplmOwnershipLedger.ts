@@ -28,6 +28,7 @@
  ******************************************************************************/
 
 import { createHash } from 'crypto';
+import { __t } from '@ugondu/shared';
 import type { UplmNormalizedPolicyState, UplmOwnershipClass } from './UplmTypes';
 
 export interface OwnershipEvidenceSignals {
@@ -93,7 +94,7 @@ export class UplmOwnershipLedger {
 
   upsertRecord(record: OwnershipLedgerRecord): void {
     if (this.corruptedOrMissing) {
-      throw new Error('LEDGER_CORRUPT: Ownership ledger is marked missing/corrupted.');
+      throw new Error(__t('uplm.error.ledger_corrupt'));
     }
     this.records.set(record.immutableProviderId, record);
   }

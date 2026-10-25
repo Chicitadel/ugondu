@@ -14,8 +14,7 @@
 import { AzureRbacAdapter } from '../adapters/azure-rbac/AzureRbacAdapter';
 import type { AzureRoleDocument } from '../adapters/azure-rbac/AzureRbacHelpers';
 import { fakeAzure, ctx, rule, SCOPE, RG, RG2, USER_ID, GROUP_ID, READER_ID } from './support/azureFake';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

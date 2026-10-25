@@ -35,6 +35,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { __t } from './i18n';
 import { globalTrustRegistry } from './trust_registry';
+import { Logger } from './logger';
+import { translateProviderError } from './errors';
 export { globalTrustRegistry } from './trust_registry';
 
 export const ALLOWED_SERVICE_ISSUERS = new Set<string>([

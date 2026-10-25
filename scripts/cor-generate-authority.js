@@ -62,7 +62,9 @@ function main() {
             if (!accountId && require('fs').existsSync(targetPath)) {
                 try {
                     accountId = JSON.parse(require('fs').readFileSync(targetPath, 'utf8')).targets[0].accountId;
-                } catch (e) {}
+                } catch (e) {
+                    console.warn(`[WARN] Failed to read account ID from ${targetPath}: ${e.message}`);
+                }
             }
             region = 'us-east-1';
             roleName = 'UgonduCORRunner';

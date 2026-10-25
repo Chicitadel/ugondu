@@ -32,7 +32,7 @@ import * as path from 'path';
 import { Request } from 'express';
 import { randomBytes, sign, createHash, createPublicKey } from 'crypto';
 import canonicalize from 'canonicalize';
-import { signServiceIdentity, globalTrustRegistry } from '@ugondu/shared';
+import { signServiceIdentity, globalTrustRegistry, Logger } from '@ugondu/shared';
 import { KeyState } from '../crypto/key-loader';
 
 export type DeploymentLifecyclePhase =
@@ -145,7 +145,7 @@ export class DurableDeploymentLedger {
         }
       }
     } catch {
-      // Initialize fresh ledger if file does not exist or is unreadable
+      Logger.warn(`Deploy ledger load error at ${this.ledgerPath}; falling back to fresh ledger`);
     }
     return {
       schemaVersion: 1,
@@ -281,7 +281,7 @@ export function safeResolveRecipeKey(keyState: KeyState): {
       };
     }
   } catch {
-    // Fall back to explicit keyState passed to createDeployRouter
+    Logger.warn('Trust registry key resolution warning; falling back to explicit keyState');
   }
   const pubPem =
     keyState.publicKeyPem ||

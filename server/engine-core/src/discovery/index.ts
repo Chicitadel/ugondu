@@ -13,7 +13,7 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
-import { __t } from '@ugondu/shared';
+import { __t, Logger } from '@ugondu/shared';
 
 /**
  * @interface DiscoveryEvidence
@@ -113,7 +113,9 @@ export class DiscoveryEngine {
                             frameworks.add('fastify');
                             evidence.push({ technology: 'fastify', category: 'framework', sourceFile: file, matchedPattern: 'dependencies.fastify', confidence: 'DEFINITIVE' });
                         }
-                    } catch {}
+                    } catch (err) {
+                        Logger.warn('Failed to parse package.json content during discovery', { file, error: err instanceof Error ? err.message : String(err) });
+                    }
                 } else {
                     // Fallback to convention
                     entrypoints.push('index.js');
@@ -134,7 +136,9 @@ export class DiscoveryEngine {
                             frameworks.add('laravel');
                             evidence.push({ technology: 'laravel', category: 'framework', sourceFile: file, matchedPattern: 'require.laravel/framework', confidence: 'DEFINITIVE' });
                         }
-                    } catch {}
+                    } catch (err) {
+                        Logger.warn('Failed to parse composer.json content during discovery', { file, error: err instanceof Error ? err.message : String(err) });
+                    }
                 }
             }
 

@@ -27,8 +27,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-// @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import type {
   ConflictReport, DependencyReport, PolicyConflict, PolicySimulationResult, ProviderNativePolicy, ReconciliationPlan,
 } from '../IPolicyProviderAdapter';

@@ -15,6 +15,7 @@
 import * as crypto from 'crypto';
 import canonicalize from 'canonicalize';
 import { __t } from '../i18n';
+import { Logger } from '../logger';
 
 export type OapMessageType = 'HANDSHAKE' | 'ACTION_REQUEST' | 'ACTION_RESPONSE' | 'HEALTH' | 'DRAIN';
 

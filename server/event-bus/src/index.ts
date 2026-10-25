@@ -208,7 +208,7 @@ app.get('/v1/events/dlq', (req: Request, res: Response) => {
     const queryTenant = typeof req.query.tenantId === 'string' ? req.query.tenantId : undefined;
     if (typeof headerTenant === 'string' && queryTenant && headerTenant.trim() !== queryTenant.trim()) {
         return res.status(403).json({
-            error: 'Cross-tenant dead-letter access denied',
+            error: __t('event_bus.error.cross_tenant_dlq_denied'),
             code: ErrorCode.CROSS_TENANT_ACCESS_DENIED,
         });
     }
@@ -230,14 +230,14 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
         return res.status(400).json({
             error: __t('event_req'),
             code: ErrorCode.SCHEMA_VALIDATION_FAILED,
-            details: ['tenantId, type (or event), and webhookUrl are required'],
+            details: [__t('messages.error.event_subscription_fields_required')],
         });
     }
 
     const headerTenant = req.headers['x-tenant-id'];
     if (typeof headerTenant === 'string' && headerTenant.trim() !== tenantId) {
         return res.status(403).json({
-            error: 'Cross-tenant subscription rejected',
+            error: __t('event_bus.error.cross_tenant_sub_rejected'),
             code: ErrorCode.CROSS_TENANT_ACCESS_DENIED,
         });
     }
@@ -262,12 +262,12 @@ app.post('/v1/events/subscribe', (req: Request, res: Response): any => {
 
 app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any> => {
     if (activeQueueDepth >= runtimeConfig.maxQueueDepth) {
-        Logger.warn('Event Bus queue capacity reached; applying backpressure', {
+        Logger.warn(__t('event_bus.warn.queue_capacity_reached'), {
             queueDepth: activeQueueDepth,
             maxQueueDepth: runtimeConfig.maxQueueDepth,
         });
         return res.status(429).json({
-            error: 'Event Bus queue capacity exceeded',
+            error: __t('event_bus.error.queue_capacity_exceeded'),
             code: 'BACKPRESSURE_REJECTED',
             queueDepth: activeQueueDepth,
             maxQueueDepth: runtimeConfig.maxQueueDepth,
@@ -286,19 +286,19 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
     const { envelope } = validation;
     const headerTenant = req.headers['x-tenant-id'];
     if (typeof headerTenant === 'string' && headerTenant.trim() !== envelope.tenantId) {
-        Logger.warn('Cross-tenant event publish blocked', {
+        Logger.warn(__t('event_bus.warn.cross_tenant_publish_blocked'), {
             headerTenant: headerTenant.trim(),
             envelopeTenant: envelope.tenantId,
             eventId: envelope.eventId,
         });
         return res.status(403).json({
-            error: 'Cross-tenant event publish denied',
+            error: __t('event_bus.error.cross_tenant_publish_denied'),
             code: ErrorCode.CROSS_TENANT_ACCESS_DENIED,
         });
     }
 
     if (eventStore.hasProcessedEvent(envelope.eventId)) {
-        Logger.info('Duplicate eventId suppressed by idempotency filter', {
+        Logger.info(__t('event_bus.info.duplicate_event_suppressed'), {
             eventId: envelope.eventId,
             tenantId: envelope.tenantId,
             type: envelope.type,
@@ -316,7 +316,7 @@ app.post('/v1/events/publish', async (req: Request, res: Response): Promise<any>
     activeQueueDepth++;
     try {
         eventStore.markEventProcessed(envelope.eventId, envelope.timestamp);
-        Logger.info(__t('dispatching') + ` ${envelope.type}`, {
+        Logger.info(__t('event_bus.info.dispatching_event', { type: envelope.type }), {
             eventId: envelope.eventId,
             tenantId: envelope.tenantId,
             schemaVersion: envelope.schemaVersion,

@@ -37,7 +37,7 @@ import * as https from 'https';
 import { promises as dns } from 'dns';
 import { URL } from 'url';
 import { isPrivateOrLocal } from './ip-blocklist';
-import { __t, ProductRegistry } from '@ugondu/shared';
+import { __t, ProductRegistry, Logger } from '@ugondu/shared';
 
 /**
  * @class SSRFBlockedError
@@ -76,7 +76,7 @@ function isTrustedInternalServiceOrigin(targetUrl: URL): boolean {
                 return true;
             }
         } catch {
-            // ignore malformed candidate
+            Logger.warn('Malformed trusted service URL candidate in SSRF validation', { candidate });
         }
     }
     return false;

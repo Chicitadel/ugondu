@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : UAIGOS
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Engine Core - Discovery
  * File           : kubernetes-probe.ts
  * Version        : 1.0.0

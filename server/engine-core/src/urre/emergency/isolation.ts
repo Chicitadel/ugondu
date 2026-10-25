@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project : Ugondu — Universal Delivery Operating System (UAIGOS)
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : URRE Emergency
  * File           : isolation.ts
  * Version        : 3.0.0

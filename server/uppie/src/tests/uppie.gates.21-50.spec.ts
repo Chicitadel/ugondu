@@ -18,7 +18,7 @@ import { AdapterRegistry } from '../adapters/AdapterRegistry';
 import { AwsIamPolicyAdapter } from '../adapters/aws-iam/AwsIamPolicyAdapter';
 import type { IPolicyProviderAdapter, AdapterContext } from '../adapters/IPolicyProviderAdapter';
 import type { AuthorizationRule } from '../types/index';
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any;
 declare var it: any;

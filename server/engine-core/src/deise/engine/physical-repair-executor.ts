@@ -1,4 +1,32 @@
-import { Logger } from '@ugondu/shared';
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Engine Core / DEISE / Physical Repair Executor
+ * File           : physical-repair-executor.ts
+ * Version        : 2.1.0
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
+ * Created Date   : 2026-09-30
+ * Last Modified  : 2026-10-25
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ * - Zero String Hardcoding
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
+ ******************************************************************************/
+
+import { Logger, __t } from '@ugondu/shared';
 import { RepairPlan } from './repair-engine';
 import { DriftCategory } from '../model/drift';
 import { DirectAdminNativeClient } from '../../fabric/providers/directadmin-native-client';
@@ -15,11 +43,11 @@ export class PhysicalRepairExecutor {
             return true; // Nothing to repair physically
         }
 
-        Logger.info(`Executing Physical Repair for instance ${instanceId}...`);
+        Logger.info(__t('deise.repair.executing_instance', { instanceId }));
 
         for (const diag of plan.diagnoses) {
             if (diag.category === DriftCategory.TOPOLOGY_DRIFT) {
-                Logger.info(`Repairing Topology Drift: ${diag.description}`);
+                Logger.info(__t('deise.repair.repairing_drift', { description: diag.description }));
 
                 // Specific fix for the DirectAdmin "public_html broken symlink" incident
                 if (diag.description.includes('pointer') || diag.description.includes('public_html')) {
@@ -27,7 +55,7 @@ export class PhysicalRepairExecutor {
                         // The 'daClient' now has a physical execCmd (exposed or used internally)
                         // However, we need a specific 'repairSymlink' capability or just use createHostedApp
                         // For a precise DirectAdmin physical fix:
-                        Logger.info(`Executing physical SSH restoration of public_html for ${instanceId}`);
+                        Logger.info(__t('deise.repair.ssh_restoration', { instanceId }));
 
                         // We will physically recreate the public_html symlink pointing to the current release
                         // (Assuming release_currentVersion is tracked or we fallback to an empty safe dir)
@@ -35,9 +63,9 @@ export class PhysicalRepairExecutor {
                         // We'll call a dedicated repair function on the client.
                         await this.daClient.createHostedApp(instanceId, 'repair');
 
-                        Logger.info(`Successfully repaired topology for ${instanceId}`);
+                        Logger.info(__t('deise.repair.topology_repaired', { instanceId }));
                     } catch (err) {
-                        Logger.error(`Physical repair failed: ${(err as Error).message}`);
+                        Logger.error(__t('deise.repair.failed', { error: (err as Error).message }));
                         return false;
                     }
                 }

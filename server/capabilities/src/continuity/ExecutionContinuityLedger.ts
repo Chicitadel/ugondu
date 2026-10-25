@@ -28,6 +28,7 @@
  ******************************************************************************/
 
 import * as crypto from 'crypto';
+import { __t } from '@ugondu/shared';
 
 export type ContinuityExecutionState =
   | 'INITIALIZED'
@@ -115,7 +116,7 @@ export class ExecutionContinuityLedger {
     const token = fencingToken ?? this.currentFencingToken;
     if (token < this.currentFencingToken) {
       throw new Error(
-        `Fencing token violation: provided ${token} is lower than current active token ${this.currentFencingToken}`
+        __t('messages.error.fencing_token_violation', { token, currentToken: this.currentFencingToken })
       );
     }
     this.currentFencingToken = token;
@@ -227,7 +228,7 @@ export class ExecutionContinuityLedger {
   public createCheckpoint(transactionId: string): CheckpointSnapshot {
     const txEntries = this.entries.filter((e) => e.transactionId === transactionId);
     if (txEntries.length === 0) {
-      throw new Error(`Cannot checkpoint non-existent transaction '${transactionId}'`);
+      throw new Error(__t('messages.error.checkpoint_nonexistent_transaction', { transactionId }));
     }
 
     const last = txEntries[txEntries.length - 1];

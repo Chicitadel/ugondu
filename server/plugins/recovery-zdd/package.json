@@ -1,0 +1,12 @@
+{
+  "name": "@ugondu/plugin-recovery-zdd",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Zero-Downtime Deployment (ZDD) Topology Repair Recovery Capability Plugin",
+  "main": "src/zdd-topology-repair.ts",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@ugondu/shared": "^1.0.0"
+  }
+}

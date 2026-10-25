@@ -15,6 +15,7 @@
 import crypto from 'crypto';
 import canonicalize from 'canonicalize';
 import { __t } from '../i18n';
+import { Logger } from '../logger';
 
 export interface SovereignCryptographicLease {
     leaseId: string;

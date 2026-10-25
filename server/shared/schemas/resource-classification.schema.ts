@@ -1,10 +1,10 @@
 /******************************************************************************
- * Project        : UAIGOS
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Resource Classification Schema
  * File           : resource-classification.schema.ts
  * Version        : 1.0.0
  * Author         : Universal Provenance Engineer
- * Organization   : UAIGOS Organization
+ * Organization   : Air Roofers SASU / Ujomor Systems
  * Created Date   : 2026-10-08
  * Last Modified  : 2026-10-08
  * Classification : ENTERPRISE
@@ -28,7 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 UAIGOS Organization
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  * All Rights Reserved.
  ******************************************************************************/
 

@@ -14,7 +14,7 @@
 import { EntitlementResolver } from '../entitlement-resolver/EntitlementResolver';
 import { CapabilityStateMachine } from '../capability-lifecycle/CapabilityStateMachine';
 import type { CapabilityManifest } from '../entitlement-resolver/CapabilityManifest';
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any;
 declare var it: any;

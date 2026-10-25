@@ -29,8 +29,7 @@
 
 import { z } from 'zod';
 
-// @ts-ignore
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 export const PolicyRuleSchema = z.object({
   id: z.string(),

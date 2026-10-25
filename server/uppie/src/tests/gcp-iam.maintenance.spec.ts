@@ -13,8 +13,7 @@
 
 import { GcpIamAdapter } from '../adapters/gcp-iam/GcpIamAdapter';
 import { fakeGcp, ctx, rule, ORG, FOLDER, PROJECT, OTHER, USER, BOB, VIEWER } from './support/gcpFake';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

@@ -111,7 +111,7 @@ export function createDeployRouter(
           res.status(409).json({
             error: 'IDEMPOTENCY_CONFLICT',
             code: 'IDEMPOTENCY_CONFLICT',
-            message: 'Idempotency-Key already used with a different deployment payload.',
+            message: __t('messages.error.idempotency_key_deployment_conflict'),
           });
           return;
         }

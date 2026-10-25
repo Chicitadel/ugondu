@@ -16,8 +16,7 @@ import { K8sApiError } from '../adapters/kubernetes-rbac/KubernetesRbacClient';
 import type { K8sClusterRole } from '../adapters/kubernetes-rbac/KubernetesRbacClient';
 import { fakeCluster, ctx, rule } from './support/k8sFakeCluster';
 import { compileK8sPolicyRules, parseScope, parseSubject, buildBindingName } from '../adapters/kubernetes-rbac/KubernetesRbacHelpers';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

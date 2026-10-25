@@ -15,8 +15,7 @@ import { AwsIamPolicyAdapter } from '../adapters/aws-iam/AwsIamPolicyAdapter';
 import { compileConditions } from '../adapters/aws-iam/AwsIamConditions';
 import type { AwsPolicyDocument } from '../adapters/aws-iam/AwsIamClient';
 import { fakeIam, ARN, ACCOUNT, ctx, rule } from './support/awsFakeIam';
-// @ts-ignore
-import { __t } from '../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 
 declare var describe: any, it: any, expect: any;
 

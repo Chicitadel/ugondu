@@ -394,7 +394,7 @@ describe('LiveInferenceReceipt & Production Fleet Activation Boundaries', () => 
             source: 'airroofers-live-transport', httpStatus: 200, verification: 'AUTHENTIC_LIVE_INFERENCE_QUALIFIED',
             candidateSha: 'candidate-head', modelId: 'test-model', responseDigestSha256: computeSha256('out'),
             providerRequestId: 'req-host', endpointHost: 'attacker.evil-proxy.org', observedAt: new Date().toISOString(),
-        })).toThrow(/Disallowed endpoint host/);
+        })).toThrow(/Disallowed endpoint host|ai\.error\.receipt_endpoint_disallowed/);
 
         const lc = new ModelLifecycle({ alias: 'bad-host-model', providerId: 'airroofers-ai' });
         lc.state = 'QUALIFIED';

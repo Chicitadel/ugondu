@@ -1,37 +1,36 @@
 /******************************************************************************
- * Project        : Universal Autonomous AI Governance Operating System (UAIGOS)
- * Module         : Engine Core - Database Lifecycle
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Engine Core / Database Lifecycle
  * File           : migration.ts
- * Version        : 1.0.0
- * Author         : Enterprise Architecture Team
- * Organization   : UAIGOS Governance Board
+ * Version        : 2.0.0
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU / Ujomor Systems
  * Created Date   : 2026-10-08
- * Last Modified  : 2026-10-08
- * Classification : ENTERPRISE
+ * Last Modified  : 2026-10-25
+ * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
+ * - Fail-Closed Semantics
  *
  * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
  *
  * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 UAIGOS Governance Board
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { DatabaseProvider } from './provider';
+import { Logger, translateProviderError, __t } from '@ugondu/shared';
 
 export interface MigrationStep {
     id: string;
@@ -53,20 +52,24 @@ export class MigrationManager {
                 await this.performSchemaDiff(step);
                 await this.createBackupCheckpoint(step);
                 await this.provider.execute(step.upQuery);
-                // Note: Governance tracking for applied migrations goes here.
-            } catch (error) {
+            } catch (error: unknown) {
                 await this.rollbackStrategy(step);
-                throw new Error(`Migration ${step.id} failed and was rolled back. Reason: ${(error as Error).message}`);
+                throw translateProviderError('DATABASE', error, {
+                    action: 'safelyMigrate',
+                    stepId: step.id,
+                    checksum: step.checksum,
+                    rollbackCompleted: true
+                });
             }
         }
     }
 
     private async performSchemaDiff(step: MigrationStep): Promise<void> {
-        console.log(`[GOV-LOG] Enforcing schema diffing for ${step.id}...`);
+        Logger.info(`[GOV-LOG] Enforcing schema diffing for ${step.id}...`, { stepId: step.id });
     }
 
     private async createBackupCheckpoint(step: MigrationStep): Promise<void> {
-        console.log(`[GOV-LOG] Creating backup checkpoint for ${step.id}...`);
+        Logger.info(`[GOV-LOG] Creating backup checkpoint for ${step.id}...`, { stepId: step.id });
     }
 
     /**
@@ -75,8 +78,14 @@ export class MigrationManager {
     private async rollbackStrategy(step: MigrationStep): Promise<void> {
         try {
             await this.provider.execute(step.downQuery);
-        } catch (rollbackError) {
-            throw new Error(`CRITICAL: Rollback failed for migration ${step.id}. Manual intervention required. Reason: ${(rollbackError as Error).message}`);
+        } catch (rollbackError: unknown) {
+            throw translateProviderError('DATABASE', rollbackError, {
+                action: 'rollbackStrategy',
+                stepId: step.id,
+                checksum: step.checksum,
+                critical: true,
+                manualInterventionRequired: true
+            });
         }
     }
 }

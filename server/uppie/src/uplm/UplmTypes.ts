@@ -27,6 +27,8 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
+
 /**
  * 13 Canonical Bootstrap States (Agent-Neutral Capability Contract §5.2).
  */
@@ -87,7 +89,7 @@ export function guardPolicyStateConversion(
     (toState === 'MISSING' || toState === 'COMPLIANT')
   ) {
     throw new Error(
-      `UPLM Invariant Violation (§3.2): Cannot convert ambiguous/conflicting policy state '${fromState}' directly to '${toState}'.`
+      __t('uplm.error.invariant_violation', { fromState, toState })
     );
   }
   return toState;

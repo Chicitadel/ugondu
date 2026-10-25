@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project : Ugondu — Universal Delivery Operating System (UAIGOS)
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : URRE Admission
  * File           : preflight.ts
  * Version        : 3.0.0

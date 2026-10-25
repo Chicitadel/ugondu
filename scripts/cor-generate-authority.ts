@@ -26,7 +26,9 @@ async function main() {
             const raw = require('fs').readFileSync(targetPath, 'utf8');
             const targetConfig = JSON.parse(raw);
             accountId = targetConfig.targets?.[0]?.accountId || '';
-        } catch {}
+        } catch (err: unknown) {
+            console.warn(`[WARN] Failed to load target configuration from ${targetPath}: ${err instanceof Error ? err.message : String(err)}`);
+        }
     }
     const region = 'us-east-1';
     const roleName = 'UgonduCORRunner';

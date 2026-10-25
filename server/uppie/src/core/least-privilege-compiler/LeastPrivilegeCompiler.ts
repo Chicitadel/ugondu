@@ -27,7 +27,7 @@
  * Copyright (c) 2026 Air Roofers. All Rights Reserved.
  ******************************************************************************/
 
-import { __t } from '../../../../shared/i18n';
+import { __t } from '@ugondu/shared';
 import type { AuthorizationRule, AuthorizationAction, AuthorizationResource } from '../../types/index';
 import type { CapabilityGapResult } from '../policy-evaluation-engine/EffectiveAuthorityCalculator';
 import { randomUUID } from 'crypto';

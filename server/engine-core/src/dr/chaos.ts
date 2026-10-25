@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { execFileSync } from 'child_process';
-import { __t } from '@ugondu/shared';
+import { __t, Logger } from '@ugondu/shared';
 
 export type ChaosFaultType = 'NETWORK_PARTITION' | 'TARGET_CRASH' | 'STATE_CORRUPTION';
 
@@ -192,7 +192,12 @@ export class DisasterRecoveryEngine {
                 if (fs.existsSync(sandboxDir)) {
                     fs.rmSync(sandboxDir, { recursive: true, force: true });
                 }
-            } catch {}
+            } catch (cleanupErr: unknown) {
+                Logger.warn('Chaos engine sandbox cleanup failed', {
+                    sandboxDir,
+                    error: cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr)
+                });
+            }
         }
     }
 }

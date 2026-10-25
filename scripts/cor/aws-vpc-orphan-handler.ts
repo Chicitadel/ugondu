@@ -5,7 +5,7 @@ import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
 import { __t } from '../../server/shared/i18n';
 
 if (!process.env.AWS_REGION) {
-    throw new Error('Safety Violation: AWS_REGION must be explicitly specified in the environment.');
+    throw new Error(__t('messages.error.aws_region_required'));
 }
 
 const ec2Client = new EC2Client({ region: process.env.AWS_REGION });
@@ -25,7 +25,7 @@ async function runVpcOrphanReconciliation() {
     const principalArn = identity.Arn;
 
     if (!accountId || !principalArn) {
-        throw new Error('Failed to resolve AWS Caller Identity.');
+        throw new Error(__t('messages.error.aws_caller_identity_failed'));
     }
 
     const describeVpcsCommand = new DescribeVpcsCommand({});
@@ -63,7 +63,7 @@ async function runVpcOrphanReconciliation() {
             const approvalSignatureString = process.env.UGONDU_APPROVAL_SIGNATURES;
 
             if (!transactionId || !intentHash || !approvalSignatureString) {
-                throw new Error('DESTRUCTIVE_ACTION_BLOCKED REASON=NO_VALID_AUTHORIZATION');
+                throw new Error(__t('messages.error.destructive_action_blocked_no_auth'));
             }
 
             const approvalSignatures = approvalSignatureString.split(',').map(s => s.trim());

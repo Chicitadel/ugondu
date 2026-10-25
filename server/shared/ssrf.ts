@@ -36,6 +36,7 @@ import * as net from 'net';
 import * as http from 'http';
 import * as https from 'https';
 import { __t } from './i18n';
+import { Logger } from './logger';
 
 export class NetworkDestinationPolicy {
     static isDisallowedIPv4(ip: string): boolean {
