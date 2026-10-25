@@ -157,3 +157,16 @@ This update closes the previous **latest-head PR regression verification pending
 - `532078b337cf60dae93880e65a86253be8bade2b`: canonical guardrail records the finding.
 
 **Verification state:** Latest-head CI rerun pending. Keep the finding YELLOW until T04 and the governance regression suite pass on the new PR merge candidate. No release evidence was hand-edited; universal commercial release remains **NOT CERTIFIED**.
+
+
+## Latest-head verification — COR-REM-006 / COR-REM-007 (2026-10-25 21:35 UTC)
+
+The prior pending-verification statements in the COR-REM-006 and COR-REM-007 sections above are superseded for **PR CI acceptance** by the completed latest-head runs:
+
+- PR source head: `3267d637b1473ab02aff906e697aefafb297040e`; PR #24 remains draft/open/unmerged.
+- [CI/CD run #541 (`40236147953`)](https://github.com/Chicitadel/ugondu/actions/runs/40236147953): SUCCESS. Attribution and T03 passed, the explicit workspace build prerequisite passed, T04 reported all 5/5 gates conformant, and `tests/governance-verifiers.test.mjs` passed 8/8 with zero failures.
+- [COR run #428 (`40236147971`)](https://github.com/Chicitadel/ugondu/actions/runs/40236147971): SUCCESS for PR validation. COR qualification passed; AWS physical qualification was intentionally skipped for the PR event; the final gate explicitly withheld release certification.
+
+COR-REM-006 and COR-REM-007 are now GREEN for PR-CI acceptance. This is not a universal release certification. The evidence manifest, AI qualification report and native-runner evidence still bind to the earlier candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`. AI qualification is still `CATALOG_OFFLINE`, with zero qualified/active models and 12 disabled. Broader native target, IDE/host/cloud, and immutable artifact lifecycle qualification remain open. Candidate freeze and approved evidence regeneration plus successful non-PR AWS physical qualification are still required.
+
+**Release decision remains: NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE.**
