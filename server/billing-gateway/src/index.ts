@@ -51,7 +51,8 @@ export type LicenseOutcome =
     | 'suspended'
     | 'insufficient_entitlement'
     | 'upstream_unavailable'
-    | 'replay_detected';
+    | 'replay_detected'
+    | 'license_store_unavailable';
 
 export const BillingErrorCode = {
     AUTH_TOKEN_MISSING: 'AUTH_TOKEN_MISSING',
@@ -62,6 +63,7 @@ export const BillingErrorCode = {
     INSUFFICIENT_ENTITLEMENT: 'INSUFFICIENT_ENTITLEMENT',
     UPSTREAM_UNAVAILABLE: 'UPSTREAM_UNAVAILABLE',
     REPLAY_DETECTED: 'REPLAY_DETECTED',
+    LICENSE_STORE_UNAVAILABLE: 'LICENSE_STORE_UNAVAILABLE',
 } as const;
 
 interface IdempotencyEntry {
@@ -134,19 +136,36 @@ app.get('/health/live', (_req: Request, res: Response) => {
 });
 
 app.get('/health/ready', (_req: Request, res: Response) => {
+    const production = process.env.NODE_ENV === 'production';
     const storeReady = tokenStore.isReady();
-    if (!storeReady) {
+    const authorityConfigured = Boolean(
+        (process.env.BILLING_AUTHORITY_URL || process.env.IDENTITY_AUTHORITY_URL || '').trim()
+    );
+
+    // In production, every authorization is checked with the federated Air Roofers
+    // authority; the local file store is only a non-production development cache.
+    // On a shared host with no authority URL, do not advertise production readiness.
+    if ((production && !authorityConfigured) || (!production && !storeReady)) {
         return res.status(503).json({
             status: 'not_ready',
             service: 'billing-gateway',
-            checks: { tokenStore: 'failed' },
+            code: production && !authorityConfigured
+                ? BillingErrorCode.UPSTREAM_UNAVAILABLE
+                : BillingErrorCode.LICENSE_STORE_UNAVAILABLE,
+            checks: {
+                tokenStore: production ? 'not_authoritative' : (storeReady ? 'ok' : 'failed'),
+                billingAuthority: authorityConfigured ? 'configured' : 'missing',
+            },
             timestamp: new Date().toISOString(),
         });
     }
     return res.status(200).json({
         status: 'ready',
         service: 'billing-gateway',
-        checks: { tokenStore: 'ok' },
+        checks: {
+            tokenStore: production ? 'non_authoritative_cache' : 'ok',
+            billingAuthority: production ? 'configured' : 'optional_for_local_development',
+        },
         timestamp: new Date().toISOString(),
     });
 });
@@ -274,6 +293,36 @@ app.post(
         }
 
         const tokenFingerprint = computeTokenFingerprint(token);
+        const production = process.env.NODE_ENV === 'production';
+        const authorityBaseUrl =
+            (process.env.BILLING_AUTHORITY_URL || process.env.IDENTITY_AUTHORITY_URL || '').trim();
+
+        // Local cached records are not authoritative in production: the license and
+        // entitlement state belongs to Air Roofers' federated billing/entitlement
+        // authority (AeroBill/Mandatag). Require live authority verification on
+        // every production authorization, and do not silently trust stale local data.
+        if (production && !authorityBaseUrl) {
+            emitAuditDecision('ERROR', 'upstream_unavailable', BillingErrorCode.UPSTREAM_UNAVAILABLE, {
+                tokenFingerprint,
+                reason: 'billing_authority_not_configured',
+                correlationId,
+            });
+            return res.status(503).json({
+                error: __t('auth_rejected'),
+                code: BillingErrorCode.UPSTREAM_UNAVAILABLE,
+                outcome: 'upstream_unavailable',
+                correlationId,
+            });
+        }
+
+        if (!production && !tokenStore.isReady()) {
+            return res.status(503).json({
+                error: __t('messages.error.billing_store_unavailable'),
+                code: BillingErrorCode.LICENSE_STORE_UNAVAILABLE,
+                outcome: 'license_store_unavailable',
+                correlationId,
+            });
+        }
 
         // 1. Nonce Replay Protection
         const nonceHeader = req.headers['x-request-nonce'] || req.headers['x-nonce'];
@@ -316,7 +365,7 @@ app.post(
             )
             .digest('hex');
 
-        if (idempotencyKey) {
+        if (idempotencyKey && !production) {
             const existingIdemp = idempotencyCache.get(idempotencyKey);
             if (existingIdemp) {
                 if (existingIdemp.payloadHash !== payloadHash) {
@@ -343,15 +392,15 @@ app.post(
 
         Logger.info(__t('auth_validating'), { tokenFingerprint, correlationId });
 
-        let record: TenantInfo | null = tokenStore.verifyToken(token);
+        let record: TenantInfo | null = production ? null : tokenStore.verifyToken(token);
 
         if (!record) {
-            const hasConfiguredUpstream = Boolean(process.env.IDENTITY_AUTHORITY_URL);
+            const hasConfiguredUpstream = Boolean(authorityBaseUrl);
             const isAxiosMocked = Boolean(
                 (axios.post as any)?._isMockFunction || (axios.post as any)?.mock
             );
             const shouldQueryUpstream =
-                hasConfiguredUpstream || isAxiosMocked || body.requireUpstream === true;
+                production || hasConfiguredUpstream || isAxiosMocked || body.requireUpstream === true;
 
             if (!shouldQueryUpstream) {
                 emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
@@ -368,7 +417,7 @@ app.post(
             }
 
             const upstreamUrl =
-                process.env.IDENTITY_AUTHORITY_URL || DEFAULT_IDENTITY_AUTHORITY_URL;
+                authorityBaseUrl || process.env.IDENTITY_AUTHORITY_URL || DEFAULT_IDENTITY_AUTHORITY_URL;
 
             try {
                 const outboundHeaders = createOutboundPropagationHeaders(req);
@@ -410,14 +459,28 @@ app.post(
                     });
                 }
 
-                record = tokenStore.registerToken(token, resolvedTenantId, resolvedTier, {
-                    status: (['active', 'expired', 'revoked', 'suspended', 'invalid'].includes(
-                        upstreamStatus
-                    )
-                        ? upstreamStatus
-                        : 'active') as any,
-                    expiresAt: data.expiresAt,
-                });
+                const normalizedStatus = (['active', 'expired', 'revoked', 'suspended', 'invalid'].includes(
+                    upstreamStatus
+                ) ? upstreamStatus : 'active') as TenantInfo['status'];
+
+                if (production) {
+                    // This response is authoritative for the current request only.
+                    // It is deliberately not persisted as a future production allow.
+                    record = {
+                        token,
+                        token_fingerprint: tokenFingerprint,
+                        tenant_id: resolvedTenantId,
+                        edition: resolvedTier,
+                        status: normalizedStatus,
+                        created_at: new Date().toISOString(),
+                        ...(data.expiresAt ? { expires_at: String(data.expiresAt) } : {}),
+                    };
+                } else {
+                    record = tokenStore.registerToken(token, resolvedTenantId, resolvedTier, {
+                        status: normalizedStatus,
+                        expiresAt: data.expiresAt,
+                    });
+                }
             } catch (err: any) {
                 const httpStatus = err?.response?.status;
                 if (httpStatus === 401 || httpStatus === 402 || httpStatus === 404) {
@@ -578,7 +641,7 @@ app.post(
             correlationId,
         };
 
-        if (idempotencyKey) {
+        if (idempotencyKey && !production) {
             idempotencyCache.set(idempotencyKey, {
                 payloadHash,
                 status: 200,

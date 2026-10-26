@@ -34,6 +34,36 @@ import {
   DirectAdminTargetAdapter,
   Target,
 } from '../directadmin';
+import { DirectAdminNativeClient } from '../../fabric/providers/directadmin-native-client';
+
+describe('DirectAdmin native client safety and truthful status', () => {
+  it('rejects path traversal identifiers before opening an SSH connection', async () => {
+    const client = new DirectAdminNativeClient('da.example.net', 22, 'safeuser', '/tmp/test-key');
+
+    await expect(client.removeHostedApp('../../etc')).rejects.toThrow();
+    await expect(client.removeAccountFILE('../billing.json')).rejects.toThrow();
+    await expect(client.removeDatabase('db/name')).rejects.toThrow();
+    await expect(client.createSnapshot({ resourceId: '../other-domain' })).rejects.toThrow();
+
+    await expect(
+      Promise.resolve().then(() => new DirectAdminNativeClient('da.example.net', 22, '../other-user', '/tmp/test-key'))
+    ).rejects.toThrow();
+  });
+
+  it('rejects an invalid SSH port before connecting', () => {
+    expect(() => new DirectAdminNativeClient('da.example.net', 0, 'safeuser', '/tmp/test-key')).toThrow();
+    expect(() => new DirectAdminNativeClient('da.example.net', 65536, 'safeuser', '/tmp/test-key')).toThrow();
+  });
+
+  it('does not claim an application is deployed when the adapter cannot deploy images', async () => {
+    const client = new DirectAdminNativeClient('da.example.net', 22, 'safeuser', '/tmp/test-key');
+
+    await expect(client.createHostedApp('acme.example.net', 'node:22-alpine')).rejects.toThrow();
+    await expect(client.removeHostedApp('acme.example.net')).rejects.toThrow();
+    // The adapter never used to execute the image or verify HTTP health; a
+    // successful mkdir must not be presented as a running application.
+  });
+});
 
 describe('DirectAdmin Target & Environment Twin Governance Specifications', () => {
   const validEvidenceDigest = 'sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069';

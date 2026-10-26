@@ -259,3 +259,45 @@ The workspace coverage verifier joined each `package.json` workspace declaration
 - **Acceptance:** Pending latest exact-head CI.
 
 - **Handover:** `docs/audit/REAUDIT_HANDOVER_TENANT_POLICY_RESOLUTION_2026-10-26.md`.
+
+
+## 2026-10-26 Addendum — Portable Shared-Host Launch & Federated Billing Boundary
+
+**Task ID:** UG-PORTABILITY-BILLING-001  
+**Owner branch:** `fix/hosting-portability-billing-persistence-2026-10-26`  
+**Stacked PR:** [#29](https://github.com/Chicitadel/ugondu/pull/29), based on the whole-product candidate at `4cabc3533e81e0fb0e3890a9290489414984439c`.  
+**Release posture:** implementation candidate only; exact-head CI/COR and target qualification pending.
+
+### Required architecture invariants
+
+1. **One codebase, host by configuration.** Hosting provider selection must not alter billing/entitlement semantics, policy contracts, service APIs, or canonical capability registry.
+2. **AeroBill/Mandatag remain the entitlement authority.** In production the billing gateway must query the configured federated authority for each authorization. A local cache, local JSON file, replay cache, or stale idempotency response must not grant entitlement after authority revocation.
+3. **Authority failure is fail-closed.** Missing production authority configuration, corrupt storage required by the current mode, or failed persistence must not be reported as ready and must not create a fallback authorization.
+4. **Shared-host constraints are explicit.** Do not require Docker, root, systemd, or arbitrary background daemons for the shared-host profile. Use host-managed Node runtime/process supervisor, host TLS, private persistent storage, and cron only for bounded scheduled tasks. If prerequisites are absent, report the host unsupported/unqualified; do not emulate unsupported capabilities.
+5. **DirectAdmin filesystem safety.** Shell quoting is not path containment. Validate path-segment identifiers before any remote filesystem mutation. Never delete a customer's domain tree unless ownership and created-resource provenance are independently verified.
+6. **Truthful lifecycle status.** A directory existing does not prove an application has deployed, started, or passed health checks. The current native DirectAdmin application operation remains unqualified until installation/start/HTTP health is genuinely implemented and independently tested.
+7. **Legal-policy source of truth.** Legal policies live at https://policies.airroofers.eu. Keep links and authority references in the repository; do not fork central legal text into parallel repo-owned versions.
+
+### UG-PORTABILITY-BILLING-001 implementation ledger
+
+- `server/engine-core/src/fabric/providers/directadmin-native-client.ts`: identifier and SSH-port validation; refused false app-deployment success; unqualified application deletion without ownership proof; safe identifier requirements on DB/storage/snapshot operations.
+- `server/billing-gateway/src/db.ts`: strict load validation, no silent temporary fallback, atomic private-file writes, explicit readiness and write failures, preserve corrupt evidence, typed/localized storage errors.
+- `server/billing-gateway/src/index.ts`: production authority required; production authorization bypasses cached local tokens and queries Air Roofers authority for each decision; no in-process idempotency authorization cache in production.
+- `server/billing-gateway/src/__tests__/license-store-portability.spec.ts`: private file mode, reload persistence, corrupt-store behavior, configured path failure, write-failure mutation safety.
+- `server/billing-gateway/src/__tests__/billing-gateway.spec.ts`: production authority freshness, missing-authority fail-closed cases.
+- `server/engine-core/src/targets/__tests__/directadmin.spec.ts`: path traversal, SSH-port bounds, unqualified app deploy/delete behavior.
+- `.governance/platform/deployment/shared-hosting.json` and `docs/deployment/SHARED_HOSTING_LAUNCH_AND_MIGRATION.md`: portable shared-host launch requirements and shared-host → VPS → AWS migration contract.
+- Server and root locale catalogs: 7 new error keys across all 12 locale files; locale parity and T03 remain mandatory gates.
+
+### Acceptance criteria
+
+- Run all workspace builds/typechecks/tests on exact PR head, including the new billing/store and DirectAdmin suites.
+- Run locale-parity and T03 checks; all 12 locales in both catalogs must contain each new key and preserve placeholders.
+- Verify billing production tests prove a stale local token cannot authorize and upstream outage returns 503.
+- Verify DirectAdmin negative tests run without connecting to a production host and no destructive command is performed for an unqualified application.
+- Keep PR #29 draft until exact-head CI/COR results are fully known.
+- Do not claim a live DirectAdmin deployment or shared-host support receipt without a non-destructive probe and authorized smoke test on the actual host.
+
+### Qualification gaps intentionally left open
+
+The profile is a deployment contract, not a claim that the current hosting account meets it. The actual hosting runtime and outbound authority connectivity need qualification. GCP/Azure physical qualification, AI model fleet receipts, and immutable release-artifact lifecycle remain separate universal-COR blockers.
