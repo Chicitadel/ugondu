@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "schema_version": "1.0.0",
   "catalog_id": "ugondu.bootstrap.role-catalog",
   "status": "logical-contract-runtime-mapping-required",
@@ -155,5 +154,6 @@
     "vps_private_cloud": "capability-probe-required",
     "cpanel_directadmin_shared_hosting": "capability-probe-required",
     "generic_hosting": "capability-probe-required"
-  }
+  },
+  "schema_uri": "https://json-schema.org/draft/2020-12/schema"
 }
