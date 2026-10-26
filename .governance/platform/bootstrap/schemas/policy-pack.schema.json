@@ -15,7 +15,8 @@
     "policy_documents",
     "validation_receipts",
     "approval_requirements",
-    "rollback_strategy"
+    "rollback_strategy",
+    "expires_at_or_session_limit"
   ],
   "properties": {
     "policy_pack_id": {
