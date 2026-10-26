@@ -17,10 +17,10 @@ export class DirectAdminLiveAdapter implements LiveEnvironmentAdapterContract {
         // LR-01: Read-only authentication check
         const testRes = await fetch(`${this.url}/CMD_API_SYSTEM_INFO`, {
             headers: { 'Authorization': `Basic ${this.token}` }
-        }).catch(e => { throw new Error(__t('network_error_connecting_to_di') + e.message); });
+        }).catch(e => { throw new Error(__t('network_error_connecting_to_di', { message: e.message })); });
 
         if (!testRes.ok) {
-            throw new Error(__t('directadmin_authentication_fai') + testRes.status);
+            throw new Error(__t('directadmin_authentication_fai', { status: testRes.status }));
         }
 
         return 'directadmin-protected-host';

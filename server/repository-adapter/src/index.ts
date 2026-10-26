@@ -30,7 +30,7 @@ import cors from 'cors';
 import * as fs from 'fs';
 import * as path from 'path';
 import { randomBytes, randomUUID } from 'crypto';
-import { __t, NetworkDestinationPolicy, Logger } from '@ugondu/shared';
+import { __t, NetworkDestinationPolicy, Logger, ProductRegistry } from '@ugondu/shared';
 import {
     CredentialContext,
     parseAndValidateRepositoryUrl,
@@ -71,46 +71,7 @@ function resolveCorrelationId(incoming?: string, traceparent?: string): string {
 }
 
 function loadAllowedCorsOrigins(): string[] {
-    const origins = new Set<string>();
-
-    const envOrigins = process.env['CORS_ALLOWED_ORIGINS'];
-    if (envOrigins) {
-        for (const item of envOrigins.split(',')) {
-            const trimmed = item.trim();
-            if (trimmed) origins.add(trimmed);
-        }
-    }
-
-    const candidatePaths = [
-        path.resolve(process.cwd(), '.governance/standards/product-registry.json'),
-        path.resolve(__dirname, '../../../.governance/standards/product-registry.json'),
-        path.resolve(__dirname, '../../../../.governance/standards/product-registry.json')
-    ];
-
-    for (const registryPath of candidatePaths) {
-        try {
-            if (fs.existsSync(registryPath)) {
-                const parsed = JSON.parse(fs.readFileSync(registryPath, 'utf-8'));
-                const products = Array.isArray(parsed.products) ? parsed.products : [];
-                const ugondu = products.find(
-                    (p: Record<string, unknown>) => p['productId'] === 'UGONDU' || p['id'] === 'ugondu'
-                );
-                const regOrigins = (ugondu?.cors as Record<string, unknown> | undefined)?.['allowedOrigins'];
-                if (Array.isArray(regOrigins)) {
-                    for (const origin of regOrigins) {
-                        if (typeof origin === 'string' && origin.trim()) {
-                            origins.add(origin.trim());
-                        }
-                    }
-                }
-                break;
-            }
-        } catch {
-            // Continue searching candidate registry paths
-        }
-    }
-
-    return Array.from(origins);
+    return ProductRegistry.getAllowedOrigins();
 }
 
 function buildRequestContext(req: TraceRequest, body: Record<string, unknown>): RequestContext {
@@ -248,7 +209,7 @@ export function createRepositoryAdapterApp(
             displayName: 'Ugondu Repository Adapter',
             version: '2.0.0',
             apiVersion: 'v1',
-            port: Number(process.env['PORT'] || 4005),
+            port: Number(process.env['PORT'] || ProductRegistry.getServiceConfig('repository_adapter').port),
             endpoints: {
                 liveness: '/health/live',
                 readiness: '/health/ready',
@@ -553,7 +514,7 @@ export const defaultRegistry = new RepositoryAdapterRegistry();
 export const app = createRepositoryAdapterApp(defaultRegistry);
 
 if (require.main === module) {
-    const PORT = process.env['PORT'] || 4005;
+    const PORT = process.env['PORT'] || ProductRegistry.getServiceConfig('repository_adapter').port;
     app.listen(Number(PORT), '0.0.0.0', () => {
         Logger.info(__t('listening_port', __t('repository_adapter'), PORT));
         Logger.info(__t('repo_supported'));

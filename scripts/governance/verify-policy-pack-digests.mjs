@@ -67,6 +67,44 @@ export function resolvePackPrivateKey() {
   return null;
 }
 
+/**
+ * Resolve a manifest template only when its real path remains inside the pack.
+ * Lexical containment blocks traversal; realpath containment blocks symlink escapes.
+ */
+export function resolvePolicyTemplatePath(baseDir, relativePath) {
+  if (typeof relativePath !== 'string' || !relativePath.trim() || path.isAbsolute(relativePath)) {
+    return { file: null, error: 'invalid or absolute template path' };
+  }
+
+  try {
+    const realBase = fs.realpathSync(baseDir);
+    const candidate = path.resolve(realBase, relativePath);
+    const lexicalRelative = path.relative(realBase, candidate);
+    if (!lexicalRelative || lexicalRelative === '..' ||
+        lexicalRelative.startsWith(`..${path.sep}`) || path.isAbsolute(lexicalRelative)) {
+      return { file: null, error: 'template path escapes policy pack directory' };
+    }
+
+    if (!fs.existsSync(candidate)) {
+      return { file: null, error: 'template file is missing' };
+    }
+
+    const realCandidate = fs.realpathSync(candidate);
+    const realRelative = path.relative(realBase, realCandidate);
+    if (!realRelative || realRelative === '..' ||
+        realRelative.startsWith(`..${path.sep}`) || path.isAbsolute(realRelative)) {
+      return { file: null, error: 'template path resolves outside policy pack directory' };
+    }
+
+    if (!fs.statSync(realCandidate).isFile()) {
+      return { file: null, error: 'template path does not reference a regular file' };
+    }
+    return { file: realCandidate, error: null };
+  } catch (error) {
+    return { file: null, error: `unable to resolve template path: ${error.message}` };
+  }
+}
+
 export function verifyPolicyPack(yamlText, baseDir) {
   const problems = [];
   const entries = [];
@@ -74,12 +112,12 @@ export function verifyPolicyPack(yamlText, baseDir) {
   let m;
   while ((m = re.exec(yamlText))) {
     const rel = m[1];
-    const file = path.join(baseDir, rel);
-    if (!fs.existsSync(file)) {
-      problems.push(`missing template ${rel}`);
+    const resolved = resolvePolicyTemplatePath(baseDir, rel);
+    if (!resolved.file) {
+      problems.push(`invalid template ${rel}: ${resolved.error}`);
       continue;
     }
-    const actual = sha(fs.readFileSync(file));
+    const actual = sha(fs.readFileSync(resolved.file));
     entries.push({ rel, declared: m[2], actual });
     if (actual !== m[2]) problems.push(`digest mismatch ${rel}: declared ${m[2]} actual ${actual}`);
   }

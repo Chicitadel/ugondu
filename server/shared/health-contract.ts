@@ -105,6 +105,7 @@ export interface ServiceMetadataPayload {
     capabilities: string[];
 }
 
+import { __t } from './i18n';
 const DEFAULT_CHECK_TIMEOUT_MS = 2500;
 
 function normalizeDependencyChecks(input?: DependencyChecksInput, defaultTimeoutMs: number = DEFAULT_CHECK_TIMEOUT_MS): NamedDependencyCheck[] {
@@ -201,7 +202,7 @@ export async function evaluateReadinessChecks(
 
 export function createHealthAndMetadataRouter(options: HealthAndMetadataOptions): any {
     if (!options || !options.service || typeof options.service !== 'string') {
-        throw new Error('createHealthAndMetadataRouter requires a non-empty service name.');
+        throw new Error(__t('err_health_service_name_required'));
     }
 
     const resolveVersion = (): string =>

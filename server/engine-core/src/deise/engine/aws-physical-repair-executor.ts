@@ -111,7 +111,7 @@ export class AwsPhysicalRepairExecutor {
                         Logger.info(__t('deise.aws_repair.rds_passed', { resourceId: drift.resourceId }));
                     }
                 } catch (err: any) {
-                    Logger.error(__t('deise.aws_repair.failed', { error: err.message }));
+                    Logger.error(__t('deise.repair.failed', { error: err.message }));
                     return false;
                 }
             }

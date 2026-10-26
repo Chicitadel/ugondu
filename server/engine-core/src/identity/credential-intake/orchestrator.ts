@@ -10,18 +10,18 @@ export class CredentialIntakeOrchestrator {
 
     private getVerifier(provider: string): AuthenticationVerifier {
         if (provider === 'aws') return new AwsAuthenticationVerifier();
-        throw new Error(`No AuthenticationVerifier registered for provider: ${provider}`);
+        throw new Error(__t('no_auth_verifier_registered_for_provider', { provider }));
     }
 
     private getPreflight(provider: string): AuthorizationPreflight {
         if (provider === 'aws') return new AwsAuthorizationPreflight();
-        throw new Error(`No AuthorizationPreflight registered for provider: ${provider}`);
+        throw new Error(__t('no_auth_preflight_registered_for_provider', { provider }));
     }
 
     public async processImport(filePath: string, capabilities: string[]) {
         const absolutePath = path.resolve(filePath);
         if (!fs.existsSync(absolutePath)) {
-            throw new Error(`Credential file not found at: ${absolutePath}`);
+            throw new Error(__t('credential_file_not_found_at_path', { path: absolutePath }));
         }
 
         const rawContent = fs.readFileSync(absolutePath, 'utf8');
@@ -43,7 +43,7 @@ export class CredentialIntakeOrchestrator {
         const normalized = await matchedNormalizer.normalize(rawContent);
 
         // 2. Authenticate
-        Logger.info(`Authenticating ${normalized.provider} credential...`);
+        Logger.info(__t('authenticating_provider_credential', { provider: normalized.provider }));
         const verifier = this.getVerifier(normalized.provider);
         const identity = await verifier.verify(normalized);
 

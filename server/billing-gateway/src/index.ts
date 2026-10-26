@@ -32,6 +32,7 @@ import {
     Logger,
     telemetryContextMiddleware,
     createOutboundPropagationHeaders,
+    ProductRegistry,
 } from '@ugondu/shared';
 import { tokenStore, computeTokenFingerprint, TenantInfo } from './db';
 import {
@@ -95,7 +96,7 @@ export function resolveAllowedOrigins(): string[] {
             .filter(Boolean);
     }
     return [
-        process.env.ENGINE_CORE_ORIGIN || 'http://localhost:4001',
+        process.env.ENGINE_CORE_ORIGIN || ProductRegistry.getServiceUrl('engine_core'),
         process.env.ADMIN_ORIGIN || 'https://admin.airroofers.eu',
     ];
 }
@@ -597,7 +598,7 @@ app.post(
     }
 );
 
-const PORT = process.env.PORT || 4002;
+const PORT = process.env.PORT || ProductRegistry.getServiceConfig('billing_gateway').port;
 export let serverInstance: any = null;
 
 if (require.main === module) {

@@ -206,7 +206,7 @@ class DeterministicTargetAdapter implements TargetAdapter {
   public async plan(ctx: TargetContext): Promise<TargetPlanResult> {
     const preflight = await this.preflight(ctx);
     if (!preflight.passed) {
-      throw new Error(`Target preflight failed for ${this.platform}: ${preflight.blockedReason}`);
+      throw new Error(__t('target_preflight_failed_blocked_reason', { platform: this.platform, reason: preflight.blockedReason }));
     }
 
     const strategy = preflight.strategy;

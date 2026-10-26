@@ -86,6 +86,50 @@ describe('RegionPolicyRenderer', () => {
     expect(res.violations[0]).toContain('violates standard AWS region naming pattern');
   });
 
+  it('accepts partitioned AWS region identifiers such as us-gov-west-1', () => {
+    const template: RenderedPolicyDocument = {
+      Version: '2012-10-17',
+      Statement: [{
+        Sid: 'GovRegionalRead',
+        Effect: 'Allow',
+        Action: 'ec2:DescribeInstances',
+        Resource: 'arn:aws-us-gov:ec2:${REGION}:${ACCOUNT_ID}:instance/*',
+      }],
+    };
+    const result = renderer.renderPolicy(template, {
+      accountId: '971671216490',
+      allowedRegions: ['us-gov-west-1'],
+      executionRoleName: 'UgonduCORExecutionRole',
+    });
+    expect(result.valid).toBe(true);
+    expect(result.document.Statement[0].Resource).toBe('arn:aws-us-gov:ec2:us-gov-west-1:971671216490:instance/*');
+  });
+
+  it('expands aws:RequestedRegion conditions across every explicitly allowed region', () => {
+    const template: RenderedPolicyDocument = {
+      Version: '2012-10-17',
+      Statement: [{
+        Sid: 'MultiRegionRead',
+        Effect: 'Allow',
+        Action: 'ec2:DescribeInstances',
+        Resource: 'arn:aws:ec2:${REGION}:${ACCOUNT_ID}:instance/*',
+        Condition: { StringEquals: { 'aws:RequestedRegion': '${REGION}' } },
+      }],
+    };
+    const result = renderer.renderPolicy(template, {
+      accountId: '971671216490',
+      allowedRegions: ['eu-west-3', 'us-gov-west-1'],
+      executionRoleName: 'UgonduCORExecutionRole',
+    });
+    expect(result.valid).toBe(true);
+    expect(result.document.Statement[0].Resource).toEqual([
+      'arn:aws:ec2:eu-west-3:971671216490:instance/*',
+      'arn:aws:ec2:us-gov-west-1:971671216490:instance/*',
+    ]);
+    expect((result.document.Statement[0].Condition as any).StringEquals['aws:RequestedRegion'])
+      .toEqual(['eu-west-3', 'us-gov-west-1']);
+  });
+
   it('requires explicit allowedRegions and rejects missing or empty allowedRegions without eu-west-3 fallback', () => {
     const template: RenderedPolicyDocument = {
       Version: '2012-10-17',
@@ -305,6 +349,35 @@ describe('RegionPolicyRenderer', () => {
 });
 
 describe('CanonicalPolicyRegistry / canonicalJson & computePolicyDigest', () => {
+  it('RegionPolicyRenderer emits the same recursive canonical digest as the canonical policy registry', () => {
+    const renderer = new RegionPolicyRenderer();
+    const first: RenderedPolicyDocument = {
+      Version: '2012-10-17',
+      Statement: [{
+        Sid: 'CanonicalNestedCondition',
+        Effect: 'Allow',
+        Action: 'ec2:DescribeInstances',
+        Resource: '*',
+        Condition: { StringEquals: { 'aws:PrincipalAccount': '971671216490', 'aws:RequestedRegion': 'eu-west-3' } },
+      }],
+    };
+    const reordered: RenderedPolicyDocument = {
+      Version: '2012-10-17',
+      Statement: [{
+        Sid: 'CanonicalNestedCondition',
+        Effect: 'Allow',
+        Action: 'ec2:DescribeInstances',
+        Resource: '*',
+        Condition: { StringEquals: { 'aws:RequestedRegion': 'eu-west-3', 'aws:PrincipalAccount': '971671216490' } },
+      }],
+    };
+    const scope = { accountId: '971671216490', allowedRegions: ['eu-west-3'], executionRoleName: 'UgonduCORExecutionRole' };
+    const firstResult = renderer.renderPolicy(first, scope);
+    const reorderedResult = renderer.renderPolicy(reordered, scope);
+    expect(firstResult.documentSha256).toBe(computePolicyDigest(firstResult.documentJson));
+    expect(firstResult.documentSha256).toBe(reorderedResult.documentSha256);
+  });
+
   it('canonicalJson recursively sorts object keys lexicographically', () => {
     const objA = { z: 1, a: 2, m: { y: 'nested', b: true } };
     const objB = { a: 2, m: { b: true, y: 'nested' }, z: 1 };

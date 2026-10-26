@@ -1,0 +1,13 @@
+{
+  "name": "@ugondu/plugin-recovery-code",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Autonomous Code Patching Recovery Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "autonomous-code-patching"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}

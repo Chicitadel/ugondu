@@ -1,0 +1,19 @@
+{
+  "name": "ugondu-plugin-node",
+  "version": "1.0.0",
+  "description": "[en] Node.js build and dependency resolution plugin for Ugondu.",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "pre-build",
+    "build",
+    "NODE_INSTALL"
+  ],
+  "hooks": [
+    "pre-build",
+    "build"
+  ],
+  "options": {
+    "packageManager": "npm"
+  }
+}

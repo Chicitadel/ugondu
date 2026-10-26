@@ -92,7 +92,7 @@ export class URREngine {
             tx.edges = existing.edges;
             const hasPendingOrRunning = tx.nodes.some(n => n.status !== 'SUCCESS' && n.status !== 'ROLLBACK_SUCCESS');
             if (!hasPendingOrRunning && (existing.status === 'SUCCESS' || existing.status === 'RECOVERED')) {
-                Logger.info(`Transaction ${tx.id} already in terminal state: ${existing.status}`);
+                Logger.info(__t('urre_transaction_terminal_state', { txId: tx.id, status: existing.status }));
                 return;
             }
         }
@@ -125,7 +125,7 @@ export class URREngine {
 
             try {
                 const key = `${node.provider}:${node.action}`;
-                if (!this.handlers[key]) throw new Error(`No handler registered for ${key}`);
+                if (!this.handlers[key]) throw new Error(__t('urre_no_handler_registered_for_key', { key }));
 
                 await protectedKernel.executeAction({
                     actionId: node.id,
@@ -163,7 +163,7 @@ export class URREngine {
                     await this.faultInjector.afterNodePersisted(node);
                 }
 
-                Logger.error(`Transaction ${tx.id} failed at node ${node.id}: ${node.error}`);
+                Logger.error(__t('urre_transaction_failed_at_node', { txId: tx.id, nodeId: node.id, error: node.error }));
 
                 // Immediately invoke URRE Rollback Engine
                 await this.triggerRollback({ id: tx.id, targetEnvironment: '', tx });
@@ -185,7 +185,7 @@ export class URREngine {
 
         tx.status = 'ROLLBACK';
         await this.store.save(tx);
-        Logger.info(`[SIM-URRE] Initiating Rollback Sequence for TX ${tx.id}...`);
+        Logger.info(__t('urre_initiating_rollback_sequence', { txId: tx.id }));
 
         // Reverse the DAG for Rollback Traverser
         const inDegree = this.getIndegree(tx, true);
@@ -221,7 +221,7 @@ export class URREngine {
                     if (this.faultInjector?.afterNodePersisted) {
                         await this.faultInjector.afterNodePersisted(node);
                     }
-                    Logger.error(`Rollback failed at node ${node.id}: ${node.error}`);
+                    Logger.error(__t('urre_rollback_failed_at_node', { nodeId: node.id, error: node.error }));
                 }
                 
                 await this.store.save(tx);
@@ -260,9 +260,9 @@ export class URREngine {
         if (!this.arr) {
             throw new Error(__t('autonomousresourcereconciler_n'));
         }
-        Logger.info(`[URRE] Triggering reconciliation for provider ${providerName}...`);
+        Logger.info(__t('urre_triggering_reconciliation_provider', { providerName }));
         const result = await this.arr.runPipeline(providerName, quotaContext, authority);
-        Logger.info(`[URRE] Reconciliation completed for ${providerName}. Managed ${result.length} resources.`);
+        Logger.info(__t('urre_reconciliation_completed_provider', { providerName, count: result.length }));
         return result;
     }
 }

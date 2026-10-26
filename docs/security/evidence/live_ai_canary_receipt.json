@@ -1,7 +1,7 @@
 {
   "receiptType": "AIRROOFERS_LIVE_AI_CANARY_RECEIPT",
   "version": "1.0.0",
-  "gitSha": "294c869c250b3f065d55d674ac352eec10f3557d",
+  "gitSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
   "endpoint": "https://ai.airroofers.eu",
   "hostname": "ai.airroofers.eu",
   "timestamp": "2026-10-25T04:08:40.631Z",

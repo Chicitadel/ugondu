@@ -216,11 +216,32 @@ jobs:
       - name: Validate workspace gate & test coverage
         run: node scripts/governance/validate-test-coverage.mjs
 
+      - name: Test policy-pack template path containment
+        run: npm run test:policy-pack-boundary
+
+      - name: Test AWS bootstrap mutation fail-closed behavior
+        run: npm run test:bootstrap-fail-closed
+
       - name: Verify externally pinned AWS policy-pack signature
         run: node scripts/governance/verify-policy-pack-digests.mjs
 
       - name: Verify externally pinned release evidence bundle
         run: node scripts/release/verify-evidence-bundle.mjs --verify
+
+      - name: Verify corporate AI attribution policy
+        run: npm run verify:attribution
+
+      - name: Verify T03 tokenization conformance
+        run: npm run verify:t03
+
+      - name: Build workspace artifacts required by T04
+        run: npm ci && npm run build
+
+      - name: Verify T04 microservice workspace boundaries
+        run: npm run verify:t04
+
+      - name: Run governance verifier regression tests
+        run: npm run test:governance
 
   # ─────────────────────────────────────────────────────────────────
   # [en] Integration Tests — All 5 microservices verified via /health/ready

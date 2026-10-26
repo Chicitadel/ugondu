@@ -25,10 +25,12 @@
     "test:integration": "node tests/billing-gateway.test.js && node tests/engine-core.test.js && node tests/plugin-manager.test.js && node tests/event-bus.test.js && node tests/repository-adapter.test.js && node tests/cor-remediation.test.js && node tests/language-packs.test.js && node tests/ai-inference-gateway.test.js && node tests/uplm-conformance.test.js",
     "test:e2e": "npm --workspace=server/tests run test",
     "test:security": "node tests/security-regression.test.js && node tests/ssrf-execution.test.js && node tests/passport-cryptography.test.js",
+    "test:policy-pack-boundary": "node --test tests/policy-pack-path-containment.test.mjs",
+    "test:bootstrap-fail-closed": "node --test tests/qualification/bootstrap-fail-closed.test.mjs",
     "test:compatibility": "node tests/language-packs.test.js && node tests/provider-compilation.test.js",
     "test:locales": "node scripts/validate-locales.js",
     "test:aws": "node scripts/run-cor-gates.js",
-    "governance:validate": "node scripts/verify-release-integrity.js && node scripts/governance/validate-repository.mjs && node scripts/governance/validate-capability-registry.mjs && node scripts/governance/validate-test-coverage.mjs && node scripts/governance/verify-policy-pack-digests.mjs",
+    "governance:validate": "node scripts/verify-release-integrity.js && npm run verify:attribution && npm run verify:t03 && npm run build && npm run verify:t04 && node scripts/governance/validate-repository.mjs && node scripts/governance/validate-capability-registry.mjs && node scripts/governance/validate-test-coverage.mjs && npm run test:policy-pack-boundary && npm run test:bootstrap-fail-closed && node scripts/governance/verify-policy-pack-digests.mjs && npm run test:governance",
     "start:engine": "cd server/engine-core && node dist/index.js",
     "start:billing": "cd server/billing-gateway && node dist/index.js",
     "start:plugins": "cd server/plugin-manager && node dist/index.js",
@@ -37,7 +39,11 @@
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
-    "verify:release-integrity": "node scripts/verify-release-integrity.js"
+    "verify:release-integrity": "node scripts/verify-release-integrity.js",
+    "verify:attribution": "node scripts/governance/verify-ai-attribution.mjs",
+    "verify:t03": "node scripts/governance/verify-tokenization-t03.mjs",
+    "verify:t04": "node scripts/governance/verify-microservices-t04.mjs",
+    "test:governance": "node --test tests/governance-verifiers.test.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

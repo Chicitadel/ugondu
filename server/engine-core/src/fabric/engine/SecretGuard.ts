@@ -66,7 +66,7 @@ export async function resolveSecret(ref: string): Promise<string> {
   const value = process.env[envName];
 
   if (!value) {
-    throw new Error(`SECURITY_VIOLATION: Physical secret not found in vault for reference: ${ref}`);
+    throw new Error(__t('security_violation_secret_not_found_in_vault', { ref }));
   }
 
   return value;

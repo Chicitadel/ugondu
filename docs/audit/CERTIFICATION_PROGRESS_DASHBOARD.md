@@ -4,10 +4,8 @@
 **Authority & Authors:** Air Roofers SASU Enterprise Architecture Council & Ujomor Systems Engineering & Governance Authority  
 **Snapshot:** 2026-10-25 15:00 UTC (reconciliation snapshot)  
 **Production branch:** [phase4/production-hardening](https://github.com/Chicitadel/ugondu/tree/phase4/production-hardening)  
-**Implementation candidate:** [`294c869c250b3f065d55d674ac352eec10f3557d`](https://github.com/Chicitadel/ugondu/commit/294c869c250b3f065d55d674ac352eec10f3557d)  
-**Certified workflow descendant:** [`dc39cd42f4ce511091fd0355d9ecad05d5852432`](https://github.com/Chicitadel/ugondu/commit/dc39cd42f4ce511091fd0355d9ecad05d5852432) (final-gate head in run 40183694886)  
-**Latest observed evidence-only descendant at reconciliation:** [`ef0c3f4ee4813b59276bf0d087427af51caaf67d`](https://github.com/Chicitadel/ugondu/commit/ef0c3f4ee4813b59276bf0d087427af51caaf67d) (five commits/eight paths after candidate; GitHub compare showed audit/evidence paths only)  
-**Candidate CI:** [40183694906](https://github.com/Chicitadel/ugondu/actions/runs/40183694906) (🟢 15/15 jobs successful across microservices, Go thin-client matrix, integration tests, Docker images)  
+**Implementation candidate:** [`45b07518e82c9089d68a38d87b4566b0dd0bcba9`](https://github.com/Chicitadel/ugondu/commit/45b07518e82c9089d68a38d87b4566b0dd0bcba9)  
+**Candidate CI:** [40216812646](https://github.com/Chicitadel/ugondu/actions/runs/40216812646) (🟢 16/16 jobs successful across microservices, Go thin-client matrix, integration tests)  
 **Latest Certified COR + AWS Run Record:** [40183694886](https://github.com/Chicitadel/ugondu/actions/runs/40183694886) (🟢 UNIFIED RUN: COR Certification 1m50s, AWS Physical Gate 23m47s, Final Release Gate 2s)  
 **Live AI canary receipt:** [live_ai_canary_receipt.json](../security/evidence/live_ai_canary_receipt.json)  
 **Latest detailed audit:** [Whole-Product COR Gap Audit & Production Release Plan](./WHOLE_PRODUCT_COR_GAP_AUDIT_AND_PRODUCTION_RELEASE_PLAN_2026-10-25.md)  \n**Post-execution evidence reconciliation:** [Subagent findings, production-branch proof gaps and status reconciliation](./POST_EXECUTION_EVIDENCE_RECONCILIATION_2026-10-25.md)  \n**Master execution checklist:** [Whole-Product COR Execution Plan & Master Checklist](./WHOLE_PRODUCT_COR_EXECUTION_AND_MASTER_CHECKLIST.md)  
@@ -112,3 +110,69 @@ The supplied specialist execution log reports passing checks for localization, t
 | Universal commercial COR | 🔴 Not granted | Exact immutable artifact lifecycle and all advertised target lifecycles remain required |
 
 The T03/T04 integration-pending labels do not reopen the previously closed F-23/F-24 AWS safety findings. They constrain the claim to what is reproducibly available on the production candidate. Do not change implementation code or weaken evidence freshness on the existing certified candidate merely to attach new scripts; integrate source/script changes into a new candidate and rerun certification.
+
+## Latest PR re-audit — 2026-10-25 18:07 UTC
+
+- **Correct candidate reference:** `45b07518e82c9089d68a38d87b4566b0dd0bcba9` as recorded by `docs/governance/evidence/evidence-manifest.json` and the COR #398 freshness log. The prior header SHA `45b075185935efbe720a4b3f54516ff8d5bf305a` did not resolve in the GitHub commit lookup and is not used as evidence.
+- **CI/CD #511:** [40218667623](https://github.com/Chicitadel/ugondu/actions/runs/40218667623) passed its recorded jobs, including integration tests.
+- **COR #398:** [40218667670](https://github.com/Chicitadel/ugondu/actions/runs/40218667670) passed the COR Certification job and candidate/evidence freshness check, but the overall workflow failed at the final release gate because the AWS physical gate was intentionally skipped for a PR. This does not establish a fresh physical AWS pass for this implementation candidate.
+- **Direct fix:** `.github/workflows/cor.yml` now distinguishes PR validation from release certification. PRs require the COR job to pass and the AWS job to be skipped, and the gate prints `NOT RELEASE CERTIFIED`. Push/workflow-dispatch runs still require both COR and AWS physical gates to succeed. Regression test `COR-WF-017` added to `tests/qualification/cor-workflow-gates.test.js`.
+- **Validation pending:** CI/CD #512 [40219829697](https://github.com/Chicitadel/ugondu/actions/runs/40219829697) and COR #399 [40219829698](https://github.com/Chicitadel/ugondu/actions/runs/40219829698) were still in progress at the time of this snapshot. The workflow source change invalidates the old candidate binding; run approved candidate qualification and regenerate evidence before any release certification.
+- **Release status:** PR #24 remains draft. Universal commercial release is **NOT GRANTED**. AI fleet report remains offline with zero qualified and zero active models; non-AWS target and immutable artifact lifecycle evidence remain incomplete.
+
+
+## PR validation versus release certification — updated 2026-10-25
+
+The COR workflow was corrected on the remediation branch after run #398 showed a successful COR Certification job but a failed final gate because AWS physical qualification is intentionally skipped on pull requests.
+
+- On PRs, candidate-bound evidence freshness is deferred because unmerged code is expected to differ from the frozen release candidate. The PR still executes build/typecheck/locale/I18N/architecture/import/workspace/governance/COR checks. The final gate requires COR success and AWS skipped and explicitly labels the outcome **NOT RELEASE CERTIFIED**.
+- On push/workflow-dispatch release qualification, candidate-bound evidence freshness remains mandatory, and both COR and AWS physical qualification must succeed. A skipped physical gate is never accepted for release certification.
+- Regression tests `COR-WF-017` and `COR-WF-018` cover these semantics. The final current-head CI result remains the acceptance evidence.
+- The prior manifest candidate is still `45b07518e82c9089d68a38d87b4566b0dd0bcba9`; it is not evidence for the newly changed workflow. Regenerate candidate-bound evidence only through approved tooling after the implementation candidate is frozen.
+
+Universal commercial release remains **NOT GRANTED**.
+
+## Latest PR verification snapshot — 2026-10-25 20:25 UTC
+
+- PR #24 source head: `a5f978e177c54762daccdc5d785c772abc372339`; open, draft, unmerged.
+- COR PR validation [40230376169](https://github.com/Chicitadel/ugondu/actions/runs/40230376169): COR passed; AWS physical gate skipped by PR policy; final gate passed while stating `NOT RELEASE CERTIFIED`.
+- CI/CD [40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160): 16 substantive jobs passed; Docker validation and release publishing skipped.
+- Regression suites: 24 + 19 + 6 + 18 tests passed, including COR-WF-017 and COR-WF-018. Tested PR merge candidate: `ecfec790d411bbffec270f1d700350bb3f26243c`.
+- **Release decision unchanged:** NOT CERTIFIED FOR UNIVERSAL COMMERCIAL RELEASE. A fresh non-PR candidate-bound qualification and successful AWS physical gate remain required; AI fleet and universal target/artifact lifecycle evidence remain incomplete.
+
+
+## 2026-10-25 re-audit delta — COR-REM-006
+
+| Control | State | Evidence / next action |
+|---|---|---|
+| Attribution verifier CI enforcement | YELLOW — implemented, CI pending | Added `npm run verify:attribution` to aggregate governance and CI release-integrity gate; require latest-head run pass |
+| T03 tokenization verifier CI enforcement | YELLOW — implemented, CI pending | Added `npm run verify:t03` to aggregate governance and CI; require latest-head run pass |
+| T04 workspace boundary verifier CI enforcement | YELLOW — implemented, CI pending | Added `npm run verify:t04` to aggregate governance and CI; require latest-head run pass |
+| Governance wiring regression test | YELLOW — implemented, CI pending | Added test assertions for aggregate script and workflow step presence |
+| Universal commercial release | RED — not certified | AI fleet qualification, native target/IDE/host/cloud scope, immutable artifact lifecycle and non-PR AWS physical qualification remain outstanding |
+
+Commits: `a6d68c950e912637dd3c716ec75db3e361d6795a`, `414c68958768cc3b220f93759c78a413da67011d`, `a843ff1555dc440c9f6d8e4a1091c07a86e07670`, `b4d242519c5562f5deb9b217ce3da90e3935a197`, `b26f3a15718071807267731067388342e5af6b27`.
+
+
+## COR-REM-007 — T04 build prerequisite (2026-10-25)
+
+| Control | State | Evidence / next action |
+|---|---|---|
+| T04 artifact availability in isolated CI | YELLOW — fix committed, rerun pending | Run #533 / `40235932762` failed because `dist/` was absent in the clean governance job. CI now runs `npm ci && npm run build` before T04; aggregate governance command also builds first. |
+| Attribution and T03 in newly wired CI | GREEN for run #533 | Attribution and T03 steps passed before T04 failed. |
+| Governance regression suite | YELLOW — rerun pending | Skipped in run #533 due T04 failure; latest run must execute it. |
+| Universal commercial release | RED — not certified | AI fleet qualification, native target/IDE/host/cloud scope, immutable artifact lifecycle and non-PR AWS physical qualification remain outstanding. |
+
+Fix commits: `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`, `5313447ccecae303b75f2d2fc1ce2b7d49128c69`, `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`.
+
+
+## Latest-head verification — 2026-10-25 21:35 UTC (supersedes earlier pending states)
+
+Observed PR source head: `3267d637b1473ab02aff906e697aefafb297040e`. PR #24 remains open, draft, and unmerged.
+
+- CI/CD run [#541 / `40236147953`](https://github.com/Chicitadel/ugondu/actions/runs/40236147953): **SUCCESS**. The Release Integrity & Governance Gates job passed attribution, T03, workspace build prerequisite, T04, and governance verifier regression tests.
+- T04 output: `CONFORMANCE STATUS: ALL 5/5 GATES PASSED (GRADE: PASS / CONFORMANT)`.
+- Governance verifier regression suite: **8/8 passed, 0 failed**.
+- COR run [#428 / `40236147971`](https://github.com/Chicitadel/ugondu/actions/runs/40236147971): **SUCCESS for PR validation**. COR tests and final PR gate passed; AWS Physical Qualification Gate was intentionally skipped for PR events. The final gate states `NOT RELEASE CERTIFIED`.
+
+COR-REM-006 and COR-REM-007 are GREEN for PR-CI acceptance on this run. They do not close candidate-bound release evidence freshness or broader release blockers. The evidence manifest and AI/native receipts still bind to candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`, not the current remediation head. AI model qualification remains offline with 0 qualified, 0 active, 12 disabled; native target/IDE/host/cloud and immutable artifact lifecycle qualification remain incomplete. Universal commercial release remains **NOT CERTIFIED**.
