@@ -53,3 +53,6 @@ export * from './LocationCatalogueProvider';
 
 // Universal Placement & Region Selection Resolver
 export * from './UniversalPlacementResolver';
+
+// Universal Bootstrap & Cloud Provisioning Runtime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)
+export * from './UniversalBootstrapRuntime';

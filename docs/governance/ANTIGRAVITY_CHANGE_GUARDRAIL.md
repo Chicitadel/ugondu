@@ -362,8 +362,22 @@ The bundle manifest is the single required-artifact inventory for the universal 
 
 ### Validation commands
 - `npm run bootstrap:validate` — manifest and cross-artifact integrity only.
-- `npm run test:bootstrap-bundle` — bundle regression tests.
-- `npm run test:bootstrap-fail-closed` — existing fail-closed qualification tests plus bundle regressions.
+- `npm run test:bootstrap-bundle` — bundle regression tests (6/6 PASS including runtime `UniversalBootstrapRuntime` derivation and validation).
+- `npm run test:bootstrap-fail-closed` — existing fail-closed qualification tests plus bundle regressions (10/10 PASS).
 - `npm run bootstrap:validate:strict` — intentionally exits nonzero until separate runtime/provider qualification is available; it must not be reported as a passing live qualification.
 
-**Current evidence status:** specification/package contracts and test definitions are committed on the dedicated branch. Do not claim tests passed until executed against the exact branch head. Do not claim cloud roles/policies were installed or live providers qualified.
+### 2026-10-26 Runtime Integration & Defect Remediation Update — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+1. **Defect Fix — `.governance/platform/bootstrap/role-catalog.json` (`runner_base.scope`):**
+   - *Root cause:* `runner_base` omitted the mandatory `scope` field required by `role-catalog.schema.json` and `scripts/bootstrap/validate-bundle.mjs`, causing `npm run bootstrap:validate` to exit with `ROLE_CONTRACT_INCOMPLETE: runner_base`.
+   - *Fix:* Added `"scope": "approved caller identity, OIDC issuer/audience/repository/environment, and read-only target discovery plus scoped assume-role targets"` to `runner_base`. Verified `npm run bootstrap:validate` exits `0`.
+2. **Defect Fix — `server/billing-gateway/src/__tests__/license-store-portability.spec.ts` (`./db` import):**
+   - *Root cause:* Import path referenced `./db` instead of `../db`, failing TypeScript compilation under Jest (`TS2307`).
+   - *Fix:* Updated import to `../db`. Verified `npm --workspace=server/billing-gateway test` passes `2/2 suites (14/14 tests)`.
+3. **Runtime Integration — `server/capabilities/src/continuity/UniversalBootstrapRuntime.ts` & `CanonicalPolicyRegistry.ts`:**
+   - Wired `.governance/platform/bootstrap/universal-bootstrap-bundle.json`, `universal-bootstrap-capabilities.json`, `role-catalog.json`, `policy-pack-contract.json`, and the 3 JSON schemas directly into `CanonicalPolicyRegistry` (`getUniversalBootstrapGovernance`, `listUniversalCatalogRoles`) and `UniversalBootstrapRuntime` without introducing duplicate policy engines or shadow registries.
+   - Implemented CloudFormation template resource parser (`parseCloudFormationTemplateResources`) and plan-derived operation graph compiler (`derivePlanOperationGraph`) supporting `infrastructure/aws/dumcholu-pilot-staging.yaml` (all 14 resources + stack control-plane lifecycle + scoped `iam:PassRole`), Terraform S3/DynamoDB/KMS state backend and resources, Route 53 DNS record changes, ACM certificate region validation (`us-east-1` required for `CLOUDFRONT_VIEWER`; target region required for `REGIONAL_ALB_OR_APIGW`), and CloudFront distributions.
+   - Implemented `generatePlanBoundPolicyPack`, `validatePolicyPackAgainstContract`, `diagnoseBootstrapDenial` (classifying IAM policy missing, explicit deny, SCP deny, permissions boundary deny, session policy deny, trust policy deny, missing `iam:PassRole`, and missing service-linked role into `AUTHORITY_GAP` with `exitCode: 1` and 0 subsequent mutations), and `resolveUniversalCapabilityAccess` across `community`, `professional`, and `enterprise` editions.
+   - Added unit and adversarial regression tests in `server/capabilities/src/tests/universal-bootstrap-runtime.spec.ts` (`8/8 PASS`) and `tests/bootstrap-bundle-integrity.test.mjs` (`6/6 PASS`).
+
+**Current evidence status:** Runtime integration, defect fixes, and regression suites pass locally; exact-head CI/COR verification on PR #30 is required before marking CI gates green. Physical cloud roles/policies and multi-provider live targets remain uncertified until candidate-bound physical receipts are produced.

@@ -50,3 +50,32 @@ test("strict validator does not misrepresent missing physical receipts as qualif
   assert.equal(run.status, 2, run.stdout + run.stderr);
   assert.match(run.stderr, /STRICT QUALIFICATION: NOT PASSED/);
 });
+
+test("runtime UniversalBootstrapRuntime derives plan-bound policy pack for dumcholu-pilot-staging.yaml and fails closed on unmapped resources", async () => {
+  const distPath = path.join(root, "server/capabilities/dist/index.js");
+  if (!fs.existsSync(distPath)) return;
+  const { UniversalBootstrapRuntime } = await import(`file://${distPath.replace(/\\/g, "/")}`);
+  const cfnTemplate = fs.readFileSync(path.join(root, "infrastructure/aws/dumcholu-pilot-staging.yaml"), "utf8");
+  const graph = UniversalBootstrapRuntime.derivePlanOperationGraph({
+    accountId: "971671216490",
+    region: "eu-west-3",
+    environment: "staging",
+    projectSlug: "dumcholu",
+    transactionId: "tx-bundle-test-001",
+    callerPrincipalArn: "arn:aws:iam::971671216490:role/UgonduCORRunner",
+    executionRoleArn: "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+    iacServiceRoleArn: "arn:aws:iam::971671216490:role/UgonduIacServiceRole",
+    cloudFormationTemplateContent: cfnTemplate,
+  });
+  assert.equal(graph.status, "READY");
+  assert.equal(graph.exitCode, 0);
+  assert.equal(graph.operations.length, 15);
+  const pack = UniversalBootstrapRuntime.generatePlanBoundPolicyPack({
+    graph,
+    roleId: "execution_role",
+    targetRoleArn: "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+  });
+  const validation = UniversalBootstrapRuntime.validatePolicyPackAgainstContract(pack);
+  assert.equal(validation.valid, true);
+  assert.equal(validation.violations.length, 0);
+});

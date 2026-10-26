@@ -390,144 +390,61 @@ describe('Billing Gateway — Governance, Entitlements, Telemetry & License Life
         });
 
         it('production mode ignores cached entitlements and verifies with the federated authority on every request', async () => {
-            const originalNodeEnv = process.env.NODE_ENV;
-            const originalBillingUrl = process.env.BILLING_AUTHORITY_URL;
-            const originalIdentityUrl = process.env.IDENTITY_AUTHORITY_URL;
+            const origEnv = { NODE_ENV: process.env.NODE_ENV, BILLING: process.env.BILLING_AUTHORITY_URL, IDENTITY: process.env.IDENTITY_AUTHORITY_URL };
             try {
                 process.env.NODE_ENV = 'production';
                 process.env.BILLING_AUTHORITY_URL = 'https://billing-authority.test/api/v1';
                 delete process.env.IDENTITY_AUTHORITY_URL;
                 tokenStore.registerToken('cached-token-prod', 'tenant-stale', 'professional');
-
                 const upstream = jest.spyOn(axios, 'post').mockResolvedValue({
-                    data: {
-                        valid: true,
-                        status: 'active',
-                        tenantId: 'tenant-authoritative',
-                        subscriptionTier: 'business',
-                    },
+                    data: { valid: true, status: 'active', tenantId: 'tenant-authoritative', subscriptionTier: 'business' },
                 } as any);
-
-                const response = await requestJson(
-                    server,
-                    'POST',
-                    '/v1/authorize',
-                    { token: 'cached-token-prod' },
-                    makeServiceAuthHeader()
-                );
-
+                const response = await requestJson(server, 'POST', '/v1/authorize', { token: 'cached-token-prod' }, makeServiceAuthHeader());
                 expect(response.status).toBe(200);
                 expect(response.body.tenantId).toBe('tenant-authoritative');
                 expect(response.body.edition).toBe('business');
-                expect(upstream).toHaveBeenCalledWith(
-                    'https://billing-authority.test/api/v1/verify',
-                    { token: 'cached-token-prod' },
-                    expect.objectContaining({ timeout: 3000 })
-                );
+                expect(upstream).toHaveBeenCalledWith('https://billing-authority.test/api/v1/verify', { token: 'cached-token-prod' }, expect.objectContaining({ timeout: 3000 }));
             } finally {
-                if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
-                else process.env.NODE_ENV = originalNodeEnv;
-                if (originalBillingUrl === undefined) delete process.env.BILLING_AUTHORITY_URL;
-                else process.env.BILLING_AUTHORITY_URL = originalBillingUrl;
-                if (originalIdentityUrl === undefined) delete process.env.IDENTITY_AUTHORITY_URL;
-                else process.env.IDENTITY_AUTHORITY_URL = originalIdentityUrl;
+                if (origEnv.NODE_ENV === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = origEnv.NODE_ENV;
+                if (origEnv.BILLING === undefined) delete process.env.BILLING_AUTHORITY_URL; else process.env.BILLING_AUTHORITY_URL = origEnv.BILLING;
+                if (origEnv.IDENTITY === undefined) delete process.env.IDENTITY_AUTHORITY_URL; else process.env.IDENTITY_AUTHORITY_URL = origEnv.IDENTITY;
             }
         });
 
         it('production mode fails closed when the federated billing authority is not configured', async () => {
-            const originalNodeEnv = process.env.NODE_ENV;
-            const originalBillingUrl = process.env.BILLING_AUTHORITY_URL;
-            const originalIdentityUrl = process.env.IDENTITY_AUTHORITY_URL;
+            const origEnv = { NODE_ENV: process.env.NODE_ENV, BILLING: process.env.BILLING_AUTHORITY_URL, IDENTITY: process.env.IDENTITY_AUTHORITY_URL };
             try {
                 process.env.NODE_ENV = 'production';
                 delete process.env.BILLING_AUTHORITY_URL;
                 delete process.env.IDENTITY_AUTHORITY_URL;
                 tokenStore.registerToken('cached-token-no-authority', 'tenant-local', 'enterprise');
-
                 const upstream = jest.spyOn(axios, 'post');
-                const response = await requestJson(
-                    server,
-                    'POST',
-                    '/v1/authorize',
-                    { token: 'cached-token-no-authority' },
-                    makeServiceAuthHeader()
-                );
-
+                const response = await requestJson(server, 'POST', '/v1/authorize', { token: 'cached-token-no-authority' }, makeServiceAuthHeader());
                 expect(response.status).toBe(503);
                 expect(response.body.code).toBe(BillingErrorCode.UPSTREAM_UNAVAILABLE);
                 expect(upstream).not.toHaveBeenCalled();
             } finally {
-                if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
-                else process.env.NODE_ENV = originalNodeEnv;
-                if (originalBillingUrl === undefined) delete process.env.BILLING_AUTHORITY_URL;
-                else process.env.BILLING_AUTHORITY_URL = originalBillingUrl;
-                if (originalIdentityUrl === undefined) delete process.env.IDENTITY_AUTHORITY_URL;
-                else process.env.IDENTITY_AUTHORITY_URL = originalIdentityUrl;
+                if (origEnv.NODE_ENV === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = origEnv.NODE_ENV;
+                if (origEnv.BILLING === undefined) delete process.env.BILLING_AUTHORITY_URL; else process.env.BILLING_AUTHORITY_URL = origEnv.BILLING;
+                if (origEnv.IDENTITY === undefined) delete process.env.IDENTITY_AUTHORITY_URL; else process.env.IDENTITY_AUTHORITY_URL = origEnv.IDENTITY;
             }
         });
 
         it('enforces nonce replay protection and Idempotency-Key deduplication', async () => {
-            tokenStore.registerToken('ugp_replay_tok', 'tenant_rep', 'business', {
-                status: 'active',
-            });
-
-            // Nonce replay check
-            const firstNonceRes = await requestJson(
-                server,
-                'POST',
-                '/v1/authorize',
-                { token: 'ugp_replay_tok', nonce: 'nonce-abc-123' },
-                makeServiceAuthHeader()
-            );
+            tokenStore.registerToken('ugp_replay_tok', 'tenant_rep', 'business', { status: 'active' });
+            const firstNonceRes = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', nonce: 'nonce-abc-123' }, makeServiceAuthHeader());
             expect(firstNonceRes.status).toBe(200);
-
-            const secondNonceRes = await requestJson(
-                server,
-                'POST',
-                '/v1/authorize',
-                { token: 'ugp_replay_tok', nonce: 'nonce-abc-123' },
-                makeServiceAuthHeader()
-            );
+            const secondNonceRes = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', nonce: 'nonce-abc-123' }, makeServiceAuthHeader());
             expect(secondNonceRes.status).toBe(409);
             expect(secondNonceRes.body.code).toBe(BillingErrorCode.REPLAY_DETECTED);
 
-            // Idempotency-Key check
-            const idempHeaders = {
-                ...makeServiceAuthHeader(),
-                'Idempotency-Key': 'idemp-key-001',
-            };
-            const firstIdemp = await requestJson(
-                server,
-                'POST',
-                '/v1/authorize',
-                { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' },
-                idempHeaders
-            );
+            const idempHeaders = { ...makeServiceAuthHeader(), 'Idempotency-Key': 'idemp-key-001' };
+            const firstIdemp = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' }, idempHeaders);
             expect(firstIdemp.status).toBe(200);
-
-            const replaySamePayload = await requestJson(
-                server,
-                'POST',
-                '/v1/authorize',
-                { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' },
-                {
-                    ...makeServiceAuthHeader(),
-                    'Idempotency-Key': 'idemp-key-001',
-                }
-            );
+            const replaySamePayload = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' }, idempHeaders);
             expect(replaySamePayload.status).toBe(200);
             expect(replaySamePayload.body.idempotentReplay).toBe(true);
-
-            const replayConflictingPayload = await requestJson(
-                server,
-                'POST',
-                '/v1/authorize',
-                { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/different' },
-                {
-                    ...makeServiceAuthHeader(),
-                    'Idempotency-Key': 'idemp-key-001',
-                }
-            );
+            const replayConflictingPayload = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/different' }, idempHeaders);
             expect(replayConflictingPayload.status).toBe(409);
             expect(replayConflictingPayload.body.code).toBe(BillingErrorCode.REPLAY_DETECTED);
         });

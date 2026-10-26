@@ -6,6 +6,7 @@ const localeDir = path.join(root, 'server', 'shared', 'locales');
 
 const flat = (o, p = '', out = {}) => {
   for (const [k, v] of Object.entries(o)) {
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
     if (v && typeof v === 'object' && !Array.isArray(v)) flat(v, p + k + '.', out);
     else out[p + k] = String(v);
   }

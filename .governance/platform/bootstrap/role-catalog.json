@@ -31,6 +31,7 @@
         "oidc_ephemeral",
         "provider_native_credential_chain"
       ],
+      "scope": "approved caller identity, OIDC issuer/audience/repository/environment, and read-only target discovery plus scoped assume-role targets",
       "constraints": [
         "read-only discovery plus narrowly defined assume-role/federation operations",
         "trust conditions bind issuer audience repository/environment/subject where applicable",
