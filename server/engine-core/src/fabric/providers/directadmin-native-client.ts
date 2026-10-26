@@ -83,6 +83,22 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
     return { id: safeId, state: 'failed', health: 'unhealthy' };
   }
 
+  /**
+   * Restores the public_html directory of an existing domain and proves the result by read-back.
+   * This is a topology repair only; it never claims an application is installed, started or healthy.
+   */
+  public async restorePublicHtmlDirectory(instanceId: string): Promise<{ id: string; restored: boolean }> {
+    const safeId = this.validatePathSegment(instanceId, 'instance_id');
+    const target = `/home/${this.escapeShell(this.username)}/domains/${this.escapeShell(safeId)}/public_html`;
+    await this.execCmd(`mkdir -p ${target}`);
+    await this.ensureConnection();
+    const readBack = await this.ssh.execCommand(`test -d ${target}`);
+    if (readBack.code !== 0) {
+      throw new Error(__t('directadmin_command_failed_code_stderr', { code: readBack.code, stderr: readBack.stderr }));
+    }
+    return { id: safeId, restored: true };
+  }
+
   public async createHostedApp(name: string, image: string): Promise<{ id: string; state: string }> {
     this.validateHostedAppName(name);
     // This adapter does not deploy an application image: creating a directory

@@ -438,13 +438,13 @@ describe('Billing Gateway — Governance, Entitlements, Telemetry & License Life
             expect(secondNonceRes.status).toBe(409);
             expect(secondNonceRes.body.code).toBe(BillingErrorCode.REPLAY_DETECTED);
 
-            const idempHeaders = { ...makeServiceAuthHeader(), 'Idempotency-Key': 'idemp-key-001' };
-            const firstIdemp = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' }, idempHeaders);
+            const idempHeaders = (): Record<string, string> => ({ ...makeServiceAuthHeader(), 'Idempotency-Key': 'idemp-key-001' });
+            const firstIdemp = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' }, idempHeaders());
             expect(firstIdemp.status).toBe(200);
-            const replaySamePayload = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' }, idempHeaders);
+            const replaySamePayload = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/one' }, idempHeaders());
             expect(replaySamePayload.status).toBe(200);
             expect(replaySamePayload.body.idempotentReplay).toBe(true);
-            const replayConflictingPayload = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/different' }, idempHeaders);
+            const replayConflictingPayload = await requestJson(server, 'POST', '/v1/authorize', { token: 'ugp_replay_tok', repositoryUrl: 'https://github.com/org/different' }, idempHeaders());
             expect(replayConflictingPayload.status).toBe(409);
             expect(replayConflictingPayload.body.code).toBe(BillingErrorCode.REPLAY_DETECTED);
         });

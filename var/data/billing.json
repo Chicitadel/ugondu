@@ -1,0 +1,69 @@
+{
+  "community_token_123": {
+    "token": "community_token_123",
+    "token_fingerprint": "sha256:b5e39f8853358b14",
+    "tenant_id": "tenant_comm_01",
+    "edition": "community",
+    "status": "active",
+    "created_at": "2026-10-26T15:16:58.888Z"
+  },
+  "ugp_demo123": {
+    "token": "ugp_demo123",
+    "token_fingerprint": "sha256:5f96c5a7e55af425",
+    "tenant_id": "tenant_prof_99",
+    "edition": "professional",
+    "status": "active",
+    "created_at": "2026-10-26T15:16:58.895Z"
+  },
+  "ugb_biz789": {
+    "token": "ugb_biz789",
+    "token_fingerprint": "sha256:254e3a9172850371",
+    "tenant_id": "tenant_biz_22",
+    "edition": "business",
+    "status": "active",
+    "created_at": "2026-10-26T15:16:58.901Z"
+  },
+  "uge_corp456": {
+    "token": "uge_corp456",
+    "token_fingerprint": "sha256:f0e44e4a49d0429e",
+    "tenant_id": "tenant_ent_11",
+    "edition": "enterprise",
+    "status": "active",
+    "created_at": "2026-10-26T15:16:58.907Z"
+  },
+  "ugs_sov001": {
+    "token": "ugs_sov001",
+    "token_fingerprint": "sha256:ec0d2e30f6c4df41",
+    "tenant_id": "tenant_sov_01",
+    "edition": "sovereign",
+    "status": "active",
+    "created_at": "2026-10-26T15:16:58.913Z"
+  },
+  "ugp_suspended_001": {
+    "token": "ugp_suspended_001",
+    "token_fingerprint": "sha256:7b58de93b5dfd575",
+    "tenant_id": "tenant_susp_01",
+    "edition": "professional",
+    "status": "suspended",
+    "created_at": "2026-10-26T15:16:58.919Z",
+    "suspended_reason": "Payment delinquency threshold exceeded"
+  },
+  "ugp_expired_001": {
+    "token": "ugp_expired_001",
+    "token_fingerprint": "sha256:146738f7d8a02464",
+    "tenant_id": "tenant_exp_01",
+    "edition": "professional",
+    "status": "expired",
+    "created_at": "2026-10-26T15:16:58.925Z",
+    "expires_at": "2020-01-01T00:00:00.000Z"
+  },
+  "ugp_revoked_001": {
+    "token": "ugp_revoked_001",
+    "token_fingerprint": "sha256:8d8e838d873289b7",
+    "tenant_id": "tenant_rev_01",
+    "edition": "professional",
+    "status": "revoked",
+    "created_at": "2026-10-26T15:16:58.931Z",
+    "revoked_at": "2026-01-01T00:00:00.000Z"
+  }
+}
