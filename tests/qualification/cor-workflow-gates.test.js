@@ -204,7 +204,10 @@ test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner 
         created.push(arn);
         return { status: 0, json: { Policy: { PolicyName: name, Arn: arn } }, stderr: '' };
       }
-      if (args[1] === 'get-policy') return { status: 0, json: { Policy: { DefaultVersionId: 'v1' } }, stderr: '' };
+      if (args[1] === 'get-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        return { status: 0, json: { Policy: { Arn: arn, DefaultVersionId: 'v1' } }, stderr: '' };
+      }
       return { status: 0, json: {}, stderr: '' };
     }
   });
@@ -272,6 +275,10 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
   const os = require('node:os');
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s3-'));
   const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  const attached = [
+    { PolicyName: 'UgonduCOR-V9-Discovery', PolicyArn: 'arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery' },
+    { PolicyName: 'UgonduCOR-V9-EC2-Creation', PolicyArn: 'arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Creation' }
+  ];
   const provisionRes = runBootstrapProvisionPhase({
     evidenceDir: tmpDir,
     awsRunner: (args) => {
@@ -279,8 +286,15 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
       if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
         return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
       }
-      if (args[1] === 'list-attached-role-policies') {
-        return { status: 0, json: { AttachedPolicies: [{ PolicyName: 'UgonduCOR-V9-Discovery' }, { PolicyName: 'UgonduCOR-V9-EC2-Creation' }] }, stderr: '' };
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: [...attached] }, stderr: '' };
+      if (args[1] === 'get-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        return { status: 0, json: { Policy: { Arn: arn, DefaultVersionId: 'v1' } }, stderr: '' };
+      }
+      if (args[1] === 'attach-role-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        attached.push({ PolicyName: arn.split('/').pop(), PolicyArn: arn });
+        return { status: 0, json: {}, stderr: '' };
       }
       return { status: 0, json: {}, stderr: '' };
     }
