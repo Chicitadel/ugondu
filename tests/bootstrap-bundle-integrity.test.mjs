@@ -10,6 +10,11 @@ const read = (p) => JSON.parse(fs.readFileSync(path.join(root, p), "utf8"));
 test("universal bootstrap manifest resolves every required package artifact", () => {
   const bundle = read(".governance/platform/bootstrap/universal-bootstrap-bundle.json");
   assert.equal(bundle.bundle_invariants.fail_closed, true);
+  for (const schemaPath of [".governance/platform/bootstrap/schemas/universal-bootstrap-bundle.schema.json", ".governance/platform/bootstrap/schemas/role-catalog.schema.json", ".governance/platform/bootstrap/schemas/policy-pack.schema.json"]) {
+    const schema = read(schemaPath);
+    assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
+    assert.ok(Array.isArray(schema.required) && schema.required.length > 0);
+  }
   for (const artifact of bundle.required_package_contents) {
     if (artifact.required) assert.ok(fs.existsSync(path.join(root, artifact.path)), `missing ${artifact.path}`);
   }
