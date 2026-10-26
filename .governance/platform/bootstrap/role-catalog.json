@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0.0",
+  "catalog_id": "ugondu.bootstrap.role-catalog",
+  "status": "logical-contract-runtime-mapping-required",
+  "role_separation_required": true,
+  "roles": [
+    {
+      "role_id": "bootstrap_authority",
+      "required": true,
+      "purpose": "One-time or controlled creation/repair of explicitly approved execution roles and trust/policy attachments.",
+      "may_mutate_cloud_workloads": false,
+      "credential_mode": [
+        "operator_handoff",
+        "short_lived_assumed_role"
+      ],
+      "scope": "named target account/tenant/project and explicit role identifiers",
+      "constraints": [
+        "no self-escalation",
+        "no wildcard administrator default",
+        "policy boundary and organization restrictions must be inspected",
+        "privilege changes require explicit approval",
+        "cannot silently assume an unconfigured principal"
+      ]
+    },
+    {
+      "role_id": "runner_base",
+      "required": true,
+      "purpose": "Authenticate the Ugondu client/CI actor and discover approved targets; orchestrate requests.",
+      "may_mutate_cloud_workloads": false,
+      "credential_mode": [
+        "oidc_ephemeral",
+        "provider_native_credential_chain"
+      ],
+      "constraints": [
+        "read-only discovery plus narrowly defined assume-role/federation operations",
+        "trust conditions bind issuer audience repository/environment/subject where applicable",
+        "no default workload provisioning permissions",
+        "no arbitrary iam:PassRole"
+      ]
+    },
+    {
+      "role_id": "execution_role",
+      "required": true,
+      "purpose": "Apply only approved, target-bound deployment plan operations.",
+      "may_mutate_cloud_workloads": true,
+      "credential_mode": [
+        "short_lived_assumed_role",
+        "provider_native_ephemeral_identity"
+      ],
+      "scope": "approved account/tenant/project, region, resource family, resource names/tags, and operation set",
+      "constraints": [
+        "policy permissions are derived from the approved plan",
+        "resource constraints required where supported",
+        "explicit deny and permissions boundary/SCP/tenant policy must be respected",
+        "time-bound session and session tags where supported",
+        "no role chaining beyond configured trust graph"
+      ]
+    },
+    {
+      "role_id": "iac_service_role",
+      "required": false,
+      "purpose": "Provider-native infrastructure orchestrator service role (for example CloudFormation execution role) when supported and required.",
+      "may_mutate_cloud_workloads": true,
+      "credential_mode": [
+        "provider_service_assumed_role"
+      ],
+      "scope": "approved stack/project and exact approved service-role ARN/identity",
+      "constraints": [
+        "runner may pass only approved service roles to named services",
+        "service role has only the resources/actions required by the reviewed plan",
+        "separate from runner and workload runtime identities"
+      ]
+    },
+    {
+      "role_id": "workload_runtime_role",
+      "required": false,
+      "purpose": "Identity used by the deployed application after provisioning.",
+      "may_mutate_cloud_workloads": false,
+      "credential_mode": [
+        "workload_identity",
+        "provider_task_or_instance_role"
+      ],
+      "scope": "specific workload/service",
+      "constraints": [
+        "runtime data-plane access only",
+        "never reuse bootstrap/execution identity",
+        "no provisioning or IAM administration permissions by default"
+      ]
+    },
+    {
+      "role_id": "dns_certificate_role",
+      "required": false,
+      "purpose": "DNS and certificate lifecycle operations when separately delegated.",
+      "may_mutate_cloud_workloads": true,
+      "credential_mode": [
+        "short_lived_assumed_role",
+        "provider_native_identity"
+      ],
+      "scope": "approved hosted zones, record names, certificate domains, and regions",
+      "constraints": [
+        "prove zone/domain ownership",
+        "protect existing records",
+        "reversible change set and read-back",
+        "CloudFront viewer certificate in us-east-1 when AWS CloudFront is targeted"
+      ]
+    },
+    {
+      "role_id": "state_artifact_role",
+      "required": false,
+      "purpose": "Manage IaC state, artifacts, deployment evidence and backups.",
+      "may_mutate_cloud_workloads": false,
+      "credential_mode": [
+        "short_lived_assumed_role",
+        "provider_native_identity"
+      ],
+      "scope": "dedicated state/artifact/evidence containers and required key operations",
+      "constraints": [
+        "encryption at rest and in transit",
+        "state locking and versioning where supported",
+        "no secret values in logs/evidence",
+        "least-privilege read/write separation"
+      ]
+    },
+    {
+      "role_id": "observer_verifier",
+      "required": true,
+      "purpose": "Read back resources, status, policy/trust attachments, events and evidence after mutation.",
+      "may_mutate_cloud_workloads": false,
+      "credential_mode": [
+        "short_lived_assumed_role",
+        "provider_native_identity"
+      ],
+      "scope": "approved target and relevant resource families",
+      "constraints": [
+        "read-only",
+        "must verify effective state, not merely API acceptance",
+        "verification failure prevents success certification"
+      ]
+    }
+  ],
+  "role_binding_rules": [
+    "Each execution must bind every selected role to provider, tenant/account/project, partition, region, namespace, environment and plan digest as applicable.",
+    "Provider adapters may omit unsupported scope dimensions only with an explicit capability declaration and documented compensating control.",
+    "A missing role, missing trust, permission boundary, SCP, policy attachment, or required read permission is an AUTHORITY_GAP, not an invitation to broaden access.",
+    "The same identity may fulfill multiple logical roles only if the provider permits it, the plan explicitly records the collapse, and independent policy checks prove no privilege expansion; default is separation.",
+    "Never generate universal wildcard resource/action grants as a fallback for an unknown resource or provider.",
+    "Role and policy artifacts must be deterministic, versioned, digest-bound, schema-valid, provider-valid, and reviewed before installation."
+  ],
+  "provider_mapping_status": {
+    "aws": "targeted-for-implementation",
+    "azure": "unqualified-until-physical-receipts",
+    "gcp": "unqualified-until-physical-receipts",
+    "kubernetes": "unqualified-until-physical-receipts",
+    "vps_private_cloud": "capability-probe-required",
+    "cpanel_directadmin_shared_hosting": "capability-probe-required",
+    "generic_hosting": "capability-probe-required"
+  }
+}
