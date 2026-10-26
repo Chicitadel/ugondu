@@ -36,6 +36,20 @@ import canonicalize from 'canonicalize';
  * Unsupported JavaScript values fail closed instead of receiving a placeholder
  * digest that could make distinct policies appear equivalent.
  */
+export enum PolicyDigestInputErrorCode {
+  NON_FINITE_NUMBER = 1,
+  CIRCULAR_REFERENCE = 2,
+  NON_PLAIN_OBJECT = 3,
+  UNSUPPORTED_VALUE = 4,
+}
+
+export class PolicyDigestInputError extends TypeError {
+  constructor(public readonly code: PolicyDigestInputErrorCode) {
+    super();
+    this.name = PolicyDigestInputError.name;
+  }
+}
+
 export class PolicyDigest {
   public generate(policyContent: unknown): string {
     if (Buffer.isBuffer(policyContent)) {
@@ -68,12 +82,12 @@ export class PolicyDigest {
       if (current === null || typeof current === 'string' || typeof current === 'boolean') return;
       if (typeof current === 'number') {
         if (!Number.isFinite(current)) {
-          throw new TypeError('Policy content cannot contain non-finite numbers.');
+          throw new PolicyDigestInputError(PolicyDigestInputErrorCode.NON_FINITE_NUMBER);
         }
         return;
       }
       if (Array.isArray(current)) {
-        if (ancestors.has(current)) throw new TypeError('Policy content cannot contain circular references.');
+        if (ancestors.has(current)) throw new PolicyDigestInputError(PolicyDigestInputErrorCode.CIRCULAR_REFERENCE);
         ancestors.add(current);
         for (const item of current) validate(item);
         ancestors.delete(current);
@@ -83,21 +97,21 @@ export class PolicyDigest {
         const object = current as Record<string, unknown>;
         const prototype = Object.getPrototypeOf(object);
         if (prototype !== Object.prototype && prototype !== null) {
-          throw new TypeError('Policy content must contain only plain JSON objects.');
+          throw new PolicyDigestInputError(PolicyDigestInputErrorCode.NON_PLAIN_OBJECT);
         }
-        if (ancestors.has(object)) throw new TypeError('Policy content cannot contain circular references.');
+        if (ancestors.has(object)) throw new PolicyDigestInputError(PolicyDigestInputErrorCode.CIRCULAR_REFERENCE);
         ancestors.add(object);
         for (const item of Object.values(object)) validate(item);
         ancestors.delete(object);
         return;
       }
-      throw new TypeError('Policy content must be a JSON-compatible value.');
+      throw new PolicyDigestInputError(PolicyDigestInputErrorCode.UNSUPPORTED_VALUE);
     };
 
     validate(value);
     const canonical = canonicalize(value as never);
     if (typeof canonical !== 'string') {
-      throw new TypeError('Policy content must be a JSON-compatible value.');
+      throw new PolicyDigestInputError(PolicyDigestInputErrorCode.UNSUPPORTED_VALUE);
     }
     return canonical;
   }
