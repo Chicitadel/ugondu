@@ -301,3 +301,39 @@ The workspace coverage verifier joined each `package.json` workspace declaration
 ### Qualification gaps intentionally left open
 
 The profile is a deployment contract, not a claim that the current hosting account meets it. The actual hosting runtime and outbound authority connectivity need qualification. GCP/Azure physical qualification, AI model fleet receipts, and immutable release-artifact lifecycle remain separate universal-COR blockers.
+
+
+## 2026-10-26 Addendum — UG-UPLM-BOOTSTRAP-UNIVERSAL-001 (Immediate Action)
+
+**Owner branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26`  
+**Base:** `fix/hosting-portability-billing-persistence-2026-10-26`  
+**Status:** IMMEDIATE ACTION / SPECIFICATION ADDED / RUNTIME IMPLEMENTATION AND PHYSICAL QUALIFICATION OPEN  
+**Canonical specification:** [Universal Bootstrap & Cloud Provisioning Remediation](../audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md)  
+**Canonical capability registry:** [universal-bootstrap-capabilities.json](../../.governance/platform/bootstrap/universal-bootstrap-capabilities.json)
+
+### Task boundary and anti-drift rules
+
+- This task owns the canonical bootstrap capability manifest and its implementation blueprint. Before source edits, inspect and reuse the current UPLM/COR bootstrap, policy-pack registry, signer/digest logic, and tests. Do not add a second policy engine, duplicate capability registry, or interface-specific authorization.
+- Root cause is an authority gap during first physical AWS staging deployment. Do not solve it by self-escalation or by granting `cloudformation:*` to the current IAM user or OIDC runner as the default.
+- Bootstrap must return `AUTHORITY_GAP`, non-zero status and a durable checkpoint on denied required mutation. No dependent mutation, success status, or resume may occur before read-only reconciliation and authorization.
+- Preserve separation between OIDC/base runner, execution role, CloudFormation service role, and workload runtime roles. Restrict `iam:PassRole` to explicitly approved service roles. Verify existing provider, trust, policies, boundaries, SCPs, region and account before create/change.
+- Terraform, Route 53, ACM, CloudFront, CloudFormation and all other providers must use the same plan/approval/apply/verify/evidence lifecycle. CloudFront ACM viewer certificates require `us-east-1`; regional services use their target region.
+- Community retains a safe useful deployment route. Higher editions add scale, automation breadth, policy granularity and governance depth; no tier bypasses safety or Air Roofers AeroBill/Mandatag entitlement authority.
+- Do not mark a capability supported or this task GREEN until exact-head CI, positive/negative policy tests, and relevant physical provider receipts are fresh and independently reviewable.
+
+### Task ledger
+
+| Task ID | Owner branch | Concern | Status | Acceptance evidence |
+|---|---|---|---|---|
+| UG-UPLM-BOOTSTRAP-UNIVERSAL-001 | `fix/universal-bootstrap-cloud-provisioning-2026-10-26` | Single bootstrap manifest; IAM authority handoff; CloudFormation/Terraform/DNS/ACM/CloudFront; provider-neutral adapter contract; edition matrix; UI/CLI/IDE/agent parity | YELLOW / SPECIFIED, NOT IMPLEMENTED OR CERTIFIED | Source audit, regression tests, policy validation, exact-head CI/COR, authorized staging receipts, DNS/TLS checks, independent UAIGOS review |
+
+### Immediate execution order
+
+1. Re-audit source entrypoints, existing bootstrap/policy files and test coverage on the branch head; reconcile against the uploaded V9 policy bundle and existing UPLM specification.
+2. Reproduce the exact denied AWS API operation and distinguish IAM policy denial from trust, SCP, permission-boundary, service-role, subnet/prerequisite and region/account failures.
+3. Implement typed fail-closed authority handling and no-false-success regression tests before broadening permissions.
+4. Integrate the single manifest into the existing capability registry and generate target-scoped AWS policy/handoff output; do not create an independent runtime registry.
+5. Add governed Terraform, Route 53, ACM and CloudFront adapter paths, then additional provider/host adapters only when implemented.
+6. Run focused tests, all relevant workspace/governance checks and exact-head CI/COR. Physical cloud tests must be authorized, isolated, cost-bounded and cleanup-safe.
+7. Keep release certification withheld until authentic evidence covers each advertised capability. Existing AWS evidence does not certify the new candidate or other providers.
+
