@@ -155,3 +155,41 @@ Use per-resource-family states: Implemented; Unit-tested; Integration-tested; Ph
 - Kubernetes RBAC: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 
 **Acceptance boundary:** This catalogue is a planning inventory only. Runtime permission generation, adapter implementation, tests, exact-head CI/COR and physical qualification remain mandatory separate gates.
+
+## 19. DirectAdmin shared-host profile (observed, qualified: probe-only)
+
+Facts observed on the launch host through an operator SSH session on 2026-10-26. They are inputs for capability probing, not guarantees; every deployment must re-probe.
+
+| Aspect | Observation | Rule for Ugondu |
+| --- | --- | --- |
+| Account model | One unprivileged account; each domain lives at `~/domains/<fqdn>/public_html` | Deploy only inside the account; never assume root |
+| Fresh domain state | `public_html` holds only `cgi-bin/` and a stock `index.html`; no `.htaccess`, no per-domain `logs/` | Treat a missing `.htaccess` as an `AUTHORITY_GAP`-free prerequisite to create; verify HTTP status after upload |
+| Passenger | Application-server auto-detection can return HTTP 500 for static SPAs | Bundle must disable Passenger (`PassengerEnabled off` inside `IfModule mod_passenger.c`) |
+| Runtimes | Node and PHP present in the account home; no Docker, no systemd assumed | Probe, never assume; prefer static or PHP bundles |
+| Release layout | Releases and symlinked docroots are used by existing deployments | Use atomic symlink switch plus rollback pointer where permitted |
+| Evidence | Panel logs may be absent | Verify with an HTTP read-back (status, headers, `health.json`) and store redacted evidence |
+
+Operations matrix additions (provider: `directadmin`):
+
+| Operation | Logical role | Permission / capability | Verification |
+| --- | --- | --- | --- |
+| Discover domains | inventory | read access to `~/domains` | listing equals expected registry domains |
+| Upload `.htaccess` and static bundle | execution | write access to `public_html` of the target domain only | HTTP 200, expected headers, content hash |
+| Create/renew TLS | dns-tls | panel ACME or HTTP-01 reachability | certificate expiry read-back |
+| Rollback | execution | restore previous bundle backup | prior hash restored, HTTP 200 |
+
+Unsupported on this profile unless probed: root, containers, background daemons, custom Apache modules, `.htaccess` directives outside the permitted `AllowOverride` set (unknown directives must fail closed, not be silently dropped).
+
+## 20. Single source of truth for product identity
+
+- Product names, codes, aliases, domains, SKUs and plan codes come only from the central product registry (`platform-core/products.airroofers.eu/products.json`). The catalogue, policy packs, adapters and deployment scripts must resolve them at runtime and contain no product-name literals.
+- A deployment target domain is read from the registry entry's `domains`, or from the staged `deploy/directadmin/<fqdn>/` directory, never typed into code.
+- Adding a product is a registry change only; discovery, policy catalogues and staging scripts must pick it up without code edits.
+- A registry entry missing or ambiguous for a target stops execution with a typed `AUTHORITY_GAP`.
+
+## 21. Publication visibility principle
+
+- Policy documents are published on `policies.airroofers.eu` only for products whose registry entry has `public_release: true` and `publication_approval: APPROVED`.
+- Products in `internal_validation`, `private_pilot` or `internal_draft` keep their policies as `DRAFT` / `INTERNAL`; they are withheld from the global manifest, the product manifests and the published tree, and from product listings.
+- Approval flips the registry flags; the next build publishes the product. No policy build may override registry visibility.
+- Draft documents must state that they are pending legal review and must not be relied upon.

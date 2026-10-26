@@ -381,3 +381,10 @@ The bundle manifest is the single required-artifact inventory for the universal 
    - Added unit and adversarial regression tests in `server/capabilities/src/tests/universal-bootstrap-runtime.spec.ts` (`8/8 PASS`) and `tests/bootstrap-bundle-integrity.test.mjs` (`6/6 PASS`).
 
 **Current evidence status:** Runtime integration, defect fixes, and regression suites pass locally; exact-head CI/COR verification on PR #30 is required before marking CI gates green. Physical cloud roles/policies and multi-provider live targets remain uncertified until candidate-bound physical receipts are produced.
+
+### 2026-10-26 Exact-head verification — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+- **Candidate:** `8f4a8244781e05a6d911e4ad67c49d46ad9219bf` (PR #30 branch; integrated via PR #31, draft, base `phase4/production-hardening`).
+- **Ugondu CI/CD Pipeline:** run 40355055649 (pull_request) SUCCESS; run 40348557767 (workflow_dispatch) SUCCESS. Earlier run 40347263796 on `225f2ec1` failed on two tests (billing replay headers, DirectAdmin repair executor); both corrected in `8f4a8244`.
+- **COR Certification:** run 40355055685 SUCCESS in PR-validation mode; AWS Physical Qualification Gate intentionally skipped. **NOT RELEASE CERTIFIED.**
+- **Open (fail-closed):** authorised AWS staging receipts for the bootstrap runtime, GCP/Azure, AI model fleet (CATALOG_OFFLINE), actual DirectAdmin host qualification, immutable artifact lifecycle. Universal commercial release remains withheld.
