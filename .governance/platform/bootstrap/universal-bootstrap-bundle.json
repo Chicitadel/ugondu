@@ -54,6 +54,18 @@
       "path": "package.json",
       "required": true,
       "purpose": "Reproducible validation scripts and pinned schema validation dependency."
+    },
+    {
+      "id": "bundle-integrity-validator",
+      "path": "scripts/bootstrap/validate-bundle.mjs",
+      "required": true,
+      "purpose": "Fail-closed structural and cross-artifact integrity validation; explicitly not runtime qualification."
+    },
+    {
+      "id": "bundle-regression-test",
+      "path": "tests/bootstrap-bundle-integrity.test.mjs",
+      "required": true,
+      "purpose": "Regression coverage for bundle completeness and security invariants."
     }
   ],
   "bundle_invariants": {
