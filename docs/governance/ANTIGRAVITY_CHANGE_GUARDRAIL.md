@@ -337,3 +337,33 @@ The profile is a deployment contract, not a claim that the current hosting accou
 6. Run focused tests, all relevant workspace/governance checks and exact-head CI/COR. Physical cloud tests must be authorized, isolated, cost-bounded and cleanup-safe.
 7. Keep release certification withheld until authentic evidence covers each advertised capability. Existing AWS evidence does not certify the new candidate or other providers.
 
+
+
+## 4. Universal bootstrap bundle completeness gate — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+**Canonical package manifest:** `.governance/platform/bootstrap/universal-bootstrap-bundle.json`
+
+The bundle manifest is the single required-artifact inventory for the universal bootstrap specification. The coordinated role and policy contracts are:
+- `.governance/platform/bootstrap/universal-bootstrap-capabilities.json` — capability/provider/lifecycle registry.
+- `.governance/platform/bootstrap/role-catalog.json` — logical role boundaries and role-binding invariants.
+- `.governance/platform/bootstrap/policy-pack-contract.json` — plan-derived policy generation, validation, approval, installation, read-back, and rollback contract.
+- `docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md` — cross-platform resource/authorization inventory.
+- `docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md` — implementation and remediation specification.
+- `scripts/bootstrap/validate-bundle.mjs` and `tests/bootstrap-bundle-integrity.test.mjs` — structural validator and regression coverage.
+
+### Mandatory implementation rules
+1. Every runnable operation must map to a provider capability, lifecycle step, logical role, provider-native permission/action, target scope, prerequisite reads, mutation, wait/poll, rollback, verification and evidence action. Missing or ambiguous mapping is `AUTHORITY_GAP`.
+2. Generate policy from the normalized approved operation graph and bind it to exact provider, account/tenant/project, region/location, environment, resource identifiers/tags, role identifiers, plan digest and approval. Do not use a static universal super-policy to claim coverage.
+3. Maintain separate runner/base, bootstrap authority, execution, IaC service, workload runtime, DNS/TLS, state/artifact and verifier roles where applicable. A role may be collapsed only with explicit provider support and a proof that least privilege is preserved.
+4. Verify effective authority including trust policies, identity/resource policies, permission boundaries, organization/SCP/tenant restrictions, session policies, service-role delegation and explicit denies. An attached policy alone is not proof of effective authority.
+5. For every provider, distinguish `implemented`, `capability-probed`, `physically-qualified`, `unsupported` and `AUTHORITY_GAP`. Unknown must never become PASS. No provider is certified solely by a registry entry or JSON artifact.
+6. The integrity validator is not a provider runtime or physical qualification test. Keep the PR draft until the validator and regression tests run on the exact candidate SHA, then implement and test provider adapters and produce target-bound execution receipts.
+7. Never commit secrets or live credentials. Never grant standing administrator access, permit self-escalation, or broaden permissions merely to suppress an authorization failure.
+
+### Validation commands
+- `npm run bootstrap:validate` — manifest and cross-artifact integrity only.
+- `npm run test:bootstrap-bundle` — bundle regression tests.
+- `npm run test:bootstrap-fail-closed` — existing fail-closed qualification tests plus bundle regressions.
+- `npm run bootstrap:validate:strict` — intentionally exits nonzero until separate runtime/provider qualification is available; it must not be reported as a passing live qualification.
+
+**Current evidence status:** specification/package contracts and test definitions are committed on the dedicated branch. Do not claim tests passed until executed against the exact branch head. Do not claim cloud roles/policies were installed or live providers qualified.
