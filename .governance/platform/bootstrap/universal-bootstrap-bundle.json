@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0.0",
+  "bundle_id": "ugondu.universal-bootstrap.bundle",
+  "task_id": "UG-UPLM-BOOTSTRAP-UNIVERSAL-001",
+  "status": "specification-bundle-runtime-integration-required",
+  "description": "Canonical dependency-closed manifest for universal bootstrap role and policy execution artifacts. This manifest describes required package contents; it does not assert runtime support or grant permissions.",
+  "entrypoints": {
+    "registry": ".governance/platform/bootstrap/universal-bootstrap-capabilities.json",
+    "role_catalog": ".governance/platform/bootstrap/role-catalog.json",
+    "policy_pack_contract": ".governance/platform/bootstrap/policy-pack-contract.json",
+    "resource_authorization_catalogue": "docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md",
+    "implementation_specification": "docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md",
+    "change_guardrail": "docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md"
+  },
+  "required_package_contents": [
+    {
+      "id": "capability-registry",
+      "path": ".governance/platform/bootstrap/universal-bootstrap-capabilities.json",
+      "required": true,
+      "purpose": "Authoritative provider, lifecycle, capability, and qualification registry."
+    },
+    {
+      "id": "role-catalog",
+      "path": ".governance/platform/bootstrap/role-catalog.json",
+      "required": true,
+      "purpose": "Provider-neutral logical roles, trust boundaries, least-privilege rules, and role separation."
+    },
+    {
+      "id": "policy-pack-contract",
+      "path": ".governance/platform/bootstrap/policy-pack-contract.json",
+      "required": true,
+      "purpose": "Policy pack input/output contract, scope binding, approval, rendering, validation, installation, read-back, and rollback requirements."
+    },
+    {
+      "id": "resource-authorization-catalogue",
+      "path": "docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md",
+      "required": true,
+      "purpose": "Cross-platform resource and authorization inventory."
+    },
+    {
+      "id": "remediation-specification",
+      "path": "docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md",
+      "required": true,
+      "purpose": "Lifecycle, authority gap, safety, evidence, and rollout specification."
+    },
+    {
+      "id": "shared-guardrail",
+      "path": "docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md",
+      "required": true,
+      "purpose": "Single coordination and anti-drift authority."
+    },
+    {
+      "id": "json-schema-validation",
+      "path": "package.json",
+      "required": true,
+      "purpose": "Reproducible validation scripts and pinned schema validation dependency."
+    }
+  ],
+  "bundle_invariants": {
+    "fail_closed": true,
+    "unknown_or_missing_artifact_is_fatal": true,
+    "every_role_must_reference_policy_profile": true,
+    "every_policy_profile_must_reference_provider_and_capability_ids": true,
+    "policy_generation_must_be_deterministic": true,
+    "account_tenant_region_namespace_and_resource_scope_must_be_bound_before_apply": true,
+    "dry_run_and_policy_diff_required": true,
+    "approval_required_for_privilege_or_destructive_changes": true,
+    "secrets_must_not_be_serialized_into_bundle_or_ledger": true,
+    "runtime_permissions_must_not_exceed_approved_plan": true,
+    "permission_denials_must_emit_AUTHORITY_GAP_and_stop": true,
+    "post_mutation_readback_and_evidence_required": true,
+    "unsupported_or_unqualified_adapters_must_not_report_success": true,
+    "master_and_protected_branches_must_not_be_mutated_directly": true
+  },
+  "execution_order": [
+    "verify-bundle-integrity",
+    "load-and-schema-validate-registry",
+    "resolve-provider-capability",
+    "discover-target-and-principal",
+    "resolve-role-and-policy-profile",
+    "build-scope-bound-policy-plan",
+    "render-provider-native-artifacts",
+    "validate-policy-semantics-and-boundaries",
+    "emit-reviewable-diff",
+    "obtain-required-approval",
+    "apply-through-authorized-adapter",
+    "read-back-and-verify",
+    "write-candidate-bound-evidence",
+    "checkpoint-or-handoff"
+  ],
+  "required_runtime_outputs": [
+    "bundle-manifest-digest",
+    "capability-resolution-report",
+    "principal-and-target-scope-report",
+    "role-policy-plan",
+    "rendered-policy-artifacts",
+    "policy-diff",
+    "approval-record-when-required",
+    "execution-ledger-without-secrets",
+    "mutation-readback",
+    "verification-receipt-or-typed-failure",
+    "resume-checkpoint"
+  ],
+  "non_claims": [
+    "This specification bundle does not contain live credentials.",
+    "This manifest alone does not prove each provider adapter exists.",
+    "A policy document is not proof that it is attached or effective.",
+    "Physical qualification requires fresh evidence for the exact candidate and target."
+  ]
+}
