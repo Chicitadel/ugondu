@@ -548,5 +548,12 @@
   "vps_cloud_target": "Cible Cloud VPS",
   "warn_persist_recipe": "Attention : échec de la persistance de la recette de transaction : %v",
   "warn_prune_failed": "Avertissement : échec du nettoyage des versions : %v",
-  "wildcard_domain_mutation_is_pr": "La mutation de domaine générique est interdite par la politique de sécurité."
+  "wildcard_domain_mutation_is_pr": "La mutation de domaine générique est interdite par la politique de sécurité.",
+  "messages.error.directadmin_invalid_path_identifier": "L’identifiant de chemin DirectAdmin est invalide : {label}.",
+  "messages.error.directadmin_invalid_ssh_port": "Le port SSH DirectAdmin doit être un entier compris entre 1 et 65535.",
+  "messages.error.directadmin_hosted_app_deployment_unqualified": "Le déploiement d’applications hébergées DirectAdmin n’est pas qualifié pour {name} ; la présence de fichiers ne constitue pas un déploiement.",
+  "messages.error.directadmin_database_engine_unsupported": "Le moteur de base de données DirectAdmin n’est pas pris en charge : {type}.",
+  "messages.error.directadmin_invalid_snapshot_resource": "Un instantané DirectAdmin nécessite un identifiant de ressource valide.",
+  "messages.error.billing_store_unavailable": "Le magasin des licences de facturation n’est pas prêt ou ne peut pas enregistrer les modifications.",
+  "messages.error.billing_store_invalid_data": "Le magasin des licences de facturation contient des données invalides ou illisibles."
 }
