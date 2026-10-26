@@ -29,7 +29,7 @@ This can produce a false-positive bootstrap report when required AWS side effect
 4. Failed closed on generic (not only AccessDenied) policy update and attachment errors.
 5. Required read-back after policy creation and attachment; a successful command response alone is insufficient.
 6. Required the final observed attached-policy inventory to include every required policy before writing a preliminary-success report.
-7. Added tests/qualification/bootstrap-fail-closed.test.mjs for service-linked-role read-back failure, non-AccessDenied attach failure, and unverified successful attachment response.
+7. Added tests/qualification/bootstrap-fail-closed.test.mjs for failed service-linked-role read-back, malformed successful role response, non-AccessDenied attach failure, and unverified successful attachment response (four adversarial cases).
 8. Added npm run test:bootstrap-fail-closed, included it in governance:validate, and wired it into CI's Release Integrity & Governance Gates.
 
 ## Regression command
