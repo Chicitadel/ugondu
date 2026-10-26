@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { PolicyDigest } from './digest';
+import { PolicyDigest, PolicyDigestInputError, PolicyDigestInputErrorCode } from './digest';
 
 describe('PolicyDigest', () => {
   const digest = new PolicyDigest();
@@ -35,15 +35,22 @@ describe('PolicyDigest', () => {
   });
 
   it('rejects unsupported JavaScript values rather than returning a false digest', () => {
-    expect(() => digest.generate(undefined)).toThrow(TypeError);
-    expect(() => digest.generate({ invalid: undefined })).toThrow();
+    expect(() => digest.generate(undefined)).toThrow(PolicyDigestInputError);
+    expect(() => digest.generate({ invalid: undefined })).toThrow(PolicyDigestInputError);
   });
 
   it('rejects circular and non-finite policy values', () => {
     const circular: Record<string, unknown> = {};
     circular.self = circular;
-    expect(() => digest.generate(circular)).toThrow(/circular/i);
-    expect(() => digest.generate({ cost: Number.NaN })).toThrow(/non-finite/i);
+    expect(() => digest.generate(circular)).toThrow(PolicyDigestInputError);
+    expect(() => digest.generate({ cost: Number.NaN })).toThrow(PolicyDigestInputError);
+  });
+
+
+  it('uses stable typed error codes for invalid policy content', () => {
+    expect(() => digest.generate({ cost: Number.NaN })).toThrow(
+      expect.objectContaining({ code: PolicyDigestInputErrorCode.NON_FINITE_NUMBER })
+    );
   });
 
   it('hashes Buffer input by its exact bytes', () => {
