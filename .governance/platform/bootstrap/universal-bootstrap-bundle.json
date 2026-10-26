@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "schema_version": "1.0.0",
   "bundle_id": "ugondu.universal-bootstrap.bundle",
   "task_id": "UG-UPLM-BOOTSTRAP-UNIVERSAL-001",
@@ -107,5 +106,6 @@
     "This manifest alone does not prove each provider adapter exists.",
     "A policy document is not proof that it is attached or effective.",
     "Physical qualification requires fresh evidence for the exact candidate and target."
-  ]
+  ],
+  "schema_uri": "https://json-schema.org/draft/2020-12/schema"
 }
