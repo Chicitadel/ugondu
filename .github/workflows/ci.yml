@@ -219,6 +219,9 @@ jobs:
       - name: Test policy-pack template path containment
         run: npm run test:policy-pack-boundary
 
+      - name: Test AWS bootstrap mutation fail-closed behavior
+        run: npm run test:bootstrap-fail-closed
+
       - name: Verify externally pinned AWS policy-pack signature
         run: node scripts/governance/verify-policy-pack-digests.mjs
 
