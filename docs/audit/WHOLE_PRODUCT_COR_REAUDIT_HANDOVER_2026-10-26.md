@@ -21,6 +21,8 @@ This document is the single handover summary for Antigravity agents/actors. The 
 | UG-COR-IMPL-001 tenant policy digest placeholder | Replaced constant digest-hash with SHA-256 and canonical JSON digest; rejects unsupported, circular and non-finite values | engine-core digest.spec.ts under Jest | Await exact-head CI |
 | UG-COR-POLICY-REGION-001 region scope rendering | Multi-segment AWS region names accepted syntactically; multi-region RequestedRegion conditions align with resource expansion | region-policy-renderer.spec.ts | Await exact-head CI |
 | UG-COR-POLICY-DIGEST-001 renderer digest divergence | Renderer delegates digest to CanonicalPolicyRegistry.computePolicyDigest | key-order and digest parity regression tests | Await exact-head CI |
+| UG-COR-IMPL-002 tenant policy default-allow defect | Resolver defaults to DENY and requires action/resource scope; explicit DENY overrides ALLOW | resolver.spec.ts | Await exact-head CI |
+| UG-COR-IMPL-003 count-only impact analysis | Canonical multiset diff detects same-count changes and requires approval | impact.spec.ts | Await exact-head CI |
 
 ## Finding-specific handovers
 
@@ -29,6 +31,7 @@ This document is the single handover summary for Antigravity agents/actors. The 
 - [AWS bootstrap false-success remediation](REAUDIT_HANDOVER_BOOTSTRAP_FAIL_CLOSED_2026-10-26.md)
 - [Tenant policy digest remediation](REAUDIT_HANDOVER_TENANT_POLICY_DIGEST_2026-10-26.md)
 - [Region policy canonical digest remediation](REAUDIT_HANDOVER_REGION_POLICY_CANONICAL_DIGEST_2026-10-26.md)
+- [Tenant policy resolution and impact analysis remediation](REAUDIT_HANDOVER_TENANT_POLICY_RESOLUTION_2026-10-26.md)
 
 ## Verification protocol
 
