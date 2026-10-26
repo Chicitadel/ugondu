@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "schema_version": "1.0.0",
   "contract_id": "ugondu.bootstrap.policy-pack-contract",
   "status": "policy-contract-runtime-implementation-required",
@@ -190,5 +189,6 @@
     "rollback-plan.json",
     "execution-ledger.json-without-secrets"
   ],
-  "important_limitation": "A generic policy pack cannot be guaranteed to be sufficient for every future deployment without knowing provider, target, resource graph and lifecycle. Sufficiency must be proven per approved plan by complete operation mapping; otherwise return AUTHORITY_GAP. Broad standing privilege is not an acceptable substitute."
+  "important_limitation": "A generic policy pack cannot be guaranteed to be sufficient for every future deployment without knowing provider, target, resource graph and lifecycle. Sufficiency must be proven per approved plan by complete operation mapping; otherwise return AUTHORITY_GAP. Broad standing privilege is not an acceptable substitute.",
+  "schema_uri": "https://json-schema.org/draft/2020-12/schema"
 }
