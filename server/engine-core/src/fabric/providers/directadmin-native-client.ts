@@ -92,7 +92,10 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
 
   public async removeHostedApp(id: string): Promise<void> {
     const safeId = this.validatePathSegment(id, 'instance_id');
-    await this.execCmd(`rm -rf -- /home/${this.escapeShell(this.username)}/domains/${this.escapeShell(safeId)}/public_html`);
+    // This adapter has no verified deployment/ownership registry for hosted
+    // applications. Do not delete a domain's public_html merely because its
+    // identifier is syntactically safe.
+    throw new Error(__t('messages.error.directadmin_hosted_app_deployment_unqualified', { name: safeId }));
   }
 
   public async createDatabase(name: string, type: string): Promise<{ id: string; state: string }> {
