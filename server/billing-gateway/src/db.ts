@@ -20,7 +20,6 @@
 
 import path from 'path';
 import fs from 'fs';
-import os from 'os';
 import { createHash, randomBytes } from 'crypto';
 import { __t } from '@ugondu/shared';
 
@@ -272,7 +271,7 @@ export class JsonLicenseDatabase {
         return record;
     }
 
-    updateStatus(token: string, status: LicenseStatus, reason?: string): TenantInfo | null {
+    updateStatus(token: string, status: LicenseStatus, reason?: string, expiresAt?: string): TenantInfo | null {
         this.assertReady();
         const existing = this.get(token);
         if (!existing) return null;
@@ -281,7 +280,7 @@ export class JsonLicenseDatabase {
             status,
             ...(status === 'revoked' ? { revoked_at: new Date().toISOString() } : {}),
             ...(status === 'suspended' && reason ? { suspended_reason: reason } : {}),
-            ...(status === 'expired' && !existing.expires_at ? { expires_at: new Date(Date.now() - 1000).toISOString() } : {}),
+            ...(status === 'expired' ? { expires_at: expiresAt || existing.expires_at || new Date(Date.now() - 1000).toISOString() } : {}),
         };
         this.save({ ...this.data, [token]: updated });
         return updated;
@@ -331,18 +330,7 @@ export const tokenStore = {
         return db.updateStatus(token, 'suspended', reason);
     },
     expireToken(token: string, expiresAt?: string): TenantInfo | null {
-        const existing = db.get(token);
-        if (!existing) return null;
-        const currentStatus = existing.status;
-        const currentExpiry = existing.expires_at;
-        const updated = db.updateStatus(token, 'expired');
-        if (updated && expiresAt) return db.set(token, updated.tenant_id, updated.edition, {
-            status: 'expired', expiresAt,
-        });
-        // updateStatus already saved the expired state; variables kept for future
-        // schema migrations rather than mutating the returned record unsafely.
-        void currentStatus; void currentExpiry;
-        return updated;
+        return db.updateStatus(token, 'expired', undefined, expiresAt);
     },
     removeToken(token: string): void {
         db.remove(token);
