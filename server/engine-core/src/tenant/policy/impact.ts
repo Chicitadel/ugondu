@@ -23,7 +23,31 @@ export interface PolicyChangeImpact {
     requiresApproval: boolean;
 }
 
+function isJsonValue(value: unknown, ancestors = new Set<object>()): boolean {
+    if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+    if (typeof value === 'number') return Number.isFinite(value);
+    if (Array.isArray(value)) {
+        if (ancestors.has(value)) return false;
+        ancestors.add(value);
+        const valid = value.every((item) => isJsonValue(item, ancestors));
+        ancestors.delete(value);
+        return valid;
+    }
+    if (typeof value === 'object') {
+        const object = value as Record<string, unknown>;
+        const prototype = Object.getPrototypeOf(object);
+        if (prototype !== Object.prototype && prototype !== null) return false;
+        if (ancestors.has(object)) return false;
+        ancestors.add(object);
+        const valid = Object.values(object).every((item) => isJsonValue(item, ancestors));
+        ancestors.delete(object);
+        return valid;
+    }
+    return false;
+}
+
 function canonicalRuleKey(rule: unknown): string | undefined {
+    if (!isJsonValue(rule)) return undefined;
     try {
         const result = canonicalize(rule as never);
         return typeof result === 'string' ? result : undefined;
