@@ -2327,5 +2327,12 @@
   "wildcard_domain_mutation_is_pr": "सुरक्षा नीति द्वारा वाइल्डकार्ड डोमेन म्यूटेशन निषिद्ध है।",
   "wraps_failures_with_the_locali": "wraps failures with the localized reconcile त्रुटि",
   "wraps_reconciliation_failures_": "wraps समन्वय failures with the localized त्रुटि",
-  "writes_nothing_when_the_member": "writes nothing when the member does not hold the भूमिका, and rejects अमान्य members"
+  "writes_nothing_when_the_member": "writes nothing when the member does not hold the भूमिका, and rejects अमान्य members",
+  "messages.error.directadmin_invalid_path_identifier": "DirectAdmin पथ पहचानकर्ता अमान्य है: {label}।",
+  "messages.error.directadmin_invalid_ssh_port": "DirectAdmin SSH पोर्ट 1 से 65535 के बीच पूर्णांक होना चाहिए।",
+  "messages.error.directadmin_hosted_app_deployment_unqualified": "{name} के लिए DirectAdmin होस्टेड ऐप परिनियोजन योग्य प्रमाणित नहीं है; केवल फ़ाइलों की मौजूदगी परिनियोजन नहीं है।",
+  "messages.error.directadmin_database_engine_unsupported": "DirectAdmin डेटाबेस इंजन समर्थित नहीं है: {type}।",
+  "messages.error.directadmin_invalid_snapshot_resource": "DirectAdmin स्नैपशॉट के लिए मान्य संसाधन पहचानकर्ता आवश्यक है।",
+  "messages.error.billing_store_unavailable": "बिलिंग लाइसेंस स्टोर तैयार नहीं है या बदलाव स्थायी रूप से सहेज नहीं सकता।",
+  "messages.error.billing_store_invalid_data": "बिलिंग लाइसेंस स्टोर में अमान्य या अपठनीय डेटा है।"
 }
