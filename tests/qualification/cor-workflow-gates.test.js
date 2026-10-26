@@ -161,7 +161,8 @@ test('COR-WF-007 bootstrap policy pack reconciliation runs before AWS conformanc
 
 test('COR-WF-008 validates all 5 UgonduCOR-V9 policy templates, quotas, and guardrails', async () => {
   const { loadAndValidateBootstrapPolicyPack, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
-  assert.equal(Object.keys(BOOTSTRAP_OPERATING_STATES).length, 6, 'exactly 6 operating states must be defined');
+  assert.equal(Object.keys(BOOTSTRAP_OPERATING_STATES).length, 7, 'exactly 7 operating states must be defined');
+  assert.equal(BOOTSTRAP_OPERATING_STATES.PROVISIONING_MUTATION_FAILED, 'PROVISIONING_MUTATION_FAILED');
   const pack = loadAndValidateBootstrapPolicyPack();
   assert.equal(pack.policies.length, 5);
   assert.ok(pack.policies.length <= pack.maxPoliciesPerRole);

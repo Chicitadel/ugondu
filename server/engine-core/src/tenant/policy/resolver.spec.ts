@@ -7,7 +7,7 @@ describe('Resolver fail-closed policy evaluation', () => {
     effect: Effect.ALLOW,
     actions: ['s3:GetObject'],
     resources: ['arn:aws:s3:::docs/*'],
-    principals: ['user:*'],
+    principals: ['user:alice*'],
     conditions: { environment: 'prod' },
   };
   const baseContext = {
