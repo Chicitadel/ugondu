@@ -41,7 +41,7 @@ test("policy contract fails closed on unknown mappings and forbids standing admi
 test("bundle validator passes structural integrity without claiming live qualification", () => {
   const run = spawnSync(process.execPath, ["scripts/bootstrap/validate-bundle.mjs"], { cwd: root, encoding: "utf8" });
   assert.equal(run.status, 0, run.stdout + run.stderr);
-  assert.match(run.stdout, /specification artifact integrity only/);
+  assert.match(run.stdout, /structural and cross-artifact integrity only/);
   assert.match(run.stdout, /not runtime tests|not runtime, IAM-effective-permission, or physical deployment qualification|Qualification status remains specification-only/);
 });
 
