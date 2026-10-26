@@ -66,6 +66,24 @@
       "path": "tests/bootstrap-bundle-integrity.test.mjs",
       "required": true,
       "purpose": "Regression coverage for bundle completeness and security invariants."
+    },
+    {
+      "id": "bundle-manifest-schema",
+      "path": ".governance/platform/bootstrap/schemas/universal-bootstrap-bundle.schema.json",
+      "required": true,
+      "purpose": "Formal JSON Schema for the bundle manifest."
+    },
+    {
+      "id": "role-catalog-schema",
+      "path": ".governance/platform/bootstrap/schemas/role-catalog.schema.json",
+      "required": true,
+      "purpose": "Formal JSON Schema for logical role definitions."
+    },
+    {
+      "id": "policy-pack-schema",
+      "path": ".governance/platform/bootstrap/schemas/policy-pack.schema.json",
+      "required": true,
+      "purpose": "Formal JSON Schema for a rendered plan-bound policy pack."
     }
   ],
   "bundle_invariants": {
