@@ -350,6 +350,7 @@ describe('RegionPolicyRenderer', () => {
 
 describe('CanonicalPolicyRegistry / canonicalJson & computePolicyDigest', () => {
   it('RegionPolicyRenderer emits the same recursive canonical digest as the canonical policy registry', () => {
+    const renderer = new RegionPolicyRenderer();
     const first: RenderedPolicyDocument = {
       Version: '2012-10-17',
       Statement: [{
