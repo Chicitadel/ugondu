@@ -14,6 +14,9 @@ const required = [
   ".governance/platform/bootstrap/universal-bootstrap-bundle.json",
   ".governance/platform/bootstrap/role-catalog.json",
   ".governance/platform/bootstrap/policy-pack-contract.json",
+  ".governance/platform/bootstrap/schemas/universal-bootstrap-bundle.schema.json",
+  ".governance/platform/bootstrap/schemas/role-catalog.schema.json",
+  ".governance/platform/bootstrap/schemas/policy-pack.schema.json",
   "docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md",
   "docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md",
   "docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md",
@@ -31,6 +34,7 @@ const bundle = readJson(required[1]);
 const roles = readJson(required[2]);
 const policy = readJson(required[3]);
 const pkg = readJson("package.json");
+const schemas = required.filter(p => p.endsWith(".schema.json")).map(readJson);
 for (const file of required.slice(4)) if (!fs.existsSync(path.join(root, file))) errors.push(`MISSING_REQUIRED_ARTIFACT: ${file}`);
 
 if (bundle) {
@@ -59,6 +63,8 @@ if (policy) {
   for (const key of ["administrator_access_default","wildcard_action_default","wildcard_resource_default","self_escalation","arbitrary_pass_role","success_without_readback","success_on_permission_denial"]) if (policy.policy_safety_invariants?.[key] !== false) errors.push(`POLICY_INVARIANT_NOT_FALSE: ${key}`);
   if (policy.coverage_model?.missing_mapping_behavior !== "AUTHORITY_GAP") errors.push("UNKNOWN_PERMISSION_MAPPING_MUST_FAIL_CLOSED");
 }
+if (schemas.some(schema => schema && schema.$schema !== "https://json-schema.org/draft/2020-12/schema")) errors.push("SCHEMA_DRAFT_MISMATCH");
+if (schemas.some(schema => schema && (!schema.type || !schema.properties || !Array.isArray(schema.required)))) errors.push("SCHEMA_STRUCTURE_INVALID");
 if (pkg && (pkg.scripts?.["bootstrap:validate"] !== "node scripts/bootstrap/validate-bundle.mjs")) errors.push("PACKAGE_VALIDATION_SCRIPT_MISSING");
 
 if (errors.length) {
