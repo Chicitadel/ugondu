@@ -204,3 +204,39 @@ The workspace coverage verifier joined each `package.json` workspace declaration
 - **Gate Wiring:** Added `npm run test:policy-pack-boundary` to `package.json` (`governance:validate`) and `.github/workflows/ci.yml`.
 - **Status:** PASS locally (3/3 tests). Pushed to PR #24 branch for whole-product validation. Universal commercial release remains **NOT CERTIFIED**.
 
+
+
+## 2026-10-26 Whole-Product Re-audit Addendum — consolidated implementation ledger
+
+**Integration branch:** `fix/whole-product-cor-remediation-2026-10-25`  
+**Base:** `phase4/production-hardening` at `87ac04242b4d55f38b4ef644549cea9ff38f57c7`  
+**Rule:** Keep all findings below on this integration branch and in the canonical PR #24; do not create competing copies of the same remediation on parallel branches. Close or mark superseded any duplicate PR only after this branch contains the same code and its exact-head checks are recorded.
+
+### UG-COR-AWS-BOOTSTRAP-001 — false-success AWS mutation paths
+
+- **Owner scope:** `scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs` and `tests/qualification/bootstrap-fail-closed.test.mjs`.
+- **Change:** Require verified RDS service-linked-role read-back; fail closed on generic policy update/attachment failures; require policy create/attach read-back; verify the final required-policy inventory.
+- **Gate:** `npm run test:bootstrap-fail-closed`, added to `governance:validate` and CI Release Integrity & Governance Gates.
+- **Acceptance:** Pending exact-head CI; no live AWS mutation is performed by unit tests.
+
+### UG-COR-IMPL-001 — tenant policy digest placeholder
+
+- **Owner scope:** `server/engine-core/src/tenant/policy/digest.ts` and `digest.spec.ts`.
+- **Change:** Replace constant `digest-hash` with SHA-256; canonicalize JSON using the existing engine-core `canonicalize` dependency; validate unsupported/circular/non-finite input fail-closed.
+- **Gate:** Engine-core Jest suite, all-workspaces tests and build.
+- **Acceptance:** Pending exact-head CI; no digest result may be described as certified before tests pass.
+
+### UG-COR-POLICY-REGION-001 / UG-COR-POLICY-DIGEST-001 — renderer scope and canonical digest
+
+- **Owner scope:** `server/capabilities/src/continuity/RegionPolicyRenderer.ts` and `src/tests/region-policy-renderer.spec.ts`.
+- **Change:** Accept multi-segment region naming forms; expand `aws:RequestedRegion` consistently with explicitly allowed multi-region resource rendering; delegate renderer digest to `CanonicalPolicyRegistry.computePolicyDigest`.
+- **Gate:** Capabilities workspace tests, all-workspaces tests and build.
+- **Acceptance:** Pending exact-head CI. Syntax acceptance is not live region-availability proof. Explicit allowed regions remain mandatory.
+
+### Consolidated anti-drift requirements
+
+1. Treat this file as the canonical coordination contract; update this ledger instead of creating alternate governance authorities.
+2. Preserve the original baseline and keep `master` and `phase4/production-hardening` untouched directly.
+3. Re-run affected suites after any source, package, test, workflow or evidence change; record exact candidate SHA and workflow URL.
+4. Do not mark any finding GREEN until exact-head CI passes. Mocked AWS responses test error handling only and do not constitute live cloud qualification.
+5. Universal COR remains **NOT CERTIFIED** while account/region portability of the signed pack, physical target matrix, AI model fleet, and immutable artifact lifecycle remain open.
