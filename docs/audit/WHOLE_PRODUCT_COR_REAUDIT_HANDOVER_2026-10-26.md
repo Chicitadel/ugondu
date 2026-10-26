@@ -60,3 +60,14 @@ This document is the single handover summary for Antigravity agents/actors. The 
 - Do not merge or release until latest-head CI/COR outcomes and required live qualification have been reviewed and all P0/P1 release blockers are closed.
 
 **Current disposition:** targeted code remediations are implemented in the candidate branch; exact-head CI/COR validation is in progress or pending. Universal COR and universal commercial release remain **NOT CERTIFIED**.
+
+
+## New stacked remediation — hosting portability and federated billing (2026-10-26)
+
+- **Review branch:** `fix/hosting-portability-billing-persistence-2026-10-26`
+- **Stacked PR:** [#29](https://github.com/Chicitadel/ugondu/pull/29), based on this whole-product candidate.
+- **Canonical finding handover:** [Hosting portability and billing authority](REAUDIT_HANDOVER_HOSTING_PORTABILITY_BILLING_2026-10-26.md)
+- **Hosting contract:** [Shared-host launch and migration guide](../deployment/SHARED_HOSTING_LAUNCH_AND_MIGRATION.md)
+- **Central legal policy authority:** https://policies.airroofers.eu
+
+The branch addresses DirectAdmin traversal/false deployment claims, file-store silent failures/corruption and production reliance on stale local entitlements. New tests cover path traversal, non-qualified app deployment/removal, persistent store reload/corruption/write failure, live authority lookup and missing authority failure. The shared-host profile is now explicit about prerequisites and shared-host → VPS → AWS migration. Exact-head CI/COR and actual-host qualification remain pending. Universal COR remains **NOT CERTIFIED**.
