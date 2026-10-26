@@ -548,5 +548,12 @@
   "vps_cloud_target": "Destino VPS Cloud",
   "warn_persist_recipe": "Aviso: falha ao persistir a receita da transação: %v",
   "warn_prune_failed": "Aviso: falha na limpeza: %v",
-  "wildcard_domain_mutation_is_pr": "A mutação de domínio curinga é proibida pela política de segurança."
+  "wildcard_domain_mutation_is_pr": "A mutação de domínio curinga é proibida pela política de segurança.",
+  "messages.error.directadmin_invalid_path_identifier": "O identificador de caminho do DirectAdmin é inválido: {label}.",
+  "messages.error.directadmin_invalid_ssh_port": "A porta SSH do DirectAdmin deve ser um número inteiro entre 1 e 65535.",
+  "messages.error.directadmin_hosted_app_deployment_unqualified": "A implantação de aplicações hospedadas no DirectAdmin não está qualificada para {name}; a presença de arquivos não comprova uma implantação.",
+  "messages.error.directadmin_database_engine_unsupported": "O mecanismo de banco de dados do DirectAdmin não é compatível: {type}.",
+  "messages.error.directadmin_invalid_snapshot_resource": "O snapshot do DirectAdmin exige um identificador de recurso válido.",
+  "messages.error.billing_store_unavailable": "O armazenamento de licenças de cobrança não está pronto ou não consegue persistir as alterações.",
+  "messages.error.billing_store_invalid_data": "O armazenamento de licenças de cobrança contém dados inválidos ou ilegíveis."
 }
