@@ -240,3 +240,22 @@ The workspace coverage verifier joined each `package.json` workspace declaration
 3. Re-run affected suites after any source, package, test, workflow or evidence change; record exact candidate SHA and workflow URL.
 4. Do not mark any finding GREEN until exact-head CI passes. Mocked AWS responses test error handling only and do not constitute live cloud qualification.
 5. Universal COR remains **NOT CERTIFIED** while account/region portability of the signed pack, physical target matrix, AI model fleet, and immutable artifact lifecycle remain open.
+
+
+### UG-COR-IMPL-002 — tenant policy resolver default-allow defect
+
+- **Owner scope:** `server/engine-core/src/tenant/policy/resolver.ts` and `resolver.spec.ts`.
+- **Confirmed defect:** missing rules could produce ALLOW; rule effects were not scoped to action/resource; the resource argument was ignored.
+- **Change:** default deny for missing/malformed/unmatched input; scoped action/resource/principal/attribute matching; explicit DENY overrides ALLOW; wildcard matching escapes regex metacharacters.
+- **Gate:** engine-core resolver Jest suite and all-workspaces build/test.
+- **Acceptance:** Pending latest exact-head CI.
+
+### UG-COR-IMPL-003 — policy impact analysis count-only defect
+
+- **Owner scope:** `server/engine-core/src/tenant/policy/impact.ts` and `impact.spec.ts`.
+- **Confirmed defect:** rule-array length differences missed same-length content mutations and could incorrectly report LOW risk/no approval.
+- **Change:** recursively canonical rule fingerprints and multiset comparison; additions require approval; removals/changes are HIGH risk; unsupported rule values fail conservatively.
+- **Gate:** engine-core impact Jest suite and all-workspaces build/test.
+- **Acceptance:** Pending latest exact-head CI.
+
+- **Handover:** `docs/audit/REAUDIT_HANDOVER_TENANT_POLICY_RESOLUTION_2026-10-26.md`.
