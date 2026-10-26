@@ -59,6 +59,7 @@ describe('DirectAdmin native client safety and truthful status', () => {
     const client = new DirectAdminNativeClient('da.example.net', 22, 'safeuser', '/tmp/test-key');
 
     await expect(client.createHostedApp('acme.example.net', 'node:22-alpine')).rejects.toThrow();
+    await expect(client.removeHostedApp('acme.example.net')).rejects.toThrow();
     // The adapter never used to execute the image or verify HTTP health; a
     // successful mkdir must not be presented as a running application.
   });
