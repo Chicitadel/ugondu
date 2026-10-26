@@ -16,7 +16,7 @@ The production baseline implementation at server/engine-core/src/tenant/policy/d
 - Replaced the placeholder with SHA-256 using Node's crypto module.
 - Valid JSON strings and JSON-compatible objects use the already-declared canonicalize dependency (RFC 8785 canonical JSON) so nested key order and insignificant JSON whitespace do not change the digest.
 - Buffer inputs are hashed as exact bytes; non-JSON text strings are hashed as exact UTF-8 content.
-- Unsupported values fail closed rather than silently producing a placeholder digest.
+- Unsupported values fail closed through typed error codes rather than embedding raw user-facing English strings in the utility; callers should map those codes through the localization layer.
 - Added digest.spec.ts tests for a 64-character SHA-256 result, recursive key-order invariance, JSON-string whitespace/order invariance, content sensitivity, literal text, unsupported values, and Buffer bytes.
 - The test is discovered by the existing engine-core Jest configuration and the root all-workspaces test command.
 
