@@ -48,9 +48,14 @@ describe('PolicyDigest', () => {
 
 
   it('uses stable typed error codes for invalid policy content', () => {
-    expect(() => digest.generate({ cost: Number.NaN })).toThrow(
-      expect.objectContaining({ code: PolicyDigestInputErrorCode.NON_FINITE_NUMBER })
-    );
+    let caught: unknown;
+    try {
+      digest.generate({ cost: Number.NaN });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(PolicyDigestInputError);
+    expect(caught).toMatchObject({ code: PolicyDigestInputErrorCode.NON_FINITE_NUMBER });
   });
 
   it('hashes Buffer input by its exact bytes', () => {
