@@ -29,7 +29,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Chicitadel/ugondu/client/i18n"
+	"ugondu/client/i18n"
 )
 
 func TestVerifyCryptographicBindings(t *testing.T) {
