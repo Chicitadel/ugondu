@@ -20,6 +20,7 @@ const {
     SshTargetAdapter,
     DockerTargetAdapter,
     KubernetesTargetAdapter,
+    AzureTargetAdapter,
     TargetFabric
 } = require('../server/engine-core/dist/targets');
 
@@ -153,7 +154,59 @@ async function runTargetTests() {
         assert.strictEqual(check2.satisfied, false);
         assert.deepStrictEqual(check2.missingCapabilities, ['DOCKER_BUILD']);
 
-        reportPass('Target Fabric successfully resolves adapters and computes capability intersections');
+        // Regression: target types declared by the fabric must resolve to concrete adapters.
+        const k8sResolved = fabric.resolveAdapter('target_k8s', {
+            targetId: 'target_k8s',
+            clusterEndpoint: 'https://k8s.example.com',
+            namespace: 'default',
+            appName: 'demo',
+            replicas: 1,
+            containerImage: 'example/demo:1.0.0',
+            containerPort: 8080,
+            servicePort: 80,
+            enableRollingUpdate: true
+        });
+        assert.ok(k8sResolved instanceof KubernetesTargetAdapter);
+
+        fabric.registerTarget({
+            targetId: 'target_azure',
+            environmentType: 'azure',
+            endpoint: 'https://management.azure.com/',
+            status: 'ONLINE',
+            capabilities: ['AZURE_TARGET_VALIDATION', 'AZURE_DEPLOYMENT_PLAN']
+        });
+        const azure = fabric.resolveAdapter('target_azure', {
+            targetId: 'target_azure',
+            tenantId: 'tenant-123',
+            subscriptionId: 'subscription-123',
+            resourceGroup: 'ugondu-test',
+            location: 'francecentral',
+            deploymentName: 'ugondu-smoke',
+            workloadKind: 'bicep',
+            identityMode: 'workload_federation',
+            templatePath: 'infra/main.bicep'
+        });
+        assert.ok(azure instanceof AzureTargetAdapter);
+        const azurePlan = azure.generateDeploymentPlan();
+        assert.strictEqual(azurePlan.executionStatus, 'PLANNED_NOT_EXECUTED');
+        assert.strictEqual(azurePlan.liveExecutionRequired, true);
+        assert.ok(azurePlan.steps.some(step => step.action === 'AZURE_ESTIMATE_COST_AND_REQUIRE_BUDGET_APPROVAL'));
+        assert.ok(azurePlan.steps.some(step => step.action === 'AZURE_REQUIRE_EXECUTOR_REGISTRATION'));
+
+        assert.throws(() => new AzureTargetAdapter({
+            targetId: 'target_bad',
+            tenantId: 'tenant-123',
+            subscriptionId: 'subscription-123',
+            resourceGroup: 'ugondu-test',
+            location: 'francecentral',
+            deploymentName: 'ugondu-smoke',
+            workloadKind: 'bicep',
+            identityMode: 'workload_federation',
+            templatePath: '../outside/main.bicep'
+        }), /Unsafe Azure templatePath/);
+
+        assert.throws(() => fabric.resolveAdapter('target_cp', {}), /invalid_ctx/);
+        reportPass('Target Fabric resolves Kubernetes and Azure; Azure planning is cost-gated, explicit, and rejects path traversal');
     } catch (e) {
         reportFail('Target Fabric test', e);
     }
