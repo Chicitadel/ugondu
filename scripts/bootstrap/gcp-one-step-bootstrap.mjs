@@ -128,16 +128,26 @@ export function executePlan(c, plan, runner = gcloud) {
       "--attribute-condition", `assertion.repository == '${c.githubRepo}'`]);
   }
   const serviceAccounts = runner(["iam", "service-accounts", "list", "--project", c.project, "--format=value(email)"]);
-  if (!serviceAccounts.split(/\r?\n/).includes(saEmail)) {
+  const serviceAccountExists = serviceAccounts.split(/\r?\n/).includes(saEmail);
+  if (serviceAccountExists) {
+    // Never attach GitHub federation to an existing identity without proving it
+    // has no direct project-level workload grants. This prevents privilege
+    // inheritance through an accidentally reused service account.
+    const projectPolicy = JSON.parse(runner(["projects", "get-iam-policy", c.project, "--format=json"]));
+    const existingGrants = (projectPolicy.bindings ?? []).filter(binding =>
+      (binding.members ?? []).includes(`serviceAccount:${saEmail}`));
+    if (existingGrants.length > 0) throw new Error("EXISTING_SERVICE_ACCOUNT_HAS_PROJECT_GRANTS");
+  } else {
     runner(["iam", "service-accounts", "create", c.serviceAccount, "--project", c.project, "--display-name", "Ugondu bootstrap federation"]);
   }
+  // Verify the provider before granting the service-account impersonation binding.
+  const providerReadback = runner(["iam", "workload-identity-pools", "providers", "describe", c.provider,
+    "--project", c.project, "--location", "global", "--workload-identity-pool", c.pool, "--format=json"]);
+  if (!providerReadback.includes(c.githubRepo) || !providerReadback.includes("assertion.repository")) throw new Error("WIF_PROVIDER_READBACK_MISMATCH");
   const principal = `principalSet://iam.googleapis.com/${poolName}/attribute.repository/${c.githubRepo}`;
   runner(["iam", "service-accounts", "add-iam-policy-binding", saEmail, "--project", c.project,
     "--role", "roles/iam.workloadIdentityUser", "--member", principal]);
   // Read-back checks are mandatory; no "success" receipt without them.
-  const providerReadback = runner(["iam", "workload-identity-pools", "providers", "describe", c.provider,
-    "--project", c.project, "--location", "global", "--workload-identity-pool", c.pool, "--format=json"]);
-  if (!providerReadback.includes(c.githubRepo) || !providerReadback.includes("assertion.repository")) throw new Error("WIF_PROVIDER_READBACK_MISMATCH");
   const bindingReadback = runner(["iam", "service-accounts", "get-iam-policy", saEmail, "--project", c.project, "--format=json"]);
   if (!bindingReadback.includes(principal) || !bindingReadback.includes("roles/iam.workloadIdentityUser")) throw new Error("WIF_BINDING_READBACK_MISMATCH");
   return { status: "BOOTSTRAP_VERIFIED", project_id: c.project, project_number: projectNumber, active_caller: activeAccount, provider: providerName, service_account: saEmail, plan_digest: plan.plan_digest, role_grants: plan.role_grants, note: "No workload deployment roles were granted." };
