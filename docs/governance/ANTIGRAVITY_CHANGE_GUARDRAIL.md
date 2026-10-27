@@ -605,3 +605,28 @@ PR #37 was merged into `fix/go-thin-client-vet-and-module-imports-2026-10-27` (n
 - The changes are committed on the dedicated branch and are proposed through a draft PR; exact-head CI is still required.
 - The reported 65 local COR suites are not equivalent to all physical provider/host qualification gates. The previously recorded AWS physical qualification and signing-trust-root steps were skipped, and the uploaded Antigravity log does not provide complete raw output for every Go command.
 - Overall COR remains **PARTIAL / RELEASE BLOCKED** until mandatory exact-head checks and authorized physical qualification receipts are complete.
+
+
+## 9. Whole-product re-audit follow-up — persisted state integrity (2026-10-27)
+
+**Finding ID:** UG-COR-STATE-INTEGRITY-001  
+**Audit base:** d283132258d9f7240eb1d71b1cc61630b3edfa85  
+**Dedicated branch:** audit/whole-product-cor-reaudit-2026-10-27
+
+### Confirmed defect
+
+ExecutionState.ComputeHash and SaveState generated a deterministic SHA-256 state digest, but LoadState did not recompute or compare it before returning persisted state to the execution resume path. A changed state field could therefore be consumed without the existing integrity digest detecting the inconsistency. The digest is an integrity checksum, not a keyed signature; it detects inconsistent modification but is not proof against an attacker able to rewrite both state and digest.
+
+### Physical remediation
+
+- client/engine/state.go: LoadState now quarantines and rejects persisted state when stateHash is missing or differs from a freshly computed digest.
+- client/engine/state_test.go: added regression cases for a modified state field and a missing digest; each requires ErrStateCorrupt and quarantine.
+- The prior localization test-integrity changes remain in this same dedicated branch.
+
+### Verification boundary
+
+These code and regression changes are committed on the branch, but exact-head Go tests, go vet, race tests, and CI have not yet been independently observed as passing for this new head. The new test code must be formatted and run with gofmt, go test ./..., go test -race ./..., and go vet ./... before this finding can be marked GREEN.
+
+This check validates the consistency of the stored digest. It does not make an unkeyed SHA-256 digest tamper-proof against an actor able to rewrite the entire state file. A stronger authenticity requirement would need a separately governed keyed MAC or signature design and key lifecycle, not a misleading claim about this digest.
+
+Overall COR remains **PARTIAL / RELEASE BLOCKED** pending exact-head CI and mandatory physical qualification.
