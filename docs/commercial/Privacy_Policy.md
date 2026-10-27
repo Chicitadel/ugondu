@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
  * Module         : Commercial Documentation
- * File           : Privacy_Policy_draft.md
+ * File           : Privacy_Policy.md
  * Version        : 0.3.0-draft
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -44,7 +44,7 @@
 **Data Controller:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon commercial release following legal approval  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

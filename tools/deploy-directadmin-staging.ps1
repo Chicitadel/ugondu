@@ -12,10 +12,13 @@
 [CmdletBinding()]
 param (
     [string]$TargetSubdomain = "",
-    [string]$Root = (Split-Path -Parent $PSScriptRoot)
+    [string]$Root = ""
 )
 
 $ErrorActionPreference = "Stop"
+if (-not $Root) {
+    $Root = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { (Get-Location).Path }
+}
 
 function Assert-DnsName([string]$Value) {
     if ([string]::IsNullOrWhiteSpace($Value) -or $Value.Length -gt 253) {

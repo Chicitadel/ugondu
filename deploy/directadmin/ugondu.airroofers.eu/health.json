@@ -1,5 +1,7 @@
-{
-  "status": "ARTIFACT_STAGED_NOT_HOST_QUALIFIED",
-  "host_qualification": "NOT_RUN",
-  "evidence_scope": "artifact-only"
+﻿{
+    "generated_at":  "2026-10-27T20:22:05Z",
+    "status":  "ARTIFACT_STAGED_NOT_HOST_QUALIFIED",
+    "domain":  "ugondu.airroofers.eu",
+    "host_qualification":  "NOT_RUN",
+    "evidence_scope":  "artifact-only"
 }
