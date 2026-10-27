@@ -43,9 +43,11 @@ async function runTests() {
             console.error('[en] Could not load modules for testing:', err.message);
             process.exit(1);
         }
+    }
     const mockTaskRunner = {
         runTask: async () => ({ status: 'SUCCESS' })
     };
+    const executor = new Executor(mockTaskRunner);
 
     let passed = 0;
     let failed = 0;

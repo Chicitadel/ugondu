@@ -33,6 +33,7 @@
  ******************************************************************************/
 
 import { FailureClass } from './failure';
+import { __t } from '@ugondu/shared';
 
 /**
  * @interface FailureSignature

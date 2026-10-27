@@ -114,7 +114,7 @@ func RunRepairCommand(args []string) int {
 
 		token := os.Getenv("UGONDU_TOKEN")
 		if token != "" {
-			req.Header.Set("Authorization", i18n.T("bearer")+token)
+			req.Header.Set("Authorization", fmt.Sprintf("%s%s", i18n.T("bearer"), token))
 		}
 
 		client := &http.Client{Timeout: 30 * time.Second}

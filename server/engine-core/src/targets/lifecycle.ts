@@ -105,12 +105,12 @@ export class TargetLifecycleManager {
         try {
             const target = globalTargetFabric.getTarget(targetId);
             if (!target) {
-                Logger.warn(`[LifecycleManager] Health check failed: Target ${targetId} not found.`);
+                Logger.warn(__t('lifecycle_target_not_found', { targetId }));
                 return 'OFFLINE';
             }
 
             if (!target.capabilities || target.capabilities.length === 0) {
-                Logger.warn(`[LifecycleManager] Target ${targetId} has no registered capabilities. Marking as DEGRADED.`);
+                Logger.warn(__t('lifecycle_target_no_capabilities_degraded', { targetId }));
                 return 'DEGRADED';
             }
 
@@ -125,7 +125,7 @@ export class TargetLifecycleManager {
                     return 'OFFLINE';
             }
         } catch (error: any) {
-            Logger.error(`[LifecycleManager] Health evaluation exception for target ${targetId}: ${error.message}`);
+            Logger.error(__t('lifecycle_target_health_exception', { targetId, error: error.message }));
             return 'OFFLINE';
         }
     }

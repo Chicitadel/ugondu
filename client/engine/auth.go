@@ -137,7 +137,7 @@ func Authenticate() {
 
 	authURL := fmt.Sprintf("%s?callback=%s&state=%s", baseURL, callbackURL, state)
 
-	fmt.Printf(i18n.T("auth_browser_open")+"\n", authURL)
+	fmt.Printf("%s\n", i18n.T("auth_browser_open", authURL))
 	_ = openBrowser(authURL)
 
 	done := make(chan bool, 1)

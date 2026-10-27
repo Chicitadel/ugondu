@@ -24,20 +24,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run I18N String Audit
-        run: node scripts/i18n_audit.js
+      - name: Corporate Attribution Governance
+        run: npm run verify:attribution
 
-      - name: Run Stub / Placeholder Scan
-        run: node scripts/stub_scan.js
+      - name: Run Tokenization & Zero String Hardcoding Audit (T03)
+        run: npm run verify:t03
 
-      - name: Run Architecture Depth Scan
-        run: node scripts/depth_scan.js
+      - name: Run Repository Governance & Anti-Stub Validation
+        run: node scripts/governance/validate-repository.mjs
 
-      - name: Run Import Scan
-        run: node scripts/import_scan.js
+      - name: Build Monorepo Workspaces
+        run: npm run build
 
-      - name: Type check all packages
-        run: npm exec --workspaces -- tsc --noEmit
+      - name: Run Microservices Compliance Conformance (T04)
+        run: npm run verify:t04
 
-      - name: Run tests
+      - name: Run Workspace Tests
         run: npm run test --workspaces

@@ -2,10 +2,11 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / Targets
  * File           : index.ts
- * Version        : 2.0.0
+ * Version        : 2.1.0
  * Author         : Target Fabric Engineering Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
+ * Last Modified  : 2026-10-27
  * Classification : ENTERPRISE | INTERNAL
  *
  * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
@@ -17,6 +18,7 @@ export * from './ssh';
 export * from './docker';
 export * from './fabric';
 export * from './k8s';
+export * from './azure';
 export * from './lifecycle';
 
 export * as github from './github';

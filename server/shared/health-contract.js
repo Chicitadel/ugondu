@@ -34,6 +34,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluateReadinessChecks = evaluateReadinessChecks;
 exports.createHealthAndMetadataRouter = createHealthAndMetadataRouter;
+const { __t } = require('./i18n');
 const DEFAULT_CHECK_TIMEOUT_MS = 2500;
 function normalizeDependencyChecks(input, defaultTimeoutMs = DEFAULT_CHECK_TIMEOUT_MS) {
     if (!input)
@@ -120,7 +121,7 @@ async function evaluateReadinessChecks(options) {
 }
 function createHealthAndMetadataRouter(options) {
     if (!options || !options.service || typeof options.service !== 'string') {
-        throw new Error('createHealthAndMetadataRouter requires a non-empty service name.');
+        throw new Error(__t('err_health_service_name_required'));
     }
     const resolveVersion = () => options.version || process.env.SERVICE_VERSION || process.env.npm_package_version || '1.0.0';
     const resolveBuildSha = () => options.buildSha || process.env.BUILD_SHA || process.env.GIT_COMMIT_SHA || 'local-dev';

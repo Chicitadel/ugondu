@@ -136,11 +136,11 @@ func PrintHelp() {
 	fmt.Println(i18n.T("cmd_locale_help"))
 	fmt.Println(i18n.T("cmd_version_help"))
 	fmt.Println(i18n.T("cmd_help_help"))
-	fmt.Println("\n" + i18n.T("env_vars"))
-	fmt.Println("  " + i18n.T("env_token"))
-	fmt.Println("  " + i18n.T("env_api_url"))
-	fmt.Println("  " + i18n.T("env_target_env"))
-	fmt.Println("  " + i18n.T("env_locale"))
+	fmt.Printf("\n%s\n", i18n.T("env_vars"))
+	fmt.Printf("  %s\n", i18n.T("env_token"))
+	fmt.Printf("  %s\n", i18n.T("env_api_url"))
+	fmt.Printf("  %s\n", i18n.T("env_target_env"))
+	fmt.Printf("  %s\n", i18n.T("env_locale"))
 }
 
 // SaveTransactionRecipe persists recipe under ~/.ugondu/transactions/<txId>/recipe.json

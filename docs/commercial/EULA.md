@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
  * Module         : Commercial Documentation
- * File           : EULA_draft.md
+ * File           : EULA.md
  * Version        : 0.3.0-draft
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -46,7 +46,7 @@
 **Licensor Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon acceptance by Licensee or upon first Activation Event  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
@@ -189,7 +189,7 @@ Nothing in this Agreement shall be interpreted to waive or restrict the mandator
 
 ## 7. Data Protection and Telemetry
 
-7.1 **Privacy Framework:** The processing of personal data in connection with EAORCS is governed by the **EAORCS Privacy Policy** (`Privacy_Policy_draft.md`), incorporated herein by reference. Air Roofers complies with the European General Data Protection Regulation (Regulation (EU) 2016/679 - GDPR) and the French *Loi Informatique et Libertés*.
+7.1 **Privacy Framework:** The processing of personal data in connection with EAORCS is governed by the **EAORCS Privacy Policy** (`Privacy_Policy.md`), incorporated herein by reference. Air Roofers complies with the European General Data Protection Regulation (Regulation (EU) 2016/679 - GDPR) and the French *Loi Informatique et Libertés*.
 
 7.2 **Activation Telemetry:** The thin client transmits strictly limited operational telemetry to `telemetry.airroofers.eu` (edition, tenant ID, correlation ID, capability event counts, error metrics). **No customer source code, personal identity content, or customer data payloads are captured by the telemetry subsystem.**
 

@@ -3,10 +3,10 @@
  * Module         : client/i18n
  * File           : bootstrap.go
  * Version        : 2.2.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-21
- * Last Modified  : 2026-10-21
+ * Last Modified  : 2026-10-27
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -20,7 +20,7 @@
  * - OWASP ASVS
  * - NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 package i18n
@@ -279,4 +279,45 @@ var bootstrapDict = map[string]string{
 	"err_capability_intersection_denied_cap": "Capability intersection denied: %s not authorized by envelope",
 	"err_step_requires_cap": "Capability intersection denied: step %d (%s) requires %s",
 	"err_step_action_not_granted": "Capability intersection denied: step %d action %s not granted in (server ∩ tenant ∩ target ∩ agent ∩ action)",
+	// Cryptographic binding mismatch tokens
+	"msg_cryptographic_binding_mismatch_environme":   "CRYPTOGRAPHIC_BINDING_MISMATCH: environmentId mismatch (state=%s, recipe=%s)",
+	"msg_cryptographic_binding_mismatch_executionid": "CRYPTOGRAPHIC_BINDING_MISMATCH: executionId mismatch (state=%s, recipe=%s)",
+	"msg_cryptographic_binding_mismatch_planhash":    "CRYPTOGRAPHIC_BINDING_MISMATCH: planHash mismatch (state=%s, recipe=%s)",
+	"msg_cryptographic_binding_mismatch_policyhas":   "CRYPTOGRAPHIC_BINDING_MISMATCH: policyHash mismatch (state=%s, recipe=%s)",
+	"msg_cryptographic_binding_mismatch_projectid":   "CRYPTOGRAPHIC_BINDING_MISMATCH: projectId mismatch (state=%s, recipe=%s)",
+	"msg_cryptographic_binding_mismatch_tenantid":    "CRYPTOGRAPHIC_BINDING_MISMATCH: tenantId mismatch (state=%s, recipe=%s)",
+	"msg_cryptographic_binding_mismatch_transactionid": "CRYPTOGRAPHIC_BINDING_MISMATCH: transactionId mismatch (state=%s, recipe=%s)",
+
+	// Verification and regression test tokens (Zero String Hardcoding)
+	"expected_nil_state_to_fail_closed": "Expected nil execution state to fail closed",
+	"expected_nil_envelope_to_fail_closed": "Expected nil execution envelope to fail closed",
+	"expected_nil_both_to_fail_closed": "Expected nil state and envelope to fail closed",
+	"expected_invalid_envelope_format_token": "Expected error with invalid_envelope_format token, got: %v",
+	"expected_binding_mismatch_on_empty_envelope_field": "Expected cryptographic binding mismatch when envelope field is empty for token: %s",
+	"expected_matching_cryptographic_mismatch_error": "Expected matching cryptographic mismatch error: got %s, expected %s",
+	"expected_tenantid_mismatch": "Expected tenantId mismatch error, got nil",
+	"expected_projectid_mismatch": "Expected projectId mismatch error, got nil",
+	"expected_environmentid_mismatch": "Expected environmentId mismatch error, got nil",
+	"expected_failed_key_generation": "Failed to generate key: %v",
+	"expected_empty_logs": "Expected logs to be empty, got: %v",
+	"expected_capability_intersection_to_pass": "Expected capability intersection to pass when granted across all 5 scopes, got: %v",
+	"expected_cap_fail_closed_target_missing": "Expected ValidateCapabilityIntersection to fail closed when capability missing from target scope",
+	"expected_cap_fail_closed_action_not_granted": "Expected ValidateCapabilityIntersection to fail closed when step action is not in intersection",
+	"failed_fetch_execution_recipe": "FetchExecutionRecipe failed: %v",
+	"unexpected_recipe_result": "Unexpected recipe result: %+v, steps=%d",
+	"expected_passport_header_mismatch": "Expected X-Ugondu-Passport-Id='passport-sovereign-99', got %q",
+	"expected_traceparent_header_missing": "Expected W3C traceparent header to be sent",
+	"expected_correlation_header_missing": "Expected X-Correlation-Id header to be sent",
+	"expected_error_on_non_200": "Expected non-200 control-plane response to return an error",
+	"expected_empty_recipe_outputs": "Expected empty recipe outputs on error, got env=%v steps=%v raw=%q",
+	"expected_execute_recipe_nil_to_fail_closed": "Expected ExecuteRecipe(nil, ...) to fail closed",
+	"expected_empty_transactionid_to_fail_closed": "Expected empty TransactionId to fail closed",
+	"expected_whitespace_transactionid_to_fail_closed": "Expected whitespace TransactionId to fail closed",
+	"expected_empty_executionid_to_fail_closed": "Expected empty ExecutionId to fail closed",
+	"expected_missing_public_key_to_fail_closed": "Expected missing public key to fail closed",
+	"expected_corrupted_signature_to_fail_closed": "Expected corrupted signature to fail closed",
+	"expected_empty_recipe_body_to_fail_closed": "Expected empty recipe body to fail closed",
+	"expected_corrupted_json_recipe_body_to_fail_closed": "Expected corrupted JSON recipe body to fail closed",
+	"expected_corrupted_canonical_envelope_to_fail_closed": "Expected corrupted canonical envelope to fail closed",
+	"expected_missing_key_without_apiurl_to_fail_closed": "Expected missing key without apiURL to fail closed",
 }

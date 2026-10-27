@@ -113,6 +113,14 @@ export class CorCleanupExecutionError extends Error {
     }
 }
 
+export class CorVpcDependencyTimeoutError extends CorCleanupExecutionError {
+    constructor(message: string, context?: { resourceId?: string; operation?: string; originalError?: Error }) {
+        super(message, context);
+        this.name = 'CorVpcDependencyTimeoutError';
+        Object.setPrototypeOf(this, CorVpcDependencyTimeoutError.prototype);
+    }
+}
+
 export class CorTagVerificationAccessDeniedError extends Error {
     public readonly bucketName: string;
     public readonly originalError?: Error;
@@ -162,6 +170,18 @@ function resolveEc2Client(clientOrRegion: any) {
     const region = typeof clientOrRegion === 'string' ? clientOrRegion : process.env.UGONDU_CERT_REGION || 'eu-west-3';
     const { EC2Client: Ec2SdkClient } = require('@aws-sdk/client-ec2');
     return new Ec2SdkClient({ region });
+}
+
+function isTimeoutError(err: any): boolean {
+    if (!err) return false;
+    const name = err.name || '';
+    const code = err.code || '';
+    const msg = typeof err.message === 'string' ? err.message.toLowerCase() : '';
+    return name === 'TimeoutError' ||
+           name === 'DependencyTimeout' ||
+           code === 'ETIMEDOUT' ||
+           code === 'ESOCKETTIMEDOUT' ||
+           msg.includes('timeout');
 }
 
 export async function cleanupOwnedCorVpcs(
@@ -233,10 +253,12 @@ export async function cleanupOwnedCorVpcs(
                 Filters: [{ Name: 'vpc-id', Values: [vpc.VpcId] }]
             }));
         } catch (err: any) {
-            throw new CorCleanupExecutionError(
-                __t('cor.cleanup.describe_sgs_failed', { vpcId: vpc.VpcId, error: err.message }),
-                { resourceId: vpc.VpcId, operation: 'DescribeSecurityGroups', originalError: err }
-            );
+            const msg = __t('cor.cleanup.describe_sgs_failed', { vpcId: vpc.VpcId, error: err.message });
+            const ctx = { resourceId: vpc.VpcId, operation: 'DescribeSecurityGroups', originalError: err };
+            if (isTimeoutError(err)) {
+                throw new CorVpcDependencyTimeoutError(msg, ctx);
+            }
+            throw new CorCleanupExecutionError(msg, ctx);
         }
 
         for (const sg of sgsResponse?.SecurityGroups || []) {
@@ -246,10 +268,12 @@ export async function cleanupOwnedCorVpcs(
                     result.deletedSecurityGroupIds.push(sg.GroupId);
                     options?.manifest?.unregisterResource('security-group', sg.GroupId);
                 } catch (err: any) {
-                    throw new CorCleanupExecutionError(
-                        __t('cor.cleanup.delete_sg_failed', { sgId: sg.GroupId, vpcId: vpc.VpcId, error: err.message }),
-                        { resourceId: sg.GroupId, operation: 'DeleteSecurityGroup', originalError: err }
-                    );
+                    const msg = __t('cor.cleanup.delete_sg_failed', { sgId: sg.GroupId, vpcId: vpc.VpcId, error: err.message });
+                    const ctx = { resourceId: sg.GroupId, operation: 'DeleteSecurityGroup', originalError: err };
+                    if (isTimeoutError(err)) {
+                        throw new CorVpcDependencyTimeoutError(msg, ctx);
+                    }
+                    throw new CorCleanupExecutionError(msg, ctx);
                 }
             }
         }
@@ -261,10 +285,12 @@ export async function cleanupOwnedCorVpcs(
                 Filters: [{ Name: 'vpc-id', Values: [vpc.VpcId] }]
             }));
         } catch (err: any) {
-            throw new CorCleanupExecutionError(
-                __t('cor.cleanup.describe_subnets_failed', { vpcId: vpc.VpcId, error: err.message }),
-                { resourceId: vpc.VpcId, operation: 'DescribeSubnets', originalError: err }
-            );
+            const msg = __t('cor.cleanup.describe_subnets_failed', { vpcId: vpc.VpcId, error: err.message });
+            const ctx = { resourceId: vpc.VpcId, operation: 'DescribeSubnets', originalError: err };
+            if (isTimeoutError(err)) {
+                throw new CorVpcDependencyTimeoutError(msg, ctx);
+            }
+            throw new CorCleanupExecutionError(msg, ctx);
         }
 
         for (const sub of subsResponse?.Subnets || []) {
@@ -274,10 +300,12 @@ export async function cleanupOwnedCorVpcs(
                     result.deletedSubnetIds.push(sub.SubnetId);
                     options?.manifest?.unregisterResource('subnet', sub.SubnetId);
                 } catch (err: any) {
-                    throw new CorCleanupExecutionError(
-                        __t('cor.cleanup.delete_subnet_failed', { subnetId: sub.SubnetId, vpcId: vpc.VpcId, error: err.message }),
-                        { resourceId: sub.SubnetId, operation: 'DeleteSubnet', originalError: err }
-                    );
+                    const msg = __t('cor.cleanup.delete_subnet_failed', { subnetId: sub.SubnetId, vpcId: vpc.VpcId, error: err.message });
+                    const ctx = { resourceId: sub.SubnetId, operation: 'DeleteSubnet', originalError: err };
+                    if (isTimeoutError(err)) {
+                        throw new CorVpcDependencyTimeoutError(msg, ctx);
+                    }
+                    throw new CorCleanupExecutionError(msg, ctx);
                 }
             }
         }
@@ -288,10 +316,12 @@ export async function cleanupOwnedCorVpcs(
             result.deletedVpcIds.push(vpc.VpcId);
             options?.manifest?.unregisterResource('vpc', vpc.VpcId);
         } catch (err: any) {
-            throw new CorCleanupExecutionError(
-                __t('cor.cleanup.delete_vpc_failed', { vpcId: vpc.VpcId, error: err.message }),
-                { resourceId: vpc.VpcId, operation: 'DeleteVpc', originalError: err }
-            );
+            const msg = __t('cor.cleanup.delete_vpc_failed', { vpcId: vpc.VpcId, error: err.message });
+            const ctx = { resourceId: vpc.VpcId, operation: 'DeleteVpc', originalError: err };
+            if (isTimeoutError(err)) {
+                throw new CorVpcDependencyTimeoutError(msg, ctx);
+            }
+            throw new CorCleanupExecutionError(msg, ctx);
         }
     }
 
@@ -321,7 +351,7 @@ export async function verifyS3BucketTags(
         throw new CorTagVerificationError('Invalid S3 client provided for tag verification', { bucketName });
     }
     if (!bucketName) {
-        throw new CorTagVerificationError('Bucket name is required for tag verification');
+        throw new CorTagVerificationError(__t('bucket_name_required_for_tag_verification'));
     }
     if (!expectedTxId) {
         throw new CorTagVerificationError('Expected transaction ID is required for tag verification', { bucketName });

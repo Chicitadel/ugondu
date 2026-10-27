@@ -92,7 +92,7 @@ export class AwsCredentialNormalizer implements CredentialNormalizer {
 
             if (identity.principal.includes(':user/')) {
                 userName = identity.principal.split(':user/')[1].split('/')[0];
-                Logger.info(`Safely reconstructed User Name: ${userName}`);
+                Logger.info(__t('safely_reconstructed_user_name', { userName }));
             } else {
                 throw new Error(__t('msg_normalization_blocked_identity_authentic'));
             }

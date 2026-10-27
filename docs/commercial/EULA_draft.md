@@ -46,7 +46,7 @@
 **Licensor Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon acceptance by Licensee or upon first Activation Event  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

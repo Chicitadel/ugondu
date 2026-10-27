@@ -33,6 +33,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
+import { URL } from 'url';
 import { __t } from '../i18n';
 
 export interface HealthContractConfig {
@@ -121,6 +123,9 @@ export interface ProductRecord {
   billing?: Record<string, unknown>;
   telemetry?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  lifecycle?: string;
+  publicRelease?: boolean;
+  isDistributableProduct?: boolean;
 }
 
 export interface ProductDefinitionYaml {
@@ -467,7 +472,19 @@ export class ProductRegistry {
       licensing: raw.licensing,
       billing: raw.billing,
       telemetry: raw.telemetry,
-      metadata: raw.metadata
+      metadata: raw.metadata,
+      lifecycle: String(
+        raw.lifecycle ||
+          (raw.classification === 'COMMERCIAL_PRODUCT' ? 'RELEASED' : 'internal_draft')
+      ),
+      publicRelease:
+        raw.public_release !== undefined
+          ? Boolean(raw.public_release)
+          : raw.classification === 'COMMERCIAL_PRODUCT',
+      isDistributableProduct:
+        raw.is_distributable_product !== undefined
+          ? Boolean(raw.is_distributable_product)
+          : raw.classification === 'COMMERCIAL_PRODUCT'
     };
   }
 
@@ -490,6 +507,20 @@ export class ProductRegistry {
       unique.set(record.productId.toUpperCase(), record);
     }
     return Array.from(unique.values());
+  }
+
+  /**
+   * Serves allowlisted public projections strictly filtered conforming to ADR-0042:
+   * (lifecycle === 'RELEASED') && (public_release === true) && (is_distributable_product === true)
+   * Prevents leakage of internal platform engines or pending/unreleased pilots.
+   */
+  public getPublicCatalog(): ProductRecord[] {
+    return this.discoverAllProducts().filter((product) => {
+      const isReleased = product.lifecycle === 'RELEASED';
+      const isPublic = product.publicRelease === true;
+      const isDistributable = product.isDistributableProduct === true;
+      return isReleased && isPublic && isDistributable;
+    });
   }
 
   public getServiceConfig(serviceName: string, productId?: string): ServiceRegistryConfig {
@@ -640,6 +671,65 @@ export class ProductRegistry {
 
   public static discoverAllProducts(): ProductRecord[] {
     return ProductRegistry.getInstance().discoverAllProducts();
+  }
+
+  /**
+   * Serves allowlisted public projections strictly filtered conforming to ADR-0042:
+   * (lifecycle === 'RELEASED') && (public_release === true) && (is_distributable_product === true)
+   * Prevents leakage of internal platform engines or pending/unreleased pilots.
+   */
+  public static getPublicCatalog(): ProductRecord[] {
+    return ProductRegistry.getInstance().getPublicCatalog();
+  }
+
+  /**
+   * RFC-compliant hostname normalization conforming to enterprise networking standards.
+   * Lowercases, strips protocol, port, path, query, hash, trailing dot, and leading 'www.'.
+   */
+  public static normalizeHostname(hostname: string): string {
+    let host = (hostname || '').toLowerCase().trim();
+    if (!host) return '';
+    if (host.startsWith('http://') || host.startsWith('https://') || host.startsWith('//')) {
+      try {
+        const parsed = new URL(host.startsWith('//') ? `https:${host}` : host);
+        host = parsed.hostname;
+      } catch {
+        host = host.replace(/^(?:https?:)?\/\//, '');
+      }
+    }
+    host = host.split('/')[0].split('?')[0].split('#')[0];
+    host = host.replace(/:\d+$/, '');
+    host = host.replace(/\.+$/, '');
+    host = host.replace(/^www\./, '');
+    return host.trim();
+  }
+
+  /**
+   * Verifies an HMAC-SHA256 signature with constant-time equality check.
+   * Conforms to FIPS / OWASP ASVS cryptographic verification standards.
+   */
+  public static verifyHmacSha256(
+    payload: string | Buffer,
+    signatureHexOrBase64: string,
+    secret: string
+  ): boolean {
+    if (!payload || !signatureHexOrBase64 || !secret) {
+      return false;
+    }
+    try {
+      const hmac = crypto.createHmac('sha256', secret);
+      hmac.update(payload);
+      const isBase64 = signatureHexOrBase64.length === 44 && signatureHexOrBase64.endsWith('=');
+      const computed = isBase64 ? hmac.digest('base64') : hmac.digest('hex');
+      const computedBuf = Buffer.from(computed);
+      const providedBuf = Buffer.from(signatureHexOrBase64);
+      if (computedBuf.length !== providedBuf.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(computedBuf, providedBuf);
+    } catch {
+      return false;
+    }
   }
 }
 

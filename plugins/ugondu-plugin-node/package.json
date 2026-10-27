@@ -1,0 +1,9 @@
+{
+  "name": "@ugondu/plugin-node",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Node.js Build and Dependency Resolution Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "main": "index.js"
+}

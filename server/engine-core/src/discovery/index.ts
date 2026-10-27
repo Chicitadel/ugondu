@@ -114,7 +114,7 @@ export class DiscoveryEngine {
                             evidence.push({ technology: 'fastify', category: 'framework', sourceFile: file, matchedPattern: 'dependencies.fastify', confidence: 'DEFINITIVE' });
                         }
                     } catch (err) {
-                        Logger.warn('Failed to parse package.json content during discovery', { file, error: err instanceof Error ? err.message : String(err) });
+                        Logger.warn(__t('failed_to_parse_package_json_discovery'), { file, error: err instanceof Error ? err.message : String(err) });
                     }
                 } else {
                     // Fallback to convention
@@ -137,7 +137,7 @@ export class DiscoveryEngine {
                             evidence.push({ technology: 'laravel', category: 'framework', sourceFile: file, matchedPattern: 'require.laravel/framework', confidence: 'DEFINITIVE' });
                         }
                     } catch (err) {
-                        Logger.warn('Failed to parse composer.json content during discovery', { file, error: err instanceof Error ? err.message : String(err) });
+                        Logger.warn(__t('failed_to_parse_composer_json_discovery'), { file, error: err instanceof Error ? err.message : String(err) });
                     }
                 }
             }

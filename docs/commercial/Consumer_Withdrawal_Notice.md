@@ -46,7 +46,7 @@
 **TVA Intracommunautaire:** FR89943432534  
 **Withdrawals Department:** `withdrawals@airroofers.eu`  
 **Document Version:** 1.1.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

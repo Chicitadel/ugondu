@@ -65,11 +65,11 @@ export class MigrationManager {
     }
 
     private async performSchemaDiff(step: MigrationStep): Promise<void> {
-        Logger.info(`[GOV-LOG] Enforcing schema diffing for ${step.id}...`, { stepId: step.id });
+        Logger.info(__t('gov_log_enforcing_schema_diffing', { stepId: step.id }), { stepId: step.id });
     }
 
     private async createBackupCheckpoint(step: MigrationStep): Promise<void> {
-        Logger.info(`[GOV-LOG] Creating backup checkpoint for ${step.id}...`, { stepId: step.id });
+        Logger.info(__t('gov_log_creating_backup_checkpoint', { stepId: step.id }), { stepId: step.id });
     }
 
     /**

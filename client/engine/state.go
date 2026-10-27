@@ -130,14 +130,18 @@ func GetTransactionsDir() (string, error) {
 
 // GetTransactionDir returns ~/.ugondu/transactions/<txId>
 func GetTransactionDir(txId string) (string, error) {
-	if strings.Contains(txId, "..") || strings.Contains(txId, "/") || strings.Contains(txId, "\\") {
+	trimmed := strings.TrimSpace(txId)
+	if trimmed == "" {
+		return "", fmt.Errorf(i18n.T("invalid_transactionid_contains_path_separators"), txId)
+	}
+	if strings.Contains(trimmed, "..") || strings.Contains(trimmed, "/") || strings.Contains(trimmed, "\\") {
 		return "", fmt.Errorf(i18n.T("invalid_transactionid_contains_path_separators"), txId)
 	}
 	baseDir, err := GetTransactionsDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(baseDir, txId), nil
+	return filepath.Join(baseDir, trimmed), nil
 }
 
 // GetStateFilePath returns ~/.ugondu/transactions/<txId>/state.json
