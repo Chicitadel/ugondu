@@ -40,6 +40,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 // DefaultTrustedPublicKeyHex is the default hex-encoded 32-byte Ed25519 public key for language pack verification.
