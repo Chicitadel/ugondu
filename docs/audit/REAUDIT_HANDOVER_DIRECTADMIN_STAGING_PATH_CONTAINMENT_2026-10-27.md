@@ -51,3 +51,18 @@ Test file: `tools/tests/Test-DeployDirectAdminStaging.ps1`
 - Independent UAIGOS review and release authority sign-off.
 
 **Disposition:** Targeted defect implemented in code with regression tests added; workflow evidence pending. Universal COR and public commercial release remain **NOT CERTIFIED**.
+
+
+## Additional confirmed finding — UG-DIRECTADMIN-RESOURCE-LIFECYCLE-002
+
+A wider pass through the same provider found that database create/delete commands returned success without provider read-back or ownership proof, storage deletion used `rm -rf` based only on a syntactically valid name, and the provider contract advertised hosted-app/database lifecycle capabilities that the adapter could not qualify.
+
+### Physical code changes
+- Database creation/deletion now fail closed until a provider-native verified lifecycle and ownership/read-back protocol exists; the code no longer reports unverified database creation as running.
+- Storage deletion no longer runs `rm -rf` without durable ownership/provenance evidence.
+- Private storage creation now uses a non-idempotent `mkdir` for the target (pre-existing targets are not silently adopted) and checks the resulting directory is present and writable before returning success.
+- The DirectAdmin provider capability contract no longer advertises hosted-app deployment or database lifecycle as supported; rollback/delete claims are removed. Private file storage remains conditional because its full lifecycle is not yet qualified.
+- Regression tests assert that unqualified database create/delete and storage deletion fail closed without reaching a live host.
+
+### Acceptance
+The engine-core workspace tests and integrated CI/COR must pass on the exact final head. This is a conservative safety closure, not a claim that DirectAdmin database provisioning/deletion or application deployment is now implemented. Such capabilities remain unavailable until the native API, ownership ledger, read-back, rollback and physical smoke tests are implemented.
