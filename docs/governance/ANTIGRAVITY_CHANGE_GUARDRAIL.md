@@ -581,4 +581,27 @@ Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/
 - Public commercial release remains **BLOCKED / NOT FULLY CERTIFIED** until every mandatory physical gate and the final authorized COR decision passes on the release candidate.
 
 ### Required next action
-Keep PR #37 unmerged until the exact final head has reproducible Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, and required physical staging receipts. Any source change invalidates prior candidate-bound evidence and requires rerunning affected checks.
+PR #37 was merged into `fix/go-thin-client-vet-and-module-imports-2026-10-27` (not `master`/`main`). The merge does not waive exact-head Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, or required physical staging receipts. Any descendant source or test change invalidates prior candidate-bound evidence and requires rerunning affected checks.
+
+
+## 8. Whole-product re-audit follow-up — localization test integrity (2026-10-27)
+
+**Audit base:** `d283132258d9f7240eb1d71b1cc61630b3edfa85`  
+**Dedicated remediation branch:** `audit/whole-product-cor-reaudit-2026-10-27`
+
+### Confirmed defect: localization regression checks were permissive and mutated shared repository state
+
+- The drop-in localization test accepted either the exact localized value or a debug-prefixed variant, and some assertions used broad substring alternatives. This could allow unintended output formatting or incomplete positional interpolation to pass.
+- The test wrote `sw.json` into the repository's shared `locales/` directory. If a run terminated before its later cleanup section, the file could leak into a subsequent run and make results order-dependent.
+
+### Physical remediation on the dedicated branch
+
+- Replaced permissive OR/substring assertions with exact assertions for English, French, German, custom drop-in interpolation, English fallback, and unknown-token fallback.
+- Moved the custom locale fixture into a unique operating-system temporary directory selected through `UGONDU_LOCALES_DIR`; added exit-time cleanup and restoration of the prior environment variable. The repository's shared locale directory is no longer written by this test.
+- This is a regression-test integrity fix, not proof of complete product COR closure.
+
+### Evidence and release boundary
+
+- The changes are committed on the dedicated branch and are proposed through a draft PR; exact-head CI is still required.
+- The reported 65 local COR suites are not equivalent to all physical provider/host qualification gates. The previously recorded AWS physical qualification and signing-trust-root steps were skipped, and the uploaded Antigravity log does not provide complete raw output for every Go command.
+- Overall COR remains **PARTIAL / RELEASE BLOCKED** until mandatory exact-head checks and authorized physical qualification receipts are complete.
