@@ -140,6 +140,10 @@ export function executePlan(c, plan, runner = gcloud) {
   } else {
     runner(["iam", "service-accounts", "create", c.serviceAccount, "--project", c.project, "--display-name", "Ugondu bootstrap federation"]);
   }
+  const enabledApis = runner(["services", "list", "--enabled", "--project", c.project, "--format=value(config.name)"]);
+  for (const api of REQUIRED_APIS) if (!enabledApis.split(/\r?\n/).includes(api)) throw new Error(`BOOTSTRAP_API_READBACK_MISSING:${api}`);
+  const poolReadback = runner(["iam", "workload-identity-pools", "describe", c.pool, "--project", c.project, "--location", "global", "--format=json"]);
+  if (!poolReadback.includes(c.pool)) throw new Error("WIF_POOL_READBACK_MISMATCH");
   // Verify the provider before granting the service-account impersonation binding.
   const providerReadback = runner(["iam", "workload-identity-pools", "providers", "describe", c.provider,
     "--project", c.project, "--location", "global", "--workload-identity-pool", c.pool, "--format=json"]);
