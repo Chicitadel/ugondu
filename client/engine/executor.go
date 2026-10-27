@@ -420,6 +420,12 @@ func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) 
 	if state == nil || env == nil {
 		return nil
 	}
+	if state.ExecutionId != "" && env.ExecutionId != "" && state.ExecutionId != env.ExecutionId {
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_executionid"), state.ExecutionId, env.ExecutionId)
+	}
+	if state.TransactionId != "" && env.TransactionId != "" && state.TransactionId != env.TransactionId {
+		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_transactionid"), state.TransactionId, env.TransactionId)
+	}
 	if state.PlanHash != "" && state.PlanHash != env.PlanHash {
 		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_planhash"), state.PlanHash, env.PlanHash)
 	}

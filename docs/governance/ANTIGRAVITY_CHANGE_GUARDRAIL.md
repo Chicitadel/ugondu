@@ -519,9 +519,16 @@ Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/
 
 ### Physical remediation
 - Added the standard-library `strings` import in `client/i18n/pack.go`.
-- Corrected the engine test import to `ugondu/client/i18n`.
+- Corrected the engine test import to `ugondu/client/i18n` matching `client/go.mod`.
+- Aligned `ExecutionState` struct literal in `client/engine/executor_test.go` (`StateSequence: 1`, removed non-existent fields).
+- Completed `VerifyCryptographicBindings` in `client/engine/executor.go` to enforce `ExecutionId` and `TransactionId` parity check against tampered states.
+- Synchronized cryptographic binding mismatch tokens (`msg_cryptographic_binding_mismatch_executionid`, `msg_cryptographic_binding_mismatch_transactionid`) across all 12 corporate languages in `locales/` and `server/shared/locales/`.
 - Added regression tests for trusted public-key override trimming and fallback behavior in `client/i18n/pack_test.go`.
 - Added a focused handover note with exact failed-run evidence and mandatory verification commands.
+- Verified locally in Docker container (`golang:1.22-alpine`):
+  - `go vet ./...`: PASS (0 errors)
+  - `go test ./...`: PASS (`cmd`, `engine`, `i18n` all passing)
+  - Cross-compilation across all 5 target architectures (`linux/amd64`, `linux/arm64`, `windows/amd64`, `darwin/amd64`, `darwin/arm64`): PASS (`CROSS_BUILD_SUCCESS`)
 
 ### Non-negotiable follow-up
 1. Re-run Go vet, tests, and cross-platform builds on the exact final SHA through CI.

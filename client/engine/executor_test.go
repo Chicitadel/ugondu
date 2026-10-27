@@ -34,14 +34,12 @@ import (
 
 func TestVerifyCryptographicBindings(t *testing.T) {
 	state := &ExecutionState{
-		ExecutionId:     "exec-12345",
-		TransactionId:   "tx-abcde",
-		PlanHash:        "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-		PolicyHash:      "9f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-		StateSequenceNo: 1,
-		Status:          "RUNNING",
-		TargetEnv:       "production",
-		RollbackSafe:    true,
+		ExecutionId:   "exec-12345",
+		TransactionId: "tx-abcde",
+		PlanHash:      "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+		PolicyHash:    "9f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+		StateSequence: 1,
+		Status:        "RUNNING",
 	}
 
 	env := &ExecutionEnvelope{

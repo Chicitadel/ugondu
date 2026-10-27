@@ -18,7 +18,9 @@ The CI failure is real; it is not a flaky platform-specific test.
 ## Physical changes
 
 - `client/i18n/pack.go`: added the missing `strings` import; behavior remains unchanged.
-- `client/engine/executor_test.go`: corrected the i18n import to `ugondu/client/i18n`, matching `client/go.mod`.
+- `client/engine/executor_test.go`: corrected the i18n import to `ugondu/client/i18n`, matching `client/go.mod`; aligned `ExecutionState` struct literal with schema (`StateSequence: 1`, removed non-existent fields).
+- `client/engine/executor.go`: completed `VerifyCryptographicBindings` to check `ExecutionId` and `TransactionId` parity as expected by the cryptographic binding verification test suite.
+- `locales/` & `server/shared/locales/`: synchronized `msg_cryptographic_binding_mismatch_executionid` and `msg_cryptographic_binding_mismatch_transactionid` across all 12 corporate languages.
 - `client/i18n/pack_test.go`: added regression tests for whitespace-trimmed environment overrides, whitespace-only environment fallback, trimmed configured key, and default-key fallback.
 
 ## Required verification
