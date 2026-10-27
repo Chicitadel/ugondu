@@ -27,14 +27,14 @@ DirectoryIndex index.html index.php
   AddType font/woff2 .woff2
 </IfModule>
 
-# 4. 🔒 Enterprise Security & CORS Headers
+# 4. 🔒 Enterprise Security Headers (API CORS is enforced at the API origin with explicit allowlists; no wildcard here)
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header set Access-Control-Allow-Origin "*"
-  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, HEAD"
-  Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Ugondu-Token, X-Mandatag-Key"
+  <FilesMatch "^(index\.html|flutter_service_worker\.js)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
 </IfModule>
 
 # 5. 🚀 High-Performance Caching & SPA Expiration
@@ -43,9 +43,9 @@ DirectoryIndex index.html index.php
   ExpiresDefault "access plus 1 month"
   ExpiresByType text/html "access plus 0 seconds"
   ExpiresByType application/json "access plus 0 seconds"
-  ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType application/wasm "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 hour"
+  ExpiresByType text/css "access plus 1 hour"
+  ExpiresByType application/wasm "access plus 1 hour"
   ExpiresByType font/woff2 "access plus 1 year"
 </IfModule>
 
@@ -64,7 +64,7 @@ DirectoryIndex index.html index.php
   RewriteRule ^ index.html [QSA,L]
 </IfModule>
 
-# 7. 🚫 Protect Sensitive & Hidden Files
+# 7. Protect hidden files
 <FilesMatch "^\.">
   Require all denied
 </FilesMatch>
