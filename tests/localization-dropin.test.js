@@ -68,15 +68,15 @@ async function runLocalizationTests() {
     try {
         setLocale('en');
         const enMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.ok(enMsg === '[en] Ugondu Engine listening on port 4001' || enMsg === 'Ugondu Engine listening on port 4001');
+        assert.strictEqual(enMsg, 'Ugondu Engine listening on port 4001', 'English token must resolve exactly and interpolate both positional parameters');
 
         setLocale('fr');
         const frMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.ok(frMsg === '[fr] Ugondu Engine en écoute sur le port 4001' || frMsg === 'Ugondu Engine en écoute sur le port 4001');
+        assert.strictEqual(frMsg, 'Ugondu Engine en écoute sur le port 4001', 'French token must resolve exactly and interpolate both positional parameters');
 
         setLocale('de');
         const deMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.ok(deMsg === '[de] Ugondu Engine lauscht auf Port 4001' || deMsg === 'Ugondu Engine lauscht auf Port 4001');
+        assert.strictEqual(deMsg, 'Ugondu Engine lauscht auf Port 4001', 'German token must resolve exactly and interpolate both positional parameters');
 
         reportPass('[lang] token prefix and printf interpolation correctly applied across multiple languages');
     } catch (e) {
@@ -105,10 +105,10 @@ async function runLocalizationTests() {
         assert.strictEqual(getLocale(), customLang);
 
         const customEventMsg = __t('event_req');
-        assert.ok(customEventMsg === '[sw] Jina la tukio linahitajika.' || customEventMsg === 'Jina la tukio linahitajika.');
+        assert.strictEqual(customEventMsg, 'Jina la tukio linahitajika.', 'Drop-in locale must resolve its exact token value without debug prefixes');
 
         const customListenMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.ok(customListenMsg.includes('inasikiliza kwenye bandari 4001') || customListenMsg.includes('Ugondu Engine'));
+        assert.strictEqual(customListenMsg, 'Ugondu Engine inasikiliza kwenye bandari 4001', 'Drop-in locale must interpolate both positional parameters exactly');
 
         reportPass('Drop-in language activation (sw.json) succeeded with zero code modification or rebuild');
     } catch (e) {
@@ -118,13 +118,13 @@ async function runLocalizationTests() {
     // Test 4: Missing Key Graceful Fallback (Purity & Zero Crash)
     try {
         setLocale(customLang);
-        // 'auth_missing' is not defined in ja.json, so it must fall back to 'en' while retaining [ja] tag
+        // 'auth_missing' is not defined in the custom locale, so it must fall back exactly to English.
         const fallbackMsg = __t('auth_missing');
-        assert.ok(fallbackMsg.includes('Missing authentication token') || fallbackMsg.includes('token'));
+        assert.strictEqual(fallbackMsg, 'Missing authentication token. Deployment rejected.', 'Missing locale token must use the exact English fallback');
 
         // Completely unknown token falls back to key itself
         const unknownMsg = __t('nonexistent_token_xyz');
-        assert.ok(unknownMsg.includes('nonexistent_token_xyz'));
+        assert.strictEqual(unknownMsg, 'nonexistent_token_xyz', 'Unknown token must fall back to the unchanged token key');
 
         reportPass('Missing tokens fall back gracefully to English dictionary and raw token without crashing');
     } catch (e) {
