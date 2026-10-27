@@ -64,7 +64,7 @@ The attached Antigravity log reports 65/65 local COR suites and a green aggregat
 
 Previously inspected workflow evidence for the prior candidate also showed that the AWS physical qualification and signing-trust-root steps were skipped. Do not infer a signed or fully qualified commercial release from local test-suite success alone.
 
-The full whole-product audit is **not complete**. This branch addresses one confirmed test-integrity defect; it does not assert that all pending features, host/provider adapters, COR gaps, or UAIGOS obligations are closed.
+The full whole-product audit is **not complete**. This branch addresses two confirmed defects (localization test integrity and persisted state digest validation); it does not assert that all pending features, host/provider adapters, COR gaps, or UAIGOS obligations are closed.
 
 ## 7. Non-negotiable Antigravity guardrails
 
@@ -79,4 +79,4 @@ The full whole-product audit is **not complete**. This branch addresses one conf
 
 ## 8. Acceptance
 
-Close `UG-COR-I18N-TEST-INTEGRITY-001` only when the exact PR head passes the focused localization test and all mandatory governance/CI checks. Do not close the whole-product COR ledger based on this single finding.
+Close `UG-COR-I18N-TEST-INTEGRITY-001` only when the exact PR head passes the focused localization test and all mandatory governance/CI checks. Close `UG-COR-STATE-INTEGRITY-001` only when the exact-head Go regression tests, vet, race tests where supported, and full client suite pass. Do not close the whole-product COR ledger based on these two findings.
