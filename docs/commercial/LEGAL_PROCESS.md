@@ -1,4 +1,5 @@
-/******************************************************************************
+<!--
+*****************************************************************************
  * Project        : Ugondu
  * Module         : Docs / Commercial
  * File           : LEGAL_PROCESS.md
@@ -12,9 +13,14 @@
  *
  * Copyright (c) 2026 Air Roofers Ltd
  * All Rights Reserved.
- ******************************************************************************/
+ *****************************************************************************
+-->
 
 # Legal Process
+
+**Document Version:** 1.0.0  
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
+
 
 ## Source Documents
 All legal documents located in `docs/commercial/` are considered **source documents only**.

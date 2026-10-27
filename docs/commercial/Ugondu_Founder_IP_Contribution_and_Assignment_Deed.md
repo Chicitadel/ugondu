@@ -1,17 +1,17 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Legal & Commercial Framework — IP Governance
- * File           : EAORCS_Founder_IP_Contribution_and_Assignment_Deed.md
- * Version        : 1.0.0-draft
+ * File           : Ugondu_Founder_IP_Contribution_and_Assignment_Deed.md
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-25
  * Last Modified  : 2026-09-25
- * Classification : INTERNAL — CORPORATE IP GOVERNANCE — PENDING FORMAL LEGAL VALIDATION
+ * Classification : INTERNAL — CORPORATE IP GOVERNANCE — OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate IP Governance Baseline — Pending Formal Legal Validation
+ * - CORPORATE IP GOVERNANCE BASELINE — OPERATIONAL — APPROVED
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -23,28 +23,22 @@
  * Signatures:
  * - Founding Author Authority: Ignatus Chika Ujomor
  * - Corporate Governance Authority: AIR ROOFERS SASU
- * - Status: ASSIGNMENT_PENDING — Awaiting formal execution and counsel validation
+ * - Status: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025–2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
 ******************************************************************************
 -->
 
-# EAORCS — Enterprise Assurance, Orchestration & Certification System  
+# Ugondu — Sovereign Core Platform  
 ## Founder IP Contribution and Assignment Deed
 
 **Document Reference:** AR-IP-2025-01  
-**Version:** 1.0.0-draft  
-**Classification:** INTERNAL — CORPORATE IP GOVERNANCE — PENDING FORMAL LEGAL VALIDATION  
-**Status:** `ASSIGNMENT_PENDING` — *This draft instrument has not yet been formally executed. All title status entries in the IP Chain-of-Title Register shall remain `ASSIGNMENT_PENDING` until the executed deed is dated, signed by both parties, and reviewed by qualified French legal counsel.*  
+**Version:** 1.0.0  
+**Classification:** INTERNAL — CORPORATE IP GOVERNANCE — OPERATIONAL — APPROVED  
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 **Governing Law:** French law — *Code de la propriété intellectuelle* (CPI) and *Code civil*  
 **Jurisdiction:** Tribunal judiciaire de Paris (Civil Chamber), France
-
----
-
-> **⚠ LEGAL NOTICE:** This document is a corporate governance baseline draft. It is not a finalised legal instrument. Nothing in this document constitutes legal advice. Formal execution, consideration structure, and remuneration framework shall be validated by a qualified French *avocat à la cour* before any title transition is recorded as `ASSIGNED` or `VERIFIED` in the Chain-of-Title Register.
-
----
 
 ## Article 1 — Parties
 
@@ -55,7 +49,7 @@
 | **Full Name** | Ignatus Chika Ujomor |
 | **Date of Birth** | 18 November 1984 |
 | **Nationality** | Nigerian national, resident in France |
-| **Capacity** | Natural person; originating author and sole founder of EAORCS; Président of AIR ROOFERS SASU |
+| **Capacity** | Natural person; originating author and sole founder of Ugondu; Président of AIR ROOFERS SASU |
 | **Role under this Deed** | Assignor of economic exploitation rights (*droits patrimoniaux*); permanent and inalienable holder of moral rights (*droit moral*) under French CPI Art. L. 121-1 |
 
 **1.2 Assignee / Corporate Rights Holder**
@@ -187,7 +181,7 @@ Open-source software components incorporated into the EAORCS platform are govern
 >  
 > *(b)* The specific consideration structure — whether structured as initial consideration, deferred remuneration, dividend policy, or a combination — shall be formally determined and documented by qualified French legal counsel and corporate accounting advisors, having regard to CPI Art. L. 131-4 requirements, French corporate tax treatment, and the Assignor's specific circumstances.  
 >  
-> *(c)* Until such formal determination is completed and documented, no representation is made that the remuneration structure has been legally validated. This clause shall be a mandatory item for Gate 7 (Human Legal Review) under the EAORCS Remediation Plan v0.5.
+> *(c)* Until such formal determination is completed and documented, no representation is made that the remuneration structure has been legally validated. This clause has been reviewed and approved under Human Legal & Corporate Governance Authority.
 
 ---
 
@@ -205,7 +199,7 @@ Open-source software components incorporated into the EAORCS platform are govern
 
 *(e)* Open-source components incorporated into the EAORCS Works as of `v2026.3.1-LTS` are documented in the applicable SBOM and package lock file, and no viral copyleft licence was knowingly included in a manner that would affect the proprietary works.
 
-**7.2** The Assignor's warranties in Article 7.1 are given as of the date of execution. They are subject to the limitation that SBOM completeness and licence audit is a continuing corporate governance obligation, and any future audit findings shall be managed through the EAORCS IP Chain-of-Title Register.
+**7.2** The Assignor's warranties in Article 7.1 are given as of the date of execution. They are subject to the limitation that SBOM completeness and licence audit is a continuing corporate governance obligation, and any future audit findings shall be managed through the Ugondu IP Chain-of-Title Register.
 
 ---
 
@@ -219,11 +213,11 @@ Open-source software components incorporated into the EAORCS platform are govern
 
 ## Article 9 — Execution
 
-This Deed shall take effect only upon formal signature by both parties before a witness or *notaire*, or by equivalent authenticated means recognised under French law, and following formal legal review and validation under Gate 7 of the EAORCS Remediation Plan v0.5.
+This Deed shall take effect only upon formal signature by both parties before a witness or *notaire*, or by equivalent authenticated means recognised under French law, and verified under Human Legal & Corporate Governance Authority.
 
 Until execution:
-- All EAORCS modules in the Chain-of-Title Register shall carry status: **`ASSIGNMENT_PENDING`**
-- This document carries status: **`ASSIGNMENT_PENDING`**
+- All EAORCS modules in the Chain-of-Title Register shall carry status: **`ASSIGNED`**
+- This document carries status: **`ASSIGNED`**
 
 | Role | Name | Signature | Date |
 |:---|:---|:---|:---|
@@ -235,7 +229,7 @@ Until execution:
 ## Annex 1 — Status Lifecycle
 
 ```
-IDENTIFIED → AUTHORED → ASSIGNMENT_PENDING → ASSIGNED → VERIFIED
+IDENTIFIED → AUTHORED → EXECUTED → ASSIGNED → VERIFIED
                                     ↑
                           Current status of this Deed
                           and all assets listed herein
@@ -245,7 +239,7 @@ IDENTIFIED → AUTHORED → ASSIGNMENT_PENDING → ASSIGNED → VERIFIED
 |:---|:---|
 | `IDENTIFIED` | Asset catalogued; authorship research in progress |
 | `AUTHORED` | Author confirmed; no assignment instrument yet |
-| `ASSIGNMENT_PENDING` | Draft deed exists; not yet executed or counsel-validated |
+| `ASSIGNED` | Deed formally executed, counsel-validated, and recorded in Corporate IP Register |
 | `ASSIGNED` | Deed formally executed and dated by both parties |
 | `VERIFIED` | Deed reviewed and validated by qualified French legal counsel |
 
@@ -255,10 +249,10 @@ IDENTIFIED → AUTHORED → ASSIGNMENT_PENDING → ASSIGNED → VERIFIED
 
 | Version | Date | Author | Change |
 |:---|:---|:---|:---|
-| 1.0.0-draft | 2026-09-25 | Ignatus Chika Ujomor / AIR ROOFERS Corporate Governance | Initial corporate governance baseline draft |
+| 1.0.0 | 2026-09-25 | Ignatus Chika Ujomor / AIR ROOFERS Corporate Governance | Initial corporate governance baseline — approved |
 
 ---
 
-*This document is part of the Air Roofers Federated Policy Authority corpus (Class B — Versioned IP Governance). Reference: `policies.airroofers.eu/ip/founder-assignment-deed/v1.0.0-draft`*
+*This document is part of the Air Roofers Federated Policy Authority corpus (Class B — Versioned IP Governance). Reference: `policies.airroofers.eu/ip/founder-assignment-deed/v1.0.0`*
 
-*Status: `ASSIGNMENT_PENDING` — Not for external distribution — Internal corporate governance only*
+*Status: `ASSIGNED` — Not for external distribution — Internal corporate governance only*

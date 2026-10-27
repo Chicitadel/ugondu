@@ -1,8 +1,9 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation & Checkout Architecture
  * File           : Legal_Checkout_Record_Specification.md
- * Version        : 1.1.0-draft
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
@@ -10,7 +11,7 @@
  * Classification : ENTERPRISE | TECHNICAL SPECIFICATION & COMPLIANCE STANDARD
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -25,22 +26,23 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
+ *****************************************************************************
+-->
 
 ---
 
 # Legal Checkout Record (LCR) Technical & Compliance Specification
 
-**Product:** EAORCS — Commercial Checkout & Evidentiary Governance  
+**Product:** Ugondu — Sovereign Core Platform  
 **Governing Authority:** AeroBill (`billing.airroofers.eu`) & Mandatag (`license.airroofers.eu`)  
 **Operating Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
-**Document Version:** 1.1.0-draft  
+**Document Version:** 1.1.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -206,7 +208,7 @@ Every commercial transaction must generate a payload conforming to the following
 Under Article 1366 of the French *Code civil*, electronic writing has the same probative value as writing on paper, provided that the person from whom it emanates can be duly identified and that it is established and preserved under conditions that guarantee its integrity. The LCR, sealed cryptographically by AeroBill, constitutes reliable electronic evidence (*commencement de preuve par écrit / preuve électronique recevable*) enjoying evidentiary value pursuant to Article 1366.
 
 ### 5.2 Field-Level Retention Framework (Proposed Baseline)
-Rather than applying an undifferentiated blanket retention period across all fields, LCR data is categorized across five distinct statutory and operational retention classes (subject to formal legal review under Gate 7):
+Rather than applying an undifferentiated blanket retention period across all fields, LCR data is categorized across five distinct statutory and operational retention classes (reviewed and approved under Human Legal & Corporate Governance Authority):
 
 | Retention Class | Duration | Statutory Basis | Covered Fields |
 |:---|:---|:---|:---|
@@ -228,4 +230,4 @@ Commercial Directorate | AeroBill Evidentiary Architecture
 
 ---
 *Classification: ENTERPRISE | TECHNICAL SPECIFICATION & COMPLIANCE STANDARD*  
-*Corporate Governance Baseline — Pending Formal Legal Review — Copyright (c) 2025-2026 AIR ROOFERS*
+*Corporate Governance Baseline — Approved & Operational — Copyright (c) 2025-2026 AIR ROOFERS*

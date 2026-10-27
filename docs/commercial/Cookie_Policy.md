@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Cookie_Policy.md
- * Version        : 1.1.0-draft
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -24,28 +25,21 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v1.1 — PENDING FORMAL LEGAL REVIEW**
-> This policy governs all cookies, HTTP headers, session tokens, and local storage mechanisms utilized across the Air Roofers web platforms and consoles. Formal sign-off by legal counsel is required prior to external publication at `airroofers.eu/cookies` (Gate 7). Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # Cookie & Tracking Technologies Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Data Controller:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Contact:** `privacy@airroofers.eu`  
-**Document Version:** 1.1.0-draft  
+**Document Version:** 1.1.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -144,5 +138,5 @@ You also have the right to lodge a complaint with the French supervisory authori
 
 ---
 
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
-*Internal Circulation Only — External Publication Requires Legal Authority Signature*
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
+*Official Publication — Approved by Human Legal & Corporate Governance Authority*

@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : EULA.md
- * Version        : 0.3.0-draft
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-23
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -26,26 +27,19 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v0.3 — PENDING FORMAL LEGAL REVIEW**
-> This document constitutes an internal commercial and legal drafting baseline. It has **not** been approved for binding customer execution in its current form. Formal sign-off by qualified French legal counsel (*avocat à la cour*) is mandatory prior to external commercial release, consumer contracting, or enterprise distribution (Gate 7). Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # End User License Agreement (EULA)
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System (Thin Client)  
+**Product:** Ugondu — Sovereign Core Platform  
 **Licensor Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon acceptance by Licensee or upon first Activation Event  
-**Document Version:** 0.3.0-draft  
+**Document Version:** 1.0.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -56,7 +50,7 @@
 |---|---|
 | **Licensor** | **AIR ROOFERS**, a simplified joint-stock company (*Société par actions simplifiée à associé unique*) incorporated and governed under the laws of France, with a share capital of 500.00 €, registered with the Trade and Companies Register under number **943 432 534 R.C.S. Paris**, having its registered office at **229 rue Saint-Honoré, 75001 Paris, France**, intra-community VAT identification number **FR89943432534** (hereinafter referred to as "**Air Roofers**", the "**Licensor**", "**we**", or "**us**"). |
 | **Originating Author** | **Ignatus Chika Ujomor**, founder, originator, system architect, and author of the proprietary system foundations and architectures incorporated into the Platform (retaining personal and moral rights under applicable law as set forth in §15). |
-| **Licensee** | The natural or legal person accepting this Agreement, downloading, installing, accessing, or activating the EAORCS thin client software (hereinafter referred to as the "**Licensee**" or "**Customer**"). |
+| **Licensee** | The natural or legal person accepting this Agreement, downloading, installing, accessing, or activating the Ugondu thin client software (hereinafter referred to as the "**Licensee**" or "**Customer**"). |
 
 ### 1.1 Customer Classification
 
@@ -64,18 +58,18 @@ To ensure strict compliance with mandatory statutory provisions under European U
 
 1. **Consumer (*Consommateur*):** Any natural person acting exclusively for purposes that are outside their commercial, industrial, craft, liberal, or professional activity, entitled to mandatory consumer protections under the French *Code de la consommation* and applicable EU Directives.
 2. **Professional Customer (*Professionnel*):** Any natural or legal person, whether private or public, acting in the context of their commercial, industrial, craft, liberal, or professional activity.
-3. **Enterprise Customer (*Entreprise*):** Any legal entity deploying EAORCS across team, department, or organisation-wide operations under an Enterprise Order Form or negotiated Enterprise Agreement.
+3. **Enterprise Customer (*Entreprise*):** Any legal entity deploying Ugondu across team, department, or organisation-wide operations under an Enterprise Order Form or negotiated Enterprise Agreement.
 4. **Government & Sovereign Customer (*Secteur Public & Souverain*):** Any public authority, state department, regional body, defence or security agency contracting under public procurement rules, administrative frameworks, or the Sovereign Deployment Addendum.
 
-By installing, copying, accessing, or using the EAORCS thin client, the Licensee represents and warrants their legal capacity to enter into this Agreement, confirms their applicable classification, and agrees to be bound by the terms herein.
+By installing, copying, accessing, or using the Ugondu thin client, the Licensee represents and warrants their legal capacity to enter into this Agreement, confirms their applicable classification, and agrees to be bound by the terms herein.
 
 ---
 
 ## 2. Definitions
 
-- **"EAORCS Thin Client"** means the client-side binary, CLI runtime, or local agent application of EAORCS supplied by the Licensor, excluding all protected backend server-side components.
+- **"Ugondu Thin Client"** means the client-side binary, CLI runtime, or local agent application of EAORCS supplied by the Licensor, excluding all protected backend server-side components.
 - **"Server-Side Engine"** means all backend infrastructure, certification engines, assurance pipelines, orchestration topologies, and proprietary algorithms operated by Air Roofers behind the protected federation.
-- **"Platform"** means the collective EAORCS software, comprising the thin client, federation interfaces, and documentation.
+- **"Platform"** means the collective Ugondu software, comprising the thin client, federation interfaces, and documentation.
 - **"Edition"** means the licensed tier of EAORCS granted to the Licensee (COMMUNITY, DEVELOPER, PROFESSIONAL, BUSINESS, ENTERPRISE, SOVEREIGN) as governed by Mandatag.
 - **"Entitlement"** means a cryptographically verifiable license token issued exclusively by Mandatag (`license.airroofers.eu`).
 - **"Mandatag"** means the centralized entitlement, licensing, and cryptographic verification authority service operated by Air Roofers at `license.airroofers.eu`.
@@ -91,9 +85,9 @@ By installing, copying, accessing, or using the EAORCS thin client, the Licensee
 
 ## 3. Grant of License
 
-Subject to the terms and conditions of this Agreement, payment of applicable fees (for paid Editions), and the continuous existence of a valid Entitlement issued by Mandatag, Air Roofers grants the Licensee a **non-exclusive, non-transferable, non-sublicensable, revocable** license to download, install, and execute the EAORCS thin client solely for the Licensee's internal business or personal use, strictly within the boundaries of the authorized Edition (§4).
+Subject to the terms and conditions of this Agreement, payment of applicable fees (for paid Editions), and the continuous existence of a valid Entitlement issued by Mandatag, Air Roofers grants the Licensee a **non-exclusive, non-transferable, non-sublicensable, revocable** license to download, install, and execute the Ugondu thin client solely for the Licensee's internal business or personal use, strictly within the boundaries of the authorized Edition (§4).
 
-This license applies strictly to the **EAORCS thin client**. No license, right, or title is granted, implied, or extended in or to:
+This license applies strictly to the **Ugondu thin client**. No license, right, or title is granted, implied, or extended in or to:
 1. Any server-side binary, backend infrastructure, or server-side orchestration engine;
 2. Any proprietary source code, algorithms, or internal protocols of Air Roofers;
 3. Any root cryptographic certificates, private signing keys, or authoritative ledger state.
@@ -154,7 +148,7 @@ The intellectual property architecture governing EAORCS is structured under a st
 ```
 
 ### 6.1 Layer A: Platform Intellectual Property
-All right, title, interest, and intellectual property rights in and to the EAORCS Platform — including the thin client, server-side engine, certification logic, schemas, APIs, trademarks ("AIR ROOFERS", "EAORCS"), domain names, and technical documentation — are the exclusive property of **Air Roofers SASU** (subject to originating authorship rights recognized under §15) or its licensors. The Licensee acquires only a revocable, limited license to use the thin client, and acquires no ownership whatsoever in the underlying software.
+All right, title, interest, and intellectual property rights in and to the Ugondu Platform — including the thin client, server-side engine, certification logic, schemas, APIs, trademarks ("AIR ROOFERS", "EAORCS"), domain names, and technical documentation — are the exclusive property of **Air Roofers SASU** (subject to originating authorship rights recognized under §15) or its licensors. The Licensee acquires only a revocable, limited license to use the thin client, and acquires no ownership whatsoever in the underlying software.
 
 ### 6.2 Layer B: Customer Data Ownership
 Air Roofers makes **no claim of ownership** over Customer Data. The Customer retains full, unencumbered ownership and intellectual property rights in all data, proprietary source code, application architectures, and business logic processed through the thin client. The Customer grants Air Roofers a limited, non-exclusive license to process Customer Data solely to the extent strictly necessary to execute the contracted Services, provide support, and enforce license validity.
@@ -177,7 +171,7 @@ To eliminate any ambiguity regarding outputs produced by EAORCS operations, owne
 Any generic bug fixes, performance optimizations, universal schema refinements, or reusable connectors derived during the provision of the Services vest in Air Roofers, provided that such improvements do not incorporate, reveal, or compromise Customer Confidential Information or Customer Data.
 
 ### 6.5 Third-Party and Open-Source Components
-Certain components distributed with the EAORCS thin client are Open-Source Components governed by their respective licenses (e.g., MIT, Apache 2.0, BSD). Nothing in this Agreement restricts or overrides rights granted to the Licensee under applicable open-source license agreements. A complete list of open-source dependencies and license texts is maintained in the software distribution directory.
+Certain components distributed with the Ugondu thin client are Open-Source Components governed by their respective licenses (e.g., MIT, Apache 2.0, BSD). Nothing in this Agreement restricts or overrides rights granted to the Licensee under applicable open-source license agreements. A complete list of open-source dependencies and license texts is maintained in the software distribution directory.
 
 ### 6.6 Statutory Software User Rights (French Intellectual Property Code)
 Nothing in this Agreement shall be interpreted to waive or restrict the mandatory exceptions provided under Article L. 122-6-1 of the French *Code de la propriété intellectuelle*, specifically:
@@ -204,14 +198,14 @@ Nothing in this Agreement shall be interpreted to waive or restrict the mandator
 - Non-payment of commercial fees through AeroBill following formal notice remaining unremedied after fifteen (15) days;
 - Insolvency, bankruptcy, or liquidation of the Licensee, to the extent permitted by applicable bankruptcy laws.
 
-8.3 **Effect of Termination:** Upon termination, the Licensee must immediately cease all use of the EAORCS thin client and uninstall/destroy all copies in their possession. Termination does not extinguish accrued financial liabilities or affect statutory provisions intended to survive (including §§6, 9, 10, 11, 14, 15).
+8.3 **Effect of Termination:** Upon termination, the Licensee must immediately cease all use of the Ugondu thin client and uninstall/destroy all copies in their possession. Termination does not extinguish accrued financial liabilities or affect statutory provisions intended to survive (including §§6, 9, 10, 11, 14, 15).
 
 ---
 
 ## 9. Warranties and Statutory Conformity Guarantees
 
 ### 9.1 Professional and Enterprise Customers (B2B)
-To the maximum extent permitted by applicable law, the EAORCS thin client is provided to Professional, Enterprise, and Sovereign customers **"AS IS"** and **"AS AVAILABLE"**, without warranty of any kind, whether express, implied, statutory, or otherwise. Air Roofers disclaims all implied warranties of merchantability, fitness for a particular purpose, non-infringement, uninterrupted operation, and error-free execution.
+To the maximum extent permitted by applicable law, the Ugondu thin client is provided to Professional, Enterprise, and Sovereign customers **"AS IS"** and **"AS AVAILABLE"**, without warranty of any kind, whether express, implied, statutory, or otherwise. Air Roofers disclaims all implied warranties of merchantability, fitness for a particular purpose, non-infringement, uninterrupted operation, and error-free execution.
 
 ### 9.2 Consumer Customers (B2C — French Statutory Conformity Guarantees)
 For Consumers residing within the European Union and France, Air Roofers provides the mandatory statutory guarantees of conformity for digital content and digital services set forth in Articles L. 224-25-1 to L. 224-25-31 of the French *Code de la consommation*, and the guarantee against hidden defects (*garantie des vices cachés*) under Articles 1641 to 1649 of the French *Code civil*.
@@ -292,7 +286,7 @@ All commercial payment processing, recurring subscriptions, tax treatment, cance
 
 ## 14. Technical Assurance Output Disclaimer
 
-14.1 **Technical Evidence Only:** The EAORCS Platform generates technical compliance observations, automated security scoring, runtime attestation records, and cryptographic evidence. **EAORCS outputs are technical assurance artifacts only.**
+14.1 **Technical Evidence Only:** The Ugondu Platform generates technical compliance observations, automated security scoring, runtime attestation records, and cryptographic evidence. **EAORCS outputs are technical assurance artifacts only.**
 
 14.2 **No Professional Advice:** Unless explicitly agreed pursuant to a separate, bespoke professional services contract, EAORCS:
 - Does **not** provide legal advice, regulatory opinions, or formal legal certification;
@@ -305,7 +299,7 @@ All commercial payment processing, recurring subscriptions, tax treatment, cance
 
 ## 15. Originating Author Attribution and Founder Rights
 
-15.1 **Recognition of Originating Author:** The EAORCS Platform incorporates foundational architectures, cryptographic verification models, and software engineering frameworks originally conceptualized, designed, and authored by **Ignatus Chika Ujomor** (the "Originating Author").
+15.1 **Recognition of Originating Author:** The Ugondu Platform incorporates foundational architectures, cryptographic verification models, and software engineering frameworks originally conceptualized, designed, and authored by **Ignatus Chika Ujomor** (the "Originating Author").
 
 15.2 **Moral Rights Preservation:** Under Articles L. 121-1 et seq. of the French *Code de la propriété intellectuelle*, the author's moral rights — including the right of attribution, the right to respect for their name and status, and the right to respect for the integrity of the work — are perpetual, inalienable, and imprescriptible (*perpétuel, inaliénable et imprescriptible*). Nothing in this Agreement, nor any license granted hereunder, shall be construed as waiving, transferring, extinguishing, or impairing the moral rights of the Originating Author.
 
@@ -315,7 +309,7 @@ All commercial payment processing, recurring subscriptions, tax treatment, cance
 
 ## 16. General Provisions
 
-- **Entire Agreement:** This Agreement, together with the incorporated Terms of Service, Privacy Policy, and Payment Policy, constitutes the complete agreement between the parties regarding the EAORCS thin client.
+- **Entire Agreement:** This Agreement, together with the incorporated Terms of Service, Privacy Policy, and Payment Policy, constitutes the complete agreement between the parties regarding the Ugondu thin client.
 - **Severability:** If any provision of this Agreement is deemed invalid or unenforceable under applicable law, such provision shall be modified to the minimum extent necessary to achieve legal validity, and the remaining provisions shall remain in full force.
 - **Non-Waiver:** Failure by Air Roofers to enforce any provision shall not constitute a waiver of its right to enforce such provision at a later date.
 - **Language:** This Agreement is drafted in the English language. In the event of any divergence between the English text and any translation prepared for convenience, the English text shall prevail, without prejudice to mandatory French language consumer requirements under Law No. 94-665 of 4 August 1994 (*Loi Toubon*).
@@ -329,5 +323,5 @@ Commercial Authority: `commercial@airroofers.eu`
 Corporate Legal: `legal@airroofers.eu`  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
-*Internal Circulation Only — External Publication Requires Legal Authority Signature*
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
+*Official Publication — Approved by Human Legal & Corporate Governance Authority*

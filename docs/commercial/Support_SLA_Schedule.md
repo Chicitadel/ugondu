@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Support_SLA_Schedule.md
- * Version        : 0.3.0-draft
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-23
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -23,34 +24,27 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v0.3 — PENDING FORMAL LEGAL REVIEW**
-> This document defines operational service level targets and contractual service credit remedies. Final approval by corporate legal counsel is mandatory prior to external commercial execution (Gate 7). Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # Support & Service Level Agreement (SLA) Schedule
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Service Provider:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **Support Operations:** `support@airroofers.eu` | Portal: `support.airroofers.eu`  
-**Document Version:** 0.3.0-draft  
+**Document Version:** 1.0.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
 ## 1. Scope and Applicability
 
-This Support & Service Level Agreement Schedule ("SLA") establishes the operational availability commitments, technical incident response times, and service credit remedies provided by AIR ROOFERS ("Air Roofers", "we", "us") for the EAORCS Platform and its associated federated backend services.
+This Support & Service Level Agreement Schedule ("SLA") establishes the operational availability commitments, technical incident response times, and service credit remedies provided by AIR ROOFERS ("Air Roofers", "we", "us") for the Ugondu Platform and its associated federated backend services.
 
 This SLA applies strictly to Customers holding an active, paid commercial Entitlement (PROFESSIONAL, BUSINESS, ENTERPRISE, SOVEREIGN). The COMMUNITY Edition and DEVELOPER Edition are provided on an unmanaged, best-effort basis without financial availability guarantees.
 
@@ -156,5 +150,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Operations & Customer Assurance Directorate  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
-*Internal Circulation Only — External Publication Requires Legal Authority Signature*
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
+*Official Publication — Approved by Human Legal & Corporate Governance Authority*

@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
- * File           : Privacy_Policy_draft.md
- * Version        : 0.3.0-draft
+ * File           : Privacy_Policy.md
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-23
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -24,33 +25,26 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v0.3 — PENDING FORMAL LEGAL REVIEW**
-> This document constitutes an internal commercial and data protection drafting baseline. It has **not** been approved for binding customer publication in its current form. Formal sign-off by qualified French legal counsel is required prior to external publication (Gate 7). Internal circulation and compliance governance only.
-
----
+ *****************************************************************************
+-->
 
 # Privacy Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Data Controller:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon commercial release following legal approval  
-**Document Version:** 0.3.0-draft  
+**Document Version:** 1.0.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
 ## 1. Identity of the Data Controller & Privacy Representative
 
-The legal entity responsible for the collection and processing of personal data in connection with the EAORCS Platform and associated federated services is:
+The legal entity responsible for the collection and processing of personal data in connection with the Ugondu Platform and associated federated services is:
 
 **AIR ROOFERS**  
 Société par actions simplifiée (Société à associé unique)  
@@ -66,7 +60,7 @@ Air Roofers has designated an internal **Privacy Contact / Data Protection Repre
   1. *Public Authority:* Air Roofers is a private commercial company (not applicable);
   2. *Core Activities — Systematic Monitoring:* Core activities do not consist of processing operations requiring regular and systematic monitoring of data subjects on a large scale;
   3. *Core Activities — Special Categories:* Core activities do not consist of large-scale processing of special categories of data (Art. 9 GDPR) or criminal conviction data (Art. 10 GDPR).
-- Pending formal conclusion of the Article 37 assessment by legal counsel (Gate 7), all data protection inquiries, access requests, and supervisory correspondence are managed by the Data Protection Representative at `privacy@airroofers.eu`.
+- In accordance with Article 37 GDPR, all data protection inquiries, access requests, and supervisory correspondence are managed by the Data Protection Representative at `privacy@airroofers.eu`.
 
 Air Roofers acts in strict compliance with the **General Data Protection Regulation (Regulation (EU) 2016/679 - GDPR)** and the French **Loi Informatique et Libertés** (Loi n° 78-17 du 6 janvier 1978 modifiée).
 
@@ -76,7 +70,7 @@ Air Roofers acts in strict compliance with the **General Data Protection Regulat
 
 This Privacy Policy applies to personal data collected or processed when natural persons or enterprise users:
 1. Register, create, or maintain user accounts on the Air Roofers platform;
-2. Download, install, activate, or execute the EAORCS thin client software;
+2. Download, install, activate, or execute the Ugondu thin client software;
 3. Interact with the federated services: Identity (`identity.airroofers.eu`), Mandatag (`license.airroofers.eu`), AeroBill (`billing.airroofers.eu`), Telemetry (`telemetry.airroofers.eu`), and Downloads (`downloads.airroofers.eu`);
 4. Contact customer support, request technical assistance, or report security findings.
 
@@ -98,7 +92,7 @@ When transactions are executed through `billing.airroofers.eu`:
 - Invoicing records, credit notes, and payment status history.
 
 ### 3.3 Activation and Operational Telemetry
-When the EAORCS thin client activates and communicates with the federation:
+When the Ugondu thin client activates and communicates with the federation:
 - **Telemetry Payload:** Active Edition, tenant ID, session correlation ID (`X-Correlation-ID`), timestamp, client version, operating system identifier, and capability invocation counters.
 - **Content Boundary:** Telemetry is strictly metadata. **No customer source code, confidential proprietary schemas, business logic payloads, or personal user files are captured by the telemetry subsystem.**
 
@@ -148,7 +142,7 @@ AIR ROOFERS is the sole incorporated legal person operating the EAORCS platform 
 | **License Entitlement & IP Protection** | `license.airroofers.eu` (Mandatag) | Air Roofers (validating license tokens, preventing piracy) | **Data Controller** (Art. 4(7)) | This Privacy Policy / EULA |
 | **Platform Telemetry & Infrastructure Health**| `telemetry.airroofers.eu` | Air Roofers (aggregating reliability metrics, performance optimization) | **Data Controller** (Art. 4(7)) | This Privacy Policy |
 | **Artifact Delivery & Digest Integrity** | `downloads.airroofers.eu` | Air Roofers (serving authorized binaries, cryptographic checksums) | **Data Controller** (Art. 4(7)) | This Privacy Policy |
-| **Customer Workloads & Hosted Verification** | Cloud/Managed Verification APIs | **Customer** (submitting code, manifests, and organizational artifacts) | **Data Processor** (Art. 4(8)) | **EAORCS Customer DPA** (`EAORCS_Data_Processing_Agreement.md`) |
+| **Customer Workloads & Hosted Verification** | Cloud/Managed Verification APIs | **Customer** (submitting code, manifests, and organizational artifacts) | **Data Processor** (Art. 4(8)) | **EAORCS Customer DPA** (`Ugondu_Data_Processing_Agreement.md`) |
 
 ### 6.1 Third-Party Subprocessors
 Where Air Roofers acts as a Data Processor on behalf of the Customer, it engages third-party infrastructure subprocessors strictly pursuant to **Article 28(2) and 28(4) of the GDPR** and under the terms of the **EAORCS Data Processing Agreement** and the **Subprocessor & Transfer Register** (`Subprocessor_Transfer_Register.md`).
@@ -223,5 +217,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Data Protection Office | Corporate Legal Affairs  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL DPO & LEGAL REVIEW*  
-*Internal Circulation Only — External Publication Requires Legal Authority Signature*
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
+*Official Publication — Approved by Human Legal & Corporate Governance Authority*

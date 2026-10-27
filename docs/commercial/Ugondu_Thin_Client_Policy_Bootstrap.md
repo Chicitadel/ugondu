@@ -1,8 +1,8 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Policy Authority & Architecture
- * File           : EAORCS_Thin_Client_Policy_Bootstrap.md
+ * File           : Ugondu_Thin_Client_Policy_Bootstrap.md
  * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -11,7 +11,7 @@
  * Classification : ENTERPRISE | TECHNICAL SPECIFICATION & BOOTSTRAP PROTOCOL
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -23,7 +23,7 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
@@ -32,7 +32,7 @@
 
 # EAORCS Thin-Client Policy Bootstrap Specification
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Component:** Thin Client CLI & Runtime Bootstrap Protocol  
 **Authority:** AIR ROOFERS (`https://policies.airroofers.eu`)  
 **Operating Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
@@ -44,7 +44,7 @@
 
 ## 1. Executive Purpose
 
-This Specification establishes how the EAORCS thin client discovers, validates, caches, and enforces platform policy metadata without embedding monolithic, mutable legal texts directly inside client software binaries.
+This Specification establishes how the Ugondu thin client discovers, validates, caches, and enforces platform policy metadata without embedding monolithic, mutable legal texts directly inside client software binaries.
 
 ---
 

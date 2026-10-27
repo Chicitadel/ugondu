@@ -1,7 +1,7 @@
 # /******************************************************************************
-#  * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+#  * Project        : Ugondu — Sovereign Core Platform
 #  * Module         : Policy Authority & Architecture
-#  * File           : EAORCS_Policy_Manifest_Schema.yaml
+#  * File           : Ugondu_Policy_Manifest_Schema.yaml
 #  * Version        : 1.0.0
 #  * Author         : Ignatus Chika Ujomor | Founder & System Architect
 #  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -10,7 +10,7 @@
 #  * Classification : PUBLIC | MACHINE-READABLE SCHEMA SPECIFICATION
 #  *
 #  * Governance:
-#  * - Corporate Governance Baseline — Pending Formal Legal Review
+#  * - Corporate Governance Baseline — Approved & Operational
 #  * - Architecture Controlled
 #  * - Protocol Frozen
 #  *
@@ -104,7 +104,7 @@ properties:
         version:
           type: "string"
           description: "Document version string"
-          example: "0.3.0-draft"
+          example: "1.0.0"
         effectiveDate:
           type: "string"
           format: "date"
@@ -117,7 +117,7 @@ properties:
           type: "string"
           format: "uri"
           description: "Canonical HTTPS URL to retrieve the policy document"
-          example: "https://policies.airroofers.eu/v/0.3.0/eula.md"
+          example: "https://policies.airroofers.eu/ugondu/v/1.0.0/eula.md"
         sha256:
           type: "string"
           pattern: "^[a-f0-9]{64}$"

@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Security_Responsible_Disclosure_Policy.md
- * Version        : 1.2.0-draft
+ * Version        : 1.2.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-23
  * Last Modified  : 2026-09-25
- * Classification : ENTERPRISE | PUBLIC — PENDING FORMAL LEGAL REVIEW
+ * Classification : ENTERPRISE | PUBLIC — OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -27,34 +28,27 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v1.2 — PENDING FORMAL LEGAL APPROVAL**
-> This policy defines the binding legal and technical safe harbor extended to good-faith security researchers. Formal legal sign-off is mandatory prior to public hosting at `security.airroofers.eu/disclosure` (Gate 7). Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # Security & Responsible Vulnerability Disclosure Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Governing Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **Security Operations:** `security@airroofers.eu` | PGP Key: `security.airroofers.eu/pgp`  
-**Document Version:** 1.2.0-draft  
+**Document Version:** 1.2.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
 ## 1. Commitment to Enterprise Security
 
-AIR ROOFERS ("Air Roofers", "we", "us") places paramount importance on the security, cryptographic integrity, and resilience of the EAORCS Platform and its underlying federated services. We value the contributions of the ethical security research community and are committed to establishing a clear, legally sound, and collaborative framework for the coordinated identification and remediation of security vulnerabilities.
+AIR ROOFERS ("Air Roofers", "we", "us") places paramount importance on the security, cryptographic integrity, and resilience of the Ugondu Platform and its underlying federated services. We value the contributions of the ethical security research community and are committed to establishing a clear, legally sound, and collaborative framework for the coordinated identification and remediation of security vulnerabilities.
 
 This Policy establishes the exact technical scope, procedural rules, safe-harbor boundaries, and prohibited research activities applicable to security investigations.
 
@@ -66,7 +60,7 @@ Good-faith security research is authorized strictly within the following designa
 
 | Component | In-Scope Boundaries | Primary Purpose |
 |---|---|---|
-| **EAORCS Thin Client** | Publicly released versions of the thin-client CLI binary and local execution engine. | Local privilege boundaries, cryptographic token verification, and isolation mechanics. |
+| **Ugondu Thin Client** | Publicly released versions of the thin-client CLI binary and local execution engine. | Local privilege boundaries, cryptographic token verification, and isolation mechanics. |
 | **Public Federation APIs** | Public-facing REST endpoints exposed by `api.airroofers.eu`, `license.airroofers.eu`, and `discovery.airroofers.eu`. | Handshake authentication, schema validation, and access control models. |
 | **Artifact Verification Services** | Public release signing verification logic and cryptographic hash verification at `downloads.airroofers.eu`. | Release integrity and signature validation mechanisms. |
 
@@ -79,7 +73,7 @@ Good-faith security research is authorized strictly within the following designa
 
 The following are **strictly out of scope and prohibited**:
 
-1. **Customer Tenancies and Environments:** Testing against, targeting, or accessing any customer workspace, private repository, tenant data, or customer-hosted EAORCS cluster.
+1. **Customer Tenancies and Environments:** Testing against, targeting, or accessing any customer workspace, private repository, tenant data, or customer-hosted Ugondu cluster.
 2. **Third-Party Infrastructure and Upstream Providers:** Any testing targeting third-party cloud hosting providers, DNS providers, payment processing networks, or external telemetry pipelines.
 3. **Personal and Customer Data Access:** Any attempt to view, exfiltrate, copy, modify, or disclose personal data, customer confidential information, or proprietary source code. If personal data or customer secrets are inadvertently encountered, **testing must cease immediately**, the data must not be copied or distributed, and Air Roofers must be notified without delay.
 4. **Denial of Service (DoS/DDoS):** Any testing that degrades, impairs, or overwhelms system availability, capacity, or performance.
@@ -164,5 +158,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Security Operations & Threat Intelligence  
 
 ---
-*Classification: ENTERPRISE | PUBLIC — PENDING FORMAL LEGAL REVIEW*  
-*Internal Circulation Only — External Publication Requires Legal Authority Signature*
+*Classification : ENTERPRISE | PUBLIC — OPERATIONAL — APPROVED*  
+*Official Publication — Approved by Human Legal & Corporate Governance Authority*

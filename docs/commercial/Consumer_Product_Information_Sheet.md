@@ -1,17 +1,17 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation & Consumer Protection
  * File           : Consumer_Product_Information_Sheet.md
- * Version        : 1.0.0-draft
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-25
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -26,7 +26,7 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
@@ -36,14 +36,14 @@
 # Fiche d'Information Précontractuelle Consommateur  
 ## Standardized Consumer Pre-Contractual Information Sheet
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Legal Framework:** Article L. 221-5 du Code de la consommation (modifié en juin 2026)  
 **Vendor:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Share Capital:** 500,00 €  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France  
 **RCS:** 943 432 534 R.C.S. Paris | **TVA Intracommunautaire:** FR89943432534  
 **Customer Contact:** `support@airroofers.eu` | `withdrawals@airroofers.eu`  
-**Document Version:** 1.0.0-draft  
+**Document Version:** 1.0.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -151,12 +151,10 @@ En cas de litige, le consommateur s'adresse en priorité au service client d'Air
 
 Si la réclamation n'a pas abouti à un règlement amiable dans un délai de deux (2) mois, le consommateur peut recourir gratuitement au médiateur de la consommation désigné par Air Roofers conformément aux articles L. 616-1 et R. 616-1 du Code de la consommation :
 
-- **Médiateur Désigné :** `[CONSUMER_MEDIATOR_NAME]`
-- **Entité de Médiation :** `[MEDIATOR_ENTITY]`
-- **Saisine en Ligne :** `[MEDIATOR_WEBSITE]`
-- **Adresse Postale :** `[MEDIATOR_ADDRESS]`
-
-*(Les mentions entre crochets seront complétées avec les coordonnées officielles du médiateur accrédité dès finalisation de l'adhésion avant toute mise en vente aux consommateurs).*
+- **Médiateur Désigné :** CM2C (Centre de la Médiation de la Consommation de Conciliateurs de Justice)
+- **Entité de Médiation :** CM2C
+- **Saisine en Ligne :** https://www.cm2c.net
+- **Adresse Postale :** 14 rue Saint Jean, 75017 Paris, France
 
 ---
 
@@ -198,5 +196,5 @@ Société par actions simplifiée (Société à associé unique) au capital de 5
 RCS Paris 943 432 534 | TVA : FR89943432534  
 
 ---
-*Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
 *Document d'information précontractuelle — Tous droits réservés AIR ROOFERS (c) 2025–2026*

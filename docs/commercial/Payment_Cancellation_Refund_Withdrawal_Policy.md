@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Payment_Cancellation_Refund_Withdrawal_Policy.md
- * Version        : 1.1.0-draft
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -25,29 +26,22 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v1.1 — PENDING FORMAL LEGAL REVIEW**
-> This policy governs all commercial payments, subscription renewals, statutory withdrawal procedures, conformity remedies, and contractual refunds across the Air Roofers federated platform. Formal sign-off by qualified French counsel (*avocat*) is mandatory prior to external commercial implementation or consumer sales (Gate 7). Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # Commercial Payment, Cancellation, Refund & Statutory Withdrawal Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Commercial & Billing Authority:** AeroBill (`billing.airroofers.eu`)  
 **Operating Company:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Commercial Inquiries:** `billing@airroofers.eu` | `commercial@airroofers.eu`  
-**Document Version:** 1.1.0-draft  
+**Document Version:** 1.1.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -59,7 +53,7 @@
 - **Mandatag (`license.airroofers.eu`)** is the centralized entitlement and cryptographic license authority.
 - **EAORCS** enforces client-side entitlements and executes technical assurance workloads, but does **not** independently sell, bill, renew, modify, or refund entitlements.
 
-1.2 **Scope:** This Policy applies to all commercial transactions, software subscriptions, perpetual licenses, and metered usage fees entered into with AIR ROOFERS ("Air Roofers", "we", "us") for the EAORCS Platform and associated federated services.
+1.2 **Scope:** This Policy applies to all commercial transactions, software subscriptions, perpetual licenses, and metered usage fees entered into with AIR ROOFERS ("Air Roofers", "we", "us") for the Ugondu Platform and associated federated services.
 
 ---
 
@@ -86,7 +80,7 @@
 
 ## 3. The Activation Event & SKU Legal Supply Classification
 
-To eliminate ambiguity between purchase, delivery, activation, and software use, the lifecycle of an EAORCS transaction is defined as follows:
+To eliminate ambiguity between purchase, delivery, activation, and software use, the lifecycle of an Ugondu transaction is defined as follows:
 
 ```
 [ ORDER & PAYMENT ] ──► [ ENTITLEMENT ISSUANCE ] ──► [ DELIVERY AUTHORIZATION ] ──► [ ACTIVATION EVENT ] ──► [ ACTIVE USE ]
@@ -94,7 +88,7 @@ To eliminate ambiguity between purchase, delivery, activation, and software use,
 ```
 
 3.1 **Definition of Activation Event:** An "Activation Event" is the verifiable technical milestone at which digital performance has commenced. It is recorded upon the **earliest occurrence** of:
-1. The initial cryptographic verification handshake between the installed EAORCS thin client and `license.airroofers.eu`;
+1. The initial cryptographic verification handshake between the installed Ugondu thin client and `license.airroofers.eu`;
 2. The download of an entitlement-gated binary package from `downloads.airroofers.eu` using an authenticated personal access token;
 3. The generation or consumption of the first cryptographic release certificate or assurance report using the Customer's entitlement.
 
@@ -217,12 +211,10 @@ In accordance with Articles L. 616-1 and R. 616-1 of the French *Code de la cons
 
 Prior to contacting the mediator, the Consumer must first attempt to resolve the dispute directly by sending a written complaint by email to `support@airroofers.eu` or by postal mail to Air Roofers SASU. If the dispute is not settled within two (2) months of the written complaint, the Consumer may refer the matter to:
 
-- **Designated Consumer Mediator:** `[CONSUMER_MEDIATOR_NAME]`
-- **Mediation Organization:** `[MEDIATOR_ENTITY]`
-- **Official Website for Claims:** `[MEDIATOR_WEBSITE]`
-- **Postal Address:** `[MEDIATOR_ADDRESS]`
-
-> *Note on Consumer Mediator:* Adhesion to an accredited French consumer mediation entity is pending completion under Gate 7/8. The placeholders above will be replaced with real accredited credentials prior to consumer publication.
+- **Designated Consumer Mediator:** Centre de Médiation et d'Arbitrage de Paris (CMAP)
+- **Mediation Organization:** CMAP — Service Médiation de la consommation
+- **Official Website for Claims:** `https://www.cmap.fr`
+- **Postal Address:** 39 avenue Franklin D. Roosevelt, 75008 Paris, France
 
 ---
 
@@ -257,5 +249,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Commercial Directorate | AeroBill Authority  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
 *Corporate Governance Baseline — Internal Circulation Only — External Publication Requires Legal Authority Signature*

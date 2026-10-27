@@ -1,8 +1,8 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Policy Authority & Architecture
- * File           : EAORCS_Policy_Authority_Architecture.md
+ * File           : Ugondu_Policy_Authority_Architecture.md
  * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -11,7 +11,7 @@
  * Classification : ENTERPRISE | ARCHITECTURAL SPECIFICATION & GOVERNANCE STANDARD
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -25,7 +25,7 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
@@ -34,7 +34,7 @@
 
 # Air Roofers Federated Policy Authority Architecture
 
-**Product:** EAORCS — Platform Legal, Compliance & Evidentiary Architecture  
+**Product:** Ugondu — Sovereign Core Platform  
 **Canonical Host:** `https://policies.airroofers.eu`  
 **Operating Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
@@ -48,7 +48,7 @@
 The Air Roofers Federated Policy Authority establishes a centralized, immutable, version-controlled architecture for authoring, publishing, retrieving, and verifying all legal, operational, security, and contractual policies governing the Air Roofers platform and EAORCS.
 
 ### 1.1 Core Constitutional Axioms
-1. **Centralized Authority, Not Monolithic Runtime:** The Policy Authority (`policies.airroofers.eu`) is the single source of legal and policy truth. However, the EAORCS thin client does **not** hardcode changeable terms into client binaries.
+1. **Centralized Authority, Not Monolithic Runtime:** The Policy Authority (`policies.airroofers.eu`) is the single source of legal and policy truth. However, the Ugondu thin client does **not** hardcode changeable terms into client binaries.
 2. **Centralized Does Not Mean Mutable:** "Centralized" refers to publication and verification authority, not arbitrary mutability. Every policy publication is cryptographically sealed, content-hashed (SHA-256), and immutably versioned. Once published as an active contractual version, a policy document is immutable.
 3. **Decoupling of Legal Authorities:**
    - **Policy Authority (`policies.airroofers.eu`):** Publication, versioning, canonical hashing, and manifest distribution.
@@ -130,8 +130,8 @@ During every checkout interaction:
 ### 4.2 Mandatag Entitlement Token Binding
 Mandatag entitlement tokens embed a `policy_hash` claim representing the governance baseline under which the entitlement was granted.
 
-### 4.3 EAORCS Thin Client Bootstrap
-The thin client uses the bootstrap protocol (`EAORCS_Thin_Client_Policy_Bootstrap.md`) to verify client capability rules against the Policy Authority without embedding monolithic policy text inside the binary.
+### 4.3 Ugondu Thin Client Bootstrap
+The thin client uses the bootstrap protocol (`Ugondu_Thin_Client_Policy_Bootstrap.md`) to verify client capability rules against the Policy Authority without embedding monolithic policy text inside the binary.
 
 ---
 

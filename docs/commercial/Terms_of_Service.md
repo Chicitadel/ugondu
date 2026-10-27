@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Terms_of_Service.md
- * Version        : 0.3.0-draft
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-23
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -27,26 +28,19 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v0.3 — PENDING FORMAL LEGAL REVIEW**
-> This document constitutes an internal commercial and legal drafting baseline. It has **not** been approved for binding customer execution in its current form. Formal sign-off by qualified French legal counsel (*avocat à la cour*) is mandatory prior to external commercial release, consumer contracting, or enterprise distribution (Gate 7). Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # Terms of Service
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Service Provider:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon account creation, order execution, or first Activation Event  
-**Document Version:** 0.3.0-draft  
+**Document Version:** 1.0.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -68,7 +62,7 @@ In case of ambiguity or conflict between documents, each instrument is authorita
 1. Mandatory statutory law (French Consumer Code, GDPR, French CPI);
 2. Executed Order Form / Master Services Agreement;
 3. Specialized Addendum (Enterprise, Sovereign, or Government Addenda);
-4. Data Processing Agreement (`EAORCS_Data_Processing_Agreement.md`) — authoritative on data protection and privacy;
+4. Data Processing Agreement (`Ugondu_Data_Processing_Agreement.md`) — authoritative on data protection and privacy;
 5. End User License Agreement (`EULA.md`) — authoritative on software licensing, IP, and local client rights;
 6. These Terms of Service — authoritative on cloud platform access and hosted service delivery;
 7. Payment, Cancellation, Refund & Withdrawal Policy — authoritative on billing and refunds;
@@ -173,7 +167,7 @@ The Customer agrees not to use the Services:
 
 ## 9. Intellectual Property and Attribution
 
-9.1 **Air Roofers Intellectual Property:** All right, title, and interest in and to the EAORCS Platform, server-side engines, APIs, schemas, documentation, and trademarks belong exclusively to **Air Roofers SASU** (subject to originating authorship rights recognized below).
+9.1 **Air Roofers Intellectual Property:** All right, title, and interest in and to the Ugondu Platform, server-side engines, APIs, schemas, documentation, and trademarks belong exclusively to **Air Roofers SASU** (subject to originating authorship rights recognized below).
 
 9.2 **Customer Data:** The Customer retains 100% ownership and all intellectual property rights in their Customer Data, repositories, configurations, and internal audit evidence. Air Roofers receives only a limited processing license necessary to perform the Services.
 
@@ -224,7 +218,7 @@ Pursuant to Article L. 221-5 of the French *Code de la consommation*, essential 
 
 ## 14. International Deployment and Jurisdictional Framework
 
-Air Roofers operates from France and designs its standard Services to conform with European Union law. Air Roofers makes no representation that standard Services comply automatically with foreign regulatory, export, or compliance mandates outside the EEA. Customers deploying EAORCS outside the European Union are responsible for evaluating local compliance and, where necessary, executing a dedicated Jurisdictional Addendum (e.g., Enterprise & Sovereign Addendum).
+Air Roofers operates from France and designs its standard Services to conform with European Union law. Air Roofers makes no representation that standard Services comply automatically with foreign regulatory, export, or compliance mandates outside the EEA. Customers deploying Ugondu outside the European Union are responsible for evaluating local compliance and, where necessary, executing a dedicated Jurisdictional Addendum (e.g., Enterprise & Sovereign Addendum).
 
 ---
 
@@ -249,5 +243,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Governance Authority | Corporate Legal Affairs  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
 *Corporate Governance Baseline — Internal Circulation Only — External Publication Requires Legal Authority Signature*

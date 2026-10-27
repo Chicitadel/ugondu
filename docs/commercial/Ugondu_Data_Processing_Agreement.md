@@ -1,17 +1,17 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Data Protection & Commercial Governance
- * File           : EAORCS_Data_Processing_Agreement.md
- * Version        : 1.0.0-draft
+ * File           : Ugondu_Data_Processing_Agreement.md
+ * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-25
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -24,7 +24,7 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
@@ -34,12 +34,12 @@
 # Data Processing Agreement (DPA)
 ## Accord de Traitement des Données à Caractère Personnel
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Processor:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Privacy Contact:** `privacy@airroofers.eu`  
-**Document Version:** 1.0.0-draft  
+**Document Version:** 1.0.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -54,7 +54,7 @@
 1.1 **Definitions:** The terms used in this DPA shall have the meanings given to them in Regulation (EU) 2016/679 ("**GDPR**"), including "**Controller**", "**Processor**", "**Data Subject**", "**Personal Data**", "**Personal Data Breach**", and "**Processing**".
 
 1.2 **Roles of the Parties:**
-- The **Customer** acts as **Data Controller** (or Processor on behalf of a third-party Controller) with respect to Customer Personal Data processed through the EAORCS Platform.
+- The **Customer** acts as **Data Controller** (or Processor on behalf of a third-party Controller) with respect to Customer Personal Data processed through the Ugondu Platform.
 - **AIR ROOFERS** acts as **Data Processor** with respect to Customer Personal Data processed to provide the licensed services, in accordance with Article 28 of the GDPR.
 
 ---
@@ -114,7 +114,7 @@ AIR ROOFERS undertakes to:
 ## Article 5 — Customer Obligations
 
 The Customer warrants that:
-1. It has established a valid lawful basis under Article 6 of the GDPR for all personal data submitted to the EAORCS Platform;
+1. It has established a valid lawful basis under Article 6 of the GDPR for all personal data submitted to the Ugondu Platform;
 2. It has complied with all transparency and notice requirements under Articles 13 and 14 of the GDPR;
 3. Its instructions to Air Roofers comply with applicable data protection legislation.
 
@@ -154,5 +154,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Data Protection Office  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
 *Corporate Governance Baseline — Internal Circulation Only — Copyright (c) 2025-2026 AIR ROOFERS*

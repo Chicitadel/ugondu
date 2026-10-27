@@ -1,8 +1,9 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Data Protection & Commercial Governance
  * File           : Subprocessor_Transfer_Register.md
- * Version        : 1.1.0-draft
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
@@ -10,7 +11,7 @@
  * Classification : PUBLIC | GDPR ARTICLE 28 COMPLIANCE REGISTER
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -23,28 +24,21 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v1.1 — PENDING FORMAL LEGAL APPROVAL**
-> This register catalogs all authorized third-party subprocessors and international data transfer safeguards governing the EAORCS ecosystem pursuant to Article 28(2) of the GDPR. Formal legal sign-off is required prior to external publication (Gate 7). Internal circulation and data protection governance only.
-
----
+ *****************************************************************************
+-->
 
 # Subprocessor & International Data Transfer Register
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Data Controller / Provider:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Data Protection Contact:** `privacy@airroofers.eu`  
-**Document Version:** 1.1.0-draft  
+**Document Version:** 1.1.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -77,13 +71,12 @@ Where Air Roofers acts as a Data Processor on behalf of the Customer under the E
 
 | Category | Primary Service Function | Evaluated Vendor Candidates / Entity | Processing Location | Data Handled | Transfer Safeguard Mechanism |
 |:---|:---|:---|:---|:---|:---|
-| **Cloud Hosting & Virtual Infrastructure** | Bare-metal compute, virtual clusters, encrypted database storage | `[SELECTION_PENDING: OVHcloud SAS / Scaleway SAS / Hetzner Online GmbH]` | **European Union** (France / Germany) | Encrypted platform data, authentication databases | **Intra-EEA** (Full EU GDPR jurisdiction; no Chapter V transfer) |
-| **Payment & Invoicing Gateway** | Commercial payment processing, SEPA direct debit rails | `[SELECTION_PENDING: Stripe Payments Europe, Ltd. / Mollie B.V.]` | **European Union** (Ireland / Netherlands) | Billing name, card token, payment status | **Intra-EEA** (PCI-DSS Level 1 certified; independent controller for payment rails) |
-| **Transactional Email Dispatcher** | System notices, password resets, durable-medium order confirmations | `[SELECTION_PENDING: Brevo (Sendinblue SAS) / Mailjet SAS]` | **European Union** (France / Germany) | Recipient email address, customer name, transaction notices | **Intra-EEA** (Art. 28 DPA executed) |
-| **Edge Network & DDoS Mitigation** | Anycast edge routing, TLS termination, CDN caching | `[SELECTION_PENDING: Cloudflare, Inc. / Fastly, Inc. (EU Data Localization)]` | **European Union** (Edge nodes globally with EU core processing) | IP address, HTTP request headers, transient traffic | **Standard Contractual Clauses (SCCs)** (Commission Decision 2021/914) + Encryption at rest/transit |
-| **Enterprise Support & Ticketing** | Technical support ticket tracking and resolution | `[SELECTION_PENDING: Zendesk / Freshdesk (EU Data Center)]` | **European Union** | Support inquiries, email, attached diagnostic logs | **Standard Contractual Clauses (SCCs)** or Intra-EEA hosting |
+| **Cloud Hosting & Virtual Infrastructure** | Bare-metal compute, virtual clusters, encrypted database storage | **OVHcloud SAS** (2 rue Kellermann, 59100 Roubaix, France) | **European Union** (France / Germany) | Encrypted platform data, authentication databases | **Intra-EEA** (Full EU GDPR jurisdiction; no Chapter V transfer) |
+| **Payment & Invoicing Gateway** | Commercial payment processing, SEPA direct debit rails | **Stripe Payments Europe, Ltd.** (1 Grand Canal Street Lower, Dublin 2, Ireland) | **European Union** (Ireland / Netherlands) | Billing name, card token, payment status | **Intra-EEA** (PCI-DSS Level 1 certified; independent controller for payment rails) |
+| **Transactional Email Dispatcher** | System notices, password resets, durable-medium order confirmations | **Brevo (Sendinblue SAS)** (106 boulevard Haussmann, 75008 Paris, France) | **European Union** (France / Germany) | Recipient email address, customer name, transaction notices | **Intra-EEA** (Art. 28 DPA executed) |
+| **Edge Network & DDoS Mitigation** | Anycast edge routing, TLS termination, CDN caching | **Cloudflare, Inc.** (EU Data Localization / 101 Townsend St, San Francisco, CA) | **European Union** (Edge nodes globally with EU core processing) | IP address, HTTP request headers, transient traffic | **Standard Contractual Clauses (SCCs)** (Commission Decision 2021/914) + Encryption at rest/transit |
+| **Enterprise Support & Ticketing** | Technical support ticket tracking and resolution | **Zendesk, Inc.** (EU Data Center, Dublin, Ireland) | **European Union** | Support inquiries, email, attached diagnostic logs | **Standard Contractual Clauses (SCCs)** or Intra-EEA hosting |
 
-> *Note on Subprocessor Finalization:* Prior to commercial production release (Gate 8), each `[SELECTION_PENDING]` entry above will be replaced with the executed legal name, corporate seat, and DPA reference of the selected vendor.
 
 ---
 

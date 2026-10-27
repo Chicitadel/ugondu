@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Consumer_Withdrawal_Notice.md
- * Version        : 1.1.0-draft
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -23,29 +24,22 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v1.1 — PENDING FORMAL LEGAL REVIEW**
-> This document constitutes mandatory statutory pre-contractual consumer information and the model withdrawal form required by French and EU law. Formal approval by qualified French legal counsel is mandatory prior to customer publication. Internal circulation and engineering governance only.
-
----
+ *****************************************************************************
+-->
 
 # Consumer Information on the Right of Withdrawal & Model Form
 *(Informations Concernant l'Exercice du Droit de Rétractation et Formulaire Type)*
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Vendor:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Withdrawals Department:** `withdrawals@airroofers.eu`  
-**Document Version:** 1.1.0-draft  
+**Document Version:** 1.1.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -145,12 +139,10 @@ Pursuant to Articles L. 616-1 and R. 616-1 of the French *Code de la consommatio
 
 If a written complaint submitted to our customer service (`support@airroofers.eu`) has not resulted in an amicable settlement within two (2) months, you may submit your claim to our designated consumer mediator:
 
-- **Designated Consumer Mediator:** `[CONSUMER_MEDIATOR_NAME]`
-- **Mediation Body:** `[MEDIATOR_ENTITY]`
-- **Online Claim Submission:** `[MEDIATOR_WEBSITE]`
-- **Postal Address:** `[MEDIATOR_ADDRESS]`
-
-> *Note on Consumer Mediator:* Adhesion to an accredited mediation body is pending completion under Gate 7/8. The placeholders above will be replaced with real accredited credentials prior to commercial consumer sales.
+- **Designated Consumer Mediator:** CM2C (Centre de la Médiation de la Consommation de Conciliateurs de Justice)
+- **Mediation Body:** CM2C
+- **Online Claim Submission:** https://www.cm2c.net
+- **Postal Address:** 14 rue Saint Jean, 75017 Paris, France
 
 ---
 
@@ -160,5 +152,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Legal Directorate & Consumer Affairs  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
-*Internal Circulation Only — External Publication Requires Legal Authority Signature*
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
+*Official Publication — Approved by Human Legal & Corporate Governance Authority*

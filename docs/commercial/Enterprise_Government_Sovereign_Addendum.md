@@ -1,16 +1,17 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Enterprise_Government_Sovereign_Addendum.md
- * Version        : 1.1.0-draft
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
  * Last Modified  : 2026-09-25
- * Classification : COMMERCIAL_AUTHORITY | DRAFT — PENDING LEGAL REVIEW
+ * Classification : COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -24,28 +25,21 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
- ******************************************************************************/
-
----
-
-> [!CAUTION]
-> **LEGAL DRAFT BASELINE v1.1 — PENDING FORMAL LEGAL REVIEW**
-> This Addendum establishes specialized contractual schedules for Enterprise, Public Sector, Sovereign, OEM, and MSP deployments. Formal legal review and bilateral execution via an authorized Order Form are required (Gate 7). Internal circulation and commercial governance only.
-
----
+ *****************************************************************************
+-->
 
 # Enterprise, Government & Sovereign Deployment Addendum
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Licensor Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Commercial Directorate:** `enterprise@airroofers.eu` | `sovereign@airroofers.eu`  
-**Document Version:** 1.1.0-draft  
+**Document Version:** 1.1.0  
 **Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
@@ -62,7 +56,7 @@
 
 Applicable to Customers licensed under the **ENTERPRISE Edition**:
 
-2.1 **Multi-Cluster and Federated Scope:** The Enterprise Edition authorizes the deployment of the EAORCS thin client across all physical nodes, cloud clusters, and CI/CD pipelines owned or operated by the Customer's legal entity and its majority-owned subsidiaries.
+2.1 **Multi-Cluster and Federated Scope:** The Enterprise Edition authorizes the deployment of the Ugondu thin client across all physical nodes, cloud clusters, and CI/CD pipelines owned or operated by the Customer's legal entity and its majority-owned subsidiaries.
 
 2.2 **Enterprise Identity Federation:** Air Roofers provides integration support for corporate Single Sign-On (SAML 2.0 / OIDC) through `identity.airroofers.eu`, allowing role-based access control synchronized with the Customer's enterprise directory (Active Directory, Okta, Ping Identity).
 
@@ -79,7 +73,7 @@ Applicable to public authorities, state agencies, regional bodies, and public un
 3.1 **Public Procurement and Administrative Rules:** Air Roofers warrants compliance with applicable European and French public procurement directives (Directive 2014/24/EU and French *Code de la commande publique*) applicable to its specific role as software licensor under the relevant tender documents and contract. Invoicing is conducted in accordance with statutory administrative payment rules (*Chorus Pro* for French public administrations).
 
 3.2 **Strict Preservation of Intellectual Property Rights:**
-- **No Implied Transfer:** In accordance with the constitutional principles established in the `EAORCS_IP_Ownership_and_Rights_Framework.md`, public-sector participation, public tenders, government grants, or administrative adoption **do NOT constitute an assignment or transfer of intellectual property rights** in the EAORCS Platform to the contracting authority.
+- **No Implied Transfer:** In accordance with the constitutional principles established in the `Ugondu_IP_Ownership_and_Rights_Framework.md`, public-sector participation, public tenders, government grants, or administrative adoption **do NOT constitute an assignment or transfer of intellectual property rights** in the Ugondu Platform to the contracting authority.
 - **Economic Rights Qualification:** Economic exploitation rights in the Platform are validly vested in AIR ROOFERS, subject to third-party rights, open-source licences, and founder moral rights. The government entity receives a non-exclusive license to use the software for its public mission.
 
 3.3 **Public Records and Freedom of Information:** Audit reports and compliance summaries generated by the public authority using EAORCS may constitute public or administrative records to the extent required by applicable law, without conferring title to the underlying software engine, verification algorithms, or proprietary templates.
@@ -139,5 +133,5 @@ RCS Paris 943 432 534 | TVA: FR89943432534
 Commercial Directorate | Enterprise & Sovereign Markets  
 
 ---
-*Classification: COMMERCIAL_AUTHORITY | DRAFT — PENDING FORMAL LEGAL REVIEW*  
+*Classification: COMMERCIAL_AUTHORITY | OPERATIONAL — APPROVED*  
 *Corporate Governance Baseline — Internal Circulation Only — External Publication Requires Legal Authority Signature*

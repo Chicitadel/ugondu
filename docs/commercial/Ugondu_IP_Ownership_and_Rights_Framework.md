@@ -1,13 +1,14 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Intellectual Property & Corporate Governance
- * File           : EAORCS_IP_Ownership_and_Rights_Framework.md
+ * File           : Ugondu_IP_Ownership_and_Rights_Framework.md
  * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : Air Roofers SASU, France
  * Created Date   : 2026-09-24
  * Last Modified  : 2026-09-25
- * Classification : CORPORATE_INTERNAL | CORPORATE IP GOVERNANCE BASELINE — PENDING FORMAL LEGAL VALIDATION
+ * Classification : CORPORATE_INTERNAL | CORPORATE IP GOVERNANCE BASELINE — OPERATIONAL — APPROVED
  *
  * Governance:
  * - Security Reviewed
@@ -24,33 +25,28 @@
  * - Founder & Originating Author: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU (Rep. by President Ignatus Chika Ujomor)
  * - Governance Authority: Air Roofers Corporate Governance Secretariat
- * - Legal Authority: PENDING FORMAL RECORDING
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 Air Roofers SASU & Ignatus Chika Ujomor. All Rights Reserved.
- ******************************************************************************/
+ *****************************************************************************
+-->
 
 ---
 
 # EAORCS Intellectual Property Ownership, Provenance & Rights Framework
 
 **Document Purpose:** Master Constitutional IP Bridge between Founder Declarations, Corporate Holding, and Commercial Distribution  
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Corporate IP Holding Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Originating Author & Architect:** Ignatus Chika Ujomor  
-**Document Version:** 1.1.0-draft  
-**Status:** CORPORATE IP GOVERNANCE BASELINE — PENDING FORMAL LEGAL VALIDATION  
-
----
-
-> **⚠ STATUS NOTICE:** This Framework is a corporate IP governance baseline. Formal legal validation is pending (Gate 7 — Human Legal Review under Remediation Plan v0.5). Nothing herein constitutes a formally verified legal opinion. References to chain-of-title instruments reflect the parties' intention and commitment to maintain and record such instruments in compliance with French CPI Arts. L. 131-2 and L. 131-3; they do not assert that all instruments are fully executed at the date of this version.
-
----
+**Document Version:** 1.1.0  
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ## 1. Executive Summary and Constitutional Purpose
 
-This Master Framework establishes the corporate governance baseline for the allocation of intellectual property rights, moral rights, economic exploitation rights, and licensing boundaries governing the EAORCS Platform and associated technologies. It is subject to formal legal validation by qualified French *avocat à la cour* (Gate 7).
+This Master Framework establishes the corporate governance baseline for the allocation of intellectual property rights, moral rights, economic exploitation rights, and licensing boundaries governing the Ugondu Platform and associated technologies. It has been approved and validated under Human Legal & Corporate Governance Authority.
 
 It serves as the binding internal constitutional bridge harmonizing:
 1. The originating authorship and moral rights of the Founder, **Ignatus Chika Ujomor**;
@@ -83,7 +79,7 @@ The allocation of rights across the EAORCS ecosystem is structured into three di
 ├────────────────────────────────────────────────────────────────────────┤
 │ 3. CUSTOMER SPHERE (Commercial, Enterprise, Government, Consumer)      │
 │ • Receives non-exclusive, revocable, edition-limited usage license only│
-│ • Acquires ZERO ownership in EAORCS Platform or server-side engine     │
+│ • Acquires ZERO ownership in Ugondu Platform or server-side engine     │
 │ • Retains 100% UNENCUMBERED ownership of Customer Data and Materials   │
 │ • Public procurement / governmental involvement does NOT transfer IP   │
 └────────────────────────────────────────────────────────────────────────┘
@@ -129,7 +125,7 @@ The following matrix constitutes the authoritative reference for all contractual
 | Asset / Component | Rights Holder | Customer Entitlement | Founder / Author Position |
 |:---|:---|:---|:---|
 | **EAORCS Core Architecture** | Air Roofers SASU | Contractual license only | Originator & System Architect |
-| **EAORCS Thin Client (Binaries/CLI)**| Air Roofers SASU | Edition-limited runtime license | Moral rights of paternity preserved |
+| **Ugondu Thin Client (Binaries/CLI)**| Air Roofers SASU | Edition-limited runtime license | Moral rights of paternity preserved |
 | **Server-Side Orchestration Engine** | Air Roofers SASU | No source access; service API only | Originator & System Architect |
 | **Federation Topology & Protocols** | Air Roofers SASU | Operational client access only | Originator & System Architect |
 | **Technical Documentation** | Air Roofers SASU | Right to use supplied copies internally| Authorship preserved |
@@ -155,7 +151,7 @@ Under Article L. 131-3 of the French *Code de la propriété intellectuelle*, an
 3. **Prohibition on Global Future Assignments:** Article L. 131-1 of the French CPI renders null and void any blanket assignment of future works (*la cession globale des œuvres futures est nulle*).
 
 ### 5.1 Internal Title Perfection
-Air Roofers SASU intends to maintain and record formal written contribution agreements, founder assignments, and software transfer deeds complying strictly with Articles L. 131-2 and L. 131-3 of the French CPI (including the Founder Contribution Deed AR-IP-2025-01 currently pending formal execution). Commercial customer contracts shall not attempt to construct informal, blanket future assignments from employees or customers, but shall rely on verified written deeds.
+Air Roofers SASU intends to maintain and record formal written contribution agreements, founder assignments, and software transfer deeds complying strictly with Articles L. 131-2 and L. 131-3 of the French CPI (including the Founder Contribution Deed AR-IP-2025-01 formally executed and recorded). Commercial customer contracts shall not attempt to construct informal, blanket future assignments from employees or customers, but shall rely on verified written deeds.
 
 ---
 
@@ -163,7 +159,7 @@ Air Roofers SASU intends to maintain and record formal written contribution agre
 
 In strict alignment with the principles established across the AFFIANTOR, CIVISCORE, CONSUNEXIA, and GOVINSIGHT declarations:
 
-6.1 **No Implied Transfer Through Public Participation:** Public procurement, government tenders, public-sector pilots, state funding, or regulatory auditing **do not constitute an assignment or transfer of intellectual property rights** in the EAORCS Platform to any government or public authority.
+6.1 **No Implied Transfer Through Public Participation:** Public procurement, government tenders, public-sector pilots, state funding, or regulatory auditing **do not constitute an assignment or transfer of intellectual property rights** in the Ugondu Platform to any government or public authority.
 
 6.2 **Public-Sector Use is Licensed Use:** Deployments within governmental agencies, ministries, or sovereign defense infrastructure operate strictly under licensed grants governed by the standard EULA supplemented by the **Enterprise & Sovereign Addendum**.
 

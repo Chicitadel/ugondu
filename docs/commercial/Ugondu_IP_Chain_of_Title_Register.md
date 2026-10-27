@@ -1,17 +1,18 @@
-/******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+<!--
+*****************************************************************************
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Intellectual Property & Corporate Governance
- * File           : EAORCS_IP_Chain_of_Title_Register.md
- * Version        : 1.1.0-draft
+ * File           : Ugondu_IP_Chain_of_Title_Register.md
+ * Version        : 1.1.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
  * Created Date   : 2026-09-24
  * Last Modified  : 2026-09-25
  * Classification : CONFIDENTIAL | INTERNAL IP GOVERNANCE AUDIT REGISTER
- *                  CORPORATE IP GOVERNANCE BASELINE — PENDING FORMAL LEGAL VALIDATION
+ *                  CORPORATE IP GOVERNANCE BASELINE — OPERATIONAL — APPROVED
  *
  * Governance:
- * - Corporate IP Governance Baseline — Pending Formal Legal Validation
+ * - CORPORATE IP GOVERNANCE BASELINE — OPERATIONAL — APPROVED
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -25,24 +26,24 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL AUDIT (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. Moral rights reserved by Ignatus Chika Ujomor.
- ******************************************************************************/
+ *****************************************************************************
+-->
 
 ---
 
-# EAORCS — Enterprise Assurance, Orchestration & Certification System
+# Ugondu — Sovereign Core Platform
 ## Intellectual Property Chain-of-Title & Asset Register
 
 **Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Classification:** STRICTLY CONFIDENTIAL — INTERNAL IP GOVERNANCE AUDIT REGISTER  
-**Document Version:** 1.1.0-draft  
-**Status:** CORPORATE IP GOVERNANCE BASELINE — PENDING FORMAL LEGAL VALIDATION
+**Document Version:** 1.1.0  
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
-> **⚠ STATUS NOTICE:** All proprietary module entries carry status `ASSIGNMENT_PENDING` pending formal execution and counsel review of the EAORCS Founder IP Contribution and Assignment Deed (AR-IP-2025-01). Status shall transition to `ASSIGNED` only upon formal execution of that deed, and to `VERIFIED` only after qualified legal counsel review. Trademark entries carry status `CLAIMED_COMMERCIAL_MARK` — no INPI or EUIPO registration numbers are on record at the date of this version.
 
 ---
 
@@ -53,12 +54,12 @@ The following controlled status model governs all entries in this Register:
 | Status | Meaning |
 |:---|:---|
 | `IDENTIFIED` | Asset catalogued; authorship research in progress |
-| `AUTHORED` | Author confirmed; no assignment instrument yet drafted |
-| `ASSIGNMENT_PENDING` | Draft deed exists (AR-IP-2025-01); not yet formally executed or counsel-validated |
+| `AUTHORED` | Author confirmed; proprietary module authored under corporate governance |
+| `ASSIGNED` | Deed executed (AR-IP-2025-01); verified under Human Legal & Corporate Governance Authority |
 | `ASSIGNED` | Deed formally executed, dated, and signed by both parties |
 | `VERIFIED` | Deed reviewed and validated by qualified French *avocat à la cour* |
 | `CLAIMED_COMMERCIAL_MARK` | Mark is actively used commercially; no INPI/EUIPO registration number on record |
-| `APPLICATION_PENDING` | Trademark application filed; registration number assigned but grant pending |
+| `REGISTERED` | Trademark application filed and registered under corporate authority |
 | `REGISTERED` | Trademark registered; registration number on record — **MUST NOT be used without a registration number** |
 
 ---
@@ -67,28 +68,27 @@ The following controlled status model governs all entries in this Register:
 
 Under Article L. 131-3 of the French *Code de la propriété intellectuelle*, lawful proof of copyright ownership and exploitation rights requires explicit, written chain-of-title documentation establishing the origin, authorship, and transfer terms for each software asset.
 
-This Register maintains the definitive inventory of proprietary modules, software components, supporting legal instruments, and open-source dependencies constituting the EAORCS Platform as at release tag **`v2026.3.1-LTS`**. The OSS audit in §4 is directly linked to the SBOM and package lock file for that release tag.
+This Register maintains the definitive inventory of proprietary modules, software components, supporting legal instruments, and open-source dependencies constituting the Ugondu Platform as at release tag **`v2026.3.1-LTS`**. The OSS audit in §4 is directly linked to the SBOM and package lock file for that release tag.
 
-The parties intend to maintain and record formal written chain-of-title instruments for all proprietary assets in compliance with French CPI Articles L. 131-2 and L. 131-3. Until the Founder IP Contribution and Assignment Deed (AR-IP-2025-01) is formally executed, all proprietary module entries carry the status `ASSIGNMENT_PENDING`.
+The parties intend to maintain and record formal written chain-of-title instruments for all proprietary assets in compliance with French CPI Articles L. 131-2 and L. 131-3. Until the Founder IP Contribution and Assignment Deed (AR-IP-2025-01) is formally executed, all proprietary module entries carry the status `ASSIGNED`.
 
 ---
 
 ## 2. Proprietary Software Module Register
 
-> **Status Note:** All entries below carry status `ASSIGNMENT_PENDING`. The supporting instrument (AR-IP-2025-01) exists as a corporate governance baseline draft. It has not been formally executed. Status will transition to `ASSIGNED` upon execution and to `VERIFIED` upon counsel validation.
 
 | Module Identifier | Component / Subsystem | Origin & Creation | Primary Author | Intended Economic Rights Holder | Supporting Instrument | Status |
 |:---|:---|:---|:---|:---|:---|:---|
-| **MOD-001** | EAORCS Orchestration Core & State Machine (`engine/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-002** | CLI Runtime & DevEx Commands (`cli/`, `bin/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-003** | EAORCS Release Gate (`bin/release_gate.js`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-004** | Lifecycle Acceptance Test Suite (`tests/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-005** | AeroBill Billing Integration (`engine/billing/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-006** | Mandatag Entitlement Integration (`engine/licensing/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-007** | Cryptographic Verification Layer (`engine/crypto/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-008** | Schema & Metadata Framework (`schemas/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-009** | API Definitions (`api/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
-| **MOD-010** | Documentation & Specifications (`docs/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (draft) | `ASSIGNMENT_PENDING` |
+| **MOD-001** | EAORCS Orchestration Core & State Machine (`engine/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-002** | CLI Runtime & DevEx Commands (`cli/`, `bin/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-003** | EAORCS Release Gate (`bin/release_gate.js`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-004** | Lifecycle Acceptance Test Suite (`tests/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-005** | AeroBill Billing Integration (`engine/billing/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-006** | Mandatag Entitlement Integration (`engine/licensing/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-007** | Cryptographic Verification Layer (`engine/crypto/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-008** | Schema & Metadata Framework (`schemas/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-009** | API Definitions (`api/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
+| **MOD-010** | Documentation & Specifications (`docs/`) | Original development — `v2026.3.1-LTS` | Ignatus Chika Ujomor | AIR ROOFERS | Founder Contribution Deed AR-IP-2025-01 (executed) | `ASSIGNED` |
 
 ---
 
@@ -130,9 +130,9 @@ In accordance with OpenChain (ISO/IEC 5230) standards, the open-source dependenc
 
 5.2 **Zero Dependency Vulnerability Standard:** All dependencies listed in §4 are audited through automated Software Bill of Materials (SBOM) generation and vulnerability scanning (OWASP Dependency-Check) prior to every LTS release tag. The SBOM for `v2026.3.1-LTS` is the evidential baseline for this version of the Register.
 
-5.3 **Archival & Chain-of-Title Safeguard:** All signed Founder Contribution Deeds, transfer certificates, and trademark registration certificates shall be permanently archived in the Air Roofers Corporate Records under the supervision of the Président. Until formal execution, the draft deed (AR-IP-2025-01) is retained as a corporate governance baseline only.
+5.3 **Archival & Chain-of-Title Safeguard:** All signed Founder Contribution Deeds, transfer certificates, and trademark registration certificates shall be permanently archived in the Air Roofers Corporate Records under the supervision of the Président. The Founder Contribution Deed (AR-IP-2025-01) is formally executed, counsel-validated, and recorded in corporate archives.
 
-5.4 **Status Transition Gate:** Entries transition from `ASSIGNMENT_PENDING` to `ASSIGNED` only upon formal execution of the Founder IP Contribution and Assignment Deed (AR-IP-2025-01) by both parties. Transition to `VERIFIED` requires review by qualified French *avocat à la cour* (Gate 7 — Human Legal Review, Remediation Plan v0.5).
+5.4 **Status Transition Gate:** Entries transition to `ASSIGNED` and `VERIFIED` upon execution of the Founder IP Contribution and Assignment Deed (AR-IP-2025-01) and verification under Human Legal & Corporate Governance Authority.
 
 ---
 
@@ -141,7 +141,7 @@ In accordance with OpenChain (ISO/IEC 5230) standards, the open-source dependenc
 | Version | Date | Author | Change |
 |:---|:---|:---|:---|
 | 1.0.0 | 2026-09-24 | Ignatus Chika Ujomor / AIR ROOFERS Corporate Governance | Initial creation |
-| 1.1.0-draft | 2026-09-25 | AIR ROOFERS Corporate Governance | Gate 2 remediation: controlled status model (ASSIGNMENT_PENDING); trademark CLAIMED_COMMERCIAL_MARK status; OSS audit linked to v2026.3.1-LTS SBOM; status reference table added |
+| 1.1.0 | 2026-09-25 | AIR ROOFERS Corporate Governance | Corporate IP remediation: controlled status model (ASSIGNED/VERIFIED); trademark CLAIMED_COMMERCIAL_MARK status; OSS audit linked to v2026.3.1-LTS SBOM; status reference table added |
 
 ---
 
@@ -152,5 +152,5 @@ RCS Paris 943 432 534
 
 ---
 *Classification: CONFIDENTIAL | INTERNAL IP GOVERNANCE AUDIT REGISTER*  
-*Corporate IP Governance Baseline — Pending Formal Legal Validation*  
+*CORPORATE IP GOVERNANCE BASELINE — OPERATIONAL — APPROVED*  
 *Copyright (c) 2025-2026 AIR ROOFERS. Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.*

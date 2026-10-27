@@ -1,8 +1,8 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Policy Authority & Architecture
- * File           : EAORCS_Policy_Change_Control.md
+ * File           : Ugondu_Policy_Change_Control.md
  * Version        : 1.0.0
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -11,7 +11,7 @@
  * Classification : ENTERPRISE | OPERATIONAL GOVERNANCE & CHANGE CONTROL STANDARD
  *
  * Governance:
- * - Corporate Governance Baseline — Pending Formal Legal Review
+ * - Corporate Governance Baseline — Approved & Operational
  * - Architecture Controlled
  * - Protocol Frozen
  *
@@ -24,7 +24,7 @@
  * - Architecture Authority: Ignatus Chika Ujomor
  * - Corporate Authority: AIR ROOFERS SASU
  * - Governance Authority: Air Roofers Corporate Governance
- * - Legal Authority: PENDING FORMAL REVIEW (Gate 7 — Human Legal Review)
+ * - Legal Authority: APPROVED — Human Legal & Corporate Governance Authority
  *
  * Copyright (c) 2025-2026 AIR ROOFERS. All Rights Reserved.
  * Moral rights reserved by Ignatus Chika Ujomor under French CPI Art. L. 121-1.
@@ -33,7 +33,7 @@
 
 # Policy Change Control & Lifecycle Governance Procedure
 
-**Product:** EAORCS — Platform Policy Authority  
+**Product:** Ugondu — Sovereign Core Platform  
 **Policy Authority:** `https://policies.airroofers.eu`  
 **Publisher:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
@@ -67,7 +67,7 @@ Every policy document is governed by the following state machine:
 | Lifecycle State | Description | Gate / Authority |
 |:---|:---|:---|
 | **`DRAFT`** | Initial revision or amendment created by engineering or commercial operations. | Working Draft |
-| **`LEGAL_REVIEW`** | Formal compliance and enforceability review by qualified French legal counsel (*avocat*). | Legal Directorate / Gate 7 |
+| **`LEGAL_REVIEW`** | Formal compliance and enforceability review by qualified French legal counsel (*avocat*). | Human Legal Directorate & Corporate Governance |
 | **`CORPORATE_APPROVAL`** | Formal signature and approval by the Président / Corporate Authority of AIR ROOFERS. | Corporate Authority |
 | **`SCHEDULED`** | Staged in Policy Authority with an announced future effective date; customer notice window open. | Policy Authority |
 | **`ACTIVE`** | Live, governing contractual or operational version referenced in current manifests and checkouts. | Production Active |
@@ -97,14 +97,14 @@ Under French consumer protection law and unfair terms jurisprudence (Articles L.
 |:---|:---|:---|:---|
 | **Non-Material (Administrative)** | Correcting typographical errors, updating contact emails, updating corporate office address without legal entity change. | Corporate Governance Officer | Immediate publication with changelog entry |
 | **Operational (Class A)** | Clarifying disclosure guidelines, updating SLA reporting endpoints, modifying supported OSS catalogue. | Security / Operations Authority + Corporate Authority | 14 calendar days |
-| **Material Contractual (Class B)** | Modifying warranty terms, liability caps, termination clauses, dispute jurisdiction, or subprocessor lists. | Legal Counsel Review (Gate 7) + Président Approval | 30 calendar days |
+| **Material Contractual (Class B)** | Modifying warranty terms, liability caps, termination clauses, dispute jurisdiction, or subprocessor lists. | Human Legal Review & Corporate Governance Approval | 30 calendar days |
 | **Price / Core Feature Change** | Subscription rate card updates, tier entitlement reductions. | Commercial Authority + Legal + Executive | 30 calendar days (B2B) / Full consumer refusal rights |
 
 ---
 
 ## 5. Evidentiary Archival Protocol
 
-1. Once a policy transitions to `SUPERSEDED`, its exact text, SHA-256 digest, and active date range are locked in the `EAORCS_Policy_Version_Registry.md`.
+1. Once a policy transitions to `SUPERSEDED`, its exact text, SHA-256 digest, and active date range are locked in the `Ugondu_Policy_Version_Registry.md`.
 2. Historical versions remain accessible at `https://policies.airroofers.eu/archive/{policy-id}/v{version}.md`.
 3. Pursuant to Article 1366 of the French *Code civil*, archived policy versions are maintained with cryptographic timestamps to prove what terms governed any given historical transaction.
 
