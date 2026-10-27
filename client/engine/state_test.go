@@ -35,11 +35,12 @@ package engine
 
 import (
 	"encoding/json"
-	"ugondu/client/i18n"
 	"errors"
 	"os"
 	"strings"
 	"testing"
+
+	"ugondu/client/i18n"
 )
 
 func TestStateSaveAndLoad(t *testing.T) {
