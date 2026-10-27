@@ -62,3 +62,13 @@ After this foundation is verified, implement provider-specific GCP plan compilat
 5. Keep PR draft/unmerged until review and required qualification evidence are complete.
 
 **Disposition:** UX and WIF bootstrap foundation implemented; full GCP deployment adapter and universal COR certification remain open.
+
+
+## Additional safety hardening from re-audit
+
+- Read back the enabled bootstrap API list and workload identity pool before any service-account impersonation binding is added.
+- Verify the repository-restricted provider configuration before adding the WIF binding.
+- If the named service account already exists, inspect the direct project IAM policy and refuse to attach GitHub federation if that account has any direct project-level grants (`EXISTING_SERVICE_ACCOUNT_HAS_PROJECT_GRANTS`). Use a fresh dedicated service account instead of adopting a privileged one.
+- Added regression tests for privileged service-account rejection and a fully mocked successful bootstrap with API/pool/provider/IAM read-back.
+
+This still cannot prove the absence of inherited organization/folder-level permissions on an existing service account. Therefore the safest operational choice is a newly created dedicated service account, and the authorized operator must inspect inherited policies before using the identity for any deployment workload.
