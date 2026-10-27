@@ -23,6 +23,7 @@ import {
     Logger,
     telemetryContextMiddleware,
     createOutboundPropagationHeaders,
+    ProductRegistry,
 } from '@ugondu/shared';
 import { eventStore, deadLetterLog, DeadLetterEntry } from './db';
 
@@ -430,7 +431,7 @@ app.use((err: any, _req: Request, res: Response, _next: express.NextFunction) =>
     res.status(500).json({ error: 'INTERNAL_ERROR', message: Logger.redactString(String(err?.message || err)) });
 });
 
-const PORT = process.env.PORT || 4004;
+const PORT = process.env.PORT || ProductRegistry.getServiceConfig('event_bus').port;
 export let serverInstance: any = null;
 
 if (require.main === module) {

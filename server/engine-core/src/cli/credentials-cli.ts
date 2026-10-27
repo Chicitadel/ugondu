@@ -71,7 +71,7 @@ async function run() {
             console.log(__t('cli.credentials.stored_keystore'));
 
         } catch (error: any) {
-            console.error(__t('cli.credentials.import_failed', { error: error.message }));
+            console.error(__t('cli.credentials.import_failed', { message: error.message }));
             process.exit(1);
         }
     } else {

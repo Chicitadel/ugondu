@@ -49,6 +49,9 @@ const requiredLocales = [
 function flatten(obj, prefix = '') {
   const result = {};
   for (const key in obj) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      block(`Prohibited prototype pollution key '${key}' in locale dictionary`);
+    }
     const val = obj[key];
     const newKey = prefix ? `${prefix}.${key}` : key;
     if (typeof val === 'object' && val !== null) {

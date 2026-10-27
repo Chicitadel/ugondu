@@ -1,0 +1,14 @@
+{
+  "name": "@ugondu/plugin-recovery-dependencies",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Dependency Integrity Validation Recovery Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "composer-integrity-validation",
+    "path-repository-reconstruction"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}

@@ -126,6 +126,65 @@ describe('BOUNDARY-01: ProductRegistry & ConfigRegistry Authority', () => {
       expect(Array.isArray(catalogue.policies)).toBe(true);
       expect(catalogue.policies.length).toBe(7);
     });
+
+    it('strictly enforces ADR-0042 Public Projection Gate filtering', () => {
+      const publicCatalog = registry.getPublicCatalog();
+      expect(Array.isArray(publicCatalog)).toBe(true);
+      expect(publicCatalog.length).toBeGreaterThanOrEqual(1);
+
+      // Verify all items in public catalog conform strictly to ADR-0042:
+      // (lifecycle === 'RELEASED') && (publicRelease === true) && (isDistributableProduct === true)
+      for (const item of publicCatalog) {
+        expect(item.lifecycle).toBe('RELEASED');
+        expect(item.publicRelease).toBe(true);
+        expect(item.isDistributableProduct).toBe(true);
+      }
+
+      // Verify Ugondu is included in public projections
+      const ugondu = publicCatalog.find((p) => p.productId === 'UGONDU');
+      expect(ugondu).toBeDefined();
+      expect(ugondu?.code).toBe('UGONDU');
+
+      // Internal engines and unapproved products must be excluded
+      const mandatag = publicCatalog.find((p) => p.productId === 'MANDATAG');
+      expect(mandatag).toBeUndefined();
+      const platformCore = publicCatalog.find((p) => p.productId === 'EAORCS');
+      expect(platformCore).toBeUndefined();
+    });
+
+    it('implements RFC-compliant hostname normalization', () => {
+      expect(ProductRegistry.normalizeHostname('https://orchestrator.airroofers.eu')).toBe('orchestrator.airroofers.eu');
+      expect(ProductRegistry.normalizeHostname('http://WWW.Ugondu.AirRoofers.EU:4001/v1/health?q=1#frag')).toBe('ugondu.airroofers.eu');
+      expect(ProductRegistry.normalizeHostname('//deploy.airroofers.eu.')).toBe('deploy.airroofers.eu');
+      expect(ProductRegistry.normalizeHostname('')).toBe('');
+      expect(ProductRegistry.normalizeHostname('   ')).toBe('');
+    });
+
+    it('verifies HMAC-SHA256 signatures with constant-time equality check', () => {
+      const secret = 'corporate-audit-governance-secret-key-2026';
+      const payload = JSON.stringify({ action: 'EXECUTE', tenant: 'tenant-enterprise-01', timestamp: 1770000000 });
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const crypto = require('crypto');
+      const validHexSig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+      const validBase64Sig = crypto.createHmac('sha256', secret).update(payload).digest('base64');
+      const badSig = crypto.createHmac('sha256', 'wrong-secret').update(payload).digest('hex');
+
+      expect(ProductRegistry.verifyHmacSha256(payload, validHexSig, secret)).toBe(true);
+      expect(ProductRegistry.verifyHmacSha256(payload, validBase64Sig, secret)).toBe(true);
+      expect(ProductRegistry.verifyHmacSha256(payload, badSig, secret)).toBe(false);
+      expect(ProductRegistry.verifyHmacSha256(payload, 'invalid-length-sig', secret)).toBe(false);
+      expect(ProductRegistry.verifyHmacSha256('', validHexSig, secret)).toBe(false);
+      expect(ProductRegistry.verifyHmacSha256(payload, validHexSig, '')).toBe(false);
+    });
+
+    it('verifies dynamic workspace root resolution with zero hardcoded product paths', () => {
+      // Direct instance discovers workspace root dynamically
+      const customReg = new ProductRegistry();
+      expect(customReg.getActiveProductId()).toBe('ugondu');
+      const product = customReg.getProduct('ugondu');
+      expect(product.productId).toBe('UGONDU');
+      expect(product.ports.engine_core).toBe(4001);
+    });
   });
 
   describe('ConfigRegistry CORS Origin, Environment, Region & Timeout Validation', () => {

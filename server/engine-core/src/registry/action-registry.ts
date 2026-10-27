@@ -131,7 +131,7 @@ export class UniversalActionRegistry {
         
         const decision = govEngine.evaluateIntent('aws', [{ action: operationType, resource: resourceIdentity }], 'action-resolver');
         if (decision.decision === 'DENY') {
-            throw new Error(`Governance Denied: ${decision.reason}`);
+            throw new Error(__t('governance_denied_reason', { reason: decision.reason }));
         }
 
         // [TOKEN:SECURITY_GOVERNANCE] Safeguard: IAM conditions must match the specific action's supported condition keys
@@ -170,7 +170,7 @@ export class UniversalActionRegistry {
             } catch (rollbackError) {
                 console.error(`[URRE SAFELOCK] Fatal: Rollback failed during exception handling! tx: ${txId}`, rollbackError);
             }
-            throw new Error(`Execution failed and dependency-aware rollback executed: ${error.message}`);
+            throw new Error(__t('execution_failed_rollback_executed', { error: error.message }));
         }
 
         // Extract outputs

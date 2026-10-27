@@ -1,0 +1,13 @@
+{
+  "name": "@ugondu/plugin-recovery-config",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Environment Configuration Injection Recovery Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "env-configuration-injection"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}

@@ -47,7 +47,7 @@ export class TenantQuarantiner {
             throw new Error(__t('msg_tenant_id_required_for_quarantine_execut'));
         }
         // Zero-trust enforcement: isolate completely, block all outbound and inbound
-        Logger.info(`Quarantining tenant ${tenantId} at threat level ${threatLevel}`);
+        Logger.info(__t('tenant_lifecycle_quarantining', { tenantId, threatLevel }));
         return { status: 'success' };
     }
 }

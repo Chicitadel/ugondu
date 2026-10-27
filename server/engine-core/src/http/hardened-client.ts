@@ -76,7 +76,7 @@ function isTrustedInternalServiceOrigin(targetUrl: URL): boolean {
                 return true;
             }
         } catch {
-            Logger.warn('Malformed trusted service URL candidate in SSRF validation', { candidate });
+            Logger.warn(__t('malformed_trusted_service_url_ssrf'), { candidate });
         }
     }
     return false;

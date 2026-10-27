@@ -303,7 +303,7 @@ export function requireServiceIdentity(expectedAudience: string, requiredScope?:
         if (!result.valid) {
             return res.status(result.status || 401).json({
                 error: result.error,
-                message: __t(`auth_service_${result.error?.toLowerCase()}`) || result.error
+                message: result.error || __t('auth_service_token_missing')
             });
         }
 

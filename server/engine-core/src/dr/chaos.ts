@@ -193,7 +193,7 @@ export class DisasterRecoveryEngine {
                     fs.rmSync(sandboxDir, { recursive: true, force: true });
                 }
             } catch (cleanupErr: unknown) {
-                Logger.warn('Chaos engine sandbox cleanup failed', {
+                Logger.warn(__t('chaos_engine_sandbox_cleanup_failed'), {
                     sandboxDir,
                     error: cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr)
                 });

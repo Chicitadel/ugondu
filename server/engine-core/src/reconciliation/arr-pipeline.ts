@@ -28,6 +28,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import { SafetyGatesValidator, ActionClassification } from '../safety/safety-gates';
 import { ResourceClassification } from '@ugondu/shared';
 
@@ -73,7 +74,7 @@ export class AutonomousResourceReconciler {
     public async runPipeline(providerName: string, quotaContext: QuotaContext, authority: import('../safety/safety-gates').SafetyProof): Promise<ResourceState[]> {
         const provider = this.providers.get(providerName);
         if (!provider) {
-            throw new Error(`Provider ${providerName} is not registered`);
+            throw new Error(__t('provider_not_registered_in_pipeline', { providerName }));
         }
 
         const discovered = await this.discover(provider);

@@ -50,7 +50,7 @@ export class TenantSuspender {
             throw new Error(__t('msg_suspension_reason_must_be_recorded_for_a'));
         }
         // Disable incoming requests, revoke active sessions
-        Logger.info(`Suspending tenant ${tenantId} for reason: ${reason}`);
+        Logger.info(__t('tenant_lifecycle_suspending', { tenantId, reason }));
         return { status: 'success' };
     }
 }

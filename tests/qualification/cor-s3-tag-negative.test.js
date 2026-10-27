@@ -173,14 +173,11 @@ test('F-24 Negative Proof: Missing UgonduTransactionId fails closed', async () =
     );
 });
 
-test('F-24 Negative Proof: Wrong transaction or run ID fails closed', async () => {
+test('F-24 Negative Proof: Wrong transaction ID fails closed', async () => {
     const bucketName = 'ugondu-test-bucket-wrong-tx-005';
     const expectedTxId = 'tx-test-f24-expected-005';
     const wrongTxId = 'tx-test-f24-tampered-005';
-    const expectedRunId = 'run-expected-005';
-    const wrongRunId = 'run-different-005';
 
-    // Sub-case A: Wrong transaction ID
     const mockS3WrongTx = {
         send: async () => ({
             TagSet: [
@@ -200,8 +197,14 @@ test('F-24 Negative Proof: Wrong transaction or run ID fails closed', async () =
             return true;
         }
     );
+});
 
-    // Sub-case B: Wrong run ID when expectedRunId is required
+test('F-24 Negative Proof: Wrong run ID fails closed', async () => {
+    const bucketName = 'ugondu-test-bucket-wrong-run-005';
+    const expectedTxId = 'tx-test-f24-expected-005';
+    const expectedRunId = 'run-expected-005';
+    const wrongRunId = 'run-different-005';
+
     const mockS3WrongRun = {
         send: async () => ({
             TagSet: [
@@ -224,11 +227,10 @@ test('F-24 Negative Proof: Wrong transaction or run ID fails closed', async () =
     );
 });
 
-test('F-24 Negative Proof: Timeout or HTTP 500 fails closed with typed error', async () => {
+test('F-24 Negative Proof: Network timeout fails closed with typed error', async () => {
     const bucketName = 'ugondu-test-bucket-network-fault-006';
     const txId = 'tx-test-f24-006';
 
-    // Sub-case A: Network timeout
     const mockS3Timeout = {
         send: async () => {
             const err = new Error('Socket timeout connecting to s3.amazonaws.com');
@@ -248,8 +250,12 @@ test('F-24 Negative Proof: Timeout or HTTP 500 fails closed with typed error', a
             return true;
         }
     );
+});
 
-    // Sub-case B: Internal Server Error (HTTP 500)
+test('F-24 Negative Proof: Internal Server Error (HTTP 500) fails closed with typed error', async () => {
+    const bucketName = 'ugondu-test-bucket-http500-006';
+    const txId = 'tx-test-f24-006';
+
     const mockS3Http500 = {
         send: async () => {
             const err = new Error('Internal Server Error');

@@ -164,7 +164,7 @@ export class TrustRegistry {
                     privateKey: normalizedPem.trim()
                 });
             } catch (err) {
-                Logger.warn('Failed to register envRecipeKey into trust registry during bootstrap', {
+                Logger.warn(__t('err_failed_to_register_env_recipe_key'), {
                     error: err instanceof Error ? err.message : String(err)
                 });
             }

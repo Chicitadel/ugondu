@@ -1,3 +1,4 @@
+import { __t } from '@ugondu/shared';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -434,7 +435,7 @@ export class TransactionAuthority {
                     (error as NodeJS.ErrnoException)
                         .code !== 'EEXIST'
                 ) {
-                    throw new Error(`TRANSACTION_LOCK_FAILED: ${error instanceof Error ? error.message : String(error)}`);
+                    throw new Error(__t('transaction_lock_failed', { error: error instanceof Error ? error.message : String(error) }));
                 }
 
                 if (
