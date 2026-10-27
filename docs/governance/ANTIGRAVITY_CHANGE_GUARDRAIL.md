@@ -388,3 +388,72 @@ The bundle manifest is the single required-artifact inventory for the universal 
 - **Ugondu CI/CD Pipeline:** run 40355055649 (pull_request) SUCCESS; run 40348557767 (workflow_dispatch) SUCCESS. Earlier run 40347263796 on `225f2ec1` failed on two tests (billing replay headers, DirectAdmin repair executor); both corrected in `8f4a8244`.
 - **COR Certification:** run 40355055685 SUCCESS in PR-validation mode; AWS Physical Qualification Gate intentionally skipped. **NOT RELEASE CERTIFIED.**
 - **Open (fail-closed):** authorised AWS staging receipts for the bootstrap runtime, GCP/Azure, AI model fleet (CATALOG_OFFLINE), actual DirectAdmin host qualification, immutable artifact lifecycle. Universal commercial release remains withheld.
+
+
+## 2026-10-27 Addendum — UG-DIRECTADMIN-STAGING-PATH-001
+
+**Owner branch:** `fix/directadmin-staging-path-containment-2026-10-27`  
+**Parent candidate:** `326a7f75272ecbcfabc60cc19ba3b9c3c182a15e`  
+**Finding status:** IMPLEMENTED IN CODE / REGRESSION WORKFLOW ADDED / EXACT-HEAD WORKFLOW PENDING  
+**Canonical handover:** [DirectAdmin staging path containment](../audit/REAUDIT_HANDOVER_DIRECTADMIN_STAGING_PATH_CONTAINMENT_2026-10-27.md)
+
+### Confirmed defect and physical remediation
+
+- `tools/deploy-directadmin-staging.ps1` previously joined an untrusted `TargetSubdomain` to a path without validating DNS labels or verifying canonical path containment.
+- The staging script and committed `health.json` used `STAGING_READY`, although the script does not upload, deploy, probe or physically qualify the live host.
+- The script now validates DNS label syntax/length, resolves the staging root and target, requires the target to be a direct child of the canonical root, rejects path escapes, and verifies that `.htaccess` is a file resolved inside the target directory.
+- Generated and committed health evidence now states `ARTIFACT_STAGED_NOT_HOST_QUALIFIED`, `host_qualification: NOT_RUN`, and `evidence_scope: artifact-only`.
+- Added `tools/tests/Test-DeployDirectAdminStaging.ps1` for positive staging, traversal rejection, malformed DNS rejection and truthful evidence assertions.
+- Added `.github/workflows/directadmin-staging-safety.yml` to execute the regression test on Windows without Pester or live-host credentials.
+
+### Acceptance and anti-drift
+
+1. Wait for the dedicated Windows workflow on the exact branch head; do not claim the new tests passed before the run completes.
+2. Re-run repository CI and COR for the exact candidate SHA after all code, test, workflow and handover commits.
+3. Treat this fix as local staging-path safety only. It does not qualify the actual DirectAdmin account or make the DirectAdmin application adapter production-ready.
+4. Never claim live deployment/health from a staged artifact, a directory, or generated JSON alone.
+5. Do not modify `master` or `phase4/production-hardening` directly; keep the work isolated in the dedicated branch and PR.
+6. Universal COR remains **NOT CERTIFIED** until authentic, candidate-bound AWS, GCP/Azure, AI fleet, DirectAdmin host and immutable artifact lifecycle evidence is reviewed.
+
+
+### UG-DIRECTADMIN-RESOURCE-LIFECYCLE-002 — fail closed on unqualified provider operations
+
+- **Confirmed risks:** DirectAdmin database create/delete reported success without provider read-back/ownership proof; storage removal used `rm -rf` based only on a validated identifier; capability metadata overstated compute/database/delete/rollback support.
+- **Code:** `server/engine-core/src/fabric/providers/directadmin-native-client.ts` now refuses unqualified database create/delete and storage deletion. Storage creation rejects an existing target and verifies directory presence/writability before returning. `server/engine-core/src/fabric/providers/directadmin.ts` now accurately marks hosted-app and database operations unsupported, storage conditional, and rollback/delete unsupported.
+- **Tests:** `server/engine-core/src/targets/__tests__/directadmin.spec.ts` adds negative regression assertions for unqualified mutations. Run the engine-core workspace suite and full CI/COR on the final exact SHA.
+- **Anti-drift:** Do not re-enable these operations by removing the fail-closed checks. Re-enable only after a durable ownership/provenance ledger, provider-native read-back, safe rollback, localized typed errors, positive/negative adapter tests, and authorized physical qualification exist.
+- **Status:** IMPLEMENTED IN CODE / EXACT-HEAD FULL CI-COR PENDING. No DirectAdmin DB/app lifecycle certification is implied.
+
+
+## 2026-10-27 Addendum — UG-GCP-BOOTSTRAP-UX-001
+
+**Branch:** `feat/gcp-one-step-bootstrap-2026-10-27`  
+**Handover:** [GCP One-Step Bootstrap Re-audit Handover](../audit/REAUDIT_HANDOVER_GCP_ONE_STEP_BOOTSTRAP_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD TESTS AND COR PENDING / GCP DEPLOYMENT NOT QUALIFIED
+
+### Finding
+The GCP setup path depended on manual console navigation and did not provide a one-command, plan-bound WIF bootstrap comparable to the AWS bootstrap bundle. The operator-facing experience risked confusing inherited organization-level IAM grants with the project's intended least-privilege configuration.
+
+### Physical changes
+- Added `scripts/bootstrap/gcp-one-step-bootstrap.mjs` with read-only plan generation and digest-approved apply.
+- Added a canonical GCP bootstrap profile and registered its runtime, tests and workflow in the universal bundle.
+- Added `npm run bootstrap:gcp` and `npm run test:bootstrap:gcp`.
+- Added regression tests and `.github/workflows/gcp-bootstrap-safety.yml`.
+- Apply mode enables only the bootstrap APIs, creates/reuses a repository-restricted GitHub OIDC provider and dedicated service account, grants only `roles/iam.workloadIdentityUser` to the exact repository principal, and verifies read-back.
+- The bootstrap does not grant Owner, Editor, or workload deployment roles and does not create service-account keys.
+
+### Mandatory invariants
+1. Plan/apply must use the same stable SHA-256 plan digest. Any plan change requires fresh approval.
+2. Never silently switch the active gcloud project. Require explicit target and verify project identity before mutation.
+3. Never widen roles to bypass organization policy, IAM deny, permission boundary or missing mapping. Return a typed authority gap and stop.
+4. Provider configuration and IAM bindings require post-mutation read-back; failed read-back is not success.
+5. No user-supplied key material in chat, source control, bundle, or evidence.
+6. WIF bootstrap success is not GCP workload deployment qualification. Workload services, scoped IAM synthesis, deployment, rollback and physical receipts remain outstanding.
+7. Preserve central legal authority `https://policies.airroofers.eu` and Air Roofers AeroBill/Mandatag entitlement authority.
+8. Keep changes on this dedicated branch; do not directly modify `master` or `phase4/production-hardening`.
+
+### Required verification
+Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR on the exact final SHA. Then conduct authorized GCP staging qualification with read-back evidence before making any deployment-support claim.
+
+- **Additional hardening:** read back enabled APIs and the WIF pool; verify the repository-restricted provider before adding the impersonation binding; refuse to attach federation to an existing service account with direct project-level grants. Prefer a fresh dedicated account and inspect inherited organization/folder IAM before any workload use.
+- **Regression coverage:** a mocked successful bootstrap must pass API/pool/provider/IAM read-back; an existing privileged service account must be rejected before the WIF binding is added.

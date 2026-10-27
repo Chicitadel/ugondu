@@ -10,7 +10,8 @@
     "policy_pack_contract": ".governance/platform/bootstrap/policy-pack-contract.json",
     "resource_authorization_catalogue": "docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md",
     "implementation_specification": "docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md",
-    "change_guardrail": "docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md"
+    "change_guardrail": "docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md",
+    "gcp_one_step_bootstrap": "scripts/bootstrap/gcp-one-step-bootstrap.mjs"
   },
   "required_package_contents": [
     {
@@ -84,6 +85,30 @@
       "path": ".governance/platform/bootstrap/schemas/policy-pack.schema.json",
       "required": true,
       "purpose": "Formal JSON Schema for a rendered plan-bound policy pack."
+    },
+    {
+      "id": "gcp-one-step-bootstrap-profile",
+      "path": ".governance/platform/bootstrap/gcp-bootstrap-profile.json",
+      "required": true,
+      "purpose": "One-command GCP WIF bootstrap contract, plan approval, read-back and no-admin-grant invariants."
+    },
+    {
+      "id": "gcp-one-step-bootstrap-runtime",
+      "path": "scripts/bootstrap/gcp-one-step-bootstrap.mjs",
+      "required": true,
+      "purpose": "Plan-bound, repository-restricted GCP workload identity federation bootstrap."
+    },
+    {
+      "id": "gcp-one-step-bootstrap-regression",
+      "path": "tests/gcp-one-step-bootstrap.test.mjs",
+      "required": true,
+      "purpose": "Regression coverage for target binding, digest approval, invalid identifiers and fail-closed behavior."
+    },
+    {
+      "id": "gcp-bootstrap-safety-workflow",
+      "path": ".github/workflows/gcp-bootstrap-safety.yml",
+      "required": true,
+      "purpose": "Exact-SHA automated GCP bootstrap safety regression workflow."
     }
   ],
   "bundle_invariants": {

@@ -44,24 +44,30 @@ import type { ExtendedEnvironmentTwin } from '../../twin/model/schema';
 export const DirectAdminContract: ProviderCapabilities = {
   provider: 'directadmin',
   kinds: {
-    COMPUTE: { status: 'CONDITIONAL', modes: ['HOSTED_APP'] },
+    // Native hosted-app deployment is intentionally unqualified: the client
+    // cannot install, start and HTTP-health-check arbitrary application images.
+    COMPUTE: { status: 'UNSUPPORTED', modes: [], reasonKey: 'capability_not_implemented_and' },
     NETWORK: {
       status: 'UNSUPPORTED',
       modes: [],
       reasonKey: 'fabric.contract.reason.directadmin_network'
     },
-    DATABASE: { status: 'NATIVE', modes: ['DB'] },
-    STORAGE: { status: 'NATIVE', modes: ['FILE'] }
+    // Database create/delete remain disabled until provider-native read-back
+    // and ownership/provenance verification are implemented.
+    DATABASE: { status: 'UNSUPPORTED', modes: [], reasonKey: 'capability_not_implemented_and' },
+    // Private directory creation is available, but complete storage lifecycle
+    // and safe deletion are not yet qualified.
+    STORAGE: { status: 'CONDITIONAL', modes: ['FILE'], reasonKey: 'capability_not_implemented_and' }
   },
-  databaseEngines: ['mysql'],
+  databaseEngines: [],
   storageClasses: ['FILE'],
   publicStorageClasses: [],
   supportsDryRun: false,
-  supportsRollback: true,
+  supportsRollback: false,
   supportsIdempotency: false,
   supportsImport: false,
   supportsUpdate: false,
-  supportsDelete: true,
+  supportsDelete: false,
 };
 
 export interface IDirectAdminClient {

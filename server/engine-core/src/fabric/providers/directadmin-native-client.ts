@@ -115,28 +115,39 @@ export class DirectAdminNativeClient implements IDirectAdminClient {
   }
 
   public async createDatabase(name: string, type: string): Promise<{ id: string; state: string }> {
-    const safeName = this.validatePathSegment(name, 'database_name');
+    this.validatePathSegment(name, 'database_name');
     if (type !== 'mysql' && type !== 'mariadb') {
       throw new Error(__t('messages.error.directadmin_database_engine_unsupported', { type }));
     }
-    await this.execCmd(`da api create db ${this.escapeShell(safeName)}`);
-    return { id: safeName, state: 'running' };
+    // The current adapter has no verified create/read-back/ownership protocol.
+    // Do not mutate a live account or claim a database exists until that
+    // provider-native lifecycle is implemented and qualified.
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async removeDatabase(id: string): Promise<void> {
-    const safeId = this.validatePathSegment(id, 'database_id');
-    await this.execCmd(`da api drop db ${this.escapeShell(safeId)}`);
+    this.validatePathSegment(id, 'database_id');
+    // A syntactically safe identifier is not proof that Ugondu owns the DB.
+    // Destructive operations remain disabled until provenance and read-back
+    // are available from the provider-native adapter.
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async createAccountFILE(name: string): Promise<{ id: string; state: string }> {
     const safeName = this.validatePathSegment(name, 'storage_name');
-    await this.execCmd(`mkdir -p -- /home/${this.escapeShell(this.username)}/ugondu_storage/${this.escapeShell(safeName)}`);
+    const storageRoot = `/home/${this.escapeShell(this.username)}/ugondu_storage`;
+    const target = `${storageRoot}/${this.escapeShell(safeName)}`;
+    // mkdir (without -p on the target) fails if the target already exists,
+    // avoiding a false ownership claim over pre-existing account data.
+    await this.execCmd(`mkdir -p -- ${storageRoot} && mkdir -- ${target} && test -d ${target} && test -w ${target}`);
     return { id: safeName, state: 'running' };
   }
 
   public async removeAccountFILE(id: string): Promise<void> {
-    const safeId = this.validatePathSegment(id, 'storage_id');
-    await this.execCmd(`rm -rf -- /home/${this.escapeShell(this.username)}/ugondu_storage/${this.escapeShell(safeId)}`);
+    this.validatePathSegment(id, 'storage_id');
+    // No durable ownership/provenance registry exists yet. Never rm -rf a
+    // caller-selected directory just because its identifier is syntactically safe.
+    throw new Error(__t('capability_not_implemented_and'));
   }
 
   public async createSnapshot(req: any): Promise<string> {

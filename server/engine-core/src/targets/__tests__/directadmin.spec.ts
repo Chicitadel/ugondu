@@ -63,6 +63,13 @@ describe('DirectAdmin native client safety and truthful status', () => {
     // The adapter never used to execute the image or verify HTTP health; a
     // successful mkdir must not be presented as a running application.
   });
+  it('fails closed for database lifecycle and destructive storage operations without read-back/ownership proof', async () => {
+    const client = new DirectAdminNativeClient('da.example.net', 22, 'safeuser', '/tmp/test-key');
+
+    await expect(client.createDatabase('safe_db', 'mysql')).rejects.toThrow();
+    await expect(client.removeDatabase('safe_db')).rejects.toThrow();
+    await expect(client.removeAccountFILE('safe_storage')).rejects.toThrow();
+  });
 });
 
 describe('DirectAdmin Target & Environment Twin Governance Specifications', () => {
