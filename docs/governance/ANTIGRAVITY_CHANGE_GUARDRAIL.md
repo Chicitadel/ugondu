@@ -414,3 +414,12 @@ The bundle manifest is the single required-artifact inventory for the universal 
 4. Never claim live deployment/health from a staged artifact, a directory, or generated JSON alone.
 5. Do not modify `master` or `phase4/production-hardening` directly; keep the work isolated in the dedicated branch and PR.
 6. Universal COR remains **NOT CERTIFIED** until authentic, candidate-bound AWS, GCP/Azure, AI fleet, DirectAdmin host and immutable artifact lifecycle evidence is reviewed.
+
+
+### UG-DIRECTADMIN-RESOURCE-LIFECYCLE-002 — fail closed on unqualified provider operations
+
+- **Confirmed risks:** DirectAdmin database create/delete reported success without provider read-back/ownership proof; storage removal used `rm -rf` based only on a validated identifier; capability metadata overstated compute/database/delete/rollback support.
+- **Code:** `server/engine-core/src/fabric/providers/directadmin-native-client.ts` now refuses unqualified database create/delete and storage deletion. Storage creation rejects an existing target and verifies directory presence/writability before returning. `server/engine-core/src/fabric/providers/directadmin.ts` now accurately marks hosted-app and database operations unsupported, storage conditional, and rollback/delete unsupported.
+- **Tests:** `server/engine-core/src/targets/__tests__/directadmin.spec.ts` adds negative regression assertions for unqualified mutations. Run the engine-core workspace suite and full CI/COR on the final exact SHA.
+- **Anti-drift:** Do not re-enable these operations by removing the fail-closed checks. Re-enable only after a durable ownership/provenance ledger, provider-native read-back, safe rollback, localized typed errors, positive/negative adapter tests, and authorized physical qualification exist.
+- **Status:** IMPLEMENTED IN CODE / EXACT-HEAD FULL CI-COR PENDING. No DirectAdmin DB/app lifecycle certification is implied.
