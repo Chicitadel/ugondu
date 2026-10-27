@@ -423,3 +423,34 @@ The bundle manifest is the single required-artifact inventory for the universal 
 - **Tests:** `server/engine-core/src/targets/__tests__/directadmin.spec.ts` adds negative regression assertions for unqualified mutations. Run the engine-core workspace suite and full CI/COR on the final exact SHA.
 - **Anti-drift:** Do not re-enable these operations by removing the fail-closed checks. Re-enable only after a durable ownership/provenance ledger, provider-native read-back, safe rollback, localized typed errors, positive/negative adapter tests, and authorized physical qualification exist.
 - **Status:** IMPLEMENTED IN CODE / EXACT-HEAD FULL CI-COR PENDING. No DirectAdmin DB/app lifecycle certification is implied.
+
+
+## 2026-10-27 Addendum — UG-GCP-BOOTSTRAP-UX-001
+
+**Branch:** `feat/gcp-one-step-bootstrap-2026-10-27`  
+**Handover:** [GCP One-Step Bootstrap Re-audit Handover](../audit/REAUDIT_HANDOVER_GCP_ONE_STEP_BOOTSTRAP_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD TESTS AND COR PENDING / GCP DEPLOYMENT NOT QUALIFIED
+
+### Finding
+The GCP setup path depended on manual console navigation and did not provide a one-command, plan-bound WIF bootstrap comparable to the AWS bootstrap bundle. The operator-facing experience risked confusing inherited organization-level IAM grants with the project's intended least-privilege configuration.
+
+### Physical changes
+- Added `scripts/bootstrap/gcp-one-step-bootstrap.mjs` with read-only plan generation and digest-approved apply.
+- Added a canonical GCP bootstrap profile and registered its runtime, tests and workflow in the universal bundle.
+- Added `npm run bootstrap:gcp` and `npm run test:bootstrap:gcp`.
+- Added regression tests and `.github/workflows/gcp-bootstrap-safety.yml`.
+- Apply mode enables only the bootstrap APIs, creates/reuses a repository-restricted GitHub OIDC provider and dedicated service account, grants only `roles/iam.workloadIdentityUser` to the exact repository principal, and verifies read-back.
+- The bootstrap does not grant Owner, Editor, or workload deployment roles and does not create service-account keys.
+
+### Mandatory invariants
+1. Plan/apply must use the same stable SHA-256 plan digest. Any plan change requires fresh approval.
+2. Never silently switch the active gcloud project. Require explicit target and verify project identity before mutation.
+3. Never widen roles to bypass organization policy, IAM deny, permission boundary or missing mapping. Return a typed authority gap and stop.
+4. Provider configuration and IAM bindings require post-mutation read-back; failed read-back is not success.
+5. No user-supplied key material in chat, source control, bundle, or evidence.
+6. WIF bootstrap success is not GCP workload deployment qualification. Workload services, scoped IAM synthesis, deployment, rollback and physical receipts remain outstanding.
+7. Preserve central legal authority `https://policies.airroofers.eu` and Air Roofers AeroBill/Mandatag entitlement authority.
+8. Keep changes on this dedicated branch; do not directly modify `master` or `phase4/production-hardening`.
+
+### Required verification
+Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR on the exact final SHA. Then conduct authorized GCP staging qualification with read-back evidence before making any deployment-support claim.
