@@ -277,3 +277,27 @@ func TestFetchExecutionRecipeHTTPErrorReturnsFourValuesSafely(t *testing.T) {
 		t.Fatalf("expected empty recipe outputs on error, got env=%v steps=%v raw=%q", env, steps, raw)
 	}
 }
+
+
+func TestVerifyCryptographicBindingsFailsClosedOnMissingInputs(t *testing.T) {
+	state := &ExecutionState{ExecutionId: "exec-bound", TransactionId: "tx-bound"}
+	env := &ExecutionEnvelope{ExecutionId: "exec-bound", TransactionId: "tx-bound"}
+
+	if err := VerifyCryptographicBindings(nil, env); err == nil {
+		t.Fatal("expected nil state to fail closed")
+	}
+	if err := VerifyCryptographicBindings(state, nil); err == nil {
+		t.Fatal("expected nil envelope to fail closed")
+	}
+
+	missingExecution := *env
+	missingExecution.ExecutionId = ""
+	if err := VerifyCryptographicBindings(state, &missingExecution); err == nil {
+		t.Fatal("expected missing envelope executionId to fail closed")
+	}
+	missingTransaction := *env
+	missingTransaction.TransactionId = ""
+	if err := VerifyCryptographicBindings(state, &missingTransaction); err == nil {
+		t.Fatal("expected missing envelope transactionId to fail closed")
+	}
+}
