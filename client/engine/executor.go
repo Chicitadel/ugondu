@@ -417,29 +417,28 @@ func LoadCachedPublicKey(keyId string) (string, error) {
 
 // VerifyCryptographicBindings ensures recipe fields match the persisted transaction state.
 func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) error {
+	// Missing inputs are not a successful verification: callers use this gate when
+	// resuming persisted execution, so fail closed rather than silently bypassing it.
 	if state == nil || env == nil {
-		return nil
+		return fmt.Errorf("%s", i18n.T("invalid_envelope_format"))
 	}
-	if state.ExecutionId != "" && env.ExecutionId != "" && state.ExecutionId != env.ExecutionId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_executionid"), state.ExecutionId, env.ExecutionId)
+	// A populated persisted binding must match exactly. In particular, an empty
+	// envelope value is a mismatch, not a reason to skip the comparison.
+	bindings := []struct {
+		persisted, supplied, token string
+	}{
+		{state.ExecutionId, env.ExecutionId, "msg_cryptographic_binding_mismatch_executionid"},
+		{state.TransactionId, env.TransactionId, "msg_cryptographic_binding_mismatch_transactionid"},
+		{state.PlanHash, env.PlanHash, "msg_cryptographic_binding_mismatch_planhash"},
+		{state.TenantId, env.TenantId, "msg_cryptographic_binding_mismatch_tenantid"},
+		{state.ProjectId, env.ProjectId, "msg_cryptographic_binding_mismatch_projectid"},
+		{state.EnvironmentId, env.EnvironmentId, "msg_cryptographic_binding_mismatch_environme"},
+		{state.PolicyHash, env.PolicyHash, "msg_cryptographic_binding_mismatch_policyhas"},
 	}
-	if state.TransactionId != "" && env.TransactionId != "" && state.TransactionId != env.TransactionId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_transactionid"), state.TransactionId, env.TransactionId)
-	}
-	if state.PlanHash != "" && state.PlanHash != env.PlanHash {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_planhash"), state.PlanHash, env.PlanHash)
-	}
-	if state.TenantId != "" && state.TenantId != env.TenantId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_tenantid"), state.TenantId, env.TenantId)
-	}
-	if state.ProjectId != "" && state.ProjectId != env.ProjectId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_projectid"), state.ProjectId, env.ProjectId)
-	}
-	if state.EnvironmentId != "" && state.EnvironmentId != env.EnvironmentId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_environme"), state.EnvironmentId, env.EnvironmentId)
-	}
-	if state.PolicyHash != "" && state.PolicyHash != env.PolicyHash {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_policyhas"), state.PolicyHash, env.PolicyHash)
+	for _, binding := range bindings {
+		if binding.persisted != "" && binding.persisted != binding.supplied {
+			return fmt.Errorf(i18n.T(binding.token), binding.persisted, binding.supplied)
+		}
 	}
 	return nil
 }
@@ -666,9 +665,14 @@ func verifySignature(envelope string, sigBase64 string, pubKeyPem string) error 
 func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]string, error) {
 	var logs []string
 
+	// Defensive check: nil envelope or missing identity immediately fails closed
+	if env == nil || strings.TrimSpace(env.TransactionId) == "" || strings.TrimSpace(env.ExecutionId) == "" {
+		return logs, fmt.Errorf("%s", i18n.T("err_signature_invalid"))
+	}
+
 	// Step 0 — Cryptographic Pre-Admission (MUST precede all other checks)
 	pubKeyPem := os.Getenv("UGONDU_RECIPE_PUBLIC_KEY")
-	if pubKeyPem == "" && env != nil && env.KeyId != "" {
+	if pubKeyPem == "" && env.KeyId != "" {
 		if cachedPem, err := LoadCachedPublicKey(env.KeyId); err == nil && cachedPem != "" {
 			pubKeyPem = cachedPem
 		}
@@ -676,7 +680,7 @@ func ExecuteRecipe(env *ExecutionEnvelope, steps []map[string]interface{}) ([]st
 	if pubKeyPem == "" {
 		return logs, fmt.Errorf("%s", i18n.T("err_missing_public_key"))
 	}
-	if env == nil || env.Signature == "" || env.CanonicalEnvelope == "" {
+	if env.Signature == "" || env.CanonicalEnvelope == "" {
 		return logs, fmt.Errorf("%s", i18n.T("err_signature_invalid"))
 	}
 	if err := verifySignature(env.CanonicalEnvelope, env.Signature, pubKeyPem); err != nil {

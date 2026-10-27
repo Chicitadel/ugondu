@@ -536,3 +536,22 @@ Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/
 3. Keep the module path authoritative; fix imports rather than renaming the module as a workaround.
 4. Cross-compilation is not native platform lifecycle qualification.
 5. No direct changes to `master` or protected production branches. COR PR validation does not imply physical cloud qualification or public-release certification.
+
+
+## 2026-10-27 Addendum — UG-COR-BINDING-001
+
+**Owner branches:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` & `fix/cor-binding-reaudit-2026-10-27` (PR #37)  
+**Handover:** [Cryptographic binding fail-closed handover](../audit/REAUDIT_HANDOVER_GO_CLIENT_VET_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE & REGRESSION TESTED IN DOCKER CONTAINER
+
+### Confirmed defect
+`VerifyCryptographicBindings` in `client/engine/executor.go` returned nil success when `state` or `env` was nil, and skipped comparisons when the envelope value was empty. This allowed empty envelope inputs to bypass persisted state verification upon resume.
+
+### Physical remediation
+- In `client/engine/executor.go`: nil inputs fail closed with `invalid_envelope_format`. Populated persisted bindings (`ExecutionId`, `TransactionId`, `PlanHash`, `TenantId`, `ProjectId`, `EnvironmentId`, `PolicyHash`) are strictly verified against supplied envelope values; empty supplied envelope values trigger mismatch errors.
+- In `client/engine/executor_test.go`: added `TestVerifyCryptographicBindingsFailsClosedOnMissingInputs` covering nil state, nil envelope, empty executionId, and empty transactionId.
+- In `client/engine/state.go`: `GetTransactionDir` sanitizes input by trimming whitespace and rejecting empty values.
+- Verified in Docker container (`golang:1.22-alpine`):
+  - `go vet ./...`: PASS (0 errors)
+  - `go test -v -run TestVerifyCryptographicBindings ./engine`: PASS (both tests green)
+  - Full client test suite (`cmd`, `engine`, `i18n`): PASS (0.190s)

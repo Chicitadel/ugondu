@@ -277,3 +277,134 @@ func TestFetchExecutionRecipeHTTPErrorReturnsFourValuesSafely(t *testing.T) {
 		t.Fatalf("expected empty recipe outputs on error, got env=%v steps=%v raw=%q", env, steps, raw)
 	}
 }
+
+func TestVerifyCryptographicBindingsFailsClosedOnMissingInputs(t *testing.T) {
+	state := &ExecutionState{ExecutionId: "exec-bound", TransactionId: "tx-bound"}
+	env := &ExecutionEnvelope{ExecutionId: "exec-bound", TransactionId: "tx-bound"}
+
+	if err := VerifyCryptographicBindings(nil, env); err == nil {
+		t.Fatal("expected nil state to fail closed")
+	}
+	if err := VerifyCryptographicBindings(state, nil); err == nil {
+		t.Fatal("expected nil envelope to fail closed")
+	}
+
+	missingExecution := *env
+	missingExecution.ExecutionId = ""
+	if err := VerifyCryptographicBindings(state, &missingExecution); err == nil {
+		t.Fatal("expected missing envelope executionId to fail closed")
+	}
+	missingTransaction := *env
+	missingTransaction.TransactionId = ""
+	if err := VerifyCryptographicBindings(state, &missingTransaction); err == nil {
+		t.Fatal("expected missing envelope transactionId to fail closed")
+	}
+}
+
+func TestExecuteRecipeRobustnessFailClosed(t *testing.T) {
+	// 1. Nil envelope must fail closed without panic
+	if _, err := ExecuteRecipe(nil, nil); err == nil {
+		t.Fatal("expected ExecuteRecipe(nil, ...) to fail closed")
+	}
+
+	// 2. Empty TransactionId must fail closed without panic
+	envEmptyTx := &ExecutionEnvelope{
+		TransactionId: "",
+		ExecutionId:   "exec-1",
+		KeyId:         "key-1",
+	}
+	if _, err := ExecuteRecipe(envEmptyTx, nil); err == nil {
+		t.Fatal("expected empty TransactionId to fail closed")
+	}
+
+	// 3. Whitespace TransactionId must fail closed without panic
+	envWhitespaceTx := &ExecutionEnvelope{
+		TransactionId: "   ",
+		ExecutionId:   "exec-1",
+		KeyId:         "key-1",
+	}
+	if _, err := ExecuteRecipe(envWhitespaceTx, nil); err == nil {
+		t.Fatal("expected whitespace TransactionId to fail closed")
+	}
+
+	// 4. Missing ExecutionId must fail closed without panic
+	envEmptyExec := &ExecutionEnvelope{
+		TransactionId: "tx-1",
+		ExecutionId:   "",
+		KeyId:         "key-1",
+	}
+	if _, err := ExecuteRecipe(envEmptyExec, nil); err == nil {
+		t.Fatal("expected empty ExecutionId to fail closed")
+	}
+
+	// 5. Missing public key must fail closed without panic
+	envMissingKey := &ExecutionEnvelope{
+		TransactionId:     "tx-1",
+		ExecutionId:       "exec-1",
+		KeyId:             "non-existent-key-9999",
+		Signature:         "dGVzdA==",
+		CanonicalEnvelope: `{"transactionId":"tx-1"}`,
+	}
+	os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
+	if _, err := ExecuteRecipe(envMissingKey, nil); err == nil {
+		t.Fatal("expected missing public key to fail closed")
+	}
+
+	// 6. Corrupted signature must fail closed without panic
+	pub, _, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		t.Fatalf("failed to generate key: %v", err)
+	}
+	pubKeyBytes, _ := x509.MarshalPKIXPublicKey(pub)
+	pubKeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: pubKeyBytes,
+	})
+	os.Setenv("UGONDU_RECIPE_PUBLIC_KEY", string(pubKeyPem))
+	defer os.Unsetenv("UGONDU_RECIPE_PUBLIC_KEY")
+
+	envCorruptedSig := &ExecutionEnvelope{
+		TransactionId:     "tx-1",
+		ExecutionId:       "exec-1",
+		KeyId:             "key-1",
+		Signature:         "not-valid-base64!!!",
+		CanonicalEnvelope: `{"transactionId":"tx-1"}`,
+	}
+	if _, err := ExecuteRecipe(envCorruptedSig, nil); err == nil {
+		t.Fatal("expected corrupted signature to fail closed")
+	}
+}
+
+func TestParseRecipeLocallyCorruptedInputs(t *testing.T) {
+	// 1. Empty body must fail closed
+	if _, _, err := ParseRecipeLocally([]byte(""), ""); err == nil {
+		t.Fatal("expected empty recipe body to fail closed")
+	}
+
+	// 2. Corrupted JSON body must fail closed
+	if _, _, err := ParseRecipeLocally([]byte("{not-json"), ""); err == nil {
+		t.Fatal("expected corrupted JSON recipe body to fail closed")
+	}
+
+	// 3. Corrupted CanonicalEnvelope JSON must fail closed
+	recipeBadEnvelope := ExecutionRecipe{
+		CanonicalEnvelope: "{not-valid-envelope-json",
+		CanonicalSteps:    "[]",
+		Signature:         "dGVzdA==",
+	}
+	rawBadEnv, _ := json.Marshal(recipeBadEnvelope)
+	if _, _, err := ParseRecipeLocally(rawBadEnv, ""); err == nil {
+		t.Fatal("expected corrupted canonical envelope to fail closed")
+	}
+
+	// 4. Missing key and empty apiURL must fail closed
+	recipeNoKey := ExecutionRecipe{
+		CanonicalEnvelope: `{"keyId":"non-existent-key-offline"}`,
+		CanonicalSteps:    "[]",
+		Signature:         "dGVzdA==",
+	}
+	rawNoKey, _ := json.Marshal(recipeNoKey)
+	if _, _, err := ParseRecipeLocally(rawNoKey, ""); err == nil {
+		t.Fatal("expected missing key without apiURL to fail closed")
+	}
+}
