@@ -58,7 +58,10 @@ if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVI
             if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/\\n/g, '\n');
         }
     }
-    if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
+    for (const k of Object.keys(process.env)) {
+        if (process.env[k] === '<placeholder>') delete process.env[k];
+    }
+    if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY) {
         const { generateKeyPairSync } = require('crypto');
         const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
         process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY = privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();

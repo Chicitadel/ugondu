@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { JsonLicenseDatabase, resolveLicenseStoreDirectory } from './db';
+import { JsonLicenseDatabase, resolveLicenseStoreDirectory } from '../db';
 
 describe('Portable persistent license-store contract', () => {
   let root: string;

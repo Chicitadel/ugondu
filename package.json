@@ -26,7 +26,7 @@
     "test:e2e": "npm --workspace=server/tests run test",
     "test:security": "node tests/security-regression.test.js && node tests/ssrf-execution.test.js && node tests/passport-cryptography.test.js",
     "test:policy-pack-boundary": "node --test tests/policy-pack-path-containment.test.mjs",
-    "test:bootstrap-fail-closed": "node --test tests/qualification/bootstrap-fail-closed.test.mjs",
+    "test:bootstrap-fail-closed": "node --test tests/qualification/bootstrap-fail-closed.test.mjs tests/bootstrap-bundle-integrity.test.mjs",
     "test:compatibility": "node tests/language-packs.test.js && node tests/provider-compilation.test.js",
     "test:locales": "node scripts/validate-locales.js",
     "test:aws": "node scripts/run-cor-gates.js",
@@ -43,7 +43,12 @@
     "verify:attribution": "node scripts/governance/verify-ai-attribution.mjs",
     "verify:t03": "node scripts/governance/verify-tokenization-t03.mjs",
     "verify:t04": "node scripts/governance/verify-microservices-t04.mjs",
-    "test:governance": "node --test tests/governance-verifiers.test.mjs"
+    "test:governance": "node --test tests/governance-verifiers.test.mjs",
+    "bootstrap:validate": "node scripts/bootstrap/validate-bundle.mjs",
+    "bootstrap:validate:strict": "node scripts/bootstrap/validate-bundle.mjs --strict",
+    "test:bootstrap-bundle": "node --test tests/bootstrap-bundle-integrity.test.mjs",
+    "bootstrap:gcp": "node scripts/bootstrap/gcp-one-step-bootstrap.mjs",
+    "test:bootstrap:gcp": "node --test tests/gcp-one-step-bootstrap.test.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

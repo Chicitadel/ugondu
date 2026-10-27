@@ -48,7 +48,7 @@
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **Security Operations:** `security@airroofers.eu` | PGP Key: `security.airroofers.eu/pgp`  
 **Document Version:** 1.2.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

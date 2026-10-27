@@ -32,6 +32,8 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
+
 export interface FailureClassification {
     severity: 'TRANSIENT' | 'RECOVERABLE_STATE_CORRUPTION' | 'CRITICAL_DATA_LOSS' | 'IRREVERSIBLE_SIDE_EFFECT' | string;
 }

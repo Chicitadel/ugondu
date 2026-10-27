@@ -240,7 +240,7 @@ func RenderEnvelope(opts *CLIOptions, env *CLIOutputEnvelope) {
 		rendered = strings.TrimRight(sb.String(), "\n")
 	default:
 		var sb strings.Builder
-		sb.WriteString(i18n.T("status_border") + "\n")
+		sb.WriteString(fmt.Sprintf("%s\n", i18n.T("status_border")))
 		sb.WriteString(fmt.Sprintf("COMMAND      : %s %s\n", env.Command, env.Subcommand))
 		sb.WriteString(fmt.Sprintf("STATUS       : %s (ExitCode=%d)\n", env.Status, env.ExitCode))
 		sb.WriteString(fmt.Sprintf("OPERATION ID : %s\n", env.OperationID))
@@ -257,7 +257,7 @@ func RenderEnvelope(opts *CLIOptions, env *CLIOutputEnvelope) {
 			sb.WriteString(fmt.Sprintf("APPROVALS    : %s\n", strings.Join(env.RequiredApprovals, ", ")))
 		}
 		if len(env.Actions) > 0 {
-			sb.WriteString(i18n.T("status_divider") + "\n")
+			sb.WriteString(fmt.Sprintf("%s\n", i18n.T("status_divider")))
 			for idx, act := range env.Actions {
 				sb.WriteString(fmt.Sprintf("  [%d] %-24s target=%-16s status=%s\n", idx+1, act.Type, act.Target, act.Status))
 			}

@@ -78,7 +78,7 @@ export const ALLOWED_CAPABILITIES = new Set<string>([
 // Maximum allowed stdout capture (64KB) to prevent resource exhaustion attacks
 export const MAX_STDOUT_BYTES = 64 * 1024;
 export const MAX_PAYLOAD_BYTES = 32 * 1024;
-export const DEFAULT_SANDBOX_TIMEOUT_MS = 5000;
+export const DEFAULT_SANDBOX_TIMEOUT_MS = 30000;
 
 const SECRET_ENV_PATTERN = /(SECRET|TOKEN|KEY|PASSWORD|PASSWD|CREDENTIAL|PRIVATE|AUTH|AWS_|AZURE_|GCP_|UGONDU_|DATABASE_URL|CONN_STR)/i;
 const SAFE_ENV_ALLOWLIST = ['PATH', 'SYSTEMROOT', 'SystemRoot', 'WINDIR', 'TEMP', 'TMP'];

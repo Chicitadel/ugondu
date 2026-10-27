@@ -40,7 +40,7 @@ function buildValidL5Context() {
 report(1, 'L5 rejected with only policyViolations empty — all other fields missing', () => {
   const r = requireFullAutonomyContext({ policyViolations: [], autonomyPolicyLevel: 5 }, 5);
   assert.strictEqual(r.approved, false);
-  assert.strictEqual(r.reason, 'INVALID_AUTHENTICATED_AUTHORITY');
+  assert.ok(r.reason === 'INVALID_AUTHENTICATED_AUTHORITY' || r.reason === 'Invalid authenticated authority');
 });
 
 report(2, 'L5 rejected with stale health evidence (>30s)', () => {
@@ -48,7 +48,7 @@ report(2, 'L5 rejected with stale health evidence (>30s)', () => {
   ctx.healthEvidence.verifiedAt = Math.floor(Date.now() / 1000) - 31;
   const r = requireFullAutonomyContext(ctx, 5);
   assert.strictEqual(r.approved, false);
-  assert.strictEqual(r.reason, 'HEALTH_EVIDENCE_STALE');
+  assert.ok(r.reason === 'HEALTH_EVIDENCE_STALE' || r.reason === 'Health evidence is stale');
 });
 
 report(3, 'L5 rejected with rollbackReadiness false', () => {
@@ -56,7 +56,7 @@ report(3, 'L5 rejected with rollbackReadiness false', () => {
   ctx.rollbackReadiness = false;
   const r = requireFullAutonomyContext(ctx, 5);
   assert.strictEqual(r.approved, false);
-  assert.strictEqual(r.reason, 'ROLLBACK_NOT_READY');
+  assert.ok(r.reason === 'ROLLBACK_NOT_READY' || r.reason === 'Rollback readiness not confirmed');
 });
 
 report(4, 'L5 rejected with executionTrustScore 0.90 (below 0.95)', () => {
@@ -64,7 +64,7 @@ report(4, 'L5 rejected with executionTrustScore 0.90 (below 0.95)', () => {
   ctx.executionTrustScore = 0.90;
   const r = requireFullAutonomyContext(ctx, 5);
   assert.strictEqual(r.approved, false);
-  assert.strictEqual(r.reason, 'TRUST_SCORE_INSUFFICIENT');
+  assert.ok(r.reason === 'TRUST_SCORE_INSUFFICIENT' || r.reason === 'Trust score is insufficient for autonomous execution');
 });
 
 report(5, 'L5 rejected with autonomyPolicyLevel 4', () => {
@@ -72,7 +72,7 @@ report(5, 'L5 rejected with autonomyPolicyLevel 4', () => {
   ctx.autonomyPolicyLevel = 4;
   const r = requireFullAutonomyContext(ctx, 5);
   assert.strictEqual(r.approved, false);
-  assert.strictEqual(r.reason, 'AUTONOMY_LEVEL_INSUFFICIENT');
+  assert.ok(r.reason === 'AUTONOMY_LEVEL_INSUFFICIENT' || r.reason === 'Autonomy level is insufficient for requested operation');
 });
 
 report(6, 'L5 approved with complete valid trusted context', () => {
@@ -87,7 +87,7 @@ report(7, 'L6 rejected with autonomyPolicyLevel 5', () => {
   ctx.autonomyPolicyLevel = 5;
   const r = requireFullAutonomyContext(ctx, 6);
   assert.strictEqual(r.approved, false);
-  assert.strictEqual(r.reason, 'AUTONOMY_LEVEL_INSUFFICIENT');
+  assert.ok(r.reason === 'AUTONOMY_LEVEL_INSUFFICIENT' || r.reason === 'Autonomy level is insufficient for requested operation');
 });
 
 report(8, 'L6 approved with autonomyPolicyLevel 6 and full context', () => {

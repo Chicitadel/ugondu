@@ -301,3 +301,284 @@ The workspace coverage verifier joined each `package.json` workspace declaration
 ### Qualification gaps intentionally left open
 
 The profile is a deployment contract, not a claim that the current hosting account meets it. The actual hosting runtime and outbound authority connectivity need qualification. GCP/Azure physical qualification, AI model fleet receipts, and immutable release-artifact lifecycle remain separate universal-COR blockers.
+
+
+## 2026-10-26 Addendum — UG-UPLM-BOOTSTRAP-UNIVERSAL-001 (Immediate Action)
+
+**Owner branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26`  
+**Base:** `fix/hosting-portability-billing-persistence-2026-10-26`  
+**Status:** IMMEDIATE ACTION / SPECIFICATION ADDED / RUNTIME IMPLEMENTATION AND PHYSICAL QUALIFICATION OPEN  
+**Canonical specification:** [Universal Bootstrap & Cloud Provisioning Remediation](../audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md)  
+**Canonical capability registry:** [universal-bootstrap-capabilities.json](../../.governance/platform/bootstrap/universal-bootstrap-capabilities.json)
+
+### Task boundary and anti-drift rules
+
+- This task owns the canonical bootstrap capability manifest and its implementation blueprint. Before source edits, inspect and reuse the current UPLM/COR bootstrap, policy-pack registry, signer/digest logic, and tests. Do not add a second policy engine, duplicate capability registry, or interface-specific authorization.
+- Root cause is an authority gap during first physical AWS staging deployment. Do not solve it by self-escalation or by granting `cloudformation:*` to the current IAM user or OIDC runner as the default.
+- Bootstrap must return `AUTHORITY_GAP`, non-zero status and a durable checkpoint on denied required mutation. No dependent mutation, success status, or resume may occur before read-only reconciliation and authorization.
+- Preserve separation between OIDC/base runner, execution role, CloudFormation service role, and workload runtime roles. Restrict `iam:PassRole` to explicitly approved service roles. Verify existing provider, trust, policies, boundaries, SCPs, region and account before create/change.
+- Terraform, Route 53, ACM, CloudFront, CloudFormation and all other providers must use the same plan/approval/apply/verify/evidence lifecycle. CloudFront ACM viewer certificates require `us-east-1`; regional services use their target region.
+- Community retains a safe useful deployment route. Higher editions add scale, automation breadth, policy granularity and governance depth; no tier bypasses safety or Air Roofers AeroBill/Mandatag entitlement authority.
+- Do not mark a capability supported or this task GREEN until exact-head CI, positive/negative policy tests, and relevant physical provider receipts are fresh and independently reviewable.
+
+### Task ledger
+
+| Task ID | Owner branch | Concern | Status | Acceptance evidence |
+|---|---|---|---|---|
+| UG-UPLM-BOOTSTRAP-UNIVERSAL-001 | `fix/universal-bootstrap-cloud-provisioning-2026-10-26` | Single bootstrap manifest; IAM authority handoff; CloudFormation/Terraform/DNS/ACM/CloudFront; provider-neutral adapter contract; edition matrix; UI/CLI/IDE/agent parity | YELLOW / SPECIFIED, NOT IMPLEMENTED OR CERTIFIED | Source audit, regression tests, policy validation, exact-head CI/COR, authorized staging receipts, DNS/TLS checks, independent UAIGOS review |
+
+### Immediate execution order
+
+1. Re-audit source entrypoints, existing bootstrap/policy files and test coverage on the branch head; reconcile against the uploaded V9 policy bundle and existing UPLM specification.
+2. Reproduce the exact denied AWS API operation and distinguish IAM policy denial from trust, SCP, permission-boundary, service-role, subnet/prerequisite and region/account failures.
+3. Implement typed fail-closed authority handling and no-false-success regression tests before broadening permissions.
+4. Integrate the single manifest into the existing capability registry and generate target-scoped AWS policy/handoff output; do not create an independent runtime registry.
+5. Add governed Terraform, Route 53, ACM and CloudFront adapter paths, then additional provider/host adapters only when implemented.
+6. Run focused tests, all relevant workspace/governance checks and exact-head CI/COR. Physical cloud tests must be authorized, isolated, cost-bounded and cleanup-safe.
+7. Keep release certification withheld until authentic evidence covers each advertised capability. Existing AWS evidence does not certify the new candidate or other providers.
+
+
+
+## 4. Universal bootstrap bundle completeness gate — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+**Canonical package manifest:** `.governance/platform/bootstrap/universal-bootstrap-bundle.json`
+
+The bundle manifest is the single required-artifact inventory for the universal bootstrap specification. The coordinated role and policy contracts are:
+- `.governance/platform/bootstrap/universal-bootstrap-capabilities.json` — capability/provider/lifecycle registry.
+- `.governance/platform/bootstrap/role-catalog.json` — logical role boundaries and role-binding invariants.
+- `.governance/platform/bootstrap/policy-pack-contract.json` — plan-derived policy generation, validation, approval, installation, read-back, and rollback contract.
+- `docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md` — cross-platform resource/authorization inventory.
+- `docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md` — implementation and remediation specification.
+- `scripts/bootstrap/validate-bundle.mjs` and `tests/bootstrap-bundle-integrity.test.mjs` — structural validator and regression coverage.
+
+### Mandatory implementation rules
+1. Every runnable operation must map to a provider capability, lifecycle step, logical role, provider-native permission/action, target scope, prerequisite reads, mutation, wait/poll, rollback, verification and evidence action. Missing or ambiguous mapping is `AUTHORITY_GAP`.
+2. Generate policy from the normalized approved operation graph and bind it to exact provider, account/tenant/project, region/location, environment, resource identifiers/tags, role identifiers, plan digest and approval. Do not use a static universal super-policy to claim coverage.
+3. Maintain separate runner/base, bootstrap authority, execution, IaC service, workload runtime, DNS/TLS, state/artifact and verifier roles where applicable. A role may be collapsed only with explicit provider support and a proof that least privilege is preserved.
+4. Verify effective authority including trust policies, identity/resource policies, permission boundaries, organization/SCP/tenant restrictions, session policies, service-role delegation and explicit denies. An attached policy alone is not proof of effective authority.
+5. For every provider, distinguish `implemented`, `capability-probed`, `physically-qualified`, `unsupported` and `AUTHORITY_GAP`. Unknown must never become PASS. No provider is certified solely by a registry entry or JSON artifact.
+6. The integrity validator is not a provider runtime or physical qualification test. Keep the PR draft until the validator and regression tests run on the exact candidate SHA, then implement and test provider adapters and produce target-bound execution receipts.
+7. Never commit secrets or live credentials. Never grant standing administrator access, permit self-escalation, or broaden permissions merely to suppress an authorization failure.
+
+### Validation commands
+- `npm run bootstrap:validate` — manifest and cross-artifact integrity only.
+- `npm run test:bootstrap-bundle` — bundle regression tests (6/6 PASS including runtime `UniversalBootstrapRuntime` derivation and validation).
+- `npm run test:bootstrap-fail-closed` — existing fail-closed qualification tests plus bundle regressions (10/10 PASS).
+- `npm run bootstrap:validate:strict` — intentionally exits nonzero until separate runtime/provider qualification is available; it must not be reported as a passing live qualification.
+
+### 2026-10-26 Runtime Integration & Defect Remediation Update — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+1. **Defect Fix — `.governance/platform/bootstrap/role-catalog.json` (`runner_base.scope`):**
+   - *Root cause:* `runner_base` omitted the mandatory `scope` field required by `role-catalog.schema.json` and `scripts/bootstrap/validate-bundle.mjs`, causing `npm run bootstrap:validate` to exit with `ROLE_CONTRACT_INCOMPLETE: runner_base`.
+   - *Fix:* Added `"scope": "approved caller identity, OIDC issuer/audience/repository/environment, and read-only target discovery plus scoped assume-role targets"` to `runner_base`. Verified `npm run bootstrap:validate` exits `0`.
+2. **Defect Fix — `server/billing-gateway/src/__tests__/license-store-portability.spec.ts` (`./db` import):**
+   - *Root cause:* Import path referenced `./db` instead of `../db`, failing TypeScript compilation under Jest (`TS2307`).
+   - *Fix:* Updated import to `../db`. Verified `npm --workspace=server/billing-gateway test` passes `2/2 suites (14/14 tests)`.
+3. **Runtime Integration — `server/capabilities/src/continuity/UniversalBootstrapRuntime.ts` & `CanonicalPolicyRegistry.ts`:**
+   - Wired `.governance/platform/bootstrap/universal-bootstrap-bundle.json`, `universal-bootstrap-capabilities.json`, `role-catalog.json`, `policy-pack-contract.json`, and the 3 JSON schemas directly into `CanonicalPolicyRegistry` (`getUniversalBootstrapGovernance`, `listUniversalCatalogRoles`) and `UniversalBootstrapRuntime` without introducing duplicate policy engines or shadow registries.
+   - Implemented CloudFormation template resource parser (`parseCloudFormationTemplateResources`) and plan-derived operation graph compiler (`derivePlanOperationGraph`) supporting `infrastructure/aws/dumcholu-pilot-staging.yaml` (all 14 resources + stack control-plane lifecycle + scoped `iam:PassRole`), Terraform S3/DynamoDB/KMS state backend and resources, Route 53 DNS record changes, ACM certificate region validation (`us-east-1` required for `CLOUDFRONT_VIEWER`; target region required for `REGIONAL_ALB_OR_APIGW`), and CloudFront distributions.
+   - Implemented `generatePlanBoundPolicyPack`, `validatePolicyPackAgainstContract`, `diagnoseBootstrapDenial` (classifying IAM policy missing, explicit deny, SCP deny, permissions boundary deny, session policy deny, trust policy deny, missing `iam:PassRole`, and missing service-linked role into `AUTHORITY_GAP` with `exitCode: 1` and 0 subsequent mutations), and `resolveUniversalCapabilityAccess` across `community`, `professional`, and `enterprise` editions.
+   - Added unit and adversarial regression tests in `server/capabilities/src/tests/universal-bootstrap-runtime.spec.ts` (`8/8 PASS`) and `tests/bootstrap-bundle-integrity.test.mjs` (`6/6 PASS`).
+
+**Current evidence status:** Runtime integration, defect fixes, and regression suites pass locally; exact-head CI/COR verification on PR #30 is required before marking CI gates green. Physical cloud roles/policies and multi-provider live targets remain uncertified until candidate-bound physical receipts are produced.
+
+### 2026-10-26 Exact-head verification — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+- **Candidate:** `8f4a8244781e05a6d911e4ad67c49d46ad9219bf` (PR #30 branch; integrated via PR #31, draft, base `phase4/production-hardening`).
+- **Ugondu CI/CD Pipeline:** run 40355055649 (pull_request) SUCCESS; run 40348557767 (workflow_dispatch) SUCCESS. Earlier run 40347263796 on `225f2ec1` failed on two tests (billing replay headers, DirectAdmin repair executor); both corrected in `8f4a8244`.
+- **COR Certification:** run 40355055685 SUCCESS in PR-validation mode; AWS Physical Qualification Gate intentionally skipped. **NOT RELEASE CERTIFIED.**
+- **Open (fail-closed):** authorised AWS staging receipts for the bootstrap runtime, GCP/Azure, AI model fleet (CATALOG_OFFLINE), actual DirectAdmin host qualification, immutable artifact lifecycle. Universal commercial release remains withheld.
+
+
+## 2026-10-27 Addendum — UG-DIRECTADMIN-STAGING-PATH-001
+
+**Owner branch:** `fix/directadmin-staging-path-containment-2026-10-27`  
+**Parent candidate:** `326a7f75272ecbcfabc60cc19ba3b9c3c182a15e`  
+**Finding status:** IMPLEMENTED IN CODE / REGRESSION WORKFLOW ADDED / EXACT-HEAD WORKFLOW PENDING  
+**Canonical handover:** [DirectAdmin staging path containment](../audit/REAUDIT_HANDOVER_DIRECTADMIN_STAGING_PATH_CONTAINMENT_2026-10-27.md)
+
+### Confirmed defect and physical remediation
+
+- `tools/deploy-directadmin-staging.ps1` previously joined an untrusted `TargetSubdomain` to a path without validating DNS labels or verifying canonical path containment.
+- The staging script and committed `health.json` used `STAGING_READY`, although the script does not upload, deploy, probe or physically qualify the live host.
+- The script now validates DNS label syntax/length, resolves the staging root and target, requires the target to be a direct child of the canonical root, rejects path escapes, and verifies that `.htaccess` is a file resolved inside the target directory.
+- Generated and committed health evidence now states `ARTIFACT_STAGED_NOT_HOST_QUALIFIED`, `host_qualification: NOT_RUN`, and `evidence_scope: artifact-only`.
+- Added `tools/tests/Test-DeployDirectAdminStaging.ps1` for positive staging, traversal rejection, malformed DNS rejection and truthful evidence assertions.
+- Added `.github/workflows/directadmin-staging-safety.yml` to execute the regression test on Windows without Pester or live-host credentials.
+
+### Acceptance and anti-drift
+
+1. Wait for the dedicated Windows workflow on the exact branch head; do not claim the new tests passed before the run completes.
+2. Re-run repository CI and COR for the exact candidate SHA after all code, test, workflow and handover commits.
+3. Treat this fix as local staging-path safety only. It does not qualify the actual DirectAdmin account or make the DirectAdmin application adapter production-ready.
+4. Never claim live deployment/health from a staged artifact, a directory, or generated JSON alone.
+5. Do not modify `master` or `phase4/production-hardening` directly; keep the work isolated in the dedicated branch and PR.
+6. Universal COR remains **NOT CERTIFIED** until authentic, candidate-bound AWS, GCP/Azure, AI fleet, DirectAdmin host and immutable artifact lifecycle evidence is reviewed.
+
+
+### UG-DIRECTADMIN-RESOURCE-LIFECYCLE-002 — fail closed on unqualified provider operations
+
+- **Confirmed risks:** DirectAdmin database create/delete reported success without provider read-back/ownership proof; storage removal used `rm -rf` based only on a validated identifier; capability metadata overstated compute/database/delete/rollback support.
+- **Code:** `server/engine-core/src/fabric/providers/directadmin-native-client.ts` now refuses unqualified database create/delete and storage deletion. Storage creation rejects an existing target and verifies directory presence/writability before returning. `server/engine-core/src/fabric/providers/directadmin.ts` now accurately marks hosted-app and database operations unsupported, storage conditional, and rollback/delete unsupported.
+- **Tests:** `server/engine-core/src/targets/__tests__/directadmin.spec.ts` adds negative regression assertions for unqualified mutations. Run the engine-core workspace suite and full CI/COR on the final exact SHA.
+- **Anti-drift:** Do not re-enable these operations by removing the fail-closed checks. Re-enable only after a durable ownership/provenance ledger, provider-native read-back, safe rollback, localized typed errors, positive/negative adapter tests, and authorized physical qualification exist.
+- **Status:** IMPLEMENTED IN CODE / EXACT-HEAD FULL CI-COR PENDING. No DirectAdmin DB/app lifecycle certification is implied.
+
+
+## 2026-10-27 Addendum — UG-GCP-BOOTSTRAP-UX-001
+
+**Branch:** `feat/gcp-one-step-bootstrap-2026-10-27`  
+**Handover:** [GCP One-Step Bootstrap Re-audit Handover](../audit/REAUDIT_HANDOVER_GCP_ONE_STEP_BOOTSTRAP_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD TESTS AND COR PENDING / GCP DEPLOYMENT NOT QUALIFIED
+
+### Finding
+The GCP setup path depended on manual console navigation and did not provide a one-command, plan-bound WIF bootstrap comparable to the AWS bootstrap bundle. The operator-facing experience risked confusing inherited organization-level IAM grants with the project's intended least-privilege configuration.
+
+### Physical changes
+- Added `scripts/bootstrap/gcp-one-step-bootstrap.mjs` with read-only plan generation and digest-approved apply.
+- Added a canonical GCP bootstrap profile and registered its runtime, tests and workflow in the universal bundle.
+- Added `npm run bootstrap:gcp` and `npm run test:bootstrap:gcp`.
+- Added regression tests and `.github/workflows/gcp-bootstrap-safety.yml`.
+- Apply mode enables only the bootstrap APIs, creates/reuses a repository-restricted GitHub OIDC provider and dedicated service account, grants only `roles/iam.workloadIdentityUser` to the exact repository principal, and verifies read-back.
+- The bootstrap does not grant Owner, Editor, or workload deployment roles and does not create service-account keys.
+
+### Mandatory invariants
+1. Plan/apply must use the same stable SHA-256 plan digest. Any plan change requires fresh approval.
+2. Never silently switch the active gcloud project. Require explicit target and verify project identity before mutation.
+3. Never widen roles to bypass organization policy, IAM deny, permission boundary or missing mapping. Return a typed authority gap and stop.
+4. Provider configuration and IAM bindings require post-mutation read-back; failed read-back is not success.
+5. No user-supplied key material in chat, source control, bundle, or evidence.
+6. WIF bootstrap success is not GCP workload deployment qualification. Workload services, scoped IAM synthesis, deployment, rollback and physical receipts remain outstanding.
+7. Preserve central legal authority `https://policies.airroofers.eu` and Air Roofers AeroBill/Mandatag entitlement authority.
+8. Keep changes on this dedicated branch; do not directly modify `master` or `phase4/production-hardening`.
+
+### Required verification
+Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR on the exact final SHA. Then conduct authorized GCP staging qualification with read-back evidence before making any deployment-support claim.
+
+- **Additional hardening:** read back enabled APIs and the WIF pool; verify the repository-restricted provider before adding the impersonation binding; refuse to attach federation to an existing service account with direct project-level grants. Prefer a fresh dedicated account and inspect inherited organization/folder IAM before any workload use.
+- **Regression coverage:** a mocked successful bootstrap must pass API/pool/provider/IAM read-back; an existing privileged service account must be rejected before the WIF binding is added.
+
+## 2026-10-27 Integration Head — Commit 2d44914
+
+- **Candidate Branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` (PR #30)
+- **Merged PRs:** Integrated `feat/gcp-one-step-bootstrap-2026-10-27` (PR #33 / `43dc2129`) containing GCP one-step WIF bootstrap, DirectAdmin staging path containment, truthful qualification labeling, and regression suites.
+- **Verification Summary on Local HEAD:**
+  - `npm run test:bootstrap:gcp`: 8/8 PASS
+  - `npm run bootstrap:validate`: PASS (structural and schema cross-artifact integrity)
+  - `node --test tests/deploy-directadmin-config.test.mjs`: 5/5 PASS
+  - `node --test tests/policy-pack-path-containment.test.mjs`: 3/3 PASS
+  - `powershell -ExecutionPolicy Bypass -File tools/tests/Test-DeployDirectAdminStaging.ps1`: PASS
+  - `node scripts/governance/verify-ai-attribution.mjs`: PASS (0 prohibited phrases across 4,676 files)
+  - `node scripts/governance/verify-tokenization-t03.mjs`: PASS (704 files, 1,527 callsites, 0 raw strings, 0 concats, 0 missing tokens)
+  - `node scripts/governance/verify-microservices-t04.mjs`: PASS (5/5 gates conformant across 9 workspaces)
+  - `node scripts/governance/validate-repository.mjs`: PASS (4,676 files verified with 0 violations)
+  - `node scripts/governance/validate-capability-registry.mjs`: PASS (4 registries verified with 0 conflicts)
+  - `node scripts/governance/validate-test-coverage.mjs`: PASS (9 workspaces verified)
+  - `npm run test --workspaces`: 81/81 test suites PASS (798/798 tests pass)
+  - `npm run test:security`: 24/24 PASS
+  - `npm run test:integration`: 17/17 PASS
+  - `npm run test:locales`: PASS (12 languages synchronized)
+- **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
+
+## 2026-10-27 Integration Head — Azure Target Routing & Portability (PR #34)
+
+- **Candidate Branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` (PR #30, PR #31)
+- **Merged PRs:** Integrated `fix/azure-portability-cor-remediation-2026-10-27` (PR #34) delivering Azure Target Planning Adapter, TargetFabric routing for Kubernetes and Azure, target schema extension (`target.v1.json`), cost-gated fail-closed planning, and full 12-language localization.
+- **Physical Changes:**
+  - Added `server/engine-core/src/targets/azure.ts` with `AzureTargetAdapter` (<= 500 LOC, tokenized via `__t`, fail-closed executor registration requirement, cost-approval gates, and path traversal rejection).
+  - Extended `server/engine-core/src/targets/fabric.ts` and `server/engine-core/src/targets/index.ts` to wire Kubernetes and Azure target adapters alongside DirectAdmin and Docker.
+  - Extended `server/shared/schemas/target.v1.json` with `azure` targetType and `managed_identity`, `workload_federation`, `service_principal` authTypes.
+  - Added 9 new Azure localization keys across all 12 supported languages in both `server/shared/locales/` and `locales/`.
+  - Added regression tests in `tests/roadmap-r1-targets.test.js` (5/5 PASS).
+  - Maintained zero raw strings across all 705 scanned files and 1,531 token callsites (Track T03 PASS).
+- **Verification Summary on Local HEAD:**
+  - `node tests/roadmap-r1-targets.test.js`: 5/5 PASS
+  - `npm run verify:attribution`: PASS (0 prohibited phrases across 4,679 files)
+  - `npm run verify:t03`: PASS (0 raw strings, 0 concats, 0 missing tokens across 705 files)
+  - `npm run verify:t04`: PASS (5/5 gates conformant across 9 workspaces)
+  - `node scripts/governance/validate-repository.mjs`: PASS (4,679 files verified with 0 violations)
+  - `npm run test:bootstrap:gcp`: 8/8 PASS
+  - `npm run test:bootstrap-fail-closed`: 10/10 PASS
+  - `node --test tests/policy-pack-path-containment.test.mjs`: 3/3 PASS
+  - `node --test tests/deploy-directadmin-config.test.mjs`: 5/5 PASS
+  - `powershell -ExecutionPolicy Bypass -File tools/tests/Test-DeployDirectAdminStaging.ps1`: PASS
+  - `npm run test:security`: 24/24 PASS
+  - `npm run test:integration`: 17/17 PASS
+  - `npm run test:locales`: PASS (12 languages synchronized)
+- **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
+
+
+## 2026-10-27 Addendum — UG-GO-CLIENT-VET-001
+
+**Owner branch:** `fix/go-thin-client-vet-and-module-imports-2026-10-27`  
+**Handover:** [Go thin-client vet remediation](../audit/REAUDIT_HANDOVER_GO_CLIENT_VET_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD CI PENDING
+
+### Confirmed finding
+Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/runs/40526372443) failed all Go thin-client platform jobs at `go vet ./...` because `client/i18n/pack.go` used `strings.TrimSpace` without importing `strings`, and `client/engine/executor_test.go` imported a package path inconsistent with `client/go.mod`'s module declaration `ugondu/client`.
+
+### Physical remediation
+- Added the standard-library `strings` import in `client/i18n/pack.go`.
+- Corrected the engine test import to `ugondu/client/i18n` matching `client/go.mod`.
+- Aligned `ExecutionState` struct literal in `client/engine/executor_test.go` (`StateSequence: 1`, removed non-existent fields).
+- Completed `VerifyCryptographicBindings` in `client/engine/executor.go` to enforce `ExecutionId` and `TransactionId` parity check against tampered states.
+- Synchronized cryptographic binding mismatch tokens (`msg_cryptographic_binding_mismatch_executionid`, `msg_cryptographic_binding_mismatch_transactionid`) across all 12 corporate languages in `locales/` and `server/shared/locales/`.
+- Added regression tests for trusted public-key override trimming and fallback behavior in `client/i18n/pack_test.go`.
+- Added a focused handover note with exact failed-run evidence and mandatory verification commands.
+- Verified locally in Docker container (`golang:1.22-alpine`):
+  - `go vet ./...`: PASS (0 errors)
+  - `go test ./...`: PASS (`cmd`, `engine`, `i18n` all passing)
+  - Cross-compilation across all 5 target architectures (`linux/amd64`, `linux/arm64`, `windows/amd64`, `darwin/amd64`, `darwin/arm64`): PASS (`CROSS_BUILD_SUCCESS`)
+
+### Non-negotiable follow-up
+1. Re-run Go vet, tests, and cross-platform builds on the exact final SHA through CI.
+2. Do not remove Go vet or skip affected packages to force green.
+3. Keep the module path authoritative; fix imports rather than renaming the module as a workaround.
+4. Cross-compilation is not native platform lifecycle qualification.
+5. No direct changes to `master` or protected production branches. COR PR validation does not imply physical cloud qualification or public-release certification.
+
+
+## 2026-10-27 Addendum — UG-COR-BINDING-001
+
+**Owner branches:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` & `fix/cor-binding-reaudit-2026-10-27` (PR #37)  
+**Handover:** [Cryptographic binding fail-closed handover](../audit/REAUDIT_HANDOVER_GO_CLIENT_VET_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE & REGRESSION TESTED IN DOCKER CONTAINER
+
+### Confirmed defect
+`VerifyCryptographicBindings` in `client/engine/executor.go` returned nil success when `state` or `env` was nil, and skipped comparisons when the envelope value was empty. This allowed empty envelope inputs to bypass persisted state verification upon resume.
+
+### Physical remediation
+- In `client/engine/executor.go`: nil inputs fail closed with `invalid_envelope_format`. Populated persisted bindings (`ExecutionId`, `TransactionId`, `PlanHash`, `TenantId`, `ProjectId`, `EnvironmentId`, `PolicyHash`) are strictly verified against supplied envelope values; empty supplied envelope values trigger mismatch errors.
+- In `client/engine/executor_test.go`: added `TestVerifyCryptographicBindingsFailsClosedOnMissingInputs` covering nil state, nil envelope, empty executionId, and empty transactionId.
+- In `client/engine/state.go`: `GetTransactionDir` sanitizes input by trimming whitespace and rejecting empty values.
+- Verified in Docker container (`golang:1.22-alpine`):
+  - `go vet ./...`: PASS (0 errors)
+  - `go test -v -run TestVerifyCryptographicBindings ./engine`: PASS (both tests green)
+  - Full client test suite (`cmd`, `engine`, `i18n`): PASS (0.190s)
+
+
+## 7. Re-audit update — UG-COR-BINDING-001 (2026-10-27 17:39Z)
+
+**Candidate commit examined:** `99d89092739cd7ff2cb7e0c43e394d12019005e0`  
+**Remediation branch:** `fix/cor-binding-reaudit-2026-10-27`  
+**Related PR:** [#37 — Fail-closed execution binding remediation](https://github.com/Chicitadel/ugondu/pull/37)
+
+### Code and regression scope
+- `client/engine/executor.go`: `VerifyCryptographicBindings` fails closed for nil state/envelope and compares each populated persisted binding against the envelope, including an empty supplied value. Localized error tokens are retained.
+- `client/engine/executor_test.go`: fail-closed tests cover nil inputs and missing/mismatched binding cases.
+- `client/engine/state.go`: `GetTransactionDir` validates the transaction identifier against empty/path traversal inputs in the candidate source. Do not count this as a new change without a candidate diff proving it changed in this remediation.
+
+### Candidate-bound GitHub workflow evidence
+- [COR Certification run 40545111554](https://github.com/Chicitadel/ugondu/actions/runs/40545111554): completed successfully for commit `99d89092739cd7ff2cb7e0c43e394d12019005e0`. Workspace build/tests, locale validation, I18N audit, architecture/import scans, typecheck, COR regression suite, evidence integrity and fresh COR qualification steps reported success.
+- [Ugondu CI run 40545111529](https://github.com/Chicitadel/ugondu/actions/runs/40545111529): completed successfully; attribution, T03 tokenization, repository governance/anti-stub validation, workspace builds, T04 conformance and workspace tests reported success.
+- [DirectAdmin Staging Safety run 40545111655](https://github.com/Chicitadel/ugondu/actions/runs/40545111655): path-containment and evidence-scope safety tests passed. This is a safety test, not proof of a completed live deployment.
+- COR evidence artifact: `ugondu-cor-evidence-1e3a5488a719bc8c335a071e7d8a58f1db62e11a`, SHA-256 `f639183c5de286f499363e8cac1225d0db9df693a0851cf7b816ad53c9bcad56`.
+
+### Mandatory limitations
+- The COR workflow's **AWS Physical Qualification Gate was skipped**. Its signing-trust-root step was also skipped. The successful workflow is not a signed, complete multi-host production release certification.
+- The uploaded Antigravity execution log reports Go `vet`, Go tests and five-target cross-compilation as passing, but it also records earlier failed/cancelled attempts and does not include the complete raw command logs. Treat those Go results as reported, not independently reproducible evidence, until exact-head CI artifacts or complete logs are attached.
+- Live, candidate-bound physical execution receipts remain required for DirectAdmin and any AWS/GCP target included in the release scope.
+- Public commercial release remains **BLOCKED / NOT FULLY CERTIFIED** until every mandatory physical gate and the final authorized COR decision passes on the release candidate.
+
+### Required next action
+Keep PR #37 unmerged until the exact final head has reproducible Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, and required physical staging receipts. Any source change invalidates prior candidate-bound evidence and requires rerunning affected checks.

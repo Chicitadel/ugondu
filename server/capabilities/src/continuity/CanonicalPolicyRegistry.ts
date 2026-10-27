@@ -28,6 +28,11 @@
  ******************************************************************************/
 
 import * as crypto from 'crypto';
+import {
+  UniversalBootstrapRuntime,
+  type LoadedUniversalBootstrapGovernance,
+  type UniversalRoleCatalogEntry,
+} from './UniversalBootstrapRuntime';
 
 export interface CanonicalRoleDefinition {
   roleName: string;
@@ -138,6 +143,14 @@ export class CanonicalPolicyRegistry {
 
   public getPolicyPack(packId: string): PolicyPackManifest | undefined {
     return this.policyPacks.get(packId);
+  }
+
+  public getUniversalBootstrapGovernance(customRootDir?: string): LoadedUniversalBootstrapGovernance {
+    return UniversalBootstrapRuntime.loadUniversalBootstrapBundle(customRootDir);
+  }
+
+  public listUniversalCatalogRoles(customRootDir?: string): UniversalRoleCatalogEntry[] {
+    return UniversalBootstrapRuntime.loadUniversalBootstrapBundle(customRootDir).roleCatalog.roles;
   }
 
   /**

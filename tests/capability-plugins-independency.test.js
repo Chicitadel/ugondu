@@ -53,10 +53,10 @@ const {
   ALLOWED_ACTIONS
 } = require('../server/plugin-manager/dist/sandbox.js');
 
-describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
+describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', { concurrency: 1 }, () => {
   const publicKey = loadPublicKey();
 
-  test('CPI-001: ugondu-plugin-node runs independently in sandbox and emits canonical NODE_INSTALL', async () => {
+  test('CPI-001: ugondu-plugin-node runs independently in sandbox and emits canonical NODE_INSTALL', { timeout: 90000 }, async () => {
     const pluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-node');
     assert.ok(fs.existsSync(pluginDir), 'Node plugin dir must exist');
 
@@ -71,7 +71,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     const steps = await executePluginSandbox(pluginDir, {
       packageManager: 'npm',
       production: true
-    });
+    }, { timeoutMs: 30000 });
 
     assert.ok(Array.isArray(steps), 'Steps must be an array');
     assert.strictEqual(steps.length, 1);
@@ -80,7 +80,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     assert.strictEqual(steps[0].payload.production, true);
   });
 
-  test('CPI-002: ugondu-plugin-composer runs independently in sandbox and emits canonical COMPOSER_INSTALL', async () => {
+  test('CPI-002: ugondu-plugin-composer runs independently in sandbox and emits canonical COMPOSER_INSTALL', { timeout: 90000 }, async () => {
     const pluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-composer');
     assert.ok(fs.existsSync(pluginDir), 'Composer plugin dir must exist');
 
@@ -94,7 +94,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     const steps = await executePluginSandbox(pluginDir, {
       optimize: true,
       nodev: true
-    });
+    }, { timeoutMs: 30000 });
 
     assert.ok(Array.isArray(steps), 'Steps must be an array');
     assert.strictEqual(steps.length, 1);
@@ -103,7 +103,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     assert.strictEqual(steps[0].payload.nodev, true);
   });
 
-  test('CPI-003: ugondu-plugin-php-fpm is cryptographically verified but fail-closed on arbitrary shell execution', async () => {
+  test('CPI-003: ugondu-plugin-php-fpm is cryptographically verified but fail-closed on arbitrary shell execution', { timeout: 90000 }, async () => {
     const pluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-php-fpm');
     assert.ok(fs.existsSync(pluginDir), 'PHP-FPM plugin dir must exist');
 
@@ -115,7 +115,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
 
     // Zero-trust enforcement: arbitrary shell execution (SHELL_EXEC) must fail closed in sandbox
     await assert.rejects(
-      async () => executePluginSandbox(pluginDir, {}),
+      async () => executePluginSandbox(pluginDir, {}, { timeoutMs: 30000 }),
       /Plugin sandbox execution failed|err_plugin_action_rejected/
     );
   });

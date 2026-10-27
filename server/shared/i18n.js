@@ -108,6 +108,9 @@ function getLocalesDirectories() {
  */
 function flattenDictionary(source, prefix = '', target = {}) {
     for (const [key, value] of Object.entries(source)) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            continue;
+        }
         const token = prefix ? `${prefix}.${key}` : key;
         if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
             flattenDictionary(value, token, target);

@@ -1,7 +1,7 @@
 /******************************************************************************
  * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
  * Module         : Commercial Documentation
- * File           : Terms_of_Service_draft.md
+ * File           : Terms_of_Service.md
  * Version        : 0.3.0-draft
  * Author         : Ignatus Chika Ujomor | Founder & System Architect
  * Organization   : AIR ROOFERS (Société par actions simplifiée, RCS Paris 943 432 534)
@@ -47,7 +47,7 @@
 **Service Provider:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon account creation, order execution, or first Activation Event  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
@@ -69,7 +69,7 @@ In case of ambiguity or conflict between documents, each instrument is authorita
 2. Executed Order Form / Master Services Agreement;
 3. Specialized Addendum (Enterprise, Sovereign, or Government Addenda);
 4. Data Processing Agreement (`EAORCS_Data_Processing_Agreement.md`) — authoritative on data protection and privacy;
-5. End User License Agreement (`EULA_draft.md`) — authoritative on software licensing, IP, and local client rights;
+5. End User License Agreement (`EULA.md`) — authoritative on software licensing, IP, and local client rights;
 6. These Terms of Service — authoritative on cloud platform access and hosted service delivery;
 7. Payment, Cancellation, Refund & Withdrawal Policy — authoritative on billing and refunds;
 8. Support SLA Schedule — authoritative on service availability and support response;

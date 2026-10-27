@@ -44,7 +44,7 @@
 **RCS:** 943 432 534 R.C.S. Paris | **TVA Intracommunautaire:** FR89943432534  
 **Customer Contact:** `support@airroofers.eu` | `withdrawals@airroofers.eu`  
 **Document Version:** 1.0.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

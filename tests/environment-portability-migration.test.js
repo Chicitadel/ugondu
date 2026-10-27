@@ -140,6 +140,9 @@ describe('BOUNDARY-16: Universal Environment Portability, DirectAdmin Twin Disco
       domains: ['app.client.com'],
       subdomains: ['api.client.com', 'staging.client.com'],
       databases: ['client_prod_db'],
+      dnsManagementAvailable: true,
+      tlsAvailable: true,
+      ftpAvailable: true,
       // Attempt to inject unverified claims — discovery must refuse to guess and report UNKNOWN
       unverifiedClaims: {
         rootAccess: 'AVAILABLE',
@@ -223,6 +226,16 @@ describe('BOUNDARY-16: Universal Environment Portability, DirectAdmin Twin Disco
       domains: ['app.client.com'],
       subdomains: ['api.client.com', 'staging.client.com'],
       databases: ['client_prod_db'],
+      dnsManagementAvailable: true,
+      tlsAvailable: true,
+      backups: [
+        {
+          backupId: 'da-backup-env-da-shared-prod',
+          status: 'ACTIVE',
+          lastBackupAt: Date.now(),
+          retentionDays: 14,
+        },
+      ],
       probedCapabilities: {
         rootAccess: { probed: true, verified: true, value: false },
       },

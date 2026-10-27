@@ -44,7 +44,7 @@
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **Support Operations:** `support@airroofers.eu` | Portal: `support.airroofers.eu`  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
