@@ -28,6 +28,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 let passed = 0;
 let failed = 0;
@@ -43,6 +44,15 @@ function reportFail(name, err) {
 }
 
 async function runLocalizationTests() {
+    const previousLocalesDir = process.env.UGONDU_LOCALES_DIR;
+    const isolatedLocalesDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-locales-dropin-'));
+    process.env.UGONDU_LOCALES_DIR = isolatedLocalesDir;
+    process.once('exit', () => {
+        try { fs.rmSync(isolatedLocalesDir, { recursive: true, force: true }); } catch (_) { /* best-effort temp cleanup */ }
+        if (previousLocalesDir === undefined) delete process.env.UGONDU_LOCALES_DIR;
+        else process.env.UGONDU_LOCALES_DIR = previousLocalesDir;
+    });
+
     console.log('══════════════════════════════════════════════════════════════');
     console.log(' Ugondu Air Roofers Global Governance: Localization Suite    ');
     console.log(' Standards: Zero String Hardcoding & Drop-In [lang] Locales   ');
@@ -83,8 +93,8 @@ async function runLocalizationTests() {
         reportFail('[lang] token injection and formatting', e);
     }
 
-    // Test 3: Drop-in Activation (Drop Japanese ja.json on server with ZERO code change)
-    const localesDir = path.resolve(__dirname, '../locales');
+    // Test 3: Drop-in Activation (add a non-core locale without mutating repository files)
+    const localesDir = isolatedLocalesDir;
     const customLang = 'sw';
     const dropinPath = path.join(localesDir, `${customLang}.json`);
 
@@ -131,7 +141,7 @@ async function runLocalizationTests() {
         reportFail('Graceful fallback resilience', e);
     }
 
-    // Test 5: Drop-in Deactivation (Delete ja.json)
+    // Test 5: Drop-in Deactivation (delete the isolated custom locale)
     try {
         if (fs.existsSync(dropinPath)) { fs.unlinkSync(dropinPath); }
 
