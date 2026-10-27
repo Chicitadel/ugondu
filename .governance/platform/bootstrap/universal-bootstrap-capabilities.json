@@ -103,13 +103,22 @@
       ]
     },
     "gcp": {
-      "status": "unqualified-until-physical-receipts",
+      "status": "bootstrap-identity-setup-implemented; workload-deployment-unqualified-until-physical-receipts",
       "capabilities": [
         "organization-project-region-discovery",
         "workload-identity",
         "Terraform",
         "DNS-TLS",
         "deployment-verification"
+      ],
+      "bootstrap_profile": ".governance/platform/bootstrap/gcp-bootstrap-profile.json",
+      "bootstrap_entrypoint": "npm run bootstrap:gcp",
+      "bootstrap_invariants": [
+        "plan-digest-approval",
+        "exact-github-repository-oidc-condition",
+        "no-owner-or-editor-grants",
+        "no-workload-deployment-roles-by-default",
+        "post-mutation-readback"
       ]
     },
     "kubernetes": {
