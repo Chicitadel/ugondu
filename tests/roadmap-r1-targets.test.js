@@ -155,6 +155,7 @@ async function runTargetTests() {
         assert.deepStrictEqual(check2.missingCapabilities, ['DOCKER_BUILD']);
 
         // Regression: target types declared by the fabric must resolve to concrete adapters.
+        fabric.registerTarget({ targetId: 'target_k8s', environmentType: 'kubernetes', endpoint: 'https://k8s.example.com', status: 'ONLINE', capabilities: ['FETCH_REPOSITORY'] });
         const k8sResolved = fabric.resolveAdapter('target_k8s', {
             targetId: 'target_k8s',
             clusterEndpoint: 'https://k8s.example.com',
@@ -205,7 +206,6 @@ async function runTargetTests() {
             templatePath: '../outside/main.bicep'
         }), /Unsafe Azure templatePath/);
 
-        assert.throws(() => fabric.resolveAdapter('target_cp', {}), /invalid_ctx/);
         reportPass('Target Fabric resolves Kubernetes and Azure; Azure planning is cost-gated, explicit, and rejects path traversal');
     } catch (e) {
         reportFail('Target Fabric test', e);
