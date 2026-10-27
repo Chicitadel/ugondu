@@ -16,8 +16,10 @@ import { __t } from '@ugondu/shared';
 import { CPanelTargetAdapter } from './cpanel';
 import { SshTargetAdapter } from './ssh';
 import { DockerTargetAdapter } from './docker';
+import { KubernetesTargetAdapter } from './k8s';
+import { AzureTargetAdapter } from './azure';
 
-export type TargetEnvironmentType = 'cpanel' | 'directadmin' | 'ssh' | 'docker' | 'kubernetes' | 'cloud' | 'baremetal';
+export type TargetEnvironmentType = 'cpanel' | 'directadmin' | 'ssh' | 'docker' | 'kubernetes' | 'azure' | 'cloud' | 'baremetal';
 
 export interface TargetDescriptor {
     targetId: string;
@@ -56,6 +58,10 @@ export class TargetFabric {
                 return new SshTargetAdapter(config as any);
             case 'docker':
                 return new DockerTargetAdapter(config as any);
+            case 'kubernetes':
+                return new KubernetesTargetAdapter(config as any);
+            case 'azure':
+                return new AzureTargetAdapter(config as any);
             default:
                 throw new Error(__t('action_unknown', target.environmentType));
         }
