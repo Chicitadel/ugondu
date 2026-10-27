@@ -81,3 +81,5 @@ export class SOVEREIGNAccessControl {
         return { action: 'UPDATED', principalId: scimUser.id };
     }
 }
+
+export const EnterpriseAccessControl = SOVEREIGNAccessControl;

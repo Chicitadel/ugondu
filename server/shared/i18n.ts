@@ -206,3 +206,7 @@ export function __t(key: string, ...args: any[]): string {
 }
 
 export const t = __t;
+
+if (typeof (globalThis as any).__t === 'undefined') {
+    (globalThis as any).__t = __t;
+}
