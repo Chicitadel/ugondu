@@ -34,6 +34,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"ugondu/client/i18n"
 	"errors"
 	"os"
@@ -170,7 +171,7 @@ func TestLoadStateRejectsModifiedStateAndMissingHash(t *testing.T) {
 		},
 	}
 
-	for i, tc := range cases {
+	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			txID := "tx_state_integrity_" + strings.ReplaceAll(tc.name, " ", "_")
 			txDir, err := GetTransactionDir(txID)
@@ -235,7 +236,6 @@ func TestLoadStateRejectsModifiedStateAndMissingHash(t *testing.T) {
 			if !quarantined {
 				t.Fatalf("corrupt state was not quarantined")
 			}
-			_ = i
 		})
 	}
 }
