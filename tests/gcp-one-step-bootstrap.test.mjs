@@ -51,3 +51,25 @@ test("active project mismatch fails before any mutation", () => {
   assert.throws(() => executePlan({ ...base, mode: "apply", approvedDigest: plan.plan_digest }, plan, runner), /ACTIVE_GCLOUD_PROJECT_MISMATCH/);
   assert.equal(calls, 1);
 });
+
+test("refuses to attach federation to an existing service account with project grants", () => {
+  const c = { ...base, mode: "apply" };
+  const plan = buildPlan(c);
+  const pool = `projects/123456789/locations/global/workloadIdentityPools/${c.pool}`;
+  const provider = `${pool}/providers/${c.provider}`;
+  const saEmail = `${c.serviceAccount}@${c.project}.iam.gserviceaccount.com`;
+  const calls = [];
+  const runner = (args) => {
+    calls.push(args);
+    if (args[0] === "config") return c.project;
+    if (args[0] === "auth") return "operator@example.com";
+    if (args[0] === "projects" && args[1] === "describe") return "123456789";
+    if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "list") return pool;
+    if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "providers" && args[3] === "list") return provider;
+    if (args[0] === "iam" && args[1] === "service-accounts" && args[2] === "list") return saEmail;
+    if (args[0] === "projects" && args[1] === "get-iam-policy") return JSON.stringify({ bindings: [{ role: "roles/editor", members: [`serviceAccount:${saEmail}`] }] });
+    return "";
+  };
+  assert.throws(() => executePlan({ ...c, approvedDigest: plan.plan_digest }, plan, runner), /EXISTING_SERVICE_ACCOUNT_HAS_PROJECT_GRANTS/);
+  assert.equal(calls.some(args => args.includes("add-iam-policy-binding")), false);
+});
