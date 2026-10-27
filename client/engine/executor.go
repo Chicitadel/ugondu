@@ -34,6 +34,7 @@
 package engine
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/sha256"
 	"crypto/x509"
@@ -43,6 +44,8 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -156,23 +159,23 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 
 	payload, err := json.Marshal(ctx)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to serialize deployment context: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to serialize deployment context: %v", err)
 	}
 
 	resp, err := http.Post(apiURL+"/deploy/resolve", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
-		return nil, nil, fmt.Errorf("cannot reach Governance Server at %s: %v", apiURL, err)
+		return nil, nil, nil, fmt.Errorf("cannot reach Governance Server at %s: %v", apiURL, err)
 	}
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		return nil, nil, fmt.Errorf("server rejected deployment. HTTP %d: %s", resp.StatusCode, string(body))
+		return nil, nil, nil, fmt.Errorf("server rejected deployment. HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
 	var recipe ExecutionRecipe
 	if err := json.Unmarshal(body, &recipe); err != nil {
-		return nil, nil, fmt.Errorf("failed to parse execution recipe: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to parse execution recipe: %v", err)
 	}
 
 	// Unmarshal just enough to get KeyId
@@ -180,13 +183,13 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 		KeyId string `json:"keyId"`
 	}
 	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &partialEnv); err != nil {
-		return nil, nil, fmt.Errorf("invalid envelope format")
+		return nil, nil, nil, fmt.Errorf("invalid envelope format")
 	}
 
 	// Fetch Keys and cache them locally
 	keysResp, err := http.Get(apiURL + "/keys")
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to fetch public keys: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to fetch public keys: %v", err)
 	}
 	defer keysResp.Body.Close()
 	keysBody, _ := io.ReadAll(keysResp.Body)
@@ -197,7 +200,7 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 		} `json:"keys"`
 	}
 	if err := json.Unmarshal(keysBody, &keysData); err != nil {
-		return nil, nil, fmt.Errorf("failed to parse keys")
+		return nil, nil, nil, fmt.Errorf("failed to parse keys")
 	}
 
 	var pubKeyPem string
@@ -208,35 +211,35 @@ func FetchExecutionRecipe(apiURL string, ctx *DeploymentContext) (*ExecutionEnve
 		}
 	}
 	if pubKeyPem == "" {
-		return nil, nil, fmt.Errorf("public key not found in registry")
+		return nil, nil, nil, fmt.Errorf("public key not found in registry")
 	}
 
 	// Verify Signature
 	if err := verifySignature(recipe.CanonicalEnvelope, recipe.Signature, pubKeyPem); err != nil {
-		return nil, nil, fmt.Errorf("signature verification failed: %v", err)
+		return nil, nil, nil, fmt.Errorf("signature verification failed: %v", err)
 	}
 
 	// Unmarshal Full Envelope
 	var env ExecutionEnvelope
 	if err := json.Unmarshal([]byte(recipe.CanonicalEnvelope), &env); err != nil {
-		return nil, nil, fmt.Errorf("invalid envelope format")
+		return nil, nil, nil, fmt.Errorf("invalid envelope format")
 	}
 
 	// Verify Expiry
 	if time.Now().UnixMilli() > env.ExpiresAt {
-		return nil, nil, fmt.Errorf("execution recipe has expired")
+		return nil, nil, nil, fmt.Errorf("execution recipe has expired")
 	}
 
 	// Verify Plan Hash
 	hash := sha256.Sum256([]byte(recipe.CanonicalSteps))
 	if hex.EncodeToString(hash[:]) != env.PlanHash {
-		return nil, nil, fmt.Errorf("plan hash mismatch (recipe tampered)")
+		return nil, nil, nil, fmt.Errorf("plan hash mismatch (recipe tampered)")
 	}
 
 	// Unmarshal Steps
 	var steps []map[string]interface{}
 	if err := json.Unmarshal([]byte(recipe.CanonicalSteps), &steps); err != nil {
-		return nil, nil, fmt.Errorf("invalid steps format")
+		return nil, nil, nil, fmt.Errorf("invalid steps format")
 	}
 
 	return &env, steps, body, nil
