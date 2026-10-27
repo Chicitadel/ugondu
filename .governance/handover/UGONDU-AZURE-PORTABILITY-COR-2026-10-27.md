@@ -134,3 +134,11 @@ Cost alerts are not hard spending caps. No live Azure test may begin without a n
 - [ ] Independent reviewer confirms no regression, duplicate architecture or unsupported claim.
 
 **Current verdict:** implementation work started; adapter routing and planning contract added; runtime tests have not been executed in this environment; live Azure execution is not implemented or certified; COR remains open pending full qualification.
+
+
+## 11. Additional CI-confirmed defects discovered during this branch
+
+- **Go client compile defect:** `client/engine/executor.go` used `http`, `bytes` and `io` without imports and returned three values from a four-value `FetchExecutionRecipe` function. Fixed the imports and error return arity; added `TestFetchExecutionRecipeHTTPErrorReturnsFourValuesSafely` in `client/engine/executor_test.go`.
+- **Go vet defect:** removed the unused `strings` import from `client/i18n/pack.go`.
+- **Existing dependency-lock blocker:** CI `npm ci` reports package-lock/shrinkwrap drift and missing entries (including `@airroofers/ugondu-repository-adapter` and transitive dependencies) in engine-core and other service workspaces. This predates the Azure source changes and remains unresolved; do not bypass with `--force` or treat the build as passed. Regenerate the appropriate lockfiles with the supported npm/workspace strategy, review the complete diff, and rerun CI.
+- **CI evidence:** workflow run 600 initially reported the unused Go import and npm lock drift. The Go import was removed; subsequent run 601 exposed additional pre-existing Go compile errors in `client/engine/executor.go`, which have now been patched. Workflow run 603 was queued after that patch at the time of this note; its final result must be checked before any claim of passing tests.
