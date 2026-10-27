@@ -27,7 +27,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
-import * as crypto from 'crypto';
+import { computePolicyDigest } from './CanonicalPolicyRegistry';
 
 export interface RegionScopeConfig {
   accountId: string;
@@ -58,7 +58,7 @@ export interface PolicyRenderResult {
   violations: string[];
 }
 
-const REGION_REGEX = /^[a-z]{2}-[a-z]+-\d$/;
+const REGION_REGEX = /^[a-z]{2}(?:-[a-z0-9]+)+-\d$/;
 const ACCOUNT_REGEX = /^\d{12}$/;
 
 export const LEGITIMATE_WILDCARD_ACTION_REGEX =
@@ -170,7 +170,7 @@ export class RegionPolicyRenderer {
     };
 
     const documentJson = JSON.stringify(document, null, 2);
-    const documentSha256 = crypto.createHash('sha256').update(documentJson, 'utf8').digest('hex');
+    const documentSha256 = computePolicyDigest(documentJson);
 
     return {
       valid: violations.length === 0,
@@ -238,7 +238,14 @@ export class RegionPolicyRenderer {
       const obj = value as Record<string, unknown>;
       const result: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(obj)) {
-        result[k] = this.substituteTokensInValue(v, scope, primaryRegion);
+        const requestedRegionToken =
+          k === 'aws:RequestedRegion' &&
+          scope.allowedRegions.length > 1 &&
+          ((typeof v === 'string' && v.includes('${REGION}')) ||
+            (Array.isArray(v) && v.some((item) => typeof item === 'string' && item.includes('${REGION}'))));
+        result[k] = requestedRegionToken
+          ? [...scope.allowedRegions]
+          : this.substituteTokensInValue(v, scope, primaryRegion);
       }
       return result;
     }

@@ -161,7 +161,8 @@ test('COR-WF-007 bootstrap policy pack reconciliation runs before AWS conformanc
 
 test('COR-WF-008 validates all 5 UgonduCOR-V9 policy templates, quotas, and guardrails', async () => {
   const { loadAndValidateBootstrapPolicyPack, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
-  assert.equal(Object.keys(BOOTSTRAP_OPERATING_STATES).length, 6, 'exactly 6 operating states must be defined');
+  assert.equal(Object.keys(BOOTSTRAP_OPERATING_STATES).length, 7, 'exactly 7 operating states must be defined');
+  assert.equal(BOOTSTRAP_OPERATING_STATES.PROVISIONING_MUTATION_FAILED, 'PROVISIONING_MUTATION_FAILED');
   const pack = loadAndValidateBootstrapPolicyPack();
   assert.equal(pack.policies.length, 5);
   assert.ok(pack.policies.length <= pack.maxPoliciesPerRole);
@@ -204,7 +205,10 @@ test('COR-WF-009 operating state 1: INITIAL_INSTALLATION_AUTHORIZED when runner 
         created.push(arn);
         return { status: 0, json: { Policy: { PolicyName: name, Arn: arn } }, stderr: '' };
       }
-      if (args[1] === 'get-policy') return { status: 0, json: { Policy: { DefaultVersionId: 'v1' } }, stderr: '' };
+      if (args[1] === 'get-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        return { status: 0, json: { Policy: { Arn: arn, DefaultVersionId: 'v1' } }, stderr: '' };
+      }
       return { status: 0, json: {}, stderr: '' };
     }
   });
@@ -272,6 +276,10 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
   const os = require('node:os');
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-reconcile-s3-'));
   const { runBootstrapProvisionPhase, runVerifyEffectivePhase, BOOTSTRAP_OPERATING_STATES } = await import('../../scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs');
+  const attached = [
+    { PolicyName: 'UgonduCOR-V9-Discovery', PolicyArn: 'arn:aws:iam::971671216490:policy/UgonduCOR-V9-Discovery' },
+    { PolicyName: 'UgonduCOR-V9-EC2-Creation', PolicyArn: 'arn:aws:iam::971671216490:policy/UgonduCOR-V9-EC2-Creation' }
+  ];
   const provisionRes = runBootstrapProvisionPhase({
     evidenceDir: tmpDir,
     awsRunner: (args) => {
@@ -279,8 +287,15 @@ test('COR-WF-011 operating state 3: DRIFT_DETECTED_AND_RECONCILED when partial p
       if (args[1] === 'get-role' && args.includes('AWSServiceRoleForRDS')) {
         return { status: 0, json: { Role: { RoleName: 'AWSServiceRoleForRDS', AssumeRolePolicyDocument: { Statement: [{ Effect: 'Allow', Principal: { Service: 'rds.amazonaws.com' }, Action: 'sts:AssumeRole' }] } } }, stderr: '' };
       }
-      if (args[1] === 'list-attached-role-policies') {
-        return { status: 0, json: { AttachedPolicies: [{ PolicyName: 'UgonduCOR-V9-Discovery' }, { PolicyName: 'UgonduCOR-V9-EC2-Creation' }] }, stderr: '' };
+      if (args[1] === 'list-attached-role-policies') return { status: 0, json: { AttachedPolicies: [...attached] }, stderr: '' };
+      if (args[1] === 'get-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        return { status: 0, json: { Policy: { Arn: arn, DefaultVersionId: 'v1' } }, stderr: '' };
+      }
+      if (args[1] === 'attach-role-policy') {
+        const arn = args[args.indexOf('--policy-arn') + 1];
+        attached.push({ PolicyName: arn.split('/').pop(), PolicyArn: arn });
+        return { status: 0, json: {}, stderr: '' };
       }
       return { status: 0, json: {}, stderr: '' };
     }
@@ -438,4 +453,24 @@ test('COR-WF-016 starter bootstrap policy template is account-agnostic and uses 
   const createStmt = committedJson.Statement.find((s) => s.Sid === 'CreateOnlyCanonicalTaggedCORV9Policies');
   assert.ok(Array.isArray(createStmt.Resource) && createStmt.Resource.length === 5, 'iam:CreatePolicy must scope 5 canonical policy ARNs in Resource');
   assert.equal(createStmt.Condition?.StringEquals?.['iam:PolicyName'], undefined, 'iam:PolicyName condition key must be absent');
+});
+
+
+test('COR-WF-017 pull-request validation does not misclassify the intentionally skipped AWS gate as certification', () => {
+  const run = step(jobs['cor-final-release-gate'], 'Require every mandatory gate to have succeeded').run;
+  assert.match(run, /EVENT_NAME.*pull_request/);
+  assert.match(run, /PR validation requires COR result success/);
+  assert.match(run, /AWS_RESULT.*skipped/);
+  assert.match(run, /PR VALIDATION PASSED/);
+  assert.match(run, /NOT RELEASE CERTIFIED/);
+  assert.match(run, /if \[ "\$\{EVENT_NAME\}" = "pull_request" \]/);
+  assert.match(run, /failure, skipped, cancelled and missing all block certification/);
+});
+
+
+
+test('COR-WF-018 candidate-bound freshness is deferred on PRs but remains mandatory for release attempts', () => {
+  assert.match(text, /- name: Verify evidence freshness \(candidate-bound, evidence-only descendant\)\n        if: github\.event_name != 'pull_request'\n        run: \|/);
+  assert.match(text, /label a PR as release-certified when that gate has not run/);
+  assert.match(text, /Push\/workflow_dispatch runs are release qualification attempts/);
 });

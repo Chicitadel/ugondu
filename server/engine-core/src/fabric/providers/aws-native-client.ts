@@ -197,7 +197,7 @@ export class AwsNativeClient implements IAwsClient {
             if (res.services && res.services.length > 0) return res;
         } catch (err: unknown) {
             if (this.fargateSimulationState) {
-                Logger.warn('DescribeServices AWS call failed; falling back to fargate simulation state', {
+                Logger.warn(__t('describe_services_aws_call_failed_fallback'), {
                     cluster,
                     services,
                     error: err instanceof Error ? err.message : String(err)

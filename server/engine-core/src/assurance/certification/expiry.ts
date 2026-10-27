@@ -31,6 +31,7 @@
  * All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import { Certificate } from './certificate';
 
 export class ExpiryManager {
@@ -42,7 +43,7 @@ export class ExpiryManager {
 
     public enforceExpiry(cert: Certificate): void {
         if (cert.isExpired()) {
-            throw new Error(`Certificate ${cert.id} has expired.`);
+            throw new Error(__t('cert_has_expired', { certId: cert.id }));
         }
     }
 }

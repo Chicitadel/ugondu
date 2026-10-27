@@ -26,6 +26,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import { Logger } from '@ugondu/shared';
 
 export class ReconciliationLoop {
@@ -42,7 +43,7 @@ export class ReconciliationLoop {
                 try {
                     await onTick();
                 } catch (err: unknown) {
-                    Logger.error('ReconciliationLoop tick execution encountered error', err, {
+                    Logger.error(__t('reconciliation_loop_tick_error'), err, {
                         iteration: this.iterationCount,
                         intervalMs
                     });

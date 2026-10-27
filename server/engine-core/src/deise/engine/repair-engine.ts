@@ -78,7 +78,7 @@ export class DeploymentRepairEngine {
                     const actual = infra.actualState[key];
 
                     if (expected !== actual) {
-                        Logger.warn(`Drift Detected: Expected ${expected}, observed ${actual}`);
+                        Logger.warn(__t('drift_detected_expected_observed', { expected, actual }));
 
                         // Delegate remediation verb to Provider Adapter via universal contract
                         let repairOperation = 'adapter:ReconcileResourceState';

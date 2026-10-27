@@ -102,7 +102,7 @@ export class OIDCAdapter {
         const pubKeyObj = typeof rawPublicKey === 'string' ? createPublicKey(rawPublicKey) : rawPublicKey;
         signatureValid = verify(null, Buffer.from(signingInput, 'utf8'), pubKeyObj, signatureBytes);
       } else {
-        throw new Error(`OIDC_UNSUPPORTED_ALG: ${alg}`);
+        throw new Error(__t('oidc_unsupported_alg', { alg }));
       }
 
       if (!signatureValid) {
@@ -180,7 +180,10 @@ export class OIDCAdapter {
         true
       );
     } catch (error) {
-      throw new Error(__t('token_verification_failed') + String(error));
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(__t('token_verification_failed'));
     }
   }
 }

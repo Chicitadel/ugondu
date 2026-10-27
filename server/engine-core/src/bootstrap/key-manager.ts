@@ -28,6 +28,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import { __t } from '@ugondu/shared';
 import { generateKeyPairSync, createHash } from 'crypto';
 import path from 'path';
 import { globalTrustRegistry, Logger } from '@ugondu/shared';
@@ -63,7 +64,7 @@ function syncRecipeKeyToTrustRegistry(state: KeyState): void {
       privateKey: privPem.trim(),
     });
   } catch (err: unknown) {
-    Logger.warn('Trust registry key synchronization non-fatal warning', {
+    Logger.warn(__t('trust_registry_key_sync_warning'), {
       keyId: state.keyId,
       error: err instanceof Error ? err.message : String(err)
     });

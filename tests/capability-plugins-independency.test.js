@@ -2,7 +2,7 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Tests / Governance — Capabilities & Plugins Independency
  * File           : capability-plugins-independency.test.js
- * Version        : 1.0.0
+ * Version        : 1.1.0
  * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
  * Organization   : Air Roofers SASU
  * Created Date   : 2026-10-25
@@ -53,10 +53,10 @@ const {
   ALLOWED_ACTIONS
 } = require('../server/plugin-manager/dist/sandbox.js');
 
-describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
+describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', { concurrency: 1 }, () => {
   const publicKey = loadPublicKey();
 
-  test('CPI-001: ugondu-plugin-node runs independently in sandbox and emits canonical NODE_INSTALL', async () => {
+  test('CPI-001: ugondu-plugin-node runs independently in sandbox and emits canonical NODE_INSTALL', { timeout: 90000 }, async () => {
     const pluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-node');
     assert.ok(fs.existsSync(pluginDir), 'Node plugin dir must exist');
 
@@ -71,7 +71,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     const steps = await executePluginSandbox(pluginDir, {
       packageManager: 'npm',
       production: true
-    });
+    }, { timeoutMs: 30000 });
 
     assert.ok(Array.isArray(steps), 'Steps must be an array');
     assert.strictEqual(steps.length, 1);
@@ -80,7 +80,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     assert.strictEqual(steps[0].payload.production, true);
   });
 
-  test('CPI-002: ugondu-plugin-composer runs independently in sandbox and emits canonical COMPOSER_INSTALL', async () => {
+  test('CPI-002: ugondu-plugin-composer runs independently in sandbox and emits canonical COMPOSER_INSTALL', { timeout: 90000 }, async () => {
     const pluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-composer');
     assert.ok(fs.existsSync(pluginDir), 'Composer plugin dir must exist');
 
@@ -94,7 +94,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     const steps = await executePluginSandbox(pluginDir, {
       optimize: true,
       nodev: true
-    });
+    }, { timeoutMs: 30000 });
 
     assert.ok(Array.isArray(steps), 'Steps must be an array');
     assert.strictEqual(steps.length, 1);
@@ -103,7 +103,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     assert.strictEqual(steps[0].payload.nodev, true);
   });
 
-  test('CPI-003: ugondu-plugin-php-fpm is cryptographically verified but fail-closed on arbitrary shell execution', async () => {
+  test('CPI-003: ugondu-plugin-php-fpm is cryptographically verified but fail-closed on arbitrary shell execution', { timeout: 90000 }, async () => {
     const pluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-php-fpm');
     assert.ok(fs.existsSync(pluginDir), 'PHP-FPM plugin dir must exist');
 
@@ -115,7 +115,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
 
     // Zero-trust enforcement: arbitrary shell execution (SHELL_EXEC) must fail closed in sandbox
     await assert.rejects(
-      async () => executePluginSandbox(pluginDir, {}),
+      async () => executePluginSandbox(pluginDir, {}, { timeoutMs: 30000 }),
       /Plugin sandbox execution failed|err_plugin_action_rejected/
     );
   });
@@ -200,7 +200,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
     }
   });
 
-  test('CPI-008: Corporate Header Governance — no AI Governed or AI generated trace in plugin sources', () => {
+  test('CPI-008: Corporate Header Governance — no prohibited attribution traces in plugin sources', () => {
     const forbiddenHeaderRe = new RegExp('\\bAI\\s+' + 'Governed\\b', 'i');
     const forbiddenAiGenRe = new RegExp('\\bAI\\s+' + 'generated\\b', 'i');
 
@@ -227,7 +227,7 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
           assert.strictEqual(
             forbiddenAiGenRe.test(header),
             false,
-            `Forbidden AI generated trace found in ${full}`
+            `Forbidden non-human attribution trace found in ${full}`
           );
         }
       }
@@ -235,6 +235,178 @@ describe('Capability & Plugins Independency Suite (UAIGOS 3.0.0)', () => {
 
     for (const d of targetDirs) {
       inspectDir(d);
+    }
+  });
+
+  test('CPI-009: Fail-Closed Isolation on Absent Optional Plugins — safely denies execution when capability plugin is not installed', async () => {
+    const nonexistentPluginDir = path.join(ROOT, 'plugins', 'ugondu-plugin-nonexistent');
+    assert.strictEqual(fs.existsSync(nonexistentPluginDir), false, 'Nonexistent plugin must not exist');
+
+    // Executing an absent optional plugin must fail closed
+    await assert.rejects(
+      async () => executePluginSandbox(nonexistentPluginDir, {}),
+      /Plugin entrypoint not found|err_plugin_entrypoint_not_found/i
+    );
+
+    // Validating path of absent optional plugin must throw entrypoint not found
+    assert.throws(
+      () => validatePluginSandboxPath(nonexistentPluginDir, path.join(ROOT, 'plugins')),
+      /Plugin entrypoint not found|err_plugin_entrypoint_not_found/i
+    );
+  });
+
+  test('CPI-010: Zero Circular Dependencies Verification — ensures strictly acyclic plugin hierarchy conforming to UJP-EXT-004', () => {
+    const targetDirs = [
+      path.join(ROOT, 'plugins', 'ugondu-plugin-node'),
+      path.join(ROOT, 'plugins', 'ugondu-plugin-composer'),
+      path.join(ROOT, 'plugins', 'ugondu-plugin-php-fpm'),
+      path.join(ROOT, 'plugins', 'aws-vpc-adapter'),
+      path.join(ROOT, 'server', 'plugins', 'aws-vpc-adapter'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-code'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-config'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-database'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-dependencies'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-http'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-network'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-zdd')
+    ];
+
+    const dependencyGraph = new Map();
+    const pluginNames = new Set();
+
+    for (const pDir of targetDirs) {
+      const pkgPath = path.join(pDir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        const deps = [
+          ...Object.keys(pkg.dependencies || {}),
+          ...Object.keys(pkg.devDependencies || {}),
+          ...Object.keys(pkg.peerDependencies || {})
+        ];
+        dependencyGraph.set(pkg.name, deps);
+        pluginNames.add(pkg.name);
+      }
+    }
+
+    // 1. Full DFS cycle detection confirming an acyclic DAG
+    const visited = new Set();
+    const recStack = new Set();
+
+    const detectCycle = (node) => {
+      visited.add(node);
+      recStack.add(node);
+
+      const neighbors = dependencyGraph.get(node) || [];
+      for (const neighbor of neighbors) {
+        if (!pluginNames.has(neighbor)) continue; // external dependencies are outside the plugin graph
+        if (!visited.has(neighbor)) {
+          if (detectCycle(neighbor)) return true;
+        } else if (recStack.has(neighbor)) {
+          return true; // Cycle detected
+        }
+      }
+
+      recStack.delete(node);
+      return false;
+    };
+
+    for (const node of pluginNames) {
+      if (!visited.has(node)) {
+        const hasCycle = detectCycle(node);
+        assert.strictEqual(hasCycle, false, `Cycle detected in capability plugin dependency graph for ${node}`);
+      }
+    }
+
+    // 2. Strict zero sibling-to-sibling coupling (source-level isolation audit)
+    const pluginBasenames = targetDirs.map(d => path.basename(d));
+    for (const dir of targetDirs) {
+      const currentBase = path.basename(dir);
+      const scanDir = (curr) => {
+        for (const ent of fs.readdirSync(curr, { withFileTypes: true })) {
+          if (ent.name === 'node_modules' || ent.name === 'dist') continue;
+          const full = path.join(curr, ent.name);
+          if (ent.isDirectory()) scanDir(full);
+          else if (/\.(ts|js|mjs|cjs)$/.test(ent.name)) {
+            const content = fs.readFileSync(full, 'utf8');
+            for (const sibling of pluginBasenames) {
+              if (sibling === currentBase) continue;
+              if (currentBase === 'aws-vpc-adapter' && sibling === 'aws-vpc-adapter') continue;
+              const relPattern = new RegExp('(\\.{1,2}/)+.*' + sibling, 'i');
+              assert.strictEqual(
+                relPattern.test(content),
+                false,
+                `Forbidden sibling coupling found in ${full} referencing ${sibling}`
+              );
+            }
+          }
+        }
+      };
+      scanDir(dir);
+    }
+
+    // 3. Independent lifecycle hooks and decoupled contracts audit
+    for (const dir of targetDirs) {
+      const manifestPath = path.join(dir, 'manifest.json');
+      if (fs.existsSync(manifestPath)) {
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        assert.ok(
+          Array.isArray(manifest.hooks) && manifest.hooks.length > 0,
+          `Plugin ${dir} must declare independent lifecycle hooks`
+        );
+      } else {
+        const srcDir = fs.existsSync(path.join(dir, 'src')) ? path.join(dir, 'src') : dir;
+        const files = fs.readdirSync(srcDir).filter(f => /\.(ts|js)$/.test(f));
+        let hasLifecycleHook = false;
+        for (const f of files) {
+          const code = fs.readFileSync(path.join(srcDir, f), 'utf8');
+          if (code.includes('reconcile') || code.includes('recover') || code.includes('validateSafetyGates')) {
+            hasLifecycleHook = true;
+            break;
+          }
+        }
+        assert.ok(hasLifecycleHook, `Plugin ${dir} must export decoupled lifecycle contract (reconcile/recover)`);
+      }
+    }
+  });
+
+  test('CPI-011: Independent Package.json & Plugin Manifest Declarations — all 12 capability plugins declare isolated manifests', () => {
+    const targetDirs = [
+      path.join(ROOT, 'plugins', 'ugondu-plugin-node'),
+      path.join(ROOT, 'plugins', 'ugondu-plugin-composer'),
+      path.join(ROOT, 'plugins', 'ugondu-plugin-php-fpm'),
+      path.join(ROOT, 'plugins', 'aws-vpc-adapter'),
+      path.join(ROOT, 'server', 'plugins', 'aws-vpc-adapter'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-code'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-config'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-database'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-dependencies'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-http'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-network'),
+      path.join(ROOT, 'server', 'plugins', 'recovery-zdd')
+    ];
+
+    for (const pDir of targetDirs) {
+      // 1. Independent package.json
+      const pkgPath = path.join(pDir, 'package.json');
+      assert.ok(fs.existsSync(pkgPath), `Package manifest missing in ${pDir}`);
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      assert.ok(pkg.name, `Plugin ${pDir} must declare name in package.json`);
+      assert.ok(pkg.version, `Plugin ${pDir} must declare version in package.json`);
+      assert.strictEqual(pkg.private, true, `Plugin ${pDir} must be private`);
+      assert.ok(pkg.author, `Plugin ${pDir} must declare author in package.json`);
+      assert.ok(!pkg.author.toLowerCase().includes('ai'), `Author must not contain AI in ${pDir}`);
+
+      // 2. Isolated plugin.manifest.json or manifest.json
+      const pluginManifestPath = path.join(pDir, 'plugin.manifest.json');
+      const standardManifestPath = path.join(pDir, 'manifest.json');
+      const manifestFile = fs.existsSync(pluginManifestPath) ? pluginManifestPath : standardManifestPath;
+      assert.ok(fs.existsSync(manifestFile), `Capability manifest missing in ${pDir}`);
+
+      const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+      assert.ok(manifest.name, `Plugin ${pDir} must declare name in manifest`);
+      assert.ok(manifest.version, `Plugin ${pDir} must declare version in manifest`);
+      assert.ok(manifest.author, `Plugin ${pDir} must declare author in manifest`);
+      assert.ok(!manifest.author.toLowerCase().includes('ai'), `Manifest author must not contain AI in ${pDir}`);
     }
   });
 });

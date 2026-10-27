@@ -61,7 +61,7 @@ export class PhysicalRepairExecutor {
                         // (Assuming release_currentVersion is tracked or we fallback to an empty safe dir)
                         // Note: For full safety, DirectAdminNativeClient should expose `execCmd` securely for repair operations.
                         // We'll call a dedicated repair function on the client.
-                        await this.daClient.createHostedApp(instanceId, 'repair');
+                        await this.daClient.restorePublicHtmlDirectory(instanceId);
 
                         Logger.info(__t('deise.repair.topology_repaired', { instanceId }));
                     } catch (err) {

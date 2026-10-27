@@ -43,7 +43,8 @@ export const BOOTSTRAP_OPERATING_STATES = Object.freeze({
   DRIFT_DETECTED_AND_RECONCILED: 'DRIFT_DETECTED_AND_RECONCILED',
   BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT: 'BOOTSTRAP_AUTHORITY_MISSING_OR_INSUFFICIENT',
   CANONICAL_ROLE_MISSING_OR_UNASSUMABLE: 'CANONICAL_ROLE_MISSING_OR_UNASSUMABLE',
-  SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION: 'SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION'
+  SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION: 'SECURITY_GUARDRAIL_OR_BOUNDARY_VIOLATION',
+  PROVISIONING_MUTATION_FAILED: 'PROVISIONING_MUTATION_FAILED'
 });
 
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
@@ -160,10 +161,10 @@ export function formatBootstrapRemediationDiagnostic(pack, denialDetail) {
   ].join('\n');
 }
 
-function verifyOrCreateRdsSlr(aws, pack, region) {
+export function verifyOrCreateRdsSlr(aws, pack, region) {
   let roleRes = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
   const isRds = (r) => {
-    if (!r?.Role) return true;
+    if (!r?.Role) return false;
     const doc = r.Role.AssumeRolePolicyDocument, s = typeof doc === 'string' ? decodeURIComponent(doc) : JSON.stringify(doc || {});
     return s.includes('rds.amazonaws.com') || String(r.Role.Arn || '').includes('rds.amazonaws.com');
   };
@@ -173,18 +174,31 @@ function verifyOrCreateRdsSlr(aws, pack, region) {
   }
   const createRes = aws(['iam', 'create-service-linked-role', '--aws-service-name', 'rds.amazonaws.com'], region);
   if (createRes.status === 0) {
-    console.log('[BOOTSTRAP-PROVISION] Autonomously created AWSServiceRoleForRDS service-linked role.');
-    const reverify = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
-    if (reverify.status === 0 && isRds(reverify.json)) {
-      console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
-    }
+    console.log('[BOOTSTRAP-PROVISION] Created AWSServiceRoleForRDS; verifying the resulting role before continuing.');
+  } else if (!/InvalidInput|already exists|has been taken/i.test(createRes.stderr || '')) {
+    return { ok: false, detail: createRes.stderr || roleRes.stderr || `create-service-linked-role exited ${createRes.status}` };
+  }
+
+  // A successful create response, or an "already exists" response, is not proof
+  // that the expected service-linked role is present and valid. Always read it back.
+  const reverify = aws(['iam', 'get-role', '--role-name', 'AWSServiceRoleForRDS'], region);
+  if (reverify.status === 0 && isRds(reverify.json)) {
+    console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS service-linked role exists.');
     return { ok: true };
   }
-  if (/InvalidInput|already exists|has been taken/i.test(createRes.stderr || '')) {
-    console.log('[BOOTSTRAP-PROVISION] Verified AWSServiceRoleForRDS already exists in account.');
-    return { ok: true };
-  }
-  return { ok: false, detail: createRes.stderr || roleRes.stderr || 'AWSServiceRoleForRDS missing or inaccessible' };
+  return { ok: false, detail: reverify.stderr || 'AWSServiceRoleForRDS could not be verified after create/already-exists response' };
+}
+
+function failClosedOperation(pack, region, reportPath, reason, errorCode = 'UG-BOOTSTRAP-MUTATION-FAILED', detail = '') {
+  const report = {
+    schemaVersion: '1.0.0', packId: pack.packId, phase: 'bootstrap-provision', evaluatedAt: new Date().toISOString(),
+    awsAccountId: pack.target.accountId, awsRegion: region, executionRoleArn: pack.executionRole.arn, runnerRoleArn: pack.runnerRole.arn,
+    operatingState: BOOTSTRAP_OPERATING_STATES.PROVISIONING_MUTATION_FAILED, errorCode,
+    status: 'FAIL', reason, detail: detail || null
+  };
+  writeReport(reportPath, report);
+  console.error(`[FAIL] ${errorCode}: ${reason}${detail ? ` — ${detail}` : ''}`);
+  return { exitCode: 1, report };
 }
 
 function failClosedAuth(pack, region, reportPath, reason, diagnostic) {
@@ -235,6 +249,8 @@ export function runBootstrapProvisionPhase(options = {}) {
     const failReport = { schemaVersion: '1.0.0', phase: 'bootstrap-provision', operatingState: BOOTSTRAP_OPERATING_STATES.CANONICAL_ROLE_MISSING_OR_UNASSUMABLE, errorCode: 'UG-BOOTSTRAP-ROLE-INVALID', status: 'FAIL', reason: `Canonical execution role ${execRoleName} does not exist` };
     writeReport(reportPath, failReport);
     return { exitCode: 1, report: failReport };
+  } else {
+    return failClosedOperation(pack, region, reportPath, 'Unable to inspect attached policies; refusing to infer that policy attachments are correct', 'UG-BOOTSTRAP-READBACK-FAILED', listRes.stderr || `list-attached-role-policies exited ${listRes.status}`);
   }
 
   const alreadyAttachedCount = attachedSet.size, attachedDuringBootstrap = [], reconciledPolicyVersions = [];
@@ -293,11 +309,14 @@ export function runBootstrapProvisionPhase(options = {}) {
         if (upRes.status === 0) {
           const newVerId = upRes.json?.PolicyVersion?.VersionId || metaRes.json.Policy.DefaultVersionId;
           const verCheck = aws(['iam', 'get-policy-version', '--policy-arn', pol.arn, '--version-id', newVerId], region);
-          if (verCheck.status === 0) reconciledPolicyVersions.push(pol.physicalName);
+          if (verCheck.status !== 0 || !verCheck.json?.PolicyVersion?.Document) {
+            return failClosedOperation(pack, region, reportPath, `Policy version update for ${pol.physicalName} returned success but could not be verified`, 'UG-BOOTSTRAP-READBACK-FAILED', verCheck.stderr || `get-policy-version exited ${verCheck.status}`);
+          }
+          reconciledPolicyVersions.push(pol.physicalName);
         } else if (/AccessDenied|Access Denied|not authorized/i.test(upRes.stderr || '')) {
           return failClosedAuth(pack, region, reportPath, `iam:CreatePolicyVersion denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, upRes.stderr));
         } else {
-          console.warn(`[WARN] Autonomous policy update for ${pol.physicalName}: ${upRes.stderr || 'Failed'}`);
+          return failClosedOperation(pack, region, reportPath, `Unable to update policy ${pol.physicalName}; refusing to continue with a potentially drifted policy`, 'UG-BOOTSTRAP-POLICY-UPDATE-FAILED', upRes.stderr || `create-policy-version exited ${upRes.status}`);
         }
       }
     }
@@ -309,7 +328,9 @@ export function runBootstrapProvisionPhase(options = {}) {
       const createRes = aws(['iam', 'create-policy', '--policy-name', pol.physicalName, '--policy-document', targetCompactJson, '--tags', 'Key=UgonduCOR,Value=true'], region);
       if (createRes.status === 0) {
         const polCheck = aws(['iam', 'get-policy', '--policy-arn', pol.arn], region);
-        if (polCheck.status !== 0) console.warn(`[WARN] Created policy ${pol.physicalName} re-read warning: ${polCheck.stderr}`);
+        if (polCheck.status !== 0 || !polCheck.json?.Policy?.Arn) {
+          return failClosedOperation(pack, region, reportPath, `Policy ${pol.physicalName} was created but its existence could not be verified; attachment is blocked`, 'UG-BOOTSTRAP-READBACK-FAILED', polCheck.stderr || `get-policy exited ${polCheck.status}`);
+        }
         attachRes = aws(['iam', 'attach-role-policy', '--role-name', execRoleName, '--policy-arn', pol.arn], region);
       } else if (/AccessDenied|Access Denied|not authorized/i.test(createRes.stderr || '')) {
         return failClosedAuth(pack, region, reportPath, `iam:CreatePolicy denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, createRes.stderr));
@@ -320,12 +341,18 @@ export function runBootstrapProvisionPhase(options = {}) {
 
     if (attachRes.status === 0) {
       const verifyAttach = aws(['iam', 'list-attached-role-policies', '--role-name', execRoleName], region);
-      if (verifyAttach.status === 0 && Array.isArray(verifyAttach.json?.AttachedPolicies)) {
-        attachedSet = new Set(verifyAttach.json.AttachedPolicies.map((p) => p.PolicyName || p.PolicyArn?.split('/').pop()));
+      if (verifyAttach.status !== 0 || !Array.isArray(verifyAttach.json?.AttachedPolicies)) {
+        return failClosedOperation(pack, region, reportPath, `Attachment of ${pol.physicalName} succeeded but read-back verification failed`, 'UG-BOOTSTRAP-READBACK-FAILED', verifyAttach.stderr || `list-attached-role-policies exited ${verifyAttach.status}`);
+      }
+      attachedSet = new Set(verifyAttach.json.AttachedPolicies.map((p) => p.PolicyName || p.PolicyArn?.split('/').pop()));
+      if (!attachedSet.has(pol.physicalName)) {
+        return failClosedOperation(pack, region, reportPath, `Attachment of ${pol.physicalName} was not confirmed by AWS read-back`, 'UG-BOOTSTRAP-ATTACHMENT-UNVERIFIED');
       }
       attachedDuringBootstrap.push(pol.physicalName);
     } else if (/AccessDenied|Access Denied|not authorized/i.test(attachRes.stderr || '')) {
       return failClosedAuth(pack, region, reportPath, `iam:AttachRolePolicy denied for ${pol.physicalName}`, formatBootstrapRemediationDiagnostic(pack, attachRes.stderr));
+    } else {
+      return failClosedOperation(pack, region, reportPath, `Unable to attach required policy ${pol.physicalName}; refusing to report bootstrap success`, 'UG-BOOTSTRAP-ATTACHMENT-FAILED', attachRes.stderr || `attach-role-policy exited ${attachRes.status}`);
     }
   }
 
@@ -335,6 +362,11 @@ export function runBootstrapProvisionPhase(options = {}) {
     preliminaryState = (listConfirmed && alreadyAttachedCount > 0 && alreadyAttachedCount < 5)
       ? BOOTSTRAP_OPERATING_STATES.DRIFT_DETECTED_AND_RECONCILED
       : BOOTSTRAP_OPERATING_STATES.INITIAL_INSTALLATION_AUTHORIZED;
+  }
+
+  const missingRequiredPolicies = pack.policies.map((p) => p.physicalName).filter((name) => !attachedSet.has(name));
+  if (!listConfirmed || missingRequiredPolicies.length > 0) {
+    return failClosedOperation(pack, region, reportPath, `Required policy attachment verification incomplete: ${missingRequiredPolicies.join(', ') || 'initial attachment inventory unavailable'}`, 'UG-BOOTSTRAP-ATTACHMENT-UNVERIFIED');
   }
 
   const report = {

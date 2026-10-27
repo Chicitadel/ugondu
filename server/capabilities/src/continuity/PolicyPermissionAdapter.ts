@@ -367,7 +367,7 @@ export class AdapterRegistry {
     if (!hasNormative && !hasLegacy) {
       const missingMethod = (typeof (adapter as any).discoverIdentity === 'function' ? normativeMethods : legacyMethods)
         .find((m) => typeof (adapter as any)[m] !== 'function');
-      throw new Error(__t('capabilities.error.adapter_non_compliant', { providerId: adapter.providerId, method: missingMethod }));
+      throw new Error(__t('capabilities.error.adapter_non_compliant', { providerId: adapter.providerId, missingMethod }));
     }
 
     if (hasLegacy && !hasNormative) {

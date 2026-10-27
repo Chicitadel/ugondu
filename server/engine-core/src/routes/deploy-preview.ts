@@ -105,7 +105,7 @@ export function createPreviewHandler(
         { token, repositoryUrl },
         { headers: { Authorization: `Bearer ${bgAuth}` } },
       ).catch((e) => {
-        Logger.warn(__t('suppressed_error_in_deploy_route') + String(e));
+        Logger.warn(__t('suppressed_error_in_deploy_route'), { error: String(e) });
         return null;
       });
 
