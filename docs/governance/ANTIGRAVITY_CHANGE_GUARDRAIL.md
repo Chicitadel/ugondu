@@ -388,3 +388,29 @@ The bundle manifest is the single required-artifact inventory for the universal 
 - **Ugondu CI/CD Pipeline:** run 40355055649 (pull_request) SUCCESS; run 40348557767 (workflow_dispatch) SUCCESS. Earlier run 40347263796 on `225f2ec1` failed on two tests (billing replay headers, DirectAdmin repair executor); both corrected in `8f4a8244`.
 - **COR Certification:** run 40355055685 SUCCESS in PR-validation mode; AWS Physical Qualification Gate intentionally skipped. **NOT RELEASE CERTIFIED.**
 - **Open (fail-closed):** authorised AWS staging receipts for the bootstrap runtime, GCP/Azure, AI model fleet (CATALOG_OFFLINE), actual DirectAdmin host qualification, immutable artifact lifecycle. Universal commercial release remains withheld.
+
+
+## 2026-10-27 Addendum — UG-DIRECTADMIN-STAGING-PATH-001
+
+**Owner branch:** `fix/directadmin-staging-path-containment-2026-10-27`  
+**Parent candidate:** `326a7f75272ecbcfabc60cc19ba3b9c3c182a15e`  
+**Finding status:** IMPLEMENTED IN CODE / REGRESSION WORKFLOW ADDED / EXACT-HEAD WORKFLOW PENDING  
+**Canonical handover:** [DirectAdmin staging path containment](../audit/REAUDIT_HANDOVER_DIRECTADMIN_STAGING_PATH_CONTAINMENT_2026-10-27.md)
+
+### Confirmed defect and physical remediation
+
+- `tools/deploy-directadmin-staging.ps1` previously joined an untrusted `TargetSubdomain` to a path without validating DNS labels or verifying canonical path containment.
+- The staging script and committed `health.json` used `STAGING_READY`, although the script does not upload, deploy, probe or physically qualify the live host.
+- The script now validates DNS label syntax/length, resolves the staging root and target, requires the target to be a direct child of the canonical root, rejects path escapes, and verifies that `.htaccess` is a file resolved inside the target directory.
+- Generated and committed health evidence now states `ARTIFACT_STAGED_NOT_HOST_QUALIFIED`, `host_qualification: NOT_RUN`, and `evidence_scope: artifact-only`.
+- Added `tools/tests/Test-DeployDirectAdminStaging.ps1` for positive staging, traversal rejection, malformed DNS rejection and truthful evidence assertions.
+- Added `.github/workflows/directadmin-staging-safety.yml` to execute the regression test on Windows without Pester or live-host credentials.
+
+### Acceptance and anti-drift
+
+1. Wait for the dedicated Windows workflow on the exact branch head; do not claim the new tests passed before the run completes.
+2. Re-run repository CI and COR for the exact candidate SHA after all code, test, workflow and handover commits.
+3. Treat this fix as local staging-path safety only. It does not qualify the actual DirectAdmin account or make the DirectAdmin application adapter production-ready.
+4. Never claim live deployment/health from a staged artifact, a directory, or generated JSON alone.
+5. Do not modify `master` or `phase4/production-hardening` directly; keep the work isolated in the dedicated branch and PR.
+6. Universal COR remains **NOT CERTIFIED** until authentic, candidate-bound AWS, GCP/Azure, AI fleet, DirectAdmin host and immutable artifact lifecycle evidence is reviewed.
