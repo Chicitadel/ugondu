@@ -555,5 +555,14 @@
   "messages.error.directadmin_database_engine_unsupported": "Механизм базы данных DirectAdmin не поддерживается: {type}.",
   "messages.error.directadmin_invalid_snapshot_resource": "Для снимка DirectAdmin требуется допустимый идентификатор ресурса.",
   "messages.error.billing_store_unavailable": "Хранилище лицензий биллинга не готово или не может сохранять изменения.",
-  "messages.error.billing_store_invalid_data": "Хранилище лицензий биллинга содержит недопустимые или нечитаемые данные."
+  "messages.error.billing_store_invalid_data": "Хранилище лицензий биллинга содержит недопустимые или нечитаемые данные.",
+  "azure_target_requires": "Цель Azure требует %s",
+  "azure_unsafe_relative_path": "Небезопасный %s Azure; используйте путь, относительный к репозиторию/рабочему пространству, без обхода",
+  "azure_target_config_required": "Требуется конфигурация цели Azure",
+  "azure_unsupported_workload": "Неподдерживаемый тип рабочей нагрузки Azure: %s",
+  "azure_unsupported_identity": "Неподдерживаемый режим идентификации Azure: %s",
+  "azure_workload_requires_template": "%s требует templatePath",
+  "azure_terraform_requires_template": "terraform требует templatePath для идентификации корня конфигурации",
+  "azure_deployment_name_invalid": "deploymentName в Azure должен содержать от 1 до 64 символов и содержать только безопасные для Azure символы",
+  "azure_resource_group_too_long": "resourceGroup Azure превышает поддерживаемый лимит в 90 символов"
 }

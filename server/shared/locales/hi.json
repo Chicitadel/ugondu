@@ -2334,5 +2334,14 @@
   "messages.error.directadmin_database_engine_unsupported": "DirectAdmin डेटाबेस इंजन समर्थित नहीं है: {type}।",
   "messages.error.directadmin_invalid_snapshot_resource": "DirectAdmin स्नैपशॉट के लिए मान्य संसाधन पहचानकर्ता आवश्यक है।",
   "messages.error.billing_store_unavailable": "बिलिंग लाइसेंस स्टोर तैयार नहीं है या बदलाव स्थायी रूप से सहेज नहीं सकता।",
-  "messages.error.billing_store_invalid_data": "बिलिंग लाइसेंस स्टोर में अमान्य या अपठनीय डेटा है।"
+  "messages.error.billing_store_invalid_data": "बिलिंग लाइसेंस स्टोर में अमान्य या अपठनीय डेटा है।",
+  "azure_target_requires": "Azure लक्ष्य को %s की आवश्यकता है",
+  "azure_unsafe_relative_path": "असुरक्षित Azure %s; बिना ट्रैवर्सल के रिपॉजिटरी/कार्यक्षेत्र-सापेक्ष पथ का उपयोग करें",
+  "azure_target_config_required": "Azure लक्ष्य कॉन्फ़िगरेशन आवश्यक है",
+  "azure_unsupported_workload": "असमर्थित Azure कार्यभार प्रकार: %s",
+  "azure_unsupported_identity": "असमर्थित Azure पहचान मोड: %s",
+  "azure_workload_requires_template": "%s के लिए templatePath आवश्यक है",
+  "azure_terraform_requires_template": "कॉन्फ़िगरेशन रूट की पहचान के लिए टेराफ़ॉर्म को templatePath की आवश्यकता होती है",
+  "azure_deployment_name_invalid": "Azure deploymentName 1-64 वर्णों का होना चाहिए और इसमें केवल Azure-सुरक्षित वर्ण होने चाहिए",
+  "azure_resource_group_too_long": "Azure resourceGroup समर्थित 90-वर्ण सीमा से अधिक है"
 }

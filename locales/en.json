@@ -555,5 +555,14 @@
   "messages.error.directadmin_database_engine_unsupported": "DirectAdmin database engine is not supported: {type}.",
   "messages.error.directadmin_invalid_snapshot_resource": "DirectAdmin snapshot requires a valid resource identifier.",
   "messages.error.billing_store_unavailable": "The billing license store is not ready or cannot persist changes.",
-  "messages.error.billing_store_invalid_data": "The billing license store contains invalid or unreadable data."
+  "messages.error.billing_store_invalid_data": "The billing license store contains invalid or unreadable data.",
+  "azure_target_requires": "Azure target requires %s",
+  "azure_unsafe_relative_path": "Unsafe Azure %s; use a repository/workspace-relative path without traversal",
+  "azure_target_config_required": "Azure target configuration is required",
+  "azure_unsupported_workload": "Unsupported Azure workload kind: %s",
+  "azure_unsupported_identity": "Unsupported Azure identity mode: %s",
+  "azure_workload_requires_template": "%s requires templatePath",
+  "azure_terraform_requires_template": "terraform requires templatePath to identify the configuration root",
+  "azure_deployment_name_invalid": "Azure deploymentName must be 1-64 characters and contain only Azure-safe characters",
+  "azure_resource_group_too_long": "Azure resourceGroup exceeds the supported 90-character limit"
 }

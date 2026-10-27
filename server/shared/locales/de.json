@@ -2334,5 +2334,14 @@
   "messages.error.directadmin_database_engine_unsupported": "Diese DirectAdmin-Datenbank-Engine wird nicht unterstützt: {type}.",
   "messages.error.directadmin_invalid_snapshot_resource": "Ein DirectAdmin-Snapshot benötigt eine gültige Ressourcenkennung.",
   "messages.error.billing_store_unavailable": "Der Abrechnungslizenzspeicher ist nicht bereit oder kann Änderungen nicht dauerhaft speichern.",
-  "messages.error.billing_store_invalid_data": "Der Abrechnungslizenzspeicher enthält ungültige oder nicht lesbare Daten."
+  "messages.error.billing_store_invalid_data": "Der Abrechnungslizenzspeicher enthält ungültige oder nicht lesbare Daten.",
+  "azure_target_requires": "Azure-Ziel erfordert %s",
+  "azure_unsafe_relative_path": "Unsicherer Azure-%s; Verwenden Sie einen Repository-/Arbeitsbereich-relativen Pfad ohne Durchquerung",
+  "azure_target_config_required": "Azure-Zielkonfiguration ist erforderlich",
+  "azure_unsupported_workload": "Nicht unterstützte Azure-Workload-Art: %s",
+  "azure_unsupported_identity": "Nicht unterstützter Azure-Identitätsmodus: %s",
+  "azure_workload_requires_template": "%s erfordert templatePath",
+  "azure_terraform_requires_template": "terraform erfordert templatePath, um den Konfigurationsstamm zu identifizieren",
+  "azure_deployment_name_invalid": "Azure deploymentName muss 1-64 Zeichen lang sein und nur Azure-sichere Zeichen enthalten",
+  "azure_resource_group_too_long": "Azure resourceGroup überschreitet das unterstützte Limit von 90 Zeichen"
 }

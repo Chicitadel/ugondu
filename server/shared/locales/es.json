@@ -2334,5 +2334,14 @@
   "messages.error.directadmin_database_engine_unsupported": "El motor de base de datos de DirectAdmin no es compatible: {type}.",
   "messages.error.directadmin_invalid_snapshot_resource": "La instantánea de DirectAdmin requiere un identificador de recurso válido.",
   "messages.error.billing_store_unavailable": "El almacén de licencias de facturación no está listo o no puede guardar los cambios.",
-  "messages.error.billing_store_invalid_data": "El almacén de licencias de facturación contiene datos no válidos o ilegibles."
+  "messages.error.billing_store_invalid_data": "El almacén de licencias de facturación contiene datos no válidos o ilegibles.",
+  "azure_target_requires": "El destino de Azure requiere %s",
+  "azure_unsafe_relative_path": "%s de Azure no seguro; use una ruta relativa al repositorio/espacio de trabajo sin recorrido",
+  "azure_target_config_required": "Se requiere la configuración de destino de Azure",
+  "azure_unsupported_workload": "Tipo de carga de trabajo de Azure no compatible: %s",
+  "azure_unsupported_identity": "Modo de identidad de Azure no compatible: %s",
+  "azure_workload_requires_template": "%s requiere templatePath",
+  "azure_terraform_requires_template": "terraform requiere templatePath para identificar la raíz de configuración",
+  "azure_deployment_name_invalid": "El deploymentName de Azure debe tener entre 1 y 64 caracteres y contener solo caracteres seguros para Azure",
+  "azure_resource_group_too_long": "El resourceGroup de Azure supera el límite admitido de 90 caracteres"
 }

@@ -555,5 +555,14 @@
   "messages.error.directadmin_database_engine_unsupported": "محرك قاعدة بيانات DirectAdmin غير مدعوم: {type}.",
   "messages.error.directadmin_invalid_snapshot_resource": "تتطلب لقطة DirectAdmin معرّف مورد صالحًا.",
   "messages.error.billing_store_unavailable": "مخزن تراخيص الفوترة غير جاهز أو يتعذر عليه حفظ التغييرات.",
-  "messages.error.billing_store_invalid_data": "يحتوي مخزن تراخيص الفوترة على بيانات غير صالحة أو يتعذر قراءتها."
+  "messages.error.billing_store_invalid_data": "يحتوي مخزن تراخيص الفوترة على بيانات غير صالحة أو يتعذر قراءتها.",
+  "azure_target_requires": "يتطلب هدف Azure %s",
+  "azure_unsafe_relative_path": "مسار Azure غير آمن %s؛ استخدم مسارًا نسبيًا للمستودع/مساحة العمل بدون اجتياز",
+  "azure_target_config_required": "تكوين هدف Azure مطلوب",
+  "azure_unsupported_workload": "نوع عبء عمل Azure غير مدعوم: %s",
+  "azure_unsupported_identity": "وضع هوية Azure غير مدعوم: %s",
+  "azure_workload_requires_template": "يتطلب %s templatePath",
+  "azure_terraform_requires_template": "يتطلب terraform مسار templatePath لتحديد جذر التكوين",
+  "azure_deployment_name_invalid": "يجب أن يتراوح طول deploymentName في Azure بين 1 و64 حرفًا وأن يحتوي فقط على أحرف آمنة لـ Azure",
+  "azure_resource_group_too_long": "يتجاوز resourceGroup في Azure الحد الأقصى المدعوم وهو 90 حرفًا"
 }

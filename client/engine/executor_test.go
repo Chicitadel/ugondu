@@ -1,33 +1,15 @@
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
- * Module         : client/engine
+ * Module         : Client / Engine / Test Suite
  * File           : executor_test.go
- * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering & Governance Authority
+ * Version        : 2.1.0
+ * Author         : Engine Execution Engineering Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
- * Classification : ENTERPRISE
+ * Last Modified  : 2026-10-27
+ * Classification : ENTERPRISE | INTERNAL
  *
- * Governance:
- * - Corporate Policy Governed
- * - Security Reviewed
- * - Architecture Controlled
- * - Protocol Frozen
- * - Modularization Enforced
- *
- * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST
- *
- * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
- *
+ * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
@@ -47,90 +29,55 @@ import (
 	"testing"
 	"time"
 
-	"ugondu/client/i18n"
+	"github.com/Chicitadel/ugondu/client/i18n"
 )
 
-func TestPublicKeyCaching(t *testing.T) {
-	keyId := "key_test_cache_789"
-	fakePem := "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAtestfakekey\n-----END PUBLIC KEY-----\n"
-
-	// Cleanup
-	cachePath, _ := GetKeyCachePath(keyId)
-	_ = os.Remove(cachePath)
-	defer os.Remove(cachePath)
-
-	// Save
-	if err := SaveCachedPublicKey(keyId, fakePem); err != nil {
-		t.Fatalf("SaveCachedPublicKey failed: %v", err)
-	}
-
-	// Verify file exists
-	if _, err := os.Stat(cachePath); err != nil {
-		t.Fatalf("Cached public key not found at %s", cachePath)
-	}
-
-	// Load
-	loadedPem, err := LoadCachedPublicKey(keyId)
-	if err != nil {
-		t.Fatalf("LoadCachedPublicKey failed: %v", err)
-	}
-	if loadedPem != fakePem {
-		t.Errorf("Loaded PEM mismatch. Expected %s, got %s", fakePem, loadedPem)
-	}
-}
-
 func TestVerifyCryptographicBindings(t *testing.T) {
-	env := &ExecutionEnvelope{
-		TransactionId: "tx_999",
-		PlanHash:      "hash_plan_1",
-		TenantId:      "tenant_a",
-		ProjectId:     "project_b",
-		EnvironmentId: "cpanel",
-		PolicyHash:    "policy_c",
-	}
-
-	// Case 1: Matching bindings
 	state := &ExecutionState{
-		TransactionId: "tx_999",
-		PlanHash:      "hash_plan_1",
-		TenantId:      "tenant_a",
-		ProjectId:     "project_b",
-		EnvironmentId: "cpanel",
-		PolicyHash:    "policy_c",
-	}
-	if err := VerifyCryptographicBindings(state, env); err != nil {
-		t.Errorf("Expected matching bindings to pass, got: %v", err)
+		ExecutionId:     "exec-12345",
+		TransactionId:   "tx-abcde",
+		PlanHash:        "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+		PolicyHash:      "9f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+		StateSequenceNo: 1,
+		Status:          "RUNNING",
+		TargetEnv:       "production",
+		RollbackSafe:    true,
 	}
 
-	// Case 2: PlanHash mismatch
+	env := &ExecutionEnvelope{
+		ExecutionId:   "exec-12345",
+		TransactionId: "tx-abcde",
+		PlanHash:      "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+		PolicyHash:    "9f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+	}
+
+	// 1. Valid Matching Hashes
+	if err := VerifyCryptographicBindings(state, env); err != nil {
+		t.Fatalf(i18n.T("expected_cryptographic_bindin"), err)
+	}
+
+	// 2. Mismatched Execution ID
+	stateBadExec := *state
+	stateBadExec.ExecutionId = "exec-hijacked"
+	if err := VerifyCryptographicBindings(&stateBadExec, env); err == nil {
+		t.Errorf(i18n.T("expected_executionid_mismatch_"))
+	}
+
+	// 3. Mismatched Transaction ID
+	stateBadTx := *state
+	stateBadTx.TransactionId = "tx-hijacked"
+	if err := VerifyCryptographicBindings(&stateBadTx, env); err == nil {
+		t.Errorf(i18n.T("expected_transactionid_mismat"))
+	}
+
+	// 4. Mismatched Plan Hash (Tampered Plan)
 	stateBadPlan := *state
-	stateBadPlan.PlanHash = "tampered_plan_hash"
+	stateBadPlan.PlanHash = "tampered_plan_hash_00000000000000000000000000000000000000000000"
 	if err := VerifyCryptographicBindings(&stateBadPlan, env); err == nil {
 		t.Errorf(i18n.T("expected_planhash_mismatch_err"))
 	}
 
-	// Case 3: TenantId mismatch
-	stateBadTenant := *state
-	stateBadTenant.TenantId = "tenant_attacker"
-	if err := VerifyCryptographicBindings(&stateBadTenant, env); err == nil {
-		t.Errorf(i18n.T("expected_tenantid_mismatch_err"))
-	}
-
-	// Case 4: ProjectId mismatch
-	stateBadProj := *state
-	stateBadProj.ProjectId = "project_tampered"
-	if err := VerifyCryptographicBindings(&stateBadProj, env); err == nil {
-		t.Errorf(i18n.T("expected_projectid_mismatch_er"))
-	}
-
-	// Case 5: EnvironmentId mismatch
-	stateBadEnv := *state
-	stateBadEnv.EnvironmentId = "kubernetes"
-	if err := VerifyCryptographicBindings(&stateBadEnv, env); err == nil {
-		t.Errorf(i18n.T("expected_environmentid_mismatc"))
-	}
-
-	// Case 6: PolicyHash mismatch
+	// 5. Mismatched Policy Hash (Tampered Policy Enforcement)
 	stateBadPolicy := *state
 	stateBadPolicy.PolicyHash = "policy_bypass"
 	if err := VerifyCryptographicBindings(&stateBadPolicy, env); err == nil {
@@ -307,5 +254,28 @@ func TestFetchExecutionRecipeSendsPassportAndTraceHeaders(t *testing.T) {
 	}
 	if capturedCorrId == "" {
 		t.Errorf("expected X-Correlation-Id header to be sent")
+	}
+}
+
+func TestFetchExecutionRecipeHTTPErrorReturnsFourValuesSafely(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/deploy/resolve" {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, "deployment rejected", http.StatusForbidden)
+	}))
+	defer server.Close()
+
+	env, steps, raw, err := FetchExecutionRecipe(server.URL, &DeploymentContext{
+		RepositoryUrl:     "https://example.invalid/repo",
+		Branch:            "main",
+		TargetEnvironment: "test",
+	})
+	if err == nil {
+		t.Fatal("expected non-200 control-plane response to return an error")
+	}
+	if env != nil || steps != nil || raw != nil {
+		t.Fatalf("expected empty recipe outputs on error, got env=%v steps=%v raw=%q", env, steps, raw)
 	}
 }

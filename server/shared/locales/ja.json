@@ -2334,5 +2334,14 @@
   "messages.error.directadmin_database_engine_unsupported": "DirectAdmin のデータベースエンジンはサポートされていません: {type}。",
   "messages.error.directadmin_invalid_snapshot_resource": "DirectAdmin のスナップショットには有効なリソース識別子が必要です。",
   "messages.error.billing_store_unavailable": "課金ライセンスストアは準備できていないか、変更を永続化できません。",
-  "messages.error.billing_store_invalid_data": "課金ライセンスストアに無効または読み取り不能なデータがあります。"
+  "messages.error.billing_store_invalid_data": "課金ライセンスストアに無効または読み取り不能なデータがあります。",
+  "azure_target_requires": "Azureターゲットには%sが必要です",
+  "azure_unsafe_relative_path": "安全でない Azure %s。トラバーサルのないリポジトリ/ワークスペース相対パスを使用してください",
+  "azure_target_config_required": "Azureターゲット構成が必要です",
+  "azure_unsupported_workload": "サポートされていない Azure ワークロードの種類: %s",
+  "azure_unsupported_identity": "サポートされていない Azure ID モード: %s",
+  "azure_workload_requires_template": "%sにはtemplatePathが必要です",
+  "azure_terraform_requires_template": "terraform は構成ルートを識別するために templatePath を必要とします",
+  "azure_deployment_name_invalid": "Azure deploymentName は 1 ～ 64 文字で、Azure で安全な文字のみを含める必要があります",
+  "azure_resource_group_too_long": "Azure resourceGroup がサポートされている 90 文字の制限を超えています"
 }

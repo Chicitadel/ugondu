@@ -2334,5 +2334,14 @@
   "messages.error.directadmin_database_engine_unsupported": "DirectAdmin 데이터베이스 엔진은 지원되지 않습니다: {type}.",
   "messages.error.directadmin_invalid_snapshot_resource": "DirectAdmin 스냅샷에는 유효한 리소스 식별자가 필요합니다.",
   "messages.error.billing_store_unavailable": "결제 라이선스 저장소가 준비되지 않았거나 변경 사항을 영구 저장할 수 없습니다.",
-  "messages.error.billing_store_invalid_data": "결제 라이선스 저장소에 잘못되었거나 읽을 수 없는 데이터가 있습니다."
+  "messages.error.billing_store_invalid_data": "결제 라이선스 저장소에 잘못되었거나 읽을 수 없는 데이터가 있습니다.",
+  "azure_target_requires": "Azure 대상에는 %s이(가) 필요합니다",
+  "azure_unsafe_relative_path": "안전하지 않은 Azure %s; 순회가 없는 저장소/작업 공간 상대 경로를 사용하세요",
+  "azure_target_config_required": "Azure 대상 구성이 필요합니다",
+  "azure_unsupported_workload": "지원되지 않는 Azure 워크로드 종류: %s",
+  "azure_unsupported_identity": "지원되지 않는 Azure ID 모드: %s",
+  "azure_workload_requires_template": "%s에는 templatePath가 필요합니다",
+  "azure_terraform_requires_template": "terraform에는 구성 루트를 식별하기 위해 templatePath가 필요합니다",
+  "azure_deployment_name_invalid": "Azure deploymentName은 1~64자여야 하며 Azure 안전 문자만 포함해야 합니다",
+  "azure_resource_group_too_long": "Azure resourceGroup이 지원되는 90자 제한을 초과합니다"
 }

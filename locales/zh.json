@@ -555,5 +555,14 @@
   "messages.error.directadmin_database_engine_unsupported": "不支持此 DirectAdmin 数据库引擎：{type}。",
   "messages.error.directadmin_invalid_snapshot_resource": "DirectAdmin 快照需要有效的资源标识符。",
   "messages.error.billing_store_unavailable": "计费许可证存储尚未就绪或无法持久保存更改。",
-  "messages.error.billing_store_invalid_data": "计费许可证存储包含无效或无法读取的数据。"
+  "messages.error.billing_store_invalid_data": "计费许可证存储包含无效或无法读取的数据。",
+  "azure_target_requires": "Azure 目标需要 %s",
+  "azure_unsafe_relative_path": "不安全的 Azure %s；使用无遍历的存储库/工作区相对路径",
+  "azure_target_config_required": "需要 Azure 目标配置",
+  "azure_unsupported_workload": "不受支持的 Azure 工作负载类型: %s",
+  "azure_unsupported_identity": "不受支持的 Azure 身份模式: %s",
+  "azure_workload_requires_template": "%s 需要 templatePath",
+  "azure_terraform_requires_template": "terraform 需要 templatePath 来标识配置根目录",
+  "azure_deployment_name_invalid": "Azure deploymentName 必须为 1-64 个字符且仅包含 Azure 安全字符",
+  "azure_resource_group_too_long": "Azure resourceGroup 超出支持的 90 个字符限制"
 }

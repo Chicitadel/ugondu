@@ -1,3 +1,5 @@
+import { __t } from '@ugondu/shared';
+
 export const Target = {
     id: 'github',
     name: __t('github_repository'),

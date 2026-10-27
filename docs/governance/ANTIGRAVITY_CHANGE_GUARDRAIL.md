@@ -479,3 +479,30 @@ Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR
   - `npm run test:integration`: 17/17 PASS
   - `npm run test:locales`: PASS (12 languages synchronized)
 - **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
+
+## 2026-10-27 Integration Head — Azure Target Routing & Portability (PR #34)
+
+- **Candidate Branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` (PR #30, PR #31)
+- **Merged PRs:** Integrated `fix/azure-portability-cor-remediation-2026-10-27` (PR #34) delivering Azure Target Planning Adapter, TargetFabric routing for Kubernetes and Azure, target schema extension (`target.v1.json`), cost-gated fail-closed planning, and full 12-language localization.
+- **Physical Changes:**
+  - Added `server/engine-core/src/targets/azure.ts` with `AzureTargetAdapter` (<= 500 LOC, tokenized via `__t`, fail-closed executor registration requirement, cost-approval gates, and path traversal rejection).
+  - Extended `server/engine-core/src/targets/fabric.ts` and `server/engine-core/src/targets/index.ts` to wire Kubernetes and Azure target adapters alongside DirectAdmin and Docker.
+  - Extended `server/shared/schemas/target.v1.json` with `azure` targetType and `managed_identity`, `workload_federation`, `service_principal` authTypes.
+  - Added 9 new Azure localization keys across all 12 supported languages in both `server/shared/locales/` and `locales/`.
+  - Added regression tests in `tests/roadmap-r1-targets.test.js` (5/5 PASS).
+  - Maintained zero raw strings across all 705 scanned files and 1,531 token callsites (Track T03 PASS).
+- **Verification Summary on Local HEAD:**
+  - `node tests/roadmap-r1-targets.test.js`: 5/5 PASS
+  - `npm run verify:attribution`: PASS (0 prohibited phrases across 4,679 files)
+  - `npm run verify:t03`: PASS (0 raw strings, 0 concats, 0 missing tokens across 705 files)
+  - `npm run verify:t04`: PASS (5/5 gates conformant across 9 workspaces)
+  - `node scripts/governance/validate-repository.mjs`: PASS (4,679 files verified with 0 violations)
+  - `npm run test:bootstrap:gcp`: 8/8 PASS
+  - `npm run test:bootstrap-fail-closed`: 10/10 PASS
+  - `node --test tests/policy-pack-path-containment.test.mjs`: 3/3 PASS
+  - `node --test tests/deploy-directadmin-config.test.mjs`: 5/5 PASS
+  - `powershell -ExecutionPolicy Bypass -File tools/tests/Test-DeployDirectAdminStaging.ps1`: PASS
+  - `npm run test:security`: 24/24 PASS
+  - `npm run test:integration`: 17/17 PASS
+  - `npm run test:locales`: PASS (12 languages synchronized)
+- **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
