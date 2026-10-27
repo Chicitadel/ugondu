@@ -153,3 +153,89 @@ func TestStateSaveAndLoad(t *testing.T) {
 		t.Errorf("Expected quarantined state file matching state.json.corrupt.* in %s", txDir)
 	}
 }
+
+
+func TestLoadStateRejectsModifiedStateAndMissingHash(t *testing.T) {
+	cases := []struct {
+		name       string
+		mutate     func(*ExecutionState)
+	}{
+		{
+			name: "modified state field",
+			mutate: func(s *ExecutionState) { s.Status = "SUCCESS" },
+		},
+		{
+			name: "missing state hash",
+			mutate: func(s *ExecutionState) { s.StateHash = "" },
+		},
+	}
+
+	for i, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			txID := "tx_state_integrity_" + strings.ReplaceAll(tc.name, " ", "_")
+			txDir, err := GetTransactionDir(txID)
+			if err != nil {
+				t.Fatalf("GetTransactionDir failed: %v", err)
+			}
+			if err := os.RemoveAll(txDir); err != nil {
+				t.Fatalf("cleanup before test failed: %v", err)
+			}
+			defer os.RemoveAll(txDir)
+
+			state := &ExecutionState{
+				SchemaVersion: "1.0.0",
+				TransactionId: txID,
+				ExecutionId:   "exec-integrity",
+				PlanHash:      "plan-integrity",
+				TenantId:      "tenant-integrity",
+				ProjectId:     "project-integrity",
+				EnvironmentId: "environment-integrity",
+				PolicyHash:    "policy-integrity",
+				Status:        "RUNNING",
+			}
+			if err := SaveState(state); err != nil {
+				t.Fatalf("SaveState failed: %v", err)
+			}
+
+			stateFile, err := GetStateFilePath(txID)
+			if err != nil {
+				t.Fatalf("GetStateFilePath failed: %v", err)
+			}
+			data, err := os.ReadFile(stateFile)
+			if err != nil {
+				t.Fatalf("read saved state failed: %v", err)
+			}
+			var modified ExecutionState
+			if err := json.Unmarshal(data, &modified); err != nil {
+				t.Fatalf("unmarshal saved state failed: %v", err)
+			}
+			tc.mutate(&modified)
+			data, err = json.MarshalIndent(&modified, "", "  ")
+			if err != nil {
+				t.Fatalf("marshal modified state failed: %v", err)
+			}
+			if err := os.WriteFile(stateFile, data, 0600); err != nil {
+				t.Fatalf("write modified state failed: %v", err)
+			}
+
+			if _, err := LoadState(txID); !errors.Is(err, ErrStateCorrupt) {
+				t.Fatalf("LoadState error = %v, want ErrStateCorrupt", err)
+			}
+			entries, err := os.ReadDir(txDir)
+			if err != nil {
+				t.Fatalf("read transaction directory failed: %v", err)
+			}
+			quarantined := false
+			for _, entry := range entries {
+				if strings.HasPrefix(entry.Name(), "state.json.corrupt.") {
+					quarantined = true
+					break
+				}
+			}
+			if !quarantined {
+				t.Fatalf("corrupt state was not quarantined")
+			}
+			_ = i
+		})
+	}
+}
