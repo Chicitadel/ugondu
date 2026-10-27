@@ -555,3 +555,30 @@ Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/
   - `go vet ./...`: PASS (0 errors)
   - `go test -v -run TestVerifyCryptographicBindings ./engine`: PASS (both tests green)
   - Full client test suite (`cmd`, `engine`, `i18n`): PASS (0.190s)
+
+
+## 7. Re-audit update — UG-COR-BINDING-001 (2026-10-27 17:39Z)
+
+**Candidate commit examined:** `99d89092739cd7ff2cb7e0c43e394d12019005e0`  
+**Remediation branch:** `fix/cor-binding-reaudit-2026-10-27`  
+**Related PR:** [#37 — Fail-closed execution binding remediation](https://github.com/Chicitadel/ugondu/pull/37)
+
+### Code and regression scope
+- `client/engine/executor.go`: `VerifyCryptographicBindings` fails closed for nil state/envelope and compares each populated persisted binding against the envelope, including an empty supplied value. Localized error tokens are retained.
+- `client/engine/executor_test.go`: fail-closed tests cover nil inputs and missing/mismatched binding cases.
+- `client/engine/state.go`: `GetTransactionDir` validates the transaction identifier against empty/path traversal inputs in the candidate source. Do not count this as a new change without a candidate diff proving it changed in this remediation.
+
+### Candidate-bound GitHub workflow evidence
+- [COR Certification run 40545111554](https://github.com/Chicitadel/ugondu/actions/runs/40545111554): completed successfully for commit `99d89092739cd7ff2cb7e0c43e394d12019005e0`. Workspace build/tests, locale validation, I18N audit, architecture/import scans, typecheck, COR regression suite, evidence integrity and fresh COR qualification steps reported success.
+- [Ugondu CI run 40545111529](https://github.com/Chicitadel/ugondu/actions/runs/40545111529): completed successfully; attribution, T03 tokenization, repository governance/anti-stub validation, workspace builds, T04 conformance and workspace tests reported success.
+- [DirectAdmin Staging Safety run 40545111655](https://github.com/Chicitadel/ugondu/actions/runs/40545111655): path-containment and evidence-scope safety tests passed. This is a safety test, not proof of a completed live deployment.
+- COR evidence artifact: `ugondu-cor-evidence-1e3a5488a719bc8c335a071e7d8a58f1db62e11a`, SHA-256 `f639183c5de286f499363e8cac1225d0db9df693a0851cf7b816ad53c9bcad56`.
+
+### Mandatory limitations
+- The COR workflow's **AWS Physical Qualification Gate was skipped**. Its signing-trust-root step was also skipped. The successful workflow is not a signed, complete multi-host production release certification.
+- The uploaded Antigravity execution log reports Go `vet`, Go tests and five-target cross-compilation as passing, but it also records earlier failed/cancelled attempts and does not include the complete raw command logs. Treat those Go results as reported, not independently reproducible evidence, until exact-head CI artifacts or complete logs are attached.
+- Live, candidate-bound physical execution receipts remain required for DirectAdmin and any AWS/GCP target included in the release scope.
+- Public commercial release remains **BLOCKED / NOT FULLY CERTIFIED** until every mandatory physical gate and the final authorized COR decision passes on the release candidate.
+
+### Required next action
+Keep PR #37 unmerged until the exact final head has reproducible Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, and required physical staging receipts. Any source change invalidates prior candidate-bound evidence and requires rerunning affected checks.
