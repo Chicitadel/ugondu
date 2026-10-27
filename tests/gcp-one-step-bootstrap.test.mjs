@@ -73,3 +73,29 @@ test("refuses to attach federation to an existing service account with project g
   assert.throws(() => executePlan({ ...c, approvedDigest: plan.plan_digest }, plan, runner), /EXISTING_SERVICE_ACCOUNT_HAS_PROJECT_GRANTS/);
   assert.equal(calls.some(args => args.includes("add-iam-policy-binding")), false);
 });
+
+test("mocked bootstrap succeeds only after API, pool, provider and IAM read-back", () => {
+  const c = { ...base, mode: "apply" };
+  const plan = buildPlan(c);
+  const pool = `projects/123456789/locations/global/workloadIdentityPools/${c.pool}`;
+  const principal = `principalSet://iam.googleapis.com/${pool}/attribute.repository/${c.githubRepo}`;
+  const calls = [];
+  const runner = (args) => {
+    calls.push(args);
+    if (args[0] === "config") return c.project;
+    if (args[0] === "auth") return "operator@example.com";
+    if (args[0] === "projects" && args[1] === "describe") return "123456789";
+    if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "list") return "";
+    if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "providers" && args[3] === "list") return "";
+    if (args[0] === "iam" && args[1] === "service-accounts" && args[2] === "list") return "";
+    if (args[0] === "services" && args[1] === "list") return ["iam.googleapis.com", "iamcredentials.googleapis.com", "cloudresourcemanager.googleapis.com", "serviceusage.googleapis.com", "sts.googleapis.com"].join("\\n");
+    if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "describe") return JSON.stringify({ name: pool });
+    if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "providers" && args[3] === "describe") return JSON.stringify({ attributeCondition: `assertion.repository == '${c.githubRepo}'`, attributeMapping: { "attribute.repository": "assertion.repository" } });
+    if (args[0] === "iam" && args[1] === "service-accounts" && args[2] === "get-iam-policy") return JSON.stringify({ bindings: [{ role: "roles/iam.workloadIdentityUser", members: [principal] }] });
+    return "";
+  };
+  const receipt = executePlan({ ...c, approvedDigest: plan.plan_digest }, plan, runner);
+  assert.equal(receipt.status, "BOOTSTRAP_VERIFIED");
+  assert.deepEqual(receipt.role_grants, []);
+  assert.ok(calls.some(args => args.includes("add-iam-policy-binding")));
+});
