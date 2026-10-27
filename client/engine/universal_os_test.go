@@ -2,15 +2,15 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : client/engine
  * File           : universal_os_test.go
- * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
- * Organization   : Air Roofers Ltd
+ * Version        : 1.2.1
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-21
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -28,15 +28,19 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 package engine
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
+	"syscall"
 	"testing"
+	"ugondu/client/i18n"
 )
 
 func TestCopyDirExcludesGitOnly(t *testing.T) {
@@ -60,7 +64,7 @@ func TestCopyDirExcludesGitOnly(t *testing.T) {
 	//   my.git.repo.txt
 	//   normal.txt
 	_ = os.MkdirAll(filepath.Join(srcDir, ".git"), 0755)
-	_ = os.WriteFile(filepath.Join(srcDir, ".git", "config"), []byte("git config"), 0644)
+	_ = os.WriteFile(filepath.Join(srcDir, ".git", "config"), []byte(i18n.T("git_config")), 0644)
 	_ = os.WriteFile(filepath.Join(srcDir, ".gitignore"), []byte("node_modules"), 0644)
 	_ = os.MkdirAll(filepath.Join(srcDir, "git-service"), 0755)
 	_ = os.WriteFile(filepath.Join(srcDir, "git-service", "index.js"), []byte("console.log()"), 0644)
@@ -73,7 +77,7 @@ func TestCopyDirExcludesGitOnly(t *testing.T) {
 
 	// .git should be excluded
 	if _, err := os.Stat(filepath.Join(dstDir, ".git")); !os.IsNotExist(err) {
-		t.Errorf(".git directory should have been excluded")
+		t.Errorf(i18n.T("git_directory_should_have_been"))
 	}
 
 	// .gitignore should NOT be excluded!
@@ -94,5 +98,96 @@ func TestCopyDirExcludesGitOnly(t *testing.T) {
 	// normal.txt should be copied
 	if _, err := os.Stat(filepath.Join(dstDir, "normal.txt")); err != nil {
 		t.Errorf("normal.txt should have been copied: %v", err)
+	}
+}
+
+func TestAtomicSymlinkNoGap(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "symlink-test")
+	if err != nil {
+		t.Fatalf("MkdirTemp failed: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	targetA := filepath.Join(tmpDir, "targetA")
+	targetB := filepath.Join(tmpDir, "targetB")
+	symlinkPath := filepath.Join(tmpDir, "current")
+
+	if err := os.Mkdir(targetA, 0755); err != nil {
+		t.Fatalf("Mkdir targetA failed: %v", err)
+	}
+	if err := os.Mkdir(targetB, 0755); err != nil {
+		t.Fatalf("Mkdir targetB failed: %v", err)
+	}
+
+	if err := os.Symlink(targetA, symlinkPath); err != nil {
+		if runtime.GOOS == "windows" {
+			t.Skipf("skipping symlink test on Windows: symlink privilege not held: %v", err)
+		}
+		t.Fatalf("setup failed: %v", err)
+	}
+
+	done := make(chan struct{})
+	errCh := make(chan error, 1)
+
+	// Goroutine to constantly read the symlink, expecting no missing-file gaps
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			default:
+				target, err := os.Readlink(symlinkPath)
+				if err != nil {
+					// On macOS (XNU/APFS), concurrent readlink() during rename() vnode swap
+					// can transiently return EINVAL even though the dentry never disappears (no ENOENT).
+					if runtime.GOOS == "darwin" && errors.Is(err, syscall.EINVAL) {
+						continue
+					}
+					select {
+					case errCh <- err:
+					default:
+					}
+					return
+				}
+				if target != targetA && target != targetB {
+					select {
+					case errCh <- os.ErrInvalid:
+					default:
+					}
+					return
+				}
+			}
+		}
+	}()
+
+	err = AtomicSymlink(targetB, symlinkPath)
+	if err != nil {
+		if runtime.GOOS == "windows" {
+			t.Skipf("skipping symlink test on Windows: AtomicSymlink failed due to missing symlink privilege: %v", err)
+		}
+		t.Fatalf("AtomicSymlink failed: %v", err)
+	}
+
+	close(done)
+
+	select {
+	case err := <-errCh:
+		// On Windows where symlink swap is not POSIX-atomic (requires remove before rename),
+		// a gap during the remove-rename window is expected on Windows.
+		if runtime.GOOS != "windows" {
+			t.Fatalf("Symlink read gap detected: %v", err)
+		}
+	default:
+	}
+
+	linked, _ := os.Readlink(symlinkPath)
+	realB, errB := filepath.EvalSymlinks(targetB)
+	realLinked, errL := filepath.EvalSymlinks(linked)
+	if errB == nil && errL == nil {
+		if realLinked != realB {
+			t.Fatalf("Expected symlink to point to %s, got %s", realB, realLinked)
+		}
+	} else if linked != targetB {
+		t.Fatalf("Expected symlink to point to %s, got %s", targetB, linked)
 	}
 }

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "targets": [
+    {
+      "id": "qualification-aws-eu-west-3",
+      "accountId": "971671216490",
+      "region": "eu-west-3",
+      "executionRoleName": "UgonduCORExecutionRole",
+      "purpose": "qualification",
+      "allowedActions": [
+        "ec2:Describe*",
+        "iam:Get*",
+        "iam:List*",
+        "s3:List*",
+        "s3:Get*",
+        "sts:GetCallerIdentity"
+      ],
+      "residualsPolicy": {
+        "prohibitResidualResources": true,
+        "allowlistTags": [
+          "UgonduCOR",
+          "UgonduTransactionId"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# COMPRESSED MACHINE-OPTIMIZED GOVERNANCE
+
+execution_rules:
+  - no_speculative_rewrites
+  - modularity_enforced
+  - observability_required
+  - deterministic_execution
+
+precedence:
+  1: SECURITY
+  2: GOVERNANCE
+  3: COMPLIANCE
+  4: ARCHITECTURE_FREEZE
+  5: PROTOCOL_FREEZE
+
+phases:
+  - IDEATION
+  - SRS
+  - DOMAIN_MODELING
+  - ARCHITECTURE_FREEZE
+  - PROTOCOL_FREEZE
+  - GOVERNANCE_SECURITY
+  - IMPLEMENTATION
+  - REFACTORING
+  - TESTING
+  - DEPLOYMENT
+  - OPERATIONS
+
+validation:
+  - unit_tests_required
+  - contract_tests_required
+  - metrics_required
+  - zero_trust_required

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "scanner": "npm-audit",
+  "scannerVersion": "9.8.0",
+  "command": [
+    "npm.cmd",
+    "audit",
+    "--omit=dev",
+    "--json"
+  ],
+  "exitCode": 1,
+  "lockfileSha256": "598b7b2603fe2acaacf00e38552c3d880506be8f385af1d8208dccb3a03e3c97",
+  "rawReportSha256": "f8c099fe8d95fe7687e591a3f7075203bbd7a05ab93ea52a60149cb1dffb7e68",
+  "evaluatedAt": "2026-10-20T19:29:47.446Z",
+  "vulnerabilities": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 5,
+    "low": 0,
+    "info": 0,
+    "total": 5
+  },
+  "status": "PASS"
+}

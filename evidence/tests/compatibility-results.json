@@ -1,0 +1,444 @@
+{
+  "schemaVersion": "2.0.0",
+  "evaluatedAt": "2026-10-20T19:30:35.586Z",
+  "executionId": "exec-qual-1792524571571-724432c4",
+  "commitHash": "50ca98b6dd3672ef473b425d74e66e60e163470d",
+  "treeHash": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3",
+  "hostPlatform": "windows/amd64",
+  "nodeVersion": "v24.17.0",
+  "platformsVerified": [
+    "windows/amd64"
+  ],
+  "repositoryProvidersVerified": [
+    "github",
+    "gitlab",
+    "bitbucket",
+    "aws-codecommit"
+  ],
+  "localesVerified": [
+    "ar",
+    "de",
+    "en",
+    "es",
+    "fr",
+    "hi",
+    "it",
+    "ja",
+    "ko",
+    "pt",
+    "ru",
+    "zh"
+  ],
+  "targetDefinitions": [
+    {
+      "id": "runtime-linux-amd64",
+      "targetType": "os-runtime",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0,go>=1.22",
+      "provider": "local-posix",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/cor-remediation.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml",
+        "runtime/health-readiness.json"
+      ],
+      "supportOwner": "Ujomor Platform Runtime Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "runtime-windows-amd64",
+      "targetType": "os-runtime",
+      "os": "windows",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0,go>=1.22",
+      "provider": "local-win32",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "supported",
+      "command": [
+        "node",
+        "tests/cor-remediation.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml",
+        "runtime/health-readiness.json"
+      ],
+      "supportOwner": "Ujomor Platform Runtime Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "runtime-darwin-arm64",
+      "targetType": "os-runtime",
+      "os": "darwin",
+      "architecture": "arm64",
+      "runtimeVersion": "node>=20.0.0,go>=1.22",
+      "provider": "local-posix",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/cor-remediation.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml",
+        "runtime/health-readiness.json"
+      ],
+      "supportOwner": "Ujomor Platform Runtime Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "delivery-aws-eu-west-3",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "aws",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "qualified",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "scripts/aws-conformance/run-aws-conformance.mjs"
+      ],
+      "expectedArtifacts": [
+        "tests/aws-conformance-results.json"
+      ],
+      "supportOwner": "Ujomor Cloud Infrastructure Authority",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "delivery-directadmin-shared-hosting",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "directadmin",
+      "mode": "automation",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/deployment-lifecycle.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/e2e-results.xml"
+      ],
+      "supportOwner": "Ujomor Edge & Shared Hosting Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "delivery-docker-compose",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "docker-compose>=2.20",
+      "provider": "docker-compose",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "experimental",
+      "command": [
+        "docker",
+        "compose",
+        "config"
+      ],
+      "expectedArtifacts": [
+        "runtime/health-readiness.json"
+      ],
+      "supportOwner": "Ujomor Container Delivery Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "repo-github",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "github",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "tested",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/repository-adapter.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml"
+      ],
+      "supportOwner": "Ujomor Repository Integration Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "repo-gitlab",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "gitlab",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "implemented",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/repository-adapter.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml"
+      ],
+      "supportOwner": "Ujomor Repository Integration Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "repo-bitbucket",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "bitbucket",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "implemented",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/repository-adapter.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml"
+      ],
+      "supportOwner": "Ujomor Repository Integration Team",
+      "reviewDate": "2027-04-20"
+    },
+    {
+      "id": "repo-aws-codecommit",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "runtimeVersion": "node>=20.0.0",
+      "provider": "aws-codecommit",
+      "mode": "headless-ci",
+      "minimumRequiredTier": "implemented",
+      "supportClaim": "experimental",
+      "command": [
+        "node",
+        "tests/repository-adapter.test.js"
+      ],
+      "expectedArtifacts": [
+        "tests/integration-results.xml"
+      ],
+      "supportOwner": "Ujomor Repository Integration Team",
+      "reviewDate": "2027-04-20"
+    }
+  ],
+  "targetExecutionResults": [
+    {
+      "id": "runtime-linux-amd64",
+      "targetType": "os-runtime",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "local-posix",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "runtime-windows-amd64",
+      "targetType": "os-runtime",
+      "os": "windows",
+      "architecture": "amd64",
+      "provider": "local-win32",
+      "derivedStatus": "tested",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": true
+    },
+    {
+      "id": "runtime-darwin-arm64",
+      "targetType": "os-runtime",
+      "os": "darwin",
+      "architecture": "arm64",
+      "provider": "local-posix",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "delivery-aws-eu-west-3",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "aws",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "qualified",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "delivery-directadmin-shared-hosting",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "directadmin",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "delivery-docker-compose",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "docker-compose",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-github",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "github",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-gitlab",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "gitlab",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "implemented",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-bitbucket",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "bitbucket",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "implemented",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-aws-codecommit",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "aws-codecommit",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "implemented",
+      "verifiedOnCurrentHost": false
+    }
+  ],
+  "matrixRows": [
+    {
+      "id": "runtime-linux-amd64",
+      "targetType": "os-runtime",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "local-posix",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "runtime-windows-amd64",
+      "targetType": "os-runtime",
+      "os": "windows",
+      "architecture": "amd64",
+      "provider": "local-win32",
+      "derivedStatus": "tested",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": true
+    },
+    {
+      "id": "runtime-darwin-arm64",
+      "targetType": "os-runtime",
+      "os": "darwin",
+      "architecture": "arm64",
+      "provider": "local-posix",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "delivery-aws-eu-west-3",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "aws",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "qualified",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "delivery-directadmin-shared-hosting",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "directadmin",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "delivery-docker-compose",
+      "targetType": "delivery-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "docker-compose",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-github",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "github",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "tested",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-gitlab",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "gitlab",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "implemented",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-bitbucket",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "bitbucket",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "implemented",
+      "verifiedOnCurrentHost": false
+    },
+    {
+      "id": "repo-aws-codecommit",
+      "targetType": "repository-provider",
+      "os": "linux",
+      "architecture": "amd64",
+      "provider": "aws-codecommit",
+      "derivedStatus": "not-assessed",
+      "minimumRequiredTier": "implemented",
+      "verifiedOnCurrentHost": false
+    }
+  ],
+  "platformRejections": [],
+  "status": "PASS"
+}

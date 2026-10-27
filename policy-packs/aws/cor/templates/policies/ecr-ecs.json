@@ -1,0 +1,200 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowECRTaggingDuringCreation",
+      "Effect": "Allow",
+      "Action": "ecr:TagResource",
+      "Resource": "arn:aws:ecr:eu-west-3:971671216490:repository/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true",
+          "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "AllowECSTaggingDuringCreation",
+      "Effect": "Allow",
+      "Action": "ecs:TagResource",
+      "Resource": [
+        "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+        "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+        "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "ecs:CreateAction": [
+            "CreateCluster",
+            "CreateService",
+            "RegisterTaskDefinition"
+          ],
+          "aws:RequestTag/UgonduCOR": "true",
+          "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "CreateECROperations",
+      "Effect": "Allow",
+      "Action": "ecr:CreateRepository",
+      "Resource": "arn:aws:ecr:eu-west-3:971671216490:repository/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true",
+          "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "EnforceECROperations",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:DeleteRepository",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": "arn:aws:ecr:eu-west-3:971671216490:repository/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/UgonduCOR": "true",
+          "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "CreateECSTaskDefinition",
+      "Effect": "Allow",
+      "Action": "ecs:RegisterTaskDefinition",
+      "Resource": "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true",
+          "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "CreateECSCluster",
+      "Effect": "Allow",
+      "Action": "ecs:CreateCluster",
+      "Resource": "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true",
+          "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "CreateECSService",
+      "Effect": "Allow",
+      "Action": "ecs:CreateService",
+      "Resource": "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true",
+          "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "DeregisterECSTaskDefinition",
+      "Effect": "Allow",
+      "Action": "ecs:DeregisterTaskDefinition",
+      "Resource": "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*"
+    },
+    {
+      "Sid": "DeleteECSCluster",
+      "Effect": "Allow",
+      "Action": "ecs:DeleteCluster",
+      "Resource": "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/UgonduCOR": "true",
+          "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "ModifyECSService",
+      "Effect": "Allow",
+      "Action": [
+        "ecs:UpdateService",
+        "ecs:DeleteService"
+      ],
+      "Resource": "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/UgonduCOR": "true",
+          "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+          "aws:RequestedRegion": "eu-west-3"
+        },
+        "Null": {
+          "aws:PrincipalTag/UgonduTransactionId": "false"
+        }
+      }
+    },
+    {
+      "Sid": "DenyECSTagStripping",
+      "Effect": "Deny",
+      "Action": "ecs:UntagResource",
+      "Resource": [
+        "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-*",
+        "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-*",
+        "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-*/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/UgonduCOR": "true"
+        }
+      }
+    },
+    {
+      "Sid": "AllowPassRoleForECS",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::971671216490:role/ecsTaskExecutionRole",
+      "Condition": {
+        "StringLike": {
+          "iam:PassedToService": "ecs-tasks.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

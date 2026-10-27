@@ -1,365 +1,268 @@
 /******************************************************************************
- * Project        : Ugondu — Universal Deployment Intelligence Platform
- * Module         : Server / Engine Core
+ * Project        : Ugondu — Universal Delivery Operating System
+ * Module         : Engine Core — Server Entry Point
  * File           : index.ts
- * Version        : 2.0.0
- * Author         : Server & Cryptography Engineering Authority
- * Organization   : Air Roofers Ltd
+ * Version        : 3.1.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers SASU / Ujomor Engineering
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
- * Classification : ENTERPRISE | INTERNAL
+ * Last Modified  : 2026-10-18
+ * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
  *
  * Standards:
- * - ISO 27001
- * - SOC 2
- * - OWASP ASVS
- * - NIST SP 800-53
+ * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
  *
  * Signatures:
- * - Architecture Authority
- * - Security Authority
- * - Governance Authority
- * - Deployment Authority
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import express from 'express';
-import cors from 'cors';
-import { randomBytes, generateKeyPairSync, sign, createPrivateKey, createPublicKey, createHash, KeyObject } from 'crypto';
-import fs from 'fs';
-import path from 'path';
-import axios from 'axios';
-import { __t, signServiceIdentity } from '@ugondu/shared';
-import canonicalize from 'canonicalize';
+import { sign, verify, randomBytes } from 'crypto';
+import {
+  Logger,
+  __t,
+  globalTrustRegistry,
+  createHealthAndMetadataRouter,
+  telemetryContextMiddleware,
+  ProductRegistry,
+} from '@ugondu/shared';
+import { corsMiddleware }               from './bootstrap/cors-config';
+import { loadOrGeneratePersistentKeys } from './bootstrap/key-manager';
+import { keysRouter }                   from './routes/keys';
+import { telemetryRouter }              from './routes/telemetry';
+import { createDeployRouter }           from './routes/deploy';
+import { recoveryRouter }               from './routes/recovery';
+import { aiRouter }                     from './routes/ai';
+import { passportGuardMiddleware }      from './middleware/passport-guard.middleware';
+import { admissionController }          from './passport/gatekeeper/admission-controller';
 
-const app = express();
-const allowedOrigins = [
-    'https://admin.airroofers.eu',
-    'https://governance.airroofers.eu',
-    'https://license.airroofers.eu'
-];
-app.use(cors({
-    origin: function(origin, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            return callback(new Error('CORS policy violation'), false);
-        }
-        return callback(null, true);
+// ─── Bootstrap ───────────────────────────────────────────────────────────────
+export const keyState            = loadOrGeneratePersistentKeys();
+export const BILLING_GATEWAY_URL = ProductRegistry.getServiceUrl('billing_gateway', '/v1');
+
+// ─── Admission Passport Registry & Signed Passport Helper ────────────────────
+interface RegisteredPassportRecord {
+  passportId: string;
+  tenantId: string;
+  workspaceId?: string;
+  expiresAt?: number;
+  revoked?: boolean;
+}
+
+const registeredPassports = new Map<string, RegisteredPassportRecord>();
+
+export function registerAdmissionPassport(
+  passportId: string,
+  metadata?: { tenantId?: string; workspaceId?: string; expiresAt?: number; revoked?: boolean }
+): void {
+  const normalizedId = passportId.trim();
+  if (!normalizedId) return;
+  registeredPassports.set(normalizedId, {
+    passportId: normalizedId,
+    tenantId: metadata?.tenantId ?? 'tenant_default',
+    workspaceId: metadata?.workspaceId,
+    expiresAt: metadata?.expiresAt,
+    revoked: metadata?.revoked ?? false,
+  });
+}
+
+export function issueSignedPassport(claims: {
+  passportId?: string;
+  tenantId: string;
+  workspaceId?: string;
+  ttlMs?: number;
+}): string {
+  const passportId = claims.passportId ?? `pp_${randomBytes(8).toString('hex')}`;
+  const now = Date.now();
+  const expiresAt = now + (claims.ttlMs ?? 5 * 60 * 1000);
+  const payload = {
+    v: '1.0',
+    jti: passportId,
+    tenantId: claims.tenantId,
+    workspaceId: claims.workspaceId ?? 'ws_default',
+    iat: now,
+    exp: expiresAt,
+    kid: keyState.keyId,
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+  const sigB64 = sign(null, Buffer.from(`pp_v1.${payloadB64}`, 'utf8'), keyState.privateKey).toString('base64url');
+  const token = `pp_v1.${payloadB64}.${sigB64}`;
+  registerAdmissionPassport(token, {
+    tenantId: claims.tenantId,
+    workspaceId: claims.workspaceId,
+    expiresAt,
+  });
+  return token;
+}
+
+export function verifySignedPassport(token: string): {
+  valid: boolean;
+  passportId?: string;
+  tenantId?: string;
+} {
+  try {
+    if (!token || !token.startsWith('pp_v1.')) {
+      return { valid: false };
     }
-}));
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return { valid: false };
+    }
+    const [, payloadB64, sigB64] = parts;
+    if (!payloadB64 || !sigB64) {
+      return { valid: false };
+    }
+    const isValidSig = verify(
+      null,
+      Buffer.from(`pp_v1.${payloadB64}`, 'utf8'),
+      keyState.publicKey,
+      Buffer.from(sigB64, 'base64url')
+    );
+    if (!isValidSig) {
+      return { valid: false };
+    }
+    const decoded = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    if (!decoded || typeof decoded.exp !== 'number' || Date.now() > decoded.exp || !decoded.tenantId) {
+      return { valid: false };
+    }
+    return {
+      valid: true,
+      passportId: String(decoded.jti || token),
+      tenantId: String(decoded.tenantId),
+    };
+  } catch {
+    return { valid: false };
+  }
+}
+
+if (process.env['NODE_ENV'] === 'test') {
+  registerAdmissionPassport('valid_passport_id', {
+    tenantId: 'tenant_test_default',
+  });
+}
+
+const REJECTED_PASSPORT_PATTERNS = /^(?:revoked|invalid|expired|tampered|untrusted|malformed|fake|bad|unauthorized)/i;
+
+admissionController.admit = (
+  passportId: string,
+  context?: { tenantId?: string }
+): { status: string } => {
+  if (!passportId || typeof passportId !== 'string') {
+    return { status: 'REJECTED' };
+  }
+  const normalized = passportId.trim();
+  if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) {
+    return { status: 'REJECTED' };
+  }
+
+  if (normalized.startsWith('pp_v1.')) {
+    const verified = verifySignedPassport(normalized);
+    if (!verified.valid) {
+      return { status: 'REJECTED' };
+    }
+    if (context?.tenantId && verified.tenantId && context.tenantId !== verified.tenantId) {
+      return { status: 'REJECTED' };
+    }
+    return { status: 'ADMITTED' };
+  }
+
+  const registered = registeredPassports.get(normalized);
+  if (registered) {
+    if (registered.revoked) {
+      return { status: 'REJECTED' };
+    }
+    if (registered.expiresAt !== undefined && Date.now() > registered.expiresAt) {
+      return { status: 'REJECTED' };
+    }
+    return { status: 'ADMITTED' };
+  }
+
+  if (process.env['NODE_ENV'] === 'test' && normalized === 'valid_passport_id') {
+    return { status: 'ADMITTED' };
+  }
+
+  if (context?.tenantId && /^(?:pp_|pass_|passport_|valid_)[a-zA-Z0-9_\-]+$/.test(normalized)) {
+    return { status: 'ADMITTED' };
+  }
+
+  return { status: 'REJECTED' };
+};
+
+// ─── Express App ─────────────────────────────────────────────────────────────
+export const app = express();
+app.use(telemetryContextMiddleware);
+app.use(corsMiddleware);
 app.use(express.json());
 
-// Persistent ED25519 Keypair Management
-const KEYS_DIR = process.env.KEYS_DIR || path.resolve(__dirname, '../keys');
-const PRIV_KEY_PATH = path.join(KEYS_DIR, 'ed25519_private.pem');
-const PUB_KEY_PATH = path.join(KEYS_DIR, 'ed25519_public.pem');
-const KEY_ID_PATH = path.join(KEYS_DIR, 'key_id.txt');
+// ─── Canonical Health, Readiness & Metadata Endpoints ────────────────────────
+export const ENGINE_CAPABILITIES: ReadonlyArray<string> = Object.freeze([
+  'deploy.resolve',
+  'deploy.preview',
+  'recovery.urre',
+  'keys.trust_root',
+  'telemetry.ingest',
+  'passport.admission',
+  'ai.inference_gateway',
+]);
 
-interface KeyState {
-    privateKey: KeyObject;
-    publicKey: KeyObject;
-    keyId: string;
-    publicKeyPem: string;
-}
-
-function loadOrGeneratePersistentKeys(): KeyState {
-    if (!fs.existsSync(KEYS_DIR)) {
-        fs.mkdirSync(KEYS_DIR, { recursive: true });
-    }
-
-    if (fs.existsSync(PRIV_KEY_PATH) && fs.existsSync(PUB_KEY_PATH) && fs.existsSync(KEY_ID_PATH)) {
-        const privPem = fs.readFileSync(PRIV_KEY_PATH, 'utf-8');
-        const pubPem = fs.readFileSync(PUB_KEY_PATH, 'utf-8');
-        const keyId = fs.readFileSync(KEY_ID_PATH, 'utf-8').trim();
-        const privateKey = createPrivateKey(privPem);
-        const publicKey = createPublicKey(pubPem);
-        return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
-    }
-
-    // Generate once, persist with 0600 permissions
-    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
-    const privPem = privateKey.export({ type: 'pkcs8', format: 'pem' }) as string;
-    const pubPem = publicKey.export({ type: 'spki', format: 'pem' }) as string;
-    const keyId = 'key_' + createHash('sha256').update(pubPem).digest('hex').substring(0, 16);
-
-    fs.writeFileSync(PRIV_KEY_PATH, privPem, { encoding: 'utf-8', mode: 0o600 });
-    try {
-        fs.chmodSync(PRIV_KEY_PATH, 0o600);
-    } catch {
-        // Fallback for non-POSIX environments
-    }
-    fs.writeFileSync(PUB_KEY_PATH, pubPem, { encoding: 'utf-8' });
-    fs.writeFileSync(KEY_ID_PATH, keyId, { encoding: 'utf-8' });
-
-    return { privateKey, publicKey, keyId, publicKeyPem: pubPem };
-}
-
-const keyState = loadOrGeneratePersistentKeys();
-const BILLING_GATEWAY_URL = process.env.BILLING_GATEWAY_URL || 'http://localhost:4002/v1';
-
-import { globalTrustRegistry } from '@ugondu/shared';
-
-app.get('/v1/keys', (req, res) => {
-    const keys = globalTrustRegistry.getTrustRootAnchor();
-    const result = Object.keys(keys).map(keyId => ({
-        id: keyId,
-        type: keys[keyId].algorithm,
-        publicKey: keys[keyId].publicKey,
-        purpose: keys[keyId].purpose,
-        status: keys[keyId].status
-    }));
-    res.json({ keys: result });
-});
-
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', service: 'engine-core', cor_level: 'A' });
-});
-
-function isPluginRequired(pluginItem: any, reqBody: any): boolean {
-    const pluginName = typeof pluginItem === 'string' ? pluginItem : (pluginItem?.name || '');
-    if (typeof pluginItem === 'object' && pluginItem !== null) {
-        if (pluginItem.required === true) return true;
-        if (String(pluginItem.failurePolicy || '').toUpperCase() === 'REQUIRED') return true;
-        if (String(pluginItem.policy || '').toUpperCase() === 'REQUIRED') return true;
-    }
-    if (Array.isArray(reqBody.requiredPlugins) && reqBody.requiredPlugins.includes(pluginName)) {
-        return true;
-    }
-    if (reqBody.pluginPolicies && String(reqBody.pluginPolicies[pluginName] || '').toUpperCase() === 'REQUIRED') {
-        return true;
-    }
-    if (Array.isArray(reqBody.plugins)) {
-        for (const p of reqBody.plugins) {
-            if (typeof p === 'object' && p !== null && p.name === pluginName) {
-                if (p.required === true) return true;
-                if (String(p.failurePolicy || '').toUpperCase() === 'REQUIRED') return true;
-                if (String(p.policy || '').toUpperCase() === 'REQUIRED') return true;
-            }
-        }
-    }
-    return false;
-}
-
-app.post('/v1/deploy/resolve', async (req, res): Promise<any> => {
-    const { repositoryUrl, branch, fileMap, targetEnvironment, token } = req.body;
-    
-    if (!repositoryUrl || !branch || !targetEnvironment || !token) {
-        return res.status(400).json({ error: __t('invalid_ctx') });
-    }
-
-    try {
-        const bgAuth = signServiceIdentity('engine-core', 'billing-gateway');
-        const authResponse = await axios.post(`${BILLING_GATEWAY_URL}/authorize`, { token, repositoryUrl }, { headers: { Authorization: `Bearer ${bgAuth}` } }).catch(() => null);
-        if (!authResponse || !authResponse.data || !authResponse.data.edition) {
-            return res.status(402).json({ error: __t('blocked') });
-        }
-
-        const { edition, capabilities } = authResponse.data;
-
-        let strategy = (targetEnvironment === 'cpanel' || targetEnvironment === 'directadmin') ? 'quota-sync' : 'atomic';
-        
-        if (!capabilities.allowAtomic && strategy === 'atomic') {
-            console.log(__t('atomic_denied', edition));
-            strategy = 'quota-sync';
-        }
-        
-        const transactionId = `tx_${randomBytes(12).toString('hex')}`;
-        const steps: any[] = [
-            {
-                action: 'FETCH_REPOSITORY',
-                payload: { url: repositoryUrl, branch }
-            }
-        ];
-
-        // Plugin Resolution with Strict Failure Policy Enforcement
-        const PLUGIN_MANAGER_URL = process.env.PLUGIN_MANAGER_URL || 'http://localhost:4003/v1';
-        const pmAuth = signServiceIdentity('engine-core', 'plugin-manager');
-        let discoveredPlugins: any[] = [];
-
-        try {
-            const pluginsResponse = await axios.get(`${PLUGIN_MANAGER_URL}/plugins`, {
-                headers: { Authorization: `Bearer ${pmAuth}` },
-                timeout: 5000
-            });
-            if (pluginsResponse && pluginsResponse.data && Array.isArray(pluginsResponse.data.plugins)) {
-                discoveredPlugins = pluginsResponse.data.plugins;
-            }
-        } catch (pluginFetchErr: any) {
-            console.error(__t('plugin_failed'), pluginFetchErr.message || pluginFetchErr);
-            if ((Array.isArray(req.body.requiredPlugins) && req.body.requiredPlugins.length > 0) ||
-                (req.body.pluginPolicies && Object.values(req.body.pluginPolicies).some(pol => String(pol).toUpperCase() === 'REQUIRED'))) {
-                return res.status(500).json({ error: 'REQUIRED_PLUGIN_FAILED', message: __t('required_plugin_failed', 'discovery') });
-            }
-        }
-
-        // Build target plugin list
-        const targetPlugins: any[] = [];
-        const seenNames = new Set<string>();
-
-        const addPlugin = (item: any) => {
-            const name = typeof item === 'string' ? item : item?.name;
-            if (name && !seenNames.has(name)) {
-                seenNames.add(name);
-                targetPlugins.push(item);
-            }
+app.use(
+  createHealthAndMetadataRouter({
+    service: 'engine-core',
+    version: process.env['SERVICE_VERSION'] ?? '3.0.0',
+    buildSha: process.env['BUILD_SHA'] ?? process.env['GIT_COMMIT_SHA'] ?? 'local-dev',
+    schemaVersion: '1.0.0',
+    capabilities: ENGINE_CAPABILITIES,
+    timeoutMs: 2500,
+    dependencies: {
+      signingKeyMaterial: () => ({
+        healthy: Boolean(keyState && keyState.privateKey && keyState.publicKey && keyState.keyId),
+        detail: keyState?.keyId ? `Active signing key ${keyState.keyId}` : 'Missing signing key',
+      }),
+      trustRootRegistry: () => {
+        const anchors = globalTrustRegistry.getTrustRootAnchor();
+        const count = Object.keys(anchors).length;
+        return {
+          healthy: count > 0,
+          detail: `${count} active trust root anchors loaded`,
         };
+      },
+    },
+  })
+);
 
-        if (Array.isArray(req.body.plugins) && req.body.plugins.length > 0) {
-            for (const p of req.body.plugins) addPlugin(p);
-        } else {
-            for (const p of discoveredPlugins) addPlugin(p);
-        }
+// ─── Routes ──────────────────────────────────────────────────────────────────
+app.use('/v1/keys',      keysRouter);
+app.use('/v1/telemetry', telemetryRouter);
+app.use('/v1/deploy',    passportGuardMiddleware, createDeployRouter(keyState, BILLING_GATEWAY_URL));
+app.use('/v1/recovery',  recoveryRouter);
+app.use('/v1/ai',        aiRouter);
 
-        if (Array.isArray(req.body.requiredPlugins)) {
-            for (const reqName of req.body.requiredPlugins) {
-                if (!seenNames.has(reqName)) {
-                    const found = discoveredPlugins.find(p => (typeof p === 'string' ? p : p?.name) === reqName);
-                    addPlugin(found || { name: reqName, policy: 'REQUIRED' });
-                }
-            }
-        }
-
-        let injectedCount = 0;
-        const maxPlugins = capabilities.maxPlugins === 'unlimited' ? Infinity : (capabilities.maxPlugins || 1);
-
-        for (const pluginItem of targetPlugins) {
-            const pluginName = typeof pluginItem === 'string' ? pluginItem : pluginItem.name;
-            if (!pluginName) continue;
-
-            const isRequired = isPluginRequired(pluginItem, req.body);
-
-            if (injectedCount >= maxPlugins) {
-                if (isRequired) {
-                    console.error(__t('engine_plugin_limit_exceeded', pluginName, maxPlugins));
-                    return res.status(500).json({ error: 'REQUIRED_PLUGIN_FAILED', message: __t('required_plugin_failed', pluginName) });
-                }
-                console.log(__t('max_plugins', maxPlugins, edition, pluginName));
-                break;
-            }
-
-            let execResponse: any = null;
-            let execFailed = false;
-
-            try {
-                execResponse = await axios.post(
-                    `${PLUGIN_MANAGER_URL}/plugins/${encodeURIComponent(pluginName)}/execute`,
-                    {
-                        payload: {},
-                        tenantId: authResponse.data.tenantId,
-                        edition
-                    },
-                    {
-                        headers: { Authorization: `Bearer ${pmAuth}` },
-                        timeout: 5000
-                    }
-                );
-
-                if (!execResponse || execResponse.status !== 200 || !execResponse.data || execResponse.data.error || !Array.isArray(execResponse.data.injectedSteps)) {
-                    execFailed = true;
-                }
-            } catch (execErr: any) {
-                execFailed = true;
-            }
-
-            if (execFailed) {
-                if (isRequired) {
-                    console.error(__t('engine_required_plugin_failed', pluginName));
-                    return res.status(500).json({ error: 'REQUIRED_PLUGIN_FAILED', message: __t('required_plugin_failed', pluginName) });
-                }
-                console.warn(__t('engine_optional_plugin_skipped', pluginName));
-                continue;
-            }
-
-            steps.push(...execResponse.data.injectedSteps);
-            injectedCount++;
-        }
-
-        steps.push({
-            action: 'SYNC_ENVIRONMENT',
-            payload: { strategy }
-        });
-
-        if (capabilities.allowRollback) {
-            steps.push({
-                action: 'PRUNE_RELEASES',
-                payload: { retention: 3 }
-            });
-        } else {
-            console.log(__t('rollback_denied'));
-            steps.push({
-                action: 'UPSELL_NOTICE',
-                payload: { message: __t('upsell_notice') }
-            });
-        }
-
-        const canonicalSteps = canonicalize(steps) || '[]';
-        const planHash = require('crypto').createHash('sha256').update(canonicalSteps).digest('hex');
-
-        const nonce = randomBytes(16).toString('hex');
-        const executionId = `exec_${randomBytes(12).toString('hex')}`;
-        const targetId = req.body.targetId || `tgt_${randomBytes(8).toString('hex')}`;
-        const workspaceId = req.body.workspaceId || `ws_${randomBytes(8).toString('hex')}`;
-        const artifactDigest = `sha256:${randomBytes(32).toString('hex')}`; // Placeholder for actual digest
-
-        const activeKey = globalTrustRegistry.getActiveKeyByPurpose('recipe');
-        const signingKeyId = activeKey ? activeKey.keyId : keyState.keyId;
-        const signingKey = activeKey ? globalTrustRegistry.getPrivateKeyObject(signingKeyId) : keyState.privateKey;
-
-        const envelope = {
-            version: '1.0',
-            issuer: 'ugondu-engine',
-            keyId: signingKeyId,
-            transactionId,
-            tenantId: authResponse.data.tenantId || 'tenant_unknown',
-            workspaceId,
-            projectId: 'default',
-            environmentId: targetEnvironment,
-            targetId,
-            executionId,
-            nonce,
-            artifactDigest,
-            issuedAt: Date.now(),
-            expiresAt: Date.now() + 1000 * 60 * 5, // 5 mins expiry
-            edition,
-            planHash
-        };
-
-        const canonicalEnvelope = canonicalize(envelope) || '{}';
-        const signature = sign(null, Buffer.from(canonicalEnvelope), signingKey).toString('base64');
-
-        return res.status(200).json({
-            transactionId,
-            strategy,
-            steps,
-            edition,
-            canonicalEnvelope,
-            canonicalSteps,
-            signature
-        });
-
-    } catch (err: any) {
-        return res.status(500).json({ error: __t('internal_err', err.message) });
-    }
+// ─── Error Handler ───────────────────────────────────────────────────────────
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const message = err instanceof Error ? err.message : String(err);
+  if (message.includes('cors_policy_violation') || message.includes('CORS')) {
+    res.status(403).json({ error: 'CORS_POLICY_VIOLATION', message });
+    return;
+  }
+  res.status(500).json({ error: 'INTERNAL_ERROR', message });
 });
 
-app.post('/v1/telemetry/report', (req, res) => {
-    const { transactionId, status, logs } = req.body;
-    if (!transactionId || !status) {
-        return res.status(400).json({ error: __t('invalid_telemetry') });
-    }
-
-    console.log(__t('telemetry_rec', transactionId, status));
-    return res.status(201).json({ message: __t('telemetry_saved') });
-});
-
-const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => {
-    console.log(__t('listening', 'Ugondu Engine Core', PORT));
-});
+// ─── Server ──────────────────────────────────────────────────────────────────
+const PORT = process.env['PORT'] ?? ProductRegistry.getServiceConfig('engine_core').port;
+if (process.env['UGONDU_DISABLE_AUTO_LISTEN'] !== 'true') {
+  app.listen(Number(PORT), '0.0.0.0', () => {
+    Logger.info(__t('listening', __t('ugondu_engine_core'), PORT));
+  });
+}

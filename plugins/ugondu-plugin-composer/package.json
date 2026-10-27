@@ -1,0 +1,9 @@
+{
+  "name": "@ugondu/plugin-composer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu PHP Composer Dependency Resolution and Optimization Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "main": "index.js"
+}

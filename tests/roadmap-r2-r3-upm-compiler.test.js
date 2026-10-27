@@ -168,7 +168,20 @@ async function runTests() {
         const decL5Blocked = ProgressiveAutonomyEngine.evaluateExecutionApproval('L5', highRiskSim);
         assert.strictEqual(decL5Blocked.requiresManualApproval, true, 'L5 must block policy violations');
 
-        reportPass('Progressive Autonomy Engine correctly gates execution across L0, L1, and L5');
+        // Test hardened L5 context gates (COR-10)
+        const decL5DegradedHealth = ProgressiveAutonomyEngine.evaluateExecutionApproval('L5', lowRiskSim, { targetHealth: 'DEGRADED' });
+        assert.strictEqual(decL5DegradedHealth.requiresManualApproval, true, 'L5 must block when target health is DEGRADED');
+
+        const decL5NoRollback = ProgressiveAutonomyEngine.evaluateExecutionApproval('L5', lowRiskSim, { rollbackAvailable: false });
+        assert.strictEqual(decL5NoRollback.requiresManualApproval, true, 'L5 must block when rollback guarantee is missing');
+
+        const decL5DualAppr = ProgressiveAutonomyEngine.evaluateExecutionApproval('L5', lowRiskSim, { dualApprovalRequired: true });
+        assert.strictEqual(decL5DualAppr.requiresManualApproval, true, 'L5 must block when policy mandates dual approval');
+
+        const decL5Approved = ProgressiveAutonomyEngine.evaluateExecutionApproval('L5', lowRiskSim, { targetHealth: 'HEALTHY', rollbackAvailable: true });
+        assert.strictEqual(decL5Approved.canAutoExecute, true, 'L5 approves when all health and recovery guarantees hold');
+
+        reportPass('Progressive Autonomy Engine correctly gates execution across L0, L1, and hardened L5');
     } catch (e) {
         reportFail('Progressive Autonomy test', e);
     }

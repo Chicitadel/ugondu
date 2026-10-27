@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface TargetHealthProbe
+ * @description Corporate Governed interface implementation for TargetHealthProbe
+ * @classification ENTERPRISE
+ */
 export interface TargetHealthProbe {
     targetId: string;
     endpoint: string;
@@ -22,6 +27,11 @@ export interface TargetHealthProbe {
     latencyMs: number;
 }
 
+/**
+ * @interface SelfHealingAction
+ * @description Corporate Governed interface implementation for SelfHealingAction
+ * @classification ENTERPRISE
+ */
 export interface SelfHealingAction {
     type: 'RESTART' | 'ROLLBACK' | 'TRAFFIC_SHIFT' | 'QUARANTINE';
     targetId: string;
@@ -30,6 +40,11 @@ export interface SelfHealingAction {
     completed: boolean;
 }
 
+/**
+ * @class OperationsEngine
+ * @description Corporate Governed class implementation for OperationsEngine
+ * @classification ENTERPRISE
+ */
 export class OperationsEngine {
     private healthRegistry: Map<string, TargetHealthProbe> = new Map();
     private history: SelfHealingAction[] = [];
@@ -47,7 +62,7 @@ export class OperationsEngine {
             const action: SelfHealingAction = {
                 type: 'ROLLBACK',
                 targetId,
-                reason: 'CONSECUTIVE_HEALTH_PROBE_FAILURES',
+                reason: __t('ui.responses.consecutive_health_probe_failures'),
                 initiatedAt: Date.now(),
                 completed: true
             };
@@ -60,7 +75,7 @@ export class OperationsEngine {
             const action: SelfHealingAction = {
                 type: 'TRAFFIC_SHIFT',
                 targetId,
-                reason: 'DEGRADED_CANARY_TRAFFIC_EVACUATION',
+                reason: __t('ui.responses.degraded_canary_traffic_evacuation'),
                 initiatedAt: Date.now(),
                 completed: true
             };
@@ -73,7 +88,7 @@ export class OperationsEngine {
             const action: SelfHealingAction = {
                 type: 'RESTART',
                 targetId,
-                reason: 'TRANSIENT_FAILURE_RESTART_ATTEMPT',
+                reason: __t('ui.responses.transient_failure_restart_attempt'),
                 initiatedAt: Date.now(),
                 completed: true
             };

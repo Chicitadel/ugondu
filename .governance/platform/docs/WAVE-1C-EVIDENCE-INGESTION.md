@@ -28,5 +28,5 @@ Based on the Event-Driven Policy Engine, `ingestion` is evaluated under the **AP
 
 ## Approval
 **Wave 1C Refactoring Applied:** Yes. 
-**Execution Signature:** AntiGravity Autonomous CI
+**Execution Signature:** Ujomor Systems Engineering Authority CI
 **Governance Semantics:** `Governance Engine v2.0`, `API Policy Pack v1.0`

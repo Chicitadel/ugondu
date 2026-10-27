@@ -1,15 +1,17 @@
 /******************************************************************************
- * Project        : Ugondu
- * Module         : Client Engine
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : client/engine
  * File           : safepath.go
  * Version        : 3.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
@@ -26,8 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd
- * All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
 package engine
@@ -38,16 +39,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"ugondu/client/i18n"
 )
 
 var (
-	ErrPathTraversal = errors.New("ERR_PATH_TRAVERSAL_ATTEMPT")
-	ErrAbsolutePath  = errors.New("ERR_ABSOLUTE_PATH_ATTEMPT")
-	ErrUNCPath       = errors.New("ERR_UNC_PATH_ATTEMPT")
-	ErrNTFSStream    = errors.New("ERR_NTFS_STREAM_ATTEMPT")
-	ErrDeviceName    = errors.New("ERR_DEVICE_NAME_ATTEMPT")
-	ErrSymlinkEscape = errors.New("ERR_SYMLINK_ESCAPE")
-	ErrEscapeBaseDir = errors.New("ERR_ESCAPE_BASE_DIR")
+	ErrPathTraversal = errors.New(i18n.T("ERR_PATH_TRAVERSAL_ATTEMPT"))
+	ErrAbsolutePath  = errors.New(i18n.T("ERR_ABSOLUTE_PATH_ATTEMPT"))
+	ErrUNCPath       = errors.New(i18n.T("ERR_UNC_PATH_ATTEMPT"))
+	ErrNTFSStream    = errors.New(i18n.T("ERR_NTFS_STREAM_ATTEMPT"))
+	ErrDeviceName    = errors.New(i18n.T("ERR_DEVICE_NAME_ATTEMPT"))
+	ErrSymlinkEscape = errors.New(i18n.T("ERR_SYMLINK_ESCAPE"))
+	ErrEscapeBaseDir = errors.New(i18n.T("ERR_ESCAPE_BASE_DIR"))
 )
 
 type SafePathResolver struct{}
@@ -56,16 +59,16 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 	if strings.Contains(targetRelPath, "..") {
 		return "", ErrPathTraversal
 	}
+	if strings.HasPrefix(targetRelPath, "\\\\") || strings.HasPrefix(targetRelPath, "//") {
+		return "", ErrUNCPath
+	}
 	if filepath.IsAbs(targetRelPath) || strings.HasPrefix(targetRelPath, "/") || strings.HasPrefix(targetRelPath, "\\") {
 		return "", ErrAbsolutePath
-	}
-	if strings.HasPrefix(targetRelPath, "\\\\") {
-		return "", ErrUNCPath
 	}
 	if strings.Contains(targetRelPath, ":") {
 		return "", ErrNTFSStream
 	}
-	
+
 	// Windows Device Names
 	upper := strings.ToUpper(filepath.Base(targetRelPath))
 	devices := []string{"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}
@@ -77,11 +80,11 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 
 	cleanBase, err := filepath.Abs(filepath.Clean(baseDir))
 	if err != nil {
-		return "", fmt.Errorf("ERR_BASE_DIR_RESOLUTION: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_base_dir_resolution_w"), err)
 	}
 
 	target := filepath.Join(cleanBase, targetRelPath)
-	
+
 	// Prevent symlink escapes if the target already exists and is evaluated
 	evalTarget, err := filepath.EvalSymlinks(target)
 	if err == nil {
@@ -89,7 +92,7 @@ func (s *SafePathResolver) ResolveSafePath(baseDir, targetRelPath string) (strin
 			return "", ErrSymlinkEscape
 		}
 	} else if !os.IsNotExist(err) {
-		return "", fmt.Errorf("ERR_SYMLINK_EVALUATION: %w", err)
+		return "", fmt.Errorf(i18n.T("msg_err_symlink_evaluation_w"), err)
 	}
 
 	if !strings.HasPrefix(target, cleanBase+string(filepath.Separator)) && target != cleanBase {

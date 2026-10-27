@@ -1,0 +1,13 @@
+{
+  "name": "@ugondu/plugin-recovery-database",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Live Database State Reconstruction Recovery Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "live-database-state-reconstruction"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}

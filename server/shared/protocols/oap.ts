@@ -12,9 +12,10 @@
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import canonicalize from 'canonicalize';
 import { __t } from '../i18n';
+import { Logger } from '../logger';
 
 export type OapMessageType = 'HANDSHAKE' | 'ACTION_REQUEST' | 'ACTION_RESPONSE' | 'HEALTH' | 'DRAIN';
 

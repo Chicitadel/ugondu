@@ -1,0 +1,211 @@
+# Project        : Ugondu — Universal Delivery Operating System
+# Module         : UPLM — AWS COR V9 Policy Pack Manifest
+# File           : pack.yaml
+# Version        : 9.0.0
+# Author         : Ujomor Systems Engineering & Governance Authority
+# Organization   : Air Roofers
+# Classification : ENTERPRISE
+# Governance     : Corporate Policy Governed
+
+apiVersion: uplm.ugondu.io/v1
+kind: PolicyPack
+metadata:
+  id: aws.cor.v9
+  name: Ugondu COR V9 Split Managed Policy Pack
+  description: >-
+    Splits the 46 Ugondu COR V9 statements into five customer-managed IAM policies
+    for UgonduCORExecutionRole in account 971671216490 (eu-west-3) to satisfy AWS IAM
+    per-policy size limits while preserving every Sid and statement 1:1.
+  version: 9.0.0
+  owner: Ujomor Systems Engineering & Governance Authority
+  classification: ENTERPRISE
+  tags:
+    UgonduCOR: "true"
+    PackFamily: aws-cor
+    PackRevision: v9
+provenance:
+  source: Ugondu_CORExecutionRole_Policy_V9_Candidate(2).json
+  trustedRelease: true
+  packDigestSha256: "26ee6410a09f235df7940e332c00450c5059360793b11c453d5a3163ef5bf937"
+  signatureAlgorithm: Ed25519
+  signingKeyId: ugondu-uplm-pack-signing-key-v1
+provider:
+  id: aws
+  adapterType: AWS_IAM
+  supportedAdapterVersions: ">=2.0.0 <3.0.0"
+  requiredCapabilities:
+    - discoverIdentity
+    - inspectPolicyDocument
+    - inspectAttachments
+    - inspectTrustRelationship
+    - validatePolicy
+    - createPolicy
+    - updateOwnedPolicy
+    - attachPolicy
+    - detachPolicy
+  optionalCapabilities:
+    - inspectEffectivePermissions
+    - detectExternalConsumers
+targetScope:
+  partition: aws
+  accountId: "971671216490"
+  region: eu-west-3
+  requiredSessionTags:
+    - UgonduTransactionId
+    - UgonduCOR
+roles:
+  - logicalId: execution-role
+    physicalName: UgonduCORExecutionRole
+    arn: "arn:aws:iam::971671216490:role/UgonduCORExecutionRole"
+    roleKind: EXECUTION_ROLE
+    templatePath: templates/roles/execution-role-trust.json
+    sha256: "48d7f97020616f8a68688bc24c08ae31df4dbd8dcf12910b9be7fd7dc0272214"
+    description: Target execution role for Ugondu COR V9 split managed policies.
+    trustedPrincipalArn: "arn:aws:iam::971671216490:role/UgonduCORRunner"
+    prohibitExecutionPolicyAttachment: false
+  - logicalId: runner-role
+    physicalName: UgonduCORRunner
+    arn: "arn:aws:iam::971671216490:role/UgonduCORRunner"
+    roleKind: RUNNER_ROLE
+    templatePath: templates/roles/runner-assume-role.json
+    sha256: "05851db93e89fcc0b2ef7db76d5c66ae5f5862e5dbaed05c20910f4fe56c2053"
+    description: GitHub OIDC / runner base role allowed only to assume UgonduCORExecutionRole with session tags.
+    prohibitExecutionPolicyAttachment: true
+policies:
+  - logicalId: discovery
+    physicalName: UgonduCOR-V9-Discovery
+    templatePath: templates/policies/discovery.json
+    sha256: "a924036937a4c6e5a6baeef040b6e01b0f925ed83db5f661c3697d8799db9fa2"
+    statementCount: 2
+    compactCharLength: 832
+    targetRoleLogicalId: execution-role
+    description: Read-only SSM and global resource discovery statements (2 statements).
+    sids:
+      - AllowRegionIndependentSSM
+      - AllowGlobalReadDiscovery
+  - logicalId: ec2-creation
+    physicalName: UgonduCOR-V9-EC2-Creation
+    templatePath: templates/policies/ec2-creation.json
+    sha256: "480fee8c64d81dc29b2bef0ad1b0f2d60552929807b59b1103a9a5943fe08e1d"
+    statementCount: 9
+    compactCharLength: 3927
+    targetRoleLogicalId: execution-role
+    description: Transaction-tagged EC2 VPC, subnet, IGW, route table, SG, snapshot, and instance creation (9 statements).
+    sids:
+      - CreateTaggedVpc
+      - CreateTaggedSubnet
+      - CreateTaggedInternetGateway
+      - CreateTaggedRouteTable
+      - CreateTaggedSecurityGroup
+      - CreateTaggedSnapshot
+      - LaunchTaggedInstanceTags
+      - LaunchTaggedInstanceReadOnly
+      - AllowTaggingDuringCreation
+  - logicalId: ec2-cleanup
+    physicalName: UgonduCOR-V9-EC2-Cleanup
+    templatePath: templates/policies/ec2-cleanup.json
+    sha256: "2ac6041170ec7587fefdd2b6657d232d3087607dc89172a7f20f3d432978b0e5"
+    statementCount: 12
+    compactCharLength: 4989
+    targetRoleLogicalId: execution-role
+    description: Ownership tag protection and transaction-scoped EC2 cleanup and routing operations (12 statements).
+    sids:
+      - DenyRemovalOfUgonduOwnershipTags
+      - EnforceDeleteVpc
+      - EnforceDeleteSubnet
+      - EnforceDeleteInternetGateway
+      - EnforceDeleteRouteTable
+      - EnforceDeleteSecurityGroup
+      - EnforceTerminateInstances
+      - EnforceDeleteNetworkInterface
+      - EnforceDeleteSnapshot
+      - AllowAttachDetachGateway
+      - AllowRouteTableAssoc
+      - AllowRouteOps
+  - logicalId: rds-s3
+    physicalName: UgonduCOR-V9-RDS-S3
+    templatePath: templates/policies/rds-s3.json
+    sha256: "f4c205fd467b7b07c0e44cd6f40b21e1e1227cb0f097137230d88a95013b78f8"
+    statementCount: 11
+    compactCharLength: 4104
+    targetRoleLogicalId: execution-role
+    description: Transaction-isolated RDS instance/snapshot/subnet-group and S3 bucket/object lifecycle permissions (11 statements).
+    sids:
+      - AllowRDSTaggingDuringCreation
+      - CreateTransactionTaggedDBInstance
+      - CreateTransactionTaggedDBSnapshot
+      - CreateTransactionTaggedDBSubnetGroup
+      - EnforceDBInstanceDestructiveBounds
+      - EnforceDBSnapshotDestructiveBounds
+      - EnforceDBSubnetGroupDestructiveBounds
+      - EnforceS3BucketCreation
+      - EnforceS3BucketTagging
+      - EnforceS3BucketOperations
+      - EnforceS3ObjectOperations
+  - logicalId: ecr-ecs
+    physicalName: UgonduCOR-V9-ECR-ECS
+    templatePath: templates/policies/ecr-ecs.json
+    sha256: "09e8e53d76c6deeb73e10c413f0bc88ed5321642392d287edcb6da09257ff560"
+    statementCount: 12
+    compactCharLength: 5170
+    targetRoleLogicalId: execution-role
+    description: Transaction-scoped ECR repository, ECS cluster/service/task-definition, tag-stripping deny, and scoped PassRole (12 statements).
+    sids:
+      - AllowECRTaggingDuringCreation
+      - AllowECSTaggingDuringCreation
+      - CreateECROperations
+      - EnforceECROperations
+      - CreateECSTaskDefinition
+      - CreateECSCluster
+      - CreateECSService
+      - DeregisterECSTaskDefinition
+      - DeleteECSCluster
+      - ModifyECSService
+      - DenyECSTagStripping
+      - AllowPassRoleForECS
+quotas:
+  maxManagedPolicySizeChars: 6144
+  maxManagedPoliciesPerRole: 10
+  requiredManagedPolicySlots: 5
+  maxVersionsPerManagedPolicy: 5
+  totalStatementsInPack: 46
+safetyGuardrails:
+  preserveUnattachedTestFixture: true
+  firstRunReadOnly: true
+  prohibitRunnerExecutionAttachment: true
+  prohibitInlinePaste: true
+  prohibitSelfEscalation: true
+  blockOnUnknownTrustPrincipal: true
+  requireInspectAndPlanBeforeAttach: true
+ownershipRules:
+  defaultInstallOwnership: UGONDU_ADOPTED
+  adoptedRoleRetirementBehavior: PRESERVE
+  requireLedgerProofForDelete: true
+  tagsAloneInsufficientForDelete: true
+riskPolicy:
+  inspectRisk: R0
+  createPolicyRisk: R1
+  attachPolicyRisk: R2
+  trustChangeRisk: R3
+  retirePolicyRisk: R4
+verification:
+  requireDocumentHashMatch: true
+  requireAttachmentVerification: true
+  requireTrustPolicyVerification: true
+  requireNegativeIsolationTests: true
+migration:
+  strategy: ADDITIVE_FIRST
+  supportedSourceVersions:
+    - "8.0.0"
+    - "9.0.0"
+  retainOldUntilNewVerified: true
+retirement:
+  preserveAdoptedObjects: true
+  preserveSharedObjects: true
+  preserveExternalObjects: true
+  blockOnUnknownOwnership: true
+  forceFlagCannotBypassSafety: true
+audit:
+  evidenceRequired: true
+  retentionDays: 365
+  redactSecrets: true
