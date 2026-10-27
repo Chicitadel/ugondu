@@ -457,3 +457,25 @@ Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR
 
 - **Additional hardening:** read back enabled APIs and the WIF pool; verify the repository-restricted provider before adding the impersonation binding; refuse to attach federation to an existing service account with direct project-level grants. Prefer a fresh dedicated account and inspect inherited organization/folder IAM before any workload use.
 - **Regression coverage:** a mocked successful bootstrap must pass API/pool/provider/IAM read-back; an existing privileged service account must be rejected before the WIF binding is added.
+
+## 2026-10-27 Integration Head — Commit 2d44914
+
+- **Candidate Branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` (PR #30)
+- **Merged PRs:** Integrated `feat/gcp-one-step-bootstrap-2026-10-27` (PR #33 / `43dc2129`) containing GCP one-step WIF bootstrap, DirectAdmin staging path containment, truthful qualification labeling, and regression suites.
+- **Verification Summary on Local HEAD:**
+  - `npm run test:bootstrap:gcp`: 8/8 PASS
+  - `npm run bootstrap:validate`: PASS (structural and schema cross-artifact integrity)
+  - `node --test tests/deploy-directadmin-config.test.mjs`: 5/5 PASS
+  - `node --test tests/policy-pack-path-containment.test.mjs`: 3/3 PASS
+  - `powershell -ExecutionPolicy Bypass -File tools/tests/Test-DeployDirectAdminStaging.ps1`: PASS
+  - `node scripts/governance/verify-ai-attribution.mjs`: PASS (0 prohibited phrases across 4,676 files)
+  - `node scripts/governance/verify-tokenization-t03.mjs`: PASS (704 files, 1,527 callsites, 0 raw strings, 0 concats, 0 missing tokens)
+  - `node scripts/governance/verify-microservices-t04.mjs`: PASS (5/5 gates conformant across 9 workspaces)
+  - `node scripts/governance/validate-repository.mjs`: PASS (4,676 files verified with 0 violations)
+  - `node scripts/governance/validate-capability-registry.mjs`: PASS (4 registries verified with 0 conflicts)
+  - `node scripts/governance/validate-test-coverage.mjs`: PASS (9 workspaces verified)
+  - `npm run test --workspaces`: 81/81 test suites PASS (798/798 tests pass)
+  - `npm run test:security`: 24/24 PASS
+  - `npm run test:integration`: 17/17 PASS
+  - `npm run test:locales`: PASS (12 languages synchronized)
+- **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
