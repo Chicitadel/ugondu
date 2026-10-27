@@ -192,6 +192,19 @@ func LoadState(txId string) (*ExecutionState, error) {
 		return nil, ErrStateCorrupt
 	}
 
+	// Persisted execution state carries a deterministic integrity hash. Do not
+	// resume from a missing or mismatched hash: state fields (including completed
+	// steps and security bindings) must be internally consistent before use.
+	if state.StateHash == "" {
+		quarantineCorruptFile(path)
+		return nil, ErrStateCorrupt
+	}
+	computedHash, hashErr := state.ComputeHash()
+	if hashErr != nil || computedHash != state.StateHash {
+		quarantineCorruptFile(path)
+		return nil, ErrStateCorrupt
+	}
+
 	return &state, nil
 }
 
