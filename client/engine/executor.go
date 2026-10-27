@@ -420,24 +420,24 @@ func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) 
 	// Missing inputs are not a successful verification: callers use this gate when
 	// resuming persisted execution, so fail closed rather than silently bypassing it.
 	if state == nil || env == nil {
-		return fmt.Errorf("cryptographic binding verification requires state and envelope")
+		return fmt.Errorf("%s", i18n.T("invalid_envelope_format"))
 	}
 	// A populated persisted binding must match exactly. In particular, an empty
 	// envelope value is a mismatch, not a reason to skip the comparison.
 	bindings := []struct {
-		name, persisted, supplied string
+		persisted, supplied, token string
 	}{
-		{"executionId", state.ExecutionId, env.ExecutionId},
-		{"transactionId", state.TransactionId, env.TransactionId},
-		{"planHash", state.PlanHash, env.PlanHash},
-		{"tenantId", state.TenantId, env.TenantId},
-		{"projectId", state.ProjectId, env.ProjectId},
-		{"environmentId", state.EnvironmentId, env.EnvironmentId},
-		{"policyHash", state.PolicyHash, env.PolicyHash},
+		{state.ExecutionId, env.ExecutionId, "msg_cryptographic_binding_mismatch_executionid"},
+		{state.TransactionId, env.TransactionId, "msg_cryptographic_binding_mismatch_transactionid"},
+		{state.PlanHash, env.PlanHash, "msg_cryptographic_binding_mismatch_planhash"},
+		{state.TenantId, env.TenantId, "msg_cryptographic_binding_mismatch_tenantid"},
+		{state.ProjectId, env.ProjectId, "msg_cryptographic_binding_mismatch_projectid"},
+		{state.EnvironmentId, env.EnvironmentId, "msg_cryptographic_binding_mismatch_environme"},
+		{state.PolicyHash, env.PolicyHash, "msg_cryptographic_binding_mismatch_policyhas"},
 	}
 	for _, binding := range bindings {
 		if binding.persisted != "" && binding.persisted != binding.supplied {
-			return fmt.Errorf("cryptographic binding mismatch for %s: persisted value does not match envelope", binding.name)
+			return fmt.Errorf(i18n.T(binding.token), binding.persisted, binding.supplied)
 		}
 	}
 	return nil
