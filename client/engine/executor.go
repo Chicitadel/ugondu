@@ -417,29 +417,28 @@ func LoadCachedPublicKey(keyId string) (string, error) {
 
 // VerifyCryptographicBindings ensures recipe fields match the persisted transaction state.
 func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) error {
+	// Missing inputs are not a successful verification: callers use this gate when
+	// resuming persisted execution, so fail closed rather than silently bypassing it.
 	if state == nil || env == nil {
-		return nil
+		return fmt.Errorf("cryptographic binding verification requires state and envelope")
 	}
-	if state.ExecutionId != "" && env.ExecutionId != "" && state.ExecutionId != env.ExecutionId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_executionid"), state.ExecutionId, env.ExecutionId)
+	// A populated persisted binding must match exactly. In particular, an empty
+	// envelope value is a mismatch, not a reason to skip the comparison.
+	bindings := []struct {
+		name, persisted, supplied string
+	}{
+		{"executionId", state.ExecutionId, env.ExecutionId},
+		{"transactionId", state.TransactionId, env.TransactionId},
+		{"planHash", state.PlanHash, env.PlanHash},
+		{"tenantId", state.TenantId, env.TenantId},
+		{"projectId", state.ProjectId, env.ProjectId},
+		{"environmentId", state.EnvironmentId, env.EnvironmentId},
+		{"policyHash", state.PolicyHash, env.PolicyHash},
 	}
-	if state.TransactionId != "" && env.TransactionId != "" && state.TransactionId != env.TransactionId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_transactionid"), state.TransactionId, env.TransactionId)
-	}
-	if state.PlanHash != "" && state.PlanHash != env.PlanHash {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_planhash"), state.PlanHash, env.PlanHash)
-	}
-	if state.TenantId != "" && state.TenantId != env.TenantId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_tenantid"), state.TenantId, env.TenantId)
-	}
-	if state.ProjectId != "" && state.ProjectId != env.ProjectId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_projectid"), state.ProjectId, env.ProjectId)
-	}
-	if state.EnvironmentId != "" && state.EnvironmentId != env.EnvironmentId {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_environme"), state.EnvironmentId, env.EnvironmentId)
-	}
-	if state.PolicyHash != "" && state.PolicyHash != env.PolicyHash {
-		return fmt.Errorf(i18n.T("msg_cryptographic_binding_mismatch_policyhas"), state.PolicyHash, env.PolicyHash)
+	for _, binding := range bindings {
+		if binding.persisted != "" && binding.persisted != binding.supplied {
+			return fmt.Errorf("cryptographic binding mismatch for %s: persisted value does not match envelope", binding.name)
+		}
 	}
 	return nil
 }
