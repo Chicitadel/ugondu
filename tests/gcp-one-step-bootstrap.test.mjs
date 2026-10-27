@@ -88,7 +88,7 @@ test("mocked bootstrap succeeds only after API, pool, provider and IAM read-back
     if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "list") return "";
     if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "providers" && args[3] === "list") return "";
     if (args[0] === "iam" && args[1] === "service-accounts" && args[2] === "list") return "";
-    if (args[0] === "services" && args[1] === "list") return ["iam.googleapis.com", "iamcredentials.googleapis.com", "cloudresourcemanager.googleapis.com", "serviceusage.googleapis.com", "sts.googleapis.com"].join("\\n");
+    if (args[0] === "services" && args[1] === "list") return ["iam.googleapis.com", "iamcredentials.googleapis.com", "cloudresourcemanager.googleapis.com", "serviceusage.googleapis.com", "sts.googleapis.com"].join("\n");
     if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "describe") return JSON.stringify({ name: pool });
     if (args[0] === "iam" && args[1] === "workload-identity-pools" && args[2] === "providers" && args[3] === "describe") return JSON.stringify({ attributeCondition: `assertion.repository == '${c.githubRepo}'`, attributeMapping: { "attribute.repository": "assertion.repository" } });
     if (args[0] === "iam" && args[1] === "service-accounts" && args[2] === "get-iam-policy") return JSON.stringify({ bindings: [{ role: "roles/iam.workloadIdentityUser", members: [principal] }] });
