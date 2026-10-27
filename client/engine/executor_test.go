@@ -34,6 +34,8 @@
 package engine
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -124,5 +126,28 @@ func TestVerifyCryptographicBindings(t *testing.T) {
 	stateBadPolicy.PolicyHash = "policy_bypass"
 	if err := VerifyCryptographicBindings(&stateBadPolicy, env); err == nil {
 		t.Errorf("Expected PolicyHash mismatch error, got nil")
+	}
+}
+
+func TestFetchExecutionRecipeHTTPErrorReturnsFourValuesSafely(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/deploy/resolve" {
+			http.NotFound(w, r)
+			return
+		}
+		http.Error(w, "deployment rejected", http.StatusForbidden)
+	}))
+	defer server.Close()
+
+	env, steps, raw, err := FetchExecutionRecipe(server.URL, &DeploymentContext{
+		RepositoryUrl: "https://example.invalid/repo",
+		Branch:        "main",
+		TargetEnvironment: "test",
+	})
+	if err == nil {
+		t.Fatal("expected non-200 control-plane response to return an error")
+	}
+	if env != nil || steps != nil || raw != nil {
+		t.Fatalf("expected empty recipe outputs on error, got env=%v steps=%v raw=%q", env, steps, raw)
 	}
 }
