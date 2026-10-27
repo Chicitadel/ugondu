@@ -506,3 +506,26 @@ Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR
   - `npm run test:integration`: 17/17 PASS
   - `npm run test:locales`: PASS (12 languages synchronized)
 - **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
+
+
+## 2026-10-27 Addendum — UG-GO-CLIENT-VET-001
+
+**Owner branch:** `fix/go-thin-client-vet-and-module-imports-2026-10-27`  
+**Handover:** [Go thin-client vet remediation](../audit/REAUDIT_HANDOVER_GO_CLIENT_VET_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD CI PENDING
+
+### Confirmed finding
+Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/runs/40526372443) failed all Go thin-client platform jobs at `go vet ./...` because `client/i18n/pack.go` used `strings.TrimSpace` without importing `strings`, and `client/engine/executor_test.go` imported a package path inconsistent with `client/go.mod`'s module declaration `ugondu/client`.
+
+### Physical remediation
+- Added the standard-library `strings` import in `client/i18n/pack.go`.
+- Corrected the engine test import to `ugondu/client/i18n`.
+- Added regression tests for trusted public-key override trimming and fallback behavior in `client/i18n/pack_test.go`.
+- Added a focused handover note with exact failed-run evidence and mandatory verification commands.
+
+### Non-negotiable follow-up
+1. Re-run Go vet, tests, and cross-platform builds on the exact final SHA through CI.
+2. Do not remove Go vet or skip affected packages to force green.
+3. Keep the module path authoritative; fix imports rather than renaming the module as a workaround.
+4. Cross-compilation is not native platform lifecycle qualification.
+5. No direct changes to `master` or protected production branches. COR PR validation does not imply physical cloud qualification or public-release certification.
