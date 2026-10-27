@@ -51,7 +51,7 @@ export function buildPlan(c) {
     provider: "gcp",
     project_id: c.project,
     region: c.region ?? null,
-    mode: c.mode,
+    mode: "plan-bound",
     github_repository: c.githubRepo,
     identity: {
       pool_id: c.pool,
