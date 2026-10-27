@@ -6,8 +6,6 @@
  * separately registered executor handlers and subscription-backed integration
  * evidence. Keep cloud credentials outside this configuration object.
  */
-import { __t } from '@ugondu/shared';
-
 export type AzureWorkloadKind =
     | 'arm-template'
     | 'bicep'
