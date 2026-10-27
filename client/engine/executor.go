@@ -3,10 +3,10 @@
  * Module         : client/engine
  * File           : executor.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-27
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -28,7 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 package engine
@@ -437,7 +437,7 @@ func VerifyCryptographicBindings(state *ExecutionState, env *ExecutionEnvelope) 
 	}
 	for _, binding := range bindings {
 		if binding.persisted != "" && binding.persisted != binding.supplied {
-			return fmt.Errorf(i18n.T(binding.token), binding.persisted, binding.supplied)
+			return fmt.Errorf("%s", i18n.T(binding.token, binding.persisted, binding.supplied))
 		}
 	}
 	return nil
