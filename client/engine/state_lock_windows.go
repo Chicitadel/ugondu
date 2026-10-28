@@ -36,6 +36,7 @@
 package engine
 
 import (
+	"errors"
 	"os"
 	"syscall"
 	"unsafe"
@@ -52,7 +53,47 @@ const (
 )
 
 type windowsStateFileLock struct {
-	file *os.File
+	file       *os.File
+	overlapped syscall.Overlapped
+}
+
+// lockFileExCall and unlockFileExCall are seams for deterministic API-contract
+// tests. Both operations must use the same OVERLAPPED structure for a lock.
+var (
+	lockFileExCall = func(handle uintptr, overlapped *syscall.Overlapped) error {
+		r1, _, callErr := procLockFileEx.Call(
+			handle,
+			uintptr(lockFileExclusiveLock),
+			0,
+			1,
+			0,
+			uintptr(unsafe.Pointer(overlapped)),
+		)
+		if r1 != 0 {
+			return nil
+		}
+		return windowsCallError(callErr)
+	}
+	unlockFileExCall = func(handle uintptr, overlapped *syscall.Overlapped) error {
+		r1, _, callErr := procUnlockFileEx.Call(
+			handle,
+			0,
+			1,
+			0,
+			uintptr(unsafe.Pointer(overlapped)),
+		)
+		if r1 != 0 {
+			return nil
+		}
+		return windowsCallError(callErr)
+	}
+)
+
+func windowsCallError(callErr error) error {
+	if errno, ok := callErr.(syscall.Errno); ok && errno != 0 {
+		return errno
+	}
+	return syscall.EINVAL
 }
 
 // acquireStateFileLock acquires an exclusive lock on lockPath using
@@ -62,38 +103,20 @@ func acquireStateFileLock(lockPath string) (stateFileLock, error) {
 	if err != nil {
 		return nil, err
 	}
-	var ol syscall.Overlapped
-	r1, _, callErr := procLockFileEx.Call(
-		file.Fd(),
-		uintptr(lockFileExclusiveLock),
-		0,
-		1,
-		0,
-		uintptr(unsafe.Pointer(&ol)),
-	)
-	if r1 == 0 {
+	var overlapped syscall.Overlapped
+	if err := lockFileExCall(file.Fd(), &overlapped); err != nil {
 		_ = file.Close()
-		if errno, ok := callErr.(syscall.Errno); ok && errno != 0 {
-			return nil, errno
-		}
-		return nil, syscall.EINVAL
+		return nil, err
 	}
-	return &windowsStateFileLock{file: file}, nil
+	return &windowsStateFileLock{file: file, overlapped: overlapped}, nil
 }
 
 func (l *windowsStateFileLock) Unlock() error {
 	if l == nil || l.file == nil {
 		return nil
 	}
-	var ol syscall.Overlapped
-	procUnlockFileEx.Call(
-		l.file.Fd(),
-		0,
-		1,
-		0,
-		uintptr(unsafe.Pointer(&ol)),
-	)
-	err := l.file.Close()
+	unlockErr := unlockFileExCall(l.file.Fd(), &l.overlapped)
+	closeErr := l.file.Close()
 	l.file = nil
-	return err
+	return errors.Join(unlockErr, closeErr)
 }
