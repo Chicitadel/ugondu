@@ -494,3 +494,14 @@ func TestInitStateFromEnvelopeRejectsNil(t *testing.T) {
 		t.Fatalf("InitStateFromEnvelope(nil) = %#v, want nil", got)
 	}
 }
+
+func TestInitStateFromEnvelopeRejectsInvalidTransactionID(t *testing.T) {
+	for _, txID := range []string{"", " ", " tx_envelope_padded "} {
+		t.Run("transaction_id_"+strings.ReplaceAll(txID, " ", "_"), func(t *testing.T) {
+			env := &ExecutionEnvelope{TransactionId: txID}
+			if got := InitStateFromEnvelope(env); got != nil {
+				t.Fatalf("InitStateFromEnvelope with transaction ID %q = %#v, want nil", txID, got)
+			}
+		})
+	}
+}
