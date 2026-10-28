@@ -309,5 +309,9 @@ CI run #719 failed on two steps:
 - Executed complete Node.js governance suite: all passed with code 0.
 
 ### Status
-**GREEN (LOCAL CONTAINER VERIFIED) / CI WORKFLOW COMPLETION PENDING.** Whole-product COR remains **PARTIAL / RELEASE BLOCKED** until CI workflow completes green on GitHub Actions and physical deployment receipts are confirmed.
+**GREEN (EXACT-HEAD CI VERIFIED).** Both GitHub Actions workflows on candidate `2dd4622c` passed 100%:
+- PR CI/CD Pipeline ([run #40750080227](https://github.com/Chicitadel/ugondu/actions/runs/40750080227)): all 5 OS/architecture Go thin-client matrix builds/tests (darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64) passed; Release Integrity & Governance Gates passed; all 9 microservice workspaces passed; Integration Tests passed in 1m29s.
+- PR COR Certification ([run #40750080175](https://github.com/Chicitadel/ugondu/actions/runs/40750080175)): COR Certification passed in 2m34s; COR Final Release Gate passed in 4s.
+
+Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED** until physical AWS and production staging deployment receipts are established. PR #39 remains DRAFT and unmerged to protect master, main, and phase4/production-hardening.
 
