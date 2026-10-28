@@ -272,3 +272,18 @@ This repository contains Ugondu's Go thin client and TypeScript workspaces. Dumc
 ### Acceptance status
 **YELLOW / EXACT-HEAD TESTS PENDING.** Source implementation and regression tests are committed to the dedicated remediation branch. All Node.js governance and security suites pass cleanly (`verify:attribution`, `localization-dropin`, `test:locales`, `verify:t03`, `verify:t04`, `test:governance`, `test:security`, `test:contract`). Go toolchain is not locally available in this environment; exact-head Go test, vet, race, and platform build verification remain required on CI before closing this finding. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
 
+
+## 2026-10-28 re-audit — fail-closed protection for existing committed state
+
+**Finding:** `UG-COR-STATE-OVERWRITE-CORRUPT-001`
+
+### Root cause
+The previous `SaveState` logic only entered validation when `os.ReadFile(state.json)` succeeded and the payload was non-empty. Read errors, empty content, malformed JSON, foreign transaction IDs, and invalid/missing hashes could bypass validation and permit replacement of the existing state file.
+
+### Physical remediation
+- Updated `client/engine/state.go`: only a genuinely missing file is treated as first save. Existing state must parse, match the requested transaction identity, contain a valid recomputed digest, and match the caller's base sequence/hash. Other read errors fail closed.
+- Added `TestSaveStateFailsClosedOnInvalidCommittedState` in `client/engine/state_test.go`, covering malformed JSON, empty state, missing digest, digest mismatch and foreign transaction identity. The test asserts rejection and preservation of the existing bytes.
+- Commits: `edf5bd7d0362d2daf7cc60aafc33eb0fa53fab87`, `0f98d9db43affcacfdccf7f6dae3e0be298308ba`.
+
+### Acceptance status
+**YELLOW / TESTS NOT EXECUTED HERE.** The source and regression test are committed on the dedicated branch, but this session has not run Go formatting, vet, tests, race detection or cross-platform builds. Verify the exact candidate SHA in CI before closing this finding. Keep PR #39 draft and unmerged. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
