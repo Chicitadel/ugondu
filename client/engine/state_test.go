@@ -256,3 +256,71 @@ func TestLoadStateRejectsModifiedStateAndMissingHash(t *testing.T) {
 		})
 	}
 }
+
+
+func TestSaveStateReplacementFailurePreservesCommittedState(t *testing.T) {
+	txID := "tx_state_replace_failure"
+	txDir, err := GetTransactionDir(txID)
+	if err != nil {
+		t.Fatalf("GetTransactionDir failed: %v", err)
+	}
+	if err := os.RemoveAll(txDir); err != nil {
+		t.Fatalf("cleanup before test failed: %v", err)
+	}
+	defer os.RemoveAll(txDir)
+
+	state := InitState(txID)
+	state.Status = "PENDING"
+	if err := SaveState(state); err != nil {
+		t.Fatalf("initial SaveState failed: %v", err)
+	}
+
+	statePath, err := GetStateFilePath(txID)
+	if err != nil {
+		t.Fatalf("GetStateFilePath failed: %v", err)
+	}
+	committedBytes, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("read committed state failed: %v", err)
+	}
+	committedSequence := state.StateSequence
+	committedHash := state.StateHash
+	committedUpdatedAt := state.UpdatedAt
+	committedPreviousHash := state.PrevStateHash
+
+	// Simulate a replacement failure deterministically. The previously committed
+	// file and the caller's persistence metadata must remain unchanged.
+	previousReplacer := stateFileReplacer
+	stateFileReplacer = func(source, destination string) error {
+		return errors.New("injected replacement failure")
+	}
+	defer func() { stateFileReplacer = previousReplacer }()
+
+	state.Status = "RUNNING"
+	if err := SaveState(state); err == nil {
+		t.Fatal("SaveState succeeded despite injected replacement failure")
+	}
+
+	afterBytes, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("read committed state after failed save: %v", err)
+	}
+	if string(afterBytes) != string(committedBytes) {
+		t.Fatal("failed replacement changed the previously committed state file")
+	}
+	if state.StateSequence != committedSequence {
+		t.Fatalf("StateSequence after failed save = %d, want %d", state.StateSequence, committedSequence)
+	}
+	if state.StateHash != committedHash {
+		t.Fatal("StateHash advanced after failed save")
+	}
+	if state.UpdatedAt != committedUpdatedAt {
+		t.Fatal("UpdatedAt changed after failed save")
+	}
+	if state.PrevStateHash != committedPreviousHash {
+		t.Fatal("PrevStateHash changed after failed save")
+	}
+	if state.Status != "RUNNING" {
+		t.Fatalf("caller-requested state mutation was lost: Status = %q", state.Status)
+	}
+}
