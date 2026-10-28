@@ -644,3 +644,12 @@ Overall COR remains **PARTIAL / RELEASE BLOCKED** pending exact-head CI and mand
 **Acceptance:** `YELLOW / EXACT-HEAD CI PENDING`. This connector session authored the code and regression assertions but did not execute Go locally. Require `gofmt`, `go vet ./...`, `go test ./...`, Windows native build/test, and supported race tests on the resulting exact head. A failed replacement must leave the previous state intact. The unkeyed state digest remains a consistency check, not an authenticity guarantee.
 
 Do not close whole-product COR from this focused fix. AI fleet qualification, provider/host/IDE coverage, physical lifecycle receipts, and immutable commercial artifact qualification remain separately gated.
+
+
+## 2026-10-28 re-audit addendum — failed-save in-memory state rollback
+
+**Finding:** `UG-COR-STATE-COMMIT-ATOMICITY-001` (confirmed in `client/engine/state.go`). `SaveState` previously advanced `StateSequence`, `PrevStateHash`, `UpdatedAt`, and `StateHash` on the caller's object before the new file had been durably replaced. If persistence failed, disk retained the old state while the in-memory state advanced, allowing a later retry to create a broken or misleading hash chain.
+
+**Physical remediation:** `SaveState` now prepares a `nextState` copy, serializes and persists that candidate, and copies it back to the caller only after `stateFileReplacer` succeeds. A package-private replacement seam enables deterministic failure injection. `TestSaveStateReplacementFailurePreservesCommittedState` verifies that injected replacement failure leaves the previously committed file and persistence metadata unchanged while preserving the caller's intended domain mutation.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed; full Go tests/vet and CI have not been run in this session. Do not mark this finding GREEN until exact-head tests and platform builds pass.
