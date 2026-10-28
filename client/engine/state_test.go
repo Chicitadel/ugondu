@@ -259,6 +259,51 @@ func TestLoadStateRejectsModifiedStateAndMissingHash(t *testing.T) {
 }
 
 
+func TestLoadStateRejectsTransactionIDMismatch(t *testing.T) {
+	requestedTxID := "tx_state_identity_requested"
+	foreignTxID := "tx_state_identity_foreign"
+	txDir, err := GetTransactionDir(requestedTxID)
+	if err != nil {
+		t.Fatalf("GetTransactionDir failed: %v", err)
+	}
+	if err := os.RemoveAll(txDir); err != nil {
+		t.Fatalf("cleanup before test failed: %v", err)
+	}
+	defer os.RemoveAll(txDir)
+	if err := os.MkdirAll(txDir, 0700); err != nil {
+		t.Fatalf("create transaction directory failed: %v", err)
+	}
+
+	// Construct a state with a valid self-consistent hash, but store it under
+	// a different transaction directory to exercise the identity boundary.
+	foreignState := InitState(foreignTxID)
+	data, err := json.MarshalIndent(foreignState, "", "  ")
+	if err != nil {
+		t.Fatalf("marshal foreign state failed: %v", err)
+	}
+	statePath, err := GetStateFilePath(requestedTxID)
+	if err != nil {
+		t.Fatalf("GetStateFilePath failed: %v", err)
+	}
+	if err := os.WriteFile(statePath, data, 0600); err != nil {
+		t.Fatalf("write foreign state fixture failed: %v", err)
+	}
+
+	if got, err := LoadState(requestedTxID); !errors.Is(err, ErrStateCorrupt) || got != nil {
+		t.Fatalf("LoadState(%q) = (%v, %v), want (nil, ErrStateCorrupt)", requestedTxID, got, err)
+	}
+	entries, err := os.ReadDir(txDir)
+	if err != nil {
+		t.Fatalf("read transaction directory failed: %v", err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), "state.json.corrupt.") {
+			return
+		}
+	}
+	t.Fatal("transaction-ID-mismatched state was not quarantined")
+}
+
 func TestSaveStateReplacementFailurePreservesCommittedState(t *testing.T) {
 	txID := "tx_state_replace_failure"
 	txDir, err := GetTransactionDir(txID)
