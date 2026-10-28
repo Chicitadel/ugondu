@@ -670,3 +670,15 @@ Do not close whole-product COR from this focused fix. AI fleet qualification, pr
 **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed on this dedicated branch; Go formatting, vet, tests, race tests, and platform builds have not been executed in this session. Do not close the finding until exact-head CI proves the test passes.
 
 This identity check is not a substitute for an authenticated state MAC/signature or process-level concurrency control. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 re-audit addendum — dot-segment transaction path
+
+**Finding ID:** `UG-COR-STATE-PATH-SEGMENT-001`.
+
+**Confirmed defect:** `GetTransactionDir` rejected empty IDs, `..`, and path separators, but accepted the exact ID `.`. Joining this ID to the transaction root resolves to the root itself, so `state.json` would not be isolated under a transaction-specific directory.
+
+**Physical remediation:** `client/engine/state.go` now rejects `.` in `GetTransactionDir` using the existing invalid-transaction-ID error path. `client/engine/state_test.go` adds `TestGetTransactionDirRejectsDotTransactionID` and verifies rejection by both path helpers and `SaveState`.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. The source and regression test are committed on the dedicated branch; no Go test/vet/race/platform run has been executed in this session. Do not close without exact-head evidence.
+
+Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
