@@ -255,17 +255,39 @@ func SaveState(state *ExecutionState) error {
 
 	finalPath := filepath.Join(txDir, "state.json")
 
-	// Detect stale or divergent state if a committed state file already exists.
-	if committedData, readErr := os.ReadFile(finalPath); readErr == nil && len(strings.TrimSpace(string(committedData))) > 0 {
-		var committed ExecutionState
-		if err := json.Unmarshal(committedData, &committed); err == nil && committed.TransactionId == state.TransactionId {
-			if committed.StateSequence > state.StateSequence {
-				return fmt.Errorf("%w: committed sequence %d exceeds caller sequence %d", ErrStateStale, committed.StateSequence, state.StateSequence)
-			}
-			if state.StateSequence > 0 && committed.StateHash != "" && committed.StateHash != state.StateHash {
-				return fmt.Errorf("%w: committed state hash %s differs from caller base hash %s", ErrStateStale, committed.StateHash, state.StateHash)
-			}
+	// Existing state is authoritative: never overwrite it if it cannot be read,
+	// parsed, bound to this transaction, or integrity-verified. Treat only a
+	// genuinely absent file as a first save. Silently ignoring read/parse errors
+	// would let a later SaveState destroy evidence of corruption.
+	committedData, readErr := os.ReadFile(finalPath)
+	switch {
+	case readErr == nil:
+		if len(strings.TrimSpace(string(committedData))) == 0 {
+			return fmt.Errorf("%w: existing state file is empty", ErrStateCorrupt)
 		}
+
+		var committed ExecutionState
+		if err := json.Unmarshal(committedData, &committed); err != nil {
+			return fmt.Errorf("%w: existing state file is not valid JSON: %v", ErrStateCorrupt, err)
+		}
+		if committed.TransactionId != state.TransactionId {
+			return fmt.Errorf("%w: existing state belongs to transaction %q, not %q", ErrStateCorrupt, committed.TransactionId, state.TransactionId)
+		}
+		if committed.StateHash == "" {
+			return fmt.Errorf("%w: existing state has no integrity hash", ErrStateCorrupt)
+		}
+		committedHash, hashErr := committed.ComputeHash()
+		if hashErr != nil || committedHash != committed.StateHash {
+			return fmt.Errorf("%w: existing state integrity hash is invalid", ErrStateCorrupt)
+		}
+		if committed.StateSequence != state.StateSequence || committed.StateHash != state.StateHash {
+			return fmt.Errorf("%w: committed sequence/hash (%d/%s) differs from caller base (%d/%s)",
+				ErrStateStale, committed.StateSequence, committed.StateHash, state.StateSequence, state.StateHash)
+		}
+	case os.IsNotExist(readErr):
+		// First save: no prior committed state exists.
+	default:
+		return fmt.Errorf("read committed execution state: %w", readErr)
 	}
 
 	// Build the next version off to the side. A failed disk write must not
