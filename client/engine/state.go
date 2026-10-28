@@ -214,14 +214,18 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf(i18n.T("cannot_save_state_execution_state"))
 	}
 
-	state.StateSequence++
-	state.PrevStateHash = state.StateHash
-	state.UpdatedAt = time.Now().Unix()
-	hash, err := state.ComputeHash()
+	// Build the next version off to the side. A failed disk write must not
+	// advance the caller's sequence/hash chain when that version was never
+	// durably committed.
+	nextState := *state
+	nextState.StateSequence++
+	nextState.PrevStateHash = state.StateHash
+	nextState.UpdatedAt = time.Now().Unix()
+	hash, err := nextState.ComputeHash()
 	if err != nil {
 		return fmt.Errorf(i18n.T("failed_to_compute_state_hash"), err)
 	}
-	state.StateHash = hash
+	nextState.StateHash = hash
 
 	txDir, err := GetTransactionDir(state.TransactionId)
 	if err != nil {
@@ -235,7 +239,7 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf("secure transaction directory permissions: %w", err)
 	}
 
-	data, err := json.MarshalIndent(state, "", "  ")
+	data, err := json.MarshalIndent(&nextState, "", "  ")
 	if err != nil {
 		return fmt.Errorf(i18n.T("failed_to_serialize_execution_state"), err)
 	}
@@ -281,6 +285,8 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), err)
 	}
 
+	// Publish the new in-memory state only after the durable replacement succeeds.
+	*state = nextState
 	return nil
 }
 
