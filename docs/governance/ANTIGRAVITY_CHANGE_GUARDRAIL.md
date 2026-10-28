@@ -747,3 +747,18 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
   - Added comprehensive regression tests in `client/engine/state_test.go`: `TestConcurrentSaveStateSerializesWritersAndPreventsStaleState` and `TestStateFileLockAcquireAndRelease`.
 - **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. All Node.js governance, security, and contract test suites pass (attribution 0 violations across 4,690 files, T03 PASS, T04 PASS, 9/9 governance tests, 24/24 security tests, 21/21 contract tests). Go CI toolchain run is required on the exact candidate SHA before marking GREEN. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 
+
+## 2026-10-28 re-audit addendum — fail-closed writes over invalid committed state
+
+**Finding ID:** `UG-COR-STATE-OVERWRITE-CORRUPT-001`
+
+- **Confirmed defect:** `SaveState` previously ignored errors reading `state.json`, ignored malformed JSON, and skipped integrity/identity checks when parsing failed or the embedded transaction ID differed. A subsequent save could therefore replace an unreadable, corrupt, or foreign state file and erase evidence rather than fail closed.
+- **Physical remediation on this branch:**
+  - `SaveState` now treats only `os.IsNotExist` as a valid first-save condition.
+  - Empty content, malformed JSON, foreign transaction identity, missing hash, or a mismatched recomputed digest return an error wrapping `ErrStateCorrupt`.
+  - Other read failures are propagated and cannot fall through to a write.
+  - Existing valid state must match both caller base sequence and hash exactly; divergence returns `ErrStateStale`.
+  - The implementation leaves the rejected existing file bytes in place for forensic recovery; it does not silently overwrite or quarantine them from this path.
+- **Regression coverage:** Added `TestSaveStateFailsClosedOnInvalidCommittedState` with malformed JSON, empty content, missing digest, digest mismatch, and foreign transaction identity cases. Each case asserts `ErrStateCorrupt` and bit-for-bit preservation of the existing file.
+- **Commits:** `edf5bd7d0362d2daf7cc60aafc33eb0fa53fab87` (runtime fix); `0f98d9db43affcacfdccf7f6dae3e0be298308ba` (regression test).
+- **Verification status:** YELLOW / exact-head Go execution pending. This session wrote the source and test via the repository API but did not execute `gofmt`, `go vet`, `go test`, race tests, or platform builds. The new tests must not be described as passing until CI evidence exists for the exact candidate SHA.
