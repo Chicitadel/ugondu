@@ -54,7 +54,7 @@ const (
 
 type windowsStateFileLock struct {
 	file       *os.File
-	overlapped syscall.Overlapped
+	overlapped *syscall.Overlapped
 }
 
 // lockFileExCall and unlockFileExCall are seams for deterministic API-contract
@@ -103,8 +103,8 @@ func acquireStateFileLock(lockPath string) (stateFileLock, error) {
 	if err != nil {
 		return nil, err
 	}
-	var overlapped syscall.Overlapped
-	if err := lockFileExCall(file.Fd(), &overlapped); err != nil {
+	overlapped := &syscall.Overlapped{}
+	if err := lockFileExCall(file.Fd(), overlapped); err != nil {
 		_ = file.Close()
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (l *windowsStateFileLock) Unlock() error {
 	if l == nil || l.file == nil {
 		return nil
 	}
-	unlockErr := unlockFileExCall(l.file.Fd(), &l.overlapped)
+	unlockErr := unlockFileExCall(l.file.Fd(), l.overlapped)
 	closeErr := l.file.Close()
 	l.file = nil
 	return errors.Join(unlockErr, closeErr)
