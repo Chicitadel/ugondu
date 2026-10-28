@@ -68,3 +68,11 @@ For every finding:
 **Overall: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
 
 The two new findings above are physically implemented with regression tests authored, but require current-head CI results. Commercial release also requires authorized staging deployment, persistence/restart and rollback proof, security/tenant isolation checks, and controlled non-production federation tests with AeroBill and Mandatag. No AWS deployment is claimed by this document.
+
+
+## Evidence refresh — 2026-10-28 19:13 UTC
+
+- The Windows lock code/tests were committed through `c1587bca7d4f8e7ae23daa21a916925ba6103374`; the cross-product handover was then committed at `4bc31bfe62c93ce11a6cf39ef4b627c313a10742`. The branch's latest head is the latter documentation commit at the time of this refresh.
+- Ugondu CI/CD run #737 (`40752118438`) and COR run #613 (`40752118134`) were still pending with no job records available at the last query. No current-head pass is claimed.
+- Dumcholu PR #10 has a failing `Dumcholu Product Name Governance Gate (DUM-GOV-NAME-001)` run #363 (`40752171479`). A failed-job rerun also failed; the log-download endpoint returned `BlobNotFound`, so the exact assertion/reason has not been established. Do not guess a source fix. This is an open CI blocker requiring logs or a reproducible local execution.
+- Dumcholu's new non-finite-charge regression remains unverified until Maven tests run on the latest branch head. Older test receipts predate that change.
