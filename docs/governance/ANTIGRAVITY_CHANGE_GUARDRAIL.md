@@ -658,3 +658,15 @@ Do not close whole-product COR from this focused fix. AI fleet qualification, pr
 ## 2026-10-28 re-audit addendum — concurrent state-save temporary-file collision
 
 **Finding:** `UG-COR-STATE-TEMP-COLLISION-001` (confirmed in `client/engine/state.go`). The fixed `state.json.tmp` name allowed concurrent writers for the same transaction to truncate or rename the same in-progress file. `SaveState` now uses `os.CreateTemp` in the transaction directory, sets explicit private permissions before replacement, and cleans up its unique temporary path. `TestConcurrentSaveStateUsesDistinctTemporaryFiles` injects replacement failures after both concurrent writers reach the replacement boundary, asserts distinct temporary paths, and verifies the previously committed file remains byte-for-byte unchanged. This prevents temp-file collision; it does not provide serialized multi-writer transaction semantics or resolve last-writer-wins business conflicts. Status remains `YELLOW / EXACT-HEAD TESTS PENDING`.
+
+## 2026-10-28 re-audit addendum — persisted transaction identity binding
+
+**Finding ID:** `UG-COR-STATE-IDENTITY-BINDING-001`.
+
+**Confirmed defect:** `LoadState(txID)` opened the requested transaction's `state.json` and validated that the stored transaction ID was non-empty, but did not require it to equal the requested ID. A validly hashed state copied or placed under another transaction directory could therefore be returned as the requested transaction's state.
+
+**Physical remediation:** `client/engine/state.go` now rejects empty or mismatched transaction IDs before digest verification, quarantines the offending file, and returns `ErrStateCorrupt`. `client/engine/state_test.go` adds `TestLoadStateRejectsTransactionIDMismatch`, using a valid self-consistent hash stored beneath a different transaction directory and asserting fail-closed rejection plus quarantine.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed on this dedicated branch; Go formatting, vet, tests, race tests, and platform builds have not been executed in this session. Do not close the finding until exact-head CI proves the test passes.
+
+This identity check is not a substitute for an authenticated state MAC/signature or process-level concurrency control. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
