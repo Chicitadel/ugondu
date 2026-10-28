@@ -92,7 +92,7 @@ Close `UG-COR-I18N-TEST-INTEGRITY-001` only when the exact PR head passes the fo
 - `client/engine/state.go` now fails closed when directory or temporary-file permissions cannot be secured.
 - `client/engine/state.go` uses `replaceStateFile` and no longer deletes the previous state as a generic fallback.
 - `client/engine/state_replace_unix.go` uses same-directory `os.Rename` on non-Windows platforms.
-- `client/engine/state_replace_windows.go` uses Windows replacement-capable `MoveFileEx` with replace-existing and write-through flags.
+- `client/engine/state_replace_windows.go` uses Windows replacement-capable `MoveFileExW` via `kernel32.dll`, with replace-existing and write-through flags.
 - `client/engine/state_test.go` asserts POSIX private directory/file permission bits.
 
 ### Verification status
