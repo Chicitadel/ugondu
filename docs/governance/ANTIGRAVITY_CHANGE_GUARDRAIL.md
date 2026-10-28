@@ -653,3 +653,8 @@ Do not close whole-product COR from this focused fix. AI fleet qualification, pr
 **Physical remediation:** `SaveState` now prepares a `nextState` copy, serializes and persists that candidate, and copies it back to the caller only after `stateFileReplacer` succeeds. A package-private replacement seam enables deterministic failure injection. `TestSaveStateReplacementFailurePreservesCommittedState` verifies that injected replacement failure leaves the previously committed file and persistence metadata unchanged while preserving the caller's intended domain mutation.
 
 **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed; full Go tests/vet and CI have not been run in this session. Do not mark this finding GREEN until exact-head tests and platform builds pass.
+
+
+## 2026-10-28 re-audit addendum — concurrent state-save temporary-file collision
+
+**Finding:** `UG-COR-STATE-TEMP-COLLISION-001` (confirmed in `client/engine/state.go`). The fixed `state.json.tmp` name allowed concurrent writers for the same transaction to truncate or rename the same in-progress file. `SaveState` now uses `os.CreateTemp` in the transaction directory, sets explicit private permissions before replacement, and cleans up its unique temporary path. `TestConcurrentSaveStateUsesDistinctTemporaryFiles` injects replacement failures after both concurrent writers reach the replacement boundary, asserts distinct temporary paths, and verifies the previously committed file remains byte-for-byte unchanged. This prevents temp-file collision; it does not provide serialized multi-writer transaction semantics or resolve last-writer-wins business conflicts. Status remains `YELLOW / EXACT-HEAD TESTS PENDING`.
