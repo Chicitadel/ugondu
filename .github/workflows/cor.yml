@@ -118,7 +118,10 @@ jobs:
       # older manifest against the unmerged PR would reject all legitimate fixes.
       # Keep the check mandatory for push/workflow_dispatch release attempts.
       - name: Verify evidence freshness (candidate-bound, evidence-only descendant)
-        if: github.event_name != 'pull_request'
+        # Only an explicitly opted-in release qualification on a trusted release
+        # branch may enforce frozen-candidate evidence freshness. Fix/audit branch
+        # pushes are validation runs and must not be mistaken for release attempts.
+        if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')
         run: |
           node --test tests/qualification/evidence-freshness.test.js
           node scripts/governance/verify-evidence-freshness.mjs
@@ -127,7 +130,7 @@ jobs:
         run: npm run verify:release-integrity
 
       - name: Verify COR signing trust root
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')
         run: node scripts/ci/verify-trust-root.js
 
       - name: Validate stream registry
@@ -140,7 +143,7 @@ jobs:
         run: node scripts/cor-finalize.js
 
       - name: Sign final COR authority
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')
         run: node scripts/cor-signer.js
 
       - name: Final candidate integrity check
@@ -344,7 +347,7 @@ jobs:
               echo "::error::AWS_OPT_IN_BOUNDARY_VIOLATION: AWS gate should be skipped without explicit opt-in; got '${AWS_RESULT}'."
               exit 1
             fi
-            echo "::notice::PR VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED."
+            echo "::notice::VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was not explicitly authorized or not applicable to this event. NOT RELEASE CERTIFIED."
             exit 0
           fi
 
