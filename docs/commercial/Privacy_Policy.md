@@ -38,7 +38,7 @@
 **Data Controller:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon commercial release following legal approval  
 **Document Version:** 1.0.0  
-**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

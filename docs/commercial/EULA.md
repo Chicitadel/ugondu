@@ -40,7 +40,7 @@
 **Licensor Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon acceptance by Licensee or upon first Activation Event  
 **Document Version:** 1.0.0  
-**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

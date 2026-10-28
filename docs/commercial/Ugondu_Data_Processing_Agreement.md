@@ -40,7 +40,7 @@
 **TVA Intracommunautaire:** FR89943432534  
 **Privacy Contact:** `privacy@airroofers.eu`  
 **Document Version:** 1.0.0  
-**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 

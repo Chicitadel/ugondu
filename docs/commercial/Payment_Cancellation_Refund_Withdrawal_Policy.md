@@ -42,7 +42,7 @@
 **TVA Intracommunautaire:** FR89943432534  
 **Commercial Inquiries:** `billing@airroofers.eu` | `commercial@airroofers.eu`  
 **Document Version:** 1.1.0  
-**Status:** OPERATIONAL — APPROVED (Enterprise Legal & Corporate Governance Authority)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED (Enterprise Legal & Corporate Governance Authority)
 
 ---
 
