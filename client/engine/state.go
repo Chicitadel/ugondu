@@ -3,10 +3,10 @@
  * Module         : client/engine
  * File           : state.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Author         : Ignatus Chika Ujomor
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-28
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -28,7 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 package engine
@@ -50,7 +50,20 @@ import (
 var (
 	ErrStateNotFound = errors.New(i18n.T("state_file_not_found"))
 	ErrStateCorrupt  = errors.New(i18n.T("state_file_is_corrupt"))
+	ErrStateStale    = errors.New("cannot save stale execution state")
 )
+
+type stateFileLock interface {
+	Unlock() error
+}
+
+type noopStateLock struct{}
+
+func (noopStateLock) Unlock() error { return nil }
+
+// stateLockAcquirer is kept behind a package-private seam so locking behavior
+// can be verified and simulated in tests.
+var stateLockAcquirer = acquireStateFileLock
 
 // stateFileReplacer is kept behind a package-private seam so persistence failure
 // behavior can be tested deterministically without filesystem permission tricks.
@@ -215,9 +228,44 @@ func LoadState(txId string) (*ExecutionState, error) {
 }
 
 // SaveState performs an atomic state write with directory mode 0700 and file mode 0600.
+// Concurrent writers and multi-process callers are serialized using an exclusive file lock on <txDir>/.lock.
 func SaveState(state *ExecutionState) error {
 	if state == nil || state.TransactionId == "" || strings.TrimSpace(state.TransactionId) != state.TransactionId {
 		return fmt.Errorf(i18n.T("cannot_save_state_execution_state"))
+	}
+
+	txDir, err := GetTransactionDir(state.TransactionId)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(txDir, 0700); err != nil {
+		return fmt.Errorf(i18n.T("failed_to_create_transaction_directory"), txDir, err)
+	}
+	if err := os.Chmod(txDir, 0700); err != nil {
+		return fmt.Errorf("secure transaction directory permissions: %w", err)
+	}
+
+	lockPath := filepath.Join(txDir, ".lock")
+	lock, err := stateLockAcquirer(lockPath)
+	if err != nil {
+		return fmt.Errorf("acquire state lock: %w", err)
+	}
+	defer lock.Unlock()
+
+	finalPath := filepath.Join(txDir, "state.json")
+
+	// Detect stale or divergent state if a committed state file already exists.
+	if committedData, readErr := os.ReadFile(finalPath); readErr == nil && len(strings.TrimSpace(string(committedData))) > 0 {
+		var committed ExecutionState
+		if err := json.Unmarshal(committedData, &committed); err == nil && committed.TransactionId == state.TransactionId {
+			if committed.StateSequence > state.StateSequence {
+				return fmt.Errorf("%w: committed sequence %d exceeds caller sequence %d", ErrStateStale, committed.StateSequence, state.StateSequence)
+			}
+			if state.StateSequence > 0 && committed.StateHash != "" && committed.StateHash != state.StateHash {
+				return fmt.Errorf("%w: committed state hash %s differs from caller base hash %s", ErrStateStale, committed.StateHash, state.StateHash)
+			}
+		}
 	}
 
 	// Build the next version off to the side. A failed disk write must not
@@ -233,24 +281,10 @@ func SaveState(state *ExecutionState) error {
 	}
 	nextState.StateHash = hash
 
-	txDir, err := GetTransactionDir(state.TransactionId)
-	if err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll(txDir, 0700); err != nil {
-		return fmt.Errorf(i18n.T("failed_to_create_transaction_directory"), txDir, err)
-	}
-	if err := os.Chmod(txDir, 0700); err != nil {
-		return fmt.Errorf("secure transaction directory permissions: %w", err)
-	}
-
 	data, err := json.MarshalIndent(&nextState, "", "  ")
 	if err != nil {
 		return fmt.Errorf(i18n.T("failed_to_serialize_execution_state"), err)
 	}
-
-	finalPath := filepath.Join(txDir, "state.json")
 
 	// Each writer needs its own temporary file. A fixed state.json.tmp path lets
 	// concurrent saves truncate or rename each other's in-progress payload.

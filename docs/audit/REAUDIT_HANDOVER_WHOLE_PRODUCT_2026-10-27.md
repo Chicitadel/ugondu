@@ -247,3 +247,28 @@ GitHub evaluates a PR-triggered workflow from the base branch's workflow definit
 This repository contains Ugondu's Go thin client and TypeScript workspaces. Dumcholu's Spring Boot backend deployment belongs to `Chicitadel/dumcholu`, not this repository. Keep Ugondu's deployment/provider interfaces portable across DirectAdmin/shared hosting, VPS, and AWS; use AWS as an optional deployment profile rather than embedding AWS assumptions in core logic. Aerobill/Mandatag remains the external billing/entitlement authority. This finding implements workflow trigger coverage only; it does not implement or qualify an AWS deployment.
 
 **Status:** YELLOW / exact-head workflow evidence pending. Overall COR remains **PARTIAL / RELEASE BLOCKED**.
+
+## 2026-10-28 re-audit — multi-process transactional locking and stale state prevention (COR Track 7)
+
+**Finding ID:** `UG-COR-STATE-LOCKING-001`
+
+### Confirmed defect
+`SaveState` used unique temporary files to prevent temporary filename collisions during concurrent writes, but did not provide multi-process transactional serialization or prevent stale writers from overwriting newer committed state. If concurrent processes or callers attempted state mutations on the same transaction, a caller holding an older sequence/hash could calculate its mutation and atomically overwrite a newer state committed by another process, resulting in lost state transitions and broken hash sequences.
+
+### Physical remediation
+- `client/engine/state.go`:
+  - Defined `stateFileLock` interface and package-private `stateLockAcquirer` hook (defaulting to `acquireStateFileLock`) enabling platform-agnostic locking and deterministic testing.
+  - In `SaveState`, enforced multi-process mutual exclusion by acquiring an exclusive lock on `<txDir>/.lock` before performing state calculation and atomic replacement.
+  - Added detection of stale or divergent writers inside the critical lock section: if a committed state exists on disk, `SaveState` validates that the caller's sequence and base hash match the committed state, returning `ErrStateStale` (`cannot save stale execution state`) if disk sequence exceeds caller sequence or if base hashes mismatch.
+- `client/engine/state_lock_unix.go`:
+  - Implemented portable Unix advisory locking using `syscall.Flock` (`syscall.LOCK_EX` on acquire, `syscall.LOCK_UN` and file close on `Unlock`).
+- `client/engine/state_lock_windows.go`:
+  - Implemented Windows kernel locking using `kernel32.dll`'s `LockFileEx` (`LOCKFILE_EXCLUSIVE_LOCK = 0x2`) and `UnlockFileEx`.
+- `client/engine/state_test.go`:
+  - Preserved temporary path uniqueness testing in `TestConcurrentSaveStateUsesDistinctTemporaryFiles` by stubbing `stateLockAcquirer`.
+  - Added `TestConcurrentSaveStateSerializesWritersAndPreventsStaleState`: verifies exclusive `.lock` creation, serializes concurrent writers, asserts fail-closed rejection with `ErrStateStale` when a stale writer attempts to overwrite newer state, confirms disk integrity remains intact, and verifies full state recovery via reload-and-reapply.
+  - Added `TestStateFileLockAcquireAndRelease`: validates platform lock acquisition and clean release.
+
+### Acceptance status
+**YELLOW / EXACT-HEAD TESTS PENDING.** Source implementation and regression tests are committed to the dedicated remediation branch. All Node.js governance and security suites pass cleanly (`verify:attribution`, `localization-dropin`, `test:locales`, `verify:t03`, `verify:t04`, `test:governance`, `test:security`, `test:contract`). Go toolchain is not locally available in this environment; exact-head Go test, vet, race, and platform build verification remain required on CI before closing this finding. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
+

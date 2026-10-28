@@ -734,3 +734,16 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 - **Acceptance:** Keep this finding YELLOW until workflow runs are observed and their tested SHA equals the candidate SHA. Workflow YAML edits are not execution evidence.
 
 **AWS and portability boundary:** Ugondu's Go thin client and its existing TypeScript workspaces remain this repository's scope. Dumcholu's Flutter/Spring Boot implementation belongs in `Chicitadel/dumcholu`; do not transplant Java/Flutter tasks into Ugondu. Any AWS deployment design must preserve configuration-driven provider adapters, keep Air Roofers Aerobill/Mandatag as the sole billing/entitlement authority, and avoid making AWS-specific assumptions mandatory for DirectAdmin/VPS portability. No AWS deployment or live physical qualification is claimed by this workflow change.
+
+## 2026-10-28 re-audit addendum — multi-process transactional locking and stale state prevention
+
+**Finding ID:** `UG-COR-STATE-LOCKING-001` (COR Track 7)
+
+- **Confirmed defect:** Unique temporary files in `client/engine/state.go` prevented temporary filename collisions during concurrent writes, but did not provide multi-process transactional serialization or prevent stale writers from overwriting newer state. A process with a stale in-memory state could overwrite a newer sequence committed by another process.
+- **Physical remediation:**
+  - Implemented cross-platform transactional file locking for `SaveState` via an exclusive lock on `<txDir>/.lock` (`state_lock_unix.go` using `syscall.Flock`, `state_lock_windows.go` using `LockFileEx` via `kernel32.dll`).
+  - Added package-private `stateLockAcquirer` hook in `client/engine/state.go` and defined `ErrStateStale`.
+  - Inside the exclusive lock, `SaveState` checks committed disk state: if disk sequence exceeds caller sequence or if base hashes mismatch, it rejects the write with `ErrStateStale`, protecting committed state from stale or divergent overwrites.
+  - Added comprehensive regression tests in `client/engine/state_test.go`: `TestConcurrentSaveStateSerializesWritersAndPreventsStaleState` and `TestStateFileLockAcquireAndRelease`.
+- **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. All Node.js governance, security, and contract test suites pass (attribution 0 violations across 4,690 files, T03 PASS, T04 PASS, 9/9 governance tests, 24/24 security tests, 21/21 contract tests). Go CI toolchain run is required on the exact candidate SHA before marking GREEN. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
