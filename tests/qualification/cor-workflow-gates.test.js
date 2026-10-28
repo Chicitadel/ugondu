@@ -456,21 +456,36 @@ test('COR-WF-016 starter bootstrap policy template is account-agnostic and uses 
 });
 
 
-test('COR-WF-017 pull-request validation does not misclassify the intentionally skipped AWS gate as certification', () => {
+test('COR-WF-017 non-opt-in validation never claims release certification', () => {
   const run = step(jobs['cor-final-release-gate'], 'Require every mandatory gate to have succeeded').run;
   assert.match(run, /EVENT_NAME.*pull_request/);
-  assert.match(run, /PR validation requires COR result success/);
+  assert.match(run, /COR_GATE_NOT_SUCCESS/);
   assert.match(run, /AWS_RESULT.*skipped/);
-  assert.match(run, /PR VALIDATION PASSED/);
+  assert.match(run, /VALIDATION PASSED/);
   assert.match(run, /NOT RELEASE CERTIFIED/);
-  assert.match(run, /if \[ "\$\{EVENT_NAME\}" = "pull_request" \]/);
+  assert.match(run, /AWS_REQUIRED.*true/);
   assert.match(run, /failure, skipped, cancelled and missing all block certification/);
 });
 
+test('COR-WF-018 release-only evidence checks require explicit opt-in on a trusted release branch', () => {
+  const releaseCondition = "if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')";
+  assert.ok(text.includes(releaseCondition), 'release qualification condition must be explicit and identical');
+  assert.equal((text.match(/if: github\.event_name == 'workflow_dispatch' && inputs\.run_aws_physical_qualification == true/g) || []).length, 3,
+    'freshness, trust-root verification and signing must share the explicit opt-in boundary');
+  assert.match(text, /Fix\/audit branch\s+pushes are validation runs/);
+  assert.match(text, /VALIDATION PASSED for \$\{CANDIDATE_SHA\}/);
+});
 
-
-test('COR-WF-018 candidate-bound freshness is deferred on PRs but remains mandatory for release attempts', () => {
-  assert.match(text, /- name: Verify evidence freshness \(candidate-bound, evidence-only descendant\)\n        if: github\.event_name != 'pull_request'\n        run: \|/);
-  assert.match(text, /label a PR as release-certified when that gate has not run/);
-  assert.match(text, /Push\/workflow_dispatch runs are release qualification attempts/);
+test('COR-WF-019 ordinary remediation branch pushes do not enforce frozen release evidence or signing', () => {
+  const releaseCondition = "if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')";
+  for (const name of [
+    'Verify evidence freshness (candidate-bound, evidence-only descendant)',
+    'Verify COR signing trust root',
+    'Sign final COR authority',
+  ]) {
+    const index = text.indexOf('- name: ' + name);
+    assert.ok(index >= 0, 'missing step ' + name);
+    const block = text.slice(index, text.indexOf('\n      - name:', index + 1) > 0 ? text.indexOf('\n      - name:', index + 1) : text.length);
+    assert.ok(block.includes(releaseCondition), name + ' must require explicit release opt-in');
+  }
 });
