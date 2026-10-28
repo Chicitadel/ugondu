@@ -94,3 +94,12 @@ The two new findings above are physically implemented with regression tests auth
 **Required follow-up:** confirm protected branch/environment approval rules and repository variable settings before any physical AWS qualification. Never configure opt-in merely to make a workflow green. The workflow's AWS credential role ARN and trust relationship remain external prerequisites; do not hardcode credentials or silently fall back to untagged IAM sessions.
 
 **Verification boundary:** implementation is committed to the dedicated branch. Test execution and exact-head CI are pending; this change does not deploy either product to AWS. Whole-product COR remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## Canonical guardrail and new AWS cost-safety finding — 2026-10-28
+
+- **Canonical agent guardrail:** [`governance/cor/CROSS_PRODUCT_COR_REMEDIATION_GUARDRAIL.md`](https://github.com/Chicitadel/ugondu/blob/fix/cor-aws-physical-opt-in-2026-10-28/governance/cor/CROSS_PRODUCT_COR_REMEDIATION_GUARDRAIL.md). Antigravity agents must read this before making further changes.
+- **New finding:** `UG-COR-AWS-UNGUARDED-TRIGGER-001`. The physical AWS COR job previously ran on every non-PR event, including ordinary branch pushes/manual dispatch. The new dedicated branch `fix/cor-aws-physical-opt-in-2026-10-28` adds double opt-in (manual boolean + repository variable) and trusted release-branch allowlisting, with routine validation explicitly remaining NOT RELEASE CERTIFIED.
+- **Regression test:** `tests/qualification/aws-physical-opt-in-contract.test.mjs`, command `npm run test:aws-physical-opt-in`, wired into COR release-integrity validation.
+- **Exact-head CI:** GitHub connector lookup returned no status checks and its workflow-run helper only exposes PR-triggered runs; it did not provide a test receipt for the new head. Direct runtime execution was unavailable in this workflow. Do not mark the new finding GREEN until the workflow test and exact-head CI are observed in GitHub Actions.
+- **AWS deployment boundary:** no AWS resources were provisioned by this work. Both products remain DirectAdmin-first / optional VPS / AWS after traction, with AeroBill and Mandatag retaining authority ownership.
