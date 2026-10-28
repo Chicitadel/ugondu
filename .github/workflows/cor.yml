@@ -2,12 +2,19 @@ name: COR Certification
 
 on:
   workflow_dispatch:
+    inputs:
+      run_aws_physical_qualification:
+        description: 'Run the explicitly approved, potentially mutating AWS physical qualification (requires repository opt-in variable and protected-branch context).'
+        required: true
+        default: false
+        type: boolean
   push:
     branches:
       - main
       - phase4/production-hardening
       - 'phase4/**'
       - 'audit/**'
+      - 'fix/**'
   pull_request:
     branches:
       - main
@@ -155,7 +162,10 @@ jobs:
   aws-physical-gate:
     name: AWS Physical Qualification Gate
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
+    # Live AWS qualification is never run on push or PR. It requires an explicit
+    # workflow_dispatch boolean, a repository-level opt-in variable, and a
+    # trusted release branch. This keeps ordinary COR audits cost-free and non-mutating.
+    if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')
     concurrency:
       group: ugondu-physical-cor-${{ vars.AWS_REGION || 'eu-west-3' }}
       cancel-in-progress: false
@@ -315,40 +325,30 @@ jobs:
           COR_RESULT: ${{ needs.cor.result }}
           AWS_RESULT: ${{ needs.aws-physical-gate.result }}
           EVENT_NAME: ${{ github.event_name }}
+          AWS_REQUIRED: ${{ github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening') }}
           CANDIDATE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          echo "candidate=${CANDIDATE_SHA} event=${EVENT_NAME}"
+          echo "candidate=${CANDIDATE_SHA} event=${EVENT_NAME} aws_required=${AWS_REQUIRED}"
           echo "cor=${COR_RESULT} aws-physical-gate=${AWS_RESULT}"
-          # Pull requests are non-production validation only. The AWS physical
-          # gate is deliberately disabled for pull_request events to prevent
-          # live infrastructure mutation from an unmerged candidate. Do not
-          # label a PR as release-certified when that gate has not run.
-          if [ "${EVENT_NAME}" = "pull_request" ]; then
-            if [ "${COR_RESULT}" != "success" ]; then
-              echo "::error::COR_GATE_NOT_SUCCESS: PR validation requires COR result success; got '${COR_RESULT}'."
-              exit 1
-            fi
+          if [ "${COR_RESULT}" != "success" ]; then
+            echo "::error::COR_GATE_NOT_SUCCESS: COR validation must succeed; got '${COR_RESULT}'."
+            exit 1
+          fi
+
+          # Routine PR/push/manual validation is non-mutating. AWS is skipped
+          # unless the operator explicitly opts in on an approved release branch.
+          if [ "${AWS_REQUIRED}" != "true" ]; then
             if [ "${AWS_RESULT}" != "skipped" ]; then
-              echo "::error::COR_PR_GATE_STATE_UNEXPECTED: AWS physical gate must be skipped for pull_request events; got '${AWS_RESULT}'."
+              echo "::error::AWS_OPT_IN_BOUNDARY_VIOLATION: AWS gate should be skipped without explicit opt-in; got '${AWS_RESULT}'."
               exit 1
             fi
-            echo "::notice::PR VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED."
+            echo "::notice::COR VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was not requested. NOT RELEASE CERTIFIED."
             exit 0
           fi
 
-          # Push/workflow_dispatch runs are release qualification attempts:
-          # every mandatory gate must succeed. Skipped is never success.
-          fail=0
-          for gate in "cor:${COR_RESULT}" "aws-physical-gate:${AWS_RESULT}"; do
-            name="${gate%%:*}"; result="${gate#*:}"
-            if [ "${result}" != "success" ]; then
-              echo "::error::COR_GATE_NOT_SUCCESS: mandatory gate '${name}' result is '${result}' (failure, skipped, cancelled and missing all block certification)."
-              fail=1
-            fi
-          done
-          if [ "${fail}" -ne 0 ]; then
-            echo "::error::COR NOT CERTIFIED for ${CANDIDATE_SHA}."
+          if [ "${AWS_RESULT}" != "success" ]; then
+            echo "::error::AWS_PHYSICAL_GATE_NOT_SUCCESS: explicitly requested AWS qualification returned '${AWS_RESULT}'. NOT RELEASE CERTIFIED."
             exit 1
           fi
-          echo "All mandatory COR gates succeeded for ${CANDIDATE_SHA}."
+          echo "::notice::COR and AWS physical qualification gates passed for ${CANDIDATE_SHA}; this is not, by itself, final commercial COR certification."
