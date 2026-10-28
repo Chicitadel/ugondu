@@ -190,3 +190,18 @@ The check prevents transaction-directory identity confusion; it does not provide
 
 ### Acceptance
 **YELLOW / EXACT-HEAD TESTS PENDING.** No Go test/vet/race/platform execution has been performed in this session. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — nil execution-envelope constructor
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-NIL-001`
+
+### Evidence-backed defect
+`InitStateFromEnvelope(*ExecutionEnvelope)` read fields from `env` without a nil check. A nil argument panicked at runtime. Because the constructor's existing API has no error return, it now returns nil when no envelope is supplied; callers must fail closed and must not start execution with a nil result.
+
+### Physical changes
+- `client/engine/state.go`: added a nil guard before any envelope dereference.
+- `client/engine/state_test.go`: added `TestInitStateFromEnvelopeRejectsNil`.
+- `docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md`: synchronized the central guardrail with the finding and acceptance condition.
+
+### Verification and acceptance
+The code and regression test were committed to the dedicated remediation branch. No Go toolchain was available/executed in this session; therefore formatting, test, vet, race, and cross-platform build status are **NOT RUN / NO PASS CLAIMED**. Validate on the exact candidate SHA before closing this finding. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
