@@ -241,6 +241,9 @@ jobs:
       - name: Verify externally pinned AWS policy-pack signature
         run: node scripts/governance/verify-policy-pack-digests.mjs
 
+      - name: Test AWS physical qualification opt-in boundary
+        run: npm run test:aws-physical-opt-in
+
       - name: Verify externally pinned release evidence bundle
         run: node scripts/release/verify-evidence-bundle.mjs --verify
 
