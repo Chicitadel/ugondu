@@ -630,3 +630,17 @@ These code and regression changes are committed on the branch, but exact-head Go
 This check validates the consistency of the stored digest. It does not make an unkeyed SHA-256 digest tamper-proof against an actor able to rewrite the entire state file. A stronger authenticity requirement would need a separately governed keyed MAC or signature design and key lifecycle, not a misleading claim about this digest.
 
 Overall COR remains **PARTIAL / RELEASE BLOCKED** pending exact-head CI and mandatory physical qualification.
+
+## 2026-10-28 re-audit addendum — persisted-state permissions and replacement safety
+
+**Finding:** `UG-COR-STATE-IO-SECURITY-001` (confirmed in `client/engine/state.go`). The state writer ignored errors from `os.Chmod` when securing the transaction directory and temporary state file. It also deleted the prior `state.json` after a generic `os.Rename` failure before attempting a fallback rename. A permission-setting failure could therefore be treated as success, and an unrelated replacement error could destroy the last known-good state.
+
+**Physical remediation on `audit/whole-product-cor-reaudit-2026-10-27`:**
+- Check and propagate directory/file permission-setting failures; do not promote a state file when required permissions cannot be established.
+- Replace the delete-before-retry path with `replaceStateFile`, preserving the previous state on failure.
+- Use same-directory atomic rename on non-Windows systems and Windows `MoveFileEx(REPLACE_EXISTING | WRITE_THROUGH)` for replacement semantics.
+- Extend `state_test.go` to assert POSIX directory mode `0700` and state-file mode `0600`; Windows ACL qualification is not inferred from POSIX mode bits.
+
+**Acceptance:** `YELLOW / EXACT-HEAD CI PENDING`. This connector session authored the code and regression assertions but did not execute Go locally. Require `gofmt`, `go vet ./...`, `go test ./...`, Windows native build/test, and supported race tests on the resulting exact head. A failed replacement must leave the previous state intact. The unkeyed state digest remains a consistency check, not an authenticity guarantee.
+
+Do not close whole-product COR from this focused fix. AI fleet qualification, provider/host/IDE coverage, physical lifecycle receipts, and immutable commercial artifact qualification remain separately gated.
