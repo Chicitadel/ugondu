@@ -80,3 +80,32 @@ The full whole-product audit is **not complete**. This branch addresses two conf
 ## 8. Acceptance
 
 Close `UG-COR-I18N-TEST-INTEGRITY-001` only when the exact PR head passes the focused localization test and all mandatory governance/CI checks. Close `UG-COR-STATE-INTEGRITY-001` only when the exact-head Go regression tests, vet, race tests where supported, and full client suite pass. Do not close the whole-product COR ledger based on these two findings.
+
+## 2026-10-28 follow-up — state file permission enforcement and safe replacement
+
+**Finding:** `UG-COR-STATE-IO-SECURITY-001`.
+
+### Root cause
+`SaveState` ignored failures from chmod operations on the transaction directory and temporary file. On replacement failure, it removed the existing state before retrying, which could destroy the last known-good state for reasons unrelated to an existing destination file.
+
+### Physical changes on the dedicated branch
+- `client/engine/state.go` now fails closed when directory or temporary-file permissions cannot be secured.
+- `client/engine/state.go` uses `replaceStateFile` and no longer deletes the previous state as a generic fallback.
+- `client/engine/state_replace_unix.go` uses same-directory `os.Rename` on non-Windows platforms.
+- `client/engine/state_replace_windows.go` uses Windows replacement-capable `MoveFileEx` with replace-existing and write-through flags.
+- `client/engine/state_test.go` asserts POSIX private directory/file permission bits.
+
+### Verification status
+**`YELLOW / EXACT-HEAD CI PENDING`.** The repository connector can commit source and test changes, but no checked-out working tree was available here to execute Go commands. The new Windows-specific helper has not been runtime-verified in this session. Do not report tests as passing until the exact branch head has green Go vet, Go tests, Windows build/test, and applicable race tests.
+
+### Required acceptance commands
+```bash
+cd client
+gofmt -w engine/state.go engine/state_test.go engine/state_replace_unix.go engine/state_replace_windows.go
+go vet ./...
+go test ./...
+go test -race ./...
+GOOS=windows GOARCH=amd64 go test ./...
+```
+
+The unkeyed SHA-256 state digest detects inconsistent persisted fields but is not proof of authenticity against an attacker able to rewrite the state and digest. This fix does not close the whole-product COR gap. Preserve `PARTIAL / RELEASE BLOCKED` until all mandatory code, workflow, provider/host/IDE and authorized physical qualification evidence is current and candidate-bound.
