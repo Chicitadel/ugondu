@@ -52,6 +52,10 @@ var (
 	ErrStateCorrupt  = errors.New(i18n.T("state_file_is_corrupt"))
 )
 
+// stateFileReplacer is kept behind a package-private seam so persistence failure
+// behavior can be tested deterministically without filesystem permission tricks.
+var stateFileReplacer = replaceStateFile
+
 type StepState struct {
 	Index       int      `json:"index"`
 	Action      string   `json:"action"`
@@ -280,7 +284,7 @@ func SaveState(state *ExecutionState) error {
 	// fallback when rename fails: a failed replacement must not destroy the
 	// last known-good execution state. On platforms where replacement rename
 	// is unsupported, fail closed and preserve the existing state for recovery.
-	if err := replaceStateFile(tmpPath, finalPath); err != nil {
+	if err := stateFileReplacer(tmpPath, finalPath); err != nil {
 		_ = os.Remove(tmpPath)
 		return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), err)
 	}
