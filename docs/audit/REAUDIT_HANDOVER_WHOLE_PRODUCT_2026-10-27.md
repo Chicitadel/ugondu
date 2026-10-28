@@ -218,3 +218,13 @@ The nil-envelope guard alone was insufficient: a non-nil `ExecutionEnvelope` cou
 - Central Antigravity guardrail updated with the finding and acceptance criteria.
 
 **Verification status:** Commits exist on the dedicated remediation branch. Go formatting, unit tests, vet, race tests, and platform builds are **NOT RUN** in this session. Exact-head CI evidence remains required. The constructor still returns a pointer rather than an error to preserve its existing signature; callers must fail closed on nil. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
+
+## 2026-10-28 follow-up — Go CI formatting and race coverage
+
+**Finding ID:** `UG-COR-CI-GO-QUALITY-GATES-001`
+
+The existing Go CI path did not fail on formatting drift and did not execute the Go race detector. `.github/workflows/ci.yml` now includes:
+- A fail-closed `gofmt -s -l .` check in the client module.
+- `go test -race ./...` on the Linux amd64 matrix leg.
+
+The workflow edit is committed on the dedicated branch. This session has not executed the workflow or received a completed exact-head run, so this is an implemented CI control, not proof that the current source passes. Check the first resulting workflow run and retain logs before closing the finding. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
