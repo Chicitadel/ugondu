@@ -228,3 +228,22 @@ The existing Go CI path did not fail on formatting drift and did not execute the
 - `go test -race ./...` on the Linux amd64 matrix leg.
 
 The workflow edit is committed on the dedicated branch. This session has not executed the workflow or received a completed exact-head run, so this is an implemented CI control, not proof that the current source passes. Check the first resulting workflow run and retain logs before closing the finding. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
+
+
+## 2026-10-28 re-audit — PR trigger coverage and deployment boundary
+
+**Finding ID:** `UG-COR-CI-PR-BASE-FILTER-001`
+
+### Confirmed defect and physical change
+PR #39 targets `fix/go-thin-client-vet-and-module-imports-2026-10-27`, but both CI and COR workflow PR filters omitted `fix/**`. Added `fix/**` to `.github/workflows/ci.yml` and `.github/workflows/cor.yml` on the dedicated audit branch.
+
+- CI workflow commit: `9a2563bb61dec8eaf303ee832db6b1eae3d11cff`
+- COR workflow commit: `84065ccba005b7318a29d3046960fd0e45694904`
+
+### Evidence and limitation
+GitHub evaluates a PR-triggered workflow from the base branch's workflow definition. PR #39's current base does not yet contain these changes, so this branch-only fix does not itself prove that PR #39 now receives PR-triggered checks. Push-triggered runs for `audit/**` must be inspected directly in GitHub Actions; the workflow-run connector available in this session only returns PR-triggered runs. No test pass is inferred from the YAML edit.
+
+### AWS and product separation
+This repository contains Ugondu's Go thin client and TypeScript workspaces. Dumcholu's Spring Boot backend deployment belongs to `Chicitadel/dumcholu`, not this repository. Keep Ugondu's deployment/provider interfaces portable across DirectAdmin/shared hosting, VPS, and AWS; use AWS as an optional deployment profile rather than embedding AWS assumptions in core logic. Aerobill/Mandatag remains the external billing/entitlement authority. This finding implements workflow trigger coverage only; it does not implement or qualify an AWS deployment.
+
+**Status:** YELLOW / exact-head workflow evidence pending. Overall COR remains **PARTIAL / RELEASE BLOCKED**.
