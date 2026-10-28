@@ -14,6 +14,7 @@ on:
       - phase4/production-hardening
       - 'phase4/**'
       - 'audit/**'
+      - 'fix/**'
 
 concurrency:
   group: cor-${{ github.workflow }}-${{ github.ref }}
