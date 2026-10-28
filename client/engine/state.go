@@ -248,13 +248,16 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf(i18n.T("failed_to_serialize_execution_state"), err)
 	}
 
-	tmpPath := filepath.Join(txDir, "state.json.tmp")
 	finalPath := filepath.Join(txDir, "state.json")
 
-	file, err := os.OpenFile(tmpPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	// Each writer needs its own temporary file. A fixed state.json.tmp path lets
+	// concurrent saves truncate or rename each other's in-progress payload.
+	file, err := os.CreateTemp(txDir, ".state.json.tmp-*")
 	if err != nil {
 		return fmt.Errorf(i18n.T("failed_to_open_temp_state"), err)
 	}
+	tmpPath := file.Name()
+	defer func() { _ = os.Remove(tmpPath) }()
 
 	if _, err := file.Write(data); err != nil {
 		_ = file.Close()
