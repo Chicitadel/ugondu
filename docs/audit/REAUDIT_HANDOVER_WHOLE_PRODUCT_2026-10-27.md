@@ -315,3 +315,24 @@ CI run #719 failed on two steps:
 
 Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED** until physical AWS and production staging deployment receipts are established. PR #39 remains DRAFT and unmerged to protect master, main, and phase4/production-hardening.
 
+
+
+## 2026-10-28 re-audit addendum — Windows state-lock OVERLAPPED identity
+
+**Finding ID:** `UG-COR-WINDOWS-LOCK-OVERLAPPED-001`
+
+**Confirmed defect:** `acquireStateFileLock` passed one stack-local `syscall.Overlapped` to `LockFileEx`, discarded it, and `Unlock` passed a newly allocated `Overlapped` to `UnlockFileEx`. The Windows API contract requires the lock/unlock operations to refer to the same OVERLAPPED region identity. The unlock API result was also ignored, so a release failure could be reported as success.
+
+**Physical remediation on the dedicated branch:**
+- `client/engine/state_lock_windows.go` now retains the OVERLAPPED structure in `windowsStateFileLock` and reuses that same field for unlock.
+- Wrapped the LockFileEx/UnlockFileEx calls behind package-private function seams so API-contract behavior can be regression-tested without depending on host filesystem scheduling.
+- `Unlock` now propagates API and file-close errors via `errors.Join`.
+- Added Windows-only regression tests in `client/engine/state_lock_windows_test.go`:
+  - `TestWindowsStateFileLockReusesOverlappedForUnlock`
+  - `TestWindowsStateFileLockPropagatesUnlockFailure`
+
+**Commits:** `9ddea7cb607c31d434243277c30654ef644c17d0` (implementation); `2e1e06f3ff34ba2665b3f4f7c06a72be03f7e676` (regression tests).
+
+**Verification:** Pending. This tool session has not executed the Windows Go test suite. Require the Windows amd64 CI leg to compile and execute the new tests, plus the Linux formatting/vet/test/race gates, on the current branch head. Do not mark this finding GREEN until the exact-head results are available.
+
+**Release status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** This targeted state-lock fix does not constitute AWS qualification or whole-product COR closure.
