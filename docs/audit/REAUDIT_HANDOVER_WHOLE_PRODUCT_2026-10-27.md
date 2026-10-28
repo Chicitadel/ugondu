@@ -205,3 +205,16 @@ The check prevents transaction-directory identity confusion; it does not provide
 
 ### Verification and acceptance
 The code and regression test were committed to the dedicated remediation branch. No Go toolchain was available/executed in this session; therefore formatting, test, vet, race, and cross-platform build status are **NOT RUN / NO PASS CLAIMED**. Validate on the exact candidate SHA before closing this finding. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
+
+## 2026-10-28 follow-up — invalid envelope transaction identity
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-IDENTITY-001`
+
+The nil-envelope guard alone was insufficient: a non-nil `ExecutionEnvelope` could still carry an empty or whitespace-padded `TransactionId`. Such a value could create a state object that fails the persistence layer's canonical transaction identity requirement.
+
+**Physical changes committed**
+- `client/engine/state.go`: `InitStateFromEnvelope` returns nil for an empty or non-canonical transaction ID before constructing the state.
+- `client/engine/state_test.go`: `TestInitStateFromEnvelopeRejectsInvalidTransactionID` covers empty, whitespace-only, and padded values.
+- Central Antigravity guardrail updated with the finding and acceptance criteria.
+
+**Verification status:** Commits exist on the dedicated remediation branch. Go formatting, unit tests, vet, race tests, and platform builds are **NOT RUN** in this session. Exact-head CI evidence remains required. The constructor still returns a pointer rather than an error to preserve its existing signature; callers must fail closed on nil. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
