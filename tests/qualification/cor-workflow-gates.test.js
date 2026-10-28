@@ -470,8 +470,8 @@ test('COR-WF-017 non-opt-in validation never claims release certification', () =
 test('COR-WF-018 release-only evidence checks require explicit opt-in on a trusted release branch', () => {
   const releaseCondition = "if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')";
   assert.ok(text.includes(releaseCondition), 'release qualification condition must be explicit and identical');
-  assert.equal((text.match(/if: github\.event_name == 'workflow_dispatch' && inputs\.run_aws_physical_qualification == true/g) || []).length, 3,
-    'freshness, trust-root verification and signing must share the explicit opt-in boundary');
+  assert.equal((text.match(/if: github\.event_name == 'workflow_dispatch' && inputs\.run_aws_physical_qualification == true/g) || []).length, 4,
+    'AWS physical gate plus freshness, trust-root verification and signing must share the explicit opt-in boundary');
   assert.match(text, /Fix\/audit branch\s+pushes are validation runs/);
   assert.match(text, /VALIDATION PASSED for \$\{CANDIDATE_SHA\}/);
 });
