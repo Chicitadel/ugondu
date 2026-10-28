@@ -692,3 +692,14 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 **Physical remediation:** `SaveState` now rejects IDs whose surrounding whitespace would be removed by `strings.TrimSpace`. `TestSaveStateRejectsWhitespacePaddedTransactionID` verifies the save fails and does not create the canonical transaction directory.
 
 **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — nil execution-envelope constructor guard
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-NIL-001`
+
+- **Confirmed defect:** `InitStateFromEnvelope(env)` dereferenced `env` without validating it. A nil envelope caused a panic instead of a controlled fail-closed outcome.
+- **Physical remediation:** `client/engine/state.go` now returns `nil` when `env == nil`, before constructing execution state. This avoids fabricating an unbound state when the required envelope is absent.
+- **Regression coverage:** `client/engine/state_test.go` adds `TestInitStateFromEnvelopeRejectsNil`.
+- **Contract note:** The existing constructor signature returns only a pointer and has no error channel. Returning nil preserves the public signature; callers must treat a nil result as invalid and must not proceed with execution.
+- **Verification:** Source and regression test were committed to `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, tests, vet, race, and platform builds have **not** been executed in this session. Do not close the finding until exact-head CI evidence exists.
+- **Release status:** This is a targeted fix only. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
