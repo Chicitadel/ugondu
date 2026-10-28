@@ -46,8 +46,14 @@ test('final gate never treats skipped AWS qualification as release certification
 });
 
 test('dedicated fix branches trigger non-production CI and COR validation on push', () => {
-  const ciTriggers = section(ci, 'on:', 'concurrency:');
-  const corTriggers = section(cor, 'on:', 'concurrency:');
+  const ciStart = ci.indexOf('\non:');
+  const ciEnd = ci.indexOf('\nconcurrency:', ciStart + 1);
+  const corStart = cor.indexOf('\non:');
+  const corEnd = cor.indexOf('\nconcurrency:', corStart + 1);
+  assert.ok(ciStart >= 0 && ciEnd > ciStart, 'CI trigger section must be present');
+  assert.ok(corStart >= 0 && corEnd > corStart, 'COR trigger section must be present');
+  const ciTriggers = ci.slice(ciStart + 1, ciEnd);
+  const corTriggers = cor.slice(corStart + 1, corEnd);
   assert.match(ciTriggers, /push:[\s\S]*?'fix\/\*\*'/);
   assert.match(corTriggers, /push:[\s\S]*?'fix\/\*\*'/);
   assert.match(ciTriggers, /pull_request:[\s\S]*?'fix\/\*\*'/);
