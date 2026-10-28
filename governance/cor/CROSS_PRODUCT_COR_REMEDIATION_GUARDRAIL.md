@@ -90,3 +90,8 @@ Do not claim 100% COR gap closure or public-commercial certification until:
 The pre-fix candidate `5097e57d55d795f87b36cdbce1cf8eecc16887f1` has a push-triggered AWS physical qualification run [#616](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) that was reported in progress after OIDC, policy reconciliation and tagged role assumption. The current connector has no cancellation operation. An authorized operator must cancel this run if it was not explicitly approved and verify the cleanup/residual-resource report. Do not assume cleanup happened merely because a job ends.
 
 The same candidate's push COR gate failed evidence freshness because 153 non-evidence paths changed after candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`. This is a legitimate fail-closed block. Refresh evidence for a frozen new candidate; do not whitelist source/workflow changes as evidence-only or bypass freshness.
+
+
+## Regression receipt update — 2026-10-28
+
+The new workflow contract test `npm run test:aws-physical-opt-in` passed in standard CI run [#40759642250](https://github.com/Chicitadel/ugondu/actions/runs/40759642250), step `Test AWS physical qualification opt-in boundary`, on SHA `2edf906ca7ed2ee8a2dbbd04b4e16772daff1ede`. This is targeted regression evidence only. Full exact-head CI/COR remained pending at that time, so the finding stays YELLOW until the complete required gates finish on the current head. No AWS deployment is claimed.
