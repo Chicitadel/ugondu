@@ -83,3 +83,10 @@ Do not claim 100% COR gap closure or public-commercial certification until:
 - no unapproved AWS resource creation or cost exposure remains.
 
 **Current state: source changes are committed on the feature branch; exact-head test execution and live infrastructure qualification are pending. No AWS deployment is claimed.**
+
+
+## Incident note — active legacy AWS physical run
+
+The pre-fix candidate `5097e57d55d795f87b36cdbce1cf8eecc16887f1` has a push-triggered AWS physical qualification run [#616](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) that was reported in progress after OIDC, policy reconciliation and tagged role assumption. The current connector has no cancellation operation. An authorized operator must cancel this run if it was not explicitly approved and verify the cleanup/residual-resource report. Do not assume cleanup happened merely because a job ends.
+
+The same candidate's push COR gate failed evidence freshness because 153 non-evidence paths changed after candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`. This is a legitimate fail-closed block. Refresh evidence for a frozen new candidate; do not whitelist source/workflow changes as evidence-only or bypass freshness.
