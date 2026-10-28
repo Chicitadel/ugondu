@@ -45,6 +45,21 @@ import (
 	"ugondu/client/i18n"
 )
 
+func TestSaveStateRejectsWhitespacePaddedTransactionID(t *testing.T) {
+	txID := " tx_state_padded "
+	state := InitState(txID)
+	if err := SaveState(state); err == nil {
+		t.Fatal("SaveState accepted a whitespace-padded transaction ID")
+	}
+	canonicalDir, err := GetTransactionDir(strings.TrimSpace(txID))
+	if err != nil {
+		t.Fatalf("GetTransactionDir for canonical ID failed: %v", err)
+	}
+	if _, err := os.Stat(canonicalDir); !os.IsNotExist(err) {
+		t.Fatalf("SaveState unexpectedly created canonical transaction directory; stat err = %v", err)
+	}
+}
+
 func TestGetTransactionDirRejectsDotTransactionID(t *testing.T) {
 	for _, getPath := range []struct {
 		name string
