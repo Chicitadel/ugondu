@@ -76,3 +76,21 @@ The two new findings above are physically implemented with regression tests auth
 - Ugondu CI/CD run #737 (`40752118438`) and COR run #613 (`40752118134`) were still pending with no job records available at the last query. No current-head pass is claimed.
 - Dumcholu PR #10 has a failing `Dumcholu Product Name Governance Gate (DUM-GOV-NAME-001)` run #363 (`40752171479`). A failed-job rerun also failed; the log-download endpoint returned `BlobNotFound`, so the exact assertion/reason has not been established. Do not guess a source fix. This is an open CI blocker requiring logs or a reproducible local execution.
 - Dumcholu's new non-finite-charge regression remains unverified until Maven tests run on the latest branch head. Older test receipts predate that change.
+
+
+## 2026-10-28 critical follow-up — AWS physical qualification must be opt-in
+
+**Finding:** `UG-COR-AWS-UNGUARDED-TRIGGER-001` (P0 release-safety / cloud-cost boundary).
+
+**Confirmed source defect:** `.github/workflows/cor.yml` allowed the AWS Physical Qualification Gate to run on every non-PR event, while the workflow accepts pushes on audit/release branches and manual dispatch. The job performs AWS role assumption, policy reconciliation and physical Fargate qualification; ordinary audit pushes could therefore trigger credential use and potentially mutating/chargeable infrastructure work without a dedicated explicit operator opt-in. This conflicts with the cost-minimal DirectAdmin-first policy and the requirement to defer AWS migration until traction/funding.
+
+**Physical remediation on branch `fix/cor-aws-physical-opt-in-2026-10-28`:**
+- Added a boolean `workflow_dispatch` input defaulting to false.
+- Restricted AWS physical qualification to manual dispatch + explicit input true + repository variable `AWS_PHYSICAL_QUALIFICATION_ENABLED=true` + trusted `main` or `phase4/production-hardening` ref.
+- Added `fix/**` push triggers to CI and COR workflows so exact-head non-production checks can run on dedicated remediation branches.
+- Updated the final gate to allow routine validation only when COR succeeds and AWS is skipped, explicitly stating **NOT RELEASE CERTIFIED**. If AWS opt-in is active, the AWS gate must succeed.
+- Added a structural regression test for the workflow's opt-in and release-status contract; wired it into the package scripts and release-integrity gate.
+
+**Required follow-up:** confirm protected branch/environment approval rules and repository variable settings before any physical AWS qualification. Never configure opt-in merely to make a workflow green. The workflow's AWS credential role ARN and trust relationship remain external prerequisites; do not hardcode credentials or silently fall back to untagged IAM sessions.
+
+**Verification boundary:** implementation is committed to the dedicated branch. Test execution and exact-head CI are pending; this change does not deploy either product to AWS. Whole-product COR remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
