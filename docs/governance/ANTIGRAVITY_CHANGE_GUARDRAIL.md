@@ -638,7 +638,7 @@ Overall COR remains **PARTIAL / RELEASE BLOCKED** pending exact-head CI and mand
 **Physical remediation on `audit/whole-product-cor-reaudit-2026-10-27`:**
 - Check and propagate directory/file permission-setting failures; do not promote a state file when required permissions cannot be established.
 - Replace the delete-before-retry path with `replaceStateFile`, preserving the previous state on failure.
-- Use same-directory atomic rename on non-Windows systems and Windows `MoveFileEx(REPLACE_EXISTING | WRITE_THROUGH)` for replacement semantics.
+- Use same-directory atomic rename on non-Windows systems and Windows `MoveFileExW` via `kernel32.dll` with `MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH` for replacement semantics.
 - Extend `state_test.go` to assert POSIX directory mode `0700` and state-file mode `0600`; Windows ACL qualification is not inferred from POSIX mode bits.
 
 **Acceptance:** `YELLOW / EXACT-HEAD CI PENDING`. This connector session authored the code and regression assertions but did not execute Go locally. Require `gofmt`, `go vet ./...`, `go test ./...`, Windows native build/test, and supported race tests on the resulting exact head. A failed replacement must leave the previous state intact. The unkeyed state digest remains a consistency check, not an authenticity guarantee.
