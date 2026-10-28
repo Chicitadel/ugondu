@@ -109,3 +109,21 @@ GOOS=windows GOARCH=amd64 go test ./...
 ```
 
 The unkeyed SHA-256 state digest detects inconsistent persisted fields but is not proof of authenticity against an attacker able to rewrite the state and digest. This fix does not close the whole-product COR gap. Preserve `PARTIAL / RELEASE BLOCKED` until all mandatory code, workflow, provider/host/IDE and authorized physical qualification evidence is current and candidate-bound.
+
+
+## 2026-10-28 follow-up — SaveState commit atomicity
+
+**Finding ID:** `UG-COR-STATE-COMMIT-ATOMICITY-001`.
+
+### Confirmed defect
+`SaveState` advanced sequence/hash/timestamp metadata directly on the caller-owned `ExecutionState` before the filesystem replacement succeeded. A failed replacement could leave memory claiming a state version that was never committed to disk.
+
+### Physical remediation
+- `client/engine/state.go`: construct `nextState` as a copy; calculate its sequence, previous hash, timestamp and digest without mutating the caller's persistence metadata; marshal and replace the persisted file; only then assign `*state = nextState`.
+- Added a package-private `stateFileReplacer` seam for deterministic persistence-failure testing.
+- `client/engine/state_test.go`: added `TestSaveStateReplacementFailurePreservesCommittedState`, injecting replacement failure and asserting the previous disk bytes and persistence metadata remain unchanged.
+
+### Acceptance status
+**YELLOW / EXACT-HEAD TESTS PENDING.** This connector session committed source and regression code but did not execute the Go test suite. Run `gofmt`, `go vet ./...`, `go test ./...`, `go test -race ./...` where supported, and the native Windows build/test matrix against the current head. The test seam is package-private and must not be used as a runtime configuration mechanism.
+
+Whole-product COR remains `PARTIAL / RELEASE BLOCKED`; this targeted persistence fix is not overall certification.
