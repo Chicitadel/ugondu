@@ -722,3 +722,15 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 - **Physical remediation:** `.github/workflows/ci.yml` now fails the Go client job if `gofmt -s -l .` reports files needing formatting, and runs `go test -race ./...` on the Linux amd64 matrix leg. Race testing is deliberately not run on unsupported matrix legs.
 - **Evidence boundary:** Workflow changes are committed on the dedicated branch, but this session has not observed a completed run for the resulting exact head. A workflow definition is not test evidence; the finding remains pending until the exact-head run and logs are inspected.
 - **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 re-audit — PR trigger coverage and AWS boundary
+
+**Finding ID:** `UG-COR-CI-PR-BASE-FILTER-001`
+
+- **Confirmed gap:** Both `.github/workflows/ci.yml` and `.github/workflows/cor.yml` included `audit/**` in PR base filters but omitted `fix/**`, while PR #39 targets `fix/go-thin-client-vet-and-module-imports-2026-10-27`. This made the workflow definitions in this branch insufficient to enable PR-triggered checks for that base pattern.
+- **Physical change:** Added `fix/**` to the `pull_request.branches` filters in both workflow files on the dedicated audit branch. Commits: `9a2563bb61dec8eaf303ee832db6b1eae3d11cff` (`ci.yml`) and `84065ccba005b7318a29d3046960fd0e45694904` (`cor.yml`).
+- **Important GitHub behavior:** A PR-triggered workflow is evaluated using the workflow definition available from its base branch. Since PR #39's current base does not yet contain this trigger change, this head-only edit does not by itself prove or guarantee that PR #39 will run those workflows. Do not modify the base branch outside the reviewed PR. Push-triggered runs on the audit branch should be inspected directly in GitHub Actions; the available workflow lookup here does not expose push-triggered runs.
+- **Acceptance:** Keep this finding YELLOW until workflow runs are observed and their tested SHA equals the candidate SHA. Workflow YAML edits are not execution evidence.
+
+**AWS and portability boundary:** Ugondu's Go thin client and its existing TypeScript workspaces remain this repository's scope. Dumcholu's Flutter/Spring Boot implementation belongs in `Chicitadel/dumcholu`; do not transplant Java/Flutter tasks into Ugondu. Any AWS deployment design must preserve configuration-driven provider adapters, keep Air Roofers Aerobill/Mandatag as the sole billing/entitlement authority, and avoid making AWS-specific assumptions mandatory for DirectAdmin/VPS portability. No AWS deployment or live physical qualification is claimed by this workflow change.
