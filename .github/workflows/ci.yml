@@ -148,6 +148,16 @@ jobs:
           cache: true
           cache-dependency-path: client/go.mod
 
+      - name: Verify Go formatting
+        working-directory: client
+        shell: bash
+        run: |
+          unformatted="$(gofmt -s -l .)"
+          if [ -n "$unformatted" ]; then
+            printf 'Go files require gofmt -s:\n%s\n' "$unformatted"
+            exit 1
+          fi
+
       - name: Vet Go source
         working-directory: client
         run: go vet ./...
@@ -155,6 +165,11 @@ jobs:
       - name: Test Go thin-client
         working-directory: client
         run: go test -v ./...
+
+      - name: Run Go race detector (Linux amd64)
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
+        working-directory: client
+        run: go test -race ./...
 
       - name: Build ugondu client binary (${{ matrix.goos }}/${{ matrix.goarch }})
         working-directory: client
