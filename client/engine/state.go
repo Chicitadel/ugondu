@@ -229,7 +229,7 @@ func LoadState(txId string) (*ExecutionState, error) {
 
 // SaveState performs an atomic state write with directory mode 0700 and file mode 0600.
 // Concurrent writers and multi-process callers are serialized using an exclusive file lock on <txDir>/.lock.
-func SaveState(state *ExecutionState) error {
+func SaveState(state *ExecutionState) (retErr error) {
 	if state == nil || state.TransactionId == "" || strings.TrimSpace(state.TransactionId) != state.TransactionId {
 		return fmt.Errorf(i18n.T("cannot_save_state_execution_state"))
 	}
@@ -251,7 +251,11 @@ func SaveState(state *ExecutionState) error {
 	if err != nil {
 		return fmt.Errorf("acquire state lock: %w", err)
 	}
-	defer lock.Unlock()
+	defer func() {
+		if unlockErr := lock.Unlock(); unlockErr != nil {
+			retErr = errors.Join(retErr, fmt.Errorf("release state lock: %w", unlockErr))
+		}
+	}()
 
 	finalPath := filepath.Join(txDir, "state.json")
 
