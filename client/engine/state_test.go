@@ -48,15 +48,16 @@ import (
 func TestSaveStateRejectsWhitespacePaddedTransactionID(t *testing.T) {
 	txID := " tx_state_padded "
 	state := InitState(txID)
+	initialHash := state.StateHash
+	initialSequence := state.StateSequence
 	if err := SaveState(state); err == nil {
 		t.Fatal("SaveState accepted a whitespace-padded transaction ID")
 	}
-	canonicalDir, err := GetTransactionDir(strings.TrimSpace(txID))
-	if err != nil {
-		t.Fatalf("GetTransactionDir for canonical ID failed: %v", err)
+	if state.StateHash != initialHash {
+		t.Fatal("rejected save changed the caller state hash")
 	}
-	if _, err := os.Stat(canonicalDir); !os.IsNotExist(err) {
-		t.Fatalf("SaveState unexpectedly created canonical transaction directory; stat err = %v", err)
+	if state.StateSequence != initialSequence {
+		t.Fatalf("rejected save changed StateSequence to %d, want %d", state.StateSequence, initialSequence)
 	}
 }
 
