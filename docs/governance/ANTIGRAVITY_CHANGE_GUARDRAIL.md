@@ -703,3 +703,13 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 - **Contract note:** The existing constructor signature returns only a pointer and has no error channel. Returning nil preserves the public signature; callers must treat a nil result as invalid and must not proceed with execution.
 - **Verification:** Source and regression test were committed to `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, tests, vet, race, and platform builds have **not** been executed in this session. Do not close the finding until exact-head CI evidence exists.
 - **Release status:** This is a targeted fix only. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — envelope transaction identity validation
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-IDENTITY-001`
+
+- **Confirmed defect:** The nil-envelope guard did not prevent a non-nil envelope with an empty or whitespace-padded `TransactionId` from producing an execution state that cannot be consistently persisted and reloaded.
+- **Physical remediation:** `InitStateFromEnvelope` now returns nil when `TransactionId` is empty or is not canonical under `strings.TrimSpace`. The constructor's existing signature is preserved; callers must treat nil as a rejected envelope and stop execution.
+- **Regression coverage:** `TestInitStateFromEnvelopeRejectsInvalidTransactionID` covers empty, whitespace-only, and whitespace-padded transaction IDs.
+- **Verification:** Source and test committed on `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, unit tests, vet, race detector, and cross-platform builds have not been executed in this session. Do not close the finding until exact-head CI output is captured.
+- **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
