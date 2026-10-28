@@ -713,3 +713,12 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 - **Regression coverage:** `TestInitStateFromEnvelopeRejectsInvalidTransactionID` covers empty, whitespace-only, and whitespace-padded transaction IDs.
 - **Verification:** Source and test committed on `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, unit tests, vet, race detector, and cross-platform builds have not been executed in this session. Do not close the finding until exact-head CI output is captured.
 - **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — Go CI verification coverage
+
+**Finding ID:** `UG-COR-CI-GO-QUALITY-GATES-001`
+
+- **Confirmed gap:** The Go client CI job ran vet and tests but did not enforce repository Go formatting or run the race detector.
+- **Physical remediation:** `.github/workflows/ci.yml` now fails the Go client job if `gofmt -s -l .` reports files needing formatting, and runs `go test -race ./...` on the Linux amd64 matrix leg. Race testing is deliberately not run on unsupported matrix legs.
+- **Evidence boundary:** Workflow changes are committed on the dedicated branch, but this session has not observed a completed run for the resulting exact head. A workflow definition is not test evidence; the finding remains pending until the exact-head run and logs are inspected.
+- **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
