@@ -39,6 +39,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 
 	"ugondu/client/i18n"
@@ -322,5 +323,86 @@ func TestSaveStateReplacementFailurePreservesCommittedState(t *testing.T) {
 	}
 	if state.Status != "RUNNING" {
 		t.Fatalf("caller-requested state mutation was lost: Status = %q", state.Status)
+	}
+}
+
+
+func TestConcurrentSaveStateUsesDistinctTemporaryFiles(t *testing.T) {
+	txID := "tx_state_concurrent_temp"
+	txDir, err := GetTransactionDir(txID)
+	if err != nil {
+		t.Fatalf("GetTransactionDir failed: %v", err)
+	}
+	if err := os.RemoveAll(txDir); err != nil {
+		t.Fatalf("cleanup before test failed: %v", err)
+	}
+	defer os.RemoveAll(txDir)
+
+	initial := InitState(txID)
+	if err := SaveState(initial); err != nil {
+		t.Fatalf("initial SaveState failed: %v", err)
+	}
+	statePath, err := GetStateFilePath(txID)
+	if err != nil {
+		t.Fatalf("GetStateFilePath failed: %v", err)
+	}
+	before, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("read initial committed state: %v", err)
+	}
+
+	var mu sync.Mutex
+	var tempPaths []string
+	bothReachedReplace := make(chan struct{})
+	previousReplacer := stateFileReplacer
+	stateFileReplacer = func(source, destination string) error {
+		mu.Lock()
+		tempPaths = append(tempPaths, source)
+		if len(tempPaths) == 2 {
+			close(bothReachedReplace)
+		}
+		mu.Unlock()
+		<-bothReachedReplace
+		return errors.New("injected replacement failure")
+	}
+	defer func() { stateFileReplacer = previousReplacer }()
+
+	states := []*ExecutionState{
+		{TransactionId: txID, Status: "RUNNING"},
+		{TransactionId: txID, Status: "FAILED"},
+	}
+	var wg sync.WaitGroup
+	errs := make([]error, len(states))
+	for i, state := range states {
+		wg.Add(1)
+		go func(i int, state *ExecutionState) {
+			defer wg.Done()
+			errs[i] = SaveState(state)
+		}(i, state)
+	}
+	wg.Wait()
+
+	for i, saveErr := range errs {
+		if saveErr == nil {
+			t.Fatalf("concurrent SaveState %d unexpectedly succeeded", i)
+		}
+	}
+	mu.Lock()
+	if len(tempPaths) != 2 {
+		mu.Unlock()
+		t.Fatalf("replacement calls = %d, want 2", len(tempPaths))
+	}
+	if tempPaths[0] == tempPaths[1] {
+		mu.Unlock()
+		t.Fatalf("concurrent saves reused the same temporary path: %q", tempPaths[0])
+	}
+	mu.Unlock()
+
+	after, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("read committed state after failed concurrent saves: %v", err)
+	}
+	if string(after) != string(before) {
+		t.Fatal("failed concurrent saves changed the previously committed state")
 	}
 }
