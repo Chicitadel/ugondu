@@ -74,15 +74,19 @@ For every audit finding, use this exact lifecycle:
 
 ## 8. Release gate
 
+**Workflow status and release status are different gates.** A successful pull-request CI/COR run is development validation only. The current workflow intentionally skips physical AWS qualification, candidate-bound freshness, signing-trust-root verification and final signing on pull requests. The final PR job must say `PR VALIDATION PASSED ... NOT RELEASE CERTIFIED`. Never use a PR green badge as a release certificate.
+
 Do not claim 100% COR gap closure or public-commercial certification until:
 - all critical/high findings are closed or formally risk-accepted by the authorized owner;
-- exact-head CI and COR gates pass;
+- exact-head CI and COR gates pass for a frozen release candidate;
+- release/push qualification runs candidate-bound evidence freshness and trust-root verification successfully;
+- final COR authority signing completes and the resulting artifact is verified;
 - external AeroBill/Mandatag flows are tested in authorized staging;
-- the real production deployment target is qualified with persistence, recovery, isolation, security and rollback evidence;
+- the real deployment target is qualified with persistence, recovery, isolation, security and rollback evidence;
 - current artifacts and runtime deployments are tied to the reviewed SHA;
-- no unapproved AWS resource creation or cost exposure remains.
+- any authorized cloud resources are reconciled, cleaned up where temporary, and verified against the approved budget.
 
-**Current state: source changes are committed on the feature branch; exact-head test execution and live infrastructure qualification are pending. No AWS deployment is claimed.**
+**Current state: source changes are committed on the feature branch; commercial release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS deployment is claimed.**
 
 
 ## Incident note — active legacy AWS physical run
