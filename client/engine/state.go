@@ -135,7 +135,7 @@ func GetTransactionsDir() (string, error) {
 // GetTransactionDir returns ~/.ugondu/transactions/<txId>
 func GetTransactionDir(txId string) (string, error) {
 	trimmed := strings.TrimSpace(txId)
-	if trimmed == "" {
+	if trimmed == "" || trimmed == "." {
 		return "", fmt.Errorf(i18n.T("invalid_transactionid_contains_path_separators"), txId)
 	}
 	if strings.Contains(trimmed, "..") || strings.Contains(trimmed, "/") || strings.Contains(trimmed, "\\") {
