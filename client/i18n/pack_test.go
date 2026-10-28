@@ -112,7 +112,6 @@ func TestRTLMetadataPreservation(t *testing.T) {
 	}
 }
 
-
 func TestResolveTrustedPublicKeyHexTrimsEnvironmentOverride(t *testing.T) {
 	t.Setenv("UGONDU_PACK_PUBLIC_KEY_HEX", "  aabbcc  ")
 	if got := ResolveTrustedPublicKeyHex(); got != "aabbcc" {

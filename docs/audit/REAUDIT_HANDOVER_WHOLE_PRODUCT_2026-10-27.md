@@ -287,3 +287,27 @@ The previous `SaveState` logic only entered validation when `os.ReadFile(state.j
 
 ### Acceptance status
 **YELLOW / TESTS NOT EXECUTED HERE.** The source and regression test are committed on the dedicated branch, but this session has not run Go formatting, vet, tests, race detection or cross-platform builds. Verify the exact candidate SHA in CI before closing this finding. Keep PR #39 draft and unmerged. Whole-product COR remains **PARTIAL / RELEASE BLOCKED**.
+
+## 2026-10-28 re-audit — Go formatting and test modularization (UG-COR-GO-FORMATTING-001 & UG-COR-NO-STUBS-001)
+
+**Findings:** `UG-COR-GO-FORMATTING-001`, `UG-COR-NO-STUBS-001`
+
+### Root cause & CI gate failures
+CI run #719 failed on two steps:
+1. `Verify Go formatting` failed because `gofmt -s -l .` detected formatting/line-ending differences in 9 client source files (`engine/actions.go`, `engine/executor.go`, `engine/lock_test.go`, `engine/state_test.go`, `engine/trust_registry.go`, `i18n/bootstrap.go`, `i18n/i18n_test.go`, `i18n/locale.go`, `i18n/pack_test.go`).
+2. `Validate repository policy (UG-COR-NO-STUBS-001)` failed because `client/engine/state_test.go` grew to 728 LOC (exceeding the 500 LOC maximum governed file size limit).
+
+### Physical remediation
+- Formatted all client Go files using `gofmt -s -w .` via containerized toolchain; `gofmt -s -l .` output is now completely clean (0 unformatted files).
+- Modularized test suite: split `client/engine/state_test.go` into:
+  - `client/engine/state_test.go` (407 LOC): core state hashing, loading, corruption detection, replacement failure tests.
+  - `client/engine/state_concurrency_test.go` (359 LOC): invalid committed state fail-closed, distinct temp files, concurrent writers serialization, stale state prevention, lock acquire/release.
+- Removed unused imports (`path/filepath`, `sync`) in `state_test.go`.
+- Executed `validate-repository.mjs`: `[PASS] Repository governance validation (UG-COR-NO-STUBS-001): 4691 tracked files verified with 0 violations.`
+- Executed containerized Go test suite: `go test -v ./...` in `golang:1.22-alpine` passed 100% (`ok ugondu/client/cmd 0.040s`, `ok ugondu/client/engine 0.363s`, `ok ugondu/client/i18n 0.144s`).
+- Executed containerized Go vet: `go vet ./...` exited with code 0 (no issues).
+- Executed complete Node.js governance suite: all passed with code 0.
+
+### Status
+**GREEN (LOCAL CONTAINER VERIFIED) / CI WORKFLOW COMPLETION PENDING.** Whole-product COR remains **PARTIAL / RELEASE BLOCKED** until CI workflow completes green on GitHub Actions and physical deployment receipts are confirmed.
+

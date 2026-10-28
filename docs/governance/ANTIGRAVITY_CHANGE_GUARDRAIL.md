@@ -762,3 +762,22 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 - **Regression coverage:** Added `TestSaveStateFailsClosedOnInvalidCommittedState` with malformed JSON, empty content, missing digest, digest mismatch, and foreign transaction identity cases. Each case asserts `ErrStateCorrupt` and bit-for-bit preservation of the existing file.
 - **Commits:** `edf5bd7d0362d2daf7cc60aafc33eb0fa53fab87` (runtime fix); `0f98d9db43affcacfdccf7f6dae3e0be298308ba` (regression test).
 - **Verification status:** YELLOW / exact-head Go execution pending. This session wrote the source and test via the repository API but did not execute `gofmt`, `go vet`, `go test`, race tests, or platform builds. The new tests must not be described as passing until CI evidence exists for the exact candidate SHA.
+
+## 2026-10-28 re-audit addendum — Go formatting and test modularization (UG-COR-GO-FORMATTING-001 & UG-COR-NO-STUBS-001)
+
+**Finding IDs:** `UG-COR-GO-FORMATTING-001`, `UG-COR-NO-STUBS-001`
+
+- **Confirmed defect:**
+  1. `Verify Go formatting` failed on CI because `gofmt -s -l .` detected line-ending and whitespace differences in 9 client source files.
+  2. `Validate repository policy (UG-COR-NO-STUBS-001)` failed because `client/engine/state_test.go` grew to 728 lines (exceeding the 500 LOC maximum file limit).
+- **Physical remediation:**
+  - Formatted all client Go files with `gofmt -s -w .` via containerized toolchain; `gofmt -s -l .` verified completely clean.
+  - Split `client/engine/state_test.go` into `client/engine/state_test.go` (407 LOC) and `client/engine/state_concurrency_test.go` (359 LOC), ensuring all test files comply with the 500 LOC limit.
+  - Removed unused imports (`path/filepath`, `sync`) in `state_test.go`.
+- **Verification evidence:**
+  - `validate-repository.mjs`: `[PASS] Repository governance validation (UG-COR-NO-STUBS-001): 4691 tracked files verified with 0 violations.`
+  - `go test -v ./...` in container: `ok ugondu/client/cmd 0.040s`, `ok ugondu/client/engine 0.363s`, `ok ugondu/client/i18n 0.144s` (100% pass, 0 failures).
+  - `go vet ./...` in container: exit code 0.
+  - Node.js governance suite: 10/10 gates passed.
+- **Status:** GREEN (CONTAINER VERIFIED) / CI WORKFLOW COMPLETION PENDING. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+

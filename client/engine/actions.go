@@ -269,7 +269,6 @@ func (a *FetchRepositoryAction) Execute(env *ExecutionEnvelope, payload map[stri
 
 	fmt.Printf("     -> %s\n", i18n.T("sync_git", displayUrl, p.Branch))
 
-
 	// Ensure token is completely hidden by configuring temp git credential helper
 	var credFile string
 	if err == nil && parsedUrl != nil && parsedUrl.User != nil {
@@ -443,4 +442,3 @@ func (a *NodeInstallAction) Execute(env *ExecutionEnvelope, payload map[string]i
 	logs = append(logs, fmt.Sprintf(i18n.T("successfully_executed_in"), cmdName, strings.Join(args, " "), p.WorkingDirectory))
 	return logs, nil
 }
-
