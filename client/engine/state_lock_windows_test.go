@@ -33,7 +33,7 @@ func TestWindowsStateFileLockReusesOverlappedForUnlock(t *testing.T) {
 	if !ok {
 		t.Fatalf("unexpected lock implementation %T", acquired)
 	}
-	if lockedOverlapped != &lock.overlapped {
+	if lockedOverlapped != lock.overlapped {
 		t.Fatal("LockFileEx did not receive the lock's retained OVERLAPPED structure")
 	}
 	if err := lock.Unlock(); err != nil {
