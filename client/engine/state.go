@@ -216,7 +216,7 @@ func LoadState(txId string) (*ExecutionState, error) {
 
 // SaveState performs an atomic state write with directory mode 0700 and file mode 0600.
 func SaveState(state *ExecutionState) error {
-	if state == nil || state.TransactionId == "" {
+	if state == nil || state.TransactionId == "" || strings.TrimSpace(state.TransactionId) != state.TransactionId {
 		return fmt.Errorf(i18n.T("cannot_save_state_execution_state"))
 	}
 
