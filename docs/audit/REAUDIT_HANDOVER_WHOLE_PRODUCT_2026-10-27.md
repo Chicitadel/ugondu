@@ -175,3 +175,18 @@ The check prevents transaction-directory identity confusion; it does not provide
 
 ### Acceptance
 **YELLOW / EXACT-HEAD TESTS PENDING.** Source and regression test are committed to the dedicated branch. Go formatting, tests, vet, race checks, and platform builds remain unexecuted in this session. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 follow-up — canonical transaction ID on save
+
+**Finding ID:** `UG-COR-STATE-CANONICAL-ID-001`.
+
+### Confirmed defect
+`GetTransactionDir` trims surrounding whitespace for path construction, but `SaveState` previously persisted the original ID. A whitespace-padded ID could therefore produce a file in the canonical directory whose embedded ID was rejected by `LoadState`.
+
+### Physical remediation
+- `client/engine/state.go`: reject empty or non-canonical transaction IDs in `SaveState` before computing or writing a candidate state.
+- `client/engine/state_test.go`: add `TestSaveStateRejectsWhitespacePaddedTransactionID`, asserting rejection and no transaction-directory creation.
+
+### Acceptance
+**YELLOW / EXACT-HEAD TESTS PENDING.** No Go test/vet/race/platform execution has been performed in this session. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
