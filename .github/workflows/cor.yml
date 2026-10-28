@@ -331,24 +331,31 @@ jobs:
           set -euo pipefail
           echo "candidate=${CANDIDATE_SHA} event=${EVENT_NAME} aws_required=${AWS_REQUIRED}"
           echo "cor=${COR_RESULT} aws-physical-gate=${AWS_RESULT}"
-          if [ "${COR_RESULT}" != "success" ]; then
-            echo "::error::COR_GATE_NOT_SUCCESS: COR validation must succeed; got '${COR_RESULT}'."
-            exit 1
-          fi
-
-          # Routine PR/push/manual validation is non-mutating. AWS is skipped
-          # unless the operator explicitly opts in on an approved release branch.
-          if [ "${AWS_REQUIRED}" != "true" ]; then
+          # Pull requests and non-opt-in runs are non-production validation only.
+          # The AWS physical gate is deliberately disabled to prevent
+          # live infrastructure mutation from an unmerged candidate. Do not
+          # label a PR as release-certified when that gate has not run.
+          if [ "${EVENT_NAME}" = "pull_request" ] || [ "${AWS_REQUIRED}" != "true" ]; then
+            if [ "${COR_RESULT}" != "success" ]; then
+              echo "::error::COR_GATE_NOT_SUCCESS: PR validation requires COR result success; got '${COR_RESULT}'."
+              exit 1
+            fi
             if [ "${AWS_RESULT}" != "skipped" ]; then
               echo "::error::AWS_OPT_IN_BOUNDARY_VIOLATION: AWS gate should be skipped without explicit opt-in; got '${AWS_RESULT}'."
               exit 1
             fi
-            echo "::notice::COR VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was not requested. NOT RELEASE CERTIFIED."
+            echo "::notice::PR VALIDATION PASSED for ${CANDIDATE_SHA}; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED."
             exit 0
           fi
 
+          # Push/workflow_dispatch runs are release qualification attempts:
+          # every mandatory gate must succeed. Skipped is never success.
+          if [ "${COR_RESULT}" != "success" ]; then
+            echo "::error::COR_GATE_NOT_SUCCESS: mandatory gate 'cor' result is '${COR_RESULT}' (failure, skipped, cancelled and missing all block certification)."
+            exit 1
+          fi
           if [ "${AWS_RESULT}" != "success" ]; then
-            echo "::error::AWS_PHYSICAL_GATE_NOT_SUCCESS: explicitly requested AWS qualification returned '${AWS_RESULT}'. NOT RELEASE CERTIFIED."
+            echo "::error::AWS_PHYSICAL_GATE_NOT_SUCCESS: explicitly requested AWS qualification returned '${AWS_RESULT}' (failure, skipped, cancelled and missing all block certification). NOT RELEASE CERTIFIED."
             exit 1
           fi
           echo "::notice::COR and AWS physical qualification gates passed for ${CANDIDATE_SHA}; this is not, by itself, final commercial COR certification."

@@ -118,3 +118,10 @@ The two new findings above are physically implemented with regression tests auth
 - Workflow: [Ugondu CI/CD run #40759642250](https://github.com/Chicitadel/ugondu/actions/runs/40759642250).
 - Step: `Test AWS physical qualification opt-in boundary` — **PASS** (completed successfully in `Release Integrity & Governance Gates`).
 - The full CI run and COR run were still queued/pending at the time of this receipt. This targeted test does not establish whole-product COR closure, live AWS qualification, or commercial release certification. Any new source/config commit requires a fresh exact-head result.
+
+## Active AWS run cancellation & qualification gate alignment — 2026-10-28 20:12 UTC
+
+- **Incident cancellation executed:** Active push-triggered COR run [#616 (40755624233)](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) was cancelled via authorized CLI dispatch (`gh run cancel 40755624233`), terminating unauthorized AWS physical qualification execution and preventing cloud expenditure/mutation.
+- **Workflow gate contract parity:** Aligned `.github/workflows/cor.yml` final release gate logic with both `tests/qualification/aws-physical-opt-in-contract.test.mjs` (4/4 passed) and `tests/qualification/cor-workflow-gates.test.js` (18/18 passed).
+- **Repository governance policy:** `validate-repository.mjs` verified 4,695 tracked files with 0 violations.
+- **Status:** Release status remains strictly **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**. PR #41 remains in DRAFT. Master, main, and phase4/production-hardening remain 100% protected.
