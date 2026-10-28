@@ -80,14 +80,14 @@ func TestTrustedPublicKeyHexOverride(t *testing.T) {
 
 func TestNormalizeLocaleVariants(t *testing.T) {
 	cases := map[string]string{
-		"fr_FR.UTF-8":  "fr-FR",
-		"de_DE@euro":   "de-DE",
-		"ar":           "ar-SA",
-		"en":           "en-US",
-		"C.UTF-8":      "en-US",
-		"POSIX":        "en-US",
-		"":             "en-US",
-		"pt_br.utf8":   "pt-BR",
+		"fr_FR.UTF-8": "fr-FR",
+		"de_DE@euro":  "de-DE",
+		"ar":          "ar-SA",
+		"en":          "en-US",
+		"C.UTF-8":     "en-US",
+		"POSIX":       "en-US",
+		"":            "en-US",
+		"pt_br.utf8":  "pt-BR",
 	}
 	for input, expected := range cases {
 		if got := NormalizeLocale(input); got != expected {

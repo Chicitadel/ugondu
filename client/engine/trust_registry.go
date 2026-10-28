@@ -34,11 +34,12 @@
 package engine
 
 import (
-	"ugondu/client/i18n"
 	"errors"
+	"ugondu/client/i18n"
 )
 
 type KeyStatus string
+
 const (
 	StatusActive  KeyStatus = "ACTIVE"
 	StatusRotated KeyStatus = "ROTATED"
@@ -46,6 +47,7 @@ const (
 )
 
 type KeyPurpose string
+
 const (
 	PurposeRecipe          KeyPurpose = "recipe"
 	PurposePlugin          KeyPurpose = "plugin"
@@ -105,7 +107,7 @@ func (r *TrustRegistry) VerifyKey(keyId string, requiredPurpose KeyPurpose) erro
 	if entry.Status == StatusRevoked {
 		return ErrKeyRevoked
 	}
-	
+
 	if entry.Status == StatusRotated {
 		return ErrKeyRotated
 	}

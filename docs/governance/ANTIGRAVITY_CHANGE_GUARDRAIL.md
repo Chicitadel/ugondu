@@ -581,4 +581,216 @@ Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/
 - Public commercial release remains **BLOCKED / NOT FULLY CERTIFIED** until every mandatory physical gate and the final authorized COR decision passes on the release candidate.
 
 ### Required next action
-Keep PR #37 unmerged until the exact final head has reproducible Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, and required physical staging receipts. Any source change invalidates prior candidate-bound evidence and requires rerunning affected checks.
+PR #37 was merged into `fix/go-thin-client-vet-and-module-imports-2026-10-27` (not `master`/`main`). The merge does not waive exact-head Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, or required physical staging receipts. Any descendant source or test change invalidates prior candidate-bound evidence and requires rerunning affected checks.
+
+
+## 8. Whole-product re-audit follow-up — localization test integrity (2026-10-27)
+
+**Audit base:** `d283132258d9f7240eb1d71b1cc61630b3edfa85`  
+**Dedicated remediation branch:** `audit/whole-product-cor-reaudit-2026-10-27`
+
+### Confirmed defect: localization regression checks were permissive and mutated shared repository state
+
+- The drop-in localization test accepted either the exact localized value or a debug-prefixed variant, and some assertions used broad substring alternatives. This could allow unintended output formatting or incomplete positional interpolation to pass.
+- The test wrote `sw.json` into the repository's shared `locales/` directory. If a run terminated before its later cleanup section, the file could leak into a subsequent run and make results order-dependent.
+
+### Physical remediation on the dedicated branch
+
+- Replaced permissive OR/substring assertions with exact assertions for English, French, German, custom drop-in interpolation, English fallback, and unknown-token fallback.
+- Moved the custom locale fixture into a unique operating-system temporary directory selected through `UGONDU_LOCALES_DIR`; added exit-time cleanup and restoration of the prior environment variable. The repository's shared locale directory is no longer written by this test.
+- This is a regression-test integrity fix, not proof of complete product COR closure.
+
+### Evidence and release boundary
+
+- The changes are committed on the dedicated branch and are proposed through a draft PR; exact-head CI is still required.
+- The reported 65 local COR suites are not equivalent to all physical provider/host qualification gates. The previously recorded AWS physical qualification and signing-trust-root steps were skipped, and the uploaded Antigravity log does not provide complete raw output for every Go command.
+- Overall COR remains **PARTIAL / RELEASE BLOCKED** until mandatory exact-head checks and authorized physical qualification receipts are complete.
+
+
+## 9. Whole-product re-audit follow-up — persisted state integrity (2026-10-27)
+
+**Finding ID:** UG-COR-STATE-INTEGRITY-001  
+**Audit base:** d283132258d9f7240eb1d71b1cc61630b3edfa85  
+**Dedicated branch:** audit/whole-product-cor-reaudit-2026-10-27
+
+### Confirmed defect
+
+ExecutionState.ComputeHash and SaveState generated a deterministic SHA-256 state digest, but LoadState did not recompute or compare it before returning persisted state to the execution resume path. A changed state field could therefore be consumed without the existing integrity digest detecting the inconsistency. The digest is an integrity checksum, not a keyed signature; it detects inconsistent modification but is not proof against an attacker able to rewrite both state and digest.
+
+### Physical remediation
+
+- client/engine/state.go: LoadState now quarantines and rejects persisted state when stateHash is missing or differs from a freshly computed digest.
+- client/engine/state_test.go: added regression cases for a modified state field and a missing digest; each requires ErrStateCorrupt and quarantine.
+- The prior localization test-integrity changes remain in this same dedicated branch.
+
+### Verification boundary
+
+These code and regression changes are committed on the branch, but exact-head Go tests, go vet, race tests, and CI have not yet been independently observed as passing for this new head. The new test code must be formatted and run with gofmt, go test ./..., go test -race ./..., and go vet ./... before this finding can be marked GREEN.
+
+This check validates the consistency of the stored digest. It does not make an unkeyed SHA-256 digest tamper-proof against an actor able to rewrite the entire state file. A stronger authenticity requirement would need a separately governed keyed MAC or signature design and key lifecycle, not a misleading claim about this digest.
+
+Overall COR remains **PARTIAL / RELEASE BLOCKED** pending exact-head CI and mandatory physical qualification.
+
+## 2026-10-28 re-audit addendum — persisted-state permissions and replacement safety
+
+**Finding:** `UG-COR-STATE-IO-SECURITY-001` (confirmed in `client/engine/state.go`). The state writer ignored errors from `os.Chmod` when securing the transaction directory and temporary state file. It also deleted the prior `state.json` after a generic `os.Rename` failure before attempting a fallback rename. A permission-setting failure could therefore be treated as success, and an unrelated replacement error could destroy the last known-good state.
+
+**Physical remediation on `audit/whole-product-cor-reaudit-2026-10-27`:**
+- Check and propagate directory/file permission-setting failures; do not promote a state file when required permissions cannot be established.
+- Replace the delete-before-retry path with `replaceStateFile`, preserving the previous state on failure.
+- Use same-directory atomic rename on non-Windows systems and Windows `MoveFileExW` via `kernel32.dll` with `MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH` for replacement semantics.
+- Extend `state_test.go` to assert POSIX directory mode `0700` and state-file mode `0600`; Windows ACL qualification is not inferred from POSIX mode bits.
+
+**Acceptance:** `YELLOW / EXACT-HEAD CI PENDING`. This connector session authored the code and regression assertions but did not execute Go locally. Require `gofmt`, `go vet ./...`, `go test ./...`, Windows native build/test, and supported race tests on the resulting exact head. A failed replacement must leave the previous state intact. The unkeyed state digest remains a consistency check, not an authenticity guarantee.
+
+Do not close whole-product COR from this focused fix. AI fleet qualification, provider/host/IDE coverage, physical lifecycle receipts, and immutable commercial artifact qualification remain separately gated.
+
+
+## 2026-10-28 re-audit addendum — failed-save in-memory state rollback
+
+**Finding:** `UG-COR-STATE-COMMIT-ATOMICITY-001` (confirmed in `client/engine/state.go`). `SaveState` previously advanced `StateSequence`, `PrevStateHash`, `UpdatedAt`, and `StateHash` on the caller's object before the new file had been durably replaced. If persistence failed, disk retained the old state while the in-memory state advanced, allowing a later retry to create a broken or misleading hash chain.
+
+**Physical remediation:** `SaveState` now prepares a `nextState` copy, serializes and persists that candidate, and copies it back to the caller only after `stateFileReplacer` succeeds. A package-private replacement seam enables deterministic failure injection. `TestSaveStateReplacementFailurePreservesCommittedState` verifies that injected replacement failure leaves the previously committed file and persistence metadata unchanged while preserving the caller's intended domain mutation.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed; full Go tests/vet and CI have not been run in this session. Do not mark this finding GREEN until exact-head tests and platform builds pass.
+
+
+## 2026-10-28 re-audit addendum — concurrent state-save temporary-file collision
+
+**Finding:** `UG-COR-STATE-TEMP-COLLISION-001` (confirmed in `client/engine/state.go`). The fixed `state.json.tmp` name allowed concurrent writers for the same transaction to truncate or rename the same in-progress file. `SaveState` now uses `os.CreateTemp` in the transaction directory, sets explicit private permissions before replacement, and cleans up its unique temporary path. `TestConcurrentSaveStateUsesDistinctTemporaryFiles` injects replacement failures after both concurrent writers reach the replacement boundary, asserts distinct temporary paths, and verifies the previously committed file remains byte-for-byte unchanged. This prevents temp-file collision; it does not provide serialized multi-writer transaction semantics or resolve last-writer-wins business conflicts. Status remains `YELLOW / EXACT-HEAD TESTS PENDING`.
+
+## 2026-10-28 re-audit addendum — persisted transaction identity binding
+
+**Finding ID:** `UG-COR-STATE-IDENTITY-BINDING-001`.
+
+**Confirmed defect:** `LoadState(txID)` opened the requested transaction's `state.json` and validated that the stored transaction ID was non-empty, but did not require it to equal the requested ID. A validly hashed state copied or placed under another transaction directory could therefore be returned as the requested transaction's state.
+
+**Physical remediation:** `client/engine/state.go` now rejects empty or mismatched transaction IDs before digest verification, quarantines the offending file, and returns `ErrStateCorrupt`. `client/engine/state_test.go` adds `TestLoadStateRejectsTransactionIDMismatch`, using a valid self-consistent hash stored beneath a different transaction directory and asserting fail-closed rejection plus quarantine.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed on this dedicated branch; Go formatting, vet, tests, race tests, and platform builds have not been executed in this session. Do not close the finding until exact-head CI proves the test passes.
+
+This identity check is not a substitute for an authenticated state MAC/signature or process-level concurrency control. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 re-audit addendum — dot-segment transaction path
+
+**Finding ID:** `UG-COR-STATE-PATH-SEGMENT-001`.
+
+**Confirmed defect:** `GetTransactionDir` rejected empty IDs, `..`, and path separators, but accepted the exact ID `.`. Joining this ID to the transaction root resolves to the root itself, so `state.json` would not be isolated under a transaction-specific directory.
+
+**Physical remediation:** `client/engine/state.go` now rejects `.` in `GetTransactionDir` using the existing invalid-transaction-ID error path. `client/engine/state_test.go` adds `TestGetTransactionDirRejectsDotTransactionID` and verifies rejection by both path helpers and `SaveState`.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. The source and regression test are committed on the dedicated branch; no Go test/vet/race/platform run has been executed in this session. Do not close without exact-head evidence.
+
+Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 re-audit addendum — canonical transaction ID on save
+
+**Finding ID:** `UG-COR-STATE-CANONICAL-ID-001`.
+
+**Confirmed defect:** `GetTransactionDir` trims transaction IDs for path construction, while `SaveState` serialized the original untrimmed ID. A save using a whitespace-padded ID could write to the canonical directory and return success, but `LoadState` would reject the saved payload because its embedded ID did not match the canonical transaction identity.
+
+**Physical remediation:** `SaveState` now rejects IDs whose surrounding whitespace would be removed by `strings.TrimSpace`. `TestSaveStateRejectsWhitespacePaddedTransactionID` verifies the save fails and does not create the canonical transaction directory.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — nil execution-envelope constructor guard
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-NIL-001`
+
+- **Confirmed defect:** `InitStateFromEnvelope(env)` dereferenced `env` without validating it. A nil envelope caused a panic instead of a controlled fail-closed outcome.
+- **Physical remediation:** `client/engine/state.go` now returns `nil` when `env == nil`, before constructing execution state. This avoids fabricating an unbound state when the required envelope is absent.
+- **Regression coverage:** `client/engine/state_test.go` adds `TestInitStateFromEnvelopeRejectsNil`.
+- **Contract note:** The existing constructor signature returns only a pointer and has no error channel. Returning nil preserves the public signature; callers must treat a nil result as invalid and must not proceed with execution.
+- **Verification:** Source and regression test were committed to `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, tests, vet, race, and platform builds have **not** been executed in this session. Do not close the finding until exact-head CI evidence exists.
+- **Release status:** This is a targeted fix only. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — envelope transaction identity validation
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-IDENTITY-001`
+
+- **Confirmed defect:** The nil-envelope guard did not prevent a non-nil envelope with an empty or whitespace-padded `TransactionId` from producing an execution state that cannot be consistently persisted and reloaded.
+- **Physical remediation:** `InitStateFromEnvelope` now returns nil when `TransactionId` is empty or is not canonical under `strings.TrimSpace`. The constructor's existing signature is preserved; callers must treat nil as a rejected envelope and stop execution.
+- **Regression coverage:** `TestInitStateFromEnvelopeRejectsInvalidTransactionID` covers empty, whitespace-only, and whitespace-padded transaction IDs.
+- **Verification:** Source and test committed on `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, unit tests, vet, race detector, and cross-platform builds have not been executed in this session. Do not close the finding until exact-head CI output is captured.
+- **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — Go CI verification coverage
+
+**Finding ID:** `UG-COR-CI-GO-QUALITY-GATES-001`
+
+- **Confirmed gap:** The Go client CI job ran vet and tests but did not enforce repository Go formatting or run the race detector.
+- **Physical remediation:** `.github/workflows/ci.yml` now fails the Go client job if `gofmt -s -l .` reports files needing formatting, and runs `go test -race ./...` on the Linux amd64 matrix leg. Race testing is deliberately not run on unsupported matrix legs.
+- **Evidence boundary:** Workflow changes are committed on the dedicated branch, but this session has not observed a completed run for the resulting exact head. A workflow definition is not test evidence; the finding remains pending until the exact-head run and logs are inspected.
+- **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 re-audit — PR trigger coverage and AWS boundary
+
+**Finding ID:** `UG-COR-CI-PR-BASE-FILTER-001`
+
+- **Confirmed gap:** Both `.github/workflows/ci.yml` and `.github/workflows/cor.yml` included `audit/**` in PR base filters but omitted `fix/**`, while PR #39 targets `fix/go-thin-client-vet-and-module-imports-2026-10-27`. This made the workflow definitions in this branch insufficient to enable PR-triggered checks for that base pattern.
+- **Physical change:** Added `fix/**` to the `pull_request.branches` filters in both workflow files on the dedicated audit branch. Commits: `9a2563bb61dec8eaf303ee832db6b1eae3d11cff` (`ci.yml`) and `84065ccba005b7318a29d3046960fd0e45694904` (`cor.yml`).
+- **Important GitHub behavior:** A PR-triggered workflow is evaluated using the workflow definition available from its base branch. Since PR #39's current base does not yet contain this trigger change, this head-only edit does not by itself prove or guarantee that PR #39 will run those workflows. Do not modify the base branch outside the reviewed PR. Push-triggered runs on the audit branch should be inspected directly in GitHub Actions; the available workflow lookup here does not expose push-triggered runs.
+- **Acceptance:** Keep this finding YELLOW until workflow runs are observed and their tested SHA equals the candidate SHA. Workflow YAML edits are not execution evidence.
+
+**AWS and portability boundary:** Ugondu's Go thin client and its existing TypeScript workspaces remain this repository's scope. Dumcholu's Flutter/Spring Boot implementation belongs in `Chicitadel/dumcholu`; do not transplant Java/Flutter tasks into Ugondu. Any AWS deployment design must preserve configuration-driven provider adapters, keep Air Roofers Aerobill/Mandatag as the sole billing/entitlement authority, and avoid making AWS-specific assumptions mandatory for DirectAdmin/VPS portability. No AWS deployment or live physical qualification is claimed by this workflow change.
+
+## 2026-10-28 re-audit addendum — multi-process transactional locking and stale state prevention
+
+**Finding ID:** `UG-COR-STATE-LOCKING-001` (COR Track 7)
+
+- **Confirmed defect:** Unique temporary files in `client/engine/state.go` prevented temporary filename collisions during concurrent writes, but did not provide multi-process transactional serialization or prevent stale writers from overwriting newer state. A process with a stale in-memory state could overwrite a newer sequence committed by another process.
+- **Physical remediation:**
+  - Implemented cross-platform transactional file locking for `SaveState` via an exclusive lock on `<txDir>/.lock` (`state_lock_unix.go` using `syscall.Flock`, `state_lock_windows.go` using `LockFileEx` via `kernel32.dll`).
+  - Added package-private `stateLockAcquirer` hook in `client/engine/state.go` and defined `ErrStateStale`.
+  - Inside the exclusive lock, `SaveState` checks committed disk state: if disk sequence exceeds caller sequence or if base hashes mismatch, it rejects the write with `ErrStateStale`, protecting committed state from stale or divergent overwrites.
+  - Added comprehensive regression tests in `client/engine/state_test.go`: `TestConcurrentSaveStateSerializesWritersAndPreventsStaleState` and `TestStateFileLockAcquireAndRelease`.
+- **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. All Node.js governance, security, and contract test suites pass (attribution 0 violations across 4,690 files, T03 PASS, T04 PASS, 9/9 governance tests, 24/24 security tests, 21/21 contract tests). Go CI toolchain run is required on the exact candidate SHA before marking GREEN. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 re-audit addendum — fail-closed writes over invalid committed state
+
+**Finding ID:** `UG-COR-STATE-OVERWRITE-CORRUPT-001`
+
+- **Confirmed defect:** `SaveState` previously ignored errors reading `state.json`, ignored malformed JSON, and skipped integrity/identity checks when parsing failed or the embedded transaction ID differed. A subsequent save could therefore replace an unreadable, corrupt, or foreign state file and erase evidence rather than fail closed.
+- **Physical remediation on this branch:**
+  - `SaveState` now treats only `os.IsNotExist` as a valid first-save condition.
+  - Empty content, malformed JSON, foreign transaction identity, missing hash, or a mismatched recomputed digest return an error wrapping `ErrStateCorrupt`.
+  - Other read failures are propagated and cannot fall through to a write.
+  - Existing valid state must match both caller base sequence and hash exactly; divergence returns `ErrStateStale`.
+  - The implementation leaves the rejected existing file bytes in place for forensic recovery; it does not silently overwrite or quarantine them from this path.
+- **Regression coverage:** Added `TestSaveStateFailsClosedOnInvalidCommittedState` with malformed JSON, empty content, missing digest, digest mismatch, and foreign transaction identity cases. Each case asserts `ErrStateCorrupt` and bit-for-bit preservation of the existing file.
+- **Commits:** `edf5bd7d0362d2daf7cc60aafc33eb0fa53fab87` (runtime fix); `0f98d9db43affcacfdccf7f6dae3e0be298308ba` (regression test).
+- **Verification status:** YELLOW / exact-head Go execution pending. This session wrote the source and test via the repository API but did not execute `gofmt`, `go vet`, `go test`, race tests, or platform builds. The new tests must not be described as passing until CI evidence exists for the exact candidate SHA.
+
+## 2026-10-28 re-audit addendum — Go formatting and test modularization (UG-COR-GO-FORMATTING-001 & UG-COR-NO-STUBS-001)
+
+**Finding IDs:** `UG-COR-GO-FORMATTING-001`, `UG-COR-NO-STUBS-001`
+
+- **Confirmed defect:**
+  1. `Verify Go formatting` failed on CI because `gofmt -s -l .` detected line-ending and whitespace differences in 9 client source files.
+  2. `Validate repository policy (UG-COR-NO-STUBS-001)` failed because `client/engine/state_test.go` grew to 728 lines (exceeding the 500 LOC maximum file limit).
+- **Physical remediation:**
+  - Formatted all client Go files with `gofmt -s -w .` via containerized toolchain; `gofmt -s -l .` verified completely clean.
+  - Split `client/engine/state_test.go` into `client/engine/state_test.go` (407 LOC) and `client/engine/state_concurrency_test.go` (359 LOC), ensuring all test files comply with the 500 LOC limit.
+  - Removed unused imports (`path/filepath`, `sync`) in `state_test.go`.
+- **Verification evidence:**
+  - `validate-repository.mjs`: `[PASS] Repository governance validation (UG-COR-NO-STUBS-001): 4691 tracked files verified with 0 violations.`
+  - `go test -v ./...` in container: `ok ugondu/client/cmd 0.040s`, `ok ugondu/client/engine 0.363s`, `ok ugondu/client/i18n 0.144s` (100% pass, 0 failures).
+  - `go vet ./...` in container: exit code 0.
+  - Node.js governance suite: 10/10 gates passed.
+- **Status:** GREEN (CONTAINER VERIFIED) / CI WORKFLOW COMPLETION PENDING. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+
+## UG-COR-WINDOWS-LOCK-OVERLAPPED-001 — Windows lock/unlock identity
+
+**Finding:** The Windows lock helper used a different `syscall.Overlapped` object for `UnlockFileEx` than the one passed to `LockFileEx`, and discarded the unlock API result.
+
+**Physical fix:** `client/engine/state_lock_windows.go` now retains and reuses the same OVERLAPPED field for lock/unlock and returns unlock/close errors. Calls are behind package-private seams to permit deterministic tests.
+
+**Regression tests:** `TestWindowsStateFileLockReusesOverlappedForUnlock` and `TestWindowsStateFileLockPropagatesUnlockFailure` in Windows-only `client/engine/state_lock_windows_test.go`.
+
+**Commits:** `9ddea7cb607c31d434243277c30654ef644c17d0`; `2e1e06f3ff34ba2665b3f4f7c06a72be03f7e676`.
+
+**Status:** YELLOW / exact-head CI pending. Do not close until the Windows test job passes on the current head and other required CI checks remain green. No AWS deployment or whole-product certification is implied.

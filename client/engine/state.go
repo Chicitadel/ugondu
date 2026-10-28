@@ -3,10 +3,10 @@
  * Module         : client/engine
  * File           : state.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Author         : Ignatus Chika Ujomor
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-10-28
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -28,7 +28,7 @@
  * - Governance Authority
  * - Deployment Authority
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 package engine
@@ -50,7 +50,24 @@ import (
 var (
 	ErrStateNotFound = errors.New(i18n.T("state_file_not_found"))
 	ErrStateCorrupt  = errors.New(i18n.T("state_file_is_corrupt"))
+	ErrStateStale    = errors.New("cannot save stale execution state")
 )
+
+type stateFileLock interface {
+	Unlock() error
+}
+
+type noopStateLock struct{}
+
+func (noopStateLock) Unlock() error { return nil }
+
+// stateLockAcquirer is kept behind a package-private seam so locking behavior
+// can be verified and simulated in tests.
+var stateLockAcquirer = acquireStateFileLock
+
+// stateFileReplacer is kept behind a package-private seam so persistence failure
+// behavior can be tested deterministically without filesystem permission tricks.
+var stateFileReplacer = replaceStateFile
 
 type StepState struct {
 	Index       int      `json:"index"`
@@ -131,7 +148,7 @@ func GetTransactionsDir() (string, error) {
 // GetTransactionDir returns ~/.ugondu/transactions/<txId>
 func GetTransactionDir(txId string) (string, error) {
 	trimmed := strings.TrimSpace(txId)
-	if trimmed == "" {
+	if trimmed == "" || trimmed == "." {
 		return "", fmt.Errorf(i18n.T("invalid_transactionid_contains_path_separators"), txId)
 	}
 	if strings.Contains(trimmed, "..") || strings.Contains(trimmed, "/") || strings.Contains(trimmed, "\\") {
@@ -187,7 +204,22 @@ func LoadState(txId string) (*ExecutionState, error) {
 		return nil, ErrStateCorrupt
 	}
 
-	if state.TransactionId == "" {
+	// The directory selected by the caller is part of the transaction identity.
+	// Never return a validly hashed state belonging to a different transaction.
+	if state.TransactionId == "" || state.TransactionId != strings.TrimSpace(txId) {
+		quarantineCorruptFile(path)
+		return nil, ErrStateCorrupt
+	}
+
+	// Persisted execution state carries a deterministic integrity hash. Do not
+	// resume from a missing or mismatched hash: state fields (including completed
+	// steps and security bindings) must be internally consistent before use.
+	if state.StateHash == "" {
+		quarantineCorruptFile(path)
+		return nil, ErrStateCorrupt
+	}
+	computedHash, hashErr := state.ComputeHash()
+	if hashErr != nil || computedHash != state.StateHash {
 		quarantineCorruptFile(path)
 		return nil, ErrStateCorrupt
 	}
@@ -196,19 +228,11 @@ func LoadState(txId string) (*ExecutionState, error) {
 }
 
 // SaveState performs an atomic state write with directory mode 0700 and file mode 0600.
-func SaveState(state *ExecutionState) error {
-	if state == nil || state.TransactionId == "" {
+// Concurrent writers and multi-process callers are serialized using an exclusive file lock on <txDir>/.lock.
+func SaveState(state *ExecutionState) (retErr error) {
+	if state == nil || state.TransactionId == "" || strings.TrimSpace(state.TransactionId) != state.TransactionId {
 		return fmt.Errorf(i18n.T("cannot_save_state_execution_state"))
 	}
-
-	state.StateSequence++
-	state.PrevStateHash = state.StateHash
-	state.UpdatedAt = time.Now().Unix()
-	hash, err := state.ComputeHash()
-	if err != nil {
-		return fmt.Errorf(i18n.T("failed_to_compute_state_hash"), err)
-	}
-	state.StateHash = hash
 
 	txDir, err := GetTransactionDir(state.TransactionId)
 	if err != nil {
@@ -218,20 +242,84 @@ func SaveState(state *ExecutionState) error {
 	if err := os.MkdirAll(txDir, 0700); err != nil {
 		return fmt.Errorf(i18n.T("failed_to_create_transaction_directory"), txDir, err)
 	}
-	_ = os.Chmod(txDir, 0700)
+	if err := os.Chmod(txDir, 0700); err != nil {
+		return fmt.Errorf("secure transaction directory permissions: %w", err)
+	}
 
-	data, err := json.MarshalIndent(state, "", "  ")
+	lockPath := filepath.Join(txDir, ".lock")
+	lock, err := stateLockAcquirer(lockPath)
+	if err != nil {
+		return fmt.Errorf("acquire state lock: %w", err)
+	}
+	defer func() {
+		if unlockErr := lock.Unlock(); unlockErr != nil {
+			retErr = errors.Join(retErr, fmt.Errorf("release state lock: %w", unlockErr))
+		}
+	}()
+
+	finalPath := filepath.Join(txDir, "state.json")
+
+	// Existing state is authoritative: never overwrite it if it cannot be read,
+	// parsed, bound to this transaction, or integrity-verified. Treat only a
+	// genuinely absent file as a first save. Silently ignoring read/parse errors
+	// would let a later SaveState destroy evidence of corruption.
+	committedData, readErr := os.ReadFile(finalPath)
+	switch {
+	case readErr == nil:
+		if len(strings.TrimSpace(string(committedData))) == 0 {
+			return fmt.Errorf("%w: existing state file is empty", ErrStateCorrupt)
+		}
+
+		var committed ExecutionState
+		if err := json.Unmarshal(committedData, &committed); err != nil {
+			return fmt.Errorf("%w: existing state file is not valid JSON: %v", ErrStateCorrupt, err)
+		}
+		if committed.TransactionId != state.TransactionId {
+			return fmt.Errorf("%w: existing state belongs to transaction %q, not %q", ErrStateCorrupt, committed.TransactionId, state.TransactionId)
+		}
+		if committed.StateHash == "" {
+			return fmt.Errorf("%w: existing state has no integrity hash", ErrStateCorrupt)
+		}
+		committedHash, hashErr := committed.ComputeHash()
+		if hashErr != nil || committedHash != committed.StateHash {
+			return fmt.Errorf("%w: existing state integrity hash is invalid", ErrStateCorrupt)
+		}
+		if committed.StateSequence != state.StateSequence || committed.StateHash != state.StateHash {
+			return fmt.Errorf("%w: committed sequence/hash (%d/%s) differs from caller base (%d/%s)",
+				ErrStateStale, committed.StateSequence, committed.StateHash, state.StateSequence, state.StateHash)
+		}
+	case os.IsNotExist(readErr):
+		// First save: no prior committed state exists.
+	default:
+		return fmt.Errorf("read committed execution state: %w", readErr)
+	}
+
+	// Build the next version off to the side. A failed disk write must not
+	// advance the caller's sequence/hash chain when that version was never
+	// durably committed.
+	nextState := *state
+	nextState.StateSequence++
+	nextState.PrevStateHash = state.StateHash
+	nextState.UpdatedAt = time.Now().Unix()
+	hash, err := nextState.ComputeHash()
+	if err != nil {
+		return fmt.Errorf(i18n.T("failed_to_compute_state_hash"), err)
+	}
+	nextState.StateHash = hash
+
+	data, err := json.MarshalIndent(&nextState, "", "  ")
 	if err != nil {
 		return fmt.Errorf(i18n.T("failed_to_serialize_execution_state"), err)
 	}
 
-	tmpPath := filepath.Join(txDir, "state.json.tmp")
-	finalPath := filepath.Join(txDir, "state.json")
-
-	file, err := os.OpenFile(tmpPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	// Each writer needs its own temporary file. A fixed state.json.tmp path lets
+	// concurrent saves truncate or rename each other's in-progress payload.
+	file, err := os.CreateTemp(txDir, ".state.json.tmp-*")
 	if err != nil {
 		return fmt.Errorf(i18n.T("failed_to_open_temp_state"), err)
 	}
+	tmpPath := file.Name()
+	defer func() { _ = os.Remove(tmpPath) }()
 
 	if _, err := file.Write(data); err != nil {
 		_ = file.Close()
@@ -250,18 +338,24 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf(i18n.T("failed_to_close_temp_state"), err)
 	}
 
-	_ = os.Chmod(tmpPath, 0600)
-
-	// Atomic rename
-	if err := os.Rename(tmpPath, finalPath); err != nil {
-		// Windows fallback if destination file already exists
-		_ = os.Remove(finalPath)
-		if fallbackErr := os.Rename(tmpPath, finalPath); fallbackErr != nil {
-			_ = os.Remove(tmpPath)
-			return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), fallbackErr)
-		}
+	if err := os.Chmod(tmpPath, 0600); err != nil {
+		_ = file.Close()
+		_ = os.Remove(tmpPath)
+		return fmt.Errorf("secure temporary state file permissions: %w", err)
 	}
 
+	// Replace the persisted state only after the new file is fully written,
+	// synced, closed, and secured. Never delete the previous state as a generic
+	// fallback when rename fails: a failed replacement must not destroy the
+	// last known-good execution state. On platforms where replacement rename
+	// is unsupported, fail closed and preserve the existing state for recovery.
+	if err := stateFileReplacer(tmpPath, finalPath); err != nil {
+		_ = os.Remove(tmpPath)
+		return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), err)
+	}
+
+	// Publish the new in-memory state only after the durable replacement succeeds.
+	*state = nextState
 	return nil
 }
 
@@ -280,6 +374,20 @@ func InitState(txId string) *ExecutionState {
 
 // InitStateFromEnvelope initializes state bound cryptographically to an execution envelope.
 func InitStateFromEnvelope(env *ExecutionEnvelope) *ExecutionState {
+	// An absent envelope cannot establish transaction, tenant, target, or recipe
+	// bindings. Fail closed instead of dereferencing nil or creating an unbound
+	// execution state.
+	if env == nil {
+		return nil
+	}
+
+	// The transaction ID is the storage and state-chain identity. Reject empty or
+	// non-canonical values before creating a state that SaveState cannot persist
+	// consistently or LoadState would later reject.
+	if env.TransactionId == "" || strings.TrimSpace(env.TransactionId) != env.TransactionId {
+		return nil
+	}
+
 	s := &ExecutionState{
 		SchemaVersion:   "1.0.0",
 		TransactionId:   env.TransactionId,
