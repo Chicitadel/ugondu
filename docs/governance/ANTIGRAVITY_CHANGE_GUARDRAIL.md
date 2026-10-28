@@ -682,3 +682,13 @@ This identity check is not a substitute for an authenticated state MAC/signature
 **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. The source and regression test are committed on the dedicated branch; no Go test/vet/race/platform run has been executed in this session. Do not close without exact-head evidence.
 
 Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 re-audit addendum — canonical transaction ID on save
+
+**Finding ID:** `UG-COR-STATE-CANONICAL-ID-001`.
+
+**Confirmed defect:** `GetTransactionDir` trims transaction IDs for path construction, while `SaveState` serialized the original untrimmed ID. A save using a whitespace-padded ID could write to the canonical directory and return success, but `LoadState` would reject the saved payload because its embedded ID did not match the canonical transaction identity.
+
+**Physical remediation:** `SaveState` now rejects IDs whose surrounding whitespace would be removed by `strings.TrimSpace`. `TestSaveStateRejectsWhitespacePaddedTransactionID` verifies the save fails and does not create the canonical transaction directory.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
