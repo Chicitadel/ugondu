@@ -276,7 +276,7 @@ func SaveState(state *ExecutionState) error {
 	// fallback when rename fails: a failed replacement must not destroy the
 	// last known-good execution state. On platforms where replacement rename
 	// is unsupported, fail closed and preserve the existing state for recovery.
-	if err := os.Rename(tmpPath, finalPath); err != nil {
+	if err := replaceStateFile(tmpPath, finalPath); err != nil {
 		_ = os.Remove(tmpPath)
 		return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), err)
 	}
