@@ -191,7 +191,9 @@ func LoadState(txId string) (*ExecutionState, error) {
 		return nil, ErrStateCorrupt
 	}
 
-	if state.TransactionId == "" {
+	// The directory selected by the caller is part of the transaction identity.
+	// Never return a validly hashed state belonging to a different transaction.
+	if state.TransactionId == "" || state.TransactionId != strings.TrimSpace(txId) {
 		quarantineCorruptFile(path)
 		return nil, ErrStateCorrupt
 	}
