@@ -488,3 +488,9 @@ func TestConcurrentSaveStateUsesDistinctTemporaryFiles(t *testing.T) {
 		t.Fatal("failed concurrent saves changed the previously committed state")
 	}
 }
+
+func TestInitStateFromEnvelopeRejectsNil(t *testing.T) {
+	if got := InitStateFromEnvelope(nil); got != nil {
+		t.Fatalf("InitStateFromEnvelope(nil) = %#v, want nil", got)
+	}
+}
