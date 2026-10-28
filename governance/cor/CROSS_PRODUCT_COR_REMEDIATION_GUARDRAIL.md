@@ -74,7 +74,7 @@ For every audit finding, use this exact lifecycle:
 
 ## 8. Release gate
 
-**Workflow status and release status are different gates.** A successful pull-request CI/COR run is development validation only. The current workflow intentionally skips physical AWS qualification, candidate-bound freshness, signing-trust-root verification and final signing on pull requests. The final PR job must say `PR VALIDATION PASSED ... NOT RELEASE CERTIFIED`. Never use a PR green badge as a release certificate.
+**Workflow status and release status are different gates.** PRs and ordinary `fix/**` / `audit/**` branch pushes are validation-only. They must skip candidate-bound release freshness, signing-trust-root verification and final signing; they must emit `VALIDATION PASSED ... NOT RELEASE CERTIFIED`, never a claim of release certification. Candidate freshness, trust-root verification and final signing run only for an explicitly opted-in `workflow_dispatch` on `main` or `phase4/production-hardening`, with `AWS_PHYSICAL_QUALIFICATION_ENABLED=true`. Never use a green PR or remediation-branch badge as a release certificate.
 
 Do not claim 100% COR gap closure or public-commercial certification until:
 - all critical/high findings are closed or formally risk-accepted by the authorized owner;
@@ -89,11 +89,11 @@ Do not claim 100% COR gap closure or public-commercial certification until:
 **Current state: source changes are committed on the feature branch; commercial release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS deployment is claimed.**
 
 
-## Incident note — active legacy AWS physical run
+## Incident note — cancelled legacy AWS physical run and freshness scope
 
-The pre-fix candidate `5097e57d55d795f87b36cdbce1cf8eecc16887f1` has a push-triggered AWS physical qualification run [#616](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) that was reported in progress after OIDC, policy reconciliation and tagged role assumption. The current connector has no cancellation operation. An authorized operator must cancel this run if it was not explicitly approved and verify the cleanup/residual-resource report. Do not assume cleanup happened merely because a job ends.
+The pre-fix candidate `5097e57d55d795f87b36cdbce1cf8eecc16887f1` push-triggered AWS physical qualification run [#616](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) is confirmed `completed / cancelled`. This confirms the workflow stopped; it does not prove that AWS resources were absent or cleaned up. An authorized account operator must supply a residual-resource scan and account reconciliation before the incident can be closed.
 
-The same candidate's push COR gate failed evidence freshness because 153 non-evidence paths changed after candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`. This is a legitimate fail-closed block. Refresh evidence for a frozen new candidate; do not whitelist source/workflow changes as evidence-only or bypass freshness.
+The later push COR gate failed evidence freshness because non-evidence source/workflow paths had changed after frozen candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`. The verifier correctly failed closed. The physical workflow fix now scopes that release-only check to explicitly opted-in trusted release qualification rather than ordinary remediation pushes. It does not relax freshness requirements for release qualification, and it does not authorize source changes to be labelled evidence-only.
 
 
 ## Regression receipt update — 2026-10-28
