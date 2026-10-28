@@ -781,3 +781,16 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
   - Node.js governance suite: 10/10 gates passed.
 - **Status:** GREEN (CONTAINER VERIFIED) / CI WORKFLOW COMPLETION PENDING. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 
+
+
+## UG-COR-WINDOWS-LOCK-OVERLAPPED-001 — Windows lock/unlock identity
+
+**Finding:** The Windows lock helper used a different `syscall.Overlapped` object for `UnlockFileEx` than the one passed to `LockFileEx`, and discarded the unlock API result.
+
+**Physical fix:** `client/engine/state_lock_windows.go` now retains and reuses the same OVERLAPPED field for lock/unlock and returns unlock/close errors. Calls are behind package-private seams to permit deterministic tests.
+
+**Regression tests:** `TestWindowsStateFileLockReusesOverlappedForUnlock` and `TestWindowsStateFileLockPropagatesUnlockFailure` in Windows-only `client/engine/state_lock_windows_test.go`.
+
+**Commits:** `9ddea7cb607c31d434243277c30654ef644c17d0`; `2e1e06f3ff34ba2665b3f4f7c06a72be03f7e676`.
+
+**Status:** YELLOW / exact-head CI pending. Do not close until the Windows test job passes on the current head and other required CI checks remain green. No AWS deployment or whole-product certification is implied.
