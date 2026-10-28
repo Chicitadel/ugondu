@@ -110,3 +110,11 @@ The two new findings above are physically implemented with regression tests auth
 - Existing candidate `5097e57d55d795f87b36cdbce1cf8eecc16887f1` has push-triggered COR run [#616](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) still reported `in_progress` during the re-audit. Its AWS Physical Qualification Gate had already passed OIDC, policy reconciliation, tagged role assumption and conformance probes, and was in `Run physical certification`. The available GitHub tools expose read-only run data and do not provide a cancellation action. **An authorized repository operator must open the run and cancel it immediately if this physical qualification was not explicitly approved.** Verify the residual-resource scanner/cleanup result and reconcile any created resources before closing the incident.
 - The same candidate's push-triggered COR job failed at evidence freshness: 153 non-evidence paths had changed since candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9`, including CI/COR workflows. This is a fail-closed evidence mismatch, not permission to bypass the freshness check. Regenerate evidence against a newly frozen candidate and rerun exact-head gates; do not reclassify the push run as green because the PR-specific COR run passed.
 - Current branch `fix/cor-aws-physical-opt-in-2026-10-28` adds the same regression test to both COR and standard CI release-integrity gates. New-head CI is in progress; current result remains pending.
+
+
+## Regression execution receipt — 2026-10-28 20:02 UTC
+
+- Candidate tested: `2edf906ca7ed2ee8a2dbbd04b4e16772daff1ede`.
+- Workflow: [Ugondu CI/CD run #40759642250](https://github.com/Chicitadel/ugondu/actions/runs/40759642250).
+- Step: `Test AWS physical qualification opt-in boundary` — **PASS** (completed successfully in `Release Integrity & Governance Gates`).
+- The full CI run and COR run were still queued/pending at the time of this receipt. This targeted test does not establish whole-product COR closure, live AWS qualification, or commercial release certification. Any new source/config commit requires a fresh exact-head result.
