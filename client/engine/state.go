@@ -314,6 +314,13 @@ func InitState(txId string) *ExecutionState {
 
 // InitStateFromEnvelope initializes state bound cryptographically to an execution envelope.
 func InitStateFromEnvelope(env *ExecutionEnvelope) *ExecutionState {
+	// An absent envelope cannot establish transaction, tenant, target, or recipe
+	// bindings. Fail closed instead of dereferencing nil or creating an unbound
+	// execution state.
+	if env == nil {
+		return nil
+	}
+
 	s := &ExecutionState{
 		SchemaVersion:   "1.0.0",
 		TransactionId:   env.TransactionId,
