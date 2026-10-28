@@ -148,7 +148,8 @@ jobs:
           cache: true
           cache-dependency-path: client/go.mod
 
-      - name: Verify Go formatting
+      - name: Verify Go formatting (Linux amd64)
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         working-directory: client
         shell: bash
         run: |
