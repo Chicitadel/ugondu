@@ -143,3 +143,20 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`; this targeted persistence
 
 ### Scope and acceptance
 This closes the fixed-temp-path collision only. It does not implement per-transaction locking, compare-and-swap sequencing, or serialized concurrent state transitions. Where concurrent writers must preserve ordering, a separate transaction-lock/sequence policy is still required. Exact-head Go tests, race tests, vet and platform CI remain pending; do not mark GREEN without evidence.
+
+
+## 2026-10-28 follow-up — persisted transaction identity binding
+
+**Finding ID:** `UG-COR-STATE-IDENTITY-BINDING-001`.
+
+### Confirmed defect
+`LoadState(txID)` read `transactions/<txID>/state.json` and rejected an empty embedded transaction ID, but accepted a non-empty ID that differed from the requested transaction. A validly hashed foreign state could be returned to the caller under the wrong transaction identity.
+
+### Physical remediation
+- `client/engine/state.go`: require the embedded `TransactionId` to equal `strings.TrimSpace(txID)`; otherwise quarantine the file and return `ErrStateCorrupt` before hash validation.
+- `client/engine/state_test.go`: add `TestLoadStateRejectsTransactionIDMismatch`. The test places a correctly hashed foreign transaction state under the requested transaction directory and verifies rejection and quarantine.
+
+### Acceptance status
+**YELLOW / EXACT-HEAD TESTS PENDING.** This source and regression test have been written to the dedicated branch. No Go test, vet, race, or platform build was executed in this session. Require exact-head results before closing this finding.
+
+The check prevents transaction-directory identity confusion; it does not provide cryptographic authenticity or serialize concurrent writers. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
