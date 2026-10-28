@@ -160,3 +160,18 @@ This closes the fixed-temp-path collision only. It does not implement per-transa
 **YELLOW / EXACT-HEAD TESTS PENDING.** This source and regression test have been written to the dedicated branch. No Go test, vet, race, or platform build was executed in this session. Require exact-head results before closing this finding.
 
 The check prevents transaction-directory identity confusion; it does not provide cryptographic authenticity or serialize concurrent writers. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 follow-up — dot-segment transaction path
+
+**Finding ID:** `UG-COR-STATE-PATH-SEGMENT-001`.
+
+### Confirmed defect
+`GetTransactionDir` rejected empty IDs, `..`, and path separators but accepted the exact ID `.`. `filepath.Join(transactionsRoot, ".")` resolves to the transactions root, causing a non-transaction-specific `state.json` location.
+
+### Physical remediation
+- `client/engine/state.go`: reject `.` alongside empty IDs before path construction.
+- `client/engine/state_test.go`: add `TestGetTransactionDirRejectsDotTransactionID`, covering `GetTransactionDir`, `GetStateFilePath`, and `SaveState`.
+
+### Acceptance
+**YELLOW / EXACT-HEAD TESTS PENDING.** Source and regression test are committed to the dedicated branch. Go formatting, tests, vet, race checks, and platform builds remain unexecuted in this session. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
