@@ -127,3 +127,19 @@ The unkeyed SHA-256 state digest detects inconsistent persisted fields but is no
 **YELLOW / EXACT-HEAD TESTS PENDING.** This connector session committed source and regression code but did not execute the Go test suite. Run `gofmt`, `go vet ./...`, `go test ./...`, `go test -race ./...` where supported, and the native Windows build/test matrix against the current head. The test seam is package-private and must not be used as a runtime configuration mechanism.
 
 Whole-product COR remains `PARTIAL / RELEASE BLOCKED`; this targeted persistence fix is not overall certification.
+
+
+## 2026-10-28 follow-up — concurrent state-save temporary-file collision
+
+**Finding ID:** `UG-COR-STATE-TEMP-COLLISION-001`.
+
+### Confirmed defect
+`SaveState` used a shared fixed `state.json.tmp` path. Concurrent saves to one transaction could truncate or rename each other's payload before replacement.
+
+### Physical remediation
+- `client/engine/state.go` now creates a unique temporary file in the same transaction directory with `os.CreateTemp`, preserving same-filesystem replacement and preventing temporary-path reuse.
+- Explicit `0600` hardening remains required before replacement; the temporary file is removed on return if it was not renamed.
+- `client/engine/state_test.go` adds `TestConcurrentSaveStateUsesDistinctTemporaryFiles`. It synchronizes two concurrent save attempts at the injected replacement boundary, asserts distinct temp paths, and checks that failed writes preserve the previously committed file.
+
+### Scope and acceptance
+This closes the fixed-temp-path collision only. It does not implement per-transaction locking, compare-and-swap sequencing, or serialized concurrent state transitions. Where concurrent writers must preserve ordering, a separate transaction-lock/sequence policy is still required. Exact-head Go tests, race tests, vet and platform CI remain pending; do not mark GREEN without evidence.
