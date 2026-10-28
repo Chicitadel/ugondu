@@ -23,7 +23,7 @@ jobs:
   live-canary:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -47,6 +47,7 @@ jobs:
       - name: Run live canary
         env:
           UGONDU_AIRROOFERS_AI_KEY: ${{ secrets.UGONDU_AIRROOFERS_AI_KEY }}
+          UGONDU_AIRROOFERS_AI_BASE_URL: https://ai.airroofers.eu
         run: node scripts/qualification/airroofers-ai-live-canary.mjs
 
       - name: Upload redacted receipt

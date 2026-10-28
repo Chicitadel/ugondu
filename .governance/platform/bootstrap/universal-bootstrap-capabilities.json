@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "1.0.0",
+  "registry_id": "ugondu.universal-bootstrap-capabilities",
+  "task_id": "UG-UPLM-BOOTSTRAP-UNIVERSAL-001",
+  "status": "implementation-specification-not-runtime-certification",
+  "governance": {
+    "framework": "UAIGOS",
+    "product_authority": "Air Roofers",
+    "canonical_guardrail": "docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md",
+    "legal_policy_authority": "https://policies.airroofers.eu",
+    "entitlement_authority": "Air Roofers AeroBill/Mandatag",
+    "fail_closed": true,
+    "discover_before_create": true,
+    "no_self_escalation": true,
+    "no_master_mutation": true
+  },
+  "bootstrap_contract": {
+    "preferred_authentication": [
+      "oidc_ephemeral_credentials",
+      "assume_role_ephemeral_credentials"
+    ],
+    "operator_handoff_on_authority_gap": true,
+    "authority_gap_code": "AUTHORITY_GAP",
+    "authority_gap_exit_nonzero": true,
+    "read_back_required_after_mutation": true,
+    "durable_execution_ledger_required": true,
+    "approved_plan_digest_required": true,
+    "secret_persistence": "prohibited",
+    "default_admin_policy": "prohibited",
+    "blanket_cloudformation_star": "prohibited_as_default",
+    "iam_passrole_scope": "explicit_approved_service_roles_only"
+  },
+  "lifecycle": [
+    "DISCOVER",
+    "RESOLVE_TARGET",
+    "PLAN",
+    "VALIDATE",
+    "AUTHORIZE",
+    "APPROVE",
+    "APPLY",
+    "VERIFY",
+    "CERTIFY",
+    "FREEZE",
+    "HANDOFF"
+  ],
+  "entrypoints": {
+    "canonical_api_required": true,
+    "cli_required": true,
+    "ui_required": true,
+    "ide_adapters": "capability-qualified",
+    "model_free_required": true,
+    "model_assisted_optional": true,
+    "all_entrypoints_share_authorization": true
+  },
+  "providers": {
+    "aws": {
+      "status": "targeted-for-implementation",
+      "capabilities": {
+        "iam_bootstrap": "discover-existing-role-policy-trust-boundary-and-scp; scoped-role-handoff; read-back",
+        "cloudformation": "stack-plan-change-set-apply-events-outputs-drift-rollback",
+        "terraform": "init-validate-plan-apply-destroy-with-locked-state-and-plan-binding",
+        "route53": "zone-discovery-ownership-checked-reversible-record-changes",
+        "acm": "request-dns-validation-issuance-attachment-renewal-readiness",
+        "cloudfront": "distribution-alias-oac-certificate-deploy-status-invalidation-rollback",
+        "workload_services": [
+          "VPC",
+          "EC2",
+          "EBS",
+          "ECR",
+          "ECS",
+          "Fargate",
+          "ELB",
+          "RDS",
+          "S3",
+          "KMS",
+          "SecretsManager",
+          "CloudWatch",
+          "Backup"
+        ]
+      },
+      "regional_rules": {
+        "cloudfront_acm_certificate_region": "us-east-1",
+        "regional_service_certificate_region": "target_service_region",
+        "default_region": "none-require-explicit-or-approved-target"
+      },
+      "authorization": {
+        "require_account_and_partition_match": true,
+        "require_explicit_region_or_valid_approved_target": true,
+        "cloudformation_wildcard_action_default": false,
+        "passrole_arbitrary_role": false,
+        "runner_role_gets_workload_provisioning_by_default": false
+      }
+    },
+    "azure": {
+      "status": "unqualified-until-physical-receipts",
+      "capabilities": [
+        "tenant-subscription-region-discovery",
+        "role-assignment-plan",
+        "ARM-Bicep-Terraform",
+        "DNS-TLS",
+        "deployment-verification"
+      ]
+    },
+    "gcp": {
+      "status": "bootstrap-identity-setup-implemented; workload-deployment-unqualified-until-physical-receipts",
+      "capabilities": [
+        "organization-project-region-discovery",
+        "workload-identity",
+        "Terraform",
+        "DNS-TLS",
+        "deployment-verification"
+      ],
+      "bootstrap_profile": ".governance/platform/bootstrap/gcp-bootstrap-profile.json",
+      "bootstrap_entrypoint": "npm run bootstrap:gcp",
+      "bootstrap_invariants": [
+        "plan-digest-approval",
+        "exact-github-repository-oidc-condition",
+        "no-owner-or-editor-grants",
+        "no-workload-deployment-roles-by-default",
+        "post-mutation-readback"
+      ]
+    },
+    "kubernetes": {
+      "status": "unqualified-until-physical-receipts",
+      "capabilities": [
+        "context-namespace-discovery",
+        "RBAC",
+        "manifests-Helm",
+        "rollout-health-rollback",
+        "drift"
+      ]
+    },
+    "vps_private_cloud": {
+      "status": "capability-probe-required",
+      "capabilities": [
+        "provider-API-or-explicit-SSH-Ansible",
+        "firewall",
+        "TLS-reverse-proxy",
+        "backup",
+        "health-check"
+      ]
+    },
+    "cpanel_directadmin_shared_hosting": {
+      "status": "capability-probe-required",
+      "capabilities": [
+        "panel-API-when-available",
+        "host-managed-runtime-and-TLS",
+        "private-persistent-storage",
+        "cron-only-scheduled-work"
+      ],
+      "forbid_assuming": [
+        "root",
+        "systemd",
+        "Docker",
+        "arbitrary-background-daemons"
+      ]
+    },
+    "generic_hosting": {
+      "status": "capability-probe-required",
+      "unsupported_operation_behavior": "typed-unavailable-not-success"
+    }
+  },
+  "editions": {
+    "community": {
+      "goal": "useful-safe-end-to-end-small-target",
+      "includes": [
+        "guided-single-target-deployment",
+        "read-only-discovery",
+        "dry-run-plan",
+        "human-approval",
+        "basic-cloudformation-path-or-admin-handoff",
+        "DNS-certificate-guidance",
+        "CLI-and-UI-baseline",
+        "model-free-path",
+        "local-exportable-evidence"
+      ],
+      "limits": [
+        "one guided profile at a time",
+        "manual handoff when provider authority/API automation is unavailable"
+      ]
+    },
+    "professional": {
+      "includes": [
+        "multiple-environments",
+        "governed-terraform-apply",
+        "supported-provider-DNS-TLS-automation",
+        "custom-scoped-policy-packs",
+        "resume-and-run-history",
+        "IDE-adapters-when-qualified",
+        "cost-thresholds"
+      ]
+    },
+    "enterprise": {
+      "includes": [
+        "organization-wide-delegated-bootstrap",
+        "multi-account-multi-region-orchestration",
+        "central-execution-ledger",
+        "policy-as-code",
+        "granular-approval-hierarchy",
+        "fleet-audit-retention",
+        "cross-environment-recovery"
+      ]
+    },
+    "all_editions_must_enforce": [
+      "least-privilege",
+      "authorization",
+      "approval",
+      "secret-hygiene",
+      "explicit-target-selection",
+      "fail-closed",
+      "truthful-evidence"
+    ]
+  },
+  "required_evidence": {
+    "candidate_sha": true,
+    "manifest_digest": true,
+    "policy_digest": true,
+    "plan_digest": true,
+    "operation_id": true,
+    "principal_and_target": true,
+    "approval_actor": true,
+    "provider_request_ids": true,
+    "resource_readback": true,
+    "test_commands_and_exit_codes": true,
+    "redacted_logs": true,
+    "unresolved_items_and_release_disposition": true
+  },
+  "implementation_phases": [
+    {
+      "id": "P0",
+      "priority": "P0",
+      "title": "Fail-closed bootstrap and staging authority",
+      "status": "immediate"
+    },
+    {
+      "id": "P1",
+      "priority": "P1",
+      "title": "Terraform, DNS, ACM and CloudFront integration",
+      "status": "planned"
+    },
+    {
+      "id": "P2",
+      "priority": "P2",
+      "title": "Cloud, Kubernetes, VPS and shared-host adapters",
+      "status": "planned"
+    },
+    {
+      "id": "P3",
+      "priority": "P3",
+      "title": "UI/CLI/IDE/agent parity and edition capabilities",
+      "status": "planned"
+    },
+    {
+      "id": "P4",
+      "priority": "P4",
+      "title": "Physical qualification and UAIGOS certification",
+      "status": "blocked-on-evidence"
+    }
+  ]
+}

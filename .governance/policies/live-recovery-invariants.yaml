@@ -1,0 +1,48 @@
+invariants:
+  - id: PROTECTED_PRODUCTION_RECOVERY
+    name: Protected Production Recovery Invariant
+    description: >
+      Ugondu MUST NOT modify a protected production environment until the target environment,
+      resource ownership, intended state, dependency graph, affected scope, recovery plan,
+      rollback mechanism, and verification criteria have been independently established.
+      A recovery operation MUST be constrained to its declared resource scope and MUST
+      preserve unrelated resources.
+
+  - id: LIVE_RECOVERY_NON_INTERFERENCE
+    name: Live Recovery Non-Interference Invariant
+    description: >
+      Recovery of one application, repository, tenant, or capability MUST NOT mutate unrelated
+      applications, repositories, tenants, databases, domains, DNS records, credentials, files,
+      or hosting configuration unless those resources are explicitly declared as dependencies
+      of the approved recovery transaction.
+
+  - id: REFERENCE_ENVIRONMENT_NON_ENTANGLEMENT
+    name: Reference Environment Non-Entanglement Invariant
+    description: >
+      A real environment used to validate Ugondu MUST be represented as an external environment instance
+      and MUST NOT become an architectural dependency, hardcoded fixture, provider-specific assumption,
+      product-specific recovery rule, or contractual prerequisite of Ugondu. Conformance behavior MUST
+      be expressed through universal contracts, capabilities, resource types, adapters, policies, and evidence schemas.
+
+  - id: REAL_WORLD_CASE_GENERALIZATION
+    name: Real-World Case Generalization Invariant
+    description: >
+      When a real production environment exposes a previously unknown failure mode, Ugondu MUST generalize
+      the observed failure into a provider-neutral resource, relationship, capability, diagnosis, or recovery pattern
+      before incorporating it into the universal platform. The original environment may be retained as a conformance case
+      but MUST NOT define the universal abstraction.
+
+  - id: UNIVERSAL_RECOVERY_INVARIANT
+    name: Universal Recovery Invariant
+    description: >
+      Every supported Ugondu environment MUST expose recovery through the universal Recovery Contract.
+      Recovery capabilities MUST be provider-, hosting-model-, control-plane-, runtime-, and operating-system-neutral.
+      Platform-specific behavior MUST be isolated behind adapters implementing the universal contracts.
+      No supported environment may require a separate recovery architecture.
+
+  - id: ENVIRONMENT_AGNOSTIC_CONFORMANCE
+    name: Environment-Agnostic Conformance Invariant
+    description: >
+      A production or customer environment used to validate Ugondu MUST be treated as an environment instance
+      and conformance case. Its identity, ownership, domain names, repositories, topology, credentials,
+      and historical incidents MUST NOT become hardcoded dependencies of the Ugondu product.

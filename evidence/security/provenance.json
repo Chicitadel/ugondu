@@ -1,0 +1,41 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "ugondu-qualification-bundle",
+      "digest": {
+        "sha256": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3"
+      }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://ugondu.io/governance/release-evidence/v2",
+      "externalParameters": {
+        "repository": "Chicitadel/ugondu",
+        "commitHash": "50ca98b6dd3672ef473b425d74e66e60e163470d",
+        "treeHash": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3",
+        "workflowRunId": "local-1792524571572"
+      },
+      "resolvedDependencies": [
+        {
+          "uri": "git+https://github.com/Chicitadel/ugondu",
+          "digest": {
+            "sha1": "50ca98b6dd3672ef473b425d74e66e60e163470d"
+          }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": {
+        "id": "urn:ugondu:local-qualification-runner"
+      },
+      "metadata": {
+        "invocationId": "exec-qual-1792524571571-724432c4",
+        "startedOn": "2026-10-20T19:29:31.573Z",
+        "finishedOn": "2026-10-20T19:29:47.467Z"
+      }
+    }
+  }
+}

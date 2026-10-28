@@ -1,0 +1,12 @@
+{
+  "name": "@ugondu/plugin-recovery-code",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Sovereign Autonomous Code Patching Recovery Capability Plugin",
+  "main": "src/autonomous-code-patching.ts",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@ugondu/shared": "^1.0.0"
+  }
+}

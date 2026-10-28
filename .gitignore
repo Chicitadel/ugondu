@@ -13,6 +13,9 @@ client/ugondu.exe
 
 # [en] Environment secrets
 .env
+*_private.pem
+**/*_private.pem
+server/engine-core/keys/*.pem
 
 # [en] Logs
 *.log
@@ -23,3 +26,27 @@ Thumbs.db
 
 # [en] Server runtime datastores
 server/data/
+.service_replay_ledger.json
+**/.service_replay_ledger.json
+
+# [en] COR evidence is generated as an external CI/local artifact, never committed
+cor-evidence-bundle.json
+cor-test-results.json
+.cor_evidence/
+
+# [en] Local engineering tooling, scratch scripts, and temporary dumps (never shipped)
+scratch/
+**/scratch/
+.governance/tmp/
+scratch_*
+git-grep.txt
+grep-ts.txt
+out.txt
+prod_search_*.txt
+repo_tree.txt
+search_results*
+filtered_search.json
+sync_files.txt
+target_search.json
+tree.txt
+*.zip

@@ -1,0 +1,17 @@
+execution_evidence:
+  phase: IMPLEMENTATION
+  module: server/engine-core/src/placement
+  timestamp: "2026-10-08T12:18:23Z"
+  engineer: Region Decision Engineer
+  artifacts_created:
+    - server/engine-core/src/placement/PlacementBlockedError.ts
+    - server/engine-core/src/placement/types.ts
+    - server/engine-core/src/placement/chooseRegions.ts
+  constraints_validated:
+    - rule: "Never invent a region silently"
+      enforcement: "Strict allowlist of KNOWN_REGIONS used in algorithm."
+    - rule: "Throw a PlacementBlockedError if constraints cannot be met"
+      enforcement: "Throw statement triggered when validRegions.length === 0."
+    - rule: "Region selection must evaluate residency, compliance, latency, cost, and quota"
+      enforcement: "Filter functions applied for each dimension explicitly in chooseRegions."
+  governance_applied: true

@@ -82,3 +82,31 @@ For `targetEnvironment: cpanel | directadmin`, the engine-core **always defaults
 ---
 
 *Copyright © 2026 Air Roofers Ltd. All Rights Reserved.*
+
+## ADR-005: Thin-Client Canonical Marketplace Distribution
+
+**Status:** FROZEN  
+**Date:** 2026-10-03
+
+### Context
+To achieve maximum legitimate distribution coverage, Ugondu must be installable via native package managers (apt, brew, winget) and marketplaces. Distributing varied edition-specific binaries or allowing proprietary server code to leak into client packages compromises IP and creates severe fragmentation.
+
+### Decision
+Ugondu adopts a **Canonical Release Pipeline** where a single unified Go thin-client binary is built, cryptographically signed, and syndicated across all supported distribution channels (CLI repositories, App Stores, Docker Hub). 
+- **Edition architecture is entirely server-enforced.** The universal client queries its capability limits from the server based on the user's license.
+- No proprietary orchestration logic exists in the client.
+
+### Consequences
+- Requires strong build-pipeline automation (e.g., GitHub Actions) to syndicate the single artifact.
+- The client CLI must be programmed to handle `403` or `402` capability rejection from the server by rendering a standard upgrade prompt, avoiding opaque crashes.
+- See the full [Distribution Blueprint](DISTRIBUTION.md) for the coverage matrix and detailed strategy.
+
+## ADR-006: Intent-Driven Execution and UPM Gating Invariant
+**Date:** 2026-10-04
+**Status:** ACCEPTED
+**Context:** The engine must enforce strict compliance, licensing, and security policies before provisioning any infrastructure. We require absolute certainty that no API route, future AI agent, or local script can bypass the policy checks.
+**Decision:** 
+1. **Cryptographic Execution Seal:** All intents are simulated to produce an `ArchitectureIR`. This DAG is evaluated by the Unified Policy Model (UPPIE), which generates an `ExecutionAuthorization` object secured by an HMAC SHA-256 seal.
+2. **The Invariant:** The `ProvisioningEngine.executePlan()` strictly requires this Authorization seal. If the current runtime DAG (`irHash`) does not perfectly match the authorized DAG, or if the token TTL expires, execution immediately aborts.
+3. **Structured Explanations:** Policy rejections yield structured evidence (Policy ID, Target Capability, Affected Nodes, Remediation) rather than raw generic errors.
+**Consequences:** The UPM is un-bypassable. Execution logic and Validation logic are physically and cryptographically decoupled.

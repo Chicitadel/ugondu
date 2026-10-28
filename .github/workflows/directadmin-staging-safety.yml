@@ -1,0 +1,24 @@
+name: DirectAdmin Staging Safety
+
+on:
+  pull_request:
+    paths:
+      - "tools/deploy-directadmin-staging.ps1"
+      - "tools/tests/Test-DeployDirectAdminStaging.ps1"
+      - "deploy/directadmin/**"
+      - ".github/workflows/directadmin-staging-safety.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  staging-path-safety:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test staging path containment and evidence scope
+        shell: pwsh
+        run: ./tools/tests/Test-DeployDirectAdminStaging.ps1

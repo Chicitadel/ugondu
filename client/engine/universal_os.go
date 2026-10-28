@@ -3,14 +3,14 @@
  * Module         : client/engine
  * File           : universal_os.go
  * Version        : 1.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
- * - Corporate Governed
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -38,7 +38,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
+
+	"ugondu/client/i18n"
 )
 
 // CopyDir recursively copies a directory tree, replacing `rsync -avz --exclude .git`.
@@ -73,7 +76,7 @@ func CopyDir(src string, dst string, excludeGit bool) error {
 		resolver := &SafePathResolver{}
 		destPath, err := resolver.ResolveSafePath(dst, relPath)
 		if err != nil {
-			return fmt.Errorf("ERR_SAFE_PATH: %w", err)
+			return fmt.Errorf(i18n.T("msg_err_safe_path_w"), err)
 		}
 
 		if info.IsDir() {
@@ -109,34 +112,30 @@ func copyFile(src, dst string, mode os.FileMode) error {
 
 // AtomicSymlink creates or updates a symlink to point to the new release.
 // Uses temp-link and rename for POSIX atomic replacement.
-func AtomicSymlink(target string, linkName string) error {
+func AtomicSymlink(target string, symlinkPath string) error {
 	if _, err := os.Stat(target); err != nil {
-		return fmt.Errorf("ERR_TARGET_NOT_FOUND: %w", err)
+		return fmt.Errorf(i18n.T("msg_err_target_not_found_w"), err)
 	}
 
-	tempLink := linkName + ".tmp"
-	os.Remove(tempLink)
+	// Atomic symlink swap — no deployment gap
+	tempPath := symlinkPath + ".next"
+	// Remove stale .next if exists from a previous interrupted attempt
+	os.Remove(tempPath)
 
-	if err := os.Symlink(target, tempLink); err != nil {
-		return fmt.Errorf("ERR_TEMP_SYMLINK_FAILED: %w", err)
+	// Create new link at temp path
+	if err := os.Symlink(target, tempPath); err != nil {
+		return fmt.Errorf(i18n.T("failed_to_create_temp_symlink"), err)
 	}
 
-	prevTarget, err := os.Readlink(linkName)
-	hasPrev := (err == nil)
-
-	// os.Rename is atomic on POSIX, replacing existing symlinks.
-	if err := os.Rename(tempLink, linkName); err != nil {
-		// Windows fallback if rename over existing directory symlink fails
-		if _, statErr := os.Lstat(linkName); statErr == nil {
-			os.Remove(linkName)
-		}
-		if fallbackErr := os.Rename(tempLink, linkName); fallbackErr != nil {
-			if hasPrev {
-				os.Symlink(prevTarget, linkName)
-			}
-			return fmt.Errorf("ERR_ATOMIC_SWAP_FAILED_WEAKER_GUARANTEE: %v", fallbackErr)
-		}
+	// Atomic rename (POSIX-atomic on Linux/macOS, best-effort on Windows)
+	if runtime.GOOS == "windows" {
+		_ = os.Remove(symlinkPath)
 	}
+	if err := os.Rename(tempPath, symlinkPath); err != nil {
+		os.Remove(tempPath) // clean up on failure
+		return fmt.Errorf(i18n.T("failed_to_atomically_promote_symlink"), err)
+	}
+
 	return nil
 }
 
@@ -174,7 +173,7 @@ func PruneReleases(releasesPath string, retention int) error {
 	for _, oldDir := range dirs[retention:] {
 		fullPath := filepath.Join(releasesPath, oldDir.Name())
 		if err := os.RemoveAll(fullPath); err != nil {
-			return fmt.Errorf("failed to remove old release %s: %v", fullPath, err)
+			return fmt.Errorf(i18n.T("failed_to_remove_old_release"), fullPath, err)
 		}
 	}
 

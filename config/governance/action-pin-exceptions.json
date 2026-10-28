@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "exceptions": [
+    {
+      "ref": "slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0",
+      "reason": "SLSA generic generator requires semantic version tag for trusted builder verification per SLSA GitHub Actions spec",
+      "reviewer": "Ujomor Systems Engineering & Governance Authority",
+      "approvedAt": "2026-10-20"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@ugondu/plugin-recovery-zdd",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Zero-Downtime Deployment Topology Repair Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "zdd-topology-repair"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}
