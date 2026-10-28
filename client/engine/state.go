@@ -231,7 +231,9 @@ func SaveState(state *ExecutionState) error {
 	if err := os.MkdirAll(txDir, 0700); err != nil {
 		return fmt.Errorf(i18n.T("failed_to_create_transaction_directory"), txDir, err)
 	}
-	_ = os.Chmod(txDir, 0700)
+	if err := os.Chmod(txDir, 0700); err != nil {
+		return fmt.Errorf("secure transaction directory permissions: %w", err)
+	}
 
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
@@ -263,16 +265,20 @@ func SaveState(state *ExecutionState) error {
 		return fmt.Errorf(i18n.T("failed_to_close_temp_state"), err)
 	}
 
-	_ = os.Chmod(tmpPath, 0600)
+	if err := os.Chmod(tmpPath, 0600); err != nil {
+		_ = file.Close()
+		_ = os.Remove(tmpPath)
+		return fmt.Errorf("secure temporary state file permissions: %w", err)
+	}
 
-	// Atomic rename
+	// Replace the persisted state only after the new file is fully written,
+	// synced, closed, and secured. Never delete the previous state as a generic
+	// fallback when rename fails: a failed replacement must not destroy the
+	// last known-good execution state. On platforms where replacement rename
+	// is unsupported, fail closed and preserve the existing state for recovery.
 	if err := os.Rename(tmpPath, finalPath); err != nil {
-		// Windows fallback if destination file already exists
-		_ = os.Remove(finalPath)
-		if fallbackErr := os.Rename(tmpPath, finalPath); fallbackErr != nil {
-			_ = os.Remove(tmpPath)
-			return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), fallbackErr)
-		}
+		_ = os.Remove(tmpPath)
+		return fmt.Errorf(i18n.T("atomic_rename_failed_for_state"), err)
 	}
 
 	return nil
