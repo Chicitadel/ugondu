@@ -321,6 +321,13 @@ func InitStateFromEnvelope(env *ExecutionEnvelope) *ExecutionState {
 		return nil
 	}
 
+	// The transaction ID is the storage and state-chain identity. Reject empty or
+	// non-canonical values before creating a state that SaveState cannot persist
+	// consistently or LoadState would later reject.
+	if env.TransactionId == "" || strings.TrimSpace(env.TransactionId) != env.TransactionId {
+		return nil
+	}
+
 	s := &ExecutionState{
 		SchemaVersion:   "1.0.0",
 		TransactionId:   env.TransactionId,
