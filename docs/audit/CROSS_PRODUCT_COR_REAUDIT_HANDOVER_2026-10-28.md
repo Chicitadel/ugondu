@@ -8,7 +8,7 @@
 
 | Product | Repository | Dedicated remediation branch | Review |
 |---|---|---|---|
-| Ugondu | [Chicitadel/ugondu](https://github.com/Chicitadel/ugondu) | `audit/whole-product-cor-reaudit-2026-10-27` | [Draft PR #39](https://github.com/Chicitadel/ugondu/pull/39) |
+| Ugondu | [Chicitadel/ugondu](https://github.com/Chicitadel/ugondu) | `fix/cor-aws-physical-opt-in-2026-10-28` | [Draft PR #41](https://github.com/Chicitadel/ugondu/pull/41) |
 | Dumcholu | [Chicitadel/dumcholu](https://github.com/Chicitadel/dumcholu) | `fix/cor-gap-remediation-2026-10-28` | Keep branch isolated; do not write to master |
 
 Do not commit to, force-push, or merge to `master`, `main`, or Ugondu's `phase4/production-hardening`. Treat each repository as a separate product boundary; never copy backend code between them without a reviewed ADR.
@@ -127,3 +127,14 @@ The two new findings above are physically implemented with regression tests auth
 - **Release evidence semantics:** a green PR COR run proves PR validation only. On run [#40761032939](https://github.com/Chicitadel/ugondu/actions/runs/40761032939), candidate `241023fc6c402577109c9eb57d29c2bdad752969`, the job succeeded, but the AWS physical gate, candidate-bound evidence freshness, COR trust-root verification and final COR signing steps were skipped. The final gate explicitly logged `PR VALIDATION PASSED ... NOT RELEASE CERTIFIED`. Do not describe this as a signed final certification or 100% commercial release readiness.
 - **Known earlier candidate-specific failure:** COR run [#40759831952](https://github.com/Chicitadel/ugondu/actions/runs/40759831952) on `a0af51610d4a3124a5bb5ae74a7e54c635a0e6bf` failed; see its failed regression step/log before closing any related gate discrepancy.
 - **Status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. PR #41 remains draft. No AWS deployment was performed.
+
+
+## Re-audit update — release qualification scope correction (2026-10-28)
+
+- **Confirmed workflow defect:** the candidate-bound evidence freshness check ran on every non-PR push, including ordinary `fix/**` remediation commits. That treated a routine development push as a release attempt and failed at freshness because the source/workflow changes correctly diverged from the frozen evidence candidate. The check was fail-closed, but the trigger scope caused repeated misleading release-attempt failures during remediation.
+- **Physical fix:** `.github/workflows/cor.yml` now runs candidate freshness, trust-root verification and final authority signing only when a manual `workflow_dispatch` explicitly sets `run_aws_physical_qualification=true`, the repository variable `AWS_PHYSICAL_QUALIFICATION_ENABLED=true`, and the ref is `main` or `phase4/production-hardening`. Routine PR, audit and fix-branch pushes remain validation-only and cannot be reported as release certification.
+- **Regression coverage:** `tests/qualification/cor-workflow-gates.test.js` now tests this shared condition for all three release-only steps and the generic `VALIDATION PASSED ... NOT RELEASE CERTIFIED` message. The tests must run on the new exact head before this finding is marked TESTED.
+- **Release boundary:** this change does not weaken candidate freshness, trust-root verification or signing on an explicitly authorized release qualification. It does not create evidence, bypass stale evidence, deploy AWS or certify the product.
+- **Latest historical receipts:** [CI #40763771653](https://github.com/Chicitadel/ugondu/actions/runs/40763771653) and [COR PR validation #40763771545](https://github.com/Chicitadel/ugondu/actions/runs/40763771545) passed on `190db660b8175221a9df877fc20506a76c6884c4`; push release attempt [#40763762669](https://github.com/Chicitadel/ugondu/actions/runs/40763762669) failed at freshness as expected for that non-evidence descendant. These are historical receipts, not results for the new workflow/test commits.
+- **AWS incident:** [run #40755624233](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) is `completed / cancelled`. Resource cleanup remains unverified until an authorized account-level residual scan is supplied.
+- **Status:** code committed; exact-head CI pending. Commercial release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
