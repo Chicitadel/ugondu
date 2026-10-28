@@ -37,6 +37,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -102,6 +103,21 @@ func TestStateSaveAndLoad(t *testing.T) {
 	}
 	if info.Size() == 0 {
 		t.Errorf(i18n.T("state_file_is_empty"))
+	}
+
+	// POSIX permission bits are part of the persisted-state confidentiality
+	// boundary. Windows ACLs do not map directly to Go's mode bits.
+	if runtime.GOOS != "windows" {
+		if got := info.Mode().Perm(); got != 0600 {
+			t.Errorf("state file permissions = %#o, want 0600", got)
+		}
+		dirInfo, err := os.Stat(txDir)
+		if err != nil {
+			t.Fatalf("stat transaction directory failed: %v", err)
+		}
+		if got := dirInfo.Mode().Perm(); got != 0700 {
+			t.Errorf("transaction directory permissions = %#o, want 0700", got)
+		}
 	}
 
 	// Test 3: LoadState returns identical values
