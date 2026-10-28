@@ -45,6 +45,27 @@ import (
 	"ugondu/client/i18n"
 )
 
+func TestGetTransactionDirRejectsDotTransactionID(t *testing.T) {
+	for _, getPath := range []struct {
+		name string
+		call func(string) (string, error)
+	}{
+		{name: "transaction directory", call: GetTransactionDir},
+		{name: "state file path", call: GetStateFilePath},
+	} {
+		t.Run(getPath.name, func(t *testing.T) {
+			if path, err := getPath.call("."); err == nil {
+				t.Fatalf("path resolver accepted dot transaction ID and returned %q", path)
+			}
+		})
+	}
+
+	state := InitState(".")
+	if err := SaveState(state); err == nil {
+		t.Fatal("SaveState accepted dot transaction ID")
+	}
+}
+
 func TestStateSaveAndLoad(t *testing.T) {
 	txId := "tx_test_state_123"
 
