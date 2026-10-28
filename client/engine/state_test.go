@@ -410,6 +410,95 @@ func TestSaveStateReplacementFailurePreservesCommittedState(t *testing.T) {
 }
 
 
+
+func TestSaveStateFailsClosedOnInvalidCommittedState(t *testing.T) {
+	cases := []struct {
+		name    string
+		payload func(*ExecutionState) []byte
+	}{
+		{
+			name: "malformed JSON",
+			payload: func(*ExecutionState) []byte { return []byte("{not-json") },
+		},
+		{
+			name: "empty file",
+			payload: func(*ExecutionState) []byte { return nil },
+		},
+		{
+			name: "missing state hash",
+			payload: func(s *ExecutionState) []byte {
+				bad := *s
+				bad.StateHash = ""
+				data, _ := json.MarshalIndent(&bad, "", "  ")
+				return data
+			},
+		},
+		{
+			name: "mismatched state hash",
+			payload: func(s *ExecutionState) []byte {
+				bad := *s
+				bad.Status = "TAMPERED"
+				data, _ := json.MarshalIndent(&bad, "", "  ")
+				return data
+			},
+		},
+		{
+			name: "foreign transaction identity",
+			payload: func(s *ExecutionState) []byte {
+				bad := *s
+				bad.TransactionId = "tx_state_foreign_committed"
+				bad.StateHash, _ = bad.ComputeHash()
+				data, _ := json.MarshalIndent(&bad, "", "  ")
+				return data
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			txID := "tx_state_invalid_committed_" + strings.ReplaceAll(tc.name, " ", "_")
+			txDir, err := GetTransactionDir(txID)
+			if err != nil {
+				t.Fatalf("GetTransactionDir failed: %v", err)
+			}
+			if err := os.RemoveAll(txDir); err != nil {
+				t.Fatalf("cleanup before test failed: %v", err)
+			}
+			defer os.RemoveAll(txDir)
+
+			state := InitState(txID)
+			if err := SaveState(state); err != nil {
+				t.Fatalf("initial SaveState failed: %v", err)
+			}
+			statePath, err := GetStateFilePath(txID)
+			if err != nil {
+				t.Fatalf("GetStateFilePath failed: %v", err)
+			}
+			invalidPayload := tc.payload(state)
+			if err := os.WriteFile(statePath, invalidPayload, 0600); err != nil {
+				t.Fatalf("write invalid committed fixture failed: %v", err)
+			}
+			before, err := os.ReadFile(statePath)
+			if err != nil {
+				t.Fatalf("read invalid committed fixture failed: %v", err)
+			}
+
+			state.Status = "RUNNING"
+			err = SaveState(state)
+			if !errors.Is(err, ErrStateCorrupt) {
+				t.Fatalf("SaveState error = %v, want ErrStateCorrupt", err)
+			}
+			after, readErr := os.ReadFile(statePath)
+			if readErr != nil {
+				t.Fatalf("read committed fixture after rejected save: %v", readErr)
+			}
+			if string(after) != string(before) {
+				t.Fatal("SaveState overwrote invalid committed state instead of failing closed")
+			}
+		})
+	}
+}
+
 func TestConcurrentSaveStateUsesDistinctTemporaryFiles(t *testing.T) {
 	txID := "tx_state_concurrent_temp"
 	txDir, err := GetTransactionDir(txID)
