@@ -472,7 +472,7 @@ test('COR-WF-018 release-only evidence checks require explicit opt-in on a trust
   assert.ok(text.includes(releaseCondition), 'release qualification condition must be explicit and identical');
   assert.equal((text.match(/if: github\.event_name == 'workflow_dispatch' && inputs\.run_aws_physical_qualification == true/g) || []).length, 4,
     'AWS physical gate plus freshness, trust-root verification and signing must share the explicit opt-in boundary');
-  assert.match(text, /Fix\/audit branch\s+pushes are validation runs/);
+  assert.match(text, /Fix\/audit branch[\\s\\S]{0,80}pushes are validation runs/);
   assert.match(text, /VALIDATION PASSED for \$\{CANDIDATE_SHA\}/);
 });
 
