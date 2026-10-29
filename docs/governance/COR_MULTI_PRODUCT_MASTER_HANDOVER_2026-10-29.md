@@ -104,3 +104,11 @@ Do not use “100% COR closed”, “production ready”, or “certified” whi
 - **Root cause:** A legacy execution-envelope helper emitted a predictable string instead of a cryptographic signature.
 - **Physical remediation:** Added a signer contract, wired it to the engine-core managed Ed25519 key, signed the passport/context/timestamp payload, and failed closed without a configured signer. Regression tests verify signature validity and context tampering.
 - **Status:** `IMPLEMENTED—VALIDATION PENDING`; exact-head build/test receipts and consumer-side contract verification are still required. No release certification is implied.
+
+
+## 8. Evidence refresh — 2026-10-29 18:08 UTC
+
+- **Dumcholu PR #14**, exact head `507691d75435ad43c3b5ed86c944704d716f5a2a`: Deployment Manifest Qualification [run #40926993371](https://github.com/Chicitadel/dumcholu/actions/runs/40926993371) **SUCCESS**; Product Name Governance [run #40926993231](https://github.com/Chicitadel/dumcholu/actions/runs/40926993231) **SUCCESS**. The source-template suite passed after correcting a regression-test regex; the first run on the earlier test commit failed due to the test assertion pattern, not a reported runtime template error. No AWS service-side validation or deployment is implied.
+- **Ugondu PR #51**, head `d18ce203897186a4ad55e3864981f0c2e4d8fc21`: CI/COR runs are in progress/pending; admission bypass finding remains open pending exact-head evidence.
+- **Ugondu PR #52**, head `17449a02d3dd409e11750c768b3c52146a948eb6`: CI/COR runs are in progress/pending; execution-envelope signature finding remains open pending exact-head evidence and consumer-side contract verification.
+- The AWS Physical Qualification Gate remained **SKIPPED** in the in-progress COR runs. This is not a physical deployment receipt.
