@@ -72,19 +72,20 @@ test('successful build permits COR suites', () => {
   }
 });
 
-test('explicit build skip is visible and distinct from a successful build', () => {
+test('explicit build skip fails closed because prior-build provenance is not independently verified', () => {
   const root = fixture();
-  const messages = [];
+  const errors = [];
   try {
     const result = runEngineBuildPreflight({
       root,
       skipBuild: true,
       spawnSync: () => { throw new Error('skip must not invoke compiler'); },
-      stdout: (value) => messages.push(value),
+      stderr: (value) => errors.push(value),
     });
-    assert.equal(result.ok, true);
+    assert.equal(result.ok, false);
     assert.equal(result.skipped, true);
-    assert.match(messages.join(''), /explicit UGONDU_SKIP_BUILD=true/);
+    assert.match(result.reason, /UGONDU_SKIP_BUILD is prohibited/);
+    assert.match(errors.join(''), /BUILD PREFLIGHT FAILED/);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
