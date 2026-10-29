@@ -81,3 +81,22 @@
 - Regression test: `tests/qualification/federation-egress-network.test.mjs`, included in `npm run test:governance`. The test checks both network attachments, that the internal network remains isolated, and that the gateway is not host-published.
 - Validation status: source/test committed; exact-head CI and runtime connectivity test are pending. Do not mark the finding CLOSED until the test runs on the final commit and non-production identity/AeroBill calls produce real receipts.
 - Architecture guardrail: Ugondu must remain a client of Air Roofers federation. It must not implement or store its own authoritative billing, pricing, or entitlement decisions.
+
+
+## 7. Cross-repository remediation receipts — 2026-10-29
+
+### Ugondu — `UG-COR-FEDERATION-EGRESS-001`
+- Dedicated branch: `fix/cor-federation-egress-network-2026-10-29`; PR #48: https://github.com/Chicitadel/ugondu/pull/48.
+- Physical fix: `docker-compose.yml` attaches `billing-gateway` to both the private internal network and the outbound network required to reach the external Air Roofers identity and AeroBill authorities; no host port is published.
+- Regression test: `tests/qualification/federation-egress-network.test.mjs`, included in `npm run test:governance`. Exact candidate `dff668da2509a6d8d3bef0306e9522fd70108358` run #40912493475 showed the governance suite at 24/24 passing, including the two new federation network tests. Full CI integration tests were still running at the time of this note update.
+- COR run #40912493424 completed successfully as a workflow, but the AWS Physical Qualification Gate was **skipped**. This is not AWS deployment proof and does not certify release readiness.
+
+### Dumcholu — `DUM-COR-DEPLOY-ENV-ISOLATION-001`
+- Dedicated branch: `fix/cor-aws-environment-isolation-2026-10-29`; PR #13: https://github.com/Chicitadel/dumcholu/pull/13.
+- Physical fix: task-definition renderer and template now validate environment/tier selection, default to staging, reject recognizable cross-environment secret references, and support the declared EC2/Fargate portability tiers. EC2/Fargate CloudFormation templates use cost-bounded staging defaults, short log retention, and Secrets Manager-only database injection with scoped secret permissions.
+- Exact candidate `04c4c7b85316e9a177f118f8c351f07db12a2daf`: Deployment Manifest Qualification run #40913066856 passed; renderer and deployment regression suite reported 11/11 passing, 0 failures. Dumcholu Product Name Governance was running when this note was authored.
+- CloudFormation service-side validation, account inventory/budget approval, AWS provisioning, live health/readiness, rollback, and live AeroBill/Mandatag transactions remain unverified.
+
+## 8. Mandatory state discipline
+
+These receipts prove only the stated automated checks. Do not mark either finding fully CLOSED, staging-verified, or federation-verified until the latest candidate head has complete required CI and the corresponding runtime evidence. Do not infer an AWS deployment from manifest validation or a successful COR workflow whose physical AWS gate was skipped. Maintain `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until all mandatory gates are satisfied.
