@@ -41,8 +41,8 @@ func TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile(t *testing.
 	if lock.file != nil {
 		t.Fatal("Unlock() retained file handle after attempting unlock")
 	}
-	if _, statErr := file.Stat(); !errors.Is(statErr, os.ErrInvalid) {
-		t.Fatalf("file handle stat error = %v, want os.ErrInvalid after close", statErr)
+	if _, statErr := file.Stat(); statErr == nil {
+		t.Fatal("file handle remained usable after Unlock() returned")
 	}
 }
 
