@@ -195,9 +195,10 @@ export const CLOUDFORMATION_RESOURCE_MAP: Record<string, ResourceMappingRule> = 
   },
   'AWS::Budgets::Budget': {
     capabilityId: 'cap.cost.aws_budget', resourceFamily: 'cost.aws_budget', targetRoleId: 'iac_service_role',
-    createAndUpdateActions: ['budgets:CreateBudget', 'budgets:ModifyBudget'],
-    verifyActions: ['budgets:DescribeBudget'],
-    rollbackActions: ['budgets:DeleteBudget'],
+    // AWS maps CreateBudget, UpdateBudget, and DeleteBudget APIs to budgets:ModifyBudget.
+    createAndUpdateActions: ['budgets:ModifyBudget'],
+    verifyActions: ['budgets:ViewBudget'],
+    rollbackActions: ['budgets:ModifyBudget'],
     arnBuilder: ({ partition, accountId, environment, properties }) => {
       const nestedBudget = properties.Budget && typeof properties.Budget === 'object'
         ? properties.Budget as Record<string, unknown>
@@ -212,7 +213,7 @@ export const CLOUDFORMATION_RESOURCE_MAP: Record<string, ResourceMappingRule> = 
       if (!budgetName || /\$\{[^}]+\}/.test(budgetName)) {
         throw new Error('AWS_BUDGET_NAME_UNRESOLVED');
       }
-      return [`arn:${partition}:budgets::${accountId}:budget:${budgetName}`];
+      return [`arn:${partition}:budgets::${accountId}:budget/${budgetName}`];
     },
   },
 
