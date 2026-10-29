@@ -828,3 +828,6 @@ Do not mark the finding closed until exact-head tests pass. Test source has been
 The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a host bootstrap, not an application deployment. This branch added AWS Budgets email notifications (80% actual / 100% forecast), SSM-resolved AMI, parameterized AZ, pinned Docker Compose version plus required SHA-256 verification, and closed public ingress until an approved TLS edge exists. Regression coverage is in `tests/qualification/aws-staging-template-safety.test.mjs`, wired into `npm run test:governance`.
 
 No cloud resources were created. Do not expose public ingress or claim Ugondu/Dumcholu deployment until immutable image digests, secrets/runtime contracts, TLS edge, CloudFormation validation, health/E2E, rollback and cleanup evidence are available. Budget notifications alert; they do not cap spending.
+
+
+**Fail-closed follow-up:** `UGONDU_SKIP_BUILD=true` is now rejected because no independent exact-candidate build receipt is validated by the runner. Do not reintroduce a build-skip path unless an approved signed build receipt contract is implemented and tested against the current commit and tree. The latest diagnostic newline correction and skip-path change invalidate all earlier candidate CI/COR results; rerun against current HEAD.
