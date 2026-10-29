@@ -118,3 +118,5 @@ These receipts prove only the stated automated checks. Do not mark either findin
 - **Regression coverage:** Expanded `tests/passport-admission-gate.test.js` for forged passport-like IDs, registered cross-tenant replay, expired and revoked passports, and a valid signed passport. Updated the existing valid fixture to use the registered test tenant.
 - **Validation status:** Source and tests committed to this dedicated branch; exact-head test and CI receipts are pending. Do not close until engine-core compilation and the full relevant integration suite pass on the final candidate.
 - **Release impact:** Security-critical. Keep Ugondu release blocked until exact-head verification and independent review. No main/master changes.
+
+- **Additional boundary hardened:** the legacy synchronous `AdmissionController.admit()` implementation also returned `ADMITTED` for arbitrary non-`REVOKED` strings without signature or registry validation. It now fails closed; a regression test exercises the canonical class directly as well as the engine-core adapter.
