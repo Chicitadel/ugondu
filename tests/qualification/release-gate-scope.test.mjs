@@ -19,7 +19,7 @@ function stepBlock(name, nextName) {
 
 test('all release-only COR checks share the exact opt-in predicate', () => {
   for (const [name, next] of [
-    ['Verify evidence freshness (candidate-bound, evidence-only descendant)', 'Verify release integrity'],
+    ['Verify evidence freshness (candidate-bound, evidence-only descendant)', 'Release integrity'],
     ['Verify COR signing trust root', 'Validate stream registry'],
     ['Sign final COR authority', 'Final candidate integrity check']
   ]) {
