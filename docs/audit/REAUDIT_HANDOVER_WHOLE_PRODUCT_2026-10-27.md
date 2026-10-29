@@ -350,3 +350,21 @@ Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / 
 - Canonical cross-product guardrail updated in the same branch.
 
 **Verification status:** Code and regression test committed; local Go tests were not executed in this session. Require exact-head CI (including the Go client matrix) before declaring PASS. Record exact SHA, command, exit code, and logs. This finding does not imply AWS deployment or whole-product COR closure.
+
+
+## 2026-10-29 re-audit — Unix state-lock unlock error propagation
+
+**Finding:** `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001` (medium).
+
+**Reproduction:** The Unix `unixStateFileLock.Unlock()` ignored the error returned by `syscall.Flock(fd, syscall.LOCK_UN)`, returning only `Close()`'s result. A failed unlock could therefore be hidden from callers.
+
+**Physical remediation committed on dedicated branch `fix/cor-unix-state-unlock-errors-2026-10-29`:**
+- `client/engine/state_lock_unix.go`: added injectable `unixStateFileUnlock` seam and return `errors.Join(unlockErr, closeErr)`, matching Windows lifecycle error propagation.
+- `client/engine/state_lock_unix_test.go`: added deterministic unlock-failure propagation/handle-close regression and nil-lock no-op test.
+- Canonical `governance/cor/CROSS_PRODUCT_COR_REMEDIATION_GUARDRAIL.md` updated with finding ID, exact source/test commits, rollback, portability and release gates.
+
+**Commits:** source `a4152c26c2f12ba269a85099a1abd96642d31eab`; test `1e8787a02a18485ba73f0d653f35ea497c00971f`; guardrail `54936b7f25fcdfe4de2506fe486d46dcf47d3940`.
+
+**Verification status:** PHYSICAL CODE + REGRESSION TEST COMMITTED / CI PENDING. This chat runtime has not executed Go commands. Require exact-head Go formatting, vet, full tests and the supported OS/architecture matrix. The existing green receipts for earlier SHA `dc665fd8` do not validate this new source change or later documentation commits.
+
+**Safety:** No protected branch writes; no AWS provisioning or deployment. Continue to keep the PR draft/unmerged until exact-head evidence and all physical release prerequisites are reviewed. Overall COR remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
