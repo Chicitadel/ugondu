@@ -631,6 +631,10 @@ export class AwsNativeClient implements IAwsClient {
                 name,
                 image: imageUri,
                 essential: true,
+                portMappings: [{
+                    containerPort: Number(process.env.UGONDU_ECS_CONTAINER_PORT || '8080'),
+                    protocol: 'tcp'
+                }],
                 logConfiguration: {
                     logDriver: 'awslogs',
                     options: {
@@ -664,7 +668,7 @@ export class AwsNativeClient implements IAwsClient {
             loadBalancers: targetGroupArn ? [{
                 targetGroupArn,
                 containerName: serviceName,
-                containerPort: 80
+                containerPort: Number(process.env.UGONDU_ECS_CONTAINER_PORT || '8080')
             }] : undefined
         });
         const res = await this.ecs.send(cmd);
