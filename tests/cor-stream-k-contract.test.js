@@ -49,5 +49,10 @@ test('Stream K validates the reviewed contract before executing a command', () =
   const execution = source.indexOf('execFileSync(expectedCommand.command, expectedCommand.arguments');
   assert.ok(validation >= 0, 'must validate evidence against the reviewed command registry');
   assert.ok(execution > validation, 'must validate before any evidence command is executed');
-  assert.doesNotMatch(source, /jRecord\\.(?:command|arguments|targetRoot|verifierVersion)\\s*===\\s*jRecord\\./);
+  for (const expression of [
+    'jRecord.command === jRecord.command',
+    'JSON.stringify(jRecord.arguments) === JSON.stringify(jRecord.arguments)',
+    'jRecord.targetRoot === jRecord.targetRoot',
+    'jRecord.verifierVersion === jRecord.verifierVersion',
+  ]) assert.equal(source.includes(expression), false, `tautological check remains: ${expression}`);
 });
