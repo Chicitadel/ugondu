@@ -84,3 +84,14 @@ Do not use “100% COR closed”, “production ready”, or “certified” whi
 ## 6. Current release decision
 
 **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** Previously reported code/CI receipts are candidate-specific and must be refreshed after any subsequent code or handover change. Physical AWS deployment, service-side CloudFormation validation, rollback, and live AeroBill/Mandatag transactions are not established by this document.
+
+
+## 7. Newly discovered critical security finding — `UG-COR-PASSPORT-ADMISSION-BYPASS-001`
+
+- **PR #51:** https://github.com/Chicitadel/ugondu/pull/51
+- **Branch:** `fix/security-passport-admission-fail-closed-2026-10-29` (stacked on PR #49; no main/master changes)
+- **Root cause:** Engine-core accepted unregistered passport-like identifiers based only on generic prefixes when tenant context existed. Registered passport IDs were also not compared with the supplied tenant context.
+- **Physical remediation:** Removed the prefix-based admission fallback and redundant test-only shortcut; bound registered passports to the supplied tenant context; retained cryptographic verification for signed passports.
+- **Regression coverage:** Forged IDs, cross-tenant replay, expired/revoked registrations, and valid signed passport acceptance are covered in `tests/passport-admission-gate.test.js`.
+- **Status:** `IMPLEMENTED—VALIDATION PENDING`. The security fix is not closed until the exact final candidate compiles and its integration/CI suite passes, followed by independent security review. This finding supersedes any broader claim that all code gaps are closed.
+- **Release impact:** Critical; Ugondu remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
