@@ -14,11 +14,13 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     'UGONDU_ECS_SUBNET_IDS',
     'UGONDU_ECS_SECURITY_GROUP_IDS',
     'UGONDU_ECS_DESIRED_COUNT',
+    'UGONDU_ECS_CONTAINER_PORT',
   ];
 
   let client: AwsNativeClient;
   let runtimeCalls: Array<{ command: string; args: string[]; stdin?: string }>;
   let runtime: { run: jest.Mock };
+  let deploymentWaiter: jest.Mock;
 
   beforeEach(() => {
     for (const key of envKeys) {
@@ -38,7 +40,8 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
         return { stdout: '', stderr: '' };
       }),
     };
-    client = new AwsNativeClient('eu-west-3', undefined, 'test-tx', runtime);
+    deploymentWaiter = jest.fn().mockResolvedValue(undefined);
+    client = new AwsNativeClient('eu-west-3', undefined, 'test-tx', runtime, deploymentWaiter);
   });
 
   afterEach(() => {
@@ -139,6 +142,16 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     expect(input.containerDefinitions[0].logConfiguration.options['awslogs-group']).toBe('/ugondu/staging');
   });
 
+  it('rejects invalid configured container ports before registering a task definition', async () => {
+    process.env.UGONDU_ECS_CONTAINER_PORT = '70000';
+    const send = jest.fn();
+    (client as any).ecs.send = send;
+    await expect(client.registerTaskDefinition(
+      'ugondu-api', 'image:tag', '512', '1024', 'exec-role', 'task-role', '/logs',
+    )).rejects.toThrow('ECS_CONTAINER_PORT_INVALID');
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it('creates ECS services only with bounded, explicitly configured networking', async () => {
     process.env.UGONDU_ECS_SUBNET_IDS = 'subnet-a,subnet-b';
     process.env.UGONDU_ECS_SECURITY_GROUP_IDS = 'sg-a';
@@ -151,6 +164,25 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
       'arn:aws:ecs:eu-west-3:123456789012:task-definition/ugondu-api:7',
       1, ['subnet-a', 'subnet-b'], ['sg-a'],
     );
+    expect(deploymentWaiter).toHaveBeenCalledWith('ugondu-staging', serviceArn);
+  });
+
+  it('uses the task-definition container family, not service name, for load-balancer wiring', async () => {
+    process.env.UGONDU_ECS_CONTAINER_PORT = '9090';
+    const serviceArn = 'arn:aws:ecs:eu-west-3:123456789012:service/staging/service-alias';
+    const send = jest.fn().mockResolvedValue({ service: { serviceArn } });
+    (client as any).ecs.send = send;
+    await client.createEcsService(
+      'staging', 'service-alias', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4',
+      1, ['subnet-a', 'subnet-b'], ['sg-a'],
+      'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+    );
+    const input = send.mock.calls[0][0].input;
+    expect(input.loadBalancers).toEqual([{
+      targetGroupArn: 'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+      containerName: 'api-container-family',
+      containerPort: 9090,
+    }]);
   });
 
   it('rejects an unbounded ECS desired count and does not claim a successful rollout', async () => {
@@ -169,11 +201,22 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     await expect(client.deployFargate({ cluster: 'ugondu-staging', serviceName: 'ugondu-api', taskDefinitionArn: taskArn, desiredCount: 1 }))
       .resolves.toEqual({ id: serviceArn });
     expect(send.mock.calls[0][0].input.taskDefinition).toBe(taskArn);
+    expect(deploymentWaiter).toHaveBeenCalledWith('ugondu-staging', serviceArn);
     await expect(client.rollbackFargateDeployment(serviceArn))
       .rejects.toThrow('ECS_ROLLBACK_PREVIOUS_TASK_DEFINITION_REQUIRED');
     await expect(client.rollbackFargateDeployment(serviceArn, 'arn:aws:ecs:eu-west-3:123456789012:task-definition/ugondu-api:7'))
       .resolves.toBeUndefined();
     expect(send).toHaveBeenCalledTimes(2);
+    expect(deploymentWaiter).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not report deployment success when ECS never reaches stable state', async () => {
+    const serviceArn = 'arn:aws:ecs:eu-west-3:123456789012:service/ugondu-staging/ugondu-api';
+    const taskArn = 'arn:aws:ecs:eu-west-3:123456789012:task-definition/ugondu-api:8';
+    (client as any).ecs.send = jest.fn().mockResolvedValue({ service: { serviceArn } });
+    deploymentWaiter.mockRejectedValueOnce(new Error('ECS_SERVICE_STABILITY_NOT_CONFIRMED:FAILURE'));
+    await expect(client.deployFargate({ cluster: 'ugondu-staging', serviceName: 'ugondu-api', taskDefinitionArn: taskArn, desiredCount: 1 }))
+      .rejects.toThrow('ECS_SERVICE_STABILITY_NOT_CONFIRMED:FAILURE');
   });
 
   it('uses real ECS service describe results and never synthesizes an ACTIVE service', async () => {
