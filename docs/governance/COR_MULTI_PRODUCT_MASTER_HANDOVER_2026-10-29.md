@@ -117,3 +117,13 @@ Do not use “100% COR closed”, “production ready”, or “certified” whi
 ### Signature consumer boundary update
 
 PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature against an injected trusted public key before resource allocation; a `SIG:` prefix alone is no longer accepted. Regression coverage includes valid signature verification, context tampering, forged signature rejection, and fail-closed behavior when the verifier is not configured. Exact-head CI is still pending, and any other consumer of `ExecutionEnvelope` must be found and verified before protocol-wide closure.
+
+
+## 9. Newly confirmed provider-integrity finding — `UG-COR-AWS-FABRIC-SYNTHETIC-SUCCESS-001`
+
+- **PR #53:** https://github.com/Chicitadel/ugondu/pull/53
+- **Branch:** `fix/aws-fabric-no-synthetic-success-2026-10-29`, stacked on security PR #52.
+- **Root cause:** The AWS native client fabricated container image hashes/ECR digests and ECS ARNs, simulated service/deployment/rollback state in process memory, and could return synthetic service results after provider errors. A caller could be told a deployment succeeded without a real resource operation.
+- **Physical remediation:** Real Docker build/image inspection; ECR authorization, tag/push and digest verification; real ECS task definition/service create/delete/update commands; explicit role/network/log configuration; bounded desired count; fail-closed service describe; rollback requires a prior revision ARN.
+- **Regression coverage:** `server/engine-core/src/fabric/tests/aws-native-client-no-synthetic-success.spec.ts`.
+- **Status:** `IMPLEMENTED—VALIDATION PENDING`. Exact-head typecheck/Jest/CI/COR are pending. This is a release-critical provider-integrity issue; the release remains blocked until tests and independent review pass. No AWS physical deployment is claimed.
