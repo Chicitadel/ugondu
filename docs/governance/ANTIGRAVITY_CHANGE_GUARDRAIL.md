@@ -872,3 +872,16 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - **Regression coverage:** Updated the plan-graph test to assert the canonical slash-form ARN and valid IAM action names; explicitly rejects the prior nonexistent action strings and colon-form ARN.
 - **Authoritative reference:** AWS Service Authorization Reference: https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html ; AWS Budget API ARN pattern: https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_Budget.html
 - **Verification:** Code and test committed on PR #57 branch. Exact-head CI/COR must pass; previous receipts predate this fix and cannot close the finding.
+
+
+## 2026-10-30 re-audit — COR stream executor placeholder evidence
+
+**Finding IDs:** `UG-COR-STREAM-EXECUTOR-STUBS-001`, `UG-COR-STREAM-A02-WILDCARD-VERIFIER-001`, `UG-COR-STREAM-A03-ENVELOPE-BINDING-VERIFIER-001`.
+
+- **Confirmed defects:** A02 only checked whether the source contained the words `wildcard` and `reject`, but did not fail if either was absent; it then invoked `assertCheck() { return true; }`. A03 inspected the wrong file (`policy-gate.ts` rather than `recovery.ts`), searched only for generic words, and used the same always-true assertion. Both could emit candidate-bound PASS receipts without verifying their stated objectives.
+- **Physical fixes:** Replaced A02 with explicit source verification of the exact wildcard predicate and fail-closed error. Replaced A03 with checks that the recovery route hashes the active capability envelope, passes that expected hash to `verifyAuthorization`, and the policy gate compares it and includes it in the seal payload.
+- **Regression coverage:** Added `tests/cor-stream-objective-verifiers.test.js` for positive and negative A02/A03 cases, identity mismatch, and shared stub detection; wired it into `npm run test:governance`.
+- **Systemic guard:** Added `scripts/cor/stream-source-integrity.js`; both `scripts/cor-engine.js` and `scripts/check-cor-stream-registry.js` now reject known always-true `assertCheck`, “pretend to check”, synthetic `verified_source`, and `mock-fingerprint` patterns before a verifier can be treated as eligible.
+- **Additional open executor findings from the same source scan:** The source scan also found obvious placeholder patterns in A07, B09-B16, C22, D25-D28, E29-E33, and a mock fingerprint in F39. These are now rejected by the shared guard where the matching patterns occur, but their objectives have **not** been implemented by this change. Each must be replaced with a real verifier and regression test; do not claim all 40 streams qualified.
+- **Verification:** Source/test wiring is committed on PR #57. Exact-head CI/COR must rerun. The registry gate is expected to remain blocked until the remaining placeholder executors are replaced; this is an intentional fail-closed result, not a regression to hide.
+- **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
