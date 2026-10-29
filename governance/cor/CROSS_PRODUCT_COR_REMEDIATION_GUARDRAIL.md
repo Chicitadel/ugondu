@@ -134,3 +134,29 @@ The new workflow contract test `npm run test:aws-physical-opt-in` passed in stan
 - **Regression test:** extended `tests/qualification/aws-physical-opt-in-contract.test.mjs` to fail if signing credentials return to job-wide scope or if the trust-root/signing steps lose the trusted dispatch/branch conditions.
 - **Current source/test candidate before this documentation update:** `b7fed10bd61d9d12134a68dbbb0022d0234e35e3`. Exact-head CI/COR evidence is pending; do not claim the new regression test passed until the current SHA's workflow completes.
 - This change does not deploy AWS resources and does not weaken any release gate.
+
+
+## 2026-10-29 re-audit addendum — canonical change-control and release-gate test
+
+This repository file remains the **single canonical cross-product guardrail**. Do not create a competing guardrail in another path or copy it into the Dumcholu repository. Link to this file from the product PRs and local agent instructions.
+
+### New follow-up branch
+- Ugondu follow-up branch: `fix/cor-guardrail-release-gates-2026-10-29`
+- Follow-up PR: https://github.com/Chicitadel/ugondu/pull/42 (draft; base is the existing dedicated remediation branch).
+- Do not merge PR #42 independently of its parent remediation PR; review the stacked PR sequence and rebase/reconcile only with explicit coordination.
+- Latest known follow-up source commit when this addendum was prepared: `f54faf6a1ab866dfc3778a9f34648da738e19ae5`. Re-query the branch before relying on this SHA.
+
+### Physical source and regression changes
+- Added `tests/qualification/release-gate-scope.test.mjs` to assert that candidate-bound evidence freshness, signing trust-root verification, final signing, and the AWS physical gate use the same exact manual-dispatch + explicit repository opt-in + trusted-branch predicate.
+- The test also guards against job-wide signing/AWS credential exposure and requires the physical AWS job to be explicitly gated.
+- Wired both `aws-physical-opt-in-contract.test.mjs` and `release-gate-scope.test.mjs` into the COR workflow's remediation regression step.
+- Added the test source and workflow invocation physically on the follow-up branch. **Execution is pending**: no current-head CI run or local execution receipt was available at handover time. Do not record this as a passing test until the exact candidate CI confirms it.
+
+### Hosting decision and no-spend boundary
+- DirectAdmin/shared hosting is suitable only for components supported by the actual plan. Static frontends may be hosted there; persistent Node/Go/Spring Boot processes, workers, and containerized services may require a VPS. Verify plan limits before choosing.
+- AWS remains a prepared migration target, not an automatically authorized launch action. Migrate only after traction, meaningful official engagement or funding, and explicit account/budget/deployment approval. Do not provision AWS or incur charges during ordinary remediation.
+- Preserve portable containerization, standard environment configuration, host-neutral domain logic, migration/restore support, health checks, graceful shutdown, and rollback capability. No provider-specific SDK dependencies in core domain logic.
+- AeroBill remains authoritative for billing, usage metering, and rating; Mandatag remains authoritative for license and entitlement decisions. No local business-logic duplication or mock/fallback authorization.
+
+### Required closeout
+For each finding, physically implement before handover; add a regression that fails on the defect; run it against the exact candidate; record command, exit code, SHA, and evidence. If the environment or external service is unavailable, report **NOT RUN / BLOCKED**. Historical results are not current-head evidence. Release remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED** until every required gate and live qualification has fresh candidate-bound evidence.
