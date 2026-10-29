@@ -843,3 +843,10 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 
 - Every CloudFormation resource type in a reviewed launch template must have an explicit resource mapping, least-privilege provider actions, scoped resource ARN derivation, read-back/rollback actions, and a regression test. Updating template resource counts without closing the resulting `AUTHORITY_GAP` is not remediation.
 - For dynamic names, parse the approved template value and bind it to the environment; unresolved substitutions must fail closed rather than widening the resource ARN to `*`.
+
+
+## Budget mapping test contract correction
+
+- The first budget-mapping regression attempt correctly resolved the exact scoped ARN and mapped create/modify actions, but the test incorrectly expected `budgets:DescribeBudget` in `providerActions` instead of the separate `verificationActions` field.
+- Corrected the test to assert create/modify in `providerActions`, describe/read-back in `verificationActions`, and delete in `rollbackActions`. The implementation's lifecycle separation remains intact.
+- The failed run is not a pass; rerun the capabilities workspace and full CI/COR on the newest head.
