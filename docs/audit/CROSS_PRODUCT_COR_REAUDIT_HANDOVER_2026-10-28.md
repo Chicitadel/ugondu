@@ -164,3 +164,24 @@ The two new findings above are physically implemented with regression tests auth
 - Ugondu current candidate `e3c6decee4b7d670112c4e619953092278fe6edb` had successful CI run [#40826286743](https://github.com/Chicitadel/ugondu/actions/runs/40826286743) and COR validation [#40826286716](https://github.com/Chicitadel/ugondu/actions/runs/40826286716). The AWS physical gate, candidate freshness, trust-root and final signing remain skipped in validation-only mode.
 - No AWS resources were deployed by this work. AWS remains conditional on traction/official engagement/funding and explicit account/budget authorization; AeroBill and Mandatag remain the sole federation authorities.
 - Status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
+
+
+## 2026-10-29 09:10 CET — latest cross-product handover
+
+### Ugondu
+- Exact candidate `81db0ec938e3279fb2d36ee063dbd8205117ac34` passed the prior CI/COR runs [#40826286743](https://github.com/Chicitadel/ugondu/actions/runs/40826286743) and [#40826286716](https://github.com/Chicitadel/ugondu/actions/runs/40826286716).
+- A subsequent governance-only handover update started CI run [#40846046959](https://github.com/Chicitadel/ugondu/actions/runs/40846046959), which was in progress at the last query; COR run [#40846046924](https://github.com/Chicitadel/ugondu/actions/runs/40846046924) was pending. Do not transfer earlier green receipts to the later documentation SHA.
+- AWS physical qualification, evidence freshness, trust-root verification and final signing were skipped on validation-only runs. No AWS deployment is claimed.
+
+### Dumcholu
+- Confirmed `DUM-COR-ECS-TEMPLATE-RENDER-001`: direct registration of the unresolved ECS JSON template was replaced by a fail-closed renderer and deployment guide. The renderer now requires complete Secrets Manager ARNs matching the chosen account and region, a commit-derived image tag, valid Fargate settings, and zero unresolved placeholders.
+- The guide creates or updates ECR with `IMMUTABLE` tag mutability, defines variables before build/push, resolves full secret ARNs at deployment time, and registers only the rendered task definition.
+- Added seven renderer regression cases; a local isolated Node execution passed **7/7**. This is not a remote exact-head CI artifact.
+- Confirmed `DUM-COR-REPOSITORY-BYTECODE-001`: three tracked Python bytecode cache files removed and ignore rules added.
+- Deployment Manifest Qualification run [#40846199856](https://github.com/Chicitadel/dumcholu/actions/runs/40846199856) and Product Name Governance run [#40846199886](https://github.com/Chicitadel/dumcholu/actions/runs/40846199886) failed before recording steps; logs were unavailable. These remain **RUNNER/WORKFLOW ADMISSION UNCONFIRMED**, not source-level test failures and not passing gates. A new candidate run was queued before the subsequent ledger/guardrail-only commits; a fresh exact-head receipt is required.
+
+### Cross-product invariants
+- No direct protected-branch writes or merges.
+- DirectAdmin remains limited to supported workloads; a measured small VPS is the next step if persistent services require it. AWS remains conditional on traction/official engagement/funding and explicit budget/account authorization.
+- AeroBill and Mandatag remain the only billing/usage-rating and licensing/entitlement authorities.
+- Commercial status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
