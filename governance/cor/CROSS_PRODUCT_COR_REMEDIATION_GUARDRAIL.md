@@ -210,3 +210,24 @@ The first exact-head CI attempt surfaced a **test-only portability assumption**,
 - **Physical test correction:** `client/engine/state_lock_unix_test.go` now checks that `file.Stat()` returns any error after `Unlock()`; source behavior is unchanged.
 - **Correction commit:** `8672c94941be55e80a1ce895b5509ca30ba8fa10`.
 - **Status:** The failed exact-head run is retained as evidence. A new exact-head CI run is required; do not mark this finding PASS until the new run completes green.
+
+
+## Cross-product follow-up — Dumcholu citizen applications (2026-10-29)
+
+### `DUM-COR-CITIZEN-APPLICATIONS-I18N-001`
+
+- **Physical implementation branch:** `Chicitadel/dumcholu:fix/cor-citizen-applications-i18n-2026-10-29`
+- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11
+- Tokenized citizen applications UI strings and added 16 keys to all 12 locale bundles, both localization registries, and English fallback values.
+- Added a French locale-switching widget regression test.
+- Static remote content audit confirms all 16 keys exist in each of the 12 locale files, both registries, and the fallback dictionary.
+- **Validation remains OPEN:** exact-head Dumcholu workflows #40859147210 and #40859147148 failed before any job steps were recorded; downloadable job logs were unavailable (BlobNotFound). Do not classify these as source-test failures or passes. Re-run once runner admission is available. Flutter, locale parity, and UI governance results are not yet verified on this candidate.
+
+### `DUM-COR-APPLICATIONS-MOCK-STORE-001` — confirmed additional blocker
+
+- A source review of `dumcholu-citizen/lib/features/applications/domain/application_repository.dart` found `DefaultApplicationRepository` seeds three hardcoded application records in `_kSeedApplications` and performs withdrawal only against a mutable in-memory list.
+- The repository has no durable persistence and does not call the backend. The reviewed backend source tree also contains no applications controller/endpoint matching the claimed `GET /api/v1/applications` and withdrawal workflow. Therefore the earlier checklist statement that the citizen application feature is fully backend-wired is not supported by the current code.
+- **Status: OPEN / RELEASE BLOCKER.** Do not label this feature production-ready or hand it to agents as complete. Implement an authenticated, identity-scoped, durable backend contract and replace seeded local data with the authoritative API. Preserve fail-closed behavior and add backend persistence, authorization, client contract, withdrawal, and integration tests before closing this finding.
+- This finding has not been physically remediated in this change set. No fake closure is claimed.
+
+**Cross-product release posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No AWS deployment was performed or authorized. Hosting remains portable; AWS migration is conditional on traction/official engagement/funding and explicit budget/account authorization.
