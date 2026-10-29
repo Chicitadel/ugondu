@@ -75,9 +75,10 @@ describe('UniversalBootstrapRuntime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)', () => {
     const resources =
       UniversalBootstrapRuntime.parseCloudFormationTemplateResources(templateContent);
 
-    expect(resources).toHaveLength(14);
+    expect(resources).toHaveLength(15);
     expect(resources.map((r) => r.logicalId)).toEqual(
       expect.arrayContaining([
+        'MonthlyCostBudget',
         'PilotVPC',
         'InternetGateway',
         'AttachGateway',
