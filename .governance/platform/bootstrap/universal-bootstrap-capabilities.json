@@ -76,7 +76,8 @@
           "KMS",
           "SecretsManager",
           "CloudWatch",
-          "Backup"
+          "Backup",
+          "Budgets"
         ]
       },
       "regional_rules": {
