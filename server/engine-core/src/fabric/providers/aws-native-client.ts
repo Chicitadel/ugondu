@@ -708,6 +708,7 @@ export class AwsNativeClient implements IAwsClient {
         });
         const res = await this.ecs.send(cmd);
         if (!res.service || !res.service.serviceArn) throw new Error(__t('ecs_service_creation_failed'));
+        await this.deploymentWaiter(clusterName, res.service.serviceArn);
         return res.service.serviceArn;
     }
 
@@ -922,7 +923,6 @@ export class AwsNativeClient implements IAwsClient {
             throw new Error('ECS_SERVICE_CONFIGURATION_INVALID');
         }
         const id = await this.createEcsService(cluster, serviceName, taskDefinitionArn, desiredCount, subnets, securityGroups);
-        await this.deploymentWaiter(cluster, id);
         return { id };
     }
 
