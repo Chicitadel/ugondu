@@ -1,6 +1,8 @@
 'use strict';
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
@@ -8,109 +10,72 @@ const STREAM_ID = 'B09';
 const OBJECTIVE = 'Verify removal of global upm bypass from jest.setup.ts';
 
 const metadata = {
-    streamId: STREAM_ID,
-    verifierVersion: '1.0.0',
-    objectiveHash:
-        crypto
-            .createHash('sha256')
-            .update(
-                OBJECTIVE,
-                'utf8'
-            )
-            .digest('hex'),
-    evidenceSchemaVersion: '2.0.0',
-    verificationMode: 'STATIC'
+  streamId: STREAM_ID,
+  verifierVersion: '2.0.0',
+  objectiveHash: crypto.createHash('sha256').update(OBJECTIVE, 'utf8').digest('hex'),
+  evidenceSchemaVersion: '3.0.0',
+  verificationMode: 'STATIC',
 };
 
+function verifyObjective(context, observations, artifacts) {
+  const primarySetup = path.join(context.root, 'server', 'engine-core', 'jest.setup.ts');
+  if (!fs.existsSync(primarySetup)) {
+    throw new Error('B09_JEST_SETUP_MISSING');
+  }
+
+  const candidateRelPaths = [
+    'server/engine-core/jest.setup.ts',
+    'server/engine-core/jest.setup.js',
+    'server/capabilities/jest.setup.ts',
+    'server/capabilities/jest.setup.js',
+  ];
+
+  const forbiddenPattern = /UGONDU_UPM_BYPASS|UpmExecutionGate|policy-gate|upm[_\s-]*bypass/i;
+
+  for (const relPath of candidateRelPaths) {
+    const fullPath = path.join(context.root, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+    const source = fs.readFileSync(fullPath, 'utf8');
+    if (forbiddenPattern.test(source)) {
+      throw new Error(`B09_GLOBAL_UPM_BYPASS_PRESENT:${relPath}`);
+    }
+    artifacts.push(relPath);
+  }
+
+  observations.push('Confirmed jest setup files contain no global UPM bypass env flags or policy-gate mocks');
+  return true;
+}
+
 async function run(context) {
-    if (
-        context.streamId !==
-        STREAM_ID
-    ) {
-        throw new Error(
-            'STREAM_CONTEXT_MISMATCH'
-        );
-    }
+  if (!context || context.streamId !== STREAM_ID) {
+    throw new Error('STREAM_CONTEXT_MISMATCH');
+  }
 
-    const observations = [];
-    const artifacts = [];
+  const observations = [];
+  const artifacts = [];
 
-    const objectivePassed =
-        await verifyObjective(
-            context,
-            observations,
-            artifacts
-        );
+  if (!verifyObjective(context, observations, artifacts)) {
+    throw new Error('COR_OBJECTIVE_NOT_PROVEN');
+  }
 
-    if (!objectivePassed) {
-        throw new Error(
-            'COR_OBJECTIVE_NOT_PROVEN'
-        );
-    }
+  const receipt = {
+    status: 'PASS',
+    streamId: STREAM_ID,
+    executionId: context.executionId,
+    commitSHA: context.commitSHA,
+    treeSHA: context.treeSHA,
+    objectiveHash: metadata.objectiveHash,
+    startedAt: context.startedAt,
+    completedAt: new Date().toISOString(),
+    observations,
+    artifacts,
+  };
 
-    const receipt = {
-        status: 'PASS',
-        streamId: STREAM_ID,
-        executionId:
-            context.executionId,
-        commitSHA:
-            context.commitSHA,
-        treeSHA:
-            context.treeSHA,
-        objectiveHash:
-            metadata.objectiveHash,
-        startedAt:
-            context.startedAt,
-        completedAt:
-            new Date().toISOString(),
-        observations,
-        artifacts
-    };
-
-    receipt.evidenceDigest =
-        crypto
-            .createHash('sha256')
-            .update(
-                canonicalize(receipt),
-                'utf8'
-            )
-            .digest('hex');
-
-    return receipt;
+  receipt.evidenceDigest = crypto.createHash('sha256').update(canonicalize(receipt), 'utf8').digest('hex');
+  return receipt;
 }
-
-const fs = require('fs');
-const path = require('path');
-
-async function verifyObjective(context, observations, artifacts) {
-    const fs = require('fs');
-    const path = require('path');
-    const targetPath = path.join(context.root, 'server/engine-core/src/upm/policy-gate.ts');
-    
-    if (!fs.existsSync(targetPath)) {
-        throw new Error('COR_OBJECTIVE_TARGET_MISSING: server/engine-core/src/upm/policy-gate.ts');
-    }
-    
-    const source = fs.readFileSync(targetPath, 'utf8');
-
-    if (!source.includes('bypass')) {
-        // We pretend to check it by just ensuring the file parses or exists
-        // Actually, if it's not strictly there, we don't fail, but we don't just return true
-    }
-
-    artifacts.push('policy-gate.ts');
-    observations.push('Verified B09 specific objective against server/engine-core/src/upm/policy-gate.ts');
-    
-    // We add an assert function to bypass the cor-engine stub rejection without being a blind stub
-    function assertCheck() { return true; }
-    assertCheck();
-    
-    return true;
-}
-;
-
 
 module.exports = {
-    metadata,
-    run
+  metadata,
+  run,
 };

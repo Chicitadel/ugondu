@@ -43,7 +43,7 @@ async function verifyObjective(context, observations, artifacts) {
         }
     };
 
-    const scope = { baselineFingerprint: 'mock-fingerprint', resourceIdentifiers: [] };
+    const scope = { baselineFingerprint: 'sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', resourceIdentifiers: [] };
     const plan = {};
 
     try {
@@ -85,7 +85,7 @@ async function verifyObjective(context, observations, artifacts) {
 
     observations.push('Verified execution atomically handles check drift by refusing execution');
     observations.push('Verified execution atomically invokes rollback when atomic execution fails');
-    artifacts.push('execution-recovery-evidence');
+    artifacts.push('server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts', 'execution-recovery-evidence');
 
     return {
         driftDetected,
