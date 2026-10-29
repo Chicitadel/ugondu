@@ -39,3 +39,15 @@ for (const [field, mutate] of [
 test('rejects an unknown finding with no allowlisted command', () => {
   assert.throws(() => assertEvidenceContract('F-UNKNOWN', validRecord(), registry), /contract mismatch/);
 });
+
+test('Stream K validates the reviewed contract before executing a command', () => {
+  const source = require('node:fs').readFileSync(
+    require('node:path').resolve(__dirname, '..', '.governance', 'cor', 'stream_k_verify.js'),
+    'utf8',
+  );
+  const validation = source.indexOf('assertEvidenceContract(id, jRecord, COMMAND_REGISTRY)');
+  const execution = source.indexOf('execFileSync(expectedCommand.command, expectedCommand.arguments');
+  assert.ok(validation >= 0, 'must validate evidence against the reviewed command registry');
+  assert.ok(execution > validation, 'must validate before any evidence command is executed');
+  assert.doesNotMatch(source, /jRecord\\.(?:command|arguments|targetRoot|verifierVersion)\\s*===\\s*jRecord\\./);
+});
