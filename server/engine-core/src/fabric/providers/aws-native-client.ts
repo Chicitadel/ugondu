@@ -642,14 +642,21 @@ export class AwsNativeClient implements IAwsClient {
         return port;
     }
 
-    private async resolveTaskDefinitionContainerName(taskDefinitionArn: string): Promise<string> {
+    private async resolveTaskDefinitionContainerName(taskDefinitionArn: string, containerPort: number): Promise<string> {
         if (!/:task-definition\/[A-Za-z0-9_-]+:\d+$/.test(taskDefinitionArn)) {
             throw new Error('ECS_TASK_DEFINITION_ARN_INVALID');
         }
         const response = await this.ecs.send(new DescribeTaskDefinitionCommand({ taskDefinition: taskDefinitionArn }));
-        const containerName = response.taskDefinition?.containerDefinitions?.[0]?.name;
-        if (!containerName) throw new Error('ECS_TASK_DEFINITION_CONTAINER_NAME_MISSING');
-        return containerName;
+        const containers = response.taskDefinition?.containerDefinitions ?? [];
+        const matchingContainers = containers.filter(container =>
+            container.name && container.portMappings?.some(mapping => mapping.containerPort === containerPort)
+        );
+        if (matchingContainers.length !== 1) {
+            throw new Error(matchingContainers.length === 0
+                ? 'ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_MISSING'
+                : 'ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS');
+        }
+        return matchingContainers[0].name!;
     }
 
     public async registerTaskDefinition(name: string, imageUri: string, cpu: string, memory: string, executionRoleArn: string, taskRoleArn: string, logGroupName: string): Promise<string> {
@@ -690,7 +697,7 @@ export class AwsNativeClient implements IAwsClient {
             throw new Error('ECS_SERVICE_CONFIGURATION_INVALID');
         }
         const containerPort = this.resolveContainerPort();
-        const containerName = targetGroupArn ? await this.resolveTaskDefinitionContainerName(taskDefinitionArn) : undefined;
+        const containerName = targetGroupArn ? await this.resolveTaskDefinitionContainerName(taskDefinitionArn, containerPort) : undefined;
         const cmd = new CreateServiceCommand({
             cluster: clusterName,
             tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: this.getTransactionId() }],
