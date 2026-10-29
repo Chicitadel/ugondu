@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Air Roofers SASU - Multi-Product Pilot Staging Backend Infrastructure in Paris (eu-west-3).
-  Provides cost-effective, partitioned container infrastructure for Dumcholu, Ugondu, and UUV,
-  with seamless upgradeability to AWS ECS Fargate serverless.
+  Air Roofers SASU - Low-cost pilot host bootstrap in Paris (eu-west-3).
+  Creates an isolated EC2 host and budget notifications; it does not deploy product containers
+  or expose public ingress. Application rollout and a reviewed TLS edge are separate gated changes.
 
 Parameters:
   EnvironmentName:
@@ -20,7 +20,31 @@ Parameters:
   MonthlyBudgetLimit:
     Type: Number
     Default: 25.0
-    Description: Monthly spending limit in USD before triggering CloudWatch alarms.
+    MinValue: 1
+    Description: Monthly budget threshold in USD for AWS Budgets notifications; this is not a hard spending cap.
+
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: eu-west-3a
+    Description: Availability Zone in the selected deployment region.
+
+  AmazonLinuxAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-x86_64
+    Description: Region-resolved Amazon Linux 2023 minimal AMI from the AWS public SSM parameter.
+
+  DockerComposeVersion:
+    Type: String
+    Default: v2.39.2
+    AllowedPattern: '^v[0-9]+\.[0-9]+\.[0-9]+$'
+    Description: Explicit Docker Compose release tag; do not use latest.
+
+  DockerComposeSha256:
+    Type: String
+    MinLength: 64
+    MaxLength: 64
+    AllowedPattern: '^[a-fA-F0-9]{64}$'
+    Description: SHA-256 digest of the approved Docker Compose binary for the pinned release and target architecture.
 
   AdminEmail:
     Type: String
@@ -28,6 +52,34 @@ Parameters:
     Description: System notification email for budget and operational alerts.
 
 Resources:
+  MonthlyCostBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: !Ref MonthlyBudgetLimit
+          Unit: USD
+        BudgetName: !Sub airroofers-${EnvironmentName}-monthly-cost-budget
+        BudgetType: COST
+        TimeUnit: MONTHLY
+      NotificationsWithSubscribers:
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - Address: !Ref AdminEmail
+              SubscriptionType: EMAIL
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: FORECASTED
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - Address: !Ref AdminEmail
+              SubscriptionType: EMAIL
+
   # ─── VPC & Network Isolation ────────────────────────────────────────────────
   PilotVPC:
     Type: AWS::EC2::VPC
@@ -61,7 +113,7 @@ Resources:
     Properties:
       VpcId: !Ref PilotVPC
       CidrBlock: 10.100.1.0/24
-      AvailabilityZone: eu-west-3a
+      AvailabilityZone: !Ref AvailabilityZone
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
@@ -93,17 +145,11 @@ Resources:
   SharedWebSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Ingress HTTP/HTTPS for Air Roofers API gateway
+      GroupDescription: No public ingress until a separately reviewed TLS edge is deployed
       VpcId: !Ref PilotVPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
+      # Deliberately omit SecurityGroupIngress. Bootstrap does not install a TLS
+      # edge or deploy application listeners; open public ingress only with a
+      # reviewed ALB/reverse-proxy change and live security tests.
       Tags:
         - Key: Name
           Value: !Sub airroofers-${EnvironmentName}-web-sg
@@ -185,7 +231,7 @@ Resources:
         - !Ref DumcholuBackendSecurityGroup
         - !Ref UgonduBackendSecurityGroup
         - !Ref UUVBackendSecurityGroup
-      ImageId: ami-0be347593394f1874 # Amazon Linux 2023 Minimal (eu-west-3)
+      ImageId: !Ref AmazonLinuxAmiId
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -198,13 +244,16 @@ Resources:
           #!/bin/bash
           set -e
           dnf update -y
-          dnf install -y docker git
+          dnf install -y docker git curl coreutils
           systemctl enable --now docker
           usermod -aG docker ec2-user
           
-          # Install Docker Compose
-          curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
-          chmod +x /usr/local/bin/docker-compose
+          # Install a pinned Docker Compose release and verify the approved digest.
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://github.com/docker/compose/releases/download/${DockerComposeVersion}/docker-compose-linux-x86_64" \
+            -o /usr/local/bin/docker-compose
+          echo "${DockerComposeSha256}  /usr/local/bin/docker-compose" | sha256sum --check --status
+          chmod 0755 /usr/local/bin/docker-compose
           
           mkdir -p /opt/airroofers/{dumcholu,ugondu,uuv}
           echo "Air Roofers Paris Pilot Staging Host Initialized" > /opt/airroofers/status.txt

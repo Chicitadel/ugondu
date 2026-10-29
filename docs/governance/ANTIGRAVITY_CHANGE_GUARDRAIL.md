@@ -794,3 +794,40 @@ Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
 **Commits:** `9ddea7cb607c31d434243277c30654ef644c17d0`; `2e1e06f3ff34ba2665b3f4f7c06a72be03f7e676`.
 
 **Status:** YELLOW / exact-head CI pending. Do not close until the Windows test job passes on the current head and other required CI checks remain green. No AWS deployment or whole-product certification is implied.
+
+
+## 2026-10-29 execution addendum — COR build preflight and AWS portability
+
+**Active handover:** [UGONDU_COR_REAUDIT_HANDOVER_2026-10-29.md](../audit/UGONDU_COR_REAUDIT_HANDOVER_2026-10-29.md)  
+**Dedicated branch:** `audit/cor-remediation-aws-portability-2026-10-29`  
+**Base candidate:** `5b6774ef2a1b41ae00b795a5656c876f30de89eb`  
+**Disposition:** source fix implemented; exact-head tests pending; commercial release remains blocked.
+
+### New confirmed finding: `UG-COR-BUILD-PREFLIGHT-FAIL-OPEN-001`
+
+The prior `scripts/run-cor-gates.js` warned when engine-core TypeScript compilation failed but continued to execute qualification suites, risking stale `dist/` use. This branch now delegates build preflight to `scripts/cor/build-preflight.js`, exits non-zero before suites on missing configuration or failed/terminated build, writes a machine-readable failure summary, and adds `tests/cor-build-preflight.test.js` to `npm run test:governance`.
+
+Implementation commits:
+- `465523d189d0dcbdf39c364eea2563d8bae1e380`
+- `4753345ef92f9e88c504e7d4070b016c15d6bc6c`
+- `ab62eb6ff9522bfe4762f225d31a93c86f3d64e2`
+- `71bdb44bdee292322f3ed303fa91d00c7e863046`
+
+Do not mark the finding closed until exact-head tests pass. Test source has been authored and wired; this session did not execute it in a local checkout.
+
+### AWS and Dumcholu cross-product guardrails
+
+- Preserve one-code/host-anywhere architecture. AWS-specific differences belong in IaC, deployment adapters and external configuration, not product business logic.
+- Keep AeroBill billing and Mandatag entitlement authority in the Air Roofers federation; do not duplicate those decisions in Ugondu or Dumcholu.
+- The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a proposal, not proof of a live stack. Review AMI/AZ portability, effective security-group rules, public backend exposure, SSM-only administration, UserData secrets, durable state, budget alarms and least-privilege IAM before provisioning.
+- No AWS resource was created or changed in this execution. Any physical cloud mutation requires explicit approval, verified account/region/role, an approved change set, a cost estimate, health tests, rollback and cleanup evidence.
+- Do not claim production release, 100% COR closure, or universal certification while exact-head evidence, live target qualification, independent verification, or any mandatory receipt is missing.
+
+### 2026-10-29 AWS pilot template hardening
+
+The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a host bootstrap, not an application deployment. This branch added AWS Budgets email notifications (80% actual / 100% forecast), SSM-resolved AMI, parameterized AZ, pinned Docker Compose version plus required SHA-256 verification, and closed public ingress until an approved TLS edge exists. Regression coverage is in `tests/qualification/aws-staging-template-safety.test.mjs`, wired into `npm run test:governance`.
+
+No cloud resources were created. Do not expose public ingress or claim Ugondu/Dumcholu deployment until immutable image digests, secrets/runtime contracts, TLS edge, CloudFormation validation, health/E2E, rollback and cleanup evidence are available. Budget notifications alert; they do not cap spending.
+
+
+**Fail-closed follow-up:** `UGONDU_SKIP_BUILD=true` is now rejected because no independent exact-candidate build receipt is validated by the runner. Do not reintroduce a build-skip path unless an approved signed build receipt contract is implemented and tested against the current commit and tree. The latest diagnostic newline correction and skip-path change invalidate all earlier candidate CI/COR results; rerun against current HEAD.
