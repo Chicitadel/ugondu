@@ -200,3 +200,13 @@ For each finding, physically implement before handover; add a regression that fa
 - **Hosting and release boundary:** This is provider-neutral filesystem hardening. No AWS resources or deployments are authorized by this change. AWS migration remains conditional on traction/official engagement/funding plus explicit account, budget and deployment approval. AeroBill remains the billing/metering authority; Mandatag remains the licensing/entitlement authority.
 - **Rollback:** Revert the source and regression test together if supported-platform evidence identifies a compatibility issue; document the evidence and maintain fail-closed state persistence.
 - **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head CI, candidate-bound signed evidence, staging and live federation qualification, recovery/rollback evidence, and release-owner authorization are complete.
+
+
+### Verification follow-up — portable closed-handle assertion
+
+The first exact-head CI attempt surfaced a **test-only portability assumption**, not a production-source failure: on Linux, calling `os.File.Stat()` after close returned a platform/runtime-specific “file already closed” error that did not satisfy the test's `errors.Is(err, os.ErrInvalid)` expectation. The test was corrected to assert the stable contract (the closed file handle must return a non-nil error), without requiring a specific error identity.
+
+- **Failed run evidence:** CI/CD [run #40856167040](https://github.com/Chicitadel/ugondu/actions/runs/40856167040), Linux ARM64 Go test job [job #123387562141](https://github.com/Chicitadel/ugondu/actions/runs/40856167040/job/123387562141); failure occurred in `TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile` at the overly specific post-close error assertion. The new regression test had already confirmed that the injected unlock error propagated.
+- **Physical test correction:** `client/engine/state_lock_unix_test.go` now checks that `file.Stat()` returns any error after `Unlock()`; source behavior is unchanged.
+- **Correction commit:** `8672c94941be55e80a1ce895b5509ca30ba8fa10`.
+- **Status:** The failed exact-head run is retained as evidence. A new exact-head CI run is required; do not mark this finding PASS until the new run completes green.
