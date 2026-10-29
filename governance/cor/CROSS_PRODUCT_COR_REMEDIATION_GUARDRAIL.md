@@ -160,3 +160,26 @@ This repository file remains the **single canonical cross-product guardrail**. D
 
 ### Required closeout
 For each finding, physically implement before handover; add a regression that fails on the defect; run it against the exact candidate; record command, exit code, SHA, and evidence. If the environment or external service is unavailable, report **NOT RUN / BLOCKED**. Historical results are not current-head evidence. Release remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED** until every required gate and live qualification has fresh candidate-bound evidence.
+
+
+## 2026-10-29 finding: canonical transaction ID enforcement
+
+- **Finding ID:** `UG-COR-STATE-ID-CANONICALIZATION-001`
+- **Severity:** Medium (state identity/path aliasing; fail-closed input validation)
+- **Reproduction:** `GetTransactionDir` trimmed surrounding whitespace and resolved a padded ID to the same directory as its canonical ID. `SaveState` already rejected padded IDs, but path resolution and `LoadState` could accept the alias. This created inconsistent identifier semantics and allowed a noncanonical caller value to address an existing transaction.
+- **Physical fix:** `client/engine/state.go` now rejects whitespace-padded IDs in `GetTransactionDir`; `GetStateFilePath` and `LoadState` inherit the rejection through the shared resolver. Canonical IDs continue to resolve normally.
+- **Regression test:** `client/engine/state_test.go` adds `TestTransactionPathResolversRejectWhitespacePaddedIDs`, covering transaction-directory lookup, state-file path lookup, and `LoadState` with a padded alias, followed by a successful load using the canonical ID.
+- **Branch:** `fix/cor-state-id-canonicalization-2026-10-29` (stacked on the dedicated PR #42 branch; no protected branch writes).
+- **Verification:** Source and test are committed. Exact-head CI is required before closure; no local test execution is claimed by this handover.
+- **Rollback:** Revert the two source/test commits together if compatibility evidence reveals an approved caller depends on whitespace normalization; do not weaken the regression test without a reviewed ADR.
+
+
+## 2026-10-29 exact-candidate CI verification and Antigravity handover (verified)
+
+- **Code candidate SHA:** `dc665fd86b870aa305f7517b92c87dabc2f320d2` (PR #43, stacked on PR #42 and PR #41). No master/main/production-hardening modifications authorized.
+- **Independent GitHub Actions receipt:** [CI/CD run 40852180373](https://github.com/Chicitadel/ugondu/actions/runs/40852180373) completed **success**. Release Integrity & Governance, five Go OS/architecture builds, service/workspace builds, and integration tests passed. Docker validation and release publishing were **skipped**, not passed.
+- **Independent GitHub Actions receipt:** [COR run 40852180313](https://github.com/Chicitadel/ugondu/actions/runs/40852180313) completed **success**. COR Certification and COR Final Release Gate jobs passed; AWS Physical Qualification Gate was **skipped by design**, not physically qualified.
+- **Finding disposition:** `UG-COR-STATE-ID-CANONICALIZATION-001` is **implemented and CI-verified** on the code candidate. Preserve the physical source/test implementation; do not duplicate or rewrite it without a demonstrated regression and reviewed ADR.
+- **Evidence freshness:** This documentation update advances the branch HEAD beyond the tested code candidate. Any subsequent release gate must validate the **new exact branch HEAD**, signed candidate-bound artifacts, and unchanged executable code; do not mislabel earlier receipts as tests of the new HEAD.
+- **Agent synchronization protocol:** Treat this repository file as the canonical cross-product guardrail. Each Antigravity actor must fetch the latest branch head before modifying, claim a unique finding ID and file ownership, avoid concurrent edits to the same paths, record base/head SHA and test exit codes, and rebase/revalidate before submitting changes. Use a new dedicated branch/PR for additional code findings. Do not overwrite a superior existing implementation or copy billing/entitlement business logic into either product.
+- **Open gates:** Live DirectAdmin/VPS staging, AeroBill and Mandatag non-production federation, Ed25519 candidate signing and independent trust-root verification, rollback/restore evidence, authorized AWS resource audit, and accountable release-owner sign-off remain **NOT VERIFIED**. No cloud spend or production deployment authorized. Overall commercial release remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.

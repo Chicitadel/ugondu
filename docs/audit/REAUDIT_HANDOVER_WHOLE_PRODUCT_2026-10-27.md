@@ -336,3 +336,17 @@ Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / 
 **Verification:** Pending. This tool session has not executed the Windows Go test suite. Require the Windows amd64 CI leg to compile and execute the new tests, plus the Linux formatting/vet/test/race gates, on the current branch head. Do not mark this finding GREEN until the exact-head results are available.
 
 **Release status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** This targeted state-lock fix does not constitute AWS qualification or whole-product COR closure.
+
+
+## 2026-10-29 follow-up: canonical transaction ID aliasing
+
+**Finding:** `UG-COR-STATE-ID-CANONICALIZATION-001` (medium; input/path identity consistency).
+
+**Reproduction:** `GetTransactionDir` silently trimmed surrounding whitespace and mapped a padded transaction ID to the canonical directory. `SaveState` rejected the same padded identifier, but the path resolver and `LoadState` accepted the alias. This made transaction ID semantics inconsistent across persistence operations.
+
+**Physical remediation committed on `fix/cor-state-id-canonicalization-2026-10-29`:**
+- `client/engine/state.go`: `GetTransactionDir` now rejects IDs whose trimmed representation differs from the supplied ID. `GetStateFilePath` and `LoadState` inherit this validation.
+- `client/engine/state_test.go`: added `TestTransactionPathResolversRejectWhitespacePaddedIDs` for directory resolution, state-file resolution, padded `LoadState`, and a positive canonical-ID load control.
+- Canonical cross-product guardrail updated in the same branch.
+
+**Verification status:** Code and regression test committed; local Go tests were not executed in this session. Require exact-head CI (including the Go client matrix) before declaring PASS. Record exact SHA, command, exit code, and logs. This finding does not imply AWS deployment or whole-product COR closure.

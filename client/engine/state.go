@@ -148,7 +148,9 @@ func GetTransactionsDir() (string, error) {
 // GetTransactionDir returns ~/.ugondu/transactions/<txId>
 func GetTransactionDir(txId string) (string, error) {
 	trimmed := strings.TrimSpace(txId)
-	if trimmed == "" || trimmed == "." {
+	// Transaction IDs are canonical identifiers, not user-facing text. Reject
+	// whitespace aliases rather than silently resolving them to another ID.
+	if trimmed == "" || trimmed == "." || trimmed != txId {
 		return "", fmt.Errorf(i18n.T("invalid_transactionid_contains_path_separators"), txId)
 	}
 	if strings.Contains(trimmed, "..") || strings.Contains(trimmed, "/") || strings.Contains(trimmed, "\\") {
