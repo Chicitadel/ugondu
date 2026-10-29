@@ -120,6 +120,25 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     expect(send.mock.calls[0][0].input.taskDefinition).toBe(taskArn);
   });
 
+  it('uses the configured container port for ECS task definition port mapping', async () => {
+    process.env.UGONDU_ECS_CONTAINER_PORT = '3000';
+    const taskArn = 'arn:aws:ecs:eu-west-3:123456789012:task-definition/ugondu-api:8';
+    const send = jest.fn().mockResolvedValue({ taskDefinition: { taskDefinitionArn: taskArn } });
+    (client as any).ecs.send = send;
+    await expect(client.registerTaskDefinition(
+      'ugondu-api',
+      '123456789012.dkr.ecr.eu-west-3.amazonaws.com/ugondu:1',
+      '512',
+      '1024',
+      'arn:aws:iam::123456789012:role/ecs-execution',
+      'arn:aws:iam::123456789012:role/ugondu-task',
+      '/ugondu/staging',
+    )).resolves.toBe(taskArn);
+    const input = send.mock.calls[0][0].input;
+    expect(input.containerDefinitions[0].portMappings).toEqual([{ containerPort: 3000, protocol: 'tcp' }]);
+    expect(input.containerDefinitions[0].logConfiguration.options['awslogs-group']).toBe('/ugondu/staging');
+  });
+
   it('creates ECS services only with bounded, explicitly configured networking', async () => {
     process.env.UGONDU_ECS_SUBNET_IDS = 'subnet-a,subnet-b';
     process.env.UGONDU_ECS_SECURITY_GROUP_IDS = 'sg-a';
