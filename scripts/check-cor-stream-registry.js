@@ -20,7 +20,7 @@ const EXPECTED_IDS = [
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 
 function block(reason) {
-    process.stderr.write(`COR BLOCKED: ${reason}\\n`);
+    process.stderr.write(`COR BLOCKED: ${reason}\n`);
     process.exit(1);
 }
 
