@@ -232,3 +232,21 @@ This status snapshot is intentionally exact-head and time-bound. Re-fetch PR hea
 - **Dumcholu policy simulator:** no silent localhost fallback; remote HTTP is rejected; OpenAPI and Java DTO now model the scope fields; uncalibrated territories/regions/sectors fail closed rather than relabelling France 2030 coefficients. Nigeria remains unsupported until an approved calibration dataset and validation evidence are supplied.
 - **Hosting:** no AWS resources were provisioned by these code changes. The AWS bootstrap template and CI qualification are not proof that the application backend is deployed, healthy, reachable over TLS, rollback-tested, or integrated live with AeroBill/Mandatag.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. Require successful exact-head tests/CI/COR, independent review, approved budget/resource envelope, physical staging health/rollback/log/cleanup receipts, live non-production federation transactions, and formal corporate sign-off.
+
+
+## Exact-head status update — 2026-10-29 22:58 UTC
+
+| Candidate | Exact head | Latest evidence | Current interpretation |
+|---|---|---|---|
+| Ugondu PR #55 | `a4ac49f4c88587db88d139cb4316ff54865f9307` | [CI #40967440875](https://github.com/Chicitadel/ugondu/actions/runs/40967440875) PASS; [COR #40967440882](https://github.com/Chicitadel/ugondu/actions/runs/40967440882) PASS | The ECS resolver regression additions qualify on this head. No AWS physical deployment/federation claim.
+| Ugondu PR #57 | `1826e14efe00386ec49b9383630d91bb85f2f2e0` | [CI #40969219319](https://github.com/Chicitadel/ugondu/actions/runs/40969219319) in progress; [COR #40969219344](https://github.com/Chicitadel/ugondu/actions/runs/40969219344) in progress | Build, type-check, workspace tests and the new capabilities graph test passed in the visible job receipts; Docker image validation/integration tests and final COR steps were still running at snapshot time. AWS physical qualification is explicitly skipped.
+| Dumcholu PR #15 | `f837e6e1d23493bdaa3b47a6b11fd662cf8ae636` | [Policy contract workflow #40969420140](https://github.com/Chicitadel/dumcholu/actions/runs/40969420140) PASS; [deployment manifest #40969420151](https://github.com/Chicitadel/dumcholu/actions/runs/40969420151) PASS; [product naming #40969428590](https://github.com/Chicitadel/dumcholu/actions/runs/40969428590) PASS | Focused Flutter tests, Flutter analysis, OpenAPI drift validation, Maven policy-service tests and patch hygiene passed on the exact head. No physical AWS deployment/live federation claim.
+
+### Current guardrails
+
+- All remediation source changes are on dedicated draft PR branches; no direct `main`/`master` writes were made.
+- The policy simulator accepts only its current calibrated baseline `FR / France 2030 Framework / FR-IDF / CLEAN_ENERGY`. Nigeria-specific simulation remains a product blocker pending approved coefficients and validation evidence.
+- WebAuthn/FIDO2 server/browser ceremony remains open; device-local biometrics are not evidence of a complete relying-party ceremony.
+- Physical AWS deployment remains unexecuted in this session. The available connected tooling provides repository/CI operations, not AWS control-plane provisioning. Budget/resource authorization and deployment credentials/role remain prerequisites; CI and CloudFormation templates do not equal a live deployment.
+- AeroBill and Mandatag live non-production transactions remain unverified.
+- **Commercial gate remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
