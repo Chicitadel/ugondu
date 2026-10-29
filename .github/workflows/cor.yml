@@ -98,6 +98,7 @@ jobs:
           node tests/qualification/evidence-pipeline-adversarial.test.js
           node tests/qualification/shared-execution-and-mode-parity.test.js
           node tests/qualification/cor-workflow-gates.test.js
+          node --test tests/qualification/aws-physical-opt-in-contract.test.mjs tests/qualification/release-gate-scope.test.mjs
 
       - name: Verify externally pinned AWS policy-pack signature
         env:
