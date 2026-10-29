@@ -129,3 +129,13 @@ PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature
 - **Status:** `IMPLEMENTED—VALIDATION PENDING`. Exact-head typecheck/Jest/CI/COR are pending. This is a release-critical provider-integrity issue; the release remains blocked until tests and independent review pass. No AWS physical deployment is claimed.
 
 - **Additional portability guard:** task-definition container port and optional load-balancer target port are driven by `UGONDU_ECS_CONTAINER_PORT` (default 8080), not a hardcoded port 80. Exact-head validation is pending on the latest PR #53 commit.
+
+## 2026-10-29 follow-up audit — ECS rollout readiness
+
+- **Finding:** `UG-COR-ECS-ROLLOUT-READINESS-001`
+- **Dedicated remediation PR:** https://github.com/Chicitadel/ugondu/pull/54
+- **Branch:** `fix/aws-ecs-rollout-readiness-2026-10-29` (stacked on PR #53; no main/master changes)
+- **Implementation:** the provider now awaits AWS ECS service stability after high-level service creation, deployment and rollback, with a 600-second bounded waiter and fail-closed non-success. Container ports are validated to 1–65535, and optional target-group wiring uses the task-definition container family rather than assuming the ECS service name is the container name.
+- **Regression coverage:** added cases for readiness waiter behavior/failure, invalid ports, and target-group container-name/port mapping in `aws-native-client-no-synthetic-success.spec.ts`.
+- **Evidence discipline:** PR #54 exact-head CI/COR is pending until GitHub reports completion on its final head. The tests use injected waiters and mocked SDK responses; they do not count as live AWS deployment evidence.
+- **Release posture:** remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until authorized AWS staging health/readiness, rollback, and non-production AeroBill/Mandatag transaction receipts exist.
