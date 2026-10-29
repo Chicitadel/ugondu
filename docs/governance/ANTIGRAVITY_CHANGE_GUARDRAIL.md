@@ -840,3 +840,6 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - Any new CloudFormation resource requires updating and strengthening resource-graph tests; expected counts must reflect real resources and must assert the newly added logical ID rather than only changing a numeric count.
 - A CI failure is a confirmed defect signal that must be fixed in source/tests before handover. Never mark a failed exact-head run as evidence of closure.
 - Current follow-up branch: `fix/cor-runner-mandatory-evidence-gate-2026-10-29`, stacked on PR #56; do not edit protected branches directly.
+
+- Every CloudFormation resource type in a reviewed launch template must have an explicit resource mapping, least-privilege provider actions, scoped resource ARN derivation, read-back/rollback actions, and a regression test. Updating template resource counts without closing the resulting `AUTHORITY_GAP` is not remediation.
+- For dynamic names, parse the approved template value and bind it to the environment; unresolved substitutions must fail closed rather than widening the resource ARN to `*`.
