@@ -25,7 +25,7 @@ test('pilot host selects an AZ from its stack region and tags the actual AWS reg
   const azParameter = template.slice(azStart, azEnd);
   assert.match(azParameter, /Type: AWS::EC2::AvailabilityZone::Name/);
   assert.doesNotMatch(azParameter, /Default:/);
-  assert.match(template, /- Key: Region\\n\\s+Value: !Ref AWS::Region/);
+  assert.match(template, /- Key: Region\n\s+Value: !Ref AWS::Region/);
   assert.doesNotMatch(template, /eu-west-3a|Value: eu-west-3/);
   assert.match(template, /Description: Public Subnet in the selected deployment region/);
 });
