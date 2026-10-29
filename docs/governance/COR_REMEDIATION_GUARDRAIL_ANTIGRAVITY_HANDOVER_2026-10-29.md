@@ -72,3 +72,12 @@
 - Product-owner/architect sign-off on a traceable evidence bundle.
 
 **Release status: PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.** This document is a guardrail and handover, not a claim that defects have been exhaustively eliminated or that AWS deployment has occurred.
+
+
+## 6. Finding UG-COR-FEDERATION-EGRESS-001 — IMPLEMENTED, VALIDATION PENDING
+
+- Finding: the `billing-gateway` service in the root `docker-compose.yml` referenced external identity and AeroBill authorities but was attached only to `ugondu-internal`, which is declared `internal: true`. This prevents ordinary outbound connectivity from that service and breaks the intended federation path in the Compose deployment.
+- Physical change on branch `fix/cor-federation-egress-network-2026-10-29`: attached `billing-gateway` to both `ugondu-internal` (private service-to-service traffic) and `ugondu-external` (outbound federation). No host port was added; this does not expose the billing gateway directly to the host.
+- Regression test: `tests/qualification/federation-egress-network.test.mjs`, included in `npm run test:governance`. The test checks both network attachments, that the internal network remains isolated, and that the gateway is not host-published.
+- Validation status: source/test committed; exact-head CI and runtime connectivity test are pending. Do not mark the finding CLOSED until the test runs on the final commit and non-production identity/AeroBill calls produce real receipts.
+- Architecture guardrail: Ugondu must remain a client of Air Roofers federation. It must not implement or store its own authoritative billing, pricing, or entitlement decisions.
