@@ -822,3 +822,9 @@ Do not mark the finding closed until exact-head tests pass. Test source has been
 - The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a proposal, not proof of a live stack. Review AMI/AZ portability, effective security-group rules, public backend exposure, SSM-only administration, UserData secrets, durable state, budget alarms and least-privilege IAM before provisioning.
 - No AWS resource was created or changed in this execution. Any physical cloud mutation requires explicit approval, verified account/region/role, an approved change set, a cost estimate, health tests, rollback and cleanup evidence.
 - Do not claim production release, 100% COR closure, or universal certification while exact-head evidence, live target qualification, independent verification, or any mandatory receipt is missing.
+
+### 2026-10-29 AWS pilot template hardening
+
+The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a host bootstrap, not an application deployment. This branch added AWS Budgets email notifications (80% actual / 100% forecast), SSM-resolved AMI, parameterized AZ, pinned Docker Compose version plus required SHA-256 verification, and closed public ingress until an approved TLS edge exists. Regression coverage is in `tests/qualification/aws-staging-template-safety.test.mjs`, wired into `npm run test:governance`.
+
+No cloud resources were created. Do not expose public ingress or claim Ugondu/Dumcholu deployment until immutable image digests, secrets/runtime contracts, TLS edge, CloudFormation validation, health/E2E, rollback and cleanup evidence are available. Budget notifications alert; they do not cap spending.
