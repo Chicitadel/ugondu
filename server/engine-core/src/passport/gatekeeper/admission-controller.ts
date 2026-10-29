@@ -86,17 +86,13 @@ export class AdmissionController {
         return `SIG:${passportId}:${contextId}:${Date.now()}`;
     }
 
-    public admit(passportId: string, context: { tenantId: string }): { status: string } {
-        if (!passportId || passportId.trim() === '') {
-            return { status: 'REJECTED' };
-        }
-        if (!context || !context.tenantId) {
-            return { status: 'REJECTED' };
-        }
-        if (passportId.startsWith('REVOKED')) {
-            return { status: 'REJECTED' };
-        }
-        return { status: 'ADMITTED' };
+    /**
+     * Legacy synchronous admission cannot validate signatures, registration,
+     * expiry, revocation, or tenant binding. It must never grant admission.
+     * Production admission is provided by the engine-core verified adapter.
+     */
+    public admit(_passportId: string, _context: { tenantId: string }): { status: string } {
+        return { status: 'REJECTED' };
     }
 }
 
