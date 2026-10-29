@@ -194,3 +194,20 @@ PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature
 6. AeroBill remains the sole billing/usage authority and Mandatag the sole licensing/entitlement authority; do not copy either business logic into product domains.
 7. Preserve one-code/host-anywhere portability: endpoint URLs, secrets, and tier selection are configuration/injection concerns, not business-logic forks.
 8. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head CI/COR, independent review, authorized AWS qualification, live federation checks, remaining Dumcholu WebAuthn/FIDO2 ceremony, and corporate approval are evidenced.
+
+
+## Candidate receipt snapshot — 2026-10-29 22:41 UTC
+
+This is a coordination snapshot, not a certification declaration. Re-fetch PR metadata and run status before relying on it.
+
+| Repository / PR | Exact candidate head at snapshot | New exact-head runs | Status at snapshot |
+|---|---|---|---|
+| Ugondu PR #55 | `a4ac49f4c88587db88d139cb4316ff54865f9307` | [CI #40967440875](https://github.com/Chicitadel/ugondu/actions/runs/40967440875), [COR #40967440882](https://github.com/Chicitadel/ugondu/actions/runs/40967440882) | CI in progress; COR queued/in progress; no final pass claimed |
+| Dumcholu PR #15 | `577a7cf10db489bdfabed17161bb07bb752de504` | [Policy contract push #40967689084](https://github.com/Chicitadel/dumcholu/actions/runs/40967689084), [Policy contract PR #40967695905](https://github.com/Chicitadel/dumcholu/actions/runs/40967695905), [deployment qualification #40967696176](https://github.com/Chicitadel/dumcholu/actions/runs/40967696176) | queued/in progress; no final pass claimed |
+
+### Current changed-path summary
+
+- **Ugondu PR #55:** added malformed-ARN and ambiguous-target-port regression cases; updated finding handover. Candidate tree changed, so all prior receipts are stale for this head.
+- **Dumcholu PR #15:** removed implicit localhost policy-service URL, enforced endpoint/transport safety, added no-network-on-invalid-config tests, and introduced a repeatable exact-head CI workflow for Flutter focused tests/analyzer, Maven policy-service tests, and patch hygiene. Candidate tree changed, so all earlier receipts are stale for this head.
+- **No AWS deployment claim:** these code and CI changes do not provision AWS resources. Physical staging/production, health, rollback, logs, cleanup, and live AeroBill/Mandatag transactions remain separate gates.
+- **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
