@@ -138,3 +138,17 @@ The two new findings above are physically implemented with regression tests auth
 - **Latest historical receipts:** [CI #40763771653](https://github.com/Chicitadel/ugondu/actions/runs/40763771653) and [COR PR validation #40763771545](https://github.com/Chicitadel/ugondu/actions/runs/40763771545) passed on `190db660b8175221a9df877fc20506a76c6884c4`; push release attempt [#40763762669](https://github.com/Chicitadel/ugondu/actions/runs/40763762669) failed at freshness as expected for that non-evidence descendant. These are historical receipts, not results for the new workflow/test commits.
 - **AWS incident:** [run #40755624233](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) is `completed / cancelled`. Resource cleanup remains unverified until an authorized account-level residual scan is supplied.
 - **Status:** code committed; exact-head CI pending. Commercial release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## 2026-10-29 exact-head evidence refresh
+
+- Ugondu PR #41 branch `fix/cor-aws-physical-opt-in-2026-10-28`, head verified as `30849a07656f52307bce443114322b4ed3c2e550`.
+- CI [run #40776073589](https://github.com/Chicitadel/ugondu/actions/runs/40776073589) completed success: Go formatting, vet, unit tests, Linux/amd64 race detector, Windows amd64/macOS/Linux arm64 build/test legs, workspace and integration jobs passed.
+- COR validation [run #40776073510](https://github.com/Chicitadel/ugondu/actions/runs/40776073510) completed success on the same candidate: exact-SHA/clean-checkout, build, locale/I18N, architecture/import scans, type-check, workspace tests, COR regression, policy signature, evidence bundle, stream registry, fresh COR qualification, independent finalization and final integrity passed.
+- **Scope:** evidence-freshness, signing trust-root and final signing were skipped; AWS physical qualification was skipped. These establish validation, not signed release certification or AWS deployment.
+- Earlier push COR run [#40763762669](https://github.com/Chicitadel/ugondu/actions/runs/40763762669) failed frozen-candidate freshness before the release-only trigger scope correction. Validation skips this release-only gate; freshness stays mandatory for explicitly authorized release qualification.
+- Legacy AWS run [#40755624233](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) is cancelled, but cleanup is not proven. Authorized AWS account operator must supply residual-resource scan/account reconciliation.
+- Dumcholu PR #10 product-name job remains blocked before steps (latest [#40752340292](https://github.com/Chicitadel/dumcholu/actions/runs/40752340292), job `123042066314`, zero steps). No code-level scanner assertion is evidenced. Keep exceptions narrow and classify CI as **BLOCKED / RUNNER ADMISSION UNCONFIRMED**.
+- Dumcholu `AIBudgetService.recordCost` rejects non-finite values with `Double.isFinite(charge)`; tests cover NaN and +/-Infinity. The ledger reports `mvn test -Dtest=AIBudgetServiceTest` 9/9 pass, but this session did not independently execute tests at the latest branch SHA. Require exact-head receipt.
+- No AWS deployment or verified live AeroBill/Mandatag staging transaction was supplied. Hosting policy: DirectAdmin where workload-compatible → measured small VPS if persistent services require it → AWS only after traction, official engagement/funding and explicit cost/account approval.
+- Overall commercial status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
