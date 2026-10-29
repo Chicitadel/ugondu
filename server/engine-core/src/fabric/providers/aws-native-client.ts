@@ -648,6 +648,9 @@ export class AwsNativeClient implements IAwsClient {
         }
         const response = await this.ecs.send(new DescribeTaskDefinitionCommand({ taskDefinition: taskDefinitionArn }));
         const containers = response.taskDefinition?.containerDefinitions ?? [];
+        if (containers.length === 0 || !containers.some(c => c.name)) {
+            throw new Error('ECS_TASK_DEFINITION_CONTAINER_NAME_MISSING');
+        }
         const matchingContainers = containers.filter(container =>
             container.name && container.portMappings?.some(mapping => mapping.containerPort === containerPort)
         );
