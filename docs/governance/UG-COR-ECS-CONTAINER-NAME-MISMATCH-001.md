@@ -33,3 +33,13 @@ The ECS rollout-readiness implementation inferred an ECS load-balancer's `contai
 6. Keep AeroBill and Mandatag non-production transaction receipts open until actual federated calls are completed.
 
 Mocked SDK tests do not establish live AWS behavior. No AWS resource creation is authorized or claimed by this remediation. Do not merge or promote without human authorization.
+
+
+## Follow-up audit finding UG-COR-ECS-TARGET-CONTAINER-PORT-MISMATCH-001
+
+- **Status:** IMPLEMENTED IN SOURCE/TESTS; exact-head validation required.
+- **Root cause:** The initial container-name fix selected `containerDefinitions[0]` without confirming that it exposes the configured load-balancer container port. ECS task definitions may list a sidecar first, so the service could be wired to a container that does not serve the target port.
+- **Physical remediation:** `resolveTaskDefinitionContainerName(taskDefinitionArn, containerPort)` now searches the registered task definition for exactly one container with a matching `portMappings[].containerPort`. It fails closed with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_MISSING` when none match and `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS` when multiple containers match.
+- **Regression coverage:** The primary mismatch test declares the expected port mapping; a sidecar-first case confirms the application container is selected; a missing-port case confirms service creation is not attempted.
+- **Evidence rule:** Earlier CI and test receipts for PR #55 are invalidated by this source change. Re-run focused Jest, typecheck/build, full CI, and COR on the new exact head. Do not claim pass until receipts are available.
+- **Guardrail:** Resolve the container by the target port contract, never by task family, service name, or array position.
