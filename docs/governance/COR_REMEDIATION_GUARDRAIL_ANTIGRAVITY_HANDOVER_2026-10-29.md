@@ -120,3 +120,11 @@ These receipts prove only the stated automated checks. Do not mark either findin
 - **Release impact:** Security-critical. Keep Ugondu release blocked until exact-head verification and independent review. No main/master changes.
 
 - **Additional boundary hardened:** the legacy synchronous `AdmissionController.admit()` implementation also returned `ADMITTED` for arbitrary non-`REVOKED` strings without signature or registry validation. It now fails closed; a regression test exercises the canonical class directly as well as the engine-core adapter.
+
+
+## Finding UG-COR-EXECUTION-ENVELOPE-SIGNATURE-STUB-001 — IMPLEMENTED, VALIDATION PENDING
+
+- **Root cause:** `AdmissionController.generateExecutionSignature()` returned a predictable `SIG:<passport>:<context>:<timestamp>` string instead of a cryptographic signature.
+- **Physical fix:** Replaced the synthetic string with an injected signing contract. The engine-core bootstrap wires that contract to the managed Ed25519 key. The signature covers passport ID, context ID, and verification timestamp. The controller fails closed with `EXECUTION_ENVELOPE_SIGNER_NOT_CONFIGURED` when no signer is supplied.
+- **Regression coverage:** The admission integration suite verifies that an unconfigured signer cannot emit an envelope, a configured Ed25519 signature verifies with the managed public key, and context tampering invalidates verification.
+- **Validation status:** Exact-head build, tests and CI pending. This does not establish that all external consumers verify the envelope; contract-level consumer verification remains required before closing the wider protocol finding.
