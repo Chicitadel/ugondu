@@ -93,13 +93,15 @@ import {
     DescribeServicesCommand,
     DeregisterTaskDefinitionCommand,
     DeleteServiceCommand,
-    UpdateServiceCommand
+    UpdateServiceCommand,
+    waitUntilServicesStable
 } from '@aws-sdk/client-ecs';
 
 import {
     ECRClient,
     CreateRepositoryCommand,
-    GetAuthorizationTokenCommand
+    GetAuthorizationTokenCommand,
+    DescribeImagesCommand
 } from '@aws-sdk/client-ecr';
 
 import {
@@ -121,6 +123,8 @@ type CommandResult = { stdout: string; stderr: string };
 type ContainerRuntime = {
     run(command: string, args: string[], stdin?: string): Promise<CommandResult>;
 };
+
+type EcsDeploymentWaiter = (cluster: string, service: string) => Promise<void>;
 
 class DockerCliRuntime implements ContainerRuntime {
     public run(command: string, args: string[], stdin?: string): Promise<CommandResult> {
@@ -155,8 +159,9 @@ export class AwsNativeClient implements IAwsClient {
     private iam: IAMClient;
     private region: string;
     private currentTransactionId?: string;
+    private readonly deploymentWaiter: EcsDeploymentWaiter;
 
-    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }, transactionId?: string, containerRuntime: ContainerRuntime = new DockerCliRuntime()) {
+    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }, transactionId?: string, containerRuntime: ContainerRuntime = new DockerCliRuntime(), deploymentWaiter?: EcsDeploymentWaiter) {
         this.region = region;
         this.containerRuntime = containerRuntime;
         this.currentTransactionId = transactionId || process.env.UGONDU_TRANSACTION_ID;
@@ -169,6 +174,15 @@ export class AwsNativeClient implements IAwsClient {
         this.ecr = new ECRClient(config);
         this.cw = new CloudWatchLogsClient(config);
         this.iam = new IAMClient(config);
+        this.deploymentWaiter = deploymentWaiter || (async (cluster, service) => {
+            const result = await waitUntilServicesStable(
+                { client: this.ecs, maxWaitTime: 600, minDelay: 5, maxDelay: 15 },
+                { cluster, services: [service] },
+            );
+            if (result.state !== 'SUCCESS') {
+                throw new Error(`ECS_SERVICE_STABILITY_NOT_CONFIRMED:${result.state}`);
+            }
+        });
         Logger.info(__t('aws.client.instantiated', { region }));
     }
 
@@ -618,7 +632,23 @@ export class AwsNativeClient implements IAwsClient {
         return res.cluster.clusterName;
     }
 
+    private resolveContainerPort(): number {
+        const configured = process.env.UGONDU_ECS_CONTAINER_PORT || '8080';
+        const port = Number(configured);
+        if (!Number.isInteger(port) || port < 1 || port > 65535) {
+            throw new Error('ECS_CONTAINER_PORT_INVALID');
+        }
+        return port;
+    }
+
+    private taskDefinitionFamily(taskDefinitionArn: string): string {
+        const match = taskDefinitionArn.match(/:task-definition\/([A-Za-z0-9_-]+):\d+$/);
+        if (!match) throw new Error('ECS_TASK_DEFINITION_ARN_INVALID');
+        return match[1];
+    }
+
     public async registerTaskDefinition(name: string, imageUri: string, cpu: string, memory: string, executionRoleArn: string, taskRoleArn: string, logGroupName: string): Promise<string> {
+        const containerPort = this.resolveContainerPort();
         const cmd = new RegisterTaskDefinitionCommand({
             family: name,
             networkMode: 'awsvpc',
@@ -632,7 +662,7 @@ export class AwsNativeClient implements IAwsClient {
                 image: imageUri,
                 essential: true,
                 portMappings: [{
-                    containerPort: Number(process.env.UGONDU_ECS_CONTAINER_PORT || '8080'),
+                    containerPort,
                     protocol: 'tcp'
                 }],
                 logConfiguration: {
@@ -651,6 +681,11 @@ export class AwsNativeClient implements IAwsClient {
     }
 
     public async createEcsService(clusterName: string, serviceName: string, taskDefinitionArn: string, desiredCount: number, subnets: string[], securityGroups: string[], targetGroupArn?: string): Promise<string> {
+        if (!clusterName || !serviceName || !Number.isInteger(desiredCount) || desiredCount < 1 || desiredCount > 2 || subnets.length < 2 || securityGroups.length < 1) {
+            throw new Error('ECS_SERVICE_CONFIGURATION_INVALID');
+        }
+        const containerPort = this.resolveContainerPort();
+        const containerName = targetGroupArn ? this.taskDefinitionFamily(taskDefinitionArn) : undefined;
         const cmd = new CreateServiceCommand({
             cluster: clusterName,
             tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: this.getTransactionId() }],
@@ -667,12 +702,13 @@ export class AwsNativeClient implements IAwsClient {
             },
             loadBalancers: targetGroupArn ? [{
                 targetGroupArn,
-                containerName: serviceName,
-                containerPort: Number(process.env.UGONDU_ECS_CONTAINER_PORT || '8080')
+                containerName: containerName!,
+                containerPort
             }] : undefined
         });
         const res = await this.ecs.send(cmd);
         if (!res.service || !res.service.serviceArn) throw new Error(__t('ecs_service_creation_failed'));
+        await this.deploymentWaiter(clusterName, res.service.serviceArn);
         return res.service.serviceArn;
     }
 
@@ -823,10 +859,16 @@ export class AwsNativeClient implements IAwsClient {
         if (!imageId || !registryId) throw new Error('CONTAINER_PUSH_ARGUMENTS_INVALID');
         let registryUrl: URL;
         try { registryUrl = new URL(`https://${registryId}`); } catch { throw new Error('ECR_REPOSITORY_URI_INVALID'); }
-        const hostMatch = registryUrl.hostname.match(/^(\d{12})\.dkr\.ecr\.([a-z]{2}-[a-z]+-\d)\.amazonaws\.com(?:\.cn)?$/);
-        if (!hostMatch || hostMatch[2] !== this.region || !registryUrl.pathname || registryUrl.pathname === '/') {
+        const hostMatch = registryUrl.hostname.match(/^(\d{12})\.dkr\.ecr\.([a-z]{2}(?:-[a-z]+)+-\d)\.amazonaws\.com(?:\.cn)?$/);
+        if (!hostMatch || hostMatch[2] !== this.region || !registryUrl.pathname || registryUrl.pathname === '/' ||
+            registryUrl.username || registryUrl.password || registryUrl.port || registryUrl.search || registryUrl.hash) {
             throw new Error('ECR_REPOSITORY_URI_OUTSIDE_CONFIGURED_REGION');
         }
+        const repositoryAndTag = registryUrl.pathname.replace(/^\/+/, '');
+        const tagSeparator = repositoryAndTag.lastIndexOf(':');
+        const repositoryName = tagSeparator > repositoryAndTag.lastIndexOf('/') ? repositoryAndTag.slice(0, tagSeparator) : repositoryAndTag;
+        const imageTag = tagSeparator > repositoryAndTag.lastIndexOf('/') ? repositoryAndTag.slice(tagSeparator + 1) : 'latest';
+        if (!repositoryName || !imageTag || repositoryName.includes('..')) throw new Error('ECR_REPOSITORY_URI_INVALID');
         const auth = await this.ecr.send(new GetAuthorizationTokenCommand({ registryIds: [hostMatch[1]] }));
         const authData = auth.authorizationData?.find((entry) => {
             if (!entry.proxyEndpoint) return false;
@@ -841,10 +883,15 @@ export class AwsNativeClient implements IAwsClient {
         await this.containerRuntime.run('docker', ['login', '--username', username, '--password-stdin', registryUrl.origin], password);
         await this.containerRuntime.run('docker', ['tag', imageId, registryId]);
         await this.containerRuntime.run('docker', ['push', registryId]);
-        const inspected = await this.containerRuntime.run('docker', ['image', 'inspect', '--format', '{{index .RepoDigests 0}}', registryId]);
-        const digestMatch = inspected.stdout.match(/@((?:sha256):[a-f0-9]{64})$/i);
-        if (!digestMatch) throw new Error('ECR_PUSH_DIGEST_NOT_VERIFIED');
-        return { id: inspected.stdout, digest: digestMatch[1] };
+        const remoteImage = await this.ecr.send(new DescribeImagesCommand({
+            repositoryName,
+            imageIds: [{ imageTag }],
+        }));
+        const remoteDigest = remoteImage.imageDetails?.[0]?.imageDigest;
+        if (!remoteDigest || !/^sha256:[a-f0-9]{64}$/i.test(remoteDigest)) {
+            throw new Error('ECR_REMOTE_PUSH_DIGEST_NOT_VERIFIED');
+        }
+        return { id: `${registryUrl.hostname}/${repositoryName}@${remoteDigest}`, digest: remoteDigest };
     }
 
     public async createTaskDefinition(family: string, image: string): Promise<{ id: string }> {
@@ -897,6 +944,7 @@ export class AwsNativeClient implements IAwsClient {
         }
         const response = await this.ecs.send(new UpdateServiceCommand({ cluster, service, taskDefinition: taskDefinitionArn, desiredCount }));
         if (!response.service?.serviceArn) throw new Error('ECS_DEPLOYMENT_RESPONSE_INVALID');
+        await this.deploymentWaiter(cluster, response.service.serviceArn);
         return { id: response.service.serviceArn };
     }
 
@@ -909,6 +957,7 @@ export class AwsNativeClient implements IAwsClient {
         const [, cluster] = match;
         const response = await this.ecs.send(new UpdateServiceCommand({ cluster, service: id, taskDefinition: previousTaskDefinitionArn }));
         if (!response.service?.serviceArn) throw new Error('ECS_ROLLBACK_RESPONSE_INVALID');
+        await this.deploymentWaiter(cluster, response.service.serviceArn);
     }
 }
 

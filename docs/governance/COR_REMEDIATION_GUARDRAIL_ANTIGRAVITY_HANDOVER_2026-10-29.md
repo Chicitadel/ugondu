@@ -140,3 +140,17 @@ These receipts prove only the stated automated checks. Do not mark either findin
 - **Validation status:** Exact-head engine-core typecheck, Jest suite, root CI and COR runs pending. This is a high-impact provider-integrity finding. Do not close until exact-head checks pass and the AWS physical gate is run only after explicit budget approval.
 
 - **Portability correction:** ECS task definition port mapping and optional load-balancer target port now use `UGONDU_ECS_CONTAINER_PORT` (default 8080) instead of silently assuming port 80, allowing Node/Spring services to configure their actual listener without code edits. A regression test verifies the configured port and log-group wiring.
+
+## Finding UG-COR-ECS-ROLLOUT-READINESS-001 — IMPLEMENTED; EXACT-HEAD VALIDATION PENDING
+
+- **Root cause:** The provider's `deployFargate` returned the ECS service ARN immediately after `UpdateService` accepted the request. An accepted update is not proof that tasks started, health checks passed, or the service reached a stable deployment. Service creation similarly returned an ARN without waiting for readiness. A malformed `UGONDU_ECS_CONTAINER_PORT` could be sent to AWS, and load-balancer wiring used the service name as the container name even when the task-definition family/container name differed.
+- **Physical fix on branch `fix/aws-ecs-rollout-readiness-2026-10-29`:**
+  - Added the AWS SDK `waitUntilServicesStable` waiter with a bounded 600-second maximum and explicit non-success failure. Deployment, rollback, and the high-level service creation path now await stability before returning success.
+  - Added injectable waiter seam for deterministic regression tests without pretending a mocked waiter is live AWS qualification.
+  - Added fail-closed integer/range validation for container ports (1–65535; default 8080).
+  - When a target group is supplied, derives the load-balancer container name from the task-definition ARN family rather than assuming it equals the ECS service name.
+  - Added validation for direct `createEcsService` calls, including bounded desired count and required network inputs.
+  - ECR push completion is now verified with `DescribeImages` against the remote repository/tag and returns the registry-reported digest; it no longer trusts a local Docker `RepoDigests` entry as the evidence receipt.
+- **Regression coverage:** Expanded `aws-native-client-no-synthetic-success.spec.ts` for readiness waiting on service creation/deployment/rollback, unstable rollout rejection, invalid port rejection before AWS calls, correct target-group container-name/port mapping, and fail-closed remote ECR digest verification.
+- **Validation status:** Source and regression tests are committed on the dedicated branch; exact-head build, Jest, CI and COR receipts must complete on the final commit. Unit tests inject a waiter and mock AWS SDK responses; they do not prove real AWS service health.
+- **Release guardrail:** Do not report ECS deployment as successful until the stability waiter returns SUCCESS. Keep the overall status `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until authorized AWS staging, health/readiness, rollback, and non-production AeroBill/Mandatag transaction receipts are collected.
