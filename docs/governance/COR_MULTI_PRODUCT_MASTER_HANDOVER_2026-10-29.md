@@ -271,3 +271,15 @@ A fresh infrastructure review found that the AZ parameter still defaulted to `eu
 **Latest follow-up commits:** template `6307f818`, test `93c50d76`, assertion correction `7c03a74`, audit note `5ca1fb11`, guardrail `2b6aa9c8`. These commits advance the branch after `1826e14e`; all prior CI/COR receipts are now historical only for the old head. Exact-head tests/CI/COR must rerun before the new portability finding is closed.
 
 No AWS resources were provisioned. The template remains a low-cost EC2 host bootstrap and does not deploy either application backend or prove TLS, persistent data, live federation, rollback or production readiness. Commercial gate remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## 2026-10-30 forensic follow-up — AWS bootstrap and Budgets IAM contract
+
+Two additional confirmed portability/security defects were physically fixed on dedicated PR #57 branch `fix/cor-runner-mandatory-evidence-gate-2026-10-29`:
+
+1. **`UG-COR-AWS-BOOTSTRAP-REGION-PINNING-001`** — removed the `eu-west-3a` default from the AvailabilityZone parameter, changed the VPC Region tag to `!Ref AWS::Region`, generalized Paris-specific descriptions, and added a regression test for no fixed AZ/region values. Commits: `6307f818`, `93c50d76`, `7c03a74`.
+2. **`UG-COR-AWS-BUDGET-IAM-ARN-CONTRACT-001`** — AWS Budgets API/IAM mapping was wrong: the previous implementation used a colon-form budget ARN and IAM action names that AWS does not define for CreateBudget/DescribeBudget/DeleteBudget. Corrected to canonical slash-form ARN `arn:PARTITION:budgets::ACCOUNT:budget/BUDGET_NAME`, `budgets:ModifyBudget` for create/update/delete lifecycle, and `budgets:ViewBudget` for read-back. Added exact-ARN/action regression assertions. Commits: `230e42b1`, `59b99943`.
+
+The AWS authorization source states CreateBudget, UpdateBudget and DeleteBudget APIs are authorized by `budgets:ModifyBudget`, and DescribeBudget APIs by `budgets:ViewBudget`; the canonical ARN separator is slash. See [AWS Budgets Service Authorization Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html) and [Budget API reference](https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_Budget.html).
+
+The PR #57 candidate has advanced after the previously successful exact-head receipts. Current head must be requalified; do not reuse receipts for `1826e14e`. No AWS resources were provisioned. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
