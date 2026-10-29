@@ -50,10 +50,6 @@ Parameters:
     Type: String
     Default: systems@airroofers.eu
     Description: System notification email for budget and operational alerts.
-  AdminEmail:
-    Type: String
-    Default: systems@airroofers.eu
-    Description: System notification email for budget and operational alerts.
 
 Resources:
   MonthlyCostBudget:
