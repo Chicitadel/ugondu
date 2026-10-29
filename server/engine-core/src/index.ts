@@ -186,14 +186,9 @@ admissionController.admit = (
     if (registered.expiresAt !== undefined && Date.now() > registered.expiresAt) {
       return { status: 'REJECTED' };
     }
-    return { status: 'ADMITTED' };
-  }
-
-  if (process.env['NODE_ENV'] === 'test' && normalized === 'valid_passport_id') {
-    return { status: 'ADMITTED' };
-  }
-
-  if (context?.tenantId && /^(?:pp_|pass_|passport_|valid_)[a-zA-Z0-9_\-]+$/.test(normalized)) {
+    if (context?.tenantId && context.tenantId !== registered.tenantId) {
+      return { status: 'REJECTED' };
+    }
     return { status: 'ADMITTED' };
   }
 
