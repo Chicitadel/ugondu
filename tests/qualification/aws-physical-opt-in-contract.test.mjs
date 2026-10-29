@@ -59,3 +59,24 @@ test('dedicated fix branches trigger non-production CI and COR validation on pus
   assert.match(ciTriggers, /pull_request:[\s\S]*?'fix\/\*\*'/);
   assert.match(corTriggers, /pull_request:[\s\S]*?'fix\/\*\*'/);
 });
+
+
+test('COR signing private key is scoped only to the trusted signing step', () => {
+  const corJob = section(cor, '  cor:', '  aws-physical-gate:');
+  const jobEnvStart = corJob.indexOf('    env:');
+  const jobStepsStart = corJob.indexOf('    steps:');
+  assert.ok(jobEnvStart >= 0 && jobStepsStart > jobEnvStart, 'COR job env and steps must be present');
+  const jobEnv = corJob.slice(jobEnvStart, jobStepsStart);
+  assert.doesNotMatch(jobEnv, /COR_SIGNING_KEY|COR_PUBLIC_KEY/, 'signing credentials must not be job-wide');
+
+  const trustRoot = section(cor, '      - name: Verify COR signing trust root', '      - name: Validate stream registry');
+  assert.match(trustRoot, /COR_PUBLIC_KEY:\s*\$\{\{\s*secrets\.COR_PUBLIC_KEY\s*\}\}/);
+  assert.match(trustRoot, /if: github\.event_name == 'workflow_dispatch'/);
+
+  const signer = section(cor, '      - name: Sign final COR authority', '      - name: Final candidate integrity check');
+  assert.match(signer, /COR_SIGNING_KEY:\s*\$\{\{\s*secrets\.COR_SIGNING_KEY\s*\}\}/);
+  assert.match(signer, /if: github\.event_name == 'workflow_dispatch'/);
+  assert.match(signer, /vars\.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true'/);
+  assert.match(signer, /refs\/heads\/main/);
+  assert.match(signer, /refs\/heads\/phase4\/production-hardening/);
+});
