@@ -30,6 +30,9 @@
 
 import { Logger, __t, translateProviderError } from '@ugondu/shared';
 import * as crypto from 'crypto';
+import { spawn } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { IAwsClient } from './aws';
 import { resolveSecret } from '../engine/SecretGuard';
 import { ComputeStatus } from '../capabilities/compute';
@@ -87,12 +90,16 @@ import {
     CreateClusterCommand,
     RegisterTaskDefinitionCommand,
     CreateServiceCommand,
-    DescribeServicesCommand
+    DescribeServicesCommand,
+    DeregisterTaskDefinitionCommand,
+    DeleteServiceCommand,
+    UpdateServiceCommand
 } from '@aws-sdk/client-ecs';
 
 import {
     ECRClient,
-    CreateRepositoryCommand
+    CreateRepositoryCommand,
+    GetAuthorizationTokenCommand
 } from '@aws-sdk/client-ecr';
 
 import {
@@ -110,6 +117,33 @@ import { PolicyGovernanceEngine, ProviderAuthorizationAdapter } from '../../gove
 import { AwsGovernanceAdapter } from '../../governance/providers/aws/adapter';
 import { UniversalPermission } from '../../governance/model/authorization';
 
+type CommandResult = { stdout: string; stderr: string };
+type ContainerRuntime = {
+    run(command: string, args: string[], stdin?: string): Promise<CommandResult>;
+};
+
+class DockerCliRuntime implements ContainerRuntime {
+    public run(command: string, args: string[], stdin?: string): Promise<CommandResult> {
+        return new Promise((resolve, reject) => {
+            const child = spawn(command, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+            let stdout = '';
+            let stderr = '';
+            child.stdout.setEncoding('utf8').on('data', (chunk) => { stdout += chunk; });
+            child.stderr.setEncoding('utf8').on('data', (chunk) => { stderr += chunk; });
+            child.on('error', reject);
+            child.on('close', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`CONTAINER_COMMAND_FAILED:${command}:${code}:${stderr.slice(-2000)}`));
+                    return;
+                }
+                resolve({ stdout: stdout.trim(), stderr: stderr.trim() });
+            });
+            if (stdin !== undefined) child.stdin.end(stdin);
+            else child.stdin.end();
+        });
+    }
+}
+
 export class AwsNativeClient implements IAwsClient {
     private ec2: EC2Client;
     private rds: RDSClient;
@@ -122,8 +156,9 @@ export class AwsNativeClient implements IAwsClient {
     private region: string;
     private currentTransactionId?: string;
 
-    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }, transactionId?: string) {
+    constructor(region: string, credentials?: { accessKeyId: string, secretAccessKey: string, sessionToken?: string }, transactionId?: string, containerRuntime: ContainerRuntime = new DockerCliRuntime()) {
         this.region = region;
+        this.containerRuntime = containerRuntime;
         this.currentTransactionId = transactionId || process.env.UGONDU_TRANSACTION_ID;
         const config = { region, ...(credentials ? { credentials } : {}) };
         this.ec2 = new EC2Client(config);
@@ -194,31 +229,13 @@ export class AwsNativeClient implements IAwsClient {
     public async describeServices(cluster: string, services: string[]): Promise<any> {
         try {
             const res = await this.ecs.send(new DescribeServicesCommand({ cluster, services }));
-            if (res.services && res.services.length > 0) return res;
-        } catch (err: unknown) {
-            if (this.fargateSimulationState) {
-                Logger.warn(__t('describe_services_aws_call_failed_fallback'), {
-                    cluster,
-                    services,
-                    error: err instanceof Error ? err.message : String(err)
-                });
-            } else {
-                throw translateProviderError('AWS', err, { action: 'describeServices', cluster, services });
+            if (res.failures?.length) {
+                throw new Error(`ECS_SERVICE_DESCRIBE_FAILED:${res.failures.map((f) => f.reason || f.detail || 'unknown').join(';')}`);
             }
+            return res;
+        } catch (err: unknown) {
+            throw translateProviderError('AWS', err, { action: 'describeServices', cluster, services, failClosed: true });
         }
-        if (this.fargateSimulationState) {
-            return {
-                services: [{
-                    serviceArn: services[0] || this.fargateSimulationState.serviceArn,
-                    clusterArn: cluster,
-                    taskDefinition: this.fargateSimulationState.taskDefinition,
-                    runningCount: this.fargateSimulationState.runningCount,
-                    desiredCount: 1,
-                    status: 'ACTIVE'
-                }]
-            };
-        }
-        return { services: [] };
     }
     public async describeVpcs(params: any): Promise<any> { return this.ec2.send(new DescribeVpcsCommand(params)); }
     public async describeSubnets(params: any): Promise<any> { return this.ec2.send(new DescribeSubnetsCommand(params)); }
@@ -766,7 +783,7 @@ export class AwsNativeClient implements IAwsClient {
         return (inst as any)[attribute];
     }
 
-    private fargateSimulationState?: { cluster: string; serviceArn: string; initialTaskDefinition: string; taskDefinition: string; runningCount: number };
+    private readonly containerRuntime: ContainerRuntime;
 
     public async createContainerRegistry(name: string): Promise<{ id: string; uri: string }> {
         const uri = await this.createEcrRepository(name);
@@ -784,40 +801,110 @@ export class AwsNativeClient implements IAwsClient {
         }
     }
     public async buildContainerImage(dockerfile: string, tag: string): Promise<{ id: string }> {
-        const digest = crypto.createHash('sha256').update(`${dockerfile}:${tag}`).digest('hex');
-        return { id: `sha256:${digest}` };
+        if (!dockerfile || !tag || /\s/.test(tag)) throw new Error('CONTAINER_BUILD_ARGUMENTS_INVALID');
+        const dockerfilePath = path.resolve(dockerfile);
+        if (!fs.existsSync(dockerfilePath) || !fs.statSync(dockerfilePath).isFile()) {
+            throw new Error('CONTAINER_DOCKERFILE_NOT_FOUND');
+        }
+        const contextPath = path.dirname(dockerfilePath);
+        await this.containerRuntime.run('docker', ['build', '--file', dockerfilePath, '--tag', tag, contextPath]);
+        const inspected = await this.containerRuntime.run('docker', ['image', 'inspect', '--format', '{{.Id}}', tag]);
+        if (!/^sha256:[a-f0-9]{64}$/i.test(inspected.stdout)) {
+            throw new Error('CONTAINER_BUILD_IMAGE_ID_INVALID');
+        }
+        return { id: inspected.stdout };
     }
+
     public async pushContainerImage(imageId: string, registryId: string): Promise<{ id: string; digest: string }> {
-        const rawDigest = imageId.startsWith('sha256:') ? imageId.slice(7) : crypto.createHash('sha256').update(imageId).digest('hex');
-        const digest = `sha256:${rawDigest}`;
-        return { id: `${registryId}@${digest}`, digest };
+        if (!imageId || !registryId) throw new Error('CONTAINER_PUSH_ARGUMENTS_INVALID');
+        let registryUrl: URL;
+        try { registryUrl = new URL(`https://${registryId}`); } catch { throw new Error('ECR_REPOSITORY_URI_INVALID'); }
+        const hostMatch = registryUrl.hostname.match(/^(\d{12})\.dkr\.ecr\.([a-z]{2}-[a-z]+-\d)\.amazonaws\.com(?:\.cn)?$/);
+        if (!hostMatch || hostMatch[2] !== this.region || !registryUrl.pathname || registryUrl.pathname === '/') {
+            throw new Error('ECR_REPOSITORY_URI_OUTSIDE_CONFIGURED_REGION');
+        }
+        const auth = await this.ecr.send(new GetAuthorizationTokenCommand({ registryIds: [hostMatch[1]] }));
+        const authData = auth.authorizationData?.find((entry) => {
+            if (!entry.proxyEndpoint) return false;
+            try { return new URL(entry.proxyEndpoint).hostname === registryUrl.hostname; } catch { return false; }
+        });
+        if (!authData?.authorizationToken || !authData.proxyEndpoint) throw new Error('ECR_AUTHORIZATION_TOKEN_MISSING');
+        const decoded = Buffer.from(authData.authorizationToken, 'base64').toString('utf8');
+        const separator = decoded.indexOf(':');
+        if (separator <= 0) throw new Error('ECR_AUTHORIZATION_TOKEN_INVALID');
+        const username = decoded.slice(0, separator);
+        const password = decoded.slice(separator + 1);
+        await this.containerRuntime.run('docker', ['login', '--username', username, '--password-stdin', registryUrl.origin], password);
+        await this.containerRuntime.run('docker', ['tag', imageId, registryId]);
+        await this.containerRuntime.run('docker', ['push', registryId]);
+        const inspected = await this.containerRuntime.run('docker', ['image', 'inspect', '--format', '{{index .RepoDigests 0}}', registryId]);
+        const digestMatch = inspected.stdout.match(/@((?:sha256):[a-f0-9]{64})$/i);
+        if (!digestMatch) throw new Error('ECR_PUSH_DIGEST_NOT_VERIFIED');
+        return { id: inspected.stdout, digest: digestMatch[1] };
     }
+
     public async createTaskDefinition(family: string, image: string): Promise<{ id: string }> {
-        const arn = `arn:aws:ecs:${this.region}:971671216490:task-definition/${family}:1`;
+        const executionRoleArn = process.env.UGONDU_ECS_EXECUTION_ROLE_ARN;
+        const taskRoleArn = process.env.UGONDU_ECS_TASK_ROLE_ARN;
+        const logGroupName = process.env.UGONDU_ECS_LOG_GROUP;
+        const cpu = process.env.UGONDU_ECS_TASK_CPU || '512';
+        const memory = process.env.UGONDU_ECS_TASK_MEMORY || '1024';
+        if (!executionRoleArn || !taskRoleArn || !logGroupName) {
+            throw new Error('ECS_TASK_DEFINITION_CONFIGURATION_MISSING');
+        }
+        const arn = await this.registerTaskDefinition(family, image, cpu, memory, executionRoleArn, taskRoleArn, logGroupName);
         return { id: arn };
     }
-    public async deleteTaskDefinition(arn: string): Promise<void> {}
+
+    public async deleteTaskDefinition(arn: string): Promise<void> {
+        if (!/^arn:aws(?:-us-gov)?:ecs:[a-z]{2}-[a-z]+-\d:\d{12}:task-definition\/[A-Za-z0-9_-]+:\d+$/.test(arn)) {
+            throw new Error('ECS_TASK_DEFINITION_ARN_INVALID');
+        }
+        await this.ecs.send(new DeregisterTaskDefinitionCommand({ taskDefinition: arn }));
+    }
+
     public async createContainerService(cluster: string, serviceName: string, taskDefinitionArn: string): Promise<{ id: string }> {
-        const arn = `arn:aws:ecs:${this.region}:971671216490:service/${cluster}/${serviceName}`;
-        this.fargateSimulationState = { cluster, serviceArn: arn, initialTaskDefinition: taskDefinitionArn, taskDefinition: taskDefinitionArn, runningCount: 1 };
-        return { id: arn };
+        const subnets = (process.env.UGONDU_ECS_SUBNET_IDS || '').split(',').map((v) => v.trim()).filter(Boolean);
+        const securityGroups = (process.env.UGONDU_ECS_SECURITY_GROUP_IDS || '').split(',').map((v) => v.trim()).filter(Boolean);
+        const desiredCount = Number(process.env.UGONDU_ECS_DESIRED_COUNT || '1');
+        if (!cluster || !serviceName || !taskDefinitionArn || subnets.length < 2 || securityGroups.length < 1 ||
+            !Number.isInteger(desiredCount) || desiredCount < 1 || desiredCount > 2) {
+            throw new Error('ECS_SERVICE_CONFIGURATION_INVALID');
+        }
+        const id = await this.createEcsService(cluster, serviceName, taskDefinitionArn, desiredCount, subnets, securityGroups);
+        return { id };
     }
+
     public async deleteContainerService(arn: string): Promise<void> {
-        this.fargateSimulationState = undefined;
+        const match = arn.match(/^arn:aws(?:-us-gov)?:ecs:[a-z]{2}-[a-z]+-\d:\d{12}:service\/([^/]+)\/([^/]+)$/);
+        if (!match) throw new Error('ECS_SERVICE_ARN_INVALID');
+        const [, cluster, service] = match;
+        await this.ecs.send(new DeleteServiceCommand({ cluster, service: arn, force: true }));
     }
+
     public async deployFargate(params: any): Promise<{ id: string }> {
-        if (this.fargateSimulationState) {
-            const hasZeroDigest = String(params.taskDefinitionArn || '').includes('0000000000000000');
-            this.fargateSimulationState.taskDefinition = params.taskDefinitionArn;
-            this.fargateSimulationState.runningCount = hasZeroDigest ? 0 : 1;
+        const cluster = typeof params?.cluster === 'string' ? params.cluster : '';
+        const service = typeof params?.serviceName === 'string' ? params.serviceName : '';
+        const taskDefinitionArn = typeof params?.taskDefinitionArn === 'string' ? params.taskDefinitionArn : '';
+        const desiredCount = params?.desiredCount === undefined ? 1 : Number(params.desiredCount);
+        if (!cluster || !service || !/^arn:aws(?:-us-gov)?:ecs:[a-z]{2}-[a-z]+-\d:\d{12}:task-definition\/[A-Za-z0-9_-]+:\d+$/.test(taskDefinitionArn) ||
+            !Number.isInteger(desiredCount) || desiredCount < 1 || desiredCount > 2) {
+            throw new Error('ECS_DEPLOYMENT_PARAMETERS_INVALID');
         }
-        return { id: params.serviceName || 'fargate-svc' };
+        const response = await this.ecs.send(new UpdateServiceCommand({ cluster, service, taskDefinition: taskDefinitionArn, desiredCount }));
+        if (!response.service?.serviceArn) throw new Error('ECS_DEPLOYMENT_RESPONSE_INVALID');
+        return { id: response.service.serviceArn };
     }
-    public async rollbackFargateDeployment(id: string): Promise<void> {
-        if (this.fargateSimulationState) {
-            this.fargateSimulationState.taskDefinition = this.fargateSimulationState.initialTaskDefinition;
-            this.fargateSimulationState.runningCount = 1;
+
+    public async rollbackFargateDeployment(id: string, previousTaskDefinitionArn?: string): Promise<void> {
+        if (!previousTaskDefinitionArn || !/^arn:aws(?:-us-gov)?:ecs:[a-z]{2}-[a-z]+-\d:\d{12}:task-definition\/[A-Za-z0-9_-]+:\d+$/.test(previousTaskDefinitionArn)) {
+            throw new Error('ECS_ROLLBACK_PREVIOUS_TASK_DEFINITION_REQUIRED');
         }
+        const match = id.match(/^arn:aws(?:-us-gov)?:ecs:[a-z]{2}-[a-z]+-\d:\d{12}:service\/([^/]+)\/([^/]+)$/);
+        if (!match) throw new Error('ECS_SERVICE_ARN_INVALID');
+        const [, cluster] = match;
+        const response = await this.ecs.send(new UpdateServiceCommand({ cluster, service: id, taskDefinition: previousTaskDefinitionArn }));
+        if (!response.service?.serviceArn) throw new Error('ECS_ROLLBACK_RESPONSE_INVALID');
     }
 }
 
