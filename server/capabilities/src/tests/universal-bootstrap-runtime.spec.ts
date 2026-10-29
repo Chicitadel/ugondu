@@ -112,6 +112,14 @@ describe('UniversalBootstrapRuntime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)', () => {
     expect(graph.status).toBe('READY');
     expect(graph.exitCode).toBe(0);
     expect(graph.operations.length).toBe(15);
+    const budgetOperation = graph.operations.find((operation) => operation.resourceType === 'AWS::Budgets::Budget');
+    expect(budgetOperation?.capabilityId).toBe('cap.cost.aws_budget');
+    expect(budgetOperation?.resourceArns).toContain(
+      'arn:aws:budgets::971671216490:budget:airroofers-staging-monthly-cost-budget',
+    );
+    expect(budgetOperation?.providerActions).toEqual(
+      expect.arrayContaining(['budgets:CreateBudget', 'budgets:ModifyBudget', 'budgets:DescribeBudget']),
+    );
     expect(graph.capabilityIds).toEqual(
       expect.arrayContaining([
         'cap.iac.cloudformation_stack',
