@@ -278,3 +278,9 @@ The current `.governance/cor/ugondu-cor-qualification-manifest.json` has `candid
 **Limits / status:** physical edits are committed, but local test execution was unavailable in this session. Exact-head CI/COR must pass before calling the new gate GREEN. The finding is **IMPLEMENTED / EXACT-HEAD VALIDATION PENDING**, not closed until CI confirms. A green validation workflow still does not certify live staging, federated AeroBill/Mandatag transactions, or commercial release.
 
 **Evidence model:** do not change the committed manifest to claim completed statuses. Qualification results belong in the per-candidate generated ledger/artifact; it must bind all 40 receipts to one exact candidate commit/tree, and any missing, duplicate, stale, failed or digest-invalid receipt must block finalization.
+
+
+### Exact-head follow-up — validator diagnostic correction
+- After the first COR workflow passed on `2af6d042bbb26d7b3d656826c9387b77df4ed357`, reinspection caught that the registry validator's blocked diagnostic used an escaped backslash-n instead of an actual newline.
+- Corrected `scripts/check-cor-stream-registry.js` on the same dedicated branch; commit `729ffb13c112ea9dab7701875b42f4c26daa213b`.
+- Because this changes the candidate head, prior CI/COR receipts apply to the prior head only. Re-run exact-head CI/COR on the new HEAD before calling the latest candidate verified.
