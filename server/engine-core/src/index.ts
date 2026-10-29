@@ -52,6 +52,10 @@ import { admissionController }          from './passport/gatekeeper/admission-co
 export const keyState            = loadOrGeneratePersistentKeys();
 export const BILLING_GATEWAY_URL = ProductRegistry.getServiceUrl('billing_gateway', '/v1');
 
+admissionController.configureExecutionEnvelopeSigner((payload) =>
+  sign(null, Buffer.from(payload, 'utf8'), keyState.privateKey).toString('base64url')
+);
+
 // ─── Admission Passport Registry & Signed Passport Helper ────────────────────
 interface RegisteredPassportRecord {
   passportId: string;
