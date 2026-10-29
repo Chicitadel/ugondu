@@ -861,3 +861,14 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - **Regression coverage:** Extended `tests/qualification/aws-staging-template-safety.test.mjs` to require no AZ default, require the Region tag to use `!Ref AWS::Region`, and reject hardcoded `eu-west-3a`/region tag values.
 - **Verification:** Source and test changes are committed to the dedicated PR #57 branch. Exact-head CI/COR must rerun; prior successful receipts for `1826e14e` do not apply to this newer candidate.
 - **Scope boundary:** This corrects infrastructure portability only. The template still bootstraps a host; it does not deploy application containers, configure a TLS edge, or establish persistent production data services. No AWS resources were provisioned.
+
+
+## 2026-10-30 follow-up — AWS Budgets IAM/ARN contract defect
+
+**Finding ID:** `UG-COR-AWS-BUDGET-IAM-ARN-CONTRACT-001`
+
+- **Confirmed defect:** The first `cap.cost.aws_budget` mapping used a colon after `budget` in the resource ARN and IAM action names `budgets:CreateBudget`, `budgets:DescribeBudget`, and `budgets:DeleteBudget`. AWS's current Service Authorization Reference maps the CreateBudget, UpdateBudget, and DeleteBudget API operations to `budgets:ModifyBudget`; the read operations use `budgets:ViewBudget`. The canonical budget ARN separator is a slash: `arn:PARTITION:budgets::ACCOUNT:budget/BUDGET_NAME`.
+- **Physical remediation:** Updated the mapping to use `budget/${budgetName}`, `budgets:ModifyBudget` for create/update and rollback, and `budgets:ViewBudget` for read-back. Kept least-privilege account/name scoping and fail-closed unresolved-name handling.
+- **Regression coverage:** Updated the plan-graph test to assert the canonical slash-form ARN and valid IAM action names; explicitly rejects the prior nonexistent action strings and colon-form ARN.
+- **Authoritative reference:** AWS Service Authorization Reference: https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html ; AWS Budget API ARN pattern: https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_Budget.html
+- **Verification:** Code and test committed on PR #57 branch. Exact-head CI/COR must pass; previous receipts predate this fix and cannot close the finding.
