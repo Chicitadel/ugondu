@@ -5,7 +5,7 @@ const path = require('node:path');
 
 /**
  * Run the engine-core build before COR suites that import generated dist files.
- * Explicit skip is reserved for CI jobs that have already completed the build.
+ * Skipping the build is rejected because a prior build cannot be independently tied to this exact candidate.
  * Missing build configuration and every non-zero/indeterminate process result fail closed.
  */
 function runEngineBuildPreflight({
@@ -16,8 +16,9 @@ function runEngineBuildPreflight({
   stderr = () => {},
 }) {
   if (skipBuild) {
-    stdout('[COR-RUNNER] Build preflight skipped by explicit UGONDU_SKIP_BUILD=true; caller must have built the exact candidate.\n');
-    return { ok: true, skipped: true, reason: 'explicit-skip' };
+    const reason = 'UGONDU_SKIP_BUILD is prohibited: COR must build the exact candidate in this process';
+    stderr(`[COR-RUNNER] BUILD PREFLIGHT FAILED: ${reason}\\n`);
+    return { ok: false, skipped: true, reason };
   }
 
   const engineCoreDir = path.join(root, 'server', 'engine-core');
