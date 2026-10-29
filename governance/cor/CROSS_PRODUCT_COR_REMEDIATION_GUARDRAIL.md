@@ -125,3 +125,12 @@ The new workflow contract test `npm run test:aws-physical-opt-in` passed in stan
 - Ugondu current candidate `e3c6decee4b7d670112c4e619953092278fe6edb` had successful CI run [#40826286743](https://github.com/Chicitadel/ugondu/actions/runs/40826286743) and COR validation [#40826286716](https://github.com/Chicitadel/ugondu/actions/runs/40826286716). The AWS physical gate, candidate freshness, trust-root and final signing remain skipped in validation-only mode.
 - No AWS resources were deployed by this work. AWS remains conditional on traction/official engagement/funding and explicit account/budget authorization; AeroBill and Mandatag remain the sole federation authorities.
 - Status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
+
+
+## 2026-10-29 additional Ugondu security finding — UG-COR-SIGNING-SECRET-SCOPE-001
+
+- **Confirmed defect:** `.github/workflows/cor.yml` injected `COR_SIGNING_KEY` at the whole `cor` job level, exposing the private signing key to ordinary build, dependency-install and test steps even though only the final signer needs it. The trust-root public key was also job-wide.
+- **Physical fix:** removed both values from job-level `env`; `COR_PUBLIC_KEY` is scoped only to the trusted conditional trust-root verification step and `COR_SIGNING_KEY` only to the trusted conditional final-signing step. Both remain gated by manual workflow dispatch, explicit repository opt-in and the trusted release-branch allowlist.
+- **Regression test:** extended `tests/qualification/aws-physical-opt-in-contract.test.mjs` to fail if signing credentials return to job-wide scope or if the trust-root/signing steps lose the trusted dispatch/branch conditions.
+- **Current source/test candidate before this documentation update:** `b7fed10bd61d9d12134a68dbbb0022d0234e35e3`. Exact-head CI/COR evidence is pending; do not claim the new regression test passed until the current SHA's workflow completes.
+- This change does not deploy AWS resources and does not weaken any release gate.
