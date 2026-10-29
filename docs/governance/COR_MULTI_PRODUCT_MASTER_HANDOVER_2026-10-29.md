@@ -258,3 +258,16 @@ This status snapshot is intentionally exact-head and time-bound. Re-fetch PR hea
 - Ugondu CI [#40969219319](https://github.com/Chicitadel/ugondu/actions/runs/40969219319) is still in progress on that same head. All microservice workspace builds and Release Integrity & Governance Gates have passed; Docker Compose image validation and the integration job remain active. The integration job has already built all microservices, started all five services, passed readiness, and passed Billing Gateway and Engine Core tests; Plugin Manager tests were in progress at this snapshot.
 - Dumcholu PR #15 [Policy contract #40969420140](https://github.com/Chicitadel/dumcholu/actions/runs/40969420140), [deployment manifest #40969420151](https://github.com/Chicitadel/dumcholu/actions/runs/40969420151), and [product naming #40969428590](https://github.com/Chicitadel/dumcholu/actions/runs/40969428590) all completed SUCCESS on exact head `f837e6e1d23493bdaa3b47a6b11fd662cf8ae636`.
 - No source branch was modified after the heads above; the central handover branch itself has been updated separately. Re-fetch the PR head before making a merge decision.
+
+
+## 2026-10-30 follow-up — AWS region portability
+
+**Finding:** `UG-COR-AWS-BOOTSTRAP-REGION-PINNING-001`.
+
+The 2026-10-29 PR #57 exact-head receipts are now confirmed complete: [CI #40969228594](https://github.com/Chicitadel/ugondu/actions/runs/40969228594) and [COR #40969228621](https://github.com/Chicitadel/ugondu/actions/runs/40969228621) both SUCCESS on `1826e14efe00386ec49b9383630d91bb85f2f2e0`. The COR run skipped physical AWS qualification. CI also skipped Docker image validation and release publishing; those are not deployment or image-publication evidence.
+
+A fresh infrastructure review found that the AZ parameter still defaulted to `eu-west-3a` and the VPC Region tag/output description were Paris-pinned. On the same dedicated PR #57 branch, the AZ default was removed (deployment must supply an AZ valid in the target stack region), the Region tag now uses `!Ref AWS::Region`, and template/output descriptions were generalized. Added a regression assertion to `aws-staging-template-safety.test.mjs` for no fixed AZ default, dynamic Region tagging, and rejection of hardcoded Paris AZ/region values.
+
+**Latest follow-up commits:** template `6307f818`, test `93c50d76`, assertion correction `7c03a74`, audit note `5ca1fb11`, guardrail `2b6aa9c8`. These commits advance the branch after `1826e14e`; all prior CI/COR receipts are now historical only for the old head. Exact-head tests/CI/COR must rerun before the new portability finding is closed.
+
+No AWS resources were provisioned. The template remains a low-cost EC2 host bootstrap and does not deploy either application backend or prove TLS, persistent data, live federation, rollback or production readiness. Commercial gate remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
