@@ -195,3 +195,11 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **PR:** https://github.com/Chicitadel/ugondu/pull/57 (draft; exact-head validation pending).
 - **Protected refs:** No direct changes to `main` or `phase4/production-hardening`.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head tests, independent review, authorized AWS qualification, live external evidence and corporate approval are complete.
+
+
+### UG-COR-AWS-BUDGET-RESOURCE-AUTHORITY-GAP-001 — confirmed and physically fixed
+
+- **Observed after the resource-count correction:** the capability workspace progressed further but the plan graph returned `AUTHORITY_GAP` because `AWS::Budgets::Budget` had no resource-to-capability mapping. This proved that updating the expected resource count alone was insufficient.
+- **Physical fix:** Added a dedicated `cap.cost.aws_budget` mapping with budget create/modify, describe/read-back, and delete/rollback actions. The ARN builder resolves the exact nested `BudgetName` from CloudFormation `!Sub`/JSON `Fn::Sub`, substitutes the selected environment, and fails closed if unresolved placeholders remain. The provider capability registry now explicitly lists AWS Budgets.
+- **Regression evidence added:** The plan graph test asserts the budget resource is mapped, the scoped ARN is exactly `arn:aws:budgets::971671216490:budget:airroofers-staging-monthly-cost-budget`, and the required actions are present. With 15 template resources plus the CloudFormation stack operation, the expected operation count is 16.
+- **Prior CI:** Run [#40968027920](https://github.com/Chicitadel/ugondu/actions/runs/40968027920) failed at `graph.status` because the budget mapping was missing. It is a failure receipt, not a pass. The follow-up branch now includes the mapping; exact-head CI/COR must rerun.
