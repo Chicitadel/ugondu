@@ -368,3 +368,12 @@ Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / 
 **Verification status:** PHYSICAL CODE + REGRESSION TEST COMMITTED / CI PENDING. This chat runtime has not executed Go commands. Require exact-head Go formatting, vet, full tests and the supported OS/architecture matrix. The existing green receipts for earlier SHA `dc665fd8` do not validate this new source change or later documentation commits.
 
 **Safety:** No protected branch writes; no AWS provisioning or deployment. Continue to keep the PR draft/unmerged until exact-head evidence and all physical release prerequisites are reviewed. Overall COR remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+### Exact-head CI follow-up — regression assertion corrected
+
+The initial CI run `40856167040` failed in the newly added test because Linux returned a “file already closed” error not matching the test's overly specific `os.ErrInvalid` check. The injected unlock error itself was correctly propagated. The assertion was made portable by checking only that `file.Stat()` fails after unlock/close.
+
+- Test correction commit: `8672c94941be55e80a1ce895b5509ca30ba8fa10`.
+- Guardrail records the failed run and correction: `1e2170cb5c95d1e27be10e95eec9198836b8c8bb`.
+- **Verification remains PENDING** until CI runs against the latest branch head. The first failed run must remain in the evidence trail; do not hide it or infer success from the correction alone.
