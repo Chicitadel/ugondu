@@ -139,3 +139,15 @@ PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature
 - **Regression coverage:** added cases for readiness waiter behavior/failure, invalid ports, and target-group container-name/port mapping in `aws-native-client-no-synthetic-success.spec.ts`.
 - **Evidence discipline:** PR #54 exact-head CI/COR is pending until GitHub reports completion on its final head. The tests use injected waiters and mocked SDK responses; they do not count as live AWS deployment evidence.
 - **Release posture:** remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until authorized AWS staging health/readiness, rollback, and non-production AeroBill/Mandatag transaction receipts exist.
+
+
+## 10. Follow-up audit finding — UG-COR-ECS-CONTAINER-NAME-MISMATCH-001
+
+- **Finding-specific remediation PR:** https://github.com/Chicitadel/ugondu/pull/55
+- **Branch:** `fix/cor-ecs-container-name-resolution-2026-10-29`, based on the PR #54 rollout-readiness candidate; no `main`/`master` writes.
+- **Root cause:** The prior rollout-readiness change derived the load-balancer container name from the task-definition family. ECS task-definition family and each `containerDefinitions[].name` are separate fields; they may legitimately differ.
+- **Physical code fix:** The AWS provider now validates the task-definition ARN and reads the registered definition using `DescribeTaskDefinitionCommand`. It uses the declared container name and fails closed if none is available before calling `CreateService`.
+- **Regression tests:** The prior assumption test was replaced by a mismatch case (`api-container-family` vs `backend-api-container`), and a missing-container-name case verifies rejection before service creation.
+- **Handover note:** `docs/governance/UG-COR-ECS-CONTAINER-NAME-MISMATCH-001.md` on the finding branch records root cause, changed files, test expectations, proof obligations, and release guardrails.
+- **Evidence state:** Code/test/docs are committed; exact-head CI and COR evidence are not yet available at this writing. No local test execution or live AWS deployment is claimed. Refresh all receipts against the final head before closure.
+- **Release posture remains:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` pending exact-head automated checks, authorized physical AWS staging/rollback qualification, and live non-production AeroBill/Mandatag transactions.
