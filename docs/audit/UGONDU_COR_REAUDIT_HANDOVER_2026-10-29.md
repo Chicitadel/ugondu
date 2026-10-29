@@ -173,3 +173,25 @@ Added `tests/qualification/aws-staging-template-safety.test.mjs` and wired it in
 ### Build bypass closure follow-up
 
 A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=true` now returns a failed preflight because the runner has no independently verifiable exact-HEAD receipt for a prior build. The regression case now expects rejection. The diagnostic newline was also corrected. This follow-up changes the candidate again, so all prior CI/COR results are stale for release decisions.
+
+
+## Follow-up CI re-audit — mandatory evidence gate and AWS template expectation
+
+### UG-COR-EVIDENCE-GATE-SKIP-001 — confirmed and physically fixed
+
+- **Observed:** `scripts/run-cor-gates.js` omitted `tests/evidence-verification.test.js` when `UGONDU_SKIP_EVIDENCE_GATE=true`. This was an environment-variable bypass of a mandatory evidence gate.
+- **Fix:** The evidence-verification suite is now unconditional. The stale comment advertising `UGONDU_SKIP_BUILD=true` as an accepted prior-build optimization was corrected because the current preflight intentionally rejects that bypass.
+- **Regression guard:** Added `tests/cor-runner-mandatory-gates.test.js`, wired into `npm run test:governance`. It asserts the evidence suite cannot be removed by the legacy environment variable, the build-skip documentation is accurate, and missing/failed suites cause non-zero exit.
+
+### UG-COR-AWS-TEMPLATE-RESOURCE-COUNT-DRIFT-001 — confirmed and physically fixed
+
+- **Observed:** The exact-head COR workflow failed in `server/capabilities/src/tests/universal-bootstrap-runtime.spec.ts`: expected 14 CloudFormation resources but the pilot template correctly contained 15 after the new `MonthlyCostBudget` resource was added.
+- **Fix:** Updated the expected resource count to 15 and added `MonthlyCostBudget` to the asserted logical-ID set. The test continues to validate the generated operation graph and policy pack.
+- **Evidence:** This was a real CI failure, not a passing receipt. The fix is committed on the follow-up branch and must be revalidated by exact-head CI/COR. The previous run [#40967106726](https://github.com/Chicitadel/ugondu/actions/runs/40967106726) failed the capabilities workspace test on the stale resource count; do not reuse it as a pass.
+
+### Follow-up branch and release gate
+
+- **Branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`, based on PR #56 candidate `7b2922baa45da502f6d3d025d8d5d4483f61083d`.
+- **PR:** To be opened after the changes are committed and verified.
+- **Protected refs:** No direct changes to `main` or `phase4/production-hardening`.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head tests, independent review, authorized AWS qualification, live external evidence and corporate approval are complete.
