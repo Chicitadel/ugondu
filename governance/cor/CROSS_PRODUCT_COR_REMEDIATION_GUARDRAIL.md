@@ -183,3 +183,20 @@ For each finding, physically implement before handover; add a regression that fa
 - **Evidence freshness:** This documentation update advances the branch HEAD beyond the tested code candidate. Any subsequent release gate must validate the **new exact branch HEAD**, signed candidate-bound artifacts, and unchanged executable code; do not mislabel earlier receipts as tests of the new HEAD.
 - **Agent synchronization protocol:** Treat this repository file as the canonical cross-product guardrail. Each Antigravity actor must fetch the latest branch head before modifying, claim a unique finding ID and file ownership, avoid concurrent edits to the same paths, record base/head SHA and test exit codes, and rebase/revalidate before submitting changes. Use a new dedicated branch/PR for additional code findings. Do not overwrite a superior existing implementation or copy billing/entitlement business logic into either product.
 - **Open gates:** Live DirectAdmin/VPS staging, AeroBill and Mandatag non-production federation, Ed25519 candidate signing and independent trust-root verification, rollback/restore evidence, authorized AWS resource audit, and accountable release-owner sign-off remain **NOT VERIFIED**. No cloud spend or production deployment authorized. Overall commercial release remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
+
+
+## 2026-10-29 finding: Unix state-lock unlock errors were silently discarded
+
+- **Finding ID:** `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001`
+- **Severity:** Medium — transaction-state lock lifecycle / error observability.
+- **Confirmed defect:** `client/engine/state_lock_unix.go` discarded the return value from `syscall.Flock(fd, syscall.LOCK_UN)` and reported only the subsequent file-close error. This diverged from the Windows implementation, which combines unlock and close failures, and could falsely report a clean lock release when the OS reports an unlock error.
+- **Physical remediation:** The Unix implementation now routes unlock through package-private `unixStateFileUnlock` and returns `errors.Join(unlockErr, closeErr)`. The handle is closed and cleared even if unlock reports an error.
+- **Regression coverage:** New `client/engine/state_lock_unix_test.go` (build tag `!windows`) adds `TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile` using deterministic injected failure, and `TestUnixStateFileLockUnlockNilIsNoop`. Full Go suite and CI are required before closure.
+- **Dedicated branch:** `fix/cor-unix-state-unlock-errors-2026-10-29`, based on the canonical guardrail branch at `e7b2c90238dfe4d24c6ef147959bba0abb63911b`; no protected branch writes.
+- **Source commit:** `a4152c26c2f12ba269a85099a1abd96642d31eab`.
+- **Regression-test commit:** `1e8787a02a18485ba73f0d653f35ea497c00971f`.
+- **Verification state:** Physical source and regression test are committed. Do not mark tested until exact-head CI confirms gofmt/vet, Go tests and supported OS/architecture matrix. Local Go execution is not claimed.
+- **Agent guardrail:** Do not weaken the error propagation or replace it with ignored errors without a reviewed ADR and regression evidence. Preserve parity with Windows lock lifecycle behavior; do not create duplicate lock abstractions.
+- **Hosting and release boundary:** This is provider-neutral filesystem hardening. No AWS resources or deployments are authorized by this change. AWS migration remains conditional on traction/official engagement/funding plus explicit account, budget and deployment approval. AeroBill remains the billing/metering authority; Mandatag remains the licensing/entitlement authority.
+- **Rollback:** Revert the source and regression test together if supported-platform evidence identifies a compatibility issue; document the evidence and maintain fail-closed state persistence.
+- **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head CI, candidate-bound signed evidence, staging and live federation qualification, recovery/rollback evidence, and release-owner authorization are complete.
