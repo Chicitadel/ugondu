@@ -100,3 +100,12 @@
 ## 8. Mandatory state discipline
 
 These receipts prove only the stated automated checks. Do not mark either finding fully CLOSED, staging-verified, or federation-verified until the latest candidate head has complete required CI and the corresponding runtime evidence. Do not infer an AWS deployment from manifest validation or a successful COR workflow whose physical AWS gate was skipped. Maintain `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until all mandatory gates are satisfied.
+
+
+## 9. Finding UG-COR-GATE-SUMMARY-SCHEMA-001 — IMPLEMENTED, VALIDATION PENDING
+
+- **Root cause:** `scripts/cor-finalize.js` treated `skippedGates`, `notRunGates`, and `failedGates` as optional. A malformed or incomplete gate-summary could omit one of those fields and still pass the independent finalizer if `allGatesPassed` remained true and candidate bindings matched.
+- **Physical fix:** New `scripts/cor/gate-summary-validation.js` requires schema version `3.0.0`, `allGatesPassed === true`, exactly 40 total and passed gates, and all three status arrays present, typed, and empty. The independent finalizer now calls this shared validator before emitting `READY_FOR_COR_SIGNATURE`.
+- **Regression suite:** `tests/qualification/gate-summary-validation.test.mjs` covers the valid summary, each missing array, wrong types, non-empty skipped/not-run/failed gates, wrong counts, false pass flag, and unsupported schema. Included in `npm run test:governance` and the COR workflow.
+- **Scope:** This validates the internal 40-stream summary only. The workflow's separately gated AWS physical qualification remains independently required for release certification.
+- **Evidence status:** Source and tests committed on `fix/cor-gate-summary-schema-fail-closed-2026-10-29`; exact-head CI and local execution are pending. Do not mark the finding VERIFIED until the tests pass on the final commit.
