@@ -203,3 +203,10 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Physical fix:** Added a dedicated `cap.cost.aws_budget` mapping with budget create/modify, describe/read-back, and delete/rollback actions. The ARN builder resolves the exact nested `BudgetName` from CloudFormation `!Sub`/JSON `Fn::Sub`, substitutes the selected environment, and fails closed if unresolved placeholders remain. The provider capability registry now explicitly lists AWS Budgets.
 - **Regression evidence added:** The plan graph test asserts the budget resource is mapped, the scoped ARN is exactly `arn:aws:budgets::971671216490:budget:airroofers-staging-monthly-cost-budget`, and the required actions are present. With 15 template resources plus the CloudFormation stack operation, the expected operation count is 16.
 - **Prior CI:** Run [#40968027920](https://github.com/Chicitadel/ugondu/actions/runs/40968027920) failed at `graph.status` because the budget mapping was missing. It is a failure receipt, not a pass. The follow-up branch now includes the mapping; exact-head CI/COR must rerun.
+
+
+## Budget mapping test contract correction
+
+- The first budget-mapping regression attempt correctly resolved the exact scoped ARN and mapped create/modify actions, but the test incorrectly expected `budgets:DescribeBudget` in `providerActions` instead of the separate `verificationActions` field.
+- Corrected the test to assert create/modify in `providerActions`, describe/read-back in `verificationActions`, and delete in `rollbackActions`. The implementation's lifecycle separation remains intact.
+- The failed run is not a pass; rerun the capabilities workspace and full CI/COR on the newest head.
