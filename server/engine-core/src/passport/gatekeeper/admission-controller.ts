@@ -109,7 +109,7 @@ export class AdmissionController {
         if (typeof signature !== 'string' || signature.trim() === '') {
             throw new Error('EXECUTION_ENVELOPE_SIGNATURE_INVALID');
         }
-        return signature;
+        return `SIG:${signature}`;
     }
 
     /**
