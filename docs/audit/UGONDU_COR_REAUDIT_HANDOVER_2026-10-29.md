@@ -147,3 +147,24 @@ Before every edit, the agent must:
 | `main` and frozen production baseline | Not modified by this execution |
 
 **Handover instruction:** implement and test each confirmed code defect physically before assigning it to Antigravity. The agent is a reviewer/continuation actor, not a substitute for implementation or evidence. Close only what is proven on the exact candidate HEAD.
+
+
+## 2026-10-29 infrastructure follow-up — low-cost staging template hardening
+
+**Finding:** `UG-AWS-PILOT-BOOTSTRAP-SAFETY-001` (implementation present; template validation pending).
+
+Re-audit of `infrastructure/aws/dumcholu-pilot-staging.yaml` confirmed that its budget parameter did not create a budget/alarm resource, the AMI was pinned to a literal regional ID, Docker Compose downloaded from a mutable `releases/latest` URL, and the host bootstrap exposed 80/443 before configuring a TLS edge or deploying applications.
+
+Physical changes on this branch:
+- Added an actual `AWS::Budgets::Budget` with email notifications at 80% actual spend and 100% forecasted spend. It is an alert, not a hard cap.
+- Made Availability Zone a parameter and resolved the Amazon Linux 2023 AMI through the AWS public SSM parameter.
+- Required an explicit Docker Compose version and 64-character SHA-256 input; bootstrap verifies the binary digest before making it executable.
+- Removed public ingress from the bootstrap security group. A separately reviewed TLS edge is required before opening public ingress.
+- Ensured curl and coreutils are installed for download and digest verification.
+- Corrected the template description to state that it bootstraps a host only; it does not deploy product containers.
+
+Added `tests/qualification/aws-staging-template-safety.test.mjs` and wired it into `npm run test:governance`. The test checks single-document structure, region-portable AMI/AZ, actual budget notifications, no public ingress/SSH, pinned Compose download and internal-only backend ports.
+
+**Important scope boundary:** this does not deploy Ugondu or Dumcholu application images and does not create AWS resources. The template remains a gated bootstrap component. Application deployment requires approved immutable image digests, the correct runtime/secret contracts, a reviewed TLS edge, authenticated end-to-end tests, rollback and cleanup evidence. Do not report AWS deployment as complete from this template change.
+
+**Validation status:** source and tests are committed; no local CloudFormation lint/deploy or test execution is claimed. Exact-head CI plus `cfn-lint`/CloudFormation validation is required before using the template.
