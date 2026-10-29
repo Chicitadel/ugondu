@@ -350,3 +350,54 @@ Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / 
 - Canonical cross-product guardrail updated in the same branch.
 
 **Verification status:** Code and regression test committed; local Go tests were not executed in this session. Require exact-head CI (including the Go client matrix) before declaring PASS. Record exact SHA, command, exit code, and logs. This finding does not imply AWS deployment or whole-product COR closure.
+
+
+## 2026-10-29 re-audit — Unix state-lock unlock error propagation
+
+**Finding:** `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001` (medium).
+
+**Reproduction:** The Unix `unixStateFileLock.Unlock()` ignored the error returned by `syscall.Flock(fd, syscall.LOCK_UN)`, returning only `Close()`'s result. A failed unlock could therefore be hidden from callers.
+
+**Physical remediation committed on dedicated branch `fix/cor-unix-state-unlock-errors-2026-10-29`:**
+- `client/engine/state_lock_unix.go`: added injectable `unixStateFileUnlock` seam and return `errors.Join(unlockErr, closeErr)`, matching Windows lifecycle error propagation.
+- `client/engine/state_lock_unix_test.go`: added deterministic unlock-failure propagation/handle-close regression and nil-lock no-op test.
+- Canonical `governance/cor/CROSS_PRODUCT_COR_REMEDIATION_GUARDRAIL.md` updated with finding ID, exact source/test commits, rollback, portability and release gates.
+
+**Commits:** source `a4152c26c2f12ba269a85099a1abd96642d31eab`; test `1e8787a02a18485ba73f0d653f35ea497c00971f`; guardrail `54936b7f25fcdfe4de2506fe486d46dcf47d3940`.
+
+**Verification status:** PHYSICAL CODE + REGRESSION TEST COMMITTED / CI PENDING. This chat runtime has not executed Go commands. Require exact-head Go formatting, vet, full tests and the supported OS/architecture matrix. The existing green receipts for earlier SHA `dc665fd8` do not validate this new source change or later documentation commits.
+
+**Safety:** No protected branch writes; no AWS provisioning or deployment. Continue to keep the PR draft/unmerged until exact-head evidence and all physical release prerequisites are reviewed. Overall COR remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+### Exact-head CI follow-up — regression assertion corrected and verified
+
+The initial CI run `40856167040` failed in the newly added test because Linux returned a “file already closed” error not matching the test's overly specific `os.ErrInvalid` check. The injected unlock error itself was correctly propagated. The assertion was made portable by checking only that `file.Stat()` fails after unlock/close.
+
+- Test correction commit: `8672c94941be55e80a1ce895b5509ca30ba8fa10` (candidate commit for PR #44; branch HEAD at `2fcea071`).
+- Guardrail records the failed run and correction: `1e2170cb5c95d1e27be10e95eec9198836b8c8bb`.
+- **Exact-candidate CI verification (PR #44):**
+  - **CI/CD [run #40856269414](https://github.com/Chicitadel/ugondu/actions/runs/40856269414):** 16/16 green jobs passed (Release Integrity & Governance, all 5 OS/architecture Go thin-client matrix builds/tests, all 9 microservice workspaces, and Integration Tests).
+  - **COR Certification [run #40856269423](https://github.com/Chicitadel/ugondu/actions/runs/40856269423):** completed **PASS**; COR Certification job passed in 2m45s; AWS Physical Qualification Gate was skipped by design for validation PRs; COR Final Release Gate passed in 4s emitting `NOT RELEASE CERTIFIED`.
+- **Verification status:** Finding `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001` is **verified on candidate `8672c949`**. The historical failed run `40856167040` remains documented in the audit ledger.
+
+
+## Cross-product follow-up — Dumcholu citizen applications (2026-10-29)
+
+### `DUM-COR-CITIZEN-APPLICATIONS-I18N-001`
+
+- **Physical implementation branch:** `Chicitadel/dumcholu:fix/cor-citizen-applications-i18n-2026-10-29`
+- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11 (candidate commit `8847a3b`)
+- Tokenized citizen applications UI strings and added 16 keys to all 12 locale bundles, both localization registries, and English fallback values.
+- Added a French locale-switching widget regression test.
+- Static remote content audit confirms all 16 keys exist in each of the 12 locale files, both registries, and the fallback dictionary.
+- **Validation remains OPEN:** exact-head Dumcholu workflows #40859147210 and #40859147148 failed before any job steps were recorded; downloadable job logs were unavailable (BlobNotFound). Do not classify these as source-test failures or passes. Re-run once runner admission is available. Flutter, locale parity, and UI governance results are not yet verified on this candidate.
+
+### `DUM-COR-APPLICATIONS-MOCK-STORE-001` — confirmed additional blocker
+
+- A source review of `dumcholu-citizen/lib/features/applications/domain/application_repository.dart` found `DefaultApplicationRepository` seeds three hardcoded application records in `_kSeedApplications` and performs withdrawal only against a mutable in-memory list.
+- The repository has no durable persistence and does not call the backend. The reviewed backend source tree also contains no applications controller/endpoint matching the claimed `GET /api/v1/applications` and withdrawal workflow. Therefore the earlier checklist statement that the citizen application feature is fully backend-wired is not supported by the current code.
+- **Status: OPEN / RELEASE BLOCKER.** Do not label this feature production-ready or hand it to agents as complete. Implement an authenticated, identity-scoped, durable backend contract and replace seeded local data with the authoritative API. Preserve fail-closed behavior and add backend persistence, authorization, client contract, withdrawal, and integration tests before closing this finding.
+- This finding has not been physically remediated in this change set. No fake closure is claimed.
+
+**Cross-product release posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No AWS deployment was performed or authorized. Hosting remains portable; AWS migration is conditional on traction/official engagement/funding and explicit budget/account authorization.

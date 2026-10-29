@@ -183,3 +183,54 @@ For each finding, physically implement before handover; add a regression that fa
 - **Evidence freshness:** This documentation update advances the branch HEAD beyond the tested code candidate. Any subsequent release gate must validate the **new exact branch HEAD**, signed candidate-bound artifacts, and unchanged executable code; do not mislabel earlier receipts as tests of the new HEAD.
 - **Agent synchronization protocol:** Treat this repository file as the canonical cross-product guardrail. Each Antigravity actor must fetch the latest branch head before modifying, claim a unique finding ID and file ownership, avoid concurrent edits to the same paths, record base/head SHA and test exit codes, and rebase/revalidate before submitting changes. Use a new dedicated branch/PR for additional code findings. Do not overwrite a superior existing implementation or copy billing/entitlement business logic into either product.
 - **Open gates:** Live DirectAdmin/VPS staging, AeroBill and Mandatag non-production federation, Ed25519 candidate signing and independent trust-root verification, rollback/restore evidence, authorized AWS resource audit, and accountable release-owner sign-off remain **NOT VERIFIED**. No cloud spend or production deployment authorized. Overall commercial release remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
+
+
+## 2026-10-29 finding: Unix state-lock unlock errors were silently discarded
+
+- **Finding ID:** `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001`
+- **Severity:** Medium — transaction-state lock lifecycle / error observability.
+- **Confirmed defect:** `client/engine/state_lock_unix.go` discarded the return value from `syscall.Flock(fd, syscall.LOCK_UN)` and reported only the subsequent file-close error. This diverged from the Windows implementation, which combines unlock and close failures, and could falsely report a clean lock release when the OS reports an unlock error.
+- **Physical remediation:** The Unix implementation now routes unlock through package-private `unixStateFileUnlock` and returns `errors.Join(unlockErr, closeErr)`. The handle is closed and cleared even if unlock reports an error.
+- **Regression coverage:** New `client/engine/state_lock_unix_test.go` (build tag `!windows`) adds `TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile` using deterministic injected failure, and `TestUnixStateFileLockUnlockNilIsNoop`. Full Go suite and CI are required before closure.
+- **Dedicated branch:** `fix/cor-unix-state-unlock-errors-2026-10-29`, based on the canonical guardrail branch at `e7b2c90238dfe4d24c6ef147959bba0abb63911b`; no protected branch writes.
+- **Source commit:** `a4152c26c2f12ba269a85099a1abd96642d31eab`.
+- **Regression-test commit:** `1e8787a02a18485ba73f0d653f35ea497c00971f`.
+- **Verification state:** Physical source and regression test are committed. Do not mark tested until exact-head CI confirms gofmt/vet, Go tests and supported OS/architecture matrix. Local Go execution is not claimed.
+- **Agent guardrail:** Do not weaken the error propagation or replace it with ignored errors without a reviewed ADR and regression evidence. Preserve parity with Windows lock lifecycle behavior; do not create duplicate lock abstractions.
+- **Hosting and release boundary:** This is provider-neutral filesystem hardening. No AWS resources or deployments are authorized by this change. AWS migration remains conditional on traction/official engagement/funding plus explicit account, budget and deployment approval. AeroBill remains the billing/metering authority; Mandatag remains the licensing/entitlement authority.
+- **Rollback:** Revert the source and regression test together if supported-platform evidence identifies a compatibility issue; document the evidence and maintain fail-closed state persistence.
+- **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head CI, candidate-bound signed evidence, staging and live federation qualification, recovery/rollback evidence, and release-owner authorization are complete.
+
+
+### Verification follow-up — portable closed-handle assertion and verified CI receipts
+
+The first exact-head CI attempt surfaced a **test-only portability assumption**, not a production-source failure: on Linux, calling `os.File.Stat()` after close returned a platform/runtime-specific “file already closed” error that did not satisfy the test's `errors.Is(err, os.ErrInvalid)` expectation. The test was corrected to assert the stable contract (the closed file handle must return a non-nil error), without requiring a specific error identity.
+
+- **Failed run evidence (historical):** CI/CD [run #40856167040](https://github.com/Chicitadel/ugondu/actions/runs/40856167040), Linux ARM64 Go test job [job #123387562141](https://github.com/Chicitadel/ugondu/actions/runs/40856167040/job/123387562141); failure occurred in `TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile` at the overly specific post-close error assertion. The new regression test had already confirmed that the injected unlock error propagated.
+- **Physical test correction:** `client/engine/state_lock_unix_test.go` checks that `file.Stat()` returns any error after `Unlock()`; source behavior is unchanged.
+- **Correction candidate commit:** `8672c94941be55e80a1ce895b5509ca30ba8fa10` (PR #44 candidate; branch HEAD at `2fcea071`).
+- **Exact-candidate CI verification (PR #44):**
+  - **CI/CD [run #40856269414](https://github.com/Chicitadel/ugondu/actions/runs/40856269414):** 16/16 green jobs passed (Release Integrity & Governance, all 5 OS/architecture Go thin-client matrix builds and tests including Linux arm64/amd64, macOS amd64/arm64, Windows amd64, all 9 microservice workspaces, and Integration Tests).
+  - **COR Certification [run #40856269423](https://github.com/Chicitadel/ugondu/actions/runs/40856269423):** completed **PASS**; COR Certification job passed in 2m45s; AWS Physical Qualification skipped as expected for validation-only PR event; COR Final Release Gate passed in 4s emitting `NOT RELEASE CERTIFIED`.
+- **Status:** `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001` is **verified on candidate `8672c949`**. Error propagation via `errors.Join(unlockErr, closeErr)` and the portable closed-handle assertion are confirmed in automated CI/CD.
+
+
+## Cross-product follow-up — Dumcholu citizen applications (2026-10-29)
+
+### `DUM-COR-CITIZEN-APPLICATIONS-I18N-001`
+
+- **Physical implementation branch:** `Chicitadel/dumcholu:fix/cor-citizen-applications-i18n-2026-10-29`
+- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11 (candidate commit `8847a3b`)
+- Tokenized citizen applications UI strings and added 16 keys to all 12 locale bundles, both localization registries, and English fallback values.
+- Added a French locale-switching widget regression test.
+- Static remote content audit confirms all 16 keys exist in each of the 12 locale files, both registries, and the fallback dictionary.
+- **Validation remains OPEN:** exact-head Dumcholu workflows #40859147210 and #40859147148 failed before any job steps were recorded; downloadable job logs were unavailable (BlobNotFound). Do not classify these as source-test failures or passes. Re-run once runner admission is available. Flutter, locale parity, and UI governance results are not yet verified on this candidate.
+
+### `DUM-COR-APPLICATIONS-MOCK-STORE-001` — confirmed additional blocker
+
+- A source review of `dumcholu-citizen/lib/features/applications/domain/application_repository.dart` found `DefaultApplicationRepository` seeds three hardcoded application records in `_kSeedApplications` and performs withdrawal only against a mutable in-memory list.
+- The repository has no durable persistence and does not call the backend. The reviewed backend source tree also contains no applications controller/endpoint matching the claimed `GET /api/v1/applications` and withdrawal workflow. Therefore the earlier checklist statement that the citizen application feature is fully backend-wired is not supported by the current code.
+- **Status: OPEN / RELEASE BLOCKER.** Do not label this feature production-ready or hand it to agents as complete. Implement an authenticated, identity-scoped, durable backend contract and replace seeded local data with the authoritative API. Preserve fail-closed behavior and add backend persistence, authorization, client contract, withdrawal, and integration tests before closing this finding.
+- This finding has not been physically remediated in this change set. No fake closure is claimed.
+
+**Cross-product release posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No AWS deployment was performed or authorized. Hosting remains portable; AWS migration is conditional on traction/official engagement/funding and explicit budget/account authorization.

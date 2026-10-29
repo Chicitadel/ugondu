@@ -36,12 +36,19 @@
 package engine
 
 import (
+	"errors"
 	"os"
 	"syscall"
 )
 
 type unixStateFileLock struct {
 	file *os.File
+}
+
+// unixStateFileUnlock is a package-private seam so unlock failure handling can
+// be regression-tested without relying on operating-system fault injection.
+var unixStateFileUnlock = func(fd int) error {
+	return syscall.Flock(fd, syscall.LOCK_UN)
 }
 
 // acquireStateFileLock acquires an exclusive advisory lock on lockPath using
@@ -62,8 +69,8 @@ func (l *unixStateFileLock) Unlock() error {
 	if l == nil || l.file == nil {
 		return nil
 	}
-	_ = syscall.Flock(int(l.file.Fd()), syscall.LOCK_UN)
-	err := l.file.Close()
+	unlockErr := unixStateFileUnlock(int(l.file.Fd()))
+	closeErr := l.file.Close()
 	l.file = nil
-	return err
+	return errors.Join(unlockErr, closeErr)
 }
