@@ -152,3 +152,15 @@ The two new findings above are physically implemented with regression tests auth
 - Dumcholu `AIBudgetService.recordCost` rejects non-finite values with `Double.isFinite(charge)`; tests cover NaN and +/-Infinity. The ledger reports `mvn test -Dtest=AIBudgetServiceTest` 9/9 pass, but this session did not independently execute tests at the latest branch SHA. Require exact-head receipt.
 - No AWS deployment or verified live AeroBill/Mandatag staging transaction was supplied. Hosting policy: DirectAdmin where workload-compatible → measured small VPS if persistent services require it → AWS only after traction, official engagement/funding and explicit cost/account approval.
 - Overall commercial status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
+
+
+## 2026-10-29 09:00 CET — cross-product follow-up findings
+
+- Dumcholu branch `fix/cor-gap-remediation-2026-10-28` now includes `DUM-COR-ECS-TEMPLATE-RENDER-001`: a renderer for ECS task definitions, fail-closed validation and negative/positive regression tests. The AWS guide no longer instructs direct registration of a JSON template containing literal `${AWS_ACCOUNT_ID}`, `${AWS_REGION}` and `${IMAGE_TAG}` placeholders.
+- The renderer requires a 12-digit account ID, valid region syntax, and `commit-<12..64 lowercase hex>` image tags; rejects unresolved placeholders; checks Fargate networking, role/account consistency and Secrets Manager references; and writes rendered output with owner-only permissions. The guide also requires ECR `IMMUTABLE` tag mutability. This is deployment preparation only, not AWS provisioning.
+- `DUM-COR-REPOSITORY-BYTECODE-001`: removed three tracked `tools/__pycache__/*.pyc` files and added ignore rules.
+- Added `.github/workflows/deployment-manifests.yml` to run renderer tests and a negative missing-environment test. Latest observed run before the renderer hardening failed before any job steps; its logs were unavailable (`BlobNotFound`). Treat as runner/workflow admission unverified, not a code-test pass. Exact-head test receipt is still required.
+- The Dumcholu product-name workflow also remains blocked/failing without usable step logs. Do not broaden scanner exceptions.
+- Ugondu current candidate `e3c6decee4b7d670112c4e619953092278fe6edb` had successful CI run [#40826286743](https://github.com/Chicitadel/ugondu/actions/runs/40826286743) and COR validation [#40826286716](https://github.com/Chicitadel/ugondu/actions/runs/40826286716). The AWS physical gate, candidate freshness, trust-root and final signing remain skipped in validation-only mode.
+- No AWS resources were deployed by this work. AWS remains conditional on traction/official engagement/funding and explicit account/budget authorization; AeroBill and Mandatag remain the sole federation authorities.
+- Status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
