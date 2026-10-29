@@ -127,3 +127,5 @@ PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature
 - **Physical remediation:** Real Docker build/image inspection; ECR authorization, tag/push and digest verification; real ECS task definition/service create/delete/update commands; explicit role/network/log configuration; bounded desired count; fail-closed service describe; rollback requires a prior revision ARN.
 - **Regression coverage:** `server/engine-core/src/fabric/tests/aws-native-client-no-synthetic-success.spec.ts`.
 - **Status:** `IMPLEMENTED—VALIDATION PENDING`. Exact-head typecheck/Jest/CI/COR are pending. This is a release-critical provider-integrity issue; the release remains blocked until tests and independent review pass. No AWS physical deployment is claimed.
+
+- **Additional portability guard:** task-definition container port and optional load-balancer target port are driven by `UGONDU_ECS_CONTAINER_PORT` (default 8080), not a hardcoded port 80. Exact-head validation is pending on the latest PR #53 commit.
