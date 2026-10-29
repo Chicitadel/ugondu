@@ -193,6 +193,29 @@ export const CLOUDFORMATION_RESOURCE_MAP: Record<string, ResourceMappingRule> = 
     rollbackActions: ['cloudfront:UpdateDistribution', 'cloudfront:DeleteDistribution'],
     arnBuilder: ({ partition, accountId }) => [`arn:${partition}:cloudfront::${accountId}:distribution/*`, `arn:${partition}:cloudfront::${accountId}:origin-access-control/*`],
   },
+  'AWS::Budgets::Budget': {
+    capabilityId: 'cap.cost.aws_budget', resourceFamily: 'cost.aws_budget', targetRoleId: 'iac_service_role',
+    createAndUpdateActions: ['budgets:CreateBudget', 'budgets:ModifyBudget'],
+    verifyActions: ['budgets:DescribeBudget'],
+    rollbackActions: ['budgets:DeleteBudget'],
+    arnBuilder: ({ partition, accountId, environment, properties }) => {
+      const nestedBudget = properties.Budget && typeof properties.Budget === 'object'
+        ? properties.Budget as Record<string, unknown>
+        : undefined;
+      const rawName = properties.BudgetName ?? nestedBudget?.BudgetName;
+      const subValue = rawName && typeof rawName === 'object'
+        ? (rawName as Record<string, unknown>)['Fn::Sub']
+        : rawName;
+      const budgetName = typeof subValue === 'string'
+        ? subValue.replace(/^!Sub\\s+/, '').replace(/\\$\\{EnvironmentName\\}/g, environment)
+        : '';
+      if (!budgetName || /\\$\\{[^}]+\\}/.test(budgetName)) {
+        throw new Error('AWS_BUDGET_NAME_UNRESOLVED');
+      }
+      return [`arn:${partition}:budgets::${accountId}:budget:${budgetName}`];
+    },
+  },
+
 };
 
 export function computePlanDigest(payload: unknown): string {
@@ -265,6 +288,13 @@ export function parseCloudFormationTemplateResources(templateContent: string): C
     if (currentLogicalId) {
       const typeMatch = commentStripped.match(/^ {4}Type:\s*['"]?([A-Za-z0-9:_]+)['"]?\s*$/);
       if (typeMatch) { currentType = typeMatch[1]; continue; }
+      if (currentType === 'AWS::Budgets::Budget') {
+        const budgetNameMatch = commentStripped.match(/^ {8}BudgetName:\\s*(.+)$/);
+        if (budgetNameMatch) {
+          currentProps.BudgetName = budgetNameMatch[1].trim().replace(/^['"]|['"]$/g, '');
+          continue;
+        }
+      }
       const propMatch = commentStripped.match(/^ {6}([A-Za-z0-9_]+):\s*(.+)$/);
       if (propMatch) currentProps[propMatch[1]] = propMatch[2].trim().replace(/^['"]|['"]$/g, '');
     }
