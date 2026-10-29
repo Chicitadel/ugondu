@@ -850,3 +850,14 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - The first budget-mapping regression attempt correctly resolved the exact scoped ARN and mapped create/modify actions, but the test incorrectly expected `budgets:DescribeBudget` in `providerActions` instead of the separate `verificationActions` field.
 - Corrected the test to assert create/modify in `providerActions`, describe/read-back in `verificationActions`, and delete in `rollbackActions`. The implementation's lifecycle separation remains intact.
 - The failed run is not a pass; rerun the capabilities workspace and full CI/COR on the newest head.
+
+
+## 2026-10-30 re-audit — AWS bootstrap region portability
+
+**Finding ID:** `UG-COR-AWS-BOOTSTRAP-REGION-PINNING-001`
+
+- **Confirmed defect:** The pilot CloudFormation template parameterized the Availability Zone but retained a default of `eu-west-3a`; the VPC Region tag and output description also hardcoded Paris-specific values. Deploying the same template into another AWS region could select an invalid AZ or report incorrect region metadata, contrary to the one-template/multi-region portability rule.
+- **Physical remediation:** Removed the fixed AZ default so the deployment must supply a valid `AWS::EC2::AvailabilityZone::Name` in the stack's region; changed the resource Region tag to the `AWS::Region` pseudo parameter; generalized the template description and subnet output to the selected region.
+- **Regression coverage:** Extended `tests/qualification/aws-staging-template-safety.test.mjs` to require no AZ default, require the Region tag to use `!Ref AWS::Region`, and reject hardcoded `eu-west-3a`/region tag values.
+- **Verification:** Source and test changes are committed to the dedicated PR #57 branch. Exact-head CI/COR must rerun; prior successful receipts for `1826e14e` do not apply to this newer candidate.
+- **Scope boundary:** This corrects infrastructure portability only. The template still bootstraps a host; it does not deploy application containers, configure a TLS edge, or establish persistent production data services. No AWS resources were provisioned.
