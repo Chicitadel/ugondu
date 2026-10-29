@@ -15,6 +15,7 @@
 
 const assert = require('assert');
 const http = require('http');
+const crypto = require('crypto');
 
 function post(port, path, body, headers = {}) {
     return new Promise((resolve, reject) => {
@@ -242,6 +243,75 @@ async function runTests() {
         passed++;
     } catch (e) {
         console.error('[en] ✗ FAIL: Valid signed passport remains accepted —', e.message);
+        failed++;
+    }
+
+    // Test 9: execution envelopes must use a real cryptographic signer; no synthetic signature fallback.
+    try {
+        const { AdmissionController } = require('../server/engine-core/dist/passport/gatekeeper/admission-controller.js');
+        const validators = [
+            { validate: async () => {} },
+            { validate: async () => {} },
+            { validate: async () => {} },
+            { validate: async () => {} },
+            { validate: async () => {} },
+            { validate: async () => {} },
+            { validateState: async () => {} }
+        ];
+        const unconfigured = new AdmissionController(...validators);
+        await assert.rejects(
+            () => unconfigured.verifyPreMutation({ id: 'passport_signature_test' }, { id: 'context_signature_test' }),
+            /EXECUTION_ENVELOPE_SIGNER_NOT_CONFIGURED/
+        );
+
+        const configured = new AdmissionController(...validators);
+        configured.configureExecutionEnvelopeSigner((payload) =>
+            crypto.sign(null, Buffer.from(payload, 'utf8'), engineCore.keyState.privateKey).toString('base64url')
+        );
+        const envelope = await configured.verifyPreMutation(
+            { id: 'passport_signature_test' },
+            { id: 'context_signature_test' }
+        );
+        const signedPayload = JSON.stringify({
+            passportId: envelope.passportId,
+            contextId: envelope.contextId,
+            verifiedAt: envelope.verifiedAt.toISOString()
+        });
+        assert.strictEqual(
+            crypto.verify(null, Buffer.from(signedPayload, 'utf8'), engineCore.keyState.publicKey, Buffer.from(envelope.signature.slice(4), 'base64url')),
+            true,
+            'Execution envelope signature must verify against the managed public key'
+        );
+        assert.strictEqual(
+            crypto.verify(null, Buffer.from(signedPayload.replace('context_signature_test', 'other_context'), 'utf8'), engineCore.keyState.publicKey, Buffer.from(envelope.signature.slice(4), 'base64url')),
+            false,
+            'Signature must bind the execution context'
+        );
+        const { Provisioner } = require('../server/engine-core/dist/fabric/provisioner.js');
+        const resourceController = {
+            allocateResources: async (task) => ({ status: 'ALLOCATED', contextId: task.contextId })
+        };
+        const provisioner = new Provisioner(resourceController, engineCore.keyState.publicKey);
+        const tenantId = 'tenant_signature_test';
+        const authorizedEnvelope = {
+            ...envelope,
+            securityContext: { tenantId, tenant: { id: tenantId } }
+        };
+        const provisioned = await provisioner.provision(authorizedEnvelope, { contextId: envelope.contextId });
+        assert.strictEqual(provisioned.status, 'ALLOCATED');
+
+        await assert.rejects(
+            () => provisioner.provision({ ...authorizedEnvelope, signature: 'SIG:forged' }, { contextId: envelope.contextId }),
+            /EXECUTION_ENVELOPE_SIGNATURE_INVALID/
+        );
+        await assert.rejects(
+            () => new Provisioner(resourceController).provision(authorizedEnvelope, { contextId: envelope.contextId }),
+            /EXECUTION_ENVELOPE_VERIFIER_NOT_CONFIGURED/
+        );
+        console.log('[en] ✓ PASS: Execution envelope uses verifiable cryptographic signature');
+        passed++;
+    } catch (e) {
+        console.error('[en] ✗ FAIL: Execution envelope uses verifiable cryptographic signature —', e.message);
         failed++;
     }
 

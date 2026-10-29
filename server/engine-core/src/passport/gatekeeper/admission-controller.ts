@@ -44,7 +44,11 @@ import { LifecycleState } from '../../types/lifecycle';
  * @description Corporate Governed class implementation for AdmissionController
  * @classification ENTERPRISE
  */
+export type ExecutionEnvelopeSigner = (payload: string) => string;
+
 export class AdmissionController {
+    private executionEnvelopeSigner?: ExecutionEnvelopeSigner;
+
     constructor(
         private readonly freshnessValidator: FreshnessValidator,
         private readonly realityGate: RealityGate,
@@ -52,8 +56,18 @@ export class AdmissionController {
         private readonly capabilityValidator: CapabilityValidator,
         private readonly policyValidator: PolicyValidator,
         private readonly emergencyValidator: EmergencyValidator,
-        private readonly lifecycleValidator: LifecycleValidator
-    ) {}
+        private readonly lifecycleValidator: LifecycleValidator,
+        executionEnvelopeSigner?: ExecutionEnvelopeSigner
+    ) {
+        this.executionEnvelopeSigner = executionEnvelopeSigner;
+    }
+
+    public configureExecutionEnvelopeSigner(signer: ExecutionEnvelopeSigner): void {
+        if (typeof signer !== 'function') {
+            throw new Error('EXECUTION_ENVELOPE_SIGNER_INVALID');
+        }
+        this.executionEnvelopeSigner = signer;
+    }
 
     public async verifyPreAdmission(passport: DeliveryPassport, context: ExecutionContext): Promise<void> {
         await this.emergencyValidator.validate(context);
@@ -73,17 +87,29 @@ export class AdmissionController {
         // Final state check before yielding execution envelope
         await this.lifecycleValidator.validateState(passport.id, LifecycleState.ISSUED);
 
+        const verifiedAt = new Date();
         return {
             passportId: passport.id,
-            verifiedAt: new Date(),
+            verifiedAt,
             contextId: context.id,
-            signature: this.generateExecutionSignature(passport.id, context.id)
+            signature: this.generateExecutionSignature(passport.id, context.id, verifiedAt)
         };
     }
 
-    private generateExecutionSignature(passportId: string, contextId: string): string {
-        // Implementation for crypto signature would go here
-        return `SIG:${passportId}:${contextId}:${Date.now()}`;
+    private generateExecutionSignature(passportId: string, contextId: string, verifiedAt: Date): string {
+        if (!this.executionEnvelopeSigner) {
+            throw new Error('EXECUTION_ENVELOPE_SIGNER_NOT_CONFIGURED');
+        }
+        const payload = JSON.stringify({
+            passportId,
+            contextId,
+            verifiedAt: verifiedAt.toISOString()
+        });
+        const signature = this.executionEnvelopeSigner(payload);
+        if (typeof signature !== 'string' || signature.trim() === '') {
+            throw new Error('EXECUTION_ENVELOPE_SIGNATURE_INVALID');
+        }
+        return `SIG:${signature}`;
     }
 
     /**
