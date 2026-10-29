@@ -17,7 +17,7 @@ function runEngineBuildPreflight({
 }) {
   if (skipBuild) {
     const reason = 'UGONDU_SKIP_BUILD is prohibited: COR must build the exact candidate in this process';
-    stderr(`[COR-RUNNER] BUILD PREFLIGHT FAILED: ${reason}\\n`);
+    stderr(`[COR-RUNNER] BUILD PREFLIGHT FAILED: ${reason}\n`);
     return { ok: false, skipped: true, reason };
   }
 
