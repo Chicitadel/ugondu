@@ -207,9 +207,9 @@ export const CLOUDFORMATION_RESOURCE_MAP: Record<string, ResourceMappingRule> = 
         ? (rawName as Record<string, unknown>)['Fn::Sub']
         : rawName;
       const budgetName = typeof subValue === 'string'
-        ? subValue.replace(/^!Sub\\s+/, '').replace(/\\$\\{EnvironmentName\\}/g, environment)
+        ? subValue.replace(/^!Sub\s+/, '').replace(/\$\{EnvironmentName\}/g, environment)
         : '';
-      if (!budgetName || /\\$\\{[^}]+\\}/.test(budgetName)) {
+      if (!budgetName || /\$\{[^}]+\}/.test(budgetName)) {
         throw new Error('AWS_BUDGET_NAME_UNRESOLVED');
       }
       return [`arn:${partition}:budgets::${accountId}:budget:${budgetName}`];
@@ -289,7 +289,7 @@ export function parseCloudFormationTemplateResources(templateContent: string): C
       const typeMatch = commentStripped.match(/^ {4}Type:\s*['"]?([A-Za-z0-9:_]+)['"]?\s*$/);
       if (typeMatch) { currentType = typeMatch[1]; continue; }
       if (currentType === 'AWS::Budgets::Budget') {
-        const budgetNameMatch = commentStripped.match(/^ {8}BudgetName:\\s*(.+)$/);
+        const budgetNameMatch = commentStripped.match(/^ {8}BudgetName:\s*(.+)$/);
         if (budgetNameMatch) {
           currentProps.BudgetName = budgetNameMatch[1].trim().replace(/^['"]|['"]$/g, '');
           continue;
