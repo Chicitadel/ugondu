@@ -234,3 +234,31 @@ The first exact-head CI attempt surfaced a **test-only portability assumption**,
 - This finding has not been physically remediated in this change set. No fake closure is claimed.
 
 **Cross-product release posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No AWS deployment was performed or authorized. Hosting remains portable; AWS migration is conditional on traction/official engagement/funding and explicit budget/account authorization.
+
+
+## 2026-10-29 — Stream K evidence command validation
+
+### `UG-COR-STREAM-K-COMMAND-ALLOWLIST-001`
+
+**Status:** Physical fix committed; exact-head CI/COR pending.
+
+A re-audit found that Stream K compared several evidence fields to themselves (for example, `jRecord.command === jRecord.command`) and executed `command` / `arguments` read from an evidence JSON record before validating those values against an independent allowlist. Since the evidence digest is unkeyed, recomputing it is not a safe command-authorization mechanism.
+
+**Physical remediation on `fix/cor-stream-k-independent-contract-2026-10-29`:**
+- Added `.governance/cor/stream_k_expected_commands.json`, a committed reviewed command contract for the 11 AUDIT-003 evidence findings.
+- Added `.governance/cor/stream_k_contract.js` to compare finding ID, command, arguments, target-root provenance and verifier version to the allowlist.
+- Updated `stream_k_verify.js` to fail closed on a mismatch **before executing any evidence-supplied command**, and to execute the allowlisted command/arguments rather than the untrusted record.
+- Replaced tautological field checks with explicit comparisons to the expected contract.
+- Added `tests/cor-stream-k-contract.test.js` covering altered command, arguments, finding ID, target-root provenance, verifier version, unknown findings and pre-execution ordering. Wired the tests into `npm run test:governance`.
+
+**Validation:** No local test execution is claimed. Exact-head CI/COR is required before this finding can be marked verified. The allowlist is a reviewed code-level trust anchor; it is not a cryptographic signature and must remain protected by normal branch review.
+
+## 2026-10-29 — Qualification manifest coverage gap
+
+### `UG-COR-QUALIFICATION-MANIFEST-COVERAGE-001`
+
+**Status:** OPEN / RELEASE BLOCKER — not remediated by the Stream K change.
+
+The current `.governance/cor/ugondu-cor-qualification-manifest.json` has `candidateCommit: null`, `candidateTree: null`, and all 40 streams marked `PLANNED`. `scripts/check-cor-stream-registry.js` checks IDs, executor presence and objective hashes, but does not require a candidate-bound receipt or verify that streams have completed. Therefore a green ordinary CI/COR run must not be interpreted as proof that all 40 qualification streams were executed.
+
+**Closure requirements:** execute every stream against a declared candidate; persist exact command, exit status, candidate SHA/tree, raw output and evidence digest; independently verify the receipts; then make the release gate fail closed if any stream is planned, missing, stale or not independently verified. Until then, keep the broad COR claim and commercial release blocked.

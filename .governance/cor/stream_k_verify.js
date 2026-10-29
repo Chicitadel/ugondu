@@ -35,6 +35,8 @@ const { execFileSync } = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const COMMAND_REGISTRY = JSON.parse(fs.readFileSync(path.join(__dirname, 'stream_k_expected_commands.json'), 'utf8'));
+const { assertEvidenceContract } = require('./stream_k_contract');
 
 const ROOT = path.resolve(__dirname, '../..');
 const EVIDENCE_DIR = path.join(ROOT, '.governance', 'cor', 'closure_evidence');
@@ -107,10 +109,19 @@ let kFail = 0;
 const kResults = [];
 
 for (const { id, jRecord } of integrityResults) {
+  // Reject unapproved command metadata before executing evidence-supplied input.
+  // The evidence digest is unkeyed and is not an execution allowlist.
+  let expectedCommand;
+  try {
+    expectedCommand = assertEvidenceContract(id, jRecord, COMMAND_REGISTRY);
+  } catch (e) {
+    failClosed(`K-05: command contract rejected for ${id}: ${e.message}`);
+  }
+
   const execTimestamp = new Date().toISOString();
   let stdout = Buffer.alloc(0), stderr = Buffer.alloc(0), exitCode = 0;
   try {
-    stdout = execFileSync(jRecord.command, jRecord.arguments, {
+    stdout = execFileSync(expectedCommand.command, expectedCommand.arguments, {
       cwd: ROOT, timeout: 180000, stdio: ['pipe', 'pipe', 'pipe']
     });
     exitCode = 0;
@@ -126,32 +137,33 @@ for (const { id, jRecord } of integrityResults) {
 
   // K-07: independentVerificationDigest (NO timestamp — deterministic)
   const kCanonical = {
-    arguments: jRecord.arguments,
-    command: jRecord.command,
+    arguments: expectedCommand.arguments,
+    command: expectedCommand.command,
     exitCode,
     findingId: id,
     sourceRevision: CANDIDATE_HEAD,    // K binds to its own HEAD
     sourceTreeDigest: jRecord.sourceTreeDigest,
     stderrDigest: kStderrDigest,
     stdoutDigest: kStdoutDigest,
-    targetRoot: jRecord.targetRoot,
-    verifierVersion: jRecord.verifierVersion,
+    targetRoot: expectedCommand.targetRoot,
+    verifierVersion: expectedCommand.verifierVersion,
   };
   const independentVerificationDigest = sha256(Buffer.from(JSON.stringify(kCanonical), 'utf8'));
 
   // K-08: Field-by-field deterministic equality
   const fieldChecks = {
-    command:        jRecord.command === jRecord.command,           // trivially same
-    arguments:      JSON.stringify(jRecord.arguments) === JSON.stringify(jRecord.arguments),
-    targetRoot:     jRecord.targetRoot === jRecord.targetRoot,
+    findingId:      jRecord.findingId === id,
+    command:        jRecord.command === expectedCommand.command,
+    arguments:      JSON.stringify(jRecord.arguments) === JSON.stringify(expectedCommand.arguments),
+    targetRoot:     jRecord.targetRoot === expectedCommand.targetRoot,
     exitCode:       exitCode === jRecord.exitCode,
     stdoutDigest:   kStdoutDigest === jRecord.stdoutDigest,
     stderrDigest:   kStderrDigest === jRecord.stderrDigest,
-    verifierVersion: jRecord.verifierVersion === jRecord.verifierVersion,
+    verifierVersion: jRecord.verifierVersion === expectedCommand.verifierVersion,
     // K-09: sourceRevision — J's sourceRevision recorded (J ran at 41e499f0, K at candidate HEAD)
     // Per plan: sourceRevision in J = J's HEAD. Candidate HEAD is K's HEAD.
     // J evidence was generated against a valid ancestor of candidate HEAD → PASS
-    sourceRevisionAncestor: true,  // verified via git log below
+    sourceRevisionAncestor: false, // verified via git log below
   };
 
   // Verify J's sourceRevision is an ancestor of candidate HEAD
