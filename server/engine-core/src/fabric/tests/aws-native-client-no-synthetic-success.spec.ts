@@ -74,18 +74,37 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
   });
 
   it('authenticates to the configured-region ECR registry and verifies the pushed digest', async () => {
-    (client as any).ecr.send = jest.fn().mockResolvedValue({
-      authorizationData: [{
-        authorizationToken: Buffer.from('AWS:test-password').toString('base64'),
-        proxyEndpoint: 'https://123456789012.dkr.ecr.eu-west-3.amazonaws.com',
-      }],
-    });
+    const ecrSend = jest.fn()
+      .mockResolvedValueOnce({
+        authorizationData: [{
+          authorizationToken: Buffer.from('AWS:test-password').toString('base64'),
+          proxyEndpoint: 'https://123456789012.dkr.ecr.eu-west-3.amazonaws.com',
+        }],
+      })
+      .mockResolvedValueOnce({ imageDetails: [{ imageDigest: `sha256:${'a'.repeat(64)}` }] });
+    (client as any).ecr.send = ecrSend;
     const result = await client.pushContainerImage(`sha256:${'b'.repeat(64)}`, '123456789012.dkr.ecr.eu-west-3.amazonaws.com/repo:release');
     expect(result.digest).toBe(`sha256:${'a'.repeat(64)}`);
     expect(result.id).toContain('@sha256:');
     expect(runtimeCalls[0].args).toEqual(['login', '--username', 'AWS', '--password-stdin', 'https://123456789012.dkr.ecr.eu-west-3.amazonaws.com']);
     expect(runtimeCalls[0].stdin).toBe('test-password');
     expect(runtimeCalls.some((call) => call.args[0] === 'push')).toBe(true);
+    expect(ecrSend).toHaveBeenCalledTimes(2);
+    expect(ecrSend.mock.calls[1][0].input).toEqual({ repositoryName: 'repo', imageIds: [{ imageTag: 'release' }] });
+    expect(result.id).toBe(`123456789012.dkr.ecr.eu-west-3.amazonaws.com/repo@sha256:${'a'.repeat(64)}`);
+  });
+
+  it('does not trust a local Docker digest when ECR has no verified pushed image', async () => {
+    (client as any).ecr.send = jest.fn()
+      .mockResolvedValueOnce({
+        authorizationData: [{
+          authorizationToken: Buffer.from('AWS:test-password').toString('base64'),
+          proxyEndpoint: 'https://123456789012.dkr.ecr.eu-west-3.amazonaws.com',
+        }],
+      })
+      .mockResolvedValueOnce({ imageDetails: [] });
+    await expect(client.pushContainerImage(`sha256:${'b'.repeat(64)}`, '123456789012.dkr.ecr.eu-west-3.amazonaws.com/repo:release'))
+      .rejects.toThrow('ECR_REMOTE_PUSH_DIGEST_NOT_VERIFIED');
   });
 
   it('rejects an ECR repository URI from a different region before Docker login', async () => {
