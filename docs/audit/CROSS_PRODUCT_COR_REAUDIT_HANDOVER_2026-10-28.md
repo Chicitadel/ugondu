@@ -185,3 +185,12 @@ The two new findings above are physically implemented with regression tests auth
 - DirectAdmin remains limited to supported workloads; a measured small VPS is the next step if persistent services require it. AWS remains conditional on traction/official engagement/funding and explicit budget/account authorization.
 - AeroBill and Mandatag remain the only billing/usage-rating and licensing/entitlement authorities.
 - Commercial status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
+
+
+## 2026-10-29 Ugondu credential-scope remediation
+
+- Finding `UG-COR-SIGNING-SECRET-SCOPE-001`: moved `COR_SIGNING_KEY` out of job-level environment into the final signer step only; moved `COR_PUBLIC_KEY` into the conditional trust-root verification step only.
+- Added regression coverage to `tests/qualification/aws-physical-opt-in-contract.test.mjs` asserting no signing credentials in job-wide env and preserving manual dispatch, repository opt-in and trusted release-branch guards.
+- Implementation/test candidate before this documentation update: `b7fed10bd61d9d12134a68dbbb0022d0234e35e3`. Fresh exact-head CI/COR receipts are required after this change; earlier green runs do not qualify it.
+- Dumcholu deployment renderer regression logic passed 7/7 in local isolated execution; GitHub Actions attempts have failed before steps with unavailable logs, so exact-head remote CI remains unverified. Its product-name gate remains independently unresolved.
+- No AWS deployment, live federation transaction, rollback proof or resource reconciliation has been verified. Overall status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
