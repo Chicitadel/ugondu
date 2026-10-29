@@ -278,14 +278,35 @@ async function runTests() {
             verifiedAt: envelope.verifiedAt.toISOString()
         });
         assert.strictEqual(
-            crypto.verify(null, Buffer.from(signedPayload, 'utf8'), engineCore.keyState.publicKey, Buffer.from(envelope.signature, 'base64url')),
+            crypto.verify(null, Buffer.from(signedPayload, 'utf8'), engineCore.keyState.publicKey, Buffer.from(envelope.signature.slice(4), 'base64url')),
             true,
             'Execution envelope signature must verify against the managed public key'
         );
         assert.strictEqual(
-            crypto.verify(null, Buffer.from(signedPayload.replace('context_signature_test', 'other_context'), 'utf8'), engineCore.keyState.publicKey, Buffer.from(envelope.signature, 'base64url')),
+            crypto.verify(null, Buffer.from(signedPayload.replace('context_signature_test', 'other_context'), 'utf8'), engineCore.keyState.publicKey, Buffer.from(envelope.signature.slice(4), 'base64url')),
             false,
             'Signature must bind the execution context'
+        );
+        const { Provisioner } = require('../server/engine-core/dist/fabric/provisioner.js');
+        const resourceController = {
+            allocateResources: async (task) => ({ status: 'ALLOCATED', contextId: task.contextId })
+        };
+        const provisioner = new Provisioner(resourceController, engineCore.keyState.publicKey);
+        const tenantId = 'tenant_signature_test';
+        const authorizedEnvelope = {
+            ...envelope,
+            securityContext: { tenantId, tenant: { id: tenantId } }
+        };
+        const provisioned = await provisioner.provision(authorizedEnvelope, { contextId: envelope.contextId });
+        assert.strictEqual(provisioned.status, 'ALLOCATED');
+
+        await assert.rejects(
+            () => provisioner.provision({ ...authorizedEnvelope, signature: 'SIG:forged' }, { contextId: envelope.contextId }),
+            /EXECUTION_ENVELOPE_SIGNATURE_INVALID/
+        );
+        await assert.rejects(
+            () => new Provisioner(resourceController).provision(authorizedEnvelope, { contextId: envelope.contextId }),
+            /EXECUTION_ENVELOPE_VERIFIER_NOT_CONFIGURED/
         );
         console.log('[en] ✓ PASS: Execution envelope uses verifiable cryptographic signature');
         passed++;
