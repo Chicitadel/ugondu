@@ -175,14 +175,15 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     process.env.UGONDU_ECS_SUBNET_IDS = 'subnet-a,subnet-b';
     process.env.UGONDU_ECS_SECURITY_GROUP_IDS = 'sg-a';
     const serviceArn = 'arn:aws:ecs:eu-west-3:123456789012:service/ugondu-staging/ugondu-api';
-    jest.spyOn(client, 'createEcsService').mockResolvedValue(serviceArn);
+    const send = jest.fn().mockResolvedValue({ service: { serviceArn } });
+    (client as any).ecs.send = send;
     await expect(client.createContainerService('ugondu-staging', 'ugondu-api', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/ugondu-api:7'))
       .resolves.toEqual({ id: serviceArn });
-    expect(client.createEcsService).toHaveBeenCalledWith(
-      'ugondu-staging', 'ugondu-api',
-      'arn:aws:ecs:eu-west-3:123456789012:task-definition/ugondu-api:7',
-      1, ['subnet-a', 'subnet-b'], ['sg-a'],
-    );
+    const input = send.mock.calls[0][0].input;
+    expect(input.cluster).toBe('ugondu-staging');
+    expect(input.serviceName).toBe('ugondu-api');
+    expect(input.networkConfiguration.awsvpcConfiguration.subnets).toEqual(['subnet-a', 'subnet-b']);
+    expect(input.networkConfiguration.awsvpcConfiguration.securityGroups).toEqual(['sg-a']);
     expect(deploymentWaiter).toHaveBeenCalledWith('ugondu-staging', serviceArn);
   });
 
