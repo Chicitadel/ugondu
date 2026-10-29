@@ -99,3 +99,17 @@ The later push COR gate failed evidence freshness because non-evidence source/wo
 ## Regression receipt update — 2026-10-28
 
 The new workflow contract test `npm run test:aws-physical-opt-in` passed in standard CI run [#40759642250](https://github.com/Chicitadel/ugondu/actions/runs/40759642250), step `Test AWS physical qualification opt-in boundary`, on SHA `2edf906ca7ed2ee8a2dbbd04b4e16772daff1ede`. This is targeted regression evidence only. Full exact-head CI/COR remained pending at that time, so the finding stays YELLOW until the complete required gates finish on the current head. No AWS deployment is claimed.
+
+
+## 2026-10-29 exact-head evidence refresh
+
+- Ugondu PR #41 branch `fix/cor-aws-physical-opt-in-2026-10-28`, head verified in PR metadata as `30849a07656f52307bce443114322b4ed3c2e550`.
+- CI [run #40776073589](https://github.com/Chicitadel/ugondu/actions/runs/40776073589) completed success. The workflow reports successful Go formatting, vet, unit tests and Linux/amd64 race detector; Windows amd64, macOS and Linux arm64 build/test legs; workspace and integration jobs.
+- COR validation [run #40776073510](https://github.com/Chicitadel/ugondu/actions/runs/40776073510) completed success on the same candidate. Exact-SHA/clean-checkout, build, locales, I18N, architecture and import scans, type-check, workspace tests, COR regression, policy-pack signature, evidence bundle, stream registry, fresh COR qualification, independent finalization and final candidate integrity passed.
+- **Release boundary:** COR evidence-freshness, signing trust-root and final signing were skipped; AWS physical qualification was skipped. These runs prove branch validation only, not signed release certification or AWS deployment.
+- Earlier failed push COR run [#40763762669](https://github.com/Chicitadel/ugondu/actions/runs/40763762669) failed the frozen-candidate freshness check before the release-only trigger scope correction. Current validation-only behavior correctly skipped that release-only check; freshness is still required in an explicitly authorized release attempt.
+- AWS run [#40755624233](https://github.com/Chicitadel/ugondu/actions/runs/40755624233) is cancelled. Resource cleanup has not been verified; an authorized AWS account operator still needs a residual-resource scan and account reconciliation.
+- Dumcholu PR #10 has a product-name governance job failing before steps (latest observable run [#40752340292](https://github.com/Chicitadel/dumcholu/actions/runs/40752340292), job ID `123042066314`, no steps; earlier rerun similarly failed before steps). There is no evidence of a code-level scanner assertion failure; classify as **BLOCKED / RUNNER ADMISSION UNCONFIRMED**, not pass. Keep naming exceptions narrowly scoped.
+- Dumcholu source now rejects non-finite AI charges using `Double.isFinite(charge)`; test covers NaN and +/-Infinity. Ledger reports `mvn test -Dtest=AIBudgetServiceTest` 9/9 pass, but this session has not independently executed the command against current head. Require exact-head CI receipt to close the test gate.
+- No AWS deployment was performed; no verified live AeroBill/Mandatag staging transaction receipt was available. Host policy remains DirectAdmin where workload-compatible → small measured VPS if persistent Java services cannot run reliably → AWS only after traction/official engagement/funding and explicit cost/account approval.
+- Commercial status remains **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`**.
