@@ -48,7 +48,8 @@
     "bootstrap:validate:strict": "node scripts/bootstrap/validate-bundle.mjs --strict",
     "test:bootstrap-bundle": "node --test tests/bootstrap-bundle-integrity.test.mjs",
     "bootstrap:gcp": "node scripts/bootstrap/gcp-one-step-bootstrap.mjs",
-    "test:bootstrap:gcp": "node --test tests/gcp-one-step-bootstrap.test.mjs"
+    "test:bootstrap:gcp": "node --test tests/gcp-one-step-bootstrap.test.mjs",
+    "test:aws-physical-opt-in": "node --test tests/qualification/aws-physical-opt-in-contract.test.mjs"
   },
   "engines": {
     "node": ">=20.0.0",
