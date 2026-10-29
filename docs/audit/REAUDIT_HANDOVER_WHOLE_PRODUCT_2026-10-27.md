@@ -370,13 +370,16 @@ Whole-product COR release status remains strictly **PARTIAL / RELEASE BLOCKED / 
 **Safety:** No protected branch writes; no AWS provisioning or deployment. Continue to keep the PR draft/unmerged until exact-head evidence and all physical release prerequisites are reviewed. Overall COR remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
 
 
-### Exact-head CI follow-up — regression assertion corrected
+### Exact-head CI follow-up — regression assertion corrected and verified
 
 The initial CI run `40856167040` failed in the newly added test because Linux returned a “file already closed” error not matching the test's overly specific `os.ErrInvalid` check. The injected unlock error itself was correctly propagated. The assertion was made portable by checking only that `file.Stat()` fails after unlock/close.
 
-- Test correction commit: `8672c94941be55e80a1ce895b5509ca30ba8fa10`.
+- Test correction commit: `8672c94941be55e80a1ce895b5509ca30ba8fa10` (candidate commit for PR #44; branch HEAD at `2fcea071`).
 - Guardrail records the failed run and correction: `1e2170cb5c95d1e27be10e95eec9198836b8c8bb`.
-- **Verification remains PENDING** until CI runs against the latest branch head. The first failed run must remain in the evidence trail; do not hide it or infer success from the correction alone.
+- **Exact-candidate CI verification (PR #44):**
+  - **CI/CD [run #40856269414](https://github.com/Chicitadel/ugondu/actions/runs/40856269414):** 16/16 green jobs passed (Release Integrity & Governance, all 5 OS/architecture Go thin-client matrix builds/tests, all 9 microservice workspaces, and Integration Tests).
+  - **COR Certification [run #40856269423](https://github.com/Chicitadel/ugondu/actions/runs/40856269423):** completed **PASS**; COR Certification job passed in 2m45s; AWS Physical Qualification Gate was skipped by design for validation PRs; COR Final Release Gate passed in 4s emitting `NOT RELEASE CERTIFIED`.
+- **Verification status:** Finding `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001` is **verified on candidate `8672c949`**. The historical failed run `40856167040` remains documented in the audit ledger.
 
 
 ## Cross-product follow-up — Dumcholu citizen applications (2026-10-29)
@@ -384,7 +387,7 @@ The initial CI run `40856167040` failed in the newly added test because Linux re
 ### `DUM-COR-CITIZEN-APPLICATIONS-I18N-001`
 
 - **Physical implementation branch:** `Chicitadel/dumcholu:fix/cor-citizen-applications-i18n-2026-10-29`
-- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11
+- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11 (candidate commit `8847a3b`)
 - Tokenized citizen applications UI strings and added 16 keys to all 12 locale bundles, both localization registries, and English fallback values.
 - Added a French locale-switching widget regression test.
 - Static remote content audit confirms all 16 keys exist in each of the 12 locale files, both registries, and the fallback dictionary.

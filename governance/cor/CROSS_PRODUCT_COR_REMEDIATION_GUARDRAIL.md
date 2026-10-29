@@ -202,14 +202,17 @@ For each finding, physically implement before handover; add a regression that fa
 - **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head CI, candidate-bound signed evidence, staging and live federation qualification, recovery/rollback evidence, and release-owner authorization are complete.
 
 
-### Verification follow-up — portable closed-handle assertion
+### Verification follow-up — portable closed-handle assertion and verified CI receipts
 
 The first exact-head CI attempt surfaced a **test-only portability assumption**, not a production-source failure: on Linux, calling `os.File.Stat()` after close returned a platform/runtime-specific “file already closed” error that did not satisfy the test's `errors.Is(err, os.ErrInvalid)` expectation. The test was corrected to assert the stable contract (the closed file handle must return a non-nil error), without requiring a specific error identity.
 
-- **Failed run evidence:** CI/CD [run #40856167040](https://github.com/Chicitadel/ugondu/actions/runs/40856167040), Linux ARM64 Go test job [job #123387562141](https://github.com/Chicitadel/ugondu/actions/runs/40856167040/job/123387562141); failure occurred in `TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile` at the overly specific post-close error assertion. The new regression test had already confirmed that the injected unlock error propagated.
-- **Physical test correction:** `client/engine/state_lock_unix_test.go` now checks that `file.Stat()` returns any error after `Unlock()`; source behavior is unchanged.
-- **Correction commit:** `8672c94941be55e80a1ce895b5509ca30ba8fa10`.
-- **Status:** The failed exact-head run is retained as evidence. A new exact-head CI run is required; do not mark this finding PASS until the new run completes green.
+- **Failed run evidence (historical):** CI/CD [run #40856167040](https://github.com/Chicitadel/ugondu/actions/runs/40856167040), Linux ARM64 Go test job [job #123387562141](https://github.com/Chicitadel/ugondu/actions/runs/40856167040/job/123387562141); failure occurred in `TestUnixStateFileLockUnlockPropagatesUnlockFailureAndClosesFile` at the overly specific post-close error assertion. The new regression test had already confirmed that the injected unlock error propagated.
+- **Physical test correction:** `client/engine/state_lock_unix_test.go` checks that `file.Stat()` returns any error after `Unlock()`; source behavior is unchanged.
+- **Correction candidate commit:** `8672c94941be55e80a1ce895b5509ca30ba8fa10` (PR #44 candidate; branch HEAD at `2fcea071`).
+- **Exact-candidate CI verification (PR #44):**
+  - **CI/CD [run #40856269414](https://github.com/Chicitadel/ugondu/actions/runs/40856269414):** 16/16 green jobs passed (Release Integrity & Governance, all 5 OS/architecture Go thin-client matrix builds and tests including Linux arm64/amd64, macOS amd64/arm64, Windows amd64, all 9 microservice workspaces, and Integration Tests).
+  - **COR Certification [run #40856269423](https://github.com/Chicitadel/ugondu/actions/runs/40856269423):** completed **PASS**; COR Certification job passed in 2m45s; AWS Physical Qualification skipped as expected for validation-only PR event; COR Final Release Gate passed in 4s emitting `NOT RELEASE CERTIFIED`.
+- **Status:** `UG-COR-UNIX-LOCK-UNLOCK-ERROR-001` is **verified on candidate `8672c949`**. Error propagation via `errors.Join(unlockErr, closeErr)` and the portable closed-handle assertion are confirmed in automated CI/CD.
 
 
 ## Cross-product follow-up — Dumcholu citizen applications (2026-10-29)
@@ -217,7 +220,7 @@ The first exact-head CI attempt surfaced a **test-only portability assumption**,
 ### `DUM-COR-CITIZEN-APPLICATIONS-I18N-001`
 
 - **Physical implementation branch:** `Chicitadel/dumcholu:fix/cor-citizen-applications-i18n-2026-10-29`
-- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11
+- **Draft PR:** https://github.com/Chicitadel/dumcholu/pull/11 (candidate commit `8847a3b`)
 - Tokenized citizen applications UI strings and added 16 keys to all 12 locale bundles, both localization registries, and English fallback values.
 - Added a French locale-switching widget regression test.
 - Static remote content audit confirms all 16 keys exist in each of the 12 locale files, both registries, and the fallback dictionary.
