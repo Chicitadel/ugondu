@@ -118,8 +118,10 @@ describe('UniversalBootstrapRuntime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)', () => {
       'arn:aws:budgets::971671216490:budget:airroofers-staging-monthly-cost-budget',
     );
     expect(budgetOperation?.providerActions).toEqual(
-      expect.arrayContaining(['budgets:CreateBudget', 'budgets:ModifyBudget', 'budgets:DescribeBudget']),
+      expect.arrayContaining(['budgets:CreateBudget', 'budgets:ModifyBudget']),
     );
+    expect(budgetOperation?.verificationActions).toContain('budgets:DescribeBudget');
+    expect(budgetOperation?.rollbackActions).toContain('budgets:DeleteBudget');
     expect(graph.capabilityIds).toEqual(
       expect.arrayContaining([
         'cap.iac.cloudformation_stack',
