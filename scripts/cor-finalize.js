@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
+const { validateGateSummary } = require('./cor/gate-summary-validation');
 
 const ROOT =
     process.env.UGONDU_ROOT ||
@@ -186,39 +187,9 @@ const ledger =
 const gateSummary =
     readJson(GATE_SUMMARY);
 
-if (
-    gateSummary.allGatesPassed !== true
-) {
-    block(
-        'allGatesPassed != true'
-    );
-}
-
-if (
-    gateSummary.skippedGates &&
-    gateSummary.skippedGates.length > 0
-) {
-    block(
-        'skippedGates not empty'
-    );
-}
-
-if (
-    gateSummary.notRunGates &&
-    gateSummary.notRunGates.length > 0
-) {
-    block(
-        'notRunGates not empty'
-    );
-}
-
-if (
-    gateSummary.failedGates &&
-    gateSummary.failedGates.length > 0
-) {
-    block(
-        'failedGates not empty'
-    );
+const gateSummaryError = validateGateSummary(gateSummary);
+if (gateSummaryError) {
+    block(gateSummaryError);
 }
 
 if (
