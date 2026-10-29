@@ -112,3 +112,8 @@ Do not use “100% COR closed”, “production ready”, or “certified” whi
 - **Ugondu PR #51**, head `d18ce203897186a4ad55e3864981f0c2e4d8fc21`: CI/COR runs are in progress/pending; admission bypass finding remains open pending exact-head evidence.
 - **Ugondu PR #52**, head `17449a02d3dd409e11750c768b3c52146a948eb6`: CI/COR runs are in progress/pending; execution-envelope signature finding remains open pending exact-head evidence and consumer-side contract verification.
 - The AWS Physical Qualification Gate remained **SKIPPED** in the in-progress COR runs. This is not a physical deployment receipt.
+
+
+### Signature consumer boundary update
+
+PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature against an injected trusted public key before resource allocation; a `SIG:` prefix alone is no longer accepted. Regression coverage includes valid signature verification, context tampering, forged signature rejection, and fail-closed behavior when the verifier is not configured. Exact-head CI is still pending, and any other consumer of `ExecutionEnvelope` must be found and verified before protocol-wide closure.
