@@ -192,7 +192,7 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     const serviceArn = 'arn:aws:ecs:eu-west-3:123456789012:service/staging/service-alias';
     const taskArn = 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4';
     const send = jest.fn()
-      .mockResolvedValueOnce({ taskDefinition: { containerDefinitions: [{ name: 'backend-api-container' }] } })
+      .mockResolvedValueOnce({ taskDefinition: { containerDefinitions: [{ name: 'backend-api-container', portMappings: [{ containerPort: 9090 }] }] } })
       .mockResolvedValueOnce({ service: { serviceArn } });
     (client as any).ecs.send = send;
     await client.createEcsService(
@@ -218,6 +218,42 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
       1, ['subnet-a', 'subnet-b'], ['sg-a'],
       'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
     )).rejects.toThrow('ECS_TASK_DEFINITION_CONTAINER_NAME_MISSING');
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('selects the container that maps the target port when a sidecar is listed first', async () => {
+    process.env.UGONDU_ECS_CONTAINER_PORT = '9090';
+    const serviceArn = 'arn:aws:ecs:eu-west-3:123456789012:service/staging/service-alias';
+    const send = jest.fn()
+      .mockResolvedValueOnce({ taskDefinition: { containerDefinitions: [
+        { name: 'telemetry-sidecar', portMappings: [{ containerPort: 4317 }] },
+        { name: 'backend-api-container', portMappings: [{ containerPort: 9090 }] },
+      ] } })
+      .mockResolvedValueOnce({ service: { serviceArn } });
+    (client as any).ecs.send = send;
+    await client.createEcsService(
+      'staging', 'service-alias', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4',
+      1, ['subnet-a', 'subnet-b'], ['sg-a'],
+      'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+    );
+    expect(send.mock.calls[1][0].input.loadBalancers).toEqual([{
+      targetGroupArn: 'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+      containerName: 'backend-api-container',
+      containerPort: 9090,
+    }]);
+  });
+
+  it('fails closed when no container maps the configured target port', async () => {
+    process.env.UGONDU_ECS_CONTAINER_PORT = '9090';
+    const send = jest.fn().mockResolvedValue({ taskDefinition: { containerDefinitions: [
+      { name: 'telemetry-sidecar', portMappings: [{ containerPort: 4317 }] },
+    ] } });
+    (client as any).ecs.send = send;
+    await expect(client.createEcsService(
+      'staging', 'service-alias', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4',
+      1, ['subnet-a', 'subnet-b'], ['sg-a'],
+      'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+    )).rejects.toThrow('ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_MISSING');
     expect(send).toHaveBeenCalledTimes(1);
   });
 
