@@ -37,6 +37,7 @@ services:
     restart: unless-stopped
     networks:
       - ugondu-internal
+      - ugondu-external # Required for outbound calls to Air Roofers identity and AeroBill authorities
     environment:
       - PORT=4002
       - GOVERNANCE_ROOT=/usr/src/app/.governance
