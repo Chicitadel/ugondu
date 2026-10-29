@@ -211,3 +211,24 @@ This is a coordination snapshot, not a certification declaration. Re-fetch PR me
 - **Dumcholu PR #15:** removed implicit localhost policy-service URL, enforced endpoint/transport safety, added no-network-on-invalid-config tests, and introduced a repeatable exact-head CI workflow for Flutter focused tests/analyzer, Maven policy-service tests, and patch hygiene. Candidate tree changed, so all earlier receipts are stale for this head.
 - **No AWS deployment claim:** these code and CI changes do not provision AWS resources. Physical staging/production, health, rollback, logs, cleanup, and live AeroBill/Mandatag transactions remain separate gates.
 - **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## Re-audit receipt snapshot — 2026-10-29 22:51 UTC
+
+This status snapshot is intentionally exact-head and time-bound. Re-fetch PR heads/runs before any merge decision.
+
+| Repository / PR | Candidate head | Evidence | Status / consequence |
+|---|---|---|---|
+| Ugondu PR #55 — ECS resolver edge coverage | `a4ac49f4c88587db88d139cb4316ff54865f9307` | [CI #40967440875](https://github.com/Chicitadel/ugondu/actions/runs/40967440875), [COR #40967440882](https://github.com/Chicitadel/ugondu/actions/runs/40967440882) | **Both PASS** on this head. The added malformed-ARN and ambiguous-port tests are in the candidate. AWS physical qualification and federation remain unverified.
+| Ugondu PR #56 — AWS portability / preflight | `7b2922baa45da502f6d3d025d8d5d4483f61083d` | [COR #40967106726](https://github.com/Chicitadel/ugondu/actions/runs/40967106726), [CI #40968027920](https://github.com/Chicitadel/ugondu/actions/runs/40968027920) | **FAIL**. First CI failure was stale resource count; after that was corrected, the plan graph exposed unmapped `AWS::Budgets::Budget` as `AUTHORITY_GAP`. Do not use this head as a pass.
+| Ugondu PR #57 — mandatory evidence + AWS Budgets mapping | `d8c75ae436b4ae323527e540dc2368d24f299f68` | [CI #40968910790](https://github.com/Chicitadel/ugondu/actions/runs/40968910790), [COR #40968910751](https://github.com/Chicitadel/ugondu/actions/runs/40968910751) | Pending/queued at snapshot. Contains unconditional evidence-verification gate, regression guard, 15-resource/16-operation assertions, and scoped AWS Budgets mapping. No pass claimed.
+| Dumcholu PR #15 — policy simulator endpoint/API scope | `ebadaff61c1cf2e3fafd4b77a0758445979f0f78` | [Policy contract #40968990106](https://github.com/Chicitadel/dumcholu/actions/runs/40968990106) | In progress at snapshot. Earlier head [#40968564428](https://github.com/Chicitadel/dumcholu/actions/runs/40968564428) failed on a Java test identifier and stale Flutter round-trip assertion; both were corrected and must be re-run on this head.
+
+### Re-audit findings and safeguards now represented in code
+
+- **Ugondu ECS:** malformed task-definition ARN and ambiguous target-port mappings reject before service creation; exact-head CI/COR passed for PR #55 head listed above.
+- **Ugondu COR:** mandatory evidence-verification can no longer be skipped with `UGONDU_SKIP_EVIDENCE_GATE=true`; missing or failed suites force non-zero exit.
+- **Ugondu AWS budget:** the `MonthlyCostBudget` resource is included in template tests, and `AWS::Budgets::Budget` now has a scoped mapping for create/modify, read-back, and rollback. Exact environment-specific ARN derivation is covered by regression tests.
+- **Dumcholu policy simulator:** no silent localhost fallback; remote HTTP is rejected; OpenAPI and Java DTO now model the scope fields; uncalibrated territories/regions/sectors fail closed rather than relabelling France 2030 coefficients. Nigeria remains unsupported until an approved calibration dataset and validation evidence are supplied.
+- **Hosting:** no AWS resources were provisioned by these code changes. The AWS bootstrap template and CI qualification are not proof that the application backend is deployed, healthy, reachable over TLS, rollback-tested, or integrated live with AeroBill/Mandatag.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. Require successful exact-head tests/CI/COR, independent review, approved budget/resource envelope, physical staging health/rollback/log/cleanup receipts, live non-production federation transactions, and formal corporate sign-off.
