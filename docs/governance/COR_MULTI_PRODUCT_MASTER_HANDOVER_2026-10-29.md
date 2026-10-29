@@ -151,3 +151,14 @@ PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature
 - **Handover note:** `docs/governance/UG-COR-ECS-CONTAINER-NAME-MISMATCH-001.md` on the finding branch records root cause, changed files, test expectations, proof obligations, and release guardrails.
 - **Evidence state:** Code/test/docs are committed; exact-head CI and COR evidence are not yet available at this writing. No local test execution or live AWS deployment is claimed. Refresh all receipts against the final head before closure.
 - **Release posture remains:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` pending exact-head automated checks, authorized physical AWS staging/rollback qualification, and live non-production AeroBill/Mandatag transactions.
+
+
+## Follow-up finding UG-COR-ECS-TARGET-CONTAINER-PORT-MISMATCH-001 — IMPLEMENTED; VALIDATION PENDING
+
+- **Finding branch / PR:** `fix/cor-ecs-container-name-resolution-2026-10-29` / [PR #55](https://github.com/Chicitadel/ugondu/pull/55).
+- **Exact current candidate head at documentation update:** `0d83b41776cd5d41b99ed21e2c1e8c42eed3e922` (re-fetch PR head before relying on this SHA; documentation and commits can move).
+- **Root cause:** The prior fix selected the first `containerDefinitions[]` entry. ECS task definitions can place telemetry/proxy sidecars before the application container, so the first container may not expose the configured target port.
+- **Physical fix:** The resolver now selects exactly one container whose `portMappings[].containerPort` matches the configured target port. Zero matches fail closed with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_MISSING`; multiple matches fail closed with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS`.
+- **Regression coverage:** Added a sidecar-first case and a missing-port case; updated the existing mismatch fixture to declare its port mapping. Source: `server/engine-core/src/fabric/providers/aws-native-client.ts`; tests: `server/engine-core/src/fabric/tests/aws-native-client-no-synthetic-success.spec.ts`.
+- **Receipt invalidation:** Earlier PR #55 receipts (16/16 and runs #40952496112/#40952496020) apply to the previous head only and do NOT qualify this updated candidate. Re-run focused tests, build/typecheck, full CI and COR on the exact current head.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`; physical AWS qualification, live AeroBill/Mandatag transactions, Dumcholu Policy Simulator contract verification, WebAuthn/FIDO2 ceremony completion, and corporate sign-off remain open as applicable.
