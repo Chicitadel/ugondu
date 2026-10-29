@@ -95,3 +95,12 @@ Do not use “100% COR closed”, “production ready”, or “certified” whi
 - **Regression coverage:** Forged IDs, cross-tenant replay, expired/revoked registrations, and valid signed passport acceptance are covered in `tests/passport-admission-gate.test.js`.
 - **Status:** `IMPLEMENTED—VALIDATION PENDING`. The security fix is not closed until the exact final candidate compiles and its integration/CI suite passes, followed by independent security review. This finding supersedes any broader claim that all code gaps are closed.
 - **Release impact:** Critical; Ugondu remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+### Related finding: `UG-COR-EXECUTION-ENVELOPE-SIGNATURE-STUB-001`
+
+- **PR #52:** https://github.com/Chicitadel/ugondu/pull/52
+- **Branch:** `fix/security-execution-envelope-signature-2026-10-29`, stacked on PR #51.
+- **Root cause:** A legacy execution-envelope helper emitted a predictable string instead of a cryptographic signature.
+- **Physical remediation:** Added a signer contract, wired it to the engine-core managed Ed25519 key, signed the passport/context/timestamp payload, and failed closed without a configured signer. Regression tests verify signature validity and context tampering.
+- **Status:** `IMPLEMENTED—VALIDATION PENDING`; exact-head build/test receipts and consumer-side contract verification are still required. No release certification is implied.
