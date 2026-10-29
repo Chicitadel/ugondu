@@ -94,6 +94,7 @@ import {
     DeregisterTaskDefinitionCommand,
     DeleteServiceCommand,
     UpdateServiceCommand,
+    DescribeTaskDefinitionCommand,
     waitUntilServicesStable
 } from '@aws-sdk/client-ecs';
 
@@ -641,10 +642,24 @@ export class AwsNativeClient implements IAwsClient {
         return port;
     }
 
-    private taskDefinitionFamily(taskDefinitionArn: string): string {
-        const match = taskDefinitionArn.match(/:task-definition\/([A-Za-z0-9_-]+):\d+$/);
-        if (!match) throw new Error('ECS_TASK_DEFINITION_ARN_INVALID');
-        return match[1];
+    private async resolveTaskDefinitionContainerName(taskDefinitionArn: string, containerPort: number): Promise<string> {
+        if (!/:task-definition\/[A-Za-z0-9_-]+:\d+$/.test(taskDefinitionArn)) {
+            throw new Error('ECS_TASK_DEFINITION_ARN_INVALID');
+        }
+        const response = await this.ecs.send(new DescribeTaskDefinitionCommand({ taskDefinition: taskDefinitionArn }));
+        const containers = response.taskDefinition?.containerDefinitions ?? [];
+        if (containers.length === 0 || !containers.some(c => c.name)) {
+            throw new Error('ECS_TASK_DEFINITION_CONTAINER_NAME_MISSING');
+        }
+        const matchingContainers = containers.filter(container =>
+            container.name && container.portMappings?.some(mapping => mapping.containerPort === containerPort)
+        );
+        if (matchingContainers.length !== 1) {
+            throw new Error(matchingContainers.length === 0
+                ? 'ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_MISSING'
+                : 'ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS');
+        }
+        return matchingContainers[0].name!;
     }
 
     public async registerTaskDefinition(name: string, imageUri: string, cpu: string, memory: string, executionRoleArn: string, taskRoleArn: string, logGroupName: string): Promise<string> {
@@ -685,7 +700,7 @@ export class AwsNativeClient implements IAwsClient {
             throw new Error('ECS_SERVICE_CONFIGURATION_INVALID');
         }
         const containerPort = this.resolveContainerPort();
-        const containerName = targetGroupArn ? this.taskDefinitionFamily(taskDefinitionArn) : undefined;
+        const containerName = targetGroupArn ? await this.resolveTaskDefinitionContainerName(taskDefinitionArn, containerPort) : undefined;
         const cmd = new CreateServiceCommand({
             cluster: clusterName,
             tags: [{ key: 'UgonduCOR', value: 'true' }, { key: 'UgonduTransactionId', value: this.getTransactionId() }],
