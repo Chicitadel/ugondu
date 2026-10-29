@@ -39,8 +39,6 @@ jobs:
 
     env:
       NODE_VERSION: "20"
-      COR_SIGNING_KEY: ${{ secrets.COR_SIGNING_KEY }}
-      COR_PUBLIC_KEY: ${{ secrets.COR_PUBLIC_KEY }}
       UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
       UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
 
@@ -131,6 +129,8 @@ jobs:
 
       - name: Verify COR signing trust root
         if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')
+        env:
+          COR_PUBLIC_KEY: ${{ secrets.COR_PUBLIC_KEY }}
         run: node scripts/ci/verify-trust-root.js
 
       - name: Validate stream registry
@@ -144,6 +144,8 @@ jobs:
 
       - name: Sign final COR authority
         if: github.event_name == 'workflow_dispatch' && inputs.run_aws_physical_qualification == true && vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/phase4/production-hardening')
+        env:
+          COR_SIGNING_KEY: ${{ secrets.COR_SIGNING_KEY }}
         run: node scripts/cor-signer.js
 
       - name: Final candidate integrity check
