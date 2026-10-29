@@ -20,7 +20,270 @@ Parameters:
   MonthlyBudgetLimit:
     Type: Number
     Default: 25.0
-    Description: Monthly spending limit in USD before triggering CloudWatch alarms.
+    MinValue: 1
+    Description: Monthly budget threshold in USD for AWS Budgets notifications; this is not a hard spending cap.
+
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: eu-west-3a
+    Description: Availability Zone in the selected deployment region.
+
+  AmazonLinuxAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-x86_64
+    Description: Region-resolved Amazon Linux 2023 minimal AMI from the AWS public SSM parameter.
+
+  DockerComposeVersion:
+    Type: String
+    Default: v2.39.2
+    AllowedPattern: '^v[0-9]+\\.[0-9]+\\.[0-9]+
+
+  AdminEmail:
+    Type: String
+    Default: systems@airroofers.eu
+    Description: System notification email for budget and operational alerts.
+
+Resources:
+  MonthlyCostBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetLimit:
+          Amount: !Ref MonthlyBudgetLimit
+          Unit: USD
+        BudgetName: !Sub airroofers-${EnvironmentName}-monthly-cost-budget
+        BudgetType: COST
+        TimeUnit: MONTHLY
+      NotificationsWithSubscribers:
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: ACTUAL
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - Address: !Ref AdminEmail
+              SubscriptionType: EMAIL
+        - Notification:
+            ComparisonOperator: GREATER_THAN
+            NotificationType: FORECASTED
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - Address: !Ref AdminEmail
+              SubscriptionType: EMAIL
+
+  # ─── VPC & Network Isolation ────────────────────────────────────────────────
+  PilotVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.100.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-vpc
+        - Key: Organization
+          Value: Air Roofers SASU
+        - Key: Region
+          Value: eu-west-3
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-igw
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref PilotVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref PilotVPC
+      CidrBlock: 10.100.1.0/24
+      AvailabilityZone: !Ref AvailabilityZone
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-public-subnet-3a
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref PilotVPC
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-public-rt
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # ─── Multi-Product Security Groups ──────────────────────────────────────────
+  SharedWebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: No public ingress until a separately reviewed TLS edge is deployed
+      VpcId: !Ref PilotVPC
+      # Deliberately omit SecurityGroupIngress. Bootstrap does not install a TLS
+      # edge or deploy application listeners; open public ingress only with a
+      # reviewed ALB/reverse-proxy change and live security tests.
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-web-sg
+
+  DumcholuBackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Dumcholu backend microservices internal network
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref SharedWebSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub dumcholu-${EnvironmentName}-backend-sg
+
+  UgonduBackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Ugondu deployment backend internal network
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8081
+          ToPort: 8081
+          SourceSecurityGroupId: !Ref SharedWebSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ugondu-${EnvironmentName}-backend-sg
+
+  UUVBackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Universal UI Validator service internal network
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8082
+          ToPort: 8082
+          SourceSecurityGroupId: !Ref SharedWebSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub uuv-${EnvironmentName}-backend-sg
+
+  # ─── IAM Instance Role for Least Privilege ──────────────────────────────────
+  PilotInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ec2.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Tags:
+        - Key: Organization
+          Value: Air Roofers SASU
+
+  PilotInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref PilotInstanceRole]
+
+  # ─── Pilot Staging EC2 Instance ─────────────────────────────────────────────
+  PilotHostInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref PilotInstanceProfile
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref SharedWebSecurityGroup
+        - !Ref DumcholuBackendSecurityGroup
+        - !Ref UgonduBackendSecurityGroup
+        - !Ref UUVBackendSecurityGroup
+      ImageId: !Ref AmazonLinuxAmiId
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+            DeleteOnTermination: true
+            Encrypted: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -e
+          dnf update -y
+          dnf install -y docker git
+          systemctl enable --now docker
+          usermod -aG docker ec2-user
+          
+          # Install a pinned Docker Compose release and verify the approved digest.
+          curl --fail --location --retry 3 --retry-delay 2 \
+            "https://github.com/docker/compose/releases/download/${DockerComposeVersion}/docker-compose-linux-x86_64" \
+            -o /usr/local/bin/docker-compose
+          echo "${DockerComposeSha256}  /usr/local/bin/docker-compose" | sha256sum --check --status
+          chmod 0755 /usr/local/bin/docker-compose
+          
+          mkdir -p /opt/airroofers/{dumcholu,ugondu,uuv}
+          echo "Air Roofers Paris Pilot Staging Host Initialized" > /opt/airroofers/status.txt
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-host
+        - Key: Organization
+          Value: Air Roofers SASU
+        - Key: PrimaryAudience
+          Value: France / EU
+
+Outputs:
+  VpcId:
+    Description: Pilot Staging VPC ID
+    Value: !Ref PilotVPC
+  PublicSubnetId:
+    Description: Public Subnet in eu-west-3a
+    Value: !Ref PublicSubnet
+  InstanceId:
+    Description: EC2 Pilot Host Instance ID
+    Value: !Ref PilotHostInstance
+  DumcholuPort:
+    Description: Dumcholu Backend Port
+    Value: "8080"
+  UgonduPort:
+    Description: Ugondu Backend Port
+    Value: "8081"
+  UUVPort:
+    Description: Universal UI Validator Port
+    Value: "8082"
+
+    Description: Explicit Docker Compose release tag; do not use latest.
+
+  DockerComposeSha256:
+    Type: String
+    MinLength: 64
+    MaxLength: 64
+    AllowedPattern: '^[a-fA-F0-9]{64}
 
   AdminEmail:
     Type: String
@@ -61,7 +324,223 @@ Resources:
     Properties:
       VpcId: !Ref PilotVPC
       CidrBlock: 10.100.1.0/24
-      AvailabilityZone: eu-west-3a
+      AvailabilityZone: !Ref AvailabilityZone
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-public-subnet-3a
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref PilotVPC
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-public-rt
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  # ─── Multi-Product Security Groups ──────────────────────────────────────────
+  SharedWebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Ingress HTTP/HTTPS for Air Roofers API gateway
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-web-sg
+
+  DumcholuBackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Dumcholu backend microservices internal network
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref SharedWebSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub dumcholu-${EnvironmentName}-backend-sg
+
+  UgonduBackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Ugondu deployment backend internal network
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8081
+          ToPort: 8081
+          SourceSecurityGroupId: !Ref SharedWebSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ugondu-${EnvironmentName}-backend-sg
+
+  UUVBackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Universal UI Validator service internal network
+      VpcId: !Ref PilotVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8082
+          ToPort: 8082
+          SourceSecurityGroupId: !Ref SharedWebSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub uuv-${EnvironmentName}-backend-sg
+
+  # ─── IAM Instance Role for Least Privilege ──────────────────────────────────
+  PilotInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ec2.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Tags:
+        - Key: Organization
+          Value: Air Roofers SASU
+
+  PilotInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref PilotInstanceRole]
+
+  # ─── Pilot Staging EC2 Instance ─────────────────────────────────────────────
+  PilotHostInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref PilotInstanceProfile
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref SharedWebSecurityGroup
+        - !Ref DumcholuBackendSecurityGroup
+        - !Ref UgonduBackendSecurityGroup
+        - !Ref UUVBackendSecurityGroup
+      ImageId: ami-0be347593394f1874 # Amazon Linux 2023 Minimal (eu-west-3)
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+            DeleteOnTermination: true
+            Encrypted: true
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -e
+          dnf update -y
+          dnf install -y docker git
+          systemctl enable --now docker
+          usermod -aG docker ec2-user
+          
+          # Install Docker Compose
+          curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          
+          mkdir -p /opt/airroofers/{dumcholu,ugondu,uuv}
+          echo "Air Roofers Paris Pilot Staging Host Initialized" > /opt/airroofers/status.txt
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-host
+        - Key: Organization
+          Value: Air Roofers SASU
+        - Key: PrimaryAudience
+          Value: France / EU
+
+Outputs:
+  VpcId:
+    Description: Pilot Staging VPC ID
+    Value: !Ref PilotVPC
+  PublicSubnetId:
+    Description: Public Subnet in eu-west-3a
+    Value: !Ref PublicSubnet
+  InstanceId:
+    Description: EC2 Pilot Host Instance ID
+    Value: !Ref PilotHostInstance
+  DumcholuPort:
+    Description: Dumcholu Backend Port
+    Value: "8080"
+  UgonduPort:
+    Description: Ugondu Backend Port
+    Value: "8081"
+  UUVPort:
+    Description: Universal UI Validator Port
+    Value: "8082"
+
+    Description: SHA-256 digest of the approved Docker Compose binary for the pinned release and target architecture.
+
+  AdminEmail:
+    Type: String
+    Default: systems@airroofers.eu
+    Description: System notification email for budget and operational alerts.
+
+Resources:
+  # ─── VPC & Network Isolation ────────────────────────────────────────────────
+  PilotVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.100.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-vpc
+        - Key: Organization
+          Value: Air Roofers SASU
+        - Key: Region
+          Value: eu-west-3
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub airroofers-${EnvironmentName}-igw
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref PilotVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref PilotVPC
+      CidrBlock: 10.100.1.0/24
+      AvailabilityZone: !Ref AvailabilityZone
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
