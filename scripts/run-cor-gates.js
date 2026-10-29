@@ -119,24 +119,33 @@ const suites = [
 ];
 
 // ── Pre-run: compile engine-core TypeScript ──────────────────────────────────
-// Test files load modules from dist/. Build here unless already built by CI.
-if (process.env.UGONDU_SKIP_BUILD !== 'true') {
-  const engineCoreDir = path.join(ROOT, 'server', 'engine-core');
-  if (fs.existsSync(path.join(engineCoreDir, 'tsconfig.json'))) {
-    process.stdout.write('[COR-RUNNER] Compiling engine-core TypeScript...\n');
-    const build = spawnSync('npx', ['tsc', '--project', 'tsconfig.json'], {
-      cwd: engineCoreDir,
-      encoding: 'utf8',
-      timeout: 120000,
-      shell: true,
-    });
-    if (build.status !== 0) {
-      process.stderr.write('[COR-RUNNER] TypeScript compilation errors — some gates may report [SKIP].\n');
-      if (build.stderr) process.stderr.write(build.stderr.slice(0, 3000) + '\n');
-    } else {
-      process.stdout.write('[COR-RUNNER] Compilation complete.\n');
-    }
-  }
+// A stale dist/ must never be used after a failed or missing build.
+const { runEngineBuildPreflight } = require('./cor/build-preflight');
+const buildPreflight = runEngineBuildPreflight({
+  root: ROOT,
+  skipBuild: process.env.UGONDU_SKIP_BUILD === 'true',
+  spawnSync,
+  stdout: (message) => process.stdout.write(message),
+  stderr: (message) => process.stderr.write(message),
+});
+if (!buildPreflight.ok) {
+  const failedAt = Date.now();
+  fs.writeFileSync(
+    path.join(ROOT, 'cor-test-results.json'),
+    JSON.stringify({
+      startedAt: failedAt,
+      completedAt: failedAt,
+      buildPreflight,
+      suites: [],
+      passed: 0,
+      failed: 1,
+      skipped: 0,
+      notRun: suites.length,
+      total: suites.length,
+    }, null, 2) + '\n',
+    { mode: 0o600 }
+  );
+  process.exit(1);
 }
 
 // ── Gate execution ────────────────────────────────────────────────────────────
