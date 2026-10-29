@@ -243,6 +243,32 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     }]);
   });
 
+  it('rejects an invalid task-definition ARN before querying ECS', async () => {
+    const send = jest.fn();
+    (client as any).ecs.send = send;
+    await expect(client.createEcsService(
+      'staging', 'service-alias', 'not-an-ecs-task-definition-arn',
+      1, ['subnet-a', 'subnet-b'], ['sg-a'],
+      'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+    )).rejects.toThrow('ECS_TASK_DEFINITION_ARN_INVALID');
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when multiple containers map the configured target port', async () => {
+    process.env.UGONDU_ECS_CONTAINER_PORT = '9090';
+    const send = jest.fn().mockResolvedValue({ taskDefinition: { containerDefinitions: [
+      { name: 'backend-api-container', portMappings: [{ containerPort: 9090 }] },
+      { name: 'duplicate-api-container', portMappings: [{ containerPort: 9090 }] },
+    ] } });
+    (client as any).ecs.send = send;
+    await expect(client.createEcsService(
+      'staging', 'service-alias', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4',
+      1, ['subnet-a', 'subnet-b'], ['sg-a'],
+      'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+    )).rejects.toThrow('ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS');
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it('fails closed when no container maps the configured target port', async () => {
     process.env.UGONDU_ECS_CONTAINER_PORT = '9090';
     const send = jest.fn().mockResolvedValue({ taskDefinition: { containerDefinitions: [
