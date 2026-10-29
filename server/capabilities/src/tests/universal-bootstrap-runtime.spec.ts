@@ -111,7 +111,7 @@ describe('UniversalBootstrapRuntime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)', () => {
 
     expect(graph.status).toBe('READY');
     expect(graph.exitCode).toBe(0);
-    expect(graph.operations.length).toBe(15);
+    expect(graph.operations.length).toBe(16);
     const budgetOperation = graph.operations.find((operation) => operation.resourceType === 'AWS::Budgets::Budget');
     expect(budgetOperation?.capabilityId).toBe('cap.cost.aws_budget');
     expect(budgetOperation?.resourceArns).toContain(
