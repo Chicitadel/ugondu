@@ -283,3 +283,18 @@ Two additional confirmed portability/security defects were physically fixed on d
 The AWS authorization source states CreateBudget, UpdateBudget and DeleteBudget APIs are authorized by `budgets:ModifyBudget`, and DescribeBudget APIs by `budgets:ViewBudget`; the canonical ARN separator is slash. See [AWS Budgets Service Authorization Reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html) and [Budget API reference](https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_Budget.html).
 
 The PR #57 candidate has advanced after the previously successful exact-head receipts. Current head must be requalified; do not reuse receipts for `1826e14e`. No AWS resources were provisioned. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## 2026-10-30 critical COR stream verifier re-audit
+
+A deeper source audit of the 40 qualification executors found that some “PASS” receipts were not supported by the stated checks. In particular, A02 only looked for generic words and used an always-true local assertion; A03 inspected the wrong source file and also used an always-true assertion. This invalidates any interpretation that the 40-stream verifier set was already independently complete.
+
+**Physical fixes on Ugondu PR #57 branch:**
+- A02 now verifies the actual wildcard rejection predicate and fail-closed error in `policy-gate.ts`.
+- A03 now verifies recovery derives the hash from the active capability envelope, binds it into `verifyAuthorization`, and the policy gate compares and seals that hash.
+- Added `tests/cor-stream-objective-verifiers.test.js` and wired it into governance qualification.
+- Added `scripts/cor/stream-source-integrity.js`; the COR engine and registry checker reject known always-true `assertCheck`, “pretend to check”, `mock-fingerprint`, and synthetic `verified_source` placeholders.
+
+**Further placeholders detected, not yet implemented:** A07, B09-B16, C22, D25-D28, E29-E33, and F39. The shared guard rejects the recognized patterns; those objectives still need real verifiers and regression coverage. This intentionally prevents a misleading 40/40 PASS until all executors are genuine.
+
+The same branch also contains the previously recorded AWS region portability and AWS Budgets IAM/ARN fixes. All earlier successful receipts predate the latest code changes and are not valid evidence for the new head. No AWS resources were provisioned. Commercial release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
