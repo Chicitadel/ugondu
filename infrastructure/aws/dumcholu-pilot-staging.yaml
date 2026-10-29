@@ -1,8 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Air Roofers SASU - Multi-Product Pilot Staging Backend Infrastructure in Paris (eu-west-3).
-  Provides cost-effective, partitioned container infrastructure for Dumcholu, Ugondu, and UUV,
-  with seamless upgradeability to AWS ECS Fargate serverless.
+  Air Roofers SASU - Low-cost pilot host bootstrap in Paris (eu-west-3).
+  Creates an isolated EC2 host and budget notifications; it does not deploy product containers
+  or expose public ingress. Application rollout and a reviewed TLS edge are separate gated changes.
 
 Parameters:
   EnvironmentName:
@@ -244,7 +244,7 @@ Resources:
           #!/bin/bash
           set -e
           dnf update -y
-          dnf install -y docker git
+          dnf install -y docker git curl coreutils
           systemctl enable --now docker
           usermod -aG docker ec2-user
           
