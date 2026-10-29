@@ -156,9 +156,41 @@ PR #52 now also changes the fabric `Provisioner` to verify the Ed25519 signature
 ## Follow-up finding UG-COR-ECS-TARGET-CONTAINER-PORT-MISMATCH-001 — IMPLEMENTED; VALIDATION PENDING
 
 - **Finding branch / PR:** `fix/cor-ecs-container-name-resolution-2026-10-29` / [PR #55](https://github.com/Chicitadel/ugondu/pull/55).
-- **Exact current candidate head at documentation update:** `0d83b41776cd5d41b99ed21e2c1e8c42eed3e922` (re-fetch PR head before relying on this SHA; documentation and commits can move).
+- **Candidate-head authority:** Always read the live PR #55 head SHA from GitHub. The SHA recorded in older snapshots is historical only; every source, test, or handover update invalidates receipts tied to earlier heads.
 - **Root cause:** The prior fix selected the first `containerDefinitions[]` entry. ECS task definitions can place telemetry/proxy sidecars before the application container, so the first container may not expose the configured target port.
 - **Physical fix:** The resolver now selects exactly one container whose `portMappings[].containerPort` matches the configured target port. Zero matches fail closed with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_MISSING`; multiple matches fail closed with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS`.
 - **Regression coverage:** Added a sidecar-first case and a missing-port case; updated the existing mismatch fixture to declare its port mapping. Source: `server/engine-core/src/fabric/providers/aws-native-client.ts`; tests: `server/engine-core/src/fabric/tests/aws-native-client-no-synthetic-success.spec.ts`.
 - **Receipt invalidation:** Earlier PR #55 receipts (16/16 and runs #40952496112/#40952496020) apply to the previous head only and do NOT qualify this updated candidate. Re-run focused tests, build/typecheck, full CI and COR on the exact current head.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`; physical AWS qualification, live AeroBill/Mandatag transactions, Dumcholu Policy Simulator contract verification, WebAuthn/FIDO2 ceremony completion, and corporate sign-off remain open as applicable.
+
+
+## 2026-10-29 re-audit — regression hardening and Dumcholu endpoint portability
+
+### Ugondu: ECS target-container resolver test completeness
+
+- **PR:** https://github.com/Chicitadel/ugondu/pull/55
+- **Branch:** `fix/cor-ecs-container-name-resolution-2026-10-29` (stacked on PR #54; no `main`/`master` writes).
+- **Additional regression coverage:** malformed task-definition ARN must reject before any ECS SDK call; multiple containers declaring the same configured target port must fail closed with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS` before service creation.
+- **Receipt invalidation:** the additional tests and handover update changed the candidate tree. Previous focused Jest/CI/COR receipts do not qualify this newest head. Re-run focused tests, full CI and COR against the current PR head.
+- **Resolver guardrail:** select the one named container that maps the configured target port; reject empty/unnamed definitions, missing mappings, and ambiguous mappings. Never select by array position, task family, or service name.
+
+### Dumcholu: Policy Simulator endpoint configuration
+
+- **Finding:** `DUM-COR-POLICY-SERVICE-ENDPOINT-CONFIG-001`
+- **PR:** https://github.com/Chicitadel/dumcholu/pull/15
+- **Branch:** `fix/cor-policy-service-endpoint-config-2026-10-29`, stacked on PR #14 candidate; no `main`/`master` writes.
+- **Confirmed defect:** Flutter HTTP repository silently defaulted `POLICY_SERVICE_URL` to `http://localhost:8080`, which is incorrect for deployed users and permits remote plaintext transport.
+- **Physical remediation:** Removed localhost fallback; added fail-closed missing endpoint handling, absolute HTTP(S) URL validation, rejection of embedded credentials/query/fragment, and HTTPS requirement for non-loopback hosts. Existing backend route remains `POST /api/v1/policies/simulate`.
+- **Regression coverage:** Tests assert missing config, remote HTTP, and malformed/unsafe URLs are rejected before network access.
+- **Receipt invalidation:** Re-run Flutter focused tests/analyzer, policy-service contract tests, CI and COR on the final PR #15 head.
+
+### Shared execution controls
+
+1. Treat candidate branches and their PR heads as the only mutable code targets; never write to `main` or `master` directly.
+2. Re-audit source, callers, API DTO/OpenAPI, manifests and tests before accepting checklist claims.
+3. Pair each confirmed code defect with a regression test that proves the failure boundary; do not weaken assertions to achieve green status.
+4. Any commit changes the evidence target. Re-run required tests and exact-head CI/COR after the last code, test, or documentation commit if the workflows validate the whole candidate tree.
+5. Keep AWS physical staging/production deployment behind an explicit resource/cost review and capture health, rollback, log and cleanup receipts. A template or mocked SDK test is not deployment evidence.
+6. AeroBill remains the sole billing/usage authority and Mandatag the sole licensing/entitlement authority; do not copy either business logic into product domains.
+7. Preserve one-code/host-anywhere portability: endpoint URLs, secrets, and tier selection are configuration/injection concerns, not business-logic forks.
+8. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head CI/COR, independent review, authorized AWS qualification, live federation checks, remaining Dumcholu WebAuthn/FIDO2 ceremony, and corporate approval are evidenced.
