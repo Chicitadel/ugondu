@@ -109,3 +109,14 @@ These receipts prove only the stated automated checks. Do not mark either findin
 - **Regression suite:** `tests/qualification/gate-summary-validation.test.mjs` covers the valid summary, each missing array, wrong types, non-empty skipped/not-run/failed gates, wrong counts, false pass flag, and unsupported schema. Included in `npm run test:governance` and the COR workflow.
 - **Scope:** This validates the internal 40-stream summary only. The workflow's separately gated AWS physical qualification remains independently required for release certification.
 - **Evidence status:** Source and tests committed on `fix/cor-gate-summary-schema-fail-closed-2026-10-29`; exact-head CI and local execution are pending. Do not mark the finding VERIFIED until the tests pass on the final commit.
+
+
+## Finding UG-COR-PASSPORT-ADMISSION-BYPASS-001 — IMPLEMENTED, VALIDATION PENDING
+
+- **Root cause:** Engine-core admission logic admitted unregistered identifiers matching generic prefixes such as `passport_`, `pass_`, `pp_`, or `valid_` whenever a tenant ID was supplied. The registered-passport path also did not compare the registered tenant to the supplied tenant context.
+- **Physical fix:** Removed the generic prefix admission fallback and the redundant test-only admission shortcut; a non-signed passport must be explicitly registered. Registered passports are rejected when the request tenant context does not match the registered tenant. Signed passports continue through cryptographic signature and expiry verification.
+- **Regression coverage:** Expanded `tests/passport-admission-gate.test.js` for forged passport-like IDs, registered cross-tenant replay, expired and revoked passports, and a valid signed passport. Updated the existing valid fixture to use the registered test tenant.
+- **Validation status:** Source and tests committed to this dedicated branch; exact-head test and CI receipts are pending. Do not close until engine-core compilation and the full relevant integration suite pass on the final candidate.
+- **Release impact:** Security-critical. Keep Ugondu release blocked until exact-head verification and independent review. No main/master changes.
+
+- **Additional boundary hardened:** the legacy synchronous `AdmissionController.admit()` implementation also returned `ADMITTED` for arbitrary non-`REVOKED` strings without signature or registry validation. It now fails closed; a regression test exercises the canonical class directly as well as the engine-core adapter.

@@ -74,6 +74,7 @@ let ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4005');
 let passed = 0;
 let failed = 0;
 let serverProcess = null;
+let engineCore = null;
 
 async function runTests() {
     console.log('[en] ══════════════════════════════════════════════════════');
@@ -90,7 +91,7 @@ async function runTests() {
             return originalListen.apply(this, args);
         };
         try {
-            require('../server/engine-core/dist/index.js');
+            engineCore = require('../server/engine-core/dist/index.js');
         } catch (e) {
             if (e.code === 'MODULE_NOT_FOUND') {
                 console.log('[SKIP] Engine-core not compiled');
@@ -123,7 +124,7 @@ async function runTests() {
         targetId: 'tgt_cpanel_01',
         agentId: 'agent_node_01',
         agentVersion: '2.0.0',
-        tenantId: 'tenant_123'
+        tenantId: 'tenant_test_default'
     };
 
     // Test 1: POST to /v1/deploy/resolve without X-Ugondu-Passport-Id → 403
@@ -164,6 +165,83 @@ async function runTests() {
         passed++;
     } catch (e) {
         console.error('[en] ✗ FAIL: Valid passport ID passes middleware —', e.message);
+        failed++;
+    }
+
+    // Test 4: the legacy controller cannot admit any identifier without a trusted verifier.
+    try {
+        const { AdmissionController } = require('../server/engine-core/dist/passport/gatekeeper/admission-controller.js');
+        const legacyController = new AdmissionController({}, {}, {}, {}, {}, {}, {});
+        assert.strictEqual(legacyController.admit('passport_forged_123', { tenantId: 'tenant_test_default' }).status, 'REJECTED');
+        console.log('[en] ✓ PASS: Legacy admission controller fails closed');
+        passed++;
+    } catch (e) {
+        console.error('[en] ✗ FAIL: Legacy admission controller fails closed —', e.message);
+        failed++;
+    }
+
+    // Test 5: passport-like identifiers without registration or a valid signature must be rejected.
+    try {
+        const r = await post(ENGINE_PORT, '/v1/deploy/resolve', validPayload, {
+            'X-Ugondu-Passport-Id': 'passport_forged_123'
+        });
+        assert.strictEqual(r.status, 403, `Expected 403 for unregistered passport-like ID, got ${r.status}`);
+        assert.strictEqual(r.body.code, 'PASSPORT_REJECTED');
+        console.log('[en] ✓ PASS: Unregistered passport-like identifier is rejected');
+        passed++;
+    } catch (e) {
+        console.error('[en] ✗ FAIL: Unregistered passport-like identifier is rejected —', e.message);
+        failed++;
+    }
+
+    // Test 6: a registered passport cannot be replayed across tenant contexts.
+    try {
+        engineCore.registerAdmissionPassport('registered_tenant_a', { tenantId: 'tenant_A' });
+        const r = await post(ENGINE_PORT, '/v1/deploy/resolve', { ...validPayload, tenantId: 'tenant_B' }, {
+            'X-Ugondu-Passport-Id': 'registered_tenant_a'
+        });
+        assert.strictEqual(r.status, 403, `Expected 403 for tenant mismatch, got ${r.status}`);
+        assert.strictEqual(r.body.code, 'PASSPORT_REJECTED');
+        console.log('[en] ✓ PASS: Registered passport tenant mismatch is rejected');
+        passed++;
+    } catch (e) {
+        console.error('[en] ✗ FAIL: Registered passport tenant mismatch is rejected —', e.message);
+        failed++;
+    }
+
+    // Test 7: expired and revoked registered passports fail closed.
+    for (const [id, metadata] of [
+        ['expired_registered', { tenantId: 'tenant_test_default', expiresAt: Date.now() - 1000 }],
+        ['revoked_registered', { tenantId: 'tenant_test_default', revoked: true }]
+    ]) {
+        try {
+            engineCore.registerAdmissionPassport(id, metadata);
+            const r = await post(ENGINE_PORT, '/v1/deploy/resolve', validPayload, {
+                'X-Ugondu-Passport-Id': id
+            });
+            assert.strictEqual(r.status, 403, `Expected 403 for ${id}, got ${r.status}`);
+            assert.strictEqual(r.body.code, 'PASSPORT_REJECTED');
+            console.log(`[en] ✓ PASS: ${id} is rejected`);
+            passed++;
+        } catch (e) {
+            console.error(`[en] ✗ FAIL: ${id} is rejected —`, e.message);
+            failed++;
+        }
+    }
+
+    // Test 8: a correctly signed, unexpired passport is still accepted for its tenant.
+    try {
+        const tenantId = 'tenant_signed_test';
+        const token = engineCore.issueSignedPassport({ tenantId, ttlMs: 60_000 });
+        const r = await post(ENGINE_PORT, '/v1/deploy/resolve', { ...validPayload, tenantId }, {
+            'X-Ugondu-Passport-Id': token
+        });
+        assert.ok([200, 400, 402, 500].includes(r.status), `Expected signed passport to pass middleware, got ${r.status}`);
+        assert.notStrictEqual(r.status, 403);
+        console.log('[en] ✓ PASS: Valid signed passport remains accepted');
+        passed++;
+    } catch (e) {
+        console.error('[en] ✗ FAIL: Valid signed passport remains accepted —', e.message);
         failed++;
     }
 
