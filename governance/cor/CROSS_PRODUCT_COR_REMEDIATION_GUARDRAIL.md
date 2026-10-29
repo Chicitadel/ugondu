@@ -160,3 +160,15 @@ This repository file remains the **single canonical cross-product guardrail**. D
 
 ### Required closeout
 For each finding, physically implement before handover; add a regression that fails on the defect; run it against the exact candidate; record command, exit code, SHA, and evidence. If the environment or external service is unavailable, report **NOT RUN / BLOCKED**. Historical results are not current-head evidence. Release remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED** until every required gate and live qualification has fresh candidate-bound evidence.
+
+
+## 2026-10-29 finding: canonical transaction ID enforcement
+
+- **Finding ID:** `UG-COR-STATE-ID-CANONICALIZATION-001`
+- **Severity:** Medium (state identity/path aliasing; fail-closed input validation)
+- **Reproduction:** `GetTransactionDir` trimmed surrounding whitespace and resolved a padded ID to the same directory as its canonical ID. `SaveState` already rejected padded IDs, but path resolution and `LoadState` could accept the alias. This created inconsistent identifier semantics and allowed a noncanonical caller value to address an existing transaction.
+- **Physical fix:** `client/engine/state.go` now rejects whitespace-padded IDs in `GetTransactionDir`; `GetStateFilePath` and `LoadState` inherit the rejection through the shared resolver. Canonical IDs continue to resolve normally.
+- **Regression test:** `client/engine/state_test.go` adds `TestTransactionPathResolversRejectWhitespacePaddedIDs`, covering transaction-directory lookup, state-file path lookup, and `LoadState` with a padded alias, followed by a successful load using the canonical ID.
+- **Branch:** `fix/cor-state-id-canonicalization-2026-10-29` (stacked on the dedicated PR #42 branch; no protected branch writes).
+- **Verification:** Source and test are committed. Exact-head CI is required before closure; no local test execution is claimed by this handover.
+- **Rollback:** Revert the two source/test commits together if compatibility evidence reveals an approved caller depends on whitespace normalization; do not weaken the regression test without a reviewed ADR.
