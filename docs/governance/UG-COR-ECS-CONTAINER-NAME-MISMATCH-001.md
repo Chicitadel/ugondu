@@ -43,3 +43,10 @@ Mocked SDK tests do not establish live AWS behavior. No AWS resource creation is
 - **Regression coverage:** The primary mismatch test declares the expected port mapping; a sidecar-first case confirms the application container is selected; a missing-port case confirms service creation is not attempted.
 - **Evidence rule:** Earlier CI and test receipts for PR #55 are invalidated by this source change. Re-run focused Jest, typecheck/build, full CI, and COR on the new exact head. Do not claim pass until receipts are available.
 - **Guardrail:** Resolve the container by the target port contract, never by task family, service name, or array position.
+
+
+## Verification hardening — invalid and ambiguous mappings
+
+- Added regression coverage that rejects a malformed task-definition ARN before making any ECS SDK call.
+- Added regression coverage that rejects two containers exposing the configured target port with `ECS_TASK_DEFINITION_CONTAINER_PORT_MAPPING_AMBIGUOUS` before attempting service creation.
+- These additions change the candidate tree; previous focused-test, CI, and COR receipts must not be reused as evidence for the new head. Re-run the focused Jest suite and all required exact-head gates.
