@@ -831,3 +831,12 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 
 
 **Fail-closed follow-up:** `UGONDU_SKIP_BUILD=true` is now rejected because no independent exact-candidate build receipt is validated by the runner. Do not reintroduce a build-skip path unless an approved signed build receipt contract is implemented and tested against the current commit and tree. The latest diagnostic newline correction and skip-path change invalidate all earlier candidate CI/COR results; rerun against current HEAD.
+
+
+## 2026-10-29 re-audit guardrails — mandatory evidence and template drift
+
+- The COR evidence-verification suite is mandatory. Do not introduce environment-variable switches that remove required evidence, security, tenant-isolation, or release-gate suites from qualification.
+- A build or test that is skipped, missing, terminated, stale, or unexecuted is not PASS. Mandatory missing suites must force a non-zero process exit.
+- Any new CloudFormation resource requires updating and strengthening resource-graph tests; expected counts must reflect real resources and must assert the newly added logical ID rather than only changing a numeric count.
+- A CI failure is a confirmed defect signal that must be fixed in source/tests before handover. Never mark a failed exact-head run as evidence of closure.
+- Current follow-up branch: `fix/cor-runner-mandatory-evidence-gate-2026-10-29`, stacked on PR #56; do not edit protected branches directly.
