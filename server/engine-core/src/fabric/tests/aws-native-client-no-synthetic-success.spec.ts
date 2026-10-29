@@ -187,22 +187,38 @@ describe('AwsNativeClient refuses synthetic deployment success', () => {
     expect(deploymentWaiter).toHaveBeenCalledWith('ugondu-staging', serviceArn);
   });
 
-  it('uses the task-definition container family, not service name, for load-balancer wiring', async () => {
+  it('resolves the actual task-definition container name for load-balancer wiring', async () => {
     process.env.UGONDU_ECS_CONTAINER_PORT = '9090';
     const serviceArn = 'arn:aws:ecs:eu-west-3:123456789012:service/staging/service-alias';
-    const send = jest.fn().mockResolvedValue({ service: { serviceArn } });
+    const taskArn = 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4';
+    const send = jest.fn()
+      .mockResolvedValueOnce({ taskDefinition: { containerDefinitions: [{ name: 'backend-api-container' }] } })
+      .mockResolvedValueOnce({ service: { serviceArn } });
     (client as any).ecs.send = send;
     await client.createEcsService(
-      'staging', 'service-alias', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4',
+      'staging', 'service-alias', taskArn,
       1, ['subnet-a', 'subnet-b'], ['sg-a'],
       'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
     );
-    const input = send.mock.calls[0][0].input;
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls[0][0].input.taskDefinition).toBe(taskArn);
+    const input = send.mock.calls[1][0].input;
     expect(input.loadBalancers).toEqual([{
       targetGroupArn: 'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
-      containerName: 'api-container-family',
+      containerName: 'backend-api-container',
       containerPort: 9090,
     }]);
+  });
+
+  it('fails closed when the task definition has no resolvable container name', async () => {
+    const send = jest.fn().mockResolvedValue({ taskDefinition: { containerDefinitions: [] } });
+    (client as any).ecs.send = send;
+    await expect(client.createEcsService(
+      'staging', 'service-alias', 'arn:aws:ecs:eu-west-3:123456789012:task-definition/api-container-family:4',
+      1, ['subnet-a', 'subnet-b'], ['sg-a'],
+      'arn:aws:elasticloadbalancing:eu-west-3:123456789012:targetgroup/api/0123456789abcdef',
+    )).rejects.toThrow('ECS_TASK_DEFINITION_CONTAINER_NAME_MISSING');
+    expect(send).toHaveBeenCalledTimes(1);
   });
 
   it('rejects an unbounded ECS desired count and does not claim a successful rollout', async () => {
