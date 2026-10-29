@@ -46,11 +46,16 @@ test('bootstrap downloads an explicitly versioned Docker Compose binary and chec
 });
 
 test('backend ports remain scoped to the shared edge security group, not public CIDRs', () => {
-  for (const [port, group] of [['8080', 'DumcholuBackendSecurityGroup'], ['8081', 'UgonduBackendSecurityGroup'], ['8082', 'UUVBackendSecurityGroup']]) {
+  const cases = [
+    ['8080', 'DumcholuBackendSecurityGroup', 'UgonduBackendSecurityGroup'],
+    ['8081', 'UgonduBackendSecurityGroup', 'UUVBackendSecurityGroup'],
+    ['8082', 'UUVBackendSecurityGroup', 'PilotInstanceRole'],
+  ];
+  for (const [port, group, nextGroup] of cases) {
     const start = template.indexOf(`  ${group}:`);
-    assert.ok(start >= 0, `${group} must exist`);
-    const next = template.indexOf('\n  ', start + 4);
-    const section = template.slice(start, next > start ? next : template.length);
+    const end = template.indexOf(`  ${nextGroup}:`, start + 1);
+    assert.ok(start >= 0 && end > start, `${group} section must exist`);
+    const section = template.slice(start, end);
     assert.match(section, new RegExp(`FromPort: ${port}\\n\\s+ToPort: ${port}\\n\\s+SourceSecurityGroupId: !Ref SharedWebSecurityGroup`));
     assert.doesNotMatch(section, /CidrIp:/);
   }
