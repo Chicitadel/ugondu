@@ -60,6 +60,42 @@ func TestSaveStateRejectsWhitespacePaddedTransactionID(t *testing.T) {
 	}
 }
 
+func TestTransactionPathResolversRejectWhitespacePaddedIDs(t *testing.T) {
+	txID := "tx_state_canonical_id"
+	state := InitState(txID)
+	txDir, err := GetTransactionDir(txID)
+	if err != nil {
+		t.Fatalf("GetTransactionDir(valid ID) failed: %v", err)
+	}
+	_ = os.RemoveAll(txDir)
+	defer os.RemoveAll(txDir)
+
+	if err := SaveState(state); err != nil {
+		t.Fatalf("SaveState(valid ID) failed: %v", err)
+	}
+
+	for _, getPath := range []struct {
+		name string
+		call func(string) (string, error)
+	}{
+		{name: "transaction directory", call: GetTransactionDir},
+		{name: "state file path", call: GetStateFilePath},
+	} {
+		t.Run(getPath.name, func(t *testing.T) {
+			if path, err := getPath.call(" " + txID + " "); err == nil {
+				t.Fatalf("path resolver accepted whitespace-padded transaction ID and returned %q", path)
+			}
+		})
+	}
+
+	if _, err := LoadState(" " + txID + " "); err == nil {
+		t.Fatal("LoadState accepted a whitespace-padded alias for a valid transaction ID")
+	}
+	if _, err := LoadState(txID); err != nil {
+		t.Fatalf("LoadState(valid ID) failed after rejecting alias: %v", err)
+	}
+}
+
 func TestGetTransactionDirRejectsDotTransactionID(t *testing.T) {
 	for _, getPath := range []struct {
 		name string
