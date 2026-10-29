@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { assertNoVerifierStub } = require('./cor/stream-source-integrity');
 
 const ROOT = process.env.UGONDU_ROOT || path.resolve(__dirname, '..');
 const MANIFEST_PATH = path.join(ROOT, '.governance', 'cor', 'ugondu-cor-qualification-manifest.json');
@@ -94,6 +95,8 @@ for (const stream of manifest.streams) {
     }
 
     const executorPath = path.join(EXECUTOR_DIR, expectedFile);
+    const executorSource = fs.readFileSync(executorPath, 'utf8');
+    try { assertNoVerifierStub(executorSource, stream.id); } catch (error) { block(error.message); }
     let executor;
     try {
         executor = require(executorPath);
