@@ -168,7 +168,19 @@ async function runTests() {
         failed++;
     }
 
-    // Test 4: passport-like identifiers without registration or a valid signature must be rejected.
+    // Test 4: the legacy controller cannot admit any identifier without a trusted verifier.
+    try {
+        const { AdmissionController } = require('../server/engine-core/dist/passport/gatekeeper/admission-controller.js');
+        const legacyController = new AdmissionController({}, {}, {}, {}, {}, {}, {});
+        assert.strictEqual(legacyController.admit('passport_forged_123', { tenantId: 'tenant_test_default' }).status, 'REJECTED');
+        console.log('[en] ✓ PASS: Legacy admission controller fails closed');
+        passed++;
+    } catch (e) {
+        console.error('[en] ✗ FAIL: Legacy admission controller fails closed —', e.message);
+        failed++;
+    }
+
+    // Test 5: passport-like identifiers without registration or a valid signature must be rejected.
     try {
         const r = await post(ENGINE_PORT, '/v1/deploy/resolve', validPayload, {
             'X-Ugondu-Passport-Id': 'passport_forged_123'
@@ -182,7 +194,7 @@ async function runTests() {
         failed++;
     }
 
-    // Test 5: a registered passport cannot be replayed across tenant contexts.
+    // Test 6: a registered passport cannot be replayed across tenant contexts.
     try {
         engineCore.registerAdmissionPassport('registered_tenant_a', { tenantId: 'tenant_A' });
         const r = await post(ENGINE_PORT, '/v1/deploy/resolve', { ...validPayload, tenantId: 'tenant_B' }, {
@@ -197,7 +209,7 @@ async function runTests() {
         failed++;
     }
 
-    // Test 6: expired and revoked registered passports fail closed.
+    // Test 7: expired and revoked registered passports fail closed.
     for (const [id, metadata] of [
         ['expired_registered', { tenantId: 'tenant_test_default', expiresAt: Date.now() - 1000 }],
         ['revoked_registered', { tenantId: 'tenant_test_default', revoked: true }]
@@ -217,7 +229,7 @@ async function runTests() {
         }
     }
 
-    // Test 7: a correctly signed, unexpired passport is still accepted for its tenant.
+    // Test 8: a correctly signed, unexpired passport is still accepted for its tenant.
     try {
         const tenantId = 'tenant_signed_test';
         const token = engineCore.issueSignedPassport({ tenantId, ttlMs: 60_000 });
