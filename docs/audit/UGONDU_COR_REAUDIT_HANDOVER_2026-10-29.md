@@ -26,7 +26,7 @@ This is an incremental re-audit. Existing plans and fixes are retained. Every so
 - Added `scripts/cor/build-preflight.js` as a small reusable, deterministic preflight function.
 - Updated `scripts/run-cor-gates.js` to stop before any suite runs if the engine build fails, is terminated, cannot start, or its required TypeScript configuration is missing.
 - The runner writes a failure summary to `cor-test-results.json` with `failed: 1`, all suites marked not run, and the preflight diagnostic; the process exits non-zero.
-- An explicit `UGONDU_SKIP_BUILD=true` remains visible in the diagnostic and is distinct from a successful build. Only use it where the exact candidate build has already been completed by a separately enforced prior step.
+- `UGONDU_SKIP_BUILD=true` is explicitly rejected: the runner cannot independently prove that a prior build used this exact candidate. The regression test asserts that the skip path fails closed.
 - Added `tests/cor-build-preflight.test.js` for failed build, timeout/signal, missing configuration, successful build and explicit skip behavior.
 - Wired this regression test into `npm run test:governance`.
 
@@ -168,3 +168,8 @@ Added `tests/qualification/aws-staging-template-safety.test.mjs` and wired it in
 **Important scope boundary:** this does not deploy Ugondu or Dumcholu application images and does not create AWS resources. The template remains a gated bootstrap component. Application deployment requires approved immutable image digests, the correct runtime/secret contracts, a reviewed TLS edge, authenticated end-to-end tests, rollback and cleanup evidence. Do not report AWS deployment as complete from this template change.
 
 **Validation status:** source and tests are committed; no local CloudFormation lint/deploy or test execution is claimed. Exact-head CI plus `cfn-lint`/CloudFormation validation is required before using the template.
+
+
+### Build bypass closure follow-up
+
+A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=true` now returns a failed preflight because the runner has no independently verifiable exact-HEAD receipt for a prior build. The regression case now expects rejection. The diagnostic newline was also corrected. This follow-up changes the candidate again, so all prior CI/COR results are stale for release decisions.
