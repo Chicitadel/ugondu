@@ -17,6 +17,8 @@ const EXPECTED_IDS = [
     'F35','F36','F37','F38','F39','F40'
 ];
 
+const SHA_PATTERN = /^[0-9a-f]{40}$/;
+
 function block(reason) {
     process.stderr.write(`COR BLOCKED: ${reason}\n`);
     process.exit(1);
@@ -37,6 +39,10 @@ try {
     block('Manifest invalid JSON');
 }
 
+if (manifest.repository !== 'Chicitadel/ugondu') {
+    block('Manifest repository identity mismatch');
+}
+
 if (!Array.isArray(manifest.streams)) {
     block('Manifest streams is not an array');
 }
@@ -45,7 +51,7 @@ if (manifest.streams.length !== 40) {
     block('Manifest must contain exactly 40 streams');
 }
 
-const manifestIds = manifest.streams.map(s => s.id);
+const manifestIds = manifest.streams.map(s => s && s.id);
 if (new Set(manifestIds).size !== 40) {
     block('Manifest contains duplicate IDs');
 }
@@ -54,17 +60,39 @@ if (JSON.stringify(manifestIds.sort()) !== JSON.stringify([...EXPECTED_IDS].sort
     block('Manifest IDs do not exactly match A01-F40');
 }
 
+// The committed manifest is the objective plan, not a result ledger.
+// Only runtime receipts bind execution to the exact commit/tree.
+for (const [field, value] of [
+    ['candidateCommit', manifest.candidateCommit],
+    ['candidateTree', manifest.candidateTree]
+]) {
+    if (value !== null && value !== undefined && (typeof value !== 'string' || !SHA_PATTERN.test(value))) {
+        block(`Manifest ${field} must be null or a full lowercase SHA-1`);
+    }
+}
+
 const files = fs.readdirSync(EXECUTOR_DIR).filter(f => f.endsWith('.js'));
 if (files.length !== 40) {
     block('There must be exactly 40 executor files, no more, no less');
 }
 
 for (const stream of manifest.streams) {
+    if (stream.status !== 'PLANNED') {
+        block(`Manifest stream ${stream.id || 'UNKNOWN'} must remain PLANNED; execution status belongs in candidate-bound receipts`);
+    }
+    if (typeof stream.objective !== 'string' || stream.objective.trim() === '') {
+        block(`Manifest stream ${stream.id || 'UNKNOWN'} has no objective`);
+    }
+    if (!Array.isArray(stream.location) || stream.location.length === 0 ||
+        stream.location.some(location => typeof location !== 'string' || location.trim() === '')) {
+        block(`Manifest stream ${stream.id || 'UNKNOWN'} has invalid locations`);
+    }
+
     const expectedFile = `${stream.id}.js`;
     if (!files.includes(expectedFile)) {
         block(`Executor file missing: ${expectedFile}`);
     }
-    
+
     const executorPath = path.join(EXECUTOR_DIR, expectedFile);
     let executor;
     try {
@@ -72,15 +100,15 @@ for (const stream of manifest.streams) {
     } catch {
         block(`Could not load executor: ${expectedFile}`);
     }
-    
+
     if (!executor || typeof executor.run !== 'function' || !executor.metadata) {
         block(`Executor ${stream.id} does not export metadata and run`);
     }
-    
+
     if (executor.metadata.streamId !== stream.id) {
         block(`Executor ${stream.id} metadata streamId mismatch`);
     }
-    
+
     const objectiveHash = sha256Text(stream.objective);
     if (executor.metadata.objectiveHash !== objectiveHash) {
         block(`Executor ${stream.id} objective hash mismatch`);
