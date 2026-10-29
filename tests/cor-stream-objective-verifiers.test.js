@@ -8,6 +8,7 @@ const test = require('node:test');
 
 const a02 = require('../scripts/cor/streams/A02');
 const a03 = require('../scripts/cor/streams/A03');
+const { findVerifierStub, assertNoVerifierStub } = require('../scripts/cor/stream-source-integrity');
 
 function fixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-cor-stream-'));
@@ -70,4 +71,13 @@ test('A02 and A03 reject mismatched stream identities', async () => {
     await assert.rejects(a02.run(context(f.root, 'WRONG')), /STREAM_CONTEXT_MISMATCH/);
     await assert.rejects(a03.run(context(f.root, 'WRONG')), /STREAM_CONTEXT_MISMATCH/);
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
+test('shared COR source guard rejects known placeholder verifier patterns', () => {
+  assert.equal(findVerifierStub('function assertCheck() { return true; }'), 'ASSERT_CHECK_ALWAYS_TRUE');
+  assert.equal(findVerifierStub('// We pretend to check the file'), 'PRETEND_CHECK_COMMENT');
+  assert.equal(findVerifierStub("const scope = { baselineFingerprint: 'mock-fingerprint' };"), 'MOCK_FINGERPRINT');
+  assert.equal(findVerifierStub("artifacts.push('verified_source');"), 'SYNTHETIC_VERIFIED_SOURCE');
+  assert.equal(findVerifierStub('function verify() { return observedResult === true; }'), null);
+  assert.throws(() => assertNoVerifierStub('function assertCheck() { return true; }', 'A02'), /COR_STREAM_VERIFIER_STUB_REJECTED:A02/);
 });
