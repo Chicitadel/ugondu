@@ -192,6 +192,6 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 ### Follow-up branch and release gate
 
 - **Branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`, based on PR #56 candidate `7b2922baa45da502f6d3d025d8d5d4483f61083d`.
-- **PR:** To be opened after the changes are committed and verified.
+- **PR:** https://github.com/Chicitadel/ugondu/pull/57 (draft; exact-head validation pending).
 - **Protected refs:** No direct changes to `main` or `phase4/production-hardening`.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until exact-head tests, independent review, authorized AWS qualification, live external evidence and corporate approval are complete.
