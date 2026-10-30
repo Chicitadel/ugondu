@@ -242,3 +242,63 @@ test('F39 verifies atomic drift check and rollback on real RecoveryOrchestrator'
   assert.equal(receipt.rollbackInvoked, true);
   assert.ok(receipt.artifacts.includes('server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts'));
 });
+
+
+test('F39 proves drift refusal and rollback error propagation using the built orchestrator contract', async () => {
+  const f = fixture();
+  try {
+    writeFile(
+      f.root,
+      'server/engine-core/dist/deise/engine/recovery/recovery-orchestrator.js',
+      `module.exports = { RecoveryOrchestrator: class {
+        async executeAtomically(plan, adapter, scope) {
+          if (!await adapter.checkDrift(scope, scope.baselineFingerprint)) {
+            throw new Error('environment_drift_detected');
+          }
+          const result = await adapter.executeAtomicRecovery(plan, scope);
+          if (!result.success) {
+            await adapter.rollback(result.checkpointId);
+            throw new Error('atomic_execution_failed_and_wa');
+          }
+          return { success: true };
+        }
+      } };`,
+    );
+    const receipt = await f39.run(context(f.root, 'F39'));
+    assert.equal(receipt.status, 'PASS');
+    assert.equal(receipt.driftDetected, true);
+    assert.equal(receipt.executionContinued, false);
+    assert.equal(receipt.rollbackInvoked, true);
+  } finally {
+    fs.rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+test('F39 rejects an orchestrator that rolls back but silently returns after atomic failure', async () => {
+  const f = fixture();
+  try {
+    writeFile(
+      f.root,
+      'server/engine-core/dist/deise/engine/recovery/recovery-orchestrator.js',
+      `module.exports = { RecoveryOrchestrator: class {
+        async executeAtomically(plan, adapter, scope) {
+          if (!await adapter.checkDrift(scope, scope.baselineFingerprint)) {
+            throw new Error('environment_drift_detected');
+          }
+          const result = await adapter.executeAtomicRecovery(plan, scope);
+          if (!result.success) {
+            await adapter.rollback(result.checkpointId);
+            return { success: false };
+          }
+          return { success: true };
+        }
+      } };`,
+    );
+    await assert.rejects(
+      f39.run(context(f.root, 'F39')),
+      /F39_ATOMIC_FAILURE_NOT_PROPAGATED/,
+    );
+  } finally {
+    fs.rmSync(f.root, { recursive: true, force: true });
+  }
+});
