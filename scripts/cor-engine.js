@@ -479,10 +479,20 @@ async function main() {
     );
 }
 
-main().catch(
-    error =>
-        block(
-            error?.message ||
-            'unexpected COR engine failure'
-        )
-);
+if (require.main === module) {
+    main().catch(
+        error =>
+            block(
+                error?.message ||
+                'unexpected COR engine failure'
+            )
+    );
+}
+
+module.exports = {
+    main,
+    assertManifest,
+    loadExecutor,
+    verifyReceipt,
+    writeEvidence
+};
