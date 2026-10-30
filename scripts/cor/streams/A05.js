@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const assert = require('assert');
 const { spawnSync } = require('child_process');
 const crypto = require('crypto');
 const canonicalizeModule = require('canonicalize');
