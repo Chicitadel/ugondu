@@ -100,3 +100,12 @@ This handover is a coordination and change-control artifact. It is not a certifi
 - Dumcholu strict-parser test candidate: `6fed87132ad620084b423d700a95f7b49818b62f`. COR Policy Simulator Contract run #40984748413 was queued; deployment manifest qualification run #40984748323 had passed on the preceding candidate before the final security-test change. Do not treat that older run as exact-head proof.
 - Dumcholu latest known documentation head: `ab88652344205145cba42500be3c39374239d155`; documentation-only descendants do not replace the need to verify the latest code candidate's queued workflows.
 - Final status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` for both products. No AWS resources were provisioned.
+
+
+### Additional Ugondu finding — recovery transaction revision conflict
+
+- **Finding:** `UG-COR-RECOVERY-DOUBLE-FAILURE-UPDATE-001`.
+- **Root cause:** The recovery orchestrator updated a failed transaction twice using the same stale expected revision, masking the original atomic execution failure with `TRANSACTION_REVISION_CONFLICT`.
+- **Physical fix:** Catch handling now reloads the persisted transaction and updates FAILED only if it is not already terminal/FAILED.
+- **Tests:** Added a compiled-runtime regression test for rollback, original error preservation, and persisted FAILED revision; wired it into governance and the COR runner. F39 rejects the stale revision-conflict symptom.
+- **Verification:** New exact-head checks pending; do not use earlier 40/40 receipts to close this finding.
