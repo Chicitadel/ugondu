@@ -979,3 +979,17 @@ Exact candidate branches and SHAs, parent CI receipts, regression scope and rele
 All child workflows must pass on their own exact head. Parent workflow receipts are historical context only. Do not merge child PRs until exact-head tests, COR, review and guardrail reconciliation pass.
 
 No AWS resources were provisioned. Keep shared-host portability, AeroBill billing authority, Mandatag entitlement authority, and all external operational release gates unchanged. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 12. Final exact-head enforcement — 2026-10-30
+
+The current child candidates are Dumcholu PR #28 and Ugondu PR #62. Their exact heads and finding status are recorded in the canonical dual-product handover.
+
+- Dumcholu requires tenant-bound principal syntax, strict tenant claim parsing, trusted-tenant propagation, existing-case tenant matching, and legacy-operation tenant preservation.
+- Ugondu B13/B16/C22 require runtime dependencies and must fail closed if the validator, compiled production artifact, localization registry, Go test or toolchain is missing.
+- Re-run complete product-specific qualification after every code, test, workflow or handover commit. Parent SHAs and previously successful workflows are not evidence for a new child head.
+- Do not merge, deploy or certify on a skipped or pending test. Missing runtime prerequisites are blockers.
+
+No AWS resources were provisioned. Preserve portability and the explicit capital authorization gate. AeroBill and Mandatag remain the sole billing and entitlement authorities respectively. External operational gates remain open. Release is still `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
