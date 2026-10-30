@@ -259,3 +259,15 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Verification status:** Physical source and regression test are committed. Exact-head GitHub Actions must execute on the new head; no prior CI/COR receipt applies to this new candidate. Do not mark this finding GREEN until the new locale test and all mandatory CI/COR checks pass.
 - **Additional audit concern:** A07 and several other source-inspection verifiers still rely on literal substring/regex presence rather than executing the authoritative validator or exercising its negative behavior. The 40/40 stream count and absence of known stub signatures are not, by themselves, proof that every objective is behaviorally verified. These remain subject to objective-by-objective adversarial review.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS staging or production resources were provisioned by this change.
+
+
+## 2026-10-30 follow-up — F39 atomic failure propagation false-pass
+
+**Finding ID:** `UG-COR-F39-ATOMIC-FAILURE-PROPAGATION-001`
+
+- **Confirmed defect:** F39 captured the exception from its second atomic recovery scenario in `expectedAtomicError` but never asserted that the exception existed. An orchestrator could invoke rollback and then silently return `success: false` without propagating the atomic failure, while F39 still emitted PASS.
+- **Physical remediation:** F39 now fails with `F39_ATOMIC_FAILURE_NOT_PROPAGATED` unless the failed atomic recovery path throws after rollback.
+- **Regression coverage:** Added a positive F39 test using a fixture orchestrator that refuses drift and propagates atomic failure after rollback, and a negative test whose orchestrator rolls back but silently returns. The negative fixture must be rejected.
+- **Candidate branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`.
+- **Verification:** Source and regression tests committed; exact-head governance/COR/CI rerun required. Prior 40/40 and 15/15 receipts predate this correction and are historical only.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
