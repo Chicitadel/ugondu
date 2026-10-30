@@ -426,3 +426,20 @@ Finding `DUM-AWS-EC2-HOST-SIZING-001` now includes a test-driven correction reco
 The first deployment-manifest run exposed an over-escaped regex in the new regression assertion (run #41084914908). The assertion was corrected without removing or weakening the test. Current Dumcholu candidate branch: `fix/cor-career-tenant-claim-binding-2026-10-30`; latest recorded source/test/documentation commit before this handover sync: `37561afbb27b22bc11acf9aa657efe815000112c`. Re-run the manifest and portable-runtime workflows on the final child head; earlier failure is retained as evidence and not hidden.
 
 This sizing change is template preparation only; it does not provision EC2/ECS or authorize spend.
+
+
+---
+
+## Dumcholu read-path tenant enforcement — 2026-10-30
+
+Additional finding: `DUM-COR-CAREER-READ-TENANT-BOUNDARY-003`.
+
+The controller's journey reads (journey, stages, transitions, explanations) and recalculation previously called citizen-only service methods after principal authentication. They did not verify that an existing durable discovery case belonged to the authenticated principal tenant.
+
+Physical correction on Dumcholu PR #28:
+- Added `verifyDiscoveryCaseTenant(citizenId, tenantId)`.
+- Added tenant-aware `getJourneys(citizenId, tenantId)` and `generateJourney(citizenId, tenantId)`.
+- Updated all controller journey read/recalculation paths to pass the principal-bound tenant; timeline delegates to the protected journey read.
+- Added service regression proving cross-tenant read rejection occurs before journey repository access, plus controller propagation verification.
+
+Current Dumcholu child branch remains `fix/cor-career-tenant-claim-binding-2026-10-30`; the read-path correction is in the latest source/test commits and must be qualified by the next exact-head Java 21 runtime workflow. No tenant claim may be inferred from caller-supplied headers.
