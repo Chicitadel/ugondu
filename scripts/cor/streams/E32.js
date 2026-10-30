@@ -5,6 +5,7 @@ const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
 const fs = require('fs');
 const path = require('path');
+const { assertLocaleKeyParity } = require('../locale-key-parity');
 
 const STREAM_ID = 'E32';
 const OBJECTIVE = 'Verify ru.json exists in server shared locales';
@@ -48,11 +49,7 @@ async function run(context) {
     }
     {
         const enParsed = JSON.parse(fs.readFileSync(enFile, 'utf8'));
-        const enKeys = Object.keys(enParsed).sort();
-        const localeKeys = Object.keys(parsed).sort();
-        if (JSON.stringify(enKeys) !== JSON.stringify(localeKeys)) {
-            throw new Error('E32_RU_LOCALE_KEY_PARITY_MISMATCH');
-        }
+        assertLocaleKeyParity(enParsed, parsed, STREAM_ID, 'ru');
     }
 
     const receipt = {
