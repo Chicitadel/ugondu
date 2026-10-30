@@ -103,8 +103,11 @@ async function ensureBillingAuthority() {
             parsed = {};
           }
           res.setHeader('Content-Type', 'application/json');
-          if (parsed.token === 'community_token_123' || parsed.token === 'pro_token_valid') {
+          if (parsed.token === 'community_token_123' || parsed.token === 'pro_token_valid'
+              || parsed.token === 'community_token_tenant_mismatch') {
             const isPro = parsed.token === 'pro_token_valid';
+            const tenantId = parsed.token === 'community_token_tenant_mismatch'
+              ? 'tenant_other' : 'tenant_test_default';
             res.writeHead(200);
             res.end(
               JSON.stringify({
@@ -112,7 +115,7 @@ async function ensureBillingAuthority() {
                 outcome: 'authorized',
                 edition: isPro ? 'Professional' : 'Community',
                 tier: isPro ? 'professional' : 'community',
-                tenantId: 'tenant_test_default',
+                tenantId,
                 capabilities: {
                   maxDeploymentsPerDay: 50,
                   maxPlugins: 5,
@@ -264,7 +267,7 @@ test('ENG-PASS-002: registered opaque passports are bound to their registered te
   });
   assert.deepStrictEqual(
     engineModule.admitPassport('registered_tenant_a', { tenantId: 'tenant_a' }),
-    { status: 'ADMITTED' }
+    { status: 'ADMITTED', tenantId: 'tenant_a' }
   );
   assert.deepStrictEqual(
     engineModule.admitPassport('registered_tenant_a', { tenantId: 'tenant_b' }),
@@ -294,7 +297,7 @@ test('ENG-PASS-003: signed passports require valid claims and exact tenant bindi
   const token = engineModule.issueSignedPassport({ tenantId: 'tenant_signed_a', ttlMs: 60_000 });
   assert.deepStrictEqual(
     engineModule.admitPassport(token, { tenantId: 'tenant_signed_a' }),
-    { status: 'ADMITTED' }
+    { status: 'ADMITTED', tenantId: 'tenant_signed_a' }
   );
   assert.deepStrictEqual(
     engineModule.admitPassport(token, { tenantId: 'tenant_signed_b' }),
@@ -351,6 +354,24 @@ test('ENG-003: Deterministic 200 signed recipe & idempotent replay verified', as
   assert.strictEqual(replay.status, 200);
   assert.strictEqual(replay.body.transactionId, r.body.transactionId, 'Idempotent replay must return identical transactionId');
   console.log(`[en] ✓ PASS: Deterministic 200 signed recipe & idempotent replay verified (TX: ${r.body.transactionId})`);
+});
+
+test('ENG-PASS-007: AeroBill tenant mismatch rejects deployment despite valid passport', async () => {
+  const r = await post(ENGINE_PORT, '/v1/deploy/resolve', {
+    repositoryUrl: 'https://github.com/example/repo',
+    branch: 'main',
+    fileMap: {},
+    targetEnvironment: 'cpanel',
+    token: 'community_token_tenant_mismatch',
+    projectId: 'proj_default',
+    workspaceId: 'ws_default',
+    targetId: 'tgt_cpanel_01',
+    agentId: 'agent_node_01',
+    agentVersion: '2.0.0',
+    idempotencyKey: `idem_tenant_mismatch_${Date.now()}`,
+  });
+  assert.strictEqual(r.status, 403, `Expected 403 for passport/AeroBill tenant mismatch, got ${r.status}`);
+  assert.strictEqual(r.body.code, 'PASSPORT_BILLING_TENANT_MISMATCH');
 });
 
 test('ENG-004: Unlicensed deployment request deterministically returns 402', async () => {
