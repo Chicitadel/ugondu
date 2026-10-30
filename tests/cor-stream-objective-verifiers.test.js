@@ -174,8 +174,10 @@ test('B12 verifies canonical locale validator contract and rejects an incomplete
 });
 
 test('B13 verifies Ugondu manifest has zero EAORCS inheritance and rejects contaminated manifests', async () => {
+  assert.equal(b13.metadata.verificationMode, 'TEST');
   const r13 = await b13.run(context(REPO_ROOT, 'B13'));
   assert.equal(r13.status, 'PASS');
+  assert.ok(r13.observations.some((obs) => obs.includes('Executed scripts/check-cor-stream-registry.js at runtime')));
 
   const f = fixture();
   try {
@@ -189,9 +191,14 @@ test('B13 verifies Ugondu manifest has zero EAORCS inheritance and rejects conta
 });
 
 test('B14, B15, and B16 verify capability duplicate rejection, diagnosis delegation, and absence of out-of-bounds bash execution', async () => {
+  assert.equal(b14.metadata.verificationMode, 'TEST');
+  assert.equal(b15.metadata.verificationMode, 'TEST');
+  assert.equal(b16.metadata.verificationMode, 'TEST');
   assert.equal((await b14.run(context(REPO_ROOT, 'B14'))).status, 'PASS');
   assert.equal((await b15.run(context(REPO_ROOT, 'B15'))).status, 'PASS');
-  assert.equal((await b16.run(context(REPO_ROOT, 'B16'))).status, 'PASS');
+  const r16 = await b16.run(context(REPO_ROOT, 'B16'));
+  assert.equal(r16.status, 'PASS');
+  assert.ok(r16.observations.some((obs) => obs.includes('Executed compiled RecoveryOrchestrator.analyzeBlastRadius at runtime')));
 
   const f = fixture();
   try {
@@ -207,7 +214,10 @@ test('B14, B15, and B16 verify capability duplicate rejection, diagnosis delegat
 });
 
 test('C22 verifies client repair CLI uses i18n.T without hardcoded fmt strings', async () => {
-  assert.equal((await c22.run(context(REPO_ROOT, 'C22'))).status, 'PASS');
+  assert.equal(c22.metadata.verificationMode, 'TEST');
+  const r22 = await c22.run(context(REPO_ROOT, 'C22'));
+  assert.equal(r22.status, 'PASS');
+  assert.ok(r22.observations.some((obs) => obs.includes('resolve in client/i18n/bootstrap.go')));
 
   const f = fixture();
   try {

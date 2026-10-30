@@ -47,7 +47,10 @@ jest.mock('./src/upm/policy-gate', () => ({
 }));
 `;
 
-function run(context) {
+async function run(context) {
+  if (!context || context.streamId !== STREAM_ID) {
+    throw new Error('STREAM_CONTEXT_MISMATCH');
+  }
   const setupPath = path.join(context.root, 'server', 'engine-core', 'jest.setup.ts');
   if (!fs.existsSync(setupPath)) throw new Error('B09_JEST_SETUP_MISSING');
 

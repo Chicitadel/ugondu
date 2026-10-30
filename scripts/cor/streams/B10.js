@@ -36,7 +36,10 @@ jest.mock('@ugondu/shared', () => ({
 }));
 `;
 
-function run(context) {
+async function run(context) {
+  if (!context || context.streamId !== STREAM_ID) {
+    throw new Error('STREAM_CONTEXT_MISMATCH');
+  }
   const setupPath = path.join(context.root, 'server', 'engine-core', 'jest.setup.ts');
   const configPath = path.join(context.root, 'server', 'engine-core', 'jest.config.js');
   if (!fs.existsSync(setupPath)) throw new Error('B10_JEST_SETUP_MISSING');

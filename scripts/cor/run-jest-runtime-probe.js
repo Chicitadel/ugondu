@@ -27,7 +27,7 @@ function runJestRuntimeProbe({ repoRoot, probeName, probeSource, setupSource, en
       setupFilesAfterEnv: setupPath ? [setupPath] : originalConfig.setupFilesAfterEnv,
     };
 
-    const jestCli = require.resolve('jest/bin/jest.js', { paths: [engineRoot, repoRoot] });
+    const jestCli = require.resolve('jest/bin/jest', { paths: [engineRoot, repoRoot] });
     const result = spawnSync(
       process.execPath,
       [jestCli, '--runInBand', '--runTestsByPath', probePath, '--config', JSON.stringify(config)],

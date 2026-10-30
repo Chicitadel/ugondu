@@ -2,7 +2,9 @@
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
 
@@ -11,10 +13,10 @@ const OBJECTIVE = 'Verify Ugondu manifest does not contain EAORCS inheritance';
 
 const metadata = {
   streamId: STREAM_ID,
-  verifierVersion: '2.0.0',
+  verifierVersion: '3.0.0',
   objectiveHash: crypto.createHash('sha256').update(OBJECTIVE, 'utf8').digest('hex'),
   evidenceSchemaVersion: '3.0.0',
-  verificationMode: 'STATIC',
+  verificationMode: 'TEST',
 };
 
 function verifyObjective(context, observations, artifacts) {
@@ -54,6 +56,49 @@ function verifyObjective(context, observations, artifacts) {
     }
     if (!Array.isArray(stream.location) || stream.location.some((loc) => /eaorcs/i.test(String(loc)))) {
       throw new Error(`B13_STREAM_LOCATION_EAORCS_CONTAMINATION:${stream.id}`);
+    }
+  }
+
+  // Runtime execution proof when check-cor-stream-registry.js is present
+  const validatorRel = 'scripts/check-cor-stream-registry.js';
+  const validatorPath = path.join(context.root, validatorRel);
+  if (fs.existsSync(validatorPath)) {
+    const pos = spawnSync(process.execPath, [validatorPath], {
+      cwd: context.root,
+      env: { ...process.env, UGONDU_ROOT: context.root },
+      encoding: 'utf8',
+      timeout: 30000,
+    });
+    if (pos.status !== 0) {
+      throw new Error(`B13_REGISTRY_VALIDATOR_RUNTIME_FAILED:${String(pos.stderr || pos.stdout).slice(0, 500)}`);
+    }
+
+    let tmpRoot;
+    try {
+      tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-b13-runtime-'));
+      const tmpGov = path.join(tmpRoot, '.governance', 'cor');
+      fs.mkdirSync(tmpGov, { recursive: true });
+      const contaminated = {
+        ...manifest,
+        repository: 'Chicitadel/eaorcs-platform',
+      };
+      fs.writeFileSync(path.join(tmpGov, 'ugondu-cor-qualification-manifest.json'), JSON.stringify(contaminated, null, 2), 'utf8');
+
+      const neg = spawnSync(process.execPath, [validatorPath], {
+        cwd: context.root,
+        env: { ...process.env, UGONDU_ROOT: tmpRoot },
+        encoding: 'utf8',
+        timeout: 15000,
+      });
+      if (neg.status === 0 || !String(neg.stderr).includes('Manifest repository identity mismatch')) {
+        throw new Error('B13_ADVERSARIAL_EAORCS_REPOSITORY_NOT_REJECTED');
+      }
+      observations.push('Executed scripts/check-cor-stream-registry.js at runtime: confirmed positive pass on Chicitadel/ugondu and rejection of adversarial EAORCS repository identity');
+      artifacts.push(validatorRel);
+    } finally {
+      if (tmpRoot) {
+        fs.rmSync(tmpRoot, { recursive: true, force: true });
+      }
     }
   }
 
