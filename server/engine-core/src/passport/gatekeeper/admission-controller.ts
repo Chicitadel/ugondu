@@ -91,16 +91,13 @@ export class AdmissionController {
      * engine bootstrap. This class has no authority to infer admission from string shape.
      * Until that authority is injected, deny by default.
      */
+    /**
+     * Admission must be bound to the cryptographic passport authority installed by the
+     * engine bootstrap. This class has no authority to infer admission from string shape.
+     * Until that authority is injected, deny by default.
+     */
     public admit(_passportId: string, _context: { tenantId: string }): { status: string } {
         return { status: 'REJECTED' };
-    }
-        if (!context || !context.tenantId) {
-            return { status: 'REJECTED' };
-        }
-        if (passportId.startsWith('REVOKED')) {
-            return { status: 'REJECTED' };
-        }
-        return { status: 'ADMITTED' };
     }
 }
 
