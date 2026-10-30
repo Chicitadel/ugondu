@@ -9,7 +9,6 @@ function flattenLocaleKeys(value, prefix = '', output = new Set()) {
     return output;
   }
   const keys = Object.keys(value);
-  if (keys.length === 0 && prefix) output.add(prefix);
   for (const key of keys) {
     if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
       throw new Error('LOCALE_PROHIBITED_DICTIONARY_KEY');
