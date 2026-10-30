@@ -885,3 +885,14 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - **Additional open executor findings from the same source scan:** The source scan also found obvious placeholder patterns in A07, B09-B16, C22, D25-D28, E29-E33, and a mock fingerprint in F39. These are now rejected by the shared guard where the matching patterns occur, but their objectives have **not** been implemented by this change. Each must be replaced with a real verifier and regression test; do not claim all 40 streams qualified.
 - **Verification:** Source/test wiring is committed on PR #57. Exact-head CI/COR must rerun. The registry gate is expected to remain blocked until the remaining placeholder executors are replaced; this is an intentional fail-closed result, not a regression to hide.
 - **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
+
+
+## 2026-10-30 independent re-audit addendum — verifier truthfulness
+
+- Finding `UG-COR-LOCALE-BASELINE-OPTIONAL-001` is physically fixed on the current remediation branch: D25-D28 and E29-E33 now require the English baseline before they can report locale parity.
+- Regression suite `tests/cor-locale-objective-verifiers.test.js` covers all nine locale verifiers for missing-baseline rejection and positive parity; the governance script now invokes it.
+- A passing stream count, metadata hash, or source-token scan is not proof of the stream's business objective. Every objective must have a positive test and an adversarial negative test that mutates the behavior, not merely the source text.
+- Verifiers that inspect source must establish semantic behavior or invoke the actual validator; substring-only evidence is provisional and cannot support COR certification.
+- New candidate commits invalidate all earlier CI/COR receipts. The locale fix is not GREEN until the newly wired test and all mandatory exact-head workflows pass.
+- No AWS resources were provisioned. The launch architecture remains provider-neutral; DirectAdmin-compatible deployment is retained until traction/official engagement justifies cost-bounded AWS staging. ECS EC2 is the initial low-cost AWS backend target; Fargate remains an upgrade tier, not a code fork.
+- Air Roofers federated services remain authoritative: AeroBill owns billing/metering and Mandatag owns license/entitlement decisions. Product code must integrate through configured contracts and must not duplicate those business rules.
