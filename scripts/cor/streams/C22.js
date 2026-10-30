@@ -42,10 +42,13 @@ function verifyObjective(context, observations, artifacts) {
     }
   }
 
-  // Extract all i18n.T("...") keys referenced in client/cmd/repair.go and verify they exist in client/i18n/bootstrap.go
+  // A TEST-mode localization claim requires both the real token registry and the Go runtime test.
   const bootstrapRel = 'client/i18n/bootstrap.go';
   const bootstrapPath = path.join(context.root, bootstrapRel);
-  if (fs.existsSync(bootstrapPath)) {
+  if (!fs.existsSync(bootstrapPath)) {
+    throw new Error('C22_I18N_BOOTSTRAP_MISSING');
+  }
+  {
     const bootstrapSource = fs.readFileSync(bootstrapPath, 'utf8');
     const tokenKeyMatches = [...source.matchAll(/i18n\.T\(\s*"([^"]+)"/g)].map((m) => m[1]);
     if (tokenKeyMatches.length === 0) {
