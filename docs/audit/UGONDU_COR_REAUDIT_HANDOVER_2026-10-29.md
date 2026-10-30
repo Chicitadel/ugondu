@@ -245,3 +245,17 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Additional open executor findings from the same source scan:** The source scan also found obvious placeholder patterns in A07, B09-B16, C22, D25-D28, E29-E33, and a mock fingerprint in F39. These are now rejected by the shared guard where the matching patterns occur, but their objectives have **not** been implemented by this change. Each must be replaced with a real verifier and regression test; do not claim all 40 streams qualified.
 - **Verification:** Source/test wiring is committed on PR #57. Exact-head CI/COR must rerun. The registry gate is expected to remain blocked until the remaining placeholder executors are replaced; this is an intentional fail-closed result, not a regression to hide.
 - **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
+
+
+## 2026-10-30 independent re-audit — locale verifier false-pass closure
+
+**Finding ID:** `UG-COR-LOCALE-BASELINE-OPTIONAL-001`
+
+- **Confirmed defect:** Locale objective verifiers D25-D28 and E29-E33 compared locale keys to `en.json` only when the English baseline existed. If the baseline was absent, these verifiers still emitted PASS while their observations claimed top-level key parity. This is a fail-open evidence defect.
+- **Physical remediation:** All nine verifiers now require `server/shared/locales/en.json`; absence raises a stream-specific `*_EN_LOCALE_BASELINE_MISSING` error before any PASS receipt can be emitted. Existing locale JSON parsing, non-empty object checks, and key-parity checks remain in place.
+- **Regression coverage:** Added `tests/cor-locale-objective-verifiers.test.js`, covering missing-baseline rejection and positive exact-key-parity qualification for all nine streams, plus a negative key-drift case. Added `test:cor-locale-objective-verifiers` and wired it into `test:governance`.
+- **Candidate branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`.
+- **Latest known commit at handover update:** `31fe9b8c194887c91060c6a22d8e45d09286e512` (governance test wiring; includes preceding per-file remediation commits).
+- **Verification status:** Physical source and regression test are committed. Exact-head GitHub Actions must execute on the new head; no prior CI/COR receipt applies to this new candidate. Do not mark this finding GREEN until the new locale test and all mandatory CI/COR checks pass.
+- **Additional audit concern:** A07 and several other source-inspection verifiers still rely on literal substring/regex presence rather than executing the authoritative validator or exercising its negative behavior. The 40/40 stream count and absence of known stub signatures are not, by themselves, proof that every objective is behaviorally verified. These remain subject to objective-by-objective adversarial review.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS staging or production resources were provisioned by this change.
