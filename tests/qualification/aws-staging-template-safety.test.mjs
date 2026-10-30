@@ -33,9 +33,19 @@ test('pilot host selects an AZ from its stack region and tags the actual AWS reg
 test('cost parameter creates actual AWS Budgets notifications and does not claim a hard cap', () => {
   assert.match(template, /MonthlyCostBudget:\n\s+Type: AWS::Budgets::Budget/);
   assert.match(template, /Amount: !Ref MonthlyBudgetLimit/);
+  const budgetStart = template.indexOf('  MonthlyBudgetLimit:');
+  const budgetEnd = template.indexOf('  AvailabilityZone:', budgetStart);
+  assert.ok(budgetStart >= 0 && budgetEnd > budgetStart, 'monthly budget parameter must exist');
+  assert.doesNotMatch(template.slice(budgetStart, budgetEnd), /Default:/, 'budget threshold must be explicitly approved');
   assert.match(template, /NotificationType: ACTUAL\n\s+Threshold: 80/);
   assert.match(template, /NotificationType: FORECASTED\n\s+Threshold: 100/);
   assert.match(template, /this is not a hard spending cap/i);
+});
+
+test('shared Ugondu and Dumcholu pilot defaults to sufficient memory and requires an approved budget', () => {
+  assert.match(template, /InstanceType:\n\s+Type: String\n\s+Default: t3\.medium/);
+  assert.match(template, /AllowedValues: \[t3\.medium, t3\.large\]/);
+  assert.doesNotMatch(template, /Default: t3\.small/);
 });
 
 test('unconfigured host has no public ingress or exposed SSH port', () => {
