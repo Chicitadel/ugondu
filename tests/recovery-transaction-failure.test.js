@@ -46,3 +46,32 @@ test.after(() => {
   if (previousDir === undefined) delete process.env.UGONDU_TRANSACTION_DIR;
   else process.env.UGONDU_TRANSACTION_DIR = previousDir;
 });
+
+
+test('rollback failure still records the transaction as FAILED and preserves rollback error', async () => {
+  const before = new Set(fs.readdirSync(stateDir).filter((name) => name.endsWith('.json')));
+  const adapter = {
+    checkDrift: async () => true,
+    executeAtomicRecovery: async () => ({ success: false, checkpointId: 'checkpoint-rollback-failure-002' }),
+    rollback: async () => {
+      throw new Error('rollback operation failed');
+    },
+  };
+
+  const orchestrator = new RecoveryOrchestrator();
+  await assert.rejects(
+    orchestrator.executeAtomically(
+      {},
+      adapter,
+      { baselineFingerprint: 'sha256:baseline', resourceIdentifiers: [] },
+    ),
+    /rollback operation failed/,
+  );
+
+  const created = fs.readdirSync(stateDir)
+    .filter((name) => name.endsWith('.json') && !before.has(name));
+  assert.equal(created.length, 1);
+  const transaction = JSON.parse(fs.readFileSync(path.join(stateDir, created[0]), 'utf8'));
+  assert.equal(transaction.status, 'FAILED');
+  assert.equal(transaction.revision, 3);
+});
