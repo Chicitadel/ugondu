@@ -271,3 +271,16 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Candidate branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`.
 - **Verification:** Source and regression tests committed; exact-head governance/COR/CI rerun required. Prior 40/40 and 15/15 receipts predate this correction and are historical only.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## 2026-10-30 follow-up — recovery transaction stale revision conflict
+
+**Finding ID:** `UG-COR-RECOVERY-DOUBLE-FAILURE-UPDATE-001`
+
+- **Confirmed defect:** `RecoveryOrchestrator.executeAtomically` marked a failed transaction as FAILED inside the failure branch, then its catch block attempted a second update using the same stale `tx.revision + 1`. `TransactionAuthority.update` increments the revision on the first write, so the second write could throw `TRANSACTION_REVISION_CONFLICT` and mask the original atomic execution failure.
+- **Physical remediation:** Removed the duplicate failure-state update from the failed-result branch. The catch block now reloads the authoritative transaction revision and writes FAILED only if the current state is not already terminal/FAILED.
+- **Regression coverage:** Added `tests/recovery-transaction-failure.test.js`, which exercises the compiled real RecoveryOrchestrator/TransactionAuthority, verifies rollback invocation, asserts the original failure is not replaced by a revision conflict, and checks the persisted transaction ends at FAILED revision 3. Wired the test into both `test:governance` and the mandatory COR gate suite.
+- **F39 strengthening:** F39 now also rejects `TRANSACTION_REVISION_CONFLICT` as a failed atomic recovery receipt.
+- **Candidate branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`.
+- **Verification:** Source, F39, regression test and gate wiring are committed. New exact-head build, governance, COR and CI checks are required; earlier receipts are invalidated for release decisions.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
