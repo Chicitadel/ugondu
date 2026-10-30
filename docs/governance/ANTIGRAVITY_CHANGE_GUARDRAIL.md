@@ -896,3 +896,15 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - New candidate commits invalidate all earlier CI/COR receipts. The locale fix is not GREEN until the newly wired test and all mandatory exact-head workflows pass.
 - No AWS resources were provisioned. The launch architecture remains provider-neutral; DirectAdmin-compatible deployment is retained until traction/official engagement justifies cost-bounded AWS staging. ECS EC2 is the initial low-cost AWS backend target; Fargate remains an upgrade tier, not a code fork.
 - Air Roofers federated services remain authoritative: AeroBill owns billing/metering and Mandatag owns license/entitlement decisions. Product code must integrate through configured contracts and must not duplicate those business rules.
+
+
+## 2026-10-30 verifier-strengthening guardrail
+
+- For a behavior objective, `verificationMode: TEST` must execute the real compiled implementation or actual CLI in an isolated fixture. Source substring presence is not behavioral proof.
+- Every runtime verifier must have an observed positive path and an adversarial negative path that would fail if the behavior regressed.
+- A04-A06 are now runtime-tested: engine/finalizer module independence, receipt verification, cryptographic signing and mismatched trust-root rejection. Preserve the `require.main === module` entrypoint guards; importing these modules must not run their CLI.
+- F35-F38 are now runtime-tested against compiled recovery logic and governed route behavior. Do not replace them with source token scans.
+- D25-D28/E29-E33 must use the shared recursive `scripts/cor/locale-key-parity.js`; do not reintroduce top-level-only `Object.keys` parity or skip the English baseline.
+- A candidate change invalidates previous exact-head receipts. The current qualification artifact is bound to merge candidate `59e630d7aa1e94d3153db7462a89dcfdce49666f`, with PR head `b6f64f2bc207198851d7dea09747806279890802`. Any subsequent source or documentation commit requires a new exact-head evidence run.
+- `READY_FOR_COR_SIGNATURE` is not a signed certificate. A skipped trust-root check, skipped signature ceremony, skipped AWS physical qualification, or absent live federation evidence is not PASS.
+- No AWS resources were provisioned. Keep DirectAdmin-compatible portability until the explicit traction/funding migration trigger; ECS on EC2 is the low-cost AWS tier and Fargate remains the later scaling tier.
