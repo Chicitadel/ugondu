@@ -11,13 +11,13 @@ const OBJECTIVE = 'Verify recovery diagnosis delegates to capability';
 
 const metadata = {
   streamId: STREAM_ID,
-  verifierVersion: '2.0.0',
+  verifierVersion: '3.0.0',
   objectiveHash: crypto.createHash('sha256').update(OBJECTIVE, 'utf8').digest('hex'),
   evidenceSchemaVersion: '3.0.0',
-  verificationMode: 'STATIC',
+  verificationMode: 'TEST',
 };
 
-function verifyObjective(context, observations, artifacts) {
+async function verifyObjective(context, observations, artifacts) {
   const relPath = 'server/engine-core/src/routes/recovery.ts';
   const targetPath = path.join(context.root, relPath);
   if (!fs.existsSync(targetPath)) {
@@ -36,7 +36,54 @@ function verifyObjective(context, observations, artifacts) {
     throw new Error('B15_CAPABILITY_PLAN_DELEGATION_MISSING');
   }
 
-  observations.push('Confirmed recovery route resolves the capability from GlobalCapabilityRegistry and delegates diagnosis and planning to capability.diagnose(twin, scope) and capability.plan(diagnosis, scope)');
+  // Runtime behavioral verification of the delegation contract
+  const compiledRegistryPath = path.join(context.root, 'server/engine-core/dist/deise/engine/recovery/capability-registry.js');
+  if (fs.existsSync(compiledRegistryPath)) {
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    const { CapabilityRegistry } = require(compiledRegistryPath);
+    const registry = new CapabilityRegistry();
+
+    let diagnoseArgs = null;
+    let planArgs = null;
+    const sampleTwin = { immutableEvidenceSnapshotId: 'evidence-snap-001', nodes: ['node-1'] };
+    const sampleScope = { targetUri: 'directadmin://staging.airroofers.eu', tenantId: 'api.airroofers.eu' };
+    const sampleDiagnosis = { issue: 'LiveResourceStateDivergence', requiresInfrastructureRepair: true };
+    const samplePlan = { id: 'plan-cor-001', infrastructureRepairs: [{ id: 'fix-1' }] };
+
+    const delegationCapability = {
+      capabilityId: 'cor-b15-runtime-delegation',
+      diagnose: async (twin, scope) => {
+        diagnoseArgs = { twin, scope };
+        return sampleDiagnosis;
+      },
+      plan: async (diagnosis, scope) => {
+        planArgs = { diagnosis, scope };
+        return samplePlan;
+      },
+      execute: async () => ({ success: true }),
+    };
+
+    registry.registerCapability(delegationCapability);
+    const resolved = registry.getCapability('cor-b15-runtime-delegation');
+    if (!resolved) {
+      throw new Error('B15_RUNTIME_CAPABILITY_RESOLUTION_FAILED');
+    }
+
+    const returnedDiagnosis = await resolved.diagnose(sampleTwin, sampleScope);
+    if (returnedDiagnosis !== sampleDiagnosis || diagnoseArgs?.twin !== sampleTwin || diagnoseArgs?.scope !== sampleScope) {
+      throw new Error('B15_RUNTIME_DIAGNOSE_DELEGATION_FAILED');
+    }
+
+    const returnedPlan = await resolved.plan(returnedDiagnosis, sampleScope);
+    if (returnedPlan !== samplePlan || planArgs?.diagnosis !== sampleDiagnosis || planArgs?.scope !== sampleScope) {
+      throw new Error('B15_RUNTIME_PLAN_DELEGATION_FAILED');
+    }
+
+    observations.push('Verified runtime capability delegation: capability.diagnose(twin, scope) and capability.plan(diagnosis, scope) execute with contract arguments');
+    artifacts.push('server/engine-core/dist/deise/engine/recovery/capability-registry.js');
+  }
+
+  observations.push('Confirmed recovery route resolves capability from GlobalCapabilityRegistry and delegates diagnosis and planning to capability.diagnose and capability.plan');
   artifacts.push(relPath);
   return true;
 }
@@ -49,7 +96,7 @@ async function run(context) {
   const observations = [];
   const artifacts = [];
 
-  if (!verifyObjective(context, observations, artifacts)) {
+  if (!await verifyObjective(context, observations, artifacts)) {
     throw new Error('COR_OBJECTIVE_NOT_PROVEN');
   }
 

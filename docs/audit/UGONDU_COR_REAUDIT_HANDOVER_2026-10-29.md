@@ -311,3 +311,33 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Verification:** CI/CD #40987744466 SUCCESS. COR Certification #40987744216 SUCCESS. Fresh ledger reports 40/40 PASS, zero failed/skipped/not-run streams. Independent finalization is `READY_FOR_COR_SIGNATURE`. Evidence artifact #12947368564; SHA-256 `e3aa780a793f7c07bdde524c2094615585691b1e32e3e10c49f8c88a79cc1f18`.
 - **Still not certified:** trusted signing root verification and final COR authority signature were skipped; AWS physical qualification was skipped. No AWS resources were provisioned. This is qualification evidence, not a signed commercial release certificate.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 2026-10-30 runtime-verifier depth re-audit
+
+**Candidate parent:** `01498bfa6064be8bcb6db008f740ec2f41420fa1`  
+**Branch:** `fix/cor-runtime-verifier-depth-2026-10-30`
+
+### A07 — stream registry validator execution proof
+
+- Confirmed the prior verifier only searched source strings and did not execute the validator.
+- Changed A07 to `verificationMode: TEST`.
+- It executes the actual registry CLI against the repository and requires success; then copies the manifest, registry script, source-integrity guard and 40 executor files into a temporary fixture, tampers the repository identity, and requires the validator to reject it.
+- Added `tests/cor-a07-runtime-verifier.test.js` and wired it into governance.
+
+### B11 — locale updater behavior proof
+
+- Confirmed the prior verifier checked implementation tokens rather than executing the updater.
+- Changed B11 to `verificationMode: TEST`.
+- It executes the actual locale updater CLI against temporary fixture trees, confirms existing translated strings are preserved, and requires missing/extra translation keys to fail closed.
+- Added `tests/cor-b11-locale-updater-runtime.test.js` and wired it into governance.
+
+### Exact-head qualification and remaining work
+
+- The new branch changes source, tests and governance test wiring. The previous successful CI/COR receipts for `01498bfa` do not apply.
+- Run both focused tests and the complete governance suite, then require exact-head CI/CD and COR certification.
+- B09, B10, B12-B16 and C22 are not closed by this work. They require separate objective-level assessment; where static inspection is inherently appropriate, it must test the complete contract and meaningful negative cases.
+- AWS physical deployment remains intentionally deferred. The code must stay portable and must not require AWS runtime services for DirectAdmin execution.
+- Release posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.

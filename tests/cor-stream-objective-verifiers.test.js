@@ -129,15 +129,16 @@ test('all 40 stream verifiers in scripts/cor/streams pass assertNoVerifierStub',
   }
 });
 
-test('A07 verifies stream registry validator checks and rejects incomplete validator', async () => {
+test('A07 executes the registry validator and fails closed when the validator is absent', async () => {
   const receipt = await a07.run(context(REPO_ROOT, 'A07'));
   assert.equal(receipt.status, 'PASS');
   assert.ok(receipt.artifacts.includes('scripts/check-cor-stream-registry.js'));
+  assert.ok(receipt.observations.some((value) => value.includes('all 40 executor contracts load and validate')));
+  assert.ok(receipt.observations.some((value) => value.includes('rejects a tampered repository identity')));
 
   const f = fixture();
   try {
-    writeFile(f.root, 'scripts/check-cor-stream-registry.js', "if (manifest.repository !== 'Chicitadel/ugondu') {}\n");
-    await assert.rejects(a07.run(context(f.root, 'A07')), /A07_STREAM_COUNT_CHECK_MISSING/);
+    await assert.rejects(a07.run(context(f.root, 'A07')), /A07_STREAM_REGISTRY_VALIDATOR_MISSING/);
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
@@ -155,17 +156,13 @@ test('B09 and B10 verify jest.setup.ts UPM bypass removal and unit-test translat
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
-test('B11 and B12 verify locale update preservation and locale key parity checks', async () => {
-  const r11 = await b11.run(context(REPO_ROOT, 'B11'));
-  assert.equal(r11.status, 'PASS');
-  const r12 = await b12.run(context(REPO_ROOT, 'B12'));
-  assert.equal(r12.status, 'PASS');
+test('B12 verifies canonical locale validator contract and rejects an incomplete validator', async () => {
+  const receipt = await b12.run(context(REPO_ROOT, 'B12'));
+  assert.equal(receipt.status, 'PASS');
 
   const f = fixture();
   try {
-    writeFile(f.root, 'scripts/update-locales.js', 'function mergeMissing(src, tgt) { sortedTarget[k] = src[k]; }\n');
-    writeFile(f.root, 'scripts/validate-locales.js', 'function flatten(obj) { return obj; }\n');
-    await assert.rejects(b11.run(context(f.root, 'B11')), /B11_EXISTING_TRANSLATION_PRESERVATION_MISSING/);
+    writeFile(f.root, 'scripts/validate-locales.js', 'function flatten(obj) { return obj; }\\n');
     await assert.rejects(b12.run(context(f.root, 'B12')), /B12_FLATTEN_OR_REQUIRED_LOCALES_MISSING/);
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
