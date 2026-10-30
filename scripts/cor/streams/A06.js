@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const assert = require('assert');
 const os = require('os');
 const { spawnSync, execFileSync } = require('child_process');
 const crypto = require('crypto');
@@ -96,7 +95,7 @@ async function verifyObjective(context, observations, artifacts) {
     try {
         fs.mkdirSync(path.dirname(signerPath), { recursive: true });
         fs.copyFileSync(sourcePath, signerPath);
-        fs.writeFileSync(path.join(root, '.gitignore'), '.cor_evidence/\\n', 'utf8');
+        fs.writeFileSync(path.join(root, '.gitignore'), '.cor_evidence/\n', 'utf8');
         git(['init', '-b', 'main']);
         git(['config', 'user.name', 'COR Verifier']);
         git(['config', 'user.email', 'cor-verifier@example.invalid']);
@@ -111,7 +110,7 @@ async function verifyObjective(context, observations, artifacts) {
             result: 'QUALIFICATION_PASS',
             candidate: { commitSHA, treeSHA },
             evidenceRoot
-        }, null, 2) + '\\n');
+        }, null, 2) + '\n');
         fs.writeFileSync(path.join(evidenceDir, 'cor-finalization.json'), JSON.stringify({
             status: 'READY_FOR_COR_SIGNATURE',
             candidateSHA: commitSHA,
@@ -119,7 +118,7 @@ async function verifyObjective(context, observations, artifacts) {
             qualificationEvidenceRoot: evidenceRoot,
             manifestDigest: 'sha256:fixture-manifest-digest',
             finalizationDigest: 'sha256:fixture-finalization-digest'
-        }, null, 2) + '\\n');
+        }, null, 2) + '\n');
 
         const pair = crypto.generateKeyPairSync('rsa', {
             modulusLength: 2048,
