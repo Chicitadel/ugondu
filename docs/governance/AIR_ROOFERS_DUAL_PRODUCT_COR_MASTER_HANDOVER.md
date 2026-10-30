@@ -161,3 +161,35 @@ The earlier Ugondu COR Certification run #40985028471 and CI/CD run #40985028411
 **Ugondu:** qualification pass; signature and physical deployment gates outstanding.  
 **Dumcholu:** source remediation and its three qualification workflows pass; physical deployment and live federation gates outstanding.  
 **Dual-product commercial release:** **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
+
+
+---
+
+## Ugondu re-audit continuation — 2026-10-30
+
+**Dedicated branch:** `fix/cor-runtime-verifier-depth-2026-10-30`  
+**Parent candidate:** `01498bfa6064be8bcb6db008f740ec2f41420fa1`  
+**Scope:** runtime proof depth for A07 and B11; no `main` or production branch writes.
+
+### Confirmed findings and physical changes
+
+| Finding | Previous weakness | Physical change | Regression evidence |
+|---|---|---|---|
+| `UG-COR-A07-REGISTRY-RUNTIME-PROOF-001` | A07 inspected validator source substrings and could emit PASS without executing the registry validator | Replaced with real child-process execution of `scripts/check-cor-stream-registry.js`; runs positive against all 40 executor contracts and negative against a copied fixture with tampered repository identity | `tests/cor-a07-runtime-verifier.test.js`; included in `test:governance` |
+| `UG-COR-B11-LOCALE-UPDATER-RUNTIME-PROOF-001` | B11 inspected source tokens rather than proving updater behavior | Runs actual `scripts/update-locales.js` in isolated temporary locale trees; proves translations are preserved and missing/extra keys are rejected | `tests/cor-b11-locale-updater-runtime.test.js`; included in `test:governance` |
+
+### Candidate verification
+
+- Source changes and regression tests are committed to this branch.
+- Exact-head remote CI/COR must run against the final branch head; no previous candidate receipt applies.
+- Do not infer test success from code presence. Record actual command output, workflow conclusion, COR artifact ID and digest before closing either finding.
+- Other static verifiers (B09, B10, B12-B16, C22) remain open for objective-specific review; do not mark them behaviorally closed by association.
+
+### Hosting and federation guardrails
+
+- No AWS resources are provisioned by this branch. Migration is deferred until traction, meaningful official engagement or funding.
+- Maintain one-code/host-anywhere portability across DirectAdmin, future VPS, ECS on EC2 and ECS Fargate. Keep host-specific configuration in deployment manifests, environment variables, secrets and infrastructure templates.
+- AeroBill remains authoritative for billing, pricing, metering, invoices and payments. Mandatag remains authoritative for licensing and entitlement. Ugondu must consume those contracts without duplicating their business logic.
+- Any AWS staging launch requires a separate explicit authorization, cost/budget review, physical security review and rollback/backup qualification.
+
+**Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until all required objective verifiers, deployment, federation, policy, security ceremonies, independent review and signatory gates are evidenced.
