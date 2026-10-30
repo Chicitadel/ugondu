@@ -247,7 +247,9 @@ test('ENG-PASS-003: signed passports require valid claims and exact tenant bindi
     engineModule.admitPassport(token, { tenantId: 'tenant_signed_b' }),
     { status: 'REJECTED' }
   );
-  const tampered = token.slice(0, -1) + (token.endsWith('A') ? 'B' : 'A');
+  const tokenParts = token.split('.');
+  tokenParts[2] = (tokenParts[2][0] === 'A' ? 'B' : 'A') + tokenParts[2].slice(1);
+  const tampered = tokenParts.join('.');
   assert.deepStrictEqual(
     engineModule.admitPassport(tampered, { tenantId: 'tenant_signed_a' }),
     { status: 'REJECTED' }
