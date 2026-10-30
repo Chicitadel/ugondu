@@ -38,8 +38,8 @@
 
 | Product | Repository / PR | Branch | Candidate baseline | Current posture |
 |---|---|---|---|---|
-| Ugondu | [Chicitadel/ugondu PR #57](https://github.com/Chicitadel/ugondu/pull/57) | `fix/cor-runner-mandatory-evidence-gate-2026-10-29` | `c22389617fc16abd71e5a8a54f34365ccf58612c`; locale remediation commits follow, latest known handover commit `c0077ff294633676400202fc0982bb586be9f425` | 20 stream verifiers committed; nine locale false-pass corrections and tests committed; exact-head checks for the new candidate pending |
-| Dumcholu | [Chicitadel/dumcholu PR #15](https://github.com/Chicitadel/dumcholu/pull/15) | `fix/cor-policy-service-endpoint-config-2026-10-29` | `3f662fb8c8b7491705e5f0b8fded8c4fc32c6f7a`; manifest-validator remediation commits follow, latest known security-test commit `6fed87132ad620084b423d700a95f7b49818b62f`; latest handover commit `8b13af23182fc7b15f0b463bdcb08c8eae33dd44` | Mandatag/endpoint/manifest changes committed; strengthened manifest validation and negative tests committed; exact-head checks pending |
+| Ugondu | [Chicitadel/ugondu PR #57](https://github.com/Chicitadel/ugondu/pull/57) | `fix/cor-runner-mandatory-evidence-gate-2026-10-29` | `c22389617fc16abd71e5a8a54f34365ccf58612c`; locale remediation commits follow, latest known handover commit `a54fafccd419bf3e7328c84abeb1d440178185ae` | 20 stream verifiers committed; nine locale false-pass corrections and tests committed; exact-head checks for the new candidate pending |
+| Dumcholu | [Chicitadel/dumcholu PR #15](https://github.com/Chicitadel/dumcholu/pull/15) | `fix/cor-policy-service-endpoint-config-2026-10-29` | `3f662fb8c8b7491705e5f0b8fded8c4fc32c6f7a`; manifest-validator remediation commits follow, latest known security-test commit `6fed87132ad620084b423d700a95f7b49818b62f`; latest handover commit `ab88652344205145cba42500be3c39374239d155` | Mandatag/endpoint/manifest changes committed; strengthened manifest validation and negative tests committed; exact-head checks pending |
 
 The commit hashes above are branch-specific receipts, not proof of current branch HEAD. Always query GitHub before starting a new actor or changing a file.
 
@@ -92,3 +92,11 @@ Before an actor starts:
 **Air Roofers dual-product commercial release:** NOT CERTIFIED
 
 This handover is a coordination and change-control artifact. It is not a certificate, legal opinion, AWS deployment receipt, independent security attestation, or evidence of 100% COR closure.
+
+
+## Latest verification queue snapshot — 2026-10-30
+
+- Ugondu latest known branch head: `a54fafccd419bf3e7328c84abeb1d440178185ae`. COR Certification run #40984774896 and Ugondu CI/CD run #40984774779 were pending when queried; no job results were available yet.
+- Dumcholu strict-parser test candidate: `6fed87132ad620084b423d700a95f7b49818b62f`. COR Policy Simulator Contract run #40984748413 was queued; deployment manifest qualification run #40984748323 had passed on the preceding candidate before the final security-test change. Do not treat that older run as exact-head proof.
+- Dumcholu latest known documentation head: `ab88652344205145cba42500be3c39374239d155`; documentation-only descendants do not replace the need to verify the latest code candidate's queued workflows.
+- Final status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` for both products. No AWS resources were provisioned.
