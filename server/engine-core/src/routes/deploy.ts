@@ -157,6 +157,8 @@ export function createDeployRouter(
         capabilities: Record<string, unknown>;
       };
 
+      // Security boundary: deployment is permitted only when the cryptographically
+      // verified passport tenant exactly matches the federated billing authority tenant.
       const billingTenantId = (authResponse.data as Record<string, unknown>)['tenantId'];
       const passportTenantId = res.locals['passportTenantId'];
       if (typeof billingTenantId !== 'string' || !billingTenantId.trim()
