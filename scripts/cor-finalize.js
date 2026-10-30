@@ -157,313 +157,325 @@ function verifyReceipt(receipt, commitSHA, treeSHA) {
     }
 }
 
-assertClean();
-
-if (!fs.existsSync(MANIFEST)) {
-    block(
-        'qualification manifest missing'
-    );
-}
-
-if (!fs.existsSync(LEDGER)) {
-    block(
-        'qualification evidence ledger missing'
-    );
-}
-
-if (!fs.existsSync(GATE_SUMMARY)) {
-    block(
-        'gate-summary missing'
-    );
-}
-
-const manifest =
-    readJson(MANIFEST);
-
-const ledger =
-    readJson(LEDGER);
-
-const gateSummary =
-    readJson(GATE_SUMMARY);
-
-if (
-    gateSummary.allGatesPassed !== true
-) {
-    block(
-        'allGatesPassed != true'
-    );
-}
-
-if (
-    gateSummary.skippedGates &&
-    gateSummary.skippedGates.length > 0
-) {
-    block(
-        'skippedGates not empty'
-    );
-}
-
-if (
-    gateSummary.notRunGates &&
-    gateSummary.notRunGates.length > 0
-) {
-    block(
-        'notRunGates not empty'
-    );
-}
-
-if (
-    gateSummary.failedGates &&
-    gateSummary.failedGates.length > 0
-) {
-    block(
-        'failedGates not empty'
-    );
-}
-
-if (
-    manifest.repository !==
-    'Chicitadel/ugondu'
-) {
-    block(
-        'manifest repository mismatch'
-    );
-}
-
-if (
-    manifest.streams?.length !== 40
-) {
-    block(
-        'manifest does not contain exactly 40 streams'
-    );
-}
-
-const manifestIds =
-    manifest.streams.map(
-        stream => stream.id
-    );
-
-if (
-    JSON.stringify(manifestIds) !==
-    JSON.stringify(IDS)
-) {
-    block(
-        'manifest stream registry mismatch'
-    );
-}
-
-if (
-    manifest.streams.some(
-        stream => stream.status !== 'PLANNED'
-    )
-) {
-    block(
-        'manifest contains self-certified stream status'
-    );
-}
-
-if (
-    ledger.result !==
-    'QUALIFICATION_PASS'
-) {
-    block(
-        'qualification result is not PASS'
-    );
-}
-
-const commitSHA =
-    git(['rev-parse', 'HEAD']);
-
-const treeSHA =
-    git(['rev-parse', 'HEAD^{tree}']);
-
-if (
-    manifest.candidateCommit &&
-    manifest.candidateCommit !== commitSHA
-) {
-    block(
-        'manifest candidateCommit mismatch'
-    );
-}
-
-if (
-    manifest.candidateTree &&
-    manifest.candidateTree !== treeSHA
-) {
-    block(
-        'manifest candidateTree mismatch'
-    );
-}
-
-if (
-    ledger.candidate?.repository !==
-    'Chicitadel/ugondu'
-) {
-    block(
-        'ledger repository mismatch'
-    );
-}
-
-if (
-    ledger.candidate.commitSHA !==
-    commitSHA
-) {
-    block(
-        'ledger commit differs from HEAD'
-    );
-}
-
-if (
-    ledger.candidate.treeSHA !==
-    treeSHA
-) {
-    block(
-        'ledger tree differs from HEAD'
-    );
-}
-
-if (
-    ledger.manifestDigest !==
-    digest(manifest)
-) {
-    block(
-        'ledger manifest digest mismatch'
-    );
-}
-
-if (
-    gateSummary.commitSHA !== commitSHA ||
-    gateSummary.treeSHA !== treeSHA
-) {
-    block(
-        'gateSummary commitSHA or treeSHA differs from HEAD'
-    );
-}
-
-if (
-    !Array.isArray(ledger.streams) ||
-    ledger.streams.length !== 40
-) {
-    block(
-        '40 qualification receipts required'
-    );
-}
-
-const executionIds =
-    ledger.streams.map(
-        receipt => receipt.executionId
-    );
-
-if (
-    new Set(executionIds).size !== 40
-) {
-    block(
-        'duplicate stream executionId detected'
-    );
-}
-
-const receiptIds =
-    ledger.streams.map(
-        receipt => receipt.streamId
-    );
-
-if (
-    new Set(receiptIds).size !== 40
-) {
-    block(
-        'duplicate stream receipts detected'
-    );
-}
-
-if (
-    JSON.stringify(
-        [...receiptIds].sort()
-    ) !==
-    JSON.stringify(
-        [...IDS].sort()
-    )
-) {
-    block(
-        'receipt registry does not equal A01-F40'
-    );
-}
-
-for (
-    const receipt of ledger.streams
-) {
-    verifyReceipt(
-        receipt,
-        commitSHA,
+function finalize() {
+    assertClean();
+    
+    if (!fs.existsSync(MANIFEST)) {
+        block(
+            'qualification manifest missing'
+        );
+    }
+    
+    if (!fs.existsSync(LEDGER)) {
+        block(
+            'qualification evidence ledger missing'
+        );
+    }
+    
+    if (!fs.existsSync(GATE_SUMMARY)) {
+        block(
+            'gate-summary missing'
+        );
+    }
+    
+    const manifest =
+        readJson(MANIFEST);
+    
+    const ledger =
+        readJson(LEDGER);
+    
+    const gateSummary =
+        readJson(GATE_SUMMARY);
+    
+    if (
+        gateSummary.allGatesPassed !== true
+    ) {
+        block(
+            'allGatesPassed != true'
+        );
+    }
+    
+    if (
+        gateSummary.skippedGates &&
+        gateSummary.skippedGates.length > 0
+    ) {
+        block(
+            'skippedGates not empty'
+        );
+    }
+    
+    if (
+        gateSummary.notRunGates &&
+        gateSummary.notRunGates.length > 0
+    ) {
+        block(
+            'notRunGates not empty'
+        );
+    }
+    
+    if (
+        gateSummary.failedGates &&
+        gateSummary.failedGates.length > 0
+    ) {
+        block(
+            'failedGates not empty'
+        );
+    }
+    
+    if (
+        manifest.repository !==
+        'Chicitadel/ugondu'
+    ) {
+        block(
+            'manifest repository mismatch'
+        );
+    }
+    
+    if (
+        manifest.streams?.length !== 40
+    ) {
+        block(
+            'manifest does not contain exactly 40 streams'
+        );
+    }
+    
+    const manifestIds =
+        manifest.streams.map(
+            stream => stream.id
+        );
+    
+    if (
+        JSON.stringify(manifestIds) !==
+        JSON.stringify(IDS)
+    ) {
+        block(
+            'manifest stream registry mismatch'
+        );
+    }
+    
+    if (
+        manifest.streams.some(
+            stream => stream.status !== 'PLANNED'
+        )
+    ) {
+        block(
+            'manifest contains self-certified stream status'
+        );
+    }
+    
+    if (
+        ledger.result !==
+        'QUALIFICATION_PASS'
+    ) {
+        block(
+            'qualification result is not PASS'
+        );
+    }
+    
+    const commitSHA =
+        git(['rev-parse', 'HEAD']);
+    
+    const treeSHA =
+        git(['rev-parse', 'HEAD^{tree}']);
+    
+    if (
+        manifest.candidateCommit &&
+        manifest.candidateCommit !== commitSHA
+    ) {
+        block(
+            'manifest candidateCommit mismatch'
+        );
+    }
+    
+    if (
+        manifest.candidateTree &&
+        manifest.candidateTree !== treeSHA
+    ) {
+        block(
+            'manifest candidateTree mismatch'
+        );
+    }
+    
+    if (
+        ledger.candidate?.repository !==
+        'Chicitadel/ugondu'
+    ) {
+        block(
+            'ledger repository mismatch'
+        );
+    }
+    
+    if (
+        ledger.candidate.commitSHA !==
+        commitSHA
+    ) {
+        block(
+            'ledger commit differs from HEAD'
+        );
+    }
+    
+    if (
+        ledger.candidate.treeSHA !==
         treeSHA
+    ) {
+        block(
+            'ledger tree differs from HEAD'
+        );
+    }
+    
+    if (
+        ledger.manifestDigest !==
+        digest(manifest)
+    ) {
+        block(
+            'ledger manifest digest mismatch'
+        );
+    }
+    
+    if (
+        gateSummary.commitSHA !== commitSHA ||
+        gateSummary.treeSHA !== treeSHA
+    ) {
+        block(
+            'gateSummary commitSHA or treeSHA differs from HEAD'
+        );
+    }
+    
+    if (
+        !Array.isArray(ledger.streams) ||
+        ledger.streams.length !== 40
+    ) {
+        block(
+            '40 qualification receipts required'
+        );
+    }
+    
+    const executionIds =
+        ledger.streams.map(
+            receipt => receipt.executionId
+        );
+    
+    if (
+        new Set(executionIds).size !== 40
+    ) {
+        block(
+            'duplicate stream executionId detected'
+        );
+    }
+    
+    const receiptIds =
+        ledger.streams.map(
+            receipt => receipt.streamId
+        );
+    
+    if (
+        new Set(receiptIds).size !== 40
+    ) {
+        block(
+            'duplicate stream receipts detected'
+        );
+    }
+    
+    if (
+        JSON.stringify(
+            [...receiptIds].sort()
+        ) !==
+        JSON.stringify(
+            [...IDS].sort()
+        )
+    ) {
+        block(
+            'receipt registry does not equal A01-F40'
+        );
+    }
+    
+    for (
+        const receipt of ledger.streams
+    ) {
+        verifyReceipt(
+            receipt,
+            commitSHA,
+            treeSHA
+        );
+    }
+    
+    if (
+        digest(ledger.streams) !==
+        ledger.evidenceRoot
+    ) {
+        block(
+            'qualification evidence root mismatch'
+        );
+    }
+    
+    assertClean();
+    
+    const finalCommitSHA =
+        git(['rev-parse', 'HEAD']);
+    
+    const finalTreeSHA =
+        git(['rev-parse', 'HEAD^{tree}']);
+    
+    if (
+        finalCommitSHA !== commitSHA ||
+        finalTreeSHA !== treeSHA
+    ) {
+        block(
+            'candidate changed during finalization'
+        );
+    }
+    
+    const finalization = {
+        schemaVersion: '2.0.0',
+        repository: 'Chicitadel/ugondu',
+        candidateSHA: commitSHA,
+        treeSHA,
+        manifestDigest:
+            digest(manifest),
+        qualificationEvidenceRoot:
+            ledger.evidenceRoot,
+        gateSummaryDigest:
+            digest(gateSummary),
+        status:
+            'READY_FOR_COR_SIGNATURE',
+        finalizedAt:
+            new Date().toISOString()
+    };
+    
+    finalization.finalizationDigest =
+        digest(finalization);
+    
+    fs.mkdirSync(
+        EVIDENCE_DIR,
+        {
+            recursive: true
+        }
+    );
+    
+    fs.writeFileSync(
+        OUTPUT,
+        JSON.stringify(
+            finalization,
+            null,
+            2
+        ) + '\n',
+        {
+            encoding: 'utf8',
+            mode: 0o600
+        }
+    );
+    
+    console.log(
+        'Independent COR finalization PASS'
     );
 }
 
-if (
-    digest(ledger.streams) !==
-    ledger.evidenceRoot
-) {
-    block(
-        'qualification evidence root mismatch'
-    );
+if (require.main === module) {
+    finalize();
 }
 
-assertClean();
-
-const finalCommitSHA =
-    git(['rev-parse', 'HEAD']);
-
-const finalTreeSHA =
-    git(['rev-parse', 'HEAD^{tree}']);
-
-if (
-    finalCommitSHA !== commitSHA ||
-    finalTreeSHA !== treeSHA
-) {
-    block(
-        'candidate changed during finalization'
-    );
-}
-
-const finalization = {
-    schemaVersion: '2.0.0',
-    repository: 'Chicitadel/ugondu',
-    candidateSHA: commitSHA,
-    treeSHA,
-    manifestDigest:
-        digest(manifest),
-    qualificationEvidenceRoot:
-        ledger.evidenceRoot,
-    gateSummaryDigest:
-        digest(gateSummary),
-    status:
-        'READY_FOR_COR_SIGNATURE',
-    finalizedAt:
-        new Date().toISOString()
+module.exports = {
+    finalize,
+    verifyReceipt,
+    digest
 };
-
-finalization.finalizationDigest =
-    digest(finalization);
-
-fs.mkdirSync(
-    EVIDENCE_DIR,
-    {
-        recursive: true
-    }
-);
-
-fs.writeFileSync(
-    OUTPUT,
-    JSON.stringify(
-        finalization,
-        null,
-        2
-    ) + '\n',
-    {
-        encoding: 'utf8',
-        mode: 0o600
-    }
-);
-
-console.log(
-    'Independent COR finalization PASS'
-);
