@@ -284,3 +284,15 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Candidate branch:** `fix/cor-runner-mandatory-evidence-gate-2026-10-29`.
 - **Verification:** Source, F39, regression test and gate wiring are committed. New exact-head build, governance, COR and CI checks are required; earlier receipts are invalidated for release decisions.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## 2026-10-30 independent follow-up — nested locale parity false-pass
+
+**Finding ID:** `UG-COR-LOCALE-NESTED-KEY-PARITY-001`
+
+- **Confirmed defect:** D25-D28 and E29-E33 required `en.json` but compared only `Object.keys()` at the root. Nested locale structures could drift while the stream reported key parity. The existing `scripts/validate-locales.js` recursively flattened dictionary paths, so the stream objective was weaker than the repository's canonical locale validator.
+- **Physical remediation:** Added shared `scripts/cor/locale-key-parity.js`, which recursively enumerates leaf paths (including array indexes), rejects prototype-pollution dictionary keys, and compares sorted missing/extra nested paths. Updated all nine locale stream verifiers to use the shared helper instead of top-level key comparison. Empty objects retain the canonical locale validator's no-leaf behavior.
+- **Regression coverage:** Extended `tests/cor-locale-objective-verifiers.test.js` with nested leaf-key drift rejection for each of the nine streams and a positive nested parity case covering objects and arrays. The earlier missing-English-baseline and top-level mismatch cases remain.
+- **Physical candidate commits:** helper `79bf138b7baa2e25cc82a9cf5b39e9b27ea9e616`; verifier updates D25-D28/E29-E33; nested regression `2c50fb32c5e7df668d569fb0076375e339364d0b`; empty-object semantic alignment `df3f9a0e1dbf9b0db0e134302dbd951a21bba733`.
+- **Verification:** Source and tests are committed. Exact-head CI must rebuild and run the expanded locale suite; previous 40/40 COR evidence is stale for this candidate. Do not count this finding closed until nested mutation tests and all mandatory gates pass on the new head.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
