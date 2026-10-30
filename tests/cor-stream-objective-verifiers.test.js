@@ -329,3 +329,21 @@ test('A04-A06 execute engine/finalizer independence and cryptographic signer beh
     assert.ok(receipt.artifacts.length > 0, id);
   }
 });
+
+
+test('Antigravity guardrail preserves behavioral verifier and certification boundaries', () => {
+  const guardrail = fs.readFileSync(
+    path.join(REPO_ROOT, 'docs/governance/ANTIGRAVITY_CHANGE_GUARDRAIL.md'),
+    'utf8',
+  );
+  for (const requirement of [
+    'verificationMode: TEST',
+    'Source substring presence is not behavioral proof',
+    'A04-A06 are now runtime-tested',
+    'F35-F38 are now runtime-tested',
+    'READY_FOR_COR_SIGNATURE is not a signed certificate',
+    'No AWS resources were provisioned',
+  ]) {
+    assert.ok(guardrail.includes(requirement), 'Missing Antigravity guardrail requirement: ' + requirement);
+  }
+});
