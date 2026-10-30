@@ -726,3 +726,17 @@ Changed files:
 **Evidence boundary:** Earlier CI/COR on head `94946d08...` does not qualify this new tenant cross-binding change. Fresh exact-head CI/CD and COR runs are mandatory after this code and the following evidence-note synchronization.
 
 **Status:** `IMPLEMENTED / EXACT-HEAD CI-COR PENDING / NOT CLOSED`.
+
+
+### Dumcholu assertion/candidate persistence data-loss correction — 2026-10-30
+
+The Dumcholu Java qualification [#41130646613](https://github.com/Chicitadel/dumcholu/actions/runs/41130646613) passed AeroBill protocol regressions but exposed an actual data-loss defect in career discovery persistence: `CareerJourneyService.toDiscoveryEntity` omitted the `assertionsJson` and `candidateOptionsJson` columns, while `fromDiscoveryEntity` restored an empty assertion list and regenerated pathway options. This caused HP-AT-004 conflicting qualification detection to fail after repository-backed reads.
+
+Physical remediation was committed on Dumcholu PR #28:
+- Explicit JSON serialization/restoration of every `CareerProfileAssertion` and `CareerPathOption` field.
+- Malformed non-empty persisted JSON fails with an integrity exception rather than silently dropping evidence.
+- Added `careerAssertionsAndPathwayOptionsSurviveRepositoryRoundTrip`; existing HP-AT-004 now exercises persisted assertion state.
+- Shared Mockito repository fixtures now model save/read behavior; broad shared stubs are lenient only to avoid irrelevant per-test stubbing errors.
+- Source/test candidate before evidence-note update: `d5e2307d24d5248c5fe96cd150de6ac9c6bf7483`.
+
+The prior failed run and logs remain evidence. Exact-head Java 21 qualification must pass on the post-note candidate. The independent optimistic-lock gap remains open: entities still need a separate ORM-managed version column and concurrent-writer conflict/retry tests.
