@@ -177,7 +177,7 @@ const REJECTED_PASSPORT_PATTERNS = /^(?:revoked|invalid|expired|tampered|untrust
 export function admitPassport(
   passportId: string,
   context?: { tenantId?: string }
-): { status: string } {
+): { status: string; tenantId?: string } {
   if (!passportId || typeof passportId !== 'string') return { status: 'REJECTED' };
   const normalized = passportId.trim();
   if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) return { status: 'REJECTED' };
@@ -199,7 +199,7 @@ export function admitPassport(
         || registered.tenantId !== verified.tenantId)) {
       return { status: 'REJECTED' };
     }
-    return { status: 'ADMITTED' };
+    return { status: 'ADMITTED', tenantId: verified.tenantId };
   }
 
   // Opaque identifiers are accepted only when explicitly registered. Prefix
@@ -210,7 +210,7 @@ export function admitPassport(
     return { status: 'REJECTED' };
   }
   if (requestedTenant && requestedTenant !== registered.tenantId) return { status: 'REJECTED' };
-  return { status: 'ADMITTED' };
+  return { status: 'ADMITTED', tenantId: registered.tenantId };
 }
 
 admissionController.admit = admitPassport;
