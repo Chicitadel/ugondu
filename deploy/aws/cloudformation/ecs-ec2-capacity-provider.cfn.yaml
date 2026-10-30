@@ -1,0 +1,353 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Universal Air Roofers Cloud Standard - Ugondu ECS on EC2 with Capacity Provider
+  Author: Ignatus Chika Ujomor (Lead Systems Architect) - Air Roofers SASU
+  Governance: Enterprise Governed, ISO 27001, SOC 2, OWASP ASVS
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: staging
+    AllowedValues: [development, staging, production]
+    Description: Deployment target environment name
+
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of private subnets for ECS container host EC2 instances
+
+  EC2SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security group attached to container host EC2 instances
+
+  EC2InstanceType:
+    Type: String
+    Default: t3.medium
+    AllowedValues: [t3.medium, t3.large]
+    Description: Least-cost supported ECS host profile for Ugondu Node.js backend with OS/ECS headroom; scale to t3.large only when measured demand requires it
+
+  EC2AmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2023/x86_64/recommended/image_id
+    Description: SSM parameter path for ECS-optimized Amazon Linux AMI
+
+  EC2KeyName:
+    Type: String
+    Default: ""
+    Description: Optional EC2 key pair for emergency console access
+
+  MinClusterSize:
+    Type: Number
+    Default: 1
+    Description: Minimum instance count for the EC2 Auto Scaling Group
+
+  MaxClusterSize:
+    Type: Number
+    Default: 2
+    Description: Maximum instance count for the EC2 Auto Scaling Group
+
+  DesiredCount:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: Desired number of backend tasks; keep staging to one task by default
+
+  ContainerInsights:
+    Type: String
+    Default: disabled
+    AllowedValues: [enabled, disabled]
+    Description: Enable additional ECS container telemetry explicitly when needed
+
+  TaskCpu:
+    Type: String
+    Default: "256"
+    AllowedValues: ["256", "512", "1024"]
+    Description: Task CPU units; staging defaults to 0.25 vCPU with explicit upgrade options
+
+  TaskMemory:
+    Type: String
+    Default: "512"
+    AllowedValues: ["512", "1024", "2048"]
+    Description: Task memory in MB; staging defaults to 512 MB with explicit upgrade options
+
+  BackendContainerImage:
+    Type: String
+    Description: Full ECR URI and tag of the immutable Ugondu container image
+
+  BackendContainerPort:
+    Type: Number
+    Default: 8081
+    Description: Port exposed by the Ugondu backend container
+
+  BackendTargetGroupArn:
+    Type: String
+    Description: ARN of the Application Load Balancer target group for backend traffic
+
+  DatabaseUrlSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing the database URL
+
+  DatabaseUsernameSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing the database username
+
+  DatabasePasswordSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing the database password
+
+  HealthCheckPath:
+    Type: String
+    Default: /health/ready
+    Description: Path for container health and readiness probes
+
+Resources:
+  # ----------------------------------------------------------------------------
+  # ECS Cluster
+  # ----------------------------------------------------------------------------
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-ugondu-ec2-cluster
+      ClusterSettings:
+        - Name: containerInsights
+          Value: !Ref ContainerInsights
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Standard
+          Value: air-roofers-cloud-standard
+        - Key: Product
+          Value: ugondu
+
+  # ----------------------------------------------------------------------------
+  # EC2 Launch Template & Auto Scaling Group
+  # ----------------------------------------------------------------------------
+  EC2HostRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ugondu-ec2-host-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  EC2HostInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${EnvironmentName}-ugondu-ec2-instance-profile
+      Roles:
+        - !Ref EC2HostRole
+
+  EC2LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${EnvironmentName}-ugondu-ec2-lt
+      LaunchTemplateData:
+        ImageId: !Ref EC2AmiId
+        InstanceType: !Ref EC2InstanceType
+        IamInstanceProfile:
+          Arn: !GetAtt EC2HostInstanceProfile.Arn
+        SecurityGroupIds:
+          - !Ref EC2SecurityGroupId
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo ECS_CLUSTER=${EcsCluster} >> /etc/ecs/ecs.config
+            echo ECS_ENABLE_CONTAINER_METADATA=true >> /etc/ecs/ecs.config
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: 30
+              VolumeType: gp3
+              Encrypted: true
+              DeleteOnTermination: true
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: !Sub ${EnvironmentName}-ugondu-ecs-host
+              - Key: Environment
+                Value: !Ref EnvironmentName
+
+  EC2AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Sub ${EnvironmentName}-ugondu-asg
+      VPCZoneIdentifier: !Ref SubnetIds
+      LaunchTemplate:
+        LaunchTemplateId: !Ref EC2LaunchTemplate
+        Version: !GetAtt EC2LaunchTemplate.LatestVersionNumber
+      MinSize: !Ref MinClusterSize
+      MaxSize: !Ref MaxClusterSize
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-ugondu-ecs-host
+          PropagateAtLaunch: true
+        - Key: AmazonECSManaged
+          Value: ""
+          PropagateAtLaunch: true
+
+  # ----------------------------------------------------------------------------
+  # ECS Capacity Provider
+  # ----------------------------------------------------------------------------
+  EcsCapacityProvider:
+    Type: AWS::ECS::CapacityProvider
+    Properties:
+      Name: !Sub ${EnvironmentName}-ugondu-capacity-provider
+      AutoScalingGroupProvider:
+        AutoScalingGroupArn: !Ref EC2AutoScalingGroup
+        ManagedScaling:
+          Status: ENABLED
+          TargetCapacity: 100
+        ManagedTerminationProtection: DISABLED
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  ClusterCapacityProviderAssociations:
+    Type: AWS::ECS::ClusterCapacityProviderAssociations
+    Properties:
+      Cluster: !Ref EcsCluster
+      CapacityProviders:
+        - !Ref EcsCapacityProvider
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: !Ref EcsCapacityProvider
+          Weight: 1
+
+  # ----------------------------------------------------------------------------
+  # IAM Roles for Tasks
+  # ----------------------------------------------------------------------------
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ugondu-task-exec-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref DatabaseUrlSecretArn
+                  - !Ref DatabaseUsernameSecretArn
+                  - !Ref DatabasePasswordSecretArn
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ugondu-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/${EnvironmentName}-ugondu-backend
+      RetentionInDays: 30
+
+  # ----------------------------------------------------------------------------
+  # Task Definition & Service
+  # ----------------------------------------------------------------------------
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${EnvironmentName}-ugondu-backend
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      Cpu: !Ref TaskCpu
+      Memory: !Ref TaskMemory
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: backend-api
+          Image: !Ref BackendContainerImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 4001
+              HostPort: !Ref BackendContainerPort
+              Protocol: tcp
+          Environment:
+            - Name: NODE_ENV
+              Value: !Ref EnvironmentName
+            - Name: PORT
+              Value: "4001"
+            - Name: UGONDU_BIND_PORT
+              Value: !Sub "${BackendContainerPort}"
+            - Name: PORTABILITY_TIER
+              Value: AWS_EC2
+            - Name: IDENTITY_AUTHORITY_URL
+              Value: https://identity.airroofers.eu/api/v1
+            - Name: BILLING_AUTHORITY_URL
+              Value: https://billing.airroofers.eu/api/v1
+            - Name: TELEMETRY_ENDPOINT
+              Value: https://telemetry.airroofers.eu
+            - Name: MANDATAG_LICENSE_ENDPOINT
+              Value: https://license.airroofers.eu
+          Secrets:
+            - Name: UGONDU_DB_URL
+              ValueFrom: !Ref DatabaseUrlSecretArn
+            - Name: UGONDU_DB_USER
+              ValueFrom: !Ref DatabaseUsernameSecretArn
+            - Name: UGONDU_DB_PASS
+              ValueFrom: !Ref DatabasePasswordSecretArn
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  EcsService:
+    Type: AWS::ECS::Service
+    DependsOn: ClusterCapacityProviderAssociations
+    Properties:
+      ServiceName: !Sub ${EnvironmentName}-ugondu-backend-service
+      Cluster: !Ref EcsCluster
+      TaskDefinition: !Ref TaskDefinition
+      DesiredCount: !Ref DesiredCount
+      CapacityProviderStrategy:
+        - CapacityProvider: !Ref EcsCapacityProvider
+          Weight: 1
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups:
+            - !Ref EC2SecurityGroupId
+      LoadBalancers:
+        - ContainerName: backend-api
+          ContainerPort: 4001
+          TargetGroupArn: !Ref BackendTargetGroupArn
+
+Outputs:
+  ClusterName:
+    Value: !Ref EcsCluster
+  ServiceName:
+    Value: !GetAtt EcsService.Name
+  TaskDefinitionArn:
+    Value: !Ref TaskDefinition
