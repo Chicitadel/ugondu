@@ -43,7 +43,10 @@ async function run(context) {
     }
 
     const enFile = path.join(context.root, 'server', 'shared', 'locales', 'en.json');
-    if (fs.existsSync(enFile)) {
+    if (!fs.existsSync(enFile)) {
+        throw new Error('D28_EN_LOCALE_BASELINE_MISSING');
+    }
+    {
         const enParsed = JSON.parse(fs.readFileSync(enFile, 'utf8'));
         const enKeys = Object.keys(enParsed).sort();
         const localeKeys = Object.keys(parsed).sort();
