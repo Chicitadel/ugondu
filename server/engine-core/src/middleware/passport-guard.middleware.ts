@@ -32,6 +32,7 @@
  ******************************************************************************/
 
 import { Request, Response, NextFunction } from 'express';
+import { createHash } from 'crypto';
 import { admissionController } from '../passport/gatekeeper/admission-controller';
 import { __t } from '@ugondu/shared';
 import { Logger } from '@ugondu/shared';
@@ -39,11 +40,19 @@ import { Logger } from '@ugondu/shared';
 export function passportGuardMiddleware(req: Request, res: Response, next: NextFunction): any {
     const raw = req.headers['x-ugondu-passport-id'];
 
-    // Normalise: Express may give a string[] for repeated headers; take the first value
-    const passportId = (Array.isArray(raw) ? raw[0] : raw ?? '').trim();
+    // HTTP intermediaries may combine repeated header values into a comma-delimited
+    // string. Passport credentials are single opaque values; ambiguity is rejected.
+    const values = Array.isArray(raw) ? raw : (typeof raw === 'string' ? [raw] : []);
+    if (values.length !== 1 || typeof values[0] !== 'string') {
+        Logger.warn(__t('messages.system.audit_missing_x_ugondu_passport_id_header'));
+        return res.status(403).json({
+            error: __t('err_passport_required'),
+            code: 'PASSPORT_REQUIRED'
+        });
+    }
 
-    if (!passportId) {
-        // Header entirely absent or empty string
+    const passportId = values[0].trim();
+    if (!passportId || passportId.length > 8192 || /[\s,]/.test(passportId)) {
         Logger.warn(__t('messages.system.audit_missing_x_ugondu_passport_id_header'));
         return res.status(403).json({
             error: __t('err_passport_required'),
@@ -52,13 +61,20 @@ export function passportGuardMiddleware(req: Request, res: Response, next: NextF
     }
 
     const result = admissionController.admit(passportId, { tenantId: req.body?.tenantId });
-    if (result.status !== 'ADMITTED') {
-        Logger.warn(__t('messages.system.audit_passport_rejected_id', { 'passportId': passportId }));
+    if (result.status !== 'ADMITTED' || typeof result.tenantId !== 'string' || !result.tenantId.trim()) {
+        // Never write bearer-like admission credentials to application logs.
+        const fingerprint = createHash('sha256').update(passportId).digest('hex').slice(0, 16);
+        Logger.warn(__t('messages.system.audit_passport_rejected_id', {
+            'passportId': `sha256:${fingerprint}`
+        }));
         return res.status(403).json({
             error: __t('err_passport_rejected'),
             code: 'PASSPORT_REJECTED'
         });
     }
 
+    // Carry only the tenant derived from the verified passport; downstream routes must
+    // compare it with the authoritative tenant returned by the billing authority.
+    res.locals['passportTenantId'] = result.tenantId.trim();
     return next();
 }

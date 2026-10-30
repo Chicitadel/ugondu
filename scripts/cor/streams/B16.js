@@ -54,10 +54,13 @@ async function verifyObjective(context, observations, artifacts) {
     throw new Error('B16_ADAPTER_EXECUTION_DELEGATION_MISSING');
   }
 
-  // Runtime behavioral execution against compiled RecoveryOrchestrator if present
+  // TEST mode must execute the compiled production class; source-only inspection is insufficient.
   const compiledOrchestratorRel = 'server/engine-core/dist/deise/engine/recovery/recovery-orchestrator.js';
   const compiledOrchestratorPath = path.join(context.root, compiledOrchestratorRel);
-  if (fs.existsSync(compiledOrchestratorPath)) {
+  if (!fs.existsSync(compiledOrchestratorPath)) {
+    throw new Error('B16_COMPILED_RECOVERY_ORCHESTRATOR_MISSING');
+  }
+  {
     // eslint-disable-next-line global-require, import/no-dynamic-require
     const { RecoveryOrchestrator } = require(compiledOrchestratorPath);
     const orchestrator = new RecoveryOrchestrator();

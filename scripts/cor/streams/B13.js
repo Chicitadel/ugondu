@@ -59,10 +59,13 @@ function verifyObjective(context, observations, artifacts) {
     }
   }
 
-  // Runtime execution proof when check-cor-stream-registry.js is present
+  // TEST mode is a runtime claim: absence of the real registry validator is a hard failure.
   const validatorRel = 'scripts/check-cor-stream-registry.js';
   const validatorPath = path.join(context.root, validatorRel);
-  if (fs.existsSync(validatorPath)) {
+  if (!fs.existsSync(validatorPath)) {
+    throw new Error('B13_REGISTRY_VALIDATOR_MISSING');
+  }
+  {
     const pos = spawnSync(process.execPath, [validatorPath], {
       cwd: context.root,
       env: { ...process.env, UGONDU_ROOT: context.root },

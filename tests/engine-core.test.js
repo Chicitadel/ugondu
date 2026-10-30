@@ -78,6 +78,9 @@ function get(port, path, extraHeaders = {}) {
 let ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4001', 10);
 let serverProcess = null;
 let mockBillingServer = null;
+let engineModule = null;
+const { AdmissionController } = require('../server/engine-core/dist/passport/gatekeeper/admission-controller.js');
+const { passportGuardMiddleware } = require('../server/engine-core/dist/middleware/passport-guard.middleware.js');
 
 if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -100,8 +103,11 @@ async function ensureBillingAuthority() {
             parsed = {};
           }
           res.setHeader('Content-Type', 'application/json');
-          if (parsed.token === 'community_token_123' || parsed.token === 'pro_token_valid') {
+          if (parsed.token === 'community_token_123' || parsed.token === 'pro_token_valid'
+              || parsed.token === 'community_token_tenant_mismatch') {
             const isPro = parsed.token === 'pro_token_valid';
+            const tenantId = parsed.token === 'community_token_tenant_mismatch'
+              ? 'tenant_other' : 'tenant_test_default';
             res.writeHead(200);
             res.end(
               JSON.stringify({
@@ -109,7 +115,7 @@ async function ensureBillingAuthority() {
                 outcome: 'authorized',
                 edition: isPro ? 'Professional' : 'Community',
                 tier: isPro ? 'professional' : 'community',
-                tenantId: 'tenant_test_default',
+                tenantId,
                 capabilities: {
                   maxDeploymentsPerDay: 50,
                   maxPlugins: 5,
@@ -159,7 +165,7 @@ before(async () => {
     serverProcess = this;
     return originalListen.apply(this, args);
   };
-  require('../server/engine-core/dist/index.js');
+  engineModule = require('../server/engine-core/dist/index.js');
   http.Server.prototype.listen = originalListen;
   await new Promise((resolve) => {
     if (serverProcess && serverProcess.listening) resolve();
@@ -180,6 +186,57 @@ after(async () => {
   }
 });
 
+test('ENG-PASS-004: unconfigured AdmissionController denies by default', () => {
+  const denyByDefault = new AdmissionController({}, {}, {}, {}, {}, {}, {});
+  assert.deepStrictEqual(
+    denyByDefault.admit('plausible_but_unverified', { tenantId: 'tenant_a' }),
+    { status: 'REJECTED' }
+  );
+});
+
+test('ENG-PASS-005: passport middleware rejects repeated and comma-joined credential headers', () => {
+  for (const header of [
+    ['signed-token-a', 'signed-token-b'],
+    'signed-token-a, signed-token-b',
+  ]) {
+    let status = 0;
+    let payload = null;
+    let nextCalled = false;
+    const req = {
+      headers: { 'x-ugondu-passport-id': header },
+      body: { tenantId: 'tenant_test_default' },
+    };
+    const res = {
+      status(code) { status = code; return this; },
+      json(body) { payload = body; return this; },
+    };
+    passportGuardMiddleware(req, res, () => { nextCalled = true; });
+    assert.strictEqual(status, 403);
+    assert.strictEqual(payload.code, 'PASSPORT_REQUIRED');
+    assert.strictEqual(nextCalled, false);
+  }
+});
+
+test('ENG-PASS-006: rejected passport credentials are never echoed in the response', () => {
+  const secretLikeCredential = 'opaque-secret-passport-value';
+  let status = 0;
+  let payload = null;
+  let nextCalled = false;
+  const req = {
+    headers: { 'x-ugondu-passport-id': secretLikeCredential },
+    body: { tenantId: 'tenant_test_default' },
+  };
+  const res = {
+    status(code) { status = code; return this; },
+    json(body) { payload = body; return this; },
+  };
+  passportGuardMiddleware(req, res, () => { nextCalled = true; });
+  assert.strictEqual(status, 403);
+  assert.strictEqual(payload.code, 'PASSPORT_REJECTED');
+  assert.strictEqual(JSON.stringify(payload).includes(secretLikeCredential), false);
+  assert.strictEqual(nextCalled, false);
+});
+
 test('ENG-001: /health/live and /health/ready return 200 with zero static cor_level', async () => {
   const live = await get(ENGINE_PORT, '/health/live');
   assert.strictEqual(live.status, 200, `Expected 200 on /health/live, got ${live.status}`);
@@ -191,6 +248,76 @@ test('ENG-001: /health/live and /health/ready return 200 with zero static cor_le
   assert.strictEqual(ready.body.status, 'ready');
   assert.strictEqual(ready.body.cor_level, undefined, 'Readiness response must not contain static cor_level');
   console.log('[en] ✓ PASS: /health/live and /health/ready return 200 with zero static cor_level');
+});
+
+test('ENG-PASS-001: unregistered passport prefixes never authenticate', () => {
+  for (const candidate of ['pp_forged', 'pass_forged', 'passport_admin', 'valid_unissued']) {
+    assert.deepStrictEqual(
+      engineModule.admitPassport(candidate, { tenantId: 'tenant_test_default' }),
+      { status: 'REJECTED' },
+      `Unregistered passport must be rejected: ${candidate}`
+    );
+  }
+});
+
+test('ENG-PASS-002: registered opaque passports are bound to their registered tenant', () => {
+  engineModule.registerAdmissionPassport('registered_tenant_a', {
+    tenantId: 'tenant_a',
+    expiresAt: Date.now() + 60_000,
+  });
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_tenant_a', { tenantId: 'tenant_a' }),
+    { status: 'ADMITTED', tenantId: 'tenant_a' }
+  );
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_tenant_a', { tenantId: 'tenant_b' }),
+    { status: 'REJECTED' }
+  );
+
+  engineModule.registerAdmissionPassport('registered_revoked', {
+    tenantId: 'tenant_a',
+    revoked: true,
+  });
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_revoked', { tenantId: 'tenant_a' }),
+    { status: 'REJECTED' }
+  );
+
+  engineModule.registerAdmissionPassport('registered_expired', {
+    tenantId: 'tenant_a',
+    expiresAt: Date.now() - 1,
+  });
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_expired', { tenantId: 'tenant_a' }),
+    { status: 'REJECTED' }
+  );
+});
+
+test('ENG-PASS-003: signed passports require valid claims and exact tenant binding', () => {
+  const token = engineModule.issueSignedPassport({ tenantId: 'tenant_signed_a', ttlMs: 60_000 });
+  assert.deepStrictEqual(
+    engineModule.admitPassport(token, { tenantId: 'tenant_signed_a' }),
+    { status: 'ADMITTED', tenantId: 'tenant_signed_a' }
+  );
+  assert.deepStrictEqual(
+    engineModule.admitPassport(token, { tenantId: 'tenant_signed_b' }),
+    { status: 'REJECTED' }
+  );
+  const tokenParts = token.split('.');
+  tokenParts[2] = (tokenParts[2][0] === 'A' ? 'B' : 'A') + tokenParts[2].slice(1);
+  const tampered = tokenParts.join('.');
+  assert.deepStrictEqual(
+    engineModule.admitPassport(tampered, { tenantId: 'tenant_signed_a' }),
+    { status: 'REJECTED' }
+  );
+  assert.throws(
+    () => engineModule.issueSignedPassport({ tenantId: '', ttlMs: 60_000 }),
+    /PASSPORT_TENANT_REQUIRED/
+  );
+  assert.throws(
+    () => engineModule.issueSignedPassport({ tenantId: 'tenant_signed_a', ttlMs: 0 }),
+    /PASSPORT_TTL_OUT_OF_RANGE/
+  );
 });
 
 test('ENG-002: Missing required fields returns 400', async () => {
@@ -227,6 +354,24 @@ test('ENG-003: Deterministic 200 signed recipe & idempotent replay verified', as
   assert.strictEqual(replay.status, 200);
   assert.strictEqual(replay.body.transactionId, r.body.transactionId, 'Idempotent replay must return identical transactionId');
   console.log(`[en] ✓ PASS: Deterministic 200 signed recipe & idempotent replay verified (TX: ${r.body.transactionId})`);
+});
+
+test('ENG-PASS-007: AeroBill tenant mismatch rejects deployment despite valid passport', async () => {
+  const r = await post(ENGINE_PORT, '/v1/deploy/resolve', {
+    repositoryUrl: 'https://github.com/example/repo',
+    branch: 'main',
+    fileMap: {},
+    targetEnvironment: 'cpanel',
+    token: 'community_token_tenant_mismatch',
+    projectId: 'proj_default',
+    workspaceId: 'ws_default',
+    targetId: 'tgt_cpanel_01',
+    agentId: 'agent_node_01',
+    agentVersion: '2.0.0',
+    idempotencyKey: `idem_tenant_mismatch_${Date.now()}`,
+  });
+  assert.strictEqual(r.status, 403, `Expected 403 for passport/AeroBill tenant mismatch, got ${r.status}`);
+  assert.strictEqual(r.body.code, 'PASSPORT_BILLING_TENANT_MISMATCH');
 });
 
 test('ENG-004: Unlicensed deployment request deterministically returns 402', async () => {

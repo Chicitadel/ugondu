@@ -82,8 +82,8 @@ async function invokeRoute(
     body,
     headers: normalizedHeaders,
   } as unknown as Request;
-
   const res = {
+    locals: { passportTenantId: 'tenant-enterprise-01' }, // verified tenant context for direct route invocation
     status(code: number) {
       statusCode = code;
       return this;

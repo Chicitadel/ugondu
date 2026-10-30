@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Universal Air Roofers Cloud Standard - Ugondu ECS Fargate Service
+  Author: Ignatus Chika Ujomor (Lead Systems Architect) - Air Roofers SASU
+  Governance: Enterprise Governed, ISO 27001, SOC 2, OWASP ASVS
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: staging
+    AllowedValues: [development, staging, production]
+    Description: Deployment target environment name
+
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: List of private subnets for ECS Fargate tasks
+
+  ServiceSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security group attached to Fargate tasks
+
+  DesiredCount:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    Description: Desired number of backend tasks; keep staging to one task by default
+
+  ContainerInsights:
+    Type: String
+    Default: disabled
+    AllowedValues: [enabled, disabled]
+    Description: Enable additional ECS container telemetry explicitly when needed
+
+  TaskCpu:
+    Type: String
+    Default: "256"
+    AllowedValues: ["256", "512", "1024"]
+    Description: Task CPU units; staging defaults to 0.25 vCPU
+
+  TaskMemory:
+    Type: String
+    Default: "512"
+    AllowedValues: ["512", "1024", "2048"]
+    Description: Task memory in MB; staging defaults to 512 MB
+
+  BackendContainerImage:
+    Type: String
+    Description: Full ECR URI and tag of the immutable Ugondu container image
+
+  BackendContainerPort:
+    Type: Number
+    Default: 8081
+    Description: Port exposed by the Ugondu backend container
+
+  BackendTargetGroupArn:
+    Type: String
+    Description: ARN of the Application Load Balancer target group for backend traffic
+
+  DatabaseUrlSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing the database URL
+
+  DatabaseUsernameSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing the database username
+
+  DatabasePasswordSecretArn:
+    Type: String
+    Description: Secrets Manager ARN containing the database password
+
+  HealthCheckPath:
+    Type: String
+    Default: /health/ready
+    Description: Path for container health and readiness probes
+
+Resources:
+  # ----------------------------------------------------------------------------
+  # ECS Cluster
+  # ----------------------------------------------------------------------------
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-ugondu-fargate-cluster
+      ClusterSettings:
+        - Name: containerInsights
+          Value: !Ref ContainerInsights
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Standard
+          Value: air-roofers-cloud-standard
+        - Key: Product
+          Value: ugondu
+
+  # ----------------------------------------------------------------------------
+  # IAM Roles for Tasks
+  # ----------------------------------------------------------------------------
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ugondu-fargate-exec-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref DatabaseUrlSecretArn
+                  - !Ref DatabaseUsernameSecretArn
+                  - !Ref DatabasePasswordSecretArn
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-ugondu-fargate-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/${EnvironmentName}-ugondu-fargate-backend
+      RetentionInDays: 30
+
+  # ----------------------------------------------------------------------------
+  # Task Definition & Service
+  # ----------------------------------------------------------------------------
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${EnvironmentName}-ugondu-fargate-backend
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: !Ref TaskCpu
+      Memory: !Ref TaskMemory
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt TaskRole.Arn
+      ContainerDefinitions:
+        - Name: backend-api
+          Image: !Ref BackendContainerImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 4001
+              HostPort: 4001
+              Protocol: tcp
+          Environment:
+            - Name: NODE_ENV
+              Value: !Ref EnvironmentName
+            - Name: PORT
+              Value: "4001"
+            - Name: UGONDU_BIND_PORT
+              Value: !Sub "${BackendContainerPort}"
+            - Name: PORTABILITY_TIER
+              Value: AWS_FARGATE
+            - Name: IDENTITY_AUTHORITY_URL
+              Value: https://identity.airroofers.eu/api/v1
+            - Name: BILLING_AUTHORITY_URL
+              Value: https://billing.airroofers.eu/api/v1
+            - Name: TELEMETRY_ENDPOINT
+              Value: https://telemetry.airroofers.eu
+            - Name: MANDATAG_LICENSE_ENDPOINT
+              Value: https://license.airroofers.eu
+          Secrets:
+            - Name: UGONDU_DB_URL
+              ValueFrom: !Ref DatabaseUrlSecretArn
+            - Name: UGONDU_DB_USER
+              ValueFrom: !Ref DatabaseUsernameSecretArn
+            - Name: UGONDU_DB_PASS
+              ValueFrom: !Ref DatabasePasswordSecretArn
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - !Sub wget -qO- http://127.0.0.1:${BackendContainerPort}${HealthCheckPath} || exit 1
+            Interval: 15
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 30
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  EcsService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ${EnvironmentName}-ugondu-fargate-backend-service
+      Cluster: !Ref EcsCluster
+      TaskDefinition: !Ref TaskDefinition
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups:
+            - !Ref ServiceSecurityGroupId
+      LoadBalancers:
+        - ContainerName: backend-api
+          ContainerPort: 4001
+          TargetGroupArn: !Ref BackendTargetGroupArn
+
+Outputs:
+  ClusterName:
+    Value: !Ref EcsCluster
+  ServiceName:
+    Value: !GetAtt EcsService.Name
+  TaskDefinitionArn:
+    Value: !Ref TaskDefinition

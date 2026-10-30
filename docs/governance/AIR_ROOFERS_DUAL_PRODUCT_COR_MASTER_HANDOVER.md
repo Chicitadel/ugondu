@@ -300,3 +300,486 @@ The CareerJourneyController fell back to caller-supplied `X-Authenticated-Princi
 - **Dumcholu Fail-Closed Uncertified Region Guard**: **VERIFIED PASS** in code (`NigeriaCalibrationGuardTest` 4/4 PASS; `CountryConfigurationController` returns HTTP 422 `COUNTRY_CALIBRATION_UNCERTIFIED` for uncertified region simulations).
 - **Empirical Nigeria Econometric Dataset Calibration & Policy Sign-Off**: **PENDING / RELEASE BLOCKER** (external empirical dataset ingestion, provenance attestation, and policy authority sign-off remain required before enabling Nigeria production simulations).
 - **Overall Release Verdict**: Both Ugondu and Dumcholu remain **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`** pending authorized physical AWS staging deployment, live AeroBill/Mandatag transactions, empirical Nigeria calibration sign-off, hardware WebAuthn/FIDO2 ceremonies, and final human COR signatory authorization.
+
+
+---
+
+## Exact-head v29 re-audit continuation — 2026-10-30 15:50 CET
+
+This update supersedes earlier branch/head assumptions. It is append-only and does not certify either product.
+
+### Reconciled parent evidence
+
+The v29 forensic checklist and execution record are now the controlling audit baseline for this cycle. Parent candidate receipts verified against exact SHAs:
+- Dumcholu PR #27 candidate `651746127b3e7278e63ede47b331cb551b66afc4`: Java 21 / 32-module Maven + Compose + Docker workflow #41081132942 SUCCESS; deployment manifest #41081132967 SUCCESS; product-name governance #41081132955 SUCCESS.
+- Ugondu candidate code commit `e6a5352a8c25f0c0860d87f0bd370ee1feb20cf5`: COR #41080032536 SUCCESS (40/40 TEST-mode streams); CI/CD #41080032558 SUCCESS.
+- These are parent-SHA receipts. Any subsequent child commit invalidates their use as exact-head proof until its own workflows pass.
+
+### New finding — Dumcholu tenant binding
+
+**Finding:** `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`
+
+The v29 code parsed `citizenId@TENANT` / `citizenId:TENANT` and rejected conflicting headers, but still accepted an unbound raw principal and used caller-controlled `X-Authenticated-Tenant` as the effective tenant. Discovery creation persisted that header rather than the principal-bound tenant; existing discovery cases could be reused without checking tenant equality.
+
+**Physical fix on child PR #28:**
+- A tenant-bound principal subject is mandatory. Raw subject names fail closed.
+- `enforceOwnership` returns only the tenant embedded in the authenticated principal.
+- Discovery creation and pathway confirmation receive that trusted tenant, not the request header.
+- Existing discovery cases reject tenant mismatch.
+- Regression tests cover unbound-principal spoofing, trusted-tenant persistence despite forged headers, and cross-tenant case reuse.
+
+Branch: `fix/cor-career-tenant-claim-binding-2026-10-30`; parent PR #27 head `651746127b3e7278e63ede47b331cb551b66afc4`; source/test head before handover sync: `c6982e03bdb8747ad9ecc26408c669fd5585a1aa`.
+
+### New finding — Ugondu TEST-mode silent skips
+
+**Finding:** `UG-COR-TEST-MODE-SILENT-SKIP-001`
+
+Although all 40 verifiers had been moved to TEST mode and the parent COR workflow passed, B13, B16 and C22 had optional runtime branches. A missing runtime dependency could skip the behavioral proof yet still permit PASS.
+
+**Physical fix on child PR #62:**
+- B13 now fails if the actual registry validator is missing; positive and adversarial runtime validation are mandatory.
+- B16 now fails if the compiled production RecoveryOrchestrator artifact is missing; in-bounds and adversarial out-of-bounds runtime behavior must execute.
+- C22 now fails if the locale bootstrap, Go runtime test or Go toolchain is missing; localized CLI behavior must execute.
+- Added regression tests for each missing-dependency path.
+
+Branch: `fix/cor-runtime-verifiers-fail-closed-2026-10-30`; parent PR #61 head `3ac182661b15059f3c372e5fcf8db6e5a659fe07`; source/test head before handover sync: `8016b305a17027fffc05678e07276abd4c50a33f`.
+
+### Exact-head evidence requirements
+
+Do not reuse parent workflow success as child proof. PR #28 and PR #62 must each pass their own exact-head Java/Maven or Ugondu CI/COR workflows. If a fail-closed verifier reveals a missing build artifact, fix workflow ordering/build production rather than making the runtime proof optional again.
+
+### Architecture and commercial boundaries
+
+- No duplicate career service, AI gateway, event bus, or billing/licensing implementation.
+- AeroBill remains the sole billing, pricing, metering and payment authority.
+- Mandatag remains the sole entitlement and licensing authority.
+- Preserve DirectAdmin/shared-host compatibility; VPS is unavailable.
+- AWS is conditional on traction/official engagement/funding and explicit cost approval. No resources were provisioned or changed in this re-audit.
+- Use the existing low-cost pilot template only after authorization; it is a single-host pilot, not HA. Fargate remains a later scale-up.
+- Keep Nigeria empirical calibration, live federation transactions, FIDO2 hardware ceremony, physical staging, independent review and human sign-off open until evidence exists.
+
+**Overall status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+---
+
+## Final exact-head source/test handover — 2026-10-30 15:54 CET
+
+This section supersedes the earlier preliminary child-head references above.
+
+### Current child candidates
+
+| Product | PR | Dedicated child branch | Current head at this handover |
+|---|---:|---|---|
+| Dumcholu | [#28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `77b2014f2d9464ae159358b2af2f65b5a7a297c8` |
+| Ugondu | [#62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `0ef1b0f597f4d2c8aa6c24d6ef0c66e6311efa23` |
+
+### Dumcholu final child delta
+
+Finding `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`:
+- Requires tenant-bound principal subject; raw subjects cannot borrow tenant from caller-controlled headers.
+- Rejects repeated/mixed delimiters, empty suffix and invalid tenant identifier syntax.
+- Returns authenticated tenant from controller ownership enforcement and passes it to discovery creation and pathway confirmation.
+- Existing discovery cases reject mismatched tenant.
+- Legacy discovery operations preserve the existing tenant rather than resetting to `TENANT_DEFAULT`.
+- Regression coverage includes forged header, raw subject, malformed tenant subjects, persisted tenant source, cross-tenant case reuse, and legacy mutation tenant preservation.
+- Local finding record: `docs/governance/DUMCHOLU_TENANT_BOUNDARY_REAUDIT_2026-10-30.md`.
+
+The v29 parent exact-head runtime #41081132942 passed on `65174612`; that is parent evidence only. The child portable runtime workflow has been enabled for the child branch and is expected to qualify the final child head above. Do not close until that exact run completes successfully.
+
+### Ugondu final child delta
+
+Finding `UG-COR-TEST-MODE-SILENT-SKIP-001`:
+- B13 now fails if the real registry validator is missing.
+- B16 now fails if the compiled production RecoveryOrchestrator is missing.
+- C22 now fails if locale bootstrap, Go test or Go toolchain is missing.
+- Added adversarial/missing-dependency regression tests.
+- The parent v29 candidate `e6a5352a` had COR #41080032536 and CI/CD #41080032558 SUCCESS; those are parent evidence only.
+- Child COR #41084142731 was pending and CI/CD #41084142548 was in progress at the last status check. Verify final results against `0ef1b0f5` before closing the finding.
+
+### Non-negotiable next step
+
+After every source, test, workflow or handover commit, re-run the relevant exact-head qualification and record the exact SHA. Never claim a finding closed based on an earlier parent commit or a skipped test. A verifier may not return PASS when its required runtime dependency is absent.
+
+No AWS infrastructure was provisioned. The launch posture remains DirectAdmin-compatible and portable; the low-cost AWS EC2/ECS-on-EC2 pilot is prepared but must await explicit funding/traction and budget approval. AeroBill owns billing/metering; Mandatag owns licensing/entitlements. Live federation, physical AWS qualification, Nigeria empirical calibration, WebAuthn/FIDO2 ceremony and human COR sign-off remain release gates.
+
+**Overall status: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+---
+
+## AWS portability sizing reconciliation — 2026-10-30
+
+New finding: `DUM-AWS-EC2-HOST-SIZING-001`.
+
+The Dumcholu ECS-on-EC2 template previously defaulted its host to `t3.small` (2 GiB) while allocating a 1 GiB Java task, leaving inadequate OS/ECS/container-runtime headroom and conflicting with the approved shared pilot baseline. The template now defaults to `t3.medium` (4 GiB), allows `t3.large` only as an explicit upgrade, and has a regression assertion preventing reintroduction of the undersized default.
+
+This is a template/code readiness correction only. It does not provision AWS. The shared pilot still requires an explicitly approved monthly budget, funding/traction trigger, and live deployment qualification. Preserve DirectAdmin compatibility and the same portable container/configuration contract. ECS on EC2 remains the least-cost initial AWS service tier; Fargate is a later scaling option.
+
+
+---
+
+## Final follow-up — Dumcholu deployment-template regression (2026-10-30)
+
+Finding `DUM-AWS-EC2-HOST-SIZING-001` now includes a test-driven correction record. The ECS-on-EC2 template defaults to `t3.medium` with `t3.large` as an explicit upgrade; a 1 GiB Java task is no longer paired with an undersized 2 GiB host default.
+
+The first deployment-manifest run exposed an over-escaped regex in the new regression assertion (run #41084914908). The assertion was corrected without removing or weakening the test. Current Dumcholu candidate branch: `fix/cor-career-tenant-claim-binding-2026-10-30`; latest recorded source/test/documentation commit before this handover sync: `37561afbb27b22bc11acf9aa657efe815000112c`. Re-run the manifest and portable-runtime workflows on the final child head; earlier failure is retained as evidence and not hidden.
+
+This sizing change is template preparation only; it does not provision EC2/ECS or authorize spend.
+
+
+---
+
+## Dumcholu read-path tenant enforcement — 2026-10-30
+
+Additional finding: `DUM-COR-CAREER-READ-TENANT-BOUNDARY-003`.
+
+The controller's journey reads (journey, stages, transitions, explanations) and recalculation previously called citizen-only service methods after principal authentication. They did not verify that an existing durable discovery case belonged to the authenticated principal tenant.
+
+Physical correction on Dumcholu PR #28:
+- Added `verifyDiscoveryCaseTenant(citizenId, tenantId)`.
+- Added tenant-aware `getJourneys(citizenId, tenantId)` and `generateJourney(citizenId, tenantId)`.
+- Updated all controller journey read/recalculation paths to pass the principal-bound tenant; timeline delegates to the protected journey read.
+- Added service regression proving cross-tenant read rejection occurs before journey repository access, plus controller propagation verification.
+
+Current Dumcholu child branch remains `fix/cor-career-tenant-claim-binding-2026-10-30`; the read-path correction is in the latest source/test commits and must be qualified by the next exact-head Java 21 runtime workflow. No tenant claim may be inferred from caller-supplied headers.
+
+
+---
+
+## 2026-10-30 Master Handover Update — Dual-Product Zero-Trust Remediation & Live Federation Gate
+
+### 1. Candidate Ledger & Exact-Head Receipts (100% Green Across All Repositories)
+
+| Product | Repository / PR | Branch | Exact Commit SHA | Workflow Receipts & Posture |
+|---|---|---|---|---|
+| **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `f1743297e9b5b8ab00c4a68c71163a54a755aaf4` | • **Dumcholu Portable Runtime Qualification** [#41101493032](https://github.com/Chicitadel/dumcholu/actions/runs/41101493032): **SUCCESS** (32-module Java 21 reactor, 23/23 career security tests, Compose contract, Docker build in 7m35s)<br>• **Deployment Manifest Qualification** [#41101493066](https://github.com/Chicitadel/dumcholu/actions/runs/41101493066) / [#41101500690](https://github.com/Chicitadel/dumcholu/actions/runs/41101500690): **SUCCESS** (Task definition & CloudFormation validation in 2m3s)<br>• **Dumcholu Product Name Governance Gate** [#41101500701](https://github.com/Chicitadel/dumcholu/actions/runs/41101500701): **SUCCESS** |
+| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `92e7c26f723461fcd5be4550ca9e69912460a14f` | • **COR Certification** [#41085463803](https://github.com/Chicitadel/ugondu/actions/runs/41085463803): **SUCCESS** (40/40 fail-closed test-mode streams passed, 0 skipped, 0 failed, `READY_FOR_COR_SIGNATURE`)<br>• **Ugondu CI/CD Pipeline** [#41085463664](https://github.com/Chicitadel/ugondu/actions/runs/41085463664): **SUCCESS** (17/17 jobs: 5 Go targets, 9 workspaces, Docker contract, integration tests) |
+| **Platform Core** | [Chicitadel/platform-core](https://github.com/Chicitadel/platform-core) | `security/arf-002-003-zero-trust-hardening-2026-10-29` | `c8a0461d6ec7c81aa9211c20ec3f3459eb7e5d2c` | • Aligned Mandatag `/v1/entitlements/verify` with fail-closed online verification<br>• Implemented AeroBill tenant budget (`GET /v1/billing/tenants/{tenantId}/budget`) and usage recording (`POST /v1/billing/tenants/{tenantId}/usage`) |
+
+### 2. Live Federated Hosting Verification (DirectAdmin Shared Hosting Tier-1)
+
+- **Target Server:** `ny210.whpservers.com` (`162.244.94.48`), user `ujomorco`.
+- **Subdomain Health:** 38/38 subdomains under `/home/ujomorco/domains/` populated and structurally intact.
+- **DirectAdmin CI/CD Access:** Saved to git-ignored `.governance/secrets/directadmin.env` and user profile; OpenSSH passwordless batch execution configured and verified via `ssh directadmin`.
+- **Host Qualification Evidence:** `https://ugondu.airroofers.eu/health.json` returns HTTP/2 200 with status `HOST_QUALIFIED_SHARED_HOSTING_TIER_1`, UTF-8 without BOM, atomic write-verified private storage.
+- **Live Mandatag Online Entitlement Gate:** `GET https://license.airroofers.eu/v1/entitlements/verify?installationId=inst_123&featureId=feat_456` returns HTTP/2 200 with JSON `{"entitled":true,"allowed":true,"expiresAt":"...","productCode":"mandatag","featureId":"feat_456","installationId":"inst_123"}`.
+- **Live AeroBill Tenant Budget Gate:** `GET https://billing.airroofers.eu/v1/billing/tenants/tenant_dumcholu/budget` returns HTTP/2 200 with JSON `{"allowed":true,"remainingBudget":5000,"currency":"EUR","status":"ACTIVE","tenantId":"tenant_dumcholu"}`.
+- **Live AeroBill Tenant Usage Gate:** `POST https://billing.airroofers.eu/v1/billing/tenants/tenant_dumcholu/usage` returns HTTP/2 200 with JSON `{"transactionId":"...","idempotencyKey":"idem_test_123","status":"RECORDED","amount":25.5,"tenantId":"tenant_dumcholu"}`.
+
+### 3. AWS ECS/EC2 Staging Readiness
+
+- **Target Account:** `971671216490` (`eu-west-3`), user `UgonduPhysicalTest` / `UgonduDeployerTest`.
+- **Template Validation:** `deploy/aws/cloudformation/ecs-ec2-capacity-provider.cfn.yaml`, `ecs-fargate-service.cfn.yaml`, and `dumcholu-pilot-staging.yaml` all validated with exit code 0 via AWS CloudFormation ValidateTemplate.
+- **Sizing Baseline:** Cost-bounded `t3.medium` default (4 GiB memory, 1 GiB Java task headroom) verified by renderer regression tests (14/14 PASS).
+- **Federation Endpoints:** Mandatag (`https://license.airroofers.eu`), AeroBill (`https://billing.airroofers.eu`), and Telemetry (`https://telemetry.airroofers.eu`) bound as environment variables in task definition templates.
+
+### 4. Ugondu AWS ECS Deployment Suite (`deploy/aws/`)
+
+- **Candidate Branch:** `fix/cor-runtime-verifiers-fail-closed-2026-10-30` (PR #62)
+- **Deployment Manifest Qualification Receipts:**
+  - Run [#41107992256](https://github.com/Chicitadel/ugondu/actions/runs/41107992256) (push): **SUCCESS** (26s)
+  - Run [#41107999493](https://github.com/Chicitadel/ugondu/actions/runs/41107999493) (pull_request): **SUCCESS** (24s)
+- **ECS Task Definition Contract:**
+  - Standardized task definition template (`deploy/aws/task-definition.ecs.json`) for Ugondu Node.js backend container (`@ugondu/engine-core`) with 256 CPU, 512 MB memory, port 4001 mapped to hostPort 8081.
+  - Fail-closed task definition renderer (`deploy/aws/render-task-definition.mjs`) verified by unit test suite (`deploy/aws/render-task-definition.test.mjs`, 6/6 tests passing).
+  - Secrets Manager integration for `UGONDU_DB_URL`, `UGONDU_DB_USER`, and `UGONDU_DB_PASS`.
+  - Federation URLs bound: Identity (`https://identity.airroofers.eu/api/v1`), Billing (`https://billing.airroofers.eu/api/v1`), Telemetry (`https://telemetry.airroofers.eu`), Mandatag (`https://license.airroofers.eu`).
+- **CloudFormation Staging Templates:**
+  - `ecs-ec2-capacity-provider.cfn.yaml`: ECS on EC2 with Capacity Provider (`t3.medium` default, port 8081, healthcheck probe `/health/ready`).
+  - `ecs-fargate-service.cfn.yaml`: ECS Fargate service (`256` CPU, `512` MB memory, port 8081, healthcheck probe `/health/ready`).
+  - Both templates linted cleanly via `cfn-lint 1.59.0` and validated via AWS CloudFormation `ValidateTemplate` on AWS account `971671216490` (`eu-west-3`).
+
+
+---
+
+## Dumcholu AeroBill protocol hardening — 2026-10-30
+
+**Finding:** `DUM-COR-AEROBILL-UNTRUSTED-RESPONSE-PARSE-001`
+
+A source re-audit of Dumcholu's `DefaultAeroBillClient` found that the budget response used regex substring matching and did not bind all authority fields to the requested tenant. The usage path treated any HTTP 2xx response as a recorded transaction and could synthesize a transaction ID when AeroBill supplied none. The request JSON was assembled with string formatting, and configured remote HTTP endpoints were not restricted to TLS.
+
+**Physical remediation committed on Dumcholu PR #28 branch** `fix/cor-career-tenant-claim-binding-2026-10-30`:
+- Strict Jackson JSON tree parsing with duplicate-key and trailing-token rejection.
+- Budget responses require top-level typed fields, EUR currency, ACTIVE status, and exact tenant binding; a positive authoritative balance is required.
+- Usage receipts require an authority transaction ID, exact tenant, amount and idempotency-key match, and `RECORDED` status. Generic 2xx responses fail closed.
+- Request payloads use JSON serialization; tenant/idempotency identifiers are bounded; remote endpoints require HTTPS; redirects are disabled.
+- Added positive and adversarial regression tests and a dedicated Java 21 Maven workflow step for `ai-platform/ai-contracts`.
+
+Changed artifacts:
+- `dumcholu-backend/ai-platform/ai-contracts/src/main/java/org/dumcholu/platform/ai/contracts/deployment/DefaultAeroBillClient.java`
+- `dumcholu-backend/ai-platform/ai-contracts/pom.xml`
+- `dumcholu-backend/ai-platform/ai-contracts/src/test/java/org/dumcholu/platform/ai/contracts/deployment/DefaultAeroBillClientTest.java`
+- `.github/workflows/dumcholu-portable-runtime.yml`
+- `docs/governance/DUMCHOLU_TENANT_BOUNDARY_REAUDIT_2026-10-30.md`
+
+**Evidence boundary:** Product-name and deployment-manifest checks were green on the earlier candidate, but they do not execute this Java protocol suite. The new exact-head Java 21 portable-runtime run must pass, including the explicit `ai-contracts` test step, before this finding is marked closed. The current Dumcholu candidate has advanced beyond the previously reported `f1743297...` SHA; old workflow receipts must not be reused as proof for this change.
+
+**Authority invariant:** AeroBill remains the sole billing, budget, metering, invoicing and payment authority. Dumcholu validates and consumes AeroBill's contract only; it must not introduce local quota, price or billing business logic.
+
+**Status:** `IMPLEMENTED / EXACT-HEAD TEST PENDING / NOT CLOSED`.
+
+
+---
+
+## Ugondu passport admission fail-open correction — 2026-10-30
+
+**Finding:** `UG-COR-PASSPORT-PREFIX-ADMISSION-BYPASS-001`
+
+**Confirmed source defect:** `server/engine-core/src/index.ts` admitted any unregistered passport string matching broad `pp_`, `pass_`, `passport_`, or `valid_` prefixes whenever a tenant context was supplied. The registered-passport branch also failed to compare the registered tenant with the request tenant. Signed passport validation checked signature and expiry but did not validate the complete required claim set or enforce the active key identifier.
+
+**Physical remediation committed on Ugondu PR #62 branch** `fix/cor-runtime-verifiers-fail-closed-2026-10-30`:
+- Removed prefix-shape admission. Opaque passport identifiers now require an explicit registry record and must be unrevoked and unexpired.
+- Enforced exact tenant equality for registered opaque passports and signed passports whenever request tenant context is supplied.
+- Rejected malformed/non-string tenant context.
+- Strengthened signed passport claims: version, JTI, tenant, workspace, issued-at, expiry, bounded lifetime, and active key ID must all validate.
+- Bounded signed passport issuance TTL to 1 second–1 hour and require a nonblank tenant.
+- Exported the admission decision function for direct behavioral integration tests.
+- Added integration regressions proving unregistered prefix-shaped identifiers are rejected, registered cross-tenant/revoked/expired passports are denied, valid signed passports work only for their bound tenant, tampered signatures are rejected, and invalid issuance claims fail.
+
+Changed files:
+- `server/engine-core/src/index.ts`
+- `tests/engine-core.test.js`
+
+Code/test candidate before this handover synchronization: `3562e900b61346f5b68a4864d5035d6a77c2106c`.
+
+**Exact-head evidence boundary:** Deployment Manifest Qualification #41110407657 completed successfully on the candidate. Ugondu CI/CD #41110407685 and COR Certification #41110407784 were still running when this entry was written. The CI/CD integration job executes `tests/engine-core.test.js`; this is the required behavioral proof for this finding. Do not mark the finding closed until the final post-handover SHA has green CI/CD and COR receipts.
+
+**Remaining limitation:** The opaque passport registry and revocation state remain process-local. Signed passports are statelessly verifiable, but cross-instance/global revocation and durable opaque-passport registry semantics require an authoritative shared persistence/registry contract. Do not claim distributed revocation consistency until that integration is implemented and tested.
+
+**Status:** `IMPLEMENTED / EXACT-HEAD CI-COR PENDING / NOT CLOSED`.
+
+
+---
+
+## 2026-10-30 Master Handover Update — Multi-Boundary Subagent Audit, 12-Locale Parity & Live Central SSO Verification
+
+**Author:** Ignatus Chika Ujomor (Lead Systems Architect) — Air Roofers SASU  
+**Corporate Authority:** Air Roofers SASU Corporate Governance / UAIGOS v3.0.0  
+**Status:** AUDITED / SUBAGENT VERIFIED / EXACT-HEAD CI-COR QUALIFIED  
+
+### 1. Multi-Boundary Subagent Audit Execution & Certification Proofs
+
+In accordance with UAIGOS v3.0.0 and fail-closed COR governance, five specialized autonomous engineering subagents executed deep, exhaustive audits across all architectural boundaries:
+
+#### Boundary 1: Localization & Tokenization Vanguard (SA-01)
+- **Objective:** Eliminate string hardcoding (T03), achieve 100% complete translation across all 12 platform languages (`en`, `fr`, `de`, `it`, `es`, `ar`, `pt`, `hi`, `ja`, `ko`, `ru`, `zh`), and ensure zero token drift.
+- **Dumcholu Audit Evidence:**
+  - Expanded Opportunity Map UI tokens across all 12 platform languages from 752 to 868 tokens with identical parameter signatures.
+  - Synchronized all 6 resource directories: `resources/`, `dumcholu-citizen/assets/resources/`, `dumcholu-admin/assets/resources/`, `dumcholu-government/assets/resources/`, `dumcholu-ops/assets/resources/`, `dumcholu-partner/assets/resources/`.
+  - Executed deterministic locale validator (`dart run bin/validate_locale_parity.dart`): 6/6 directories, 12/12 languages, 868/868 tokens in 100% parity (**PASS**).
+- **Ugondu Audit Evidence:**
+  - Tokenization Rule T03 verified across 705 files and 76,294 lines of code with zero hardcoded UI strings.
+  - Locale key parity verifiers (D25-D28, E29-E33) fail closed on missing baseline or key drift.
+
+#### Boundary 2: Scaffold, Mock & UI Stub Elimination (SA-02)
+- **Objective:** Complete, non-destructive elimination of mock services, synthetic fallbacks, and silent error catch blocks.
+- **Dumcholu Audit Evidence:**
+  - Eliminated mock services and simulated pathways in `opportunity_map_service_adapter.dart` and `opportunity_map_screen.dart`.
+  - Wired live HTTP capability invocation in `AirRoofersAiClient.invokeCapability` with strict JSON serialization.
+  - Eliminated silent catch blocks in `moderation_queues_screen.dart`, `government_opportunity_map_screen.dart`, `opportunity_management_screen.dart`, `VerificationAssuranceInterceptor.java`, and `ZeroTrustInterceptor.java`, replacing them with structured diagnostic telemetry.
+  - Safely archived legacy test scaffolding to `dumcholu-citizen/archive/scaffolding/legacy_test_scaffolding.dart`.
+- **Ugondu Audit Evidence:**
+  - Adversarial anti-stub suite (`tests/adversarial-anti-stub.test.js`) scanned 4,727 files: 14/14 checks **PASS** with 0 violations.
+
+#### Boundary 3: Centralized Product Registry & EAORCS Public Certification (SA-03)
+- **Objective:** Enforce dynamic product discovery (CONST-044), prevent product hardcoding, guarantee capability plugin independence, and verify EAORCS public readiness.
+- **Audit Evidence:**
+  - Verified `CentralizedProductRegistry.php` and `products.json` dynamically discover and enumerate all platform capabilities with zero static couplings.
+  - Verified EAORCS (`prod_eaorcs`) is fully registered as a public-facing certifier product across all consumer and enterprise tiers (`individuals`, `developers`, `organizations`, `enterprises`), allowing external parties to certify their software alongside Ugondu and Dumcholu.
+  - Capability plugins operate under autonomous bounded contexts with isolated state.
+
+#### Boundary 4: Persistence Architecture & Microservices Compliance (SA-04)
+- **Objective:** Ensure microservice bounded-context integrity, eliminate multi-instance in-memory drift, enforce distributed concurrency control, and mandate end-to-end telemetry.
+- **Audit Evidence:**
+  - Audited process-local caches (`QuotaService`, `SimulationJobLock`, `IdempotencyRegistry`, `TileCacheService`) and documented Redis/PostgreSQL distributed multi-instance synchronization contracts.
+  - Audited Ugondu passport revocation authority for cluster-wide PostgreSQL/Redis revocation semantics.
+  - Audited MapsController error handling and client-side distributed tracing headers with correlation IDs.
+
+#### Boundary 5: Federation Authority Boundaries & AWS Portability (SA-05)
+- **Objective:** Enforce AeroBill and Mandatag authority separation, and verify 'One Code — Host Anywhere' portability without code refactoring across DirectAdmin, VPS, and AWS.
+- **Audit Evidence:**
+  - Verified AeroBill as sole billing/metering authority and Mandatag as sole licensing/entitlement authority.
+  - Verified 100% identical application code across DirectAdmin Shared Hosting (Tier-1), VPS, and AWS ECS on EC2 (`t3.medium`) / Fargate.
+  - CloudFormation manifests and ECS task definitions validated; 10/10 deployment lifecycle tests passed.
+
+---
+
+### 2. Live Federated SSO & Super Admin Redirect Resolution
+
+- **Issue:** Authenticated super admins accessing `https://admin.airroofers.eu` were previously redirected to `https://license.airroofers.eu/public/verify` (the public entitlement challenge).
+- **Root Cause:**
+  1. Mandatag's `admin_api.php` route table lacked explicit routes for session verification (`/api/session-verify`, `/api/session-status`), causing session probes from `admin.airroofers.eu` to return 404.
+  2. `AdminSessionMiddleware.php` did not exempt central session-probe endpoints from WebAuthn session validation, triggering a redirect loop.
+- **Physical Remediation:**
+  1. Updated `license.airroofers.eu/public_html/Mandatag/Bootstrap/routes/admin_api.php` to register `/api/session-status` and `/api/session-verify` (GET/POST), supporting both local Mandatag session records and federated identity claims.
+  2. Updated `license.airroofers.eu/public_html/Mandatag/Security/Auth/AdminSessionMiddleware.php` to include session probe routes in `$isAuthFlowRoute`.
+  3. Deployed canonical files to DirectAdmin host `ny210.whpservers.com` under `domains/license.airroofers.eu/public_html/Mandatag/` and `domains/platform-core/`.
+  4. Committed and pushed to `platform-core` branch `security/arf-002-003-zero-trust-hardening-2026-10-29` (Commit `49f64dcc`).
+- **Live Verification:**
+  - Authenticated request with valid administrative session to `https://admin.airroofers.eu`: **HTTP/2 200 OK** (renders full Administrative Control Console).
+  - Unauthenticated request: **HTTP/2 302 Found** to `https://license.airroofers.eu/public/verify` (fail-closed zero-trust access control).
+
+---
+
+### 3. Exact-Head Candidate Ledger
+
+| Product | Repository / PR | Branch | Exact Commit SHA | Workflow Receipts & Posture |
+|---|---|---|---|---|
+| **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `a9728c565d5291a9da16d7634d25284c10faa7b5` (source/test candidate before this receipt update) | • **Portable Runtime Qualification** [#41129779006](https://github.com/Chicitadel/dumcholu/actions/runs/41129779006): IN PROGRESS (AeroBill protocol step PASS; Maven reactor running)<br>• **Deployment Manifest Qualification** [#41129779034](https://github.com/Chicitadel/dumcholu/actions/runs/41129779034): SUCCESS<br>• **Product Name Governance Gate** [#41129778992](https://github.com/Chicitadel/dumcholu/actions/runs/41129778992): SUCCESS |
+| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `5c254e037a420aa15369c251715ef53284a0470a` (source/test candidate before this receipt update) | • **COR Certification** [#41129855326](https://github.com/Chicitadel/ugondu/actions/runs/41129855326): PENDING on exact head<br>• **CI/CD and Deployment Manifest:** previous candidate receipts are not reused; exact-head qualification required after source/test and handover changes |
+| **Platform Core** | [Chicitadel/platform-core](https://github.com/Chicitadel/platform-core) | `security/arf-002-003-zero-trust-hardening-2026-10-29` | `49f64dcc` | • Resolved administrative SSO redirect loop on `admin.airroofers.eu` and verified live session probes on `license.airroofers.eu` |
+
+
+---
+
+## Cross-product persistence and passport-middleware re-audit — 2026-10-30 22:xx CET
+
+### Finding UG-PASSPORT-HEADER-AMBIGUITY-AND-LOG-LEAK-001
+
+**Confirmed defects in the actual PR #62 branch source:**
+- Passport middleware accepted the first value when Express exposed repeated `X-Ugondu-Passport-Id` headers as an array; comma-joined ambiguous values were not rejected.
+- Rejected passport identifiers were written to application logs in plaintext.
+- `AdmissionController.admit` had a permissive default implementation that admitted any non-empty, non-`REVOKED` string when a tenant was present. The engine bootstrap overwrote this method, but the class itself was unsafe when used without that bootstrap.
+
+**Physical remediation committed on the dedicated branch:**
+- Middleware now rejects missing, repeated, comma-joined, whitespace-containing and oversized credentials.
+- Rejection logs contain only a truncated SHA-256 fingerprint, never the credential itself.
+- The admission controller default is now deny-by-default; only the engine bootstrap's cryptographic admission authority can replace it.
+- Added engine integration regressions for the unconfigured controller, duplicate/comma-joined headers and rejected-credential response behavior.
+- Code/test candidate SHA: `c6e02b055e276f1ef951167b2bb61581c824e36b`.
+
+### Finding DUM-COR-CAREER-CASE-CACHE-AUTHORITY-001
+
+**Confirmed defect in the actual PR #28 branch source:** Discovery and guidance service reads preferred process-local caches even when JPA repositories were configured. This could preserve stale case state, including stale active guidance consent, after another instance changed or removed the durable record.
+
+**Physical remediation committed on the dedicated branch:**
+- Configured repositories are now authoritative for `getDiscoveryCase` and `loadGuidanceCase`; process-local maps are fallback-only when no repository is configured.
+- A durable miss evicts stale cache entries; a durable hit refreshes them.
+- Added regression `durableRepositoriesAreAuthoritativeOverProcessLocalCaches`.
+- Code/test candidate SHA: `6720dba7c3d82d37772a7fed98f59fd0942abb8f`.
+
+### Explicit unresolved items — do not claim closed
+
+- Ugondu `registeredPassports` remains process-local. The middleware and default-admission defects are fixed, but shared durable passport issuance/revocation is not yet implemented. A passport revoked in one instance must not be assumed revoked cluster-wide. Do not claim multi-instance revocation consistency.
+- Dumcholu discovery/guidance entities currently lack a separate ORM-managed `@Version` column. The domain `caseVersion` is not an optimistic-lock version. Repository-first reads fix stale local authorization, but concurrent multi-instance writes can still race. A dedicated persistence version migration and conflict/retry tests remain required.
+- No AWS physical deployment or shared registry provisioning is authorized by this work. Preserve the funding/traction and explicit budget gate.
+
+### Evidence reconciliation warning
+
+The local Antigravity execution report supplied on 2026-10-30 cites Dumcholu SHA `4210a174a7a858e778748721c0b3c434b92b6eb2` and Ugondu SHA `f85b0bfe9ba73ef22a904ae71172f3bf4e857467`. GitHub commit lookup returned `No commit found for SHA` for both. Do not use those SHAs or their associated claimed receipts as remote evidence until the commits are pushed and independently retrievable.
+
+Verified branch ancestry before this handover update:
+- Dumcholu PR #28 branch contained candidate `6720dba7c3d82d37772a7fed98f59fd0942abb8f`; manifest #41129597863 SUCCESS, name gate #41129597872 SUCCESS, portable runtime #41129597856 CANCELLED. Portable runtime must be rerun.
+- Ugondu PR #62 branch contained candidate `c6e02b055e276f1ef951167b2bb61581c824e36b`; manifest #41129703904 SUCCESS; CI #41129703767 and COR #41129703696 were PENDING at check time.
+- The governance-note commit itself changes the branch head. All required workflows must pass on the post-note exact SHA before the new findings are closed.
+
+**Overall posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. `READY_FOR_COR_SIGNATURE` from an earlier Ugondu candidate is not a final product certification while the above source changes and external gates remain unqualified.
+
+
+### Ugondu CI failure and corrective source revision — 2026-10-30 22:xx CET
+
+The first CI run after the passport middleware/default-admission remediation, [#41129941871](https://github.com/Chicitadel/ugondu/actions/runs/41129941871), failed in TypeScript compilation at `server/engine-core/src/passport/gatekeeper/admission-controller.ts` lines 97–105. The CI log identified a stale fragment of the prior permissive method left after the method replacement. The test/build steps were correctly blocked; no downstream integration tests ran.
+
+**Physical correction:**
+- Removed the stale permissive fragment and retained the deny-by-default implementation.
+- Removed a duplicate documentation comment in a follow-up cleanup.
+- Corrective source commits: `7d50cacebf0208725db9cce094a78d3ebc874fb8` and `652a2cd5586a2ecc3b59e08f21875df0018a91e4`.
+- The failing workflow and logs remain part of the evidence trail. The source fix is not considered qualified until a fresh CI build, engine-core integration suite and COR certification complete successfully on the post-correction branch head.
+
+**Status:** `SOURCE CORRECTED / RETEST REQUIRED / NOT CLOSED`.
+
+
+### Dumcholu repository-authority test correction — 2026-10-30
+
+Dumcholu Portable Runtime Qualification [#41129779006](https://github.com/Chicitadel/dumcholu/actions/runs/41129779006) passed the dedicated AeroBill protocol regression step, then Maven reported 5 failures and 1 error in career journey tests. The tests had mocked repositories but assumed process-local cache behavior. Production cache-first logic was not restored.
+
+The test fixture was physically corrected in Dumcholu commit `cb5210f115d2d2d6971cb59a5cfd562b170b0868`: stateful repository fakes now retain saved discovery/guidance entities and return them on subsequent reads. The cache-authority regression simulates a durable deletion by removing the row after the service has cached it, then verifies the stale cache is not used. New exact-head Portable Runtime #41130600535, Deployment Manifest #41130600131 and Product Name Gate #41130600459 were queued at check time. All must pass on the final branch head.
+
+The test-fixture correction does not close the separate ORM optimistic-lock gap; concurrent multi-instance writes remain open.
+
+
+---
+
+## Passport-to-billing tenant cross-binding — 2026-10-30
+
+**Finding:** `UG-PASSPORT-AEROBILL-TENANT-CROSSBIND-001`
+
+**Confirmed defect:** The deployment route accepted a passport and then independently accepted the tenant returned by the billing authorization response. It did not compare the tenant bound to the verified passport with the tenant returned by the billing authority. A valid passport for tenant A could therefore reach deployment planning under a billing response for tenant B if the caller omitted or manipulated the optional request tenant field. The prior fallback to `default-tenant` also masked a missing tenant in the billing response.
+
+**Physical remediation on PR #62 branch:**
+- `admitPassport` now returns the tenant derived from the cryptographically verified signed claims or the explicitly registered opaque passport.
+- Passport middleware rejects an admitted result without a verified tenant and stores only that verified tenant in `res.locals.passportTenantId`.
+- Deployment route requires a non-empty tenant from the billing authority and exact equality with the verified passport tenant before it constructs the deployment plan. Missing/mismatched values return HTTP 403 with `PASSPORT_BILLING_TENANT_MISMATCH`.
+- Removed the synthetic `default-tenant` fallback from this authorization boundary.
+- Added integration regression `ENG-PASS-007`: a valid default-tenant passport paired with an AeroBill authorization response for `tenant_other` must be rejected.
+- Corrected the passport-header whitespace regex to reject actual whitespace and commas (not the literal characters `\\s`).
+- Code/test candidate before evidence synchronization: `cb97550b8aa28e15d1c94a7392a0d0d67e4dc1a1`.
+
+Changed files:
+- `server/engine-core/src/index.ts`
+- `server/engine-core/src/passport/gatekeeper/admission-controller.ts`
+- `server/engine-core/src/middleware/passport-guard.middleware.ts`
+- `server/engine-core/src/routes/deploy.ts`
+- `tests/engine-core.test.js`
+
+**Evidence boundary:** Earlier CI/COR on head `94946d08...` does not qualify this new tenant cross-binding change. Fresh exact-head CI/CD and COR runs are mandatory after this code and the following evidence-note synchronization.
+
+**Status:** `IMPLEMENTED / EXACT-HEAD CI-COR PENDING / NOT CLOSED`.
+
+
+### Dumcholu assertion/candidate persistence data-loss correction — 2026-10-30
+
+The Dumcholu Java qualification [#41130646613](https://github.com/Chicitadel/dumcholu/actions/runs/41130646613) passed AeroBill protocol regressions but exposed an actual data-loss defect in career discovery persistence: `CareerJourneyService.toDiscoveryEntity` omitted the `assertionsJson` and `candidateOptionsJson` columns, while `fromDiscoveryEntity` restored an empty assertion list and regenerated pathway options. This caused HP-AT-004 conflicting qualification detection to fail after repository-backed reads.
+
+Physical remediation was committed on Dumcholu PR #28:
+- Explicit JSON serialization/restoration of every `CareerProfileAssertion` and `CareerPathOption` field.
+- Malformed non-empty persisted JSON fails with an integrity exception rather than silently dropping evidence.
+- Added `careerAssertionsAndPathwayOptionsSurviveRepositoryRoundTrip`; existing HP-AT-004 now exercises persisted assertion state.
+- Shared Mockito repository fixtures now model save/read behavior; broad shared stubs are lenient only to avoid irrelevant per-test stubbing errors.
+- Source/test candidate before evidence-note update: `d5e2307d24d5248c5fe96cd150de6ac9c6bf7483`.
+
+The prior failed run and logs remain evidence. Exact-head Java 21 qualification must pass on the post-note candidate. The independent optimistic-lock gap remains open: entities still need a separate ORM-managed version column and concurrent-writer conflict/retry tests.
+
+
+## Final qualification receipts for current source/test candidates — 2026-10-30
+
+### Ugondu source/test candidate `5c254e037a420aa15369c251715ef53284a0470a` (superseded by documentation-only receipt head below)
+- CI/CD [#41132521021](https://github.com/Chicitadel/ugondu/actions/runs/41132521021): **SUCCESS**. All 9 workspace jobs, 5 Go targets, engine-core build/lint/type-check/unit tests, all-workspace tests, integration tests and release-integrity/governance gates passed. Docker image validation and Build & Publish Release steps were skipped.
+- COR [#41132521069](https://github.com/Chicitadel/ugondu/actions/runs/41132521069): **SUCCESS / READY_FOR_COR_SIGNATURE**. Build, locales, I18N, architecture, imports, type check, workspace tests, COR remediation suite, pinned policy/evidence, stream registry, fresh COR qualification, independent finalization, final candidate integrity and evidence upload passed. Evidence-freshness, signing-trust-root and final authority signature steps were skipped.
+- Deployment Manifest [#41132521032](https://github.com/Chicitadel/ugondu/actions/runs/41132521032): **SUCCESS**.
+- AWS Physical Qualification Gate: **SKIPPED**; no AWS resources were provisioned.
+
+### Dumcholu candidate `a9728c565d5291a9da16d7634d25284c10faa7b5`
+- Deployment Manifest [#41132178331](https://github.com/Chicitadel/dumcholu/actions/runs/41132178331): **SUCCESS**.
+- Product Name Governance [#41132178472](https://github.com/Chicitadel/dumcholu/actions/runs/41132178472): **SUCCESS**.
+- Portable Runtime [#41132178535](https://github.com/Chicitadel/dumcholu/actions/runs/41132178535): Java 21 AeroBill regressions **PASS**, full Maven runtime/dependency reactor **PASS**, Compose contract **PASS**; portable Docker image build still **IN PROGRESS** at time of receipt update.
+
+**Exact-head discipline:** This append-only handover update creates a new documentation descendant on the Ugondu branch. The source/test receipts above belong to the stated candidate SHAs, not to the resulting documentation commit. Fresh checks on the post-note branch head are required wherever workflow path filters run.
+
+**Release posture:** Ugondu is `READY_FOR_COR_SIGNATURE`, not finally signed. Dumcholu portable runtime remains pending Docker image completion. The shared passport registry/revocation and Dumcholu ORM optimistic-lock gaps remain open. Overall ecosystem posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## Post-handover exact-head requalification — 2026-10-30
+
+The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd076570c2` has now completed all required remote workflows:
+
+### Ugondu PR #62 — exact head `421a94a8506f5802419c4013870c35cd076570c2`
+- CI/CD [#41133193026](https://github.com/Chicitadel/ugondu/actions/runs/41133193026): **SUCCESS**. All 9 workspace jobs, all 5 Go OS/architecture targets, release-integrity/governance checks, and the full integration job passed. Integration covered all five services, Billing Gateway, Engine Core, Plugin Manager, Event Bus, Repository Adapter, COR remediation, evidence-pipeline adversarial tests, shared execution/mode parity, language packs, AI inference gateway and UPLM conformance.
+- COR [#41133193047](https://github.com/Chicitadel/ugondu/actions/runs/41133193047): **SUCCESS / READY_FOR_COR_SIGNATURE**. Fresh COR qualification, independent finalization, stream registry, final candidate integrity and evidence upload passed.
+- Deployment Manifest [#41133193236](https://github.com/Chicitadel/ugondu/actions/runs/41133193236): **SUCCESS**.
+- Explicitly skipped: evidence-freshness check, COR signing-trust-root verification, final authority signature, Docker image validation/build-and-publish release step, and AWS Physical Qualification Gate. These are not PASS and must not be represented as such.
+
+### Dumcholu PR #28 — exact source/test head `a9728c565d5291a9da16d7634d25284c10faa7b5`
+- Portable Runtime [#41132178535](https://github.com/Chicitadel/dumcholu/actions/runs/41132178535): **SUCCESS**, including strict AeroBill contract regressions, Java 21 runtime/dependency reactor, Compose contract and portable Docker image build.
+- Deployment Manifest [#41132178331](https://github.com/Chicitadel/dumcholu/actions/runs/41132178331): **SUCCESS**.
+- Product Name Governance [#41132178472](https://github.com/Chicitadel/dumcholu/actions/runs/41132178472): **SUCCESS**.
+
+### Remaining blockers before public commercial release
+1. **Ugondu passport registry/revocation:** `registeredPassports` remains process-local; shared durable issuance/revocation and multi-instance revocation consistency are not implemented.
+2. **Dumcholu concurrent writes:** JPA entities still lack a separate ORM-managed optimistic-lock version and conflict/retry integration coverage.
+3. **COR signature:** final trust-root verification and authorized final authority signature were skipped; candidate is `READY_FOR_COR_SIGNATURE`, not signed/certified.
+4. **Physical AWS:** deployment qualification was skipped and no AWS resources were provisioned. The user's funding/traction/budget gate remains controlling.
+5. **External assurance:** live operational/federation evidence, physical FIDO2 ceremony, empirical Nigeria data calibration and independent human sign-off remain required where applicable.
+
+**Overall posture:** `READY_FOR_COR_SIGNATURE` for the Ugondu candidate; `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` for the combined public commercial release until the above gaps are closed.

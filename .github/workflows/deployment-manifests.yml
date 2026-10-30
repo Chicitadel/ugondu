@@ -1,0 +1,51 @@
+name: Ugondu Deployment Manifest Qualification
+
+on:
+  push:
+    branches:
+      - 'fix/**'
+      - 'audit/**'
+      - 'security/**'
+  pull_request:
+    branches:
+      - master
+      - main
+      - 'fix/**'
+      - 'audit/**'
+      - 'security/**'
+
+permissions:
+  contents: read
+
+jobs:
+  aws-task-definition:
+    name: Render and validate Ugondu ECS task definition template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: '20'
+
+      - name: Test ECS task definition rendering and fail-closed validation
+        run: node --test deploy/aws/render-task-definition.test.mjs
+
+      - name: Install CloudFormation linter
+        run: python -m pip install --disable-pip-version-check cfn-lint==1.59.0
+
+      - name: Lint ECS deployment templates
+        run: cfn-lint deploy/aws/cloudformation/ecs-ec2-capacity-provider.cfn.yaml deploy/aws/cloudformation/ecs-fargate-service.cfn.yaml
+
+      - name: Verify renderer rejects absent deployment identifiers
+        shell: bash
+        run: |
+          if env -u AWS_ACCOUNT_ID -u AWS_REGION -u IMAGE_TAG node deploy/aws/render-task-definition.mjs --output /tmp/should-not-exist.json; then
+            echo "::error::Renderer unexpectedly accepted missing deployment identifiers"
+            exit 1
+          fi
+          test ! -e /tmp/should-not-exist.json

@@ -961,3 +961,99 @@ The latest branch SHA and the Dumcholu principal-identity finding are recorded i
     - `Deployment Manifest Qualification` [#41081132967](https://github.com/Chicitadel/dumcholu/actions/runs/41081132967) & push [#41081122073](https://github.com/Chicitadel/dumcholu/actions/runs/41081122073): **SUCCESS** (24s).
     - `Dumcholu Product Name Governance Gate` [#41081132955](https://github.com/Chicitadel/dumcholu/actions/runs/41081132955): **SUCCESS** (25s).
 - **Overall release posture**: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` pending authorized physical AWS staging deployment, live AeroBill/Mandatag federation transactions, empirical Nigeria econometric dataset calibration sign-off, hardware WebAuthn/FIDO2 ceremonies, and final human COR signatory authorization.
+
+
+---
+
+## 11. v29 exact-head re-audit addendum — 2026-10-30
+
+Two additional source-level gaps were confirmed after the parent candidate CI passed:
+
+1. `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`: raw principal IDs could borrow tenant identity from caller-supplied headers. Child PR #28 requires a tenant-bound principal and propagates only the authenticated tenant to discovery persistence/confirmation.
+2. `UG-COR-TEST-MODE-SILENT-SKIP-001`: B13/B16/C22 could skip their runtime behavior checks when dependencies were missing. Child PR #62 makes the validator, compiled orchestrator, locale bootstrap, Go test and Go toolchain mandatory.
+
+**Mandatory evidence rule:** A TEST-mode verifier may never return PASS after skipping its objective's runtime proof. Missing runtime dependencies are blockers. Fix CI build/test ordering; do not weaken the assertion.
+
+Exact candidate branches and SHAs, parent CI receipts, regression scope and release boundaries are recorded in `AIR_ROOFERS_DUAL_PRODUCT_COR_MASTER_HANDOVER.md`.
+
+All child workflows must pass on their own exact head. Parent workflow receipts are historical context only. Do not merge child PRs until exact-head tests, COR, review and guardrail reconciliation pass.
+
+No AWS resources were provisioned. Keep shared-host portability, AeroBill billing authority, Mandatag entitlement authority, and all external operational release gates unchanged. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 12. Final exact-head enforcement — 2026-10-30
+
+The current child candidates are Dumcholu PR #28 and Ugondu PR #62. Their exact heads and finding status are recorded in the canonical dual-product handover.
+
+- Dumcholu requires tenant-bound principal syntax, strict tenant claim parsing, trusted-tenant propagation, existing-case tenant matching, and legacy-operation tenant preservation.
+- Ugondu B13/B16/C22 require runtime dependencies and must fail closed if the validator, compiled production artifact, localization registry, Go test or toolchain is missing.
+- Re-run complete product-specific qualification after every code, test, workflow or handover commit. Parent SHAs and previously successful workflows are not evidence for a new child head.
+- Do not merge, deploy or certify on a skipped or pending test. Missing runtime prerequisites are blockers.
+
+No AWS resources were provisioned. Preserve portability and the explicit capital authorization gate. AeroBill and Mandatag remain the sole billing and entitlement authorities respectively. External operational gates remain open. Release is still `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 13. AWS pilot sizing guardrail — 2026-10-30
+
+The Dumcholu ECS-on-EC2 host must not default to `t3.small` while hosting a 1 GiB Java task. The current template defaults to `t3.medium` with `t3.large` as an explicit measured-demand upgrade. This remains a prepared deployment profile, not authorization to provision AWS. Require an approved monthly budget, private networking, secrets, TLS edge, health-gated rollout and rollback evidence before physical deployment.
+
+
+---
+
+## 14. Test-driven AWS template corrections — 2026-10-30
+
+The Dumcholu ECS-on-EC2 default is now `t3.medium` for a 1 GiB Java task, with `t3.large` as an explicit upgrade. The first new regression run exposed an over-escaped assertion regex; the regex was corrected and the test retained. Preserve the failed run in the evidence history and require successful manifest lint/tests on the final exact head. Never delete or weaken the test to hide the failure. No AWS resources were provisioned.
+
+
+---
+
+## 15. Tenant-aware journey read guardrail — 2026-10-30
+
+Every authenticated career-journey read and recalculation endpoint must pass the principal-bound tenant into the service layer and validate any existing discovery case against that tenant before reading journey records. A principal check at the controller boundary alone is insufficient when durable discovery state carries tenant ownership. Never use citizen-only service reads from an authenticated multi-tenant HTTP route.
+
+
+---
+
+## 16. Latest source re-audit guardrails — 2026-10-30
+
+### Passport admission and middleware
+- Never admit an opaque passport based on a prefix or string shape. The default `AdmissionController.admit` implementation must deny unless the cryptographic authority is installed.
+- Reject repeated, comma-joined, malformed and oversized `X-Ugondu-Passport-Id` header values; never choose the first duplicate.
+- Never log passport credentials, bearer tokens, signatures or full credential payloads. Use a non-reversible, truncated SHA-256 fingerprint for security correlation.
+- `registeredPassports` is still process-local. Do not represent local revocation as cluster-wide revocation. Shared durable issuance/revocation is an explicit open gate and must be designed against an approved persistence/authority contract before deployment.
+
+### Dumcholu durable career state
+- When a JPA repository is configured, it is the source of truth for discovery and guidance reads. A process-local cache must never authorize stale state or preserve consent after durable withdrawal/deletion.
+- In-memory maps may be used only in explicit repository-absent test/development modes.
+- The current JPA entities do not yet expose a separate ORM-managed optimistic-lock version. Do not repurpose the domain case version. Before multi-instance production, add a dedicated persistence version/migration and verify conflict/retry semantics with concurrent integration tests.
+
+### Exact-head evidence
+- The local report's Dumcholu `4210a174...` and Ugondu `f85b0bfe...` references did not resolve through GitHub commit lookup at the time of this re-audit. Treat these as unverified local receipts until pushed and independently retrievable.
+- Latest source/test candidates before the handover update were Dumcholu `6720dba7c3d82d37772a7fed98f59fd0942abb8f` and Ugondu `c6e02b055e276f1ef951167b2bb61581c824e36b`. The subsequent handover/guardrail commits change the exact heads and therefore require fresh CI/COR receipts.
+- Dumcholu portable runtime #41129597856 was CANCELLED; manifest #41129597863 and product-name #41129597872 passed. Ugondu manifest #41129703904 passed while CI #41129703767 and COR #41129703696 were pending. Do not close findings until all required checks pass on the post-note SHA.
+
+### Hosting and authority
+- DirectAdmin remains current launch hosting; VPS is not available.
+- AWS staging/production provisioning remains conditional on traction, official engagement/funding and explicit budget approval. Do not create resources or incur spend without that approval.
+- ECS-on-EC2 `t3.medium` is the proposed minimal Java pilot baseline; Fargate is a later scale-up, not a prerequisite for portable application code.
+- AeroBill exclusively owns billing/pricing/metering; Mandatag exclusively owns licensing/entitlements. Do not duplicate either domain in Ugondu or Dumcholu.
+
+**Release status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+### CI regression retention — passport guard refactor
+- CI run [#41129941871](https://github.com/Chicitadel/ugondu/actions/runs/41129941871) exposed a TypeScript syntax error caused by a stale fragment left during the deny-by-default method replacement.
+- The fragment was removed in commit `7d50cacebf0208725db9cce094a78d3ebc874fb8`; duplicate comment cleanup followed in `652a2cd5586a2ecc3b59e08f21875df0018a91e4`.
+- Keep the failed run and logs. Do not weaken tests or mark this fixed until a new full CI/COR run passes on the final post-handover SHA.
+
+
+### Passport-to-billing tenant binding
+- The tenant returned by cryptographic passport verification is the only passport tenant authority. Never substitute `req.body.tenantId` or a default tenant.
+- Before any deployment plan is created, compare the verified passport tenant with the tenant returned by the federated billing authority. Missing or mismatched tenant values must fail closed.
+- Carry the verified passport tenant through request-scoped response locals; do not recompute it from user input.
+- Keep a regression proving that a valid tenant-A passport paired with a tenant-B billing authorization is denied.
+- This adapter boundary does not move billing, pricing or metering logic into Ugondu. AeroBill remains the sole authority for those decisions.

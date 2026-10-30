@@ -84,9 +84,16 @@ export function issueSignedPassport(claims: {
   workspaceId?: string;
   ttlMs?: number;
 }): string {
+  if (!claims || typeof claims.tenantId !== 'string' || !claims.tenantId.trim()) {
+    throw new Error('PASSPORT_TENANT_REQUIRED');
+  }
+  const ttlMs = claims.ttlMs ?? 5 * 60 * 1000;
+  if (!Number.isFinite(ttlMs) || ttlMs < 1000 || ttlMs > 60 * 60 * 1000) {
+    throw new Error('PASSPORT_TTL_OUT_OF_RANGE');
+  }
   const passportId = claims.passportId ?? `pp_${randomBytes(8).toString('hex')}`;
   const now = Date.now();
-  const expiresAt = now + (claims.ttlMs ?? 5 * 60 * 1000);
+  const expiresAt = now + ttlMs;
   const payload = {
     v: '1.0',
     jti: passportId,
@@ -134,13 +141,25 @@ export function verifySignedPassport(token: string): {
       return { valid: false };
     }
     const decoded = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
-    if (!decoded || typeof decoded.exp !== 'number' || Date.now() > decoded.exp || !decoded.tenantId) {
+    const now = Date.now();
+    if (!decoded || typeof decoded !== 'object' || Array.isArray(decoded)
+        || decoded.v !== '1.0'
+        || typeof decoded.jti !== 'string' || !decoded.jti.trim()
+        || typeof decoded.tenantId !== 'string' || !decoded.tenantId.trim()
+        || typeof decoded.workspaceId !== 'string' || !decoded.workspaceId.trim()
+        || typeof decoded.iat !== 'number' || !Number.isFinite(decoded.iat)
+        || typeof decoded.exp !== 'number' || !Number.isFinite(decoded.exp)
+        || decoded.iat > now + 30_000
+        || decoded.exp <= now
+        || decoded.exp <= decoded.iat
+        || decoded.exp - decoded.iat > 60 * 60 * 1000
+        || decoded.kid !== keyState.keyId) {
       return { valid: false };
     }
     return {
       valid: true,
-      passportId: String(decoded.jti || token),
-      tenantId: String(decoded.tenantId),
+      passportId: decoded.jti,
+      tenantId: decoded.tenantId,
     };
   } catch {
     return { valid: false };
@@ -155,50 +174,46 @@ if (process.env['NODE_ENV'] === 'test') {
 
 const REJECTED_PASSPORT_PATTERNS = /^(?:revoked|invalid|expired|tampered|untrusted|malformed|fake|bad|unauthorized)/i;
 
-admissionController.admit = (
+export function admitPassport(
   passportId: string,
   context?: { tenantId?: string }
-): { status: string } => {
-  if (!passportId || typeof passportId !== 'string') {
-    return { status: 'REJECTED' };
-  }
+): { status: string; tenantId?: string } {
+  if (!passportId || typeof passportId !== 'string') return { status: 'REJECTED' };
   const normalized = passportId.trim();
-  if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) {
+  if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) return { status: 'REJECTED' };
+
+  if (context?.tenantId !== undefined
+      && (typeof context.tenantId !== 'string' || !context.tenantId.trim())) {
     return { status: 'REJECTED' };
   }
+  const requestedTenant = typeof context?.tenantId === 'string' ? context.tenantId.trim() : undefined;
 
   if (normalized.startsWith('pp_v1.')) {
     const verified = verifySignedPassport(normalized);
-    if (!verified.valid) {
+    if (!verified.valid || !verified.tenantId) return { status: 'REJECTED' };
+    if (requestedTenant && requestedTenant !== verified.tenantId) return { status: 'REJECTED' };
+
+    const registered = registeredPassports.get(normalized);
+    if (registered && (registered.revoked
+        || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)
+        || registered.tenantId !== verified.tenantId)) {
       return { status: 'REJECTED' };
     }
-    if (context?.tenantId && verified.tenantId && context.tenantId !== verified.tenantId) {
-      return { status: 'REJECTED' };
-    }
-    return { status: 'ADMITTED' };
+    return { status: 'ADMITTED', tenantId: verified.tenantId };
   }
 
+  // Opaque identifiers are accepted only when explicitly registered. Prefix
+  // shape is not evidence of issuance, tenant ownership, or entitlement.
   const registered = registeredPassports.get(normalized);
-  if (registered) {
-    if (registered.revoked) {
-      return { status: 'REJECTED' };
-    }
-    if (registered.expiresAt !== undefined && Date.now() > registered.expiresAt) {
-      return { status: 'REJECTED' };
-    }
-    return { status: 'ADMITTED' };
+  if (!registered || registered.revoked
+      || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)) {
+    return { status: 'REJECTED' };
   }
+  if (requestedTenant && requestedTenant !== registered.tenantId) return { status: 'REJECTED' };
+  return { status: 'ADMITTED', tenantId: registered.tenantId };
+}
 
-  if (process.env['NODE_ENV'] === 'test' && normalized === 'valid_passport_id') {
-    return { status: 'ADMITTED' };
-  }
-
-  if (context?.tenantId && /^(?:pp_|pass_|passport_|valid_)[a-zA-Z0-9_\-]+$/.test(normalized)) {
-    return { status: 'ADMITTED' };
-  }
-
-  return { status: 'REJECTED' };
-};
+admissionController.admit = admitPassport;
 
 // ─── Express App ─────────────────────────────────────────────────────────────
 export const app = express();
