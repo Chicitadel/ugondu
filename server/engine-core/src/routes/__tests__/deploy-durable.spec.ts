@@ -84,6 +84,8 @@ async function invokeRoute(
   } as unknown as Request;
 
   const res = {
+    // Route-unit tests bypass passport middleware; model its verified request context explicitly.
+    locals: { passportTenantId: 'tenant-enterprise-01' },
     status(code: number) {
       statusCode = code;
       return this;
