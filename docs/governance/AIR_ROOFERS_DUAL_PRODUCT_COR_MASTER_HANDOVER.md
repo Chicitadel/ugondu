@@ -518,3 +518,33 @@ Changed artifacts:
 **Authority invariant:** AeroBill remains the sole billing, budget, metering, invoicing and payment authority. Dumcholu validates and consumes AeroBill's contract only; it must not introduce local quota, price or billing business logic.
 
 **Status:** `IMPLEMENTED / EXACT-HEAD TEST PENDING / NOT CLOSED`.
+
+
+---
+
+## Ugondu passport admission fail-open correction — 2026-10-30
+
+**Finding:** `UG-COR-PASSPORT-PREFIX-ADMISSION-BYPASS-001`
+
+**Confirmed source defect:** `server/engine-core/src/index.ts` admitted any unregistered passport string matching broad `pp_`, `pass_`, `passport_`, or `valid_` prefixes whenever a tenant context was supplied. The registered-passport branch also failed to compare the registered tenant with the request tenant. Signed passport validation checked signature and expiry but did not validate the complete required claim set or enforce the active key identifier.
+
+**Physical remediation committed on Ugondu PR #62 branch** `fix/cor-runtime-verifiers-fail-closed-2026-10-30`:
+- Removed prefix-shape admission. Opaque passport identifiers now require an explicit registry record and must be unrevoked and unexpired.
+- Enforced exact tenant equality for registered opaque passports and signed passports whenever request tenant context is supplied.
+- Rejected malformed/non-string tenant context.
+- Strengthened signed passport claims: version, JTI, tenant, workspace, issued-at, expiry, bounded lifetime, and active key ID must all validate.
+- Bounded signed passport issuance TTL to 1 second–1 hour and require a nonblank tenant.
+- Exported the admission decision function for direct behavioral integration tests.
+- Added integration regressions proving unregistered prefix-shaped identifiers are rejected, registered cross-tenant/revoked/expired passports are denied, valid signed passports work only for their bound tenant, tampered signatures are rejected, and invalid issuance claims fail.
+
+Changed files:
+- `server/engine-core/src/index.ts`
+- `tests/engine-core.test.js`
+
+Code/test candidate before this handover synchronization: `3562e900b61346f5b68a4864d5035d6a77c2106c`.
+
+**Exact-head evidence boundary:** Deployment Manifest Qualification #41110407657 completed successfully on the candidate. Ugondu CI/CD #41110407685 and COR Certification #41110407784 were still running when this entry was written. The CI/CD integration job executes `tests/engine-core.test.js`; this is the required behavioral proof for this finding. Do not mark the finding closed until the final post-handover SHA has green CI/CD and COR receipts.
+
+**Remaining limitation:** The opaque passport registry and revocation state remain process-local. Signed passports are statelessly verifiable, but cross-instance/global revocation and durable opaque-passport registry semantics require an authoritative shared persistence/registry contract. Do not claim distributed revocation consistency until that integration is implemented and tested.
+
+**Status:** `IMPLEMENTED / EXACT-HEAD CI-COR PENDING / NOT CLOSED`.
