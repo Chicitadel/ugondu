@@ -359,3 +359,48 @@ Do not reuse parent workflow success as child proof. PR #28 and PR #62 must each
 - Keep Nigeria empirical calibration, live federation transactions, FIDO2 hardware ceremony, physical staging, independent review and human sign-off open until evidence exists.
 
 **Overall status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+---
+
+## Final exact-head source/test handover — 2026-10-30 15:54 CET
+
+This section supersedes the earlier preliminary child-head references above.
+
+### Current child candidates
+
+| Product | PR | Dedicated child branch | Current head at this handover |
+|---|---:|---|---|
+| Dumcholu | [#28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `77b2014f2d9464ae159358b2af2f65b5a7a297c8` |
+| Ugondu | [#62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `0ef1b0f597f4d2c8aa6c24d6ef0c66e6311efa23` |
+
+### Dumcholu final child delta
+
+Finding `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`:
+- Requires tenant-bound principal subject; raw subjects cannot borrow tenant from caller-controlled headers.
+- Rejects repeated/mixed delimiters, empty suffix and invalid tenant identifier syntax.
+- Returns authenticated tenant from controller ownership enforcement and passes it to discovery creation and pathway confirmation.
+- Existing discovery cases reject mismatched tenant.
+- Legacy discovery operations preserve the existing tenant rather than resetting to `TENANT_DEFAULT`.
+- Regression coverage includes forged header, raw subject, malformed tenant subjects, persisted tenant source, cross-tenant case reuse, and legacy mutation tenant preservation.
+- Local finding record: `docs/governance/DUMCHOLU_TENANT_BOUNDARY_REAUDIT_2026-10-30.md`.
+
+The v29 parent exact-head runtime #41081132942 passed on `65174612`; that is parent evidence only. The child portable runtime workflow has been enabled for the child branch and is expected to qualify the final child head above. Do not close until that exact run completes successfully.
+
+### Ugondu final child delta
+
+Finding `UG-COR-TEST-MODE-SILENT-SKIP-001`:
+- B13 now fails if the real registry validator is missing.
+- B16 now fails if the compiled production RecoveryOrchestrator is missing.
+- C22 now fails if locale bootstrap, Go test or Go toolchain is missing.
+- Added adversarial/missing-dependency regression tests.
+- The parent v29 candidate `e6a5352a` had COR #41080032536 and CI/CD #41080032558 SUCCESS; those are parent evidence only.
+- Child COR #41084142731 was pending and CI/CD #41084142548 was in progress at the last status check. Verify final results against `0ef1b0f5` before closing the finding.
+
+### Non-negotiable next step
+
+After every source, test, workflow or handover commit, re-run the relevant exact-head qualification and record the exact SHA. Never claim a finding closed based on an earlier parent commit or a skipped test. A verifier may not return PASS when its required runtime dependency is absent.
+
+No AWS infrastructure was provisioned. The launch posture remains DirectAdmin-compatible and portable; the low-cost AWS EC2/ECS-on-EC2 pilot is prepared but must await explicit funding/traction and budget approval. AeroBill owns billing/metering; Mandatag owns licensing/entitlements. Live federation, physical AWS qualification, Nigeria empirical calibration, WebAuthn/FIDO2 ceremony and human COR sign-off remain release gates.
+
+**Overall status: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
