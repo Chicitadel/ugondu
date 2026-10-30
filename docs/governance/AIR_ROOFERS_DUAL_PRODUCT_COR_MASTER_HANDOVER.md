@@ -193,3 +193,70 @@ The earlier Ugondu COR Certification run #40985028471 and CI/CD run #40985028411
 - Any AWS staging launch requires a separate explicit authorization, cost/budget review, physical security review and rollback/backup qualification.
 
 **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` until all required objective verifiers, deployment, federation, policy, security ceremonies, independent review and signatory gates are evidenced.
+
+
+---
+
+## Dual-product exact-head re-audit continuation — 2026-10-30 15:49 CET
+
+This section supersedes any older branch/commit assumptions below when the exact GitHub refs differ. It is an additive status update, not a certification.
+
+### Current candidate branches
+
+| Product | Dedicated remediation branch | Starting candidate | Current source head | Status |
+|---|---|---|---|---|
+| Ugondu | `fix/cor-b09-b10-runtime-verifiers-2026-10-30` | `ea8f240070c96c3cd53ff7bee75884200ec15dbf` (PR #59 head) | `96a36bab15e41937b502a13be561d67a437a5b3d` | Source/test changes committed; exact-head CI and COR pending |
+| Dumcholu | `security/career-journey-principal-identity-hardening-2026-10-30` | `eb0f0e671f009231d2e50eb0fdd7aafd5447341d` (PR #19 head) | `56e50ec059b7e5acfd750763ecbeb25cd8a5bfc4` | Source/test changes committed; exact-head Maven and CI pending |
+
+### Ugondu — confirmed COR verifier behavior gap
+
+**Finding:** `UG-COR-B09-B10-STATIC-VERIFIER-FALSE-PROOF-001`
+
+The B09 and B10 executors declared `verificationMode: STATIC` and used source substring/regular-expression inspection. This could prove the presence/absence of source text without proving that the real Jest setup enforced UPM protection or the deterministic translation fixture.
+
+**Physical implementation on the dedicated branch:**
+- Changed B09 and B10 to `verificationMode: TEST`.
+- Added `scripts/cor/run-jest-runtime-probe.js`, an isolated Jest runtime probe harness with temporary test/setup files and guaranteed cleanup.
+- B09 now executes the actual engine-core Jest setup and actual `UpmExecutionGate` with `UGONDU_UPM_SECRET` empty; it requires rejection. A separate adversarial setup mocks the gate and must fail the probe.
+- B10 now executes the real global `__t` and `@ugondu/shared.__t` fixture behavior. An adversarial setup returning `[fr]` must fail the probe.
+- Updated `tests/cor-stream-objective-verifiers.test.js` to assert TEST mode, runtime receipts, adversarial rejection, and missing-config fail-closed behavior.
+
+**Changed files:** `scripts/cor/run-jest-runtime-probe.js`, `scripts/cor/streams/B09.js`, `scripts/cor/streams/B10.js`, `tests/cor-stream-objective-verifiers.test.js`.
+
+**Acceptance state:** YELLOW / IMPLEMENTED — exact-head CI has not yet run. Do not close B09/B10 until the focused verifier suite, `npm run test:governance`, build/typecheck, CI and COR all pass on this exact branch head. Any failed runtime probe is a real blocker, not a reason to weaken the assertion.
+
+### Dumcholu — confirmed career-journey identity trust gap
+
+**Finding:** `DUM-COR-CAREER-PRINCIPAL-HEADER-SPOOF-001`
+
+The CareerJourneyController fell back to caller-supplied `X-Authenticated-Principal` when Spring supplied no `Principal`, and passed caller-supplied `X-Authenticated-Role` to the ownership check. Its legacy programmatic overloads also fabricated a citizen identity while passing a null Principal. The current service security configuration permits API requests and the controller must not treat arbitrary request headers as proof of authentication.
+
+**Physical implementation on the dedicated branch:**
+- Removed the header-only identity fallback: missing Spring Principal now fails closed through `verifyPrincipalOwnership`.
+- The controller no longer trusts `X-Authenticated-Role`; the career citizen endpoints enforce the citizen ownership path.
+- Legacy direct overloads no longer authenticate themselves; they now fail closed because no authenticated Principal is present.
+- Added `CareerJourneyControllerSecurityTest` for anonymous header spoofing, caller-supplied ADMIN role escalation, authenticated-subject precedence, and the legacy overload.
+
+**Changed files:** `dumcholu-backend/career-journey-service/src/main/java/org/dumcholu/journey/controller/CareerJourneyController.java`, `dumcholu-backend/career-journey-service/src/test/java/org/dumcholu/journey/CareerJourneyControllerSecurityTest.java`.
+
+**Residuals — NOT CLOSED:** Tenant identity still arrives through `X-Authenticated-Tenant` / `X-Target-Tenant`; this branch does not prove those claims are cryptographically or network-bound to the authenticated Principal. The gateway-to-service authentication/tenant-claim contract must be independently verified and tested before declaring the entire identity boundary secure. The discovery and guidance case maps in `CareerJourneyService` are process-local `ConcurrentHashMap` stores; durable persistence, restart survival, and multi-instance consistency remain open. Do not describe these as complete.
+
+### Hosting, federation and release rules
+
+- Continue DirectAdmin/shared-host compatibility now. Do not assume a VPS exists.
+- Do not provision or modify AWS resources in this remediation cycle. The AWS account is an option, not deployment authorization.
+- When explicitly authorized by traction, official engagement or funding, prefer a minimal ECS-on-EC2 pilot with bounded capacity, private networking, budget alarms and the existing portable image/configuration contract. Keep Fargate as a later capacity/operations upgrade. No AWS-specific business logic.
+- AeroBill alone owns billing, pricing, metering, invoices and payments. Mandatag alone owns licensing and entitlements. Product services consume those federated contracts.
+- No production promotion, signed COR certificate, or public commercial readiness is implied by code commits or PR validation.
+
+### Required next actions for Antigravity actors
+
+1. Fetch both repositories and verify the exact branch heads above before editing.
+2. Run the Ugondu focused B09/B10 verifier and full governance/build/CI/COR suites; capture output and workflow receipts against the new SHA.
+3. Run the Dumcholu career-journey Maven module tests, controller security tests, full Maven reactor and exact-head portable-runtime/COR workflows.
+4. Resolve the remaining tenant-claim trust contract and replace process-local discovery/guidance state with the approved durable persistence pattern; do not create a duplicate journey service.
+5. Review every remaining STATIC Ugondu verifier (including B12-B16 and C22) against its objective; convert source-only checks to behavior/runtime tests where the objective requires behavior.
+6. Reconcile the conflicting Nigeria-calibration and AWS gate statements in older records. Until independently verified, classify each as PENDING/UNQUALIFIED.
+7. Preserve all open external gates: authorized physical staging, live non-production AeroBill/Mandatag transactions, backup/restore/rollback, Nigeria calibration where in scope, WebAuthn/FIDO2 ceremony, independent review and final authority signature.
+
+**Overall posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
