@@ -473,3 +473,19 @@ Current Dumcholu child branch remains `fix/cor-career-tenant-claim-binding-2026-
 - **Template Validation:** `deploy/aws/cloudformation/ecs-ec2-capacity-provider.cfn.yaml`, `ecs-fargate-service.cfn.yaml`, and `dumcholu-pilot-staging.yaml` all validated with exit code 0 via AWS CloudFormation ValidateTemplate.
 - **Sizing Baseline:** Cost-bounded `t3.medium` default (4 GiB memory, 1 GiB Java task headroom) verified by renderer regression tests (14/14 PASS).
 - **Federation Endpoints:** Mandatag (`https://license.airroofers.eu`), AeroBill (`https://billing.airroofers.eu`), and Telemetry (`https://telemetry.airroofers.eu`) bound as environment variables in task definition templates.
+
+### 4. Ugondu AWS ECS Deployment Suite (`deploy/aws/`)
+
+- **Candidate Branch:** `fix/cor-runtime-verifiers-fail-closed-2026-10-30` (PR #62)
+- **Deployment Manifest Qualification Receipts:**
+  - Run [#41107992256](https://github.com/Chicitadel/ugondu/actions/runs/41107992256) (push): **SUCCESS** (26s)
+  - Run [#41107999493](https://github.com/Chicitadel/ugondu/actions/runs/41107999493) (pull_request): **SUCCESS** (24s)
+- **ECS Task Definition Contract:**
+  - Standardized task definition template (`deploy/aws/task-definition.ecs.json`) for Ugondu Node.js backend container (`@ugondu/engine-core`) with 256 CPU, 512 MB memory, port 4001 mapped to hostPort 8081.
+  - Fail-closed task definition renderer (`deploy/aws/render-task-definition.mjs`) verified by unit test suite (`deploy/aws/render-task-definition.test.mjs`, 6/6 tests passing).
+  - Secrets Manager integration for `UGONDU_DB_URL`, `UGONDU_DB_USER`, and `UGONDU_DB_PASS`.
+  - Federation URLs bound: Identity (`https://identity.airroofers.eu/api/v1`), Billing (`https://billing.airroofers.eu/api/v1`), Telemetry (`https://telemetry.airroofers.eu`), Mandatag (`https://license.airroofers.eu`).
+- **CloudFormation Staging Templates:**
+  - `ecs-ec2-capacity-provider.cfn.yaml`: ECS on EC2 with Capacity Provider (`t3.medium` default, port 8081, healthcheck probe `/health/ready`).
+  - `ecs-fargate-service.cfn.yaml`: ECS Fargate service (`256` CPU, `512` MB memory, port 8081, healthcheck probe `/health/ready`).
+  - Both templates linted cleanly via `cfn-lint 1.59.0` and validated via AWS CloudFormation `ValidateTemplate` on AWS account `971671216490` (`eu-west-3`).
