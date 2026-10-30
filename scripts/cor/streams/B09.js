@@ -5,58 +5,83 @@ const fs = require('node:fs');
 const path = require('node:path');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
+const { runJestRuntimeProbe } = require('../run-jest-runtime-probe');
 
 const STREAM_ID = 'B09';
 const OBJECTIVE = 'Verify removal of global upm bypass from jest.setup.ts';
 
 const metadata = {
   streamId: STREAM_ID,
-  verifierVersion: '2.0.0',
+  verifierVersion: '3.0.0',
   objectiveHash: crypto.createHash('sha256').update(OBJECTIVE, 'utf8').digest('hex'),
   evidenceSchemaVersion: '3.0.0',
-  verificationMode: 'STATIC',
+  verificationMode: 'TEST',
 };
 
-function verifyObjective(context, observations, artifacts) {
-  const primarySetup = path.join(context.root, 'server', 'engine-core', 'jest.setup.ts');
-  if (!fs.existsSync(primarySetup)) {
-    throw new Error('B09_JEST_SETUP_MISSING');
+const PROBE = `
+import { UpmExecutionGate } from './upm/policy-gate';
+
+test('the real UPM gate rejects execution without its configured secret and is not mocked', async () => {
+  expect(jest.isMockFunction(UpmExecutionGate.evaluate)).toBe(false);
+  expect(process.env.UGONDU_UPM_SECRET).toBe('');
+  const context: any = {
+    intentHash: 'intent-probe',
+    twinHash: 'twin-probe',
+    ir: { nodes: [] },
+    policyVersion: 'cor-probe',
+    envelope: { edition: 'probe', allowedActions: [], tenantId: 'probe' },
+    activePolicies: [],
+  };
+  await expect(UpmExecutionGate.evaluate(context)).rejects.toThrow();
+});
+`;
+
+const ADVERSARIAL_SETUP = `
+jest.mock('./src/upm/policy-gate', () => ({
+  UpmExecutionGate: {
+    evaluate: jest.fn().mockResolvedValue({
+      decision: { status: 'ALLOW' },
+      cryptographicSeal: 'forged-test-seal',
+    }),
+  },
+}));
+`;
+
+function run(context) {
+  const setupPath = path.join(context.root, 'server', 'engine-core', 'jest.setup.ts');
+  if (!fs.existsSync(setupPath)) throw new Error('B09_JEST_SETUP_MISSING');
+
+  const positive = runJestRuntimeProbe({
+    repoRoot: context.root,
+    probeName: '__cor_b09_upm_enforcement',
+    probeSource: PROBE,
+    env: { UGONDU_UPM_SECRET: '' },
+  });
+  if (positive.status !== 0) {
+    throw new Error('B09_UPM_RUNTIME_ENFORCEMENT_NOT_PROVEN:' + (positive.error || positive.stderr || positive.stdout).slice(-3000));
   }
 
-  const candidateRelPaths = [
-    'server/engine-core/jest.setup.ts',
-    'server/engine-core/jest.setup.js',
-    'server/capabilities/jest.setup.ts',
-    'server/capabilities/jest.setup.js',
+  const negative = runJestRuntimeProbe({
+    repoRoot: context.root,
+    probeName: '__cor_b09_upm_adversarial_mock',
+    probeSource: PROBE,
+    setupSource: ADVERSARIAL_SETUP,
+    env: { UGONDU_UPM_SECRET: '' },
+  });
+  if (negative.status === 0 || negative.status == null) {
+    throw new Error('B09_ADVERSARIAL_GATE_MOCK_WAS_NOT_REJECTED');
+  }
+
+  const observations = [
+    'Executed the actual engine-core Jest setup and UPM gate; the gate rejected execution without UGONDU_UPM_SECRET.',
+    'Adversarial Jest setup that mocks UpmExecutionGate.evaluate failed the runtime probe as required.',
   ];
-
-  const forbiddenPattern = /UGONDU_UPM_BYPASS|UpmExecutionGate|policy-gate|upm[_\s-]*bypass/i;
-
-  for (const relPath of candidateRelPaths) {
-    const fullPath = path.join(context.root, relPath);
-    if (!fs.existsSync(fullPath)) continue;
-    const source = fs.readFileSync(fullPath, 'utf8');
-    if (forbiddenPattern.test(source)) {
-      throw new Error(`B09_GLOBAL_UPM_BYPASS_PRESENT:${relPath}`);
-    }
-    artifacts.push(relPath);
-  }
-
-  observations.push('Confirmed jest setup files contain no global UPM bypass env flags or policy-gate mocks');
-  return true;
-}
-
-async function run(context) {
-  if (!context || context.streamId !== STREAM_ID) {
-    throw new Error('STREAM_CONTEXT_MISMATCH');
-  }
-
-  const observations = [];
-  const artifacts = [];
-
-  if (!verifyObjective(context, observations, artifacts)) {
-    throw new Error('COR_OBJECTIVE_NOT_PROVEN');
-  }
+  const artifacts = [
+    'server/engine-core/jest.config.js',
+    'server/engine-core/jest.setup.ts',
+    'server/engine-core/src/upm/policy-gate.ts',
+    'scripts/cor/run-jest-runtime-probe.js',
+  ];
 
   const receipt = {
     status: 'PASS',
@@ -70,12 +95,8 @@ async function run(context) {
     observations,
     artifacts,
   };
-
   receipt.evidenceDigest = crypto.createHash('sha256').update(canonicalize(receipt), 'utf8').digest('hex');
   return receipt;
 }
 
-module.exports = {
-  metadata,
-  run,
-};
+module.exports = { metadata, run };
