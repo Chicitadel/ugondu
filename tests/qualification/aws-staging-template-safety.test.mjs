@@ -43,9 +43,9 @@ test('cost parameter creates actual AWS Budgets notifications and does not claim
 });
 
 test('shared Ugondu and Dumcholu pilot defaults to sufficient memory and requires an approved budget', () => {
-  assert.match(template, /InstanceType:\\n\\s+Type: String\\n\\s+Default: t3\\.medium/);
-  assert.match(template, /AllowedValues: \\[t3\\.medium, t3\\.large\\]/);
-  assert.doesNotMatch(template, /Default: t3\\.small/);
+  assert.match(template, /InstanceType:\n\s+Type: String\n\s+Default: t3\.medium/);
+  assert.match(template, /AllowedValues: \[t3\.medium, t3\.large\]/);
+  assert.doesNotMatch(template, /Default: t3\.small/);
 });
 
 test('unconfigured host has no public ingress or exposed SSH port', () => {
