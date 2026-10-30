@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const { spawnSync } = require('child_process');
 const crypto = require('crypto');
 const canonicalizeModule = require('canonicalize');
 const canonicalize = canonicalizeModule.default || canonicalizeModule;
@@ -22,7 +23,7 @@ const metadata = {
             )
             .digest('hex'),
     evidenceSchemaVersion: '2.0.0',
-    verificationMode: 'STATIC'
+    verificationMode: 'TEST'
 };
 
 async function run(context) {
@@ -87,13 +88,52 @@ async function verifyObjective(context, observations, artifacts) {
     if (!fs.existsSync(targetPath)) {
         throw new Error('COR_OBJECTIVE_TARGET_MISSING: scripts/cor-finalize.js');
     }
-    const source = fs.readFileSync(targetPath, 'utf8');
-    assert.ok(source.includes('verifyReceipt('), 'COR_OBJECTIVE_NOT_PROVEN: cor-finalize.js must independently verify stream receipts');
-    assert.ok(source.includes('READY_FOR_COR_SIGNATURE'), 'COR_OBJECTIVE_NOT_PROVEN: cor-finalize.js must emit READY_FOR_COR_SIGNATURE finalization state');
-    assert.ok(!source.includes('COR_SIGNING_KEY'), 'COR_OBJECTIVE_NOT_PROVEN: cor-finalize.js must not access COR_SIGNING_KEY');
-
-    artifacts.push('cor-finalize.js');
-    observations.push('Verified A05 specific objective against scripts/cor-finalize.js');
+    const positiveProbe = String.raw`
+const Module = require('node:module');
+let signerLoaded = false;
+const originalLoad = Module._load;
+Module._load = function(request, parent, isMain) {
+  if (String(request).includes('cor-signer')) signerLoaded = true;
+  return originalLoad.call(this, request, parent, isMain);
+};
+delete process.env.COR_SIGNING_KEY;
+delete process.env.COR_PUBLIC_KEY;
+const finalizer = require('./scripts/cor-finalize.js');
+if (signerLoaded) throw new Error('COR_FINALIZER_IMPORTED_SIGNER');
+if (typeof finalizer.finalize !== 'function' || typeof finalizer.verifyReceipt !== 'function') {
+  throw new Error('COR_FINALIZER_API_MISSING');
+}
+const receipt = {
+  status: 'PASS', streamId: 'A01', commitSHA: 'a'.repeat(40), treeSHA: 'b'.repeat(40),
+  observations: ['runtime receipt'], artifacts: ['runtime-artifact']
+};
+receipt.evidenceDigest = finalizer.digest(receipt);
+finalizer.verifyReceipt(receipt, receipt.commitSHA, receipt.treeSHA);
+process.stdout.write('FINALIZER_VERIFIED_RECEIPT_WITHOUT_SIGNER');
+`;
+    const negativeProbe = String.raw`
+const finalizer = require('./scripts/cor-finalize.js');
+const receipt = { status: 'FAIL', streamId: 'A01', commitSHA: 'a'.repeat(40), treeSHA: 'b'.repeat(40), evidenceDigest: 'invalid' };
+finalizer.verifyReceipt(receipt, receipt.commitSHA, receipt.treeSHA);
+process.exitCode = 0;
+`;
+    const env = { ...process.env, UGONDU_ROOT: context.root };
+    delete env.COR_SIGNING_KEY;
+    delete env.COR_PUBLIC_KEY;
+    const positive = spawnSync(process.execPath, ['-e', positiveProbe], {
+        cwd: context.root, encoding: 'utf8', timeout: 10000, env
+    });
+    if (positive.error || positive.status !== 0 || !String(positive.stdout).includes('FINALIZER_VERIFIED_RECEIPT_WITHOUT_SIGNER')) {
+        throw new Error('A05_FINALIZER_RUNTIME_INDEPENDENCE_FAILED: ' + String(positive.stderr || positive.stdout || positive.error?.message));
+    }
+    const negative = spawnSync(process.execPath, ['-e', negativeProbe], {
+        cwd: context.root, encoding: 'utf8', timeout: 10000, env
+    });
+    if (negative.status === 0) {
+        throw new Error('A05_FINALIZER_ACCEPTED_INVALID_RECEIPT');
+    }
+    artifacts.push('scripts/cor-finalize.js');
+    observations.push('Loaded finalizer without signing keys or signer dependency; actual receipt verifier accepted a valid digest and rejected a FAIL receipt');
     return true;
 }
 
