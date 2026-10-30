@@ -697,3 +697,32 @@ Dumcholu Portable Runtime Qualification [#41129779006](https://github.com/Chicit
 The test fixture was physically corrected in Dumcholu commit `cb5210f115d2d2d6971cb59a5cfd562b170b0868`: stateful repository fakes now retain saved discovery/guidance entities and return them on subsequent reads. The cache-authority regression simulates a durable deletion by removing the row after the service has cached it, then verifies the stale cache is not used. New exact-head Portable Runtime #41130600535, Deployment Manifest #41130600131 and Product Name Gate #41130600459 were queued at check time. All must pass on the final branch head.
 
 The test-fixture correction does not close the separate ORM optimistic-lock gap; concurrent multi-instance writes remain open.
+
+
+---
+
+## Passport-to-billing tenant cross-binding — 2026-10-30
+
+**Finding:** `UG-PASSPORT-AEROBILL-TENANT-CROSSBIND-001`
+
+**Confirmed defect:** The deployment route accepted a passport and then independently accepted the tenant returned by the billing authorization response. It did not compare the tenant bound to the verified passport with the tenant returned by the billing authority. A valid passport for tenant A could therefore reach deployment planning under a billing response for tenant B if the caller omitted or manipulated the optional request tenant field. The prior fallback to `default-tenant` also masked a missing tenant in the billing response.
+
+**Physical remediation on PR #62 branch:**
+- `admitPassport` now returns the tenant derived from the cryptographically verified signed claims or the explicitly registered opaque passport.
+- Passport middleware rejects an admitted result without a verified tenant and stores only that verified tenant in `res.locals.passportTenantId`.
+- Deployment route requires a non-empty tenant from the billing authority and exact equality with the verified passport tenant before it constructs the deployment plan. Missing/mismatched values return HTTP 403 with `PASSPORT_BILLING_TENANT_MISMATCH`.
+- Removed the synthetic `default-tenant` fallback from this authorization boundary.
+- Added integration regression `ENG-PASS-007`: a valid default-tenant passport paired with an AeroBill authorization response for `tenant_other` must be rejected.
+- Corrected the passport-header whitespace regex to reject actual whitespace and commas (not the literal characters `\\s`).
+- Code/test candidate before evidence synchronization: `cb97550b8aa28e15d1c94a7392a0d0d67e4dc1a1`.
+
+Changed files:
+- `server/engine-core/src/index.ts`
+- `server/engine-core/src/passport/gatekeeper/admission-controller.ts`
+- `server/engine-core/src/middleware/passport-guard.middleware.ts`
+- `server/engine-core/src/routes/deploy.ts`
+- `tests/engine-core.test.js`
+
+**Evidence boundary:** Earlier CI/COR on head `94946d08...` does not qualify this new tenant cross-binding change. Fresh exact-head CI/CD and COR runs are mandatory after this code and the following evidence-note synchronization.
+
+**Status:** `IMPLEMENTED / EXACT-HEAD CI-COR PENDING / NOT CLOSED`.
