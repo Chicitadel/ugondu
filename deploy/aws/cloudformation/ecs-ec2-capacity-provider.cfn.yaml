@@ -153,6 +153,7 @@ Resources:
       LaunchTemplateData:
         ImageId: !Ref EC2AmiId
         InstanceType: !Ref EC2InstanceType
+        KeyName: !If [HasKeyName, !Ref EC2KeyName, !Ref "AWS::NoValue"]
         IamInstanceProfile:
           Arn: !GetAtt EC2HostInstanceProfile.Arn
         SecurityGroupIds:
@@ -315,6 +316,14 @@ Resources:
               ValueFrom: !Ref DatabaseUsernameSecretArn
             - Name: UGONDU_DB_PASS
               ValueFrom: !Ref DatabasePasswordSecretArn
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - !Sub wget -qO- http://127.0.0.1:${BackendContainerPort}${HealthCheckPath} || exit 1
+            Interval: 15
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 30
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -343,6 +352,9 @@ Resources:
         - ContainerName: backend-api
           ContainerPort: 4001
           TargetGroupArn: !Ref BackendTargetGroupArn
+
+Conditions:
+  HasKeyName: !Not [!Equals [!Ref EC2KeyName, ""]]
 
 Outputs:
   ClusterName:

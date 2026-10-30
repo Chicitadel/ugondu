@@ -185,6 +185,14 @@ Resources:
               ValueFrom: !Ref DatabaseUsernameSecretArn
             - Name: UGONDU_DB_PASS
               ValueFrom: !Ref DatabasePasswordSecretArn
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - !Sub wget -qO- http://127.0.0.1:${BackendContainerPort}${HealthCheckPath} || exit 1
+            Interval: 15
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 30
           LogConfiguration:
             LogDriver: awslogs
             Options:
