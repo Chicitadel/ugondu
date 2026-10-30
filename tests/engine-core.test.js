@@ -78,6 +78,7 @@ function get(port, path, extraHeaders = {}) {
 let ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4001', 10);
 let serverProcess = null;
 let mockBillingServer = null;
+let engineModule = null;
 
 if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -159,7 +160,7 @@ before(async () => {
     serverProcess = this;
     return originalListen.apply(this, args);
   };
-  require('../server/engine-core/dist/index.js');
+  engineModule = require('../server/engine-core/dist/index.js');
   http.Server.prototype.listen = originalListen;
   await new Promise((resolve) => {
     if (serverProcess && serverProcess.listening) resolve();
@@ -191,6 +192,74 @@ test('ENG-001: /health/live and /health/ready return 200 with zero static cor_le
   assert.strictEqual(ready.body.status, 'ready');
   assert.strictEqual(ready.body.cor_level, undefined, 'Readiness response must not contain static cor_level');
   console.log('[en] ✓ PASS: /health/live and /health/ready return 200 with zero static cor_level');
+});
+
+test('ENG-PASS-001: unregistered passport prefixes never authenticate', () => {
+  for (const candidate of ['pp_forged', 'pass_forged', 'passport_admin', 'valid_unissued']) {
+    assert.deepStrictEqual(
+      engineModule.admitPassport(candidate, { tenantId: 'tenant_test_default' }),
+      { status: 'REJECTED' },
+      `Unregistered passport must be rejected: ${candidate}`
+    );
+  }
+});
+
+test('ENG-PASS-002: registered opaque passports are bound to their registered tenant', () => {
+  engineModule.registerAdmissionPassport('registered_tenant_a', {
+    tenantId: 'tenant_a',
+    expiresAt: Date.now() + 60_000,
+  });
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_tenant_a', { tenantId: 'tenant_a' }),
+    { status: 'ADMITTED' }
+  );
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_tenant_a', { tenantId: 'tenant_b' }),
+    { status: 'REJECTED' }
+  );
+
+  engineModule.registerAdmissionPassport('registered_revoked', {
+    tenantId: 'tenant_a',
+    revoked: true,
+  });
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_revoked', { tenantId: 'tenant_a' }),
+    { status: 'REJECTED' }
+  );
+
+  engineModule.registerAdmissionPassport('registered_expired', {
+    tenantId: 'tenant_a',
+    expiresAt: Date.now() - 1,
+  });
+  assert.deepStrictEqual(
+    engineModule.admitPassport('registered_expired', { tenantId: 'tenant_a' }),
+    { status: 'REJECTED' }
+  );
+});
+
+test('ENG-PASS-003: signed passports require valid claims and exact tenant binding', () => {
+  const token = engineModule.issueSignedPassport({ tenantId: 'tenant_signed_a', ttlMs: 60_000 });
+  assert.deepStrictEqual(
+    engineModule.admitPassport(token, { tenantId: 'tenant_signed_a' }),
+    { status: 'ADMITTED' }
+  );
+  assert.deepStrictEqual(
+    engineModule.admitPassport(token, { tenantId: 'tenant_signed_b' }),
+    { status: 'REJECTED' }
+  );
+  const tampered = token.slice(0, -1) + (token.endsWith('A') ? 'B' : 'A');
+  assert.deepStrictEqual(
+    engineModule.admitPassport(tampered, { tenantId: 'tenant_signed_a' }),
+    { status: 'REJECTED' }
+  );
+  assert.throws(
+    () => engineModule.issueSignedPassport({ tenantId: '', ttlMs: 60_000 }),
+    /PASSPORT_TENANT_REQUIRED/
+  );
+  assert.throws(
+    () => engineModule.issueSignedPassport({ tenantId: 'tenant_signed_a', ttlMs: 0 }),
+    /PASSPORT_TTL_OUT_OF_RANGE/
+  );
 });
 
 test('ENG-002: Missing required fields returns 400', async () => {
