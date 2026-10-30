@@ -1007,3 +1007,10 @@ The Dumcholu ECS-on-EC2 host must not default to `t3.small` while hosting a 1 Gi
 ## 14. Test-driven AWS template corrections — 2026-10-30
 
 The Dumcholu ECS-on-EC2 default is now `t3.medium` for a 1 GiB Java task, with `t3.large` as an explicit upgrade. The first new regression run exposed an over-escaped assertion regex; the regex was corrected and the test retained. Preserve the failed run in the evidence history and require successful manifest lint/tests on the final exact head. Never delete or weaken the test to hide the failure. No AWS resources were provisioned.
+
+
+---
+
+## 15. Tenant-aware journey read guardrail — 2026-10-30
+
+Every authenticated career-journey read and recalculation endpoint must pass the principal-bound tenant into the service layer and validate any existing discovery case against that tenant before reading journey records. A principal check at the controller boundary alone is insufficient when durable discovery state carries tenant ownership. Never use citizen-only service reads from an authenticated multi-tenant HTTP route.
