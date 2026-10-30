@@ -744,7 +744,7 @@ The prior failed run and logs remain evidence. Exact-head Java 21 qualification 
 
 ## Final qualification receipts for current source/test candidates — 2026-10-30
 
-### Ugondu candidate `5c254e037a420aa15369c251715ef53284a0470a`
+### Ugondu source/test candidate `5c254e037a420aa15369c251715ef53284a0470a` (superseded by documentation-only receipt head below)
 - CI/CD [#41132521021](https://github.com/Chicitadel/ugondu/actions/runs/41132521021): **SUCCESS**. All 9 workspace jobs, 5 Go targets, engine-core build/lint/type-check/unit tests, all-workspace tests, integration tests and release-integrity/governance gates passed. Docker image validation and Build & Publish Release steps were skipped.
 - COR [#41132521069](https://github.com/Chicitadel/ugondu/actions/runs/41132521069): **SUCCESS / READY_FOR_COR_SIGNATURE**. Build, locales, I18N, architecture, imports, type check, workspace tests, COR remediation suite, pinned policy/evidence, stream registry, fresh COR qualification, independent finalization, final candidate integrity and evidence upload passed. Evidence-freshness, signing-trust-root and final authority signature steps were skipped.
 - Deployment Manifest [#41132521032](https://github.com/Chicitadel/ugondu/actions/runs/41132521032): **SUCCESS**.
@@ -758,3 +758,28 @@ The prior failed run and logs remain evidence. Exact-head Java 21 qualification 
 **Exact-head discipline:** This append-only handover update creates a new documentation descendant on the Ugondu branch. The source/test receipts above belong to the stated candidate SHAs, not to the resulting documentation commit. Fresh checks on the post-note branch head are required wherever workflow path filters run.
 
 **Release posture:** Ugondu is `READY_FOR_COR_SIGNATURE`, not finally signed. Dumcholu portable runtime remains pending Docker image completion. The shared passport registry/revocation and Dumcholu ORM optimistic-lock gaps remain open. Overall ecosystem posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## Post-handover exact-head requalification — 2026-10-30
+
+The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd076570c2` has now completed all required remote workflows:
+
+### Ugondu PR #62 — exact head `421a94a8506f5802419c4013870c35cd076570c2`
+- CI/CD [#41133193026](https://github.com/Chicitadel/ugondu/actions/runs/41133193026): **SUCCESS**. All 9 workspace jobs, all 5 Go OS/architecture targets, release-integrity/governance checks, and the full integration job passed. Integration covered all five services, Billing Gateway, Engine Core, Plugin Manager, Event Bus, Repository Adapter, COR remediation, evidence-pipeline adversarial tests, shared execution/mode parity, language packs, AI inference gateway and UPLM conformance.
+- COR [#41133193047](https://github.com/Chicitadel/ugondu/actions/runs/41133193047): **SUCCESS / READY_FOR_COR_SIGNATURE**. Fresh COR qualification, independent finalization, stream registry, final candidate integrity and evidence upload passed.
+- Deployment Manifest [#41133193236](https://github.com/Chicitadel/ugondu/actions/runs/41133193236): **SUCCESS**.
+- Explicitly skipped: evidence-freshness check, COR signing-trust-root verification, final authority signature, Docker image validation/build-and-publish release step, and AWS Physical Qualification Gate. These are not PASS and must not be represented as such.
+
+### Dumcholu PR #28 — exact source/test head `a9728c565d5291a9da16d7634d25284c10faa7b5`
+- Portable Runtime [#41132178535](https://github.com/Chicitadel/dumcholu/actions/runs/41132178535): **SUCCESS**, including strict AeroBill contract regressions, Java 21 runtime/dependency reactor, Compose contract and portable Docker image build.
+- Deployment Manifest [#41132178331](https://github.com/Chicitadel/dumcholu/actions/runs/41132178331): **SUCCESS**.
+- Product Name Governance [#41132178472](https://github.com/Chicitadel/dumcholu/actions/runs/41132178472): **SUCCESS**.
+
+### Remaining blockers before public commercial release
+1. **Ugondu passport registry/revocation:** `registeredPassports` remains process-local; shared durable issuance/revocation and multi-instance revocation consistency are not implemented.
+2. **Dumcholu concurrent writes:** JPA entities still lack a separate ORM-managed optimistic-lock version and conflict/retry integration coverage.
+3. **COR signature:** final trust-root verification and authorized final authority signature were skipped; candidate is `READY_FOR_COR_SIGNATURE`, not signed/certified.
+4. **Physical AWS:** deployment qualification was skipped and no AWS resources were provisioned. The user's funding/traction/budget gate remains controlling.
+5. **External assurance:** live operational/federation evidence, physical FIDO2 ceremony, empirical Nigeria data calibration and independent human sign-off remain required where applicable.
+
+**Overall posture:** `READY_FOR_COR_SIGNATURE` for the Ugondu candidate; `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` for the combined public commercial release until the above gaps are closed.
