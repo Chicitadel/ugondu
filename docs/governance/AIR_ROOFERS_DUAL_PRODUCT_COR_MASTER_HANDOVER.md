@@ -783,3 +783,30 @@ The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd07657
 5. **External assurance:** live operational/federation evidence, physical FIDO2 ceremony, empirical Nigeria data calibration and independent human sign-off remain required where applicable.
 
 **Overall posture:** `READY_FOR_COR_SIGNATURE` for the Ugondu candidate; `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` for the combined public commercial release until the above gaps are closed.
+
+
+## Re-audit execution — 2026-10-31
+
+### Dumcholu optimistic-lock remediation (new physical candidate)
+- Dedicated PR #29: https://github.com/Chicitadel/dumcholu/pull/29
+- Branch: `fix/cor-career-optimistic-locking-2026-10-31`
+- Parent: PR #28 head `a9728c565d5291a9da16d7634d25284c10faa7b5`
+- Candidate head at handover: `96227ce279a3ea382e592baec933c43e1ba1e716`
+- Implemented: JPA `@Version` on both discovery and guidance case entities; Flyway V3 adds separate `orm_version BIGINT NOT NULL DEFAULT 0` columns. Existing domain `case_version` is preserved and must not be reused as the ORM lock.
+- Regression: H2/JPA stale-writer tests for both entity types in `CareerCaseOptimisticLockingTest`.
+- Exact-head workflows on `96227ce...`: Deployment Manifest #41142456377 SUCCESS; Portable Runtime #41142582557 IN PROGRESS at last observation; Product Name Governance #41142582423 IN PROGRESS. Manifest #41142582449 was also IN PROGRESS. Do not close this finding until Portable Runtime, including Java 21 career module tests and migration validation, completes successfully.
+
+### Ugondu distributed passport state — re-confirmed open
+- Dedicated investigation branch: `fix/cor-shared-passport-revocation-2026-10-31`, based on PR #62 head `64cfd32dd810decad0a8dcb2ee3c2559e6f99241`.
+- Re-audit confirms `server/engine-core/src/index.ts` still uses a process-local `Map` for `registeredPassports`. A token minted/registered in one process has no shared revocation/registration state on another process.
+- The separate `RevocationManager` in `server/engine-core/src/passport/lifecycle/revocation.ts` uses `DatabaseClient` and `CacheClient`, but the HTTP admission path in `index.ts` does not consult it. The existing `DatabaseClient` is an interface only; this engine-core workspace has no configured production SQL adapter wired into admission.
+- This is a confirmed integration defect, not a completed fix. Do not claim distributed revocation closed by the existence of the unused manager or in-memory registry abstractions.
+- Required physical work: integrate a portable SQL adapter and schema/migration, inject a durable passport admission/revocation store into HTTP admission, await authoritative shared record/revocation checks, invalidate cache on revocation, and add two-independent-instance tests (issue on A, admit on B, revoke on A, reject on B). Fail closed when the store is unavailable. Do not use Mandatag as a substitute; Mandatag remains entitlement authority.
+- Do not introduce an AWS-only DynamoDB implementation or a second billing/licensing authority.
+
+### Release posture
+- Dumcholu optimistic-lock implementation is physically present but not yet qualified at exact head.
+- Ugondu distributed admission/revocation remains open pending real portable durable-store integration.
+- Final COR trust-root verification, evidence freshness and authorized corporate signature remain external gates.
+- No AWS resources were provisioned. DirectAdmin remains launch tier; AWS remains gated by traction, official engagement/funding and explicit budget approval.
+- Overall status: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
