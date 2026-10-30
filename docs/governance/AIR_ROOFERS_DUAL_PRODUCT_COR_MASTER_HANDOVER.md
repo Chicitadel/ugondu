@@ -132,3 +132,32 @@ The earlier Ugondu COR Certification run #40985028471 and CI/CD run #40985028411
 - **Status:** Code and tests committed on the dedicated branch; exact-head CI/COR must rerun. All previous 40/40 receipts are historical and cannot close this new candidate.
 - **Candidate change commits:** helper `79bf138b7baa2e25cc82a9cf5b39e9b27ea9e616`; regression suite `2c50fb32c5e7df668d569fb0076375e339364d0b`; semantic alignment `df3f9a0e1dbf9b0db0e134302dbd951a21bba733`; audit note `61163446f7fc610bbe827ae388b46c5be0eda721`.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## 2026-10-30 follow-up — Ugondu nested locale and objective verifier remediation
+
+### Newly closed findings on the dedicated Ugondu branch
+
+- **`UG-COR-LOCALE-NESTED-KEY-PARITY-001`:** Added recursive flattened leaf-path comparison for D25-D28/E29-E33 via `scripts/cor/locale-key-parity.js`; handles nested objects and arrays, rejects prototype-pollution keys, and aligns empty-object behavior with the canonical locale validator. Added nested drift positive/negative tests.
+- **`UG-COR-ENGINE-SIGNER-INDEPENDENCE-001` (A04):** Engine module is now importable without triggering CLI execution; runtime probe verifies no signer dependency and no signing keys required.
+- **`UG-COR-FINALIZER-SIGNER-INDEPENDENCE-001` (A05):** Finalizer CLI is isolated from module import; runtime receipt verification accepts valid digests and rejects invalid receipts without loading signer or signing keys.
+- **`UG-COR-SIGNATURE-CRYPTO-VERIFICATION-001` (A06):** Actual isolated Git candidate signing with ephemeral RSA key pair; signature is verified, mismatched trusted public key rejected.
+- **`UG-COR-RECOVERY-OBJECTIVE-BEHAVIORAL-VERIFICATION-001` (F35-F38):** Replaced source-token verifiers with runtime checks for approval enforcement, governed route authorization before mutation, immutable snapshot digest binding, blast-radius limits and safe dry-runs.
+
+### Exact-head verification receipt
+
+- Ugondu PR #57 branch head: `b6f64f2bc207198851d7dea09747806279890802`.
+- Evaluated merge candidate: `59e630d7aa1e94d3153db7462a89dcfdce49666f`.
+- CI/CD run #40987744466: **SUCCESS** (all workspace builds, lint/type checks, Go target builds, five-service readiness and integration suites).
+- COR Certification run #40987744216: **SUCCESS**; fresh qualification **40/40 PASS**, zero failed/skipped/not-run streams; independent finalization `READY_FOR_COR_SIGNATURE`.
+- Evidence artifact #12947368564; SHA-256 `e3aa780a793f7c07bdde524c2094615585691b1e32e3e10c49f8c88a79cc1f18`.
+- The evidence ledger candidate is the merge commit above, not the PR head itself. The artifact's workflow metadata is bound to PR head `b6f64f2...`.
+- **Not complete:** signing trust-root step and final COR authority signature were skipped. AWS physical qualification was skipped. No AWS resources were provisioned. Therefore this remains `READY_FOR_COR_SIGNATURE`, not a signed COR certificate or public commercial release approval.
+- **Dumcholu:** PR #15 candidate `ac0585bf43b6ea4fa1ba6f5f8fa20f633428f683` retains its previously verified three successful workflows; no Dumcholu source changes were made in this follow-up.
+- Both PRs remain open and unmerged. No direct writes to `master` or `main`.
+
+### Release decision
+
+**Ugondu:** qualification pass; signature and physical deployment gates outstanding.  
+**Dumcholu:** source remediation and its three qualification workflows pass; physical deployment and live federation gates outstanding.  
+**Dual-product commercial release:** **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
