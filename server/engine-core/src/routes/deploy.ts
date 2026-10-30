@@ -157,7 +157,18 @@ export function createDeployRouter(
         capabilities: Record<string, unknown>;
       };
 
-      const tenantId = String((authResponse.data as Record<string, unknown>)['tenantId'] ?? 'default-tenant');
+      const billingTenantId = (authResponse.data as Record<string, unknown>)['tenantId'];
+      const passportTenantId = res.locals['passportTenantId'];
+      if (typeof billingTenantId !== 'string' || !billingTenantId.trim()
+          || typeof passportTenantId !== 'string' || !passportTenantId.trim()
+          || passportTenantId.trim() !== billingTenantId.trim()) {
+        res.status(403).json({
+          error: 'PASSPORT_BILLING_TENANT_MISMATCH',
+          code: 'PASSPORT_BILLING_TENANT_MISMATCH',
+        });
+        return;
+      }
+      const tenantId = billingTenantId.trim();
 
       let strategy =
         targetEnvironment === 'cpanel' || targetEnvironment === 'directadmin'
