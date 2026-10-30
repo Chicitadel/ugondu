@@ -489,3 +489,32 @@ Current Dumcholu child branch remains `fix/cor-career-tenant-claim-binding-2026-
   - `ecs-ec2-capacity-provider.cfn.yaml`: ECS on EC2 with Capacity Provider (`t3.medium` default, port 8081, healthcheck probe `/health/ready`).
   - `ecs-fargate-service.cfn.yaml`: ECS Fargate service (`256` CPU, `512` MB memory, port 8081, healthcheck probe `/health/ready`).
   - Both templates linted cleanly via `cfn-lint 1.59.0` and validated via AWS CloudFormation `ValidateTemplate` on AWS account `971671216490` (`eu-west-3`).
+
+
+---
+
+## Dumcholu AeroBill protocol hardening — 2026-10-30
+
+**Finding:** `DUM-COR-AEROBILL-UNTRUSTED-RESPONSE-PARSE-001`
+
+A source re-audit of Dumcholu's `DefaultAeroBillClient` found that the budget response used regex substring matching and did not bind all authority fields to the requested tenant. The usage path treated any HTTP 2xx response as a recorded transaction and could synthesize a transaction ID when AeroBill supplied none. The request JSON was assembled with string formatting, and configured remote HTTP endpoints were not restricted to TLS.
+
+**Physical remediation committed on Dumcholu PR #28 branch** `fix/cor-career-tenant-claim-binding-2026-10-30`:
+- Strict Jackson JSON tree parsing with duplicate-key and trailing-token rejection.
+- Budget responses require top-level typed fields, EUR currency, ACTIVE status, and exact tenant binding; a positive authoritative balance is required.
+- Usage receipts require an authority transaction ID, exact tenant, amount and idempotency-key match, and `RECORDED` status. Generic 2xx responses fail closed.
+- Request payloads use JSON serialization; tenant/idempotency identifiers are bounded; remote endpoints require HTTPS; redirects are disabled.
+- Added positive and adversarial regression tests and a dedicated Java 21 Maven workflow step for `ai-platform/ai-contracts`.
+
+Changed artifacts:
+- `dumcholu-backend/ai-platform/ai-contracts/src/main/java/org/dumcholu/platform/ai/contracts/deployment/DefaultAeroBillClient.java`
+- `dumcholu-backend/ai-platform/ai-contracts/pom.xml`
+- `dumcholu-backend/ai-platform/ai-contracts/src/test/java/org/dumcholu/platform/ai/contracts/deployment/DefaultAeroBillClientTest.java`
+- `.github/workflows/dumcholu-portable-runtime.yml`
+- `docs/governance/DUMCHOLU_TENANT_BOUNDARY_REAUDIT_2026-10-30.md`
+
+**Evidence boundary:** Product-name and deployment-manifest checks were green on the earlier candidate, but they do not execute this Java protocol suite. The new exact-head Java 21 portable-runtime run must pass, including the explicit `ai-contracts` test step, before this finding is marked closed. The current Dumcholu candidate has advanced beyond the previously reported `f1743297...` SHA; old workflow receipts must not be reused as proof for this change.
+
+**Authority invariant:** AeroBill remains the sole billing, budget, metering, invoicing and payment authority. Dumcholu validates and consumes AeroBill's contract only; it must not introduce local quota, price or billing business logic.
+
+**Status:** `IMPLEMENTED / EXACT-HEAD TEST PENDING / NOT CLOSED`.
