@@ -52,7 +52,7 @@ export function passportGuardMiddleware(req: Request, res: Response, next: NextF
     }
 
     const passportId = values[0].trim();
-    if (!passportId || passportId.length > 8192 || /[\\s,]/.test(passportId)) {
+    if (!passportId || passportId.length > 8192 || /[\s,]/.test(passportId)) {
         Logger.warn(__t('messages.system.audit_missing_x_ugondu_passport_id_header'));
         return res.status(403).json({
             error: __t('err_passport_required'),
