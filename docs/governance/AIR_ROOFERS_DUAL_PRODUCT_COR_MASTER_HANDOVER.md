@@ -627,7 +627,7 @@ In accordance with UAIGOS v3.0.0 and fail-closed COR governance, five specialize
 | Product | Repository / PR | Branch | Exact Commit SHA | Workflow Receipts & Posture |
 |---|---|---|---|---|
 | **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `94ff59cf664e56356e7ce1375320af9906f65278` | • **Portable Runtime Qualification** [#41129779006](https://github.com/Chicitadel/dumcholu/actions/runs/41129779006): IN PROGRESS (AeroBill protocol step PASS; Maven reactor running)<br>• **Deployment Manifest Qualification** [#41129779034](https://github.com/Chicitadel/dumcholu/actions/runs/41129779034): SUCCESS<br>• **Product Name Governance Gate** [#41129778992](https://github.com/Chicitadel/dumcholu/actions/runs/41129778992): SUCCESS |
-| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `afbb3fdc6bdf0ea2cdc10eeaf7d9cd66ab40475f` | • **COR Certification** [#41129855326](https://github.com/Chicitadel/ugondu/actions/runs/41129855326): PENDING on exact head<br>• **CI/CD and Deployment Manifest:** previous candidate receipts are not reused; exact-head qualification required after source/test and handover changes |
+| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `652a2cd5586a2ecc3b59e08f21875df0018a91e4` (source candidate before this note update) | • **COR Certification** [#41129855326](https://github.com/Chicitadel/ugondu/actions/runs/41129855326): PENDING on exact head<br>• **CI/CD and Deployment Manifest:** previous candidate receipts are not reused; exact-head qualification required after source/test and handover changes |
 | **Platform Core** | [Chicitadel/platform-core](https://github.com/Chicitadel/platform-core) | `security/arf-002-003-zero-trust-hardening-2026-10-29` | `49f64dcc` | • Resolved administrative SSO redirect loop on `admin.airroofers.eu` and verified live session probes on `license.airroofers.eu` |
 
 
@@ -675,3 +675,16 @@ Verified branch ancestry before this handover update:
 - The governance-note commit itself changes the branch head. All required workflows must pass on the post-note exact SHA before the new findings are closed.
 
 **Overall posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. `READY_FOR_COR_SIGNATURE` from an earlier Ugondu candidate is not a final product certification while the above source changes and external gates remain unqualified.
+
+
+### Ugondu CI failure and corrective source revision — 2026-10-30 22:xx CET
+
+The first CI run after the passport middleware/default-admission remediation, [#41129941871](https://github.com/Chicitadel/ugondu/actions/runs/41129941871), failed in TypeScript compilation at `server/engine-core/src/passport/gatekeeper/admission-controller.ts` lines 97–105. The CI log identified a stale fragment of the prior permissive method left after the method replacement. The test/build steps were correctly blocked; no downstream integration tests ran.
+
+**Physical correction:**
+- Removed the stale permissive fragment and retained the deny-by-default implementation.
+- Removed a duplicate documentation comment in a follow-up cleanup.
+- Corrective source commits: `7d50cacebf0208725db9cce094a78d3ebc874fb8` and `652a2cd5586a2ecc3b59e08f21875df0018a91e4`.
+- The failing workflow and logs remain part of the evidence trail. The source fix is not considered qualified until a fresh CI build, engine-core integration suite and COR certification complete successfully on the post-correction branch head.
+
+**Status:** `SOURCE CORRECTED / RETEST REQUIRED / NOT CLOSED`.
