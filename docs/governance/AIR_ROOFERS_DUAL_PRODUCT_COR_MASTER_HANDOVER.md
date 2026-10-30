@@ -117,3 +117,8 @@ This handover is a coordination and change-control artifact. It is not a certifi
 - **Dumcholu PR #15:** candidate run #40984788551 failed because the new Dart manifest validator did not compile; focused Flutter tests 12/12, Flutter analysis, OpenAPI drift and Maven backend tests passed, but validator negative tests were skipped. The validator was rewritten at `38382e6b652c2045b0230bcdf6a7d8508cb29b42`. Exact-head reruns on handover head `fe3b09490242b76ea701071409827e9b2022b81f`: COR Policy Simulator Contract #40985106618, Deployment Manifest Qualification #40985106578 and Product Name Governance #40985106678 were queued at last check.
 - Do not report the Dumcholu manifest validator as passing until #40985106618 completes its validator and negative-case steps successfully.
 - Both PRs remain open draft PRs; neither is merged. Both product release postures remain `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## CI queue correction
+
+The earlier Ugondu COR Certification run #40985028471 and CI/CD run #40985028411 were subsequently cancelled before job results became available. They are not passing receipts. The latest Ugondu source/test candidate therefore still requires fresh exact-head CI and COR runs. Do not infer a pass from the earlier 40/40 result on `c2238961...`.
