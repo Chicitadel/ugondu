@@ -629,3 +629,49 @@ In accordance with UAIGOS v3.0.0 and fail-closed COR governance, five specialize
 | **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `4210a174a7a858e778748721c0b3c434b92b6eb2` | • **Deployment Manifest Qualification** [#41126757475](https://github.com/Chicitadel/dumcholu/actions/runs/41126757475): **SUCCESS** (24s)<br>• **Dumcholu Product Name Governance Gate** [#41126757511](https://github.com/Chicitadel/dumcholu/actions/runs/41126757511): **SUCCESS** (31s)<br>• **Dumcholu Portable Runtime Qualification** [#41126757591](https://github.com/Chicitadel/dumcholu/actions/runs/41126757591): In Progress |
 | **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `b577b72120e6e709b10fe95192e075ec7a1a4c68` | • **COR Certification** [#41110689961](https://github.com/Chicitadel/ugondu/actions/runs/41110689961): **SUCCESS** (40/40 fail-closed streams passed, 0 skipped, 0 failed, `READY_FOR_COR_SIGNATURE`)<br>• **Ugondu CI/CD Pipeline** [#41110689801](https://github.com/Chicitadel/ugondu/actions/runs/41110689801): **SUCCESS** (17/17 jobs: 5 Go targets, 9 workspaces, Docker contract, integration tests)<br>• **Ugondu Deployment Manifest Qualification** [#41110689735](https://github.com/Chicitadel/ugondu/actions/runs/41110689735): **SUCCESS** (25s) |
 | **Platform Core** | [Chicitadel/platform-core](https://github.com/Chicitadel/platform-core) | `security/arf-002-003-zero-trust-hardening-2026-10-29` | `49f64dcc` | • Resolved administrative SSO redirect loop on `admin.airroofers.eu` and verified live session probes on `license.airroofers.eu` |
+
+
+---
+
+## Cross-product persistence and passport-middleware re-audit — 2026-10-30 22:xx CET
+
+### Finding UG-PASSPORT-HEADER-AMBIGUITY-AND-LOG-LEAK-001
+
+**Confirmed defects in the actual PR #62 branch source:**
+- Passport middleware accepted the first value when Express exposed repeated `X-Ugondu-Passport-Id` headers as an array; comma-joined ambiguous values were not rejected.
+- Rejected passport identifiers were written to application logs in plaintext.
+- `AdmissionController.admit` had a permissive default implementation that admitted any non-empty, non-`REVOKED` string when a tenant was present. The engine bootstrap overwrote this method, but the class itself was unsafe when used without that bootstrap.
+
+**Physical remediation committed on the dedicated branch:**
+- Middleware now rejects missing, repeated, comma-joined, whitespace-containing and oversized credentials.
+- Rejection logs contain only a truncated SHA-256 fingerprint, never the credential itself.
+- The admission controller default is now deny-by-default; only the engine bootstrap's cryptographic admission authority can replace it.
+- Added engine integration regressions for the unconfigured controller, duplicate/comma-joined headers and rejected-credential response behavior.
+- Code/test candidate SHA: `c6e02b055e276f1ef951167b2bb61581c824e36b`.
+
+### Finding DUM-COR-CAREER-CASE-CACHE-AUTHORITY-001
+
+**Confirmed defect in the actual PR #28 branch source:** Discovery and guidance service reads preferred process-local caches even when JPA repositories were configured. This could preserve stale case state, including stale active guidance consent, after another instance changed or removed the durable record.
+
+**Physical remediation committed on the dedicated branch:**
+- Configured repositories are now authoritative for `getDiscoveryCase` and `loadGuidanceCase`; process-local maps are fallback-only when no repository is configured.
+- A durable miss evicts stale cache entries; a durable hit refreshes them.
+- Added regression `durableRepositoriesAreAuthoritativeOverProcessLocalCaches`.
+- Code/test candidate SHA: `6720dba7c3d82d37772a7fed98f59fd0942abb8f`.
+
+### Explicit unresolved items — do not claim closed
+
+- Ugondu `registeredPassports` remains process-local. The middleware and default-admission defects are fixed, but shared durable passport issuance/revocation is not yet implemented. A passport revoked in one instance must not be assumed revoked cluster-wide. Do not claim multi-instance revocation consistency.
+- Dumcholu discovery/guidance entities currently lack a separate ORM-managed `@Version` column. The domain `caseVersion` is not an optimistic-lock version. Repository-first reads fix stale local authorization, but concurrent multi-instance writes can still race. A dedicated persistence version migration and conflict/retry tests remain required.
+- No AWS physical deployment or shared registry provisioning is authorized by this work. Preserve the funding/traction and explicit budget gate.
+
+### Evidence reconciliation warning
+
+The local Antigravity execution report supplied on 2026-10-30 cites Dumcholu SHA `4210a174a7a858e778748721c0b3c434b92b6eb2` and Ugondu SHA `f85b0bfe9ba73ef22a904ae71172f3bf4e857467`. GitHub commit lookup returned `No commit found for SHA` for both. Do not use those SHAs or their associated claimed receipts as remote evidence until the commits are pushed and independently retrievable.
+
+Verified branch ancestry before this handover update:
+- Dumcholu PR #28 branch contained candidate `6720dba7c3d82d37772a7fed98f59fd0942abb8f`; manifest #41129597863 SUCCESS, name gate #41129597872 SUCCESS, portable runtime #41129597856 CANCELLED. Portable runtime must be rerun.
+- Ugondu PR #62 branch contained candidate `c6e02b055e276f1ef951167b2bb61581c824e36b`; manifest #41129703904 SUCCESS; CI #41129703767 and COR #41129703696 were PENDING at check time.
+- The governance-note commit itself changes the branch head. All required workflows must pass on the post-note exact SHA before the new findings are closed.
+
+**Overall posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. `READY_FOR_COR_SIGNATURE` from an earlier Ugondu candidate is not a final product certification while the above source changes and external gates remain unqualified.
