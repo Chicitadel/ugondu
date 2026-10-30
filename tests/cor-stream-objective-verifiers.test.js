@@ -226,6 +226,40 @@ test('C22 verifies client repair CLI uses i18n.T without hardcoded fmt strings',
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
+
+test('B13 fails closed when the runtime registry validator is absent', async () => {
+  const f = fixture();
+  try {
+    writeFile(f.root, '.governance/cor/ugondu-cor-qualification-manifest.json', JSON.stringify({
+      repository: 'Chicitadel/ugondu',
+      streams: [{ id: 'B13', status: 'PASS', objective: 'manifest independence', location: ['scripts/cor/streams/B13.js'] }],
+    }));
+    await assert.rejects(b13.run(context(f.root, 'B13')), /B13_REGISTRY_VALIDATOR_MISSING/);
+  } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
+test('B16 fails closed when compiled RecoveryOrchestrator runtime artifact is absent', async () => {
+  const f = fixture();
+  try {
+    writeFile(f.root, 'server/engine-core/package.json', JSON.stringify({ scripts: { test: 'jest' }, dependencies: {} }));
+    writeFile(f.root, 'server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts',
+      'export class RecoveryOrchestrator { analyzeBlastRadius() { return { isSafe: true, outOfBoundsDetected: [] }; } adapter.executeAtomicRecovery(plan, scope); }');
+    await assert.rejects(b16.run(context(f.root, 'B16')), /B16_COMPILED_RECOVERY_ORCHESTRATOR_MISSING/);
+  } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
+test('C22 fails closed when localization bootstrap or Go runtime test dependencies are absent', async () => {
+  const f = fixture();
+  try {
+    writeFile(f.root, 'client/cmd/repair.go',
+      'package cmd\\nimport "ugondu/client/i18n"\\nfunc Run() { _ = i18n.T("repair.ok") }\\n');
+    await assert.rejects(c22.run(context(f.root, 'C22')), /C22_I18N_BOOTSTRAP_MISSING/);
+
+    writeFile(f.root, 'client/i18n/bootstrap.go', 'package i18n\\nvar messages = map[string]string{"repair.ok": "OK"}\\n');
+    await assert.rejects(c22.run(context(f.root, 'C22')), /C22_REPAIR_RUNTIME_TEST_MISSING/);
+  } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
 test('D25-D28 and E29-E33 verify target locale files exist and match top-level keys of en.json', async () => {
   const localeVerifiers = [
     ['D25', d25, 'ar.json'],
