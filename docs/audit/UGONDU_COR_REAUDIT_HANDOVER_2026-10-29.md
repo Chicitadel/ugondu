@@ -296,3 +296,18 @@ A second re-audit closed the explicit skip bypass as well: `UGONDU_SKIP_BUILD=tr
 - **Physical candidate commits:** helper `79bf138b7baa2e25cc82a9cf5b39e9b27ea9e616`; verifier updates D25-D28/E29-E33; nested regression `2c50fb32c5e7df668d569fb0076375e339364d0b`; empty-object semantic alignment `df3f9a0e1dbf9b0db0e134302dbd951a21bba733`.
 - **Verification:** Source and tests are committed. Exact-head CI must rebuild and run the expanded locale suite; previous 40/40 COR evidence is stale for this candidate. Do not count this finding closed until nested mutation tests and all mandatory gates pass on the new head.
 - **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
+
+
+## 2026-10-30 independent follow-up — behavioral verification closure for A04-A06 and F35-F38
+
+**Finding IDs:** `UG-COR-ENGINE-SIGNER-INDEPENDENCE-001`, `UG-COR-FINALIZER-SIGNER-INDEPENDENCE-001`, `UG-COR-SIGNATURE-CRYPTO-VERIFICATION-001`, `UG-COR-RECOVERY-OBJECTIVE-BEHAVIORAL-VERIFICATION-001`.
+
+- **A04 — COR engine independence:** Refactored `scripts/cor-engine.js` so importing the module is side-effect-free while the CLI still executes through `require.main === module`. Exported its public engine/verifier functions. A04 now starts a child Node process with signing keys removed, instruments module loading, and proves the actual engine imports without loading `cor-signer.js`.
+- **A05 — finalizer independence:** Refactored `scripts/cor-finalize.js` to expose `finalize`, `verifyReceipt`, and `digest` while only executing finalization as a CLI entry point. A05 dynamically loads it without signing keys, verifies a correctly digested PASS receipt, and proves a FAIL receipt is rejected in a negative child process.
+- **A06 — cryptographic signing:** Replaced source keyword checks with an isolated temporary Git repository. The verifier generates ephemeral RSA keys, runs the actual signer, verifies the emitted RSA-SHA256 bundle, and proves that a mismatched trusted public key is rejected. No key material is committed or persisted.
+- **F35-F38 — recovery behavior:** Replaced source-presence checks with compiled runtime tests of approval decisions, governed route denial before mutation, immutable snapshot content hashing, blast-radius enforcement, and dry-run safety.
+- **Regression coverage:** Extended `tests/cor-stream-objective-verifiers.test.js`. The A04-A06 group passes 19/19 objective tests; the prior F35-F38 behavioral group also passes. These suites are wired into governance and fresh COR qualification.
+- **Exact candidate:** branch head `b6f64f2bc207198851d7dea09747806279890802`; evaluated merge candidate `59e630d7aa1e94d3153db7462a89dcfdce49666f`.
+- **Verification:** CI/CD #40987744466 SUCCESS. COR Certification #40987744216 SUCCESS. Fresh ledger reports 40/40 PASS, zero failed/skipped/not-run streams. Independent finalization is `READY_FOR_COR_SIGNATURE`. Evidence artifact #12947368564; SHA-256 `e3aa780a793f7c07bdde524c2094615585691b1e32e3e10c49f8c88a79cc1f18`.
+- **Still not certified:** trusted signing root verification and final COR authority signature were skipped; AWS physical qualification was skipped. No AWS resources were provisioned. This is qualification evidence, not a signed commercial release certificate.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
