@@ -27,7 +27,7 @@
  *
  * Pre-run step: compiles engine-core TypeScript to dist/ so test files
  * that load compiled modules work correctly.
- * Skip with UGONDU_SKIP_BUILD=true (e.g. when build is a prior CI pipeline step).
+ * Build skipping is prohibited: the exact candidate must compile in this process.
  */
 'use strict';
 
@@ -41,9 +41,10 @@ const suites = [
   // Core infrastructure
   'tests/schema-validation.test.js',
   'tests/adversarial-execution.test.js',
-  ...(process.env.UGONDU_SKIP_EVIDENCE_GATE === 'true' ? [] : ['tests/evidence-verification.test.js']),
+  'tests/evidence-verification.test.js',
   'tests/billing-gateway.test.js',
   'tests/engine-core.test.js',
+  'tests/recovery-transaction-failure.test.js',
   'tests/plugin-manager.test.js',
   'tests/repository-adapter.test.js',
   'tests/security-regression.test.js',

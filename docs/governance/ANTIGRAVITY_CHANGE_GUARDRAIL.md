@@ -831,3 +831,80 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 
 
 **Fail-closed follow-up:** `UGONDU_SKIP_BUILD=true` is now rejected because no independent exact-candidate build receipt is validated by the runner. Do not reintroduce a build-skip path unless an approved signed build receipt contract is implemented and tested against the current commit and tree. The latest diagnostic newline correction and skip-path change invalidate all earlier candidate CI/COR results; rerun against current HEAD.
+
+
+## 2026-10-29 re-audit guardrails — mandatory evidence and template drift
+
+- The COR evidence-verification suite is mandatory. Do not introduce environment-variable switches that remove required evidence, security, tenant-isolation, or release-gate suites from qualification.
+- A build or test that is skipped, missing, terminated, stale, or unexecuted is not PASS. Mandatory missing suites must force a non-zero process exit.
+- Any new CloudFormation resource requires updating and strengthening resource-graph tests; expected counts must reflect real resources and must assert the newly added logical ID rather than only changing a numeric count.
+- A CI failure is a confirmed defect signal that must be fixed in source/tests before handover. Never mark a failed exact-head run as evidence of closure.
+- Current follow-up branch: `fix/cor-runner-mandatory-evidence-gate-2026-10-29`, stacked on PR #56; do not edit protected branches directly.
+
+- Every CloudFormation resource type in a reviewed launch template must have an explicit resource mapping, least-privilege provider actions, scoped resource ARN derivation, read-back/rollback actions, and a regression test. Updating template resource counts without closing the resulting `AUTHORITY_GAP` is not remediation.
+- For dynamic names, parse the approved template value and bind it to the environment; unresolved substitutions must fail closed rather than widening the resource ARN to `*`.
+
+
+## Budget mapping test contract correction
+
+- The first budget-mapping regression attempt correctly resolved the exact scoped ARN and mapped create/modify actions, but the test incorrectly expected `budgets:DescribeBudget` in `providerActions` instead of the separate `verificationActions` field.
+- Corrected the test to assert create/modify in `providerActions`, describe/read-back in `verificationActions`, and delete in `rollbackActions`. The implementation's lifecycle separation remains intact.
+- The failed run is not a pass; rerun the capabilities workspace and full CI/COR on the newest head.
+
+
+## 2026-10-30 re-audit — AWS bootstrap region portability
+
+**Finding ID:** `UG-COR-AWS-BOOTSTRAP-REGION-PINNING-001`
+
+- **Confirmed defect:** The pilot CloudFormation template parameterized the Availability Zone but retained a default of `eu-west-3a`; the VPC Region tag and output description also hardcoded Paris-specific values. Deploying the same template into another AWS region could select an invalid AZ or report incorrect region metadata, contrary to the one-template/multi-region portability rule.
+- **Physical remediation:** Removed the fixed AZ default so the deployment must supply a valid `AWS::EC2::AvailabilityZone::Name` in the stack's region; changed the resource Region tag to the `AWS::Region` pseudo parameter; generalized the template description and subnet output to the selected region.
+- **Regression coverage:** Extended `tests/qualification/aws-staging-template-safety.test.mjs` to require no AZ default, require the Region tag to use `!Ref AWS::Region`, and reject hardcoded `eu-west-3a`/region tag values.
+- **Verification:** Source and test changes are committed to the dedicated PR #57 branch. Exact-head CI/COR must rerun; prior successful receipts for `1826e14e` do not apply to this newer candidate.
+- **Scope boundary:** This corrects infrastructure portability only. The template still bootstraps a host; it does not deploy application containers, configure a TLS edge, or establish persistent production data services. No AWS resources were provisioned.
+
+
+## 2026-10-30 follow-up — AWS Budgets IAM/ARN contract defect
+
+**Finding ID:** `UG-COR-AWS-BUDGET-IAM-ARN-CONTRACT-001`
+
+- **Confirmed defect:** The first `cap.cost.aws_budget` mapping used a colon after `budget` in the resource ARN and IAM action names `budgets:CreateBudget`, `budgets:DescribeBudget`, and `budgets:DeleteBudget`. AWS's current Service Authorization Reference maps the CreateBudget, UpdateBudget, and DeleteBudget API operations to `budgets:ModifyBudget`; the read operations use `budgets:ViewBudget`. The canonical budget ARN separator is a slash: `arn:PARTITION:budgets::ACCOUNT:budget/BUDGET_NAME`.
+- **Physical remediation:** Updated the mapping to use `budget/${budgetName}`, `budgets:ModifyBudget` for create/update and rollback, and `budgets:ViewBudget` for read-back. Kept least-privilege account/name scoping and fail-closed unresolved-name handling.
+- **Regression coverage:** Updated the plan-graph test to assert the canonical slash-form ARN and valid IAM action names; explicitly rejects the prior nonexistent action strings and colon-form ARN.
+- **Authoritative reference:** AWS Service Authorization Reference: https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html ; AWS Budget API ARN pattern: https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_Budget.html
+- **Verification:** Code and test committed on PR #57 branch. Exact-head CI/COR must pass; previous receipts predate this fix and cannot close the finding.
+
+
+## 2026-10-30 re-audit — COR stream executor placeholder evidence
+
+**Finding IDs:** `UG-COR-STREAM-EXECUTOR-STUBS-001`, `UG-COR-STREAM-A02-WILDCARD-VERIFIER-001`, `UG-COR-STREAM-A03-ENVELOPE-BINDING-VERIFIER-001`.
+
+- **Confirmed defects:** A02 only checked whether the source contained the words `wildcard` and `reject`, but did not fail if either was absent; it then invoked `assertCheck() { return true; }`. A03 inspected the wrong file (`policy-gate.ts` rather than `recovery.ts`), searched only for generic words, and used the same always-true assertion. Both could emit candidate-bound PASS receipts without verifying their stated objectives.
+- **Physical fixes:** Replaced A02 with explicit source verification of the exact wildcard predicate and fail-closed error. Replaced A03 with checks that the recovery route hashes the active capability envelope, passes that expected hash to `verifyAuthorization`, and the policy gate compares it and includes it in the seal payload.
+- **Regression coverage:** Added `tests/cor-stream-objective-verifiers.test.js` for positive and negative A02/A03 cases, identity mismatch, and shared stub detection; wired it into `npm run test:governance`.
+- **Systemic guard:** Added `scripts/cor/stream-source-integrity.js`; both `scripts/cor-engine.js` and `scripts/check-cor-stream-registry.js` now reject known always-true `assertCheck`, “pretend to check”, synthetic `verified_source`, and `mock-fingerprint` patterns before a verifier can be treated as eligible.
+- **Additional open executor findings from the same source scan:** The source scan also found obvious placeholder patterns in A07, B09-B16, C22, D25-D28, E29-E33, and a mock fingerprint in F39. These are now rejected by the shared guard where the matching patterns occur, but their objectives have **not** been implemented by this change. Each must be replaced with a real verifier and regression test; do not claim all 40 streams qualified.
+- **Verification:** Source/test wiring is committed on PR #57. Exact-head CI/COR must rerun. The registry gate is expected to remain blocked until the remaining placeholder executors are replaced; this is an intentional fail-closed result, not a regression to hide.
+- **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
+
+
+## 2026-10-30 independent re-audit addendum — verifier truthfulness
+
+- Finding `UG-COR-LOCALE-BASELINE-OPTIONAL-001` is physically fixed on the current remediation branch: D25-D28 and E29-E33 now require the English baseline before they can report locale parity.
+- Regression suite `tests/cor-locale-objective-verifiers.test.js` covers all nine locale verifiers for missing-baseline rejection and positive parity; the governance script now invokes it.
+- A passing stream count, metadata hash, or source-token scan is not proof of the stream's business objective. Every objective must have a positive test and an adversarial negative test that mutates the behavior, not merely the source text.
+- Verifiers that inspect source must establish semantic behavior or invoke the actual validator; substring-only evidence is provisional and cannot support COR certification.
+- New candidate commits invalidate all earlier CI/COR receipts. The locale fix is not GREEN until the newly wired test and all mandatory exact-head workflows pass.
+- No AWS resources were provisioned. The launch architecture remains provider-neutral; DirectAdmin-compatible deployment is retained until traction/official engagement justifies cost-bounded AWS staging. ECS EC2 is the initial low-cost AWS backend target; Fargate remains an upgrade tier, not a code fork.
+- Air Roofers federated services remain authoritative: AeroBill owns billing/metering and Mandatag owns license/entitlement decisions. Product code must integrate through configured contracts and must not duplicate those business rules.
+
+
+## 2026-10-30 verifier-strengthening guardrail
+
+- For a behavior objective, `verificationMode: TEST` must execute the real compiled implementation or actual CLI in an isolated fixture. Source substring presence is not behavioral proof.
+- Every runtime verifier must have an observed positive path and an adversarial negative path that would fail if the behavior regressed.
+- A04-A06 are now runtime-tested: engine/finalizer module independence, receipt verification, cryptographic signing and mismatched trust-root rejection. Preserve the `require.main === module` entrypoint guards; importing these modules must not run their CLI.
+- F35-F38 are now runtime-tested against compiled recovery logic and governed route behavior. Do not replace them with source token scans.
+- D25-D28/E29-E33 must use the shared recursive `scripts/cor/locale-key-parity.js`; do not reintroduce top-level-only `Object.keys` parity or skip the English baseline.
+- A candidate change invalidates previous exact-head receipts. The current qualification artifact is bound to merge candidate `59e630d7aa1e94d3153db7462a89dcfdce49666f`, with PR head `b6f64f2bc207198851d7dea09747806279890802`. Any subsequent source or documentation commit requires a new exact-head evidence run.
+- `READY_FOR_COR_SIGNATURE` is not a signed certificate. A skipped trust-root check, skipped signature ceremony, skipped AWS physical qualification, or absent live federation evidence is not PASS.
+- No AWS resources were provisioned. Keep DirectAdmin-compatible portability until the explicit traction/funding migration trigger; ECS on EC2 is the low-cost AWS tier and Fargate remains the later scaling tier.

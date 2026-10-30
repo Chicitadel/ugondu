@@ -82,13 +82,17 @@ export class RecoveryOrchestrator implements RecoveryContract {
             const result = await adapter.executeAtomicRecovery(plan, scope);
             if (!result.success) {
                 await adapter.rollback(result.checkpointId);
-                await TransactionAuthority.update(tx.id, tx.revision + 1, { status: 'FAILED' });
                 throw new Error(__t('atomic_execution_failed_and_wa'));
             }
             await TransactionAuthority.update(tx.id, tx.revision + 1, { status: 'SUCCESS' });
             return { success: true, executionEvidence: result.evidence };
         } catch (e) {
-            await TransactionAuthority.update(tx.id, tx.revision + 1, { status: 'FAILED' });
+            // Read the current revision before recording failure. The failed-result
+            // branch and this catch must not both update using the same stale revision.
+            const current = TransactionAuthority.get(tx.id);
+            if (current.status !== 'FAILED' && current.status !== 'SUCCESS') {
+                TransactionAuthority.update(tx.id, current.revision, { status: 'FAILED' });
+            }
             throw e;
         }
     }

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
+const { assertNoVerifierStub } = require('./cor/stream-source-integrity');
 
 const ROOT =
     process.env.UGONDU_ROOT ||
@@ -165,6 +166,7 @@ function loadExecutor(stream, commitSHA) {
     }
 
     const source = fs.readFileSync(executorPath, 'utf8');
+    try { assertNoVerifierStub(source, stream.id); } catch (error) { block(error.message); }
 
     if (/return\s+true\s*;/.test(source) && !/throw\s+new\s+Error|fail\(/.test(source) && !/assert/.test(source)) {
         block(`${stream.id} verifier rejected: obvious return true stub`);
@@ -477,10 +479,20 @@ async function main() {
     );
 }
 
-main().catch(
-    error =>
-        block(
-            error?.message ||
-            'unexpected COR engine failure'
-        )
-);
+if (require.main === module) {
+    main().catch(
+        error =>
+            block(
+                error?.message ||
+                'unexpected COR engine failure'
+            )
+    );
+}
+
+module.exports = {
+    main,
+    assertManifest,
+    loadExecutor,
+    verifyReceipt,
+    writeEvidence
+};

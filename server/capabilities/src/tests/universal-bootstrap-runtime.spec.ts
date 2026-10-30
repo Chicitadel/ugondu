@@ -75,9 +75,10 @@ describe('UniversalBootstrapRuntime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)', () => {
     const resources =
       UniversalBootstrapRuntime.parseCloudFormationTemplateResources(templateContent);
 
-    expect(resources).toHaveLength(14);
+    expect(resources).toHaveLength(15);
     expect(resources.map((r) => r.logicalId)).toEqual(
       expect.arrayContaining([
+        'MonthlyCostBudget',
         'PilotVPC',
         'InternetGateway',
         'AttachGateway',
@@ -110,7 +111,17 @@ describe('UniversalBootstrapRuntime (UG-UPLM-BOOTSTRAP-UNIVERSAL-001)', () => {
 
     expect(graph.status).toBe('READY');
     expect(graph.exitCode).toBe(0);
-    expect(graph.operations.length).toBe(15);
+    expect(graph.operations.length).toBe(16);
+    const budgetOperation = graph.operations.find((operation) => operation.resourceType === 'AWS::Budgets::Budget');
+    expect(budgetOperation?.capabilityId).toBe('cap.cost.aws_budget');
+    expect(budgetOperation?.resourceArns).toContain(
+      'arn:aws:budgets::971671216490:budget/airroofers-staging-monthly-cost-budget',
+    );
+    expect(budgetOperation?.providerActions).toEqual(
+      expect.arrayContaining(['budgets:ModifyBudget']),
+    );
+    expect(budgetOperation?.verificationActions).toContain('budgets:ViewBudget');
+    expect(budgetOperation?.rollbackActions).toContain('budgets:ModifyBudget');
     expect(graph.capabilityIds).toEqual(
       expect.arrayContaining([
         'cap.iac.cloudformation_stack',

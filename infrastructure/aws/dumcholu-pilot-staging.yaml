@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  Air Roofers SASU - Low-cost pilot host bootstrap in Paris (eu-west-3).
+  Air Roofers SASU - Low-cost pilot host bootstrap in the selected AWS region.
   Creates an isolated EC2 host and budget notifications; it does not deploy product containers
   or expose public ingress. Application rollout and a reviewed TLS edge are separate gated changes.
 
@@ -25,8 +25,7 @@ Parameters:
 
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
-    Default: eu-west-3a
-    Description: Availability Zone in the selected deployment region.
+    Description: Required Availability Zone selected from the target stack region.
 
   AmazonLinuxAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -93,7 +92,7 @@ Resources:
         - Key: Organization
           Value: Air Roofers SASU
         - Key: Region
-          Value: eu-west-3
+          Value: !Ref AWS::Region
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -270,7 +269,7 @@ Outputs:
     Description: Pilot Staging VPC ID
     Value: !Ref PilotVPC
   PublicSubnetId:
-    Description: Public Subnet in eu-west-3a
+    Description: Public Subnet in the selected deployment region
     Value: !Ref PublicSubnet
   InstanceId:
     Description: EC2 Pilot Host Instance ID

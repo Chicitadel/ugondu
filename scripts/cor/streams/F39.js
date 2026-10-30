@@ -43,7 +43,7 @@ async function verifyObjective(context, observations, artifacts) {
         }
     };
 
-    const scope = { baselineFingerprint: 'mock-fingerprint', resourceIdentifiers: [] };
+    const scope = { baselineFingerprint: 'sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', resourceIdentifiers: [] };
     const plan = {};
 
     try {
@@ -80,12 +80,14 @@ async function verifyObjective(context, observations, artifacts) {
         observations.push(`Captured expected atomic failure exception: ${e.message}`);
     }
 
+    if (!expectedAtomicError) throw new Error("F39_ATOMIC_FAILURE_NOT_PROPAGATED: Failed atomic recovery did not reject");
+    if (expectedAtomicError.message === "TRANSACTION_REVISION_CONFLICT") throw new Error("F39_ATOMIC_FAILURE_STATE_CONFLICT: Failure propagation was replaced by a stale transaction revision conflict");
     if (!executionRefused) throw new Error("F39_EXECUTION_NOT_REFUSED: Did not refuse execution on drift");
     if (!rollbackInvoked) throw new Error("F39_ROLLBACK_NOT_INVOKED: Rollback/recovery path was not invoked");
 
     observations.push('Verified execution atomically handles check drift by refusing execution');
     observations.push('Verified execution atomically invokes rollback when atomic execution fails');
-    artifacts.push('execution-recovery-evidence');
+    artifacts.push('server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts', 'execution-recovery-evidence');
 
     return {
         driftDetected,

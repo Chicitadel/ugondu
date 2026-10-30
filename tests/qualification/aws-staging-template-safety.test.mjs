@@ -18,6 +18,18 @@ test('pilot template remains a single valid CloudFormation document with portabl
   assert.doesNotMatch(template, /ami-[a-f0-9]{8,}/i);
 });
 
+test('pilot host selects an AZ from its stack region and tags the actual AWS region', () => {
+  const azStart = template.indexOf('  AvailabilityZone:');
+  const azEnd = template.indexOf('  AmazonLinuxAmiId:', azStart);
+  assert.ok(azStart >= 0 && azEnd > azStart, 'AvailabilityZone parameter must exist');
+  const azParameter = template.slice(azStart, azEnd);
+  assert.match(azParameter, /Type: AWS::EC2::AvailabilityZone::Name/);
+  assert.doesNotMatch(azParameter, /Default:/);
+  assert.match(template, /- Key: Region\n\s+Value: !Ref AWS::Region/);
+  assert.doesNotMatch(template, /eu-west-3a|Value: eu-west-3/);
+  assert.match(template, /Description: Public Subnet in the selected deployment region/);
+});
+
 test('cost parameter creates actual AWS Budgets notifications and does not claim a hard cap', () => {
   assert.match(template, /MonthlyCostBudget:\n\s+Type: AWS::Budgets::Budget/);
   assert.match(template, /Amount: !Ref MonthlyBudgetLimit/);
