@@ -38,8 +38,8 @@
 
 | Product | Repository / PR | Branch | Candidate baseline | Current posture |
 |---|---|---|---|---|
-| Ugondu | [Chicitadel/ugondu PR #57](https://github.com/Chicitadel/ugondu/pull/57) | `fix/cor-runner-mandatory-evidence-gate-2026-10-29` | `c22389617fc16abd71e5a8a54f34365ccf58612c`; locale remediation commits follow, latest known handover commit `a54fafccd419bf3e7328c84abeb1d440178185ae` | 20 stream verifiers committed; nine locale false-pass corrections and tests committed; exact-head checks for the new candidate pending |
-| Dumcholu | [Chicitadel/dumcholu PR #15](https://github.com/Chicitadel/dumcholu/pull/15) | `fix/cor-policy-service-endpoint-config-2026-10-29` | `3f662fb8c8b7491705e5f0b8fded8c4fc32c6f7a`; manifest-validator remediation commits follow, latest known security-test commit `6fed87132ad620084b423d700a95f7b49818b62f`; latest handover commit `ab88652344205145cba42500be3c39374239d155` | Mandatag/endpoint/manifest changes committed; strengthened manifest validation and negative tests committed; exact-head checks pending |
+| Ugondu | [Chicitadel/ugondu PR #57](https://github.com/Chicitadel/ugondu/pull/57) | `fix/cor-runner-mandatory-evidence-gate-2026-10-29` | `c22389617fc16abd71e5a8a54f34365ccf58612c`; locale remediation commits follow, latest known candidate commit `030f9d4dd35698ec246cf4d2f8b59e018d53923b` | 20 stream verifiers committed; nine locale false-pass corrections and tests committed; exact-head checks for the new candidate pending |
+| Dumcholu | [Chicitadel/dumcholu PR #15](https://github.com/Chicitadel/dumcholu/pull/15) | `fix/cor-policy-service-endpoint-config-2026-10-29` | `3f662fb8c8b7491705e5f0b8fded8c4fc32c6f7a`; manifest-validator remediation commits follow, latest validator correction `38382e6b652c2045b0230bcdf6a7d8508cb29b42`; latest handover commit `fe3b09490242b76ea701071409827e9b2022b81f` | Mandatag/endpoint/manifest changes committed; strengthened manifest validation and negative tests committed; exact-head checks pending |
 
 The commit hashes above are branch-specific receipts, not proof of current branch HEAD. Always query GitHub before starting a new actor or changing a file.
 
@@ -109,3 +109,11 @@ This handover is a coordination and change-control artifact. It is not a certifi
 - **Physical fix:** Catch handling now reloads the persisted transaction and updates FAILED only if it is not already terminal/FAILED.
 - **Tests:** Added a compiled-runtime regression test for rollback, original error preservation, and persisted FAILED revision; wired it into governance and the COR runner. F39 rejects the stale revision-conflict symptom.
 - **Verification:** New exact-head checks pending; do not use earlier 40/40 receipts to close this finding.
+
+
+## Verification update — 2026-10-30 01:20 UTC
+
+- **Ugondu PR #57:** latest known candidate `030f9d4dd35698ec246cf4d2f8b59e018d53923b`; COR Certification run #40985028471 and CI/CD run #40985028411 were pending with no job results available. They include the F39 and recovery transaction regression changes.
+- **Dumcholu PR #15:** candidate run #40984788551 failed because the new Dart manifest validator did not compile; focused Flutter tests 12/12, Flutter analysis, OpenAPI drift and Maven backend tests passed, but validator negative tests were skipped. The validator was rewritten at `38382e6b652c2045b0230bcdf6a7d8508cb29b42`. Exact-head reruns on handover head `fe3b09490242b76ea701071409827e9b2022b81f`: COR Policy Simulator Contract #40985106618, Deployment Manifest Qualification #40985106578 and Product Name Governance #40985106678 were queued at last check.
+- Do not report the Dumcholu manifest validator as passing until #40985106618 completes its validator and negative-case steps successfully.
+- Both PRs remain open draft PRs; neither is merged. Both product release postures remain `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
