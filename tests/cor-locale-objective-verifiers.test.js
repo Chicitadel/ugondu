@@ -78,3 +78,26 @@ test('locale verifiers reject key drift against the mandatory English baseline',
     fs.rmSync(f.root, { recursive: true, force: true });
   }
 });
+
+
+for (const { id, locale, verifier } of localeVerifiers) {
+  test(id + ' rejects nested leaf-key drift, not just top-level drift', async () => {
+    const f = fixture();
+    try {
+      writeJson(f.dir, 'en.json', { greeting: 'hello', navigation: { home: 'Home', account: { profile: 'Profile', security: 'Security' } } });
+      writeJson(f.dir, locale + '.json', { greeting: 'translated', navigation: { home: 'traduit', account: { profile: 'profil' } } });
+      await assert.rejects(verifier.run(context(f.root, id)), (error) => error.message.includes(id + '_' + locale.toUpperCase() + '_LOCALE_KEY_PARITY_MISMATCH') && error.message.includes('navigation.account.security'));
+    } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+  });
+}
+
+test('recursive locale parity accepts identical nested leaf paths for every objective verifier', async () => {
+  for (const { id, locale, verifier } of localeVerifiers) {
+    const f = fixture();
+    try {
+      writeJson(f.dir, 'en.json', { greeting: 'hello', navigation: { home: 'Home', account: { profile: 'Profile', security: 'Security' } }, actions: ['Save', 'Cancel'] });
+      writeJson(f.dir, locale + '.json', { greeting: 'translated', navigation: { home: 'traduit', account: { profile: 'profil', security: 'sécurité' } }, actions: ['Enregistrer', 'Annuler'] });
+      assert.equal((await verifier.run(context(f.root, id))).status, 'PASS');
+    } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+  }
+});
