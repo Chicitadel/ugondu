@@ -993,3 +993,10 @@ The current child candidates are Dumcholu PR #28 and Ugondu PR #62. Their exact 
 - Do not merge, deploy or certify on a skipped or pending test. Missing runtime prerequisites are blockers.
 
 No AWS resources were provisioned. Preserve portability and the explicit capital authorization gate. AeroBill and Mandatag remain the sole billing and entitlement authorities respectively. External operational gates remain open. Release is still `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 13. AWS pilot sizing guardrail — 2026-10-30
+
+The Dumcholu ECS-on-EC2 host must not default to `t3.small` while hosting a 1 GiB Java task. The current template defaults to `t3.medium` with `t3.large` as an explicit measured-demand upgrade. This remains a prepared deployment profile, not authorization to provision AWS. Require an approved monthly budget, private networking, secrets, TLS edge, health-gated rollout and rollback evidence before physical deployment.
