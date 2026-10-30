@@ -37,19 +37,13 @@ services:
     networks:
       - ugondu-internal
       - ugondu-external
-    mem_limit: 256m
-    init: true
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
     environment:
       - PORT=4002
       - GOVERNANCE_ROOT=/usr/src/app/.governance
       - IDENTITY_AUTHORITY_URL=${IDENTITY_AUTHORITY_URL:-https://identity.airroofers.eu/api/v1}
       - BILLING_AUTHORITY_URL=${BILLING_AUTHORITY_URL:-https://billing.airroofers.eu/api/v1}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
-    mem_limit: 512m
+    mem_limit: 256m
     init: true
     security_opt:
       - no-new-privileges:true
@@ -90,6 +84,12 @@ services:
       - UGONDU_KEY_REF=${UGONDU_KEY_REF:-}
       - UGONDU_PRIVATE_KEY=${UGONDU_PRIVATE_KEY:-}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
+    mem_limit: 512m
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       billing-gateway:
         condition: service_healthy
@@ -186,6 +186,12 @@ services:
       - PORT=4004
       - GOVERNANCE_ROOT=/usr/src/app/.governance
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
+    mem_limit: 128m
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4004/health/ready"]
       interval: 5s
