@@ -688,3 +688,12 @@ The first CI run after the passport middleware/default-admission remediation, [#
 - The failing workflow and logs remain part of the evidence trail. The source fix is not considered qualified until a fresh CI build, engine-core integration suite and COR certification complete successfully on the post-correction branch head.
 
 **Status:** `SOURCE CORRECTED / RETEST REQUIRED / NOT CLOSED`.
+
+
+### Dumcholu repository-authority test correction — 2026-10-30
+
+Dumcholu Portable Runtime Qualification [#41129779006](https://github.com/Chicitadel/dumcholu/actions/runs/41129779006) passed the dedicated AeroBill protocol regression step, then Maven reported 5 failures and 1 error in career journey tests. The tests had mocked repositories but assumed process-local cache behavior. Production cache-first logic was not restored.
+
+The test fixture was physically corrected in Dumcholu commit `cb5210f115d2d2d6971cb59a5cfd562b170b0868`: stateful repository fakes now retain saved discovery/guidance entities and return them on subsequent reads. The cache-authority regression simulates a durable deletion by removing the row after the service has cached it, then verifies the stale cache is not used. New exact-head Portable Runtime #41130600535, Deployment Manifest #41130600131 and Product Name Gate #41130600459 were queued at check time. All must pass on the final branch head.
+
+The test-fixture correction does not close the separate ORM optimistic-lock gap; concurrent multi-instance writes remain open.
