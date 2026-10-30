@@ -81,6 +81,7 @@ async function verifyObjective(context, observations, artifacts) {
     }
 
     if (!expectedAtomicError) throw new Error("F39_ATOMIC_FAILURE_NOT_PROPAGATED: Failed atomic recovery did not reject");
+    if (expectedAtomicError.message === "TRANSACTION_REVISION_CONFLICT") throw new Error("F39_ATOMIC_FAILURE_STATE_CONFLICT: Failure propagation was replaced by a stale transaction revision conflict");
     if (!executionRefused) throw new Error("F39_EXECUTION_NOT_REFUSED: Did not refuse execution on drift");
     if (!rollbackInvoked) throw new Error("F39_ROLLBACK_NOT_INVOKED: Rollback/recovery path was not invoked");
 
