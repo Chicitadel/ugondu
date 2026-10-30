@@ -415,3 +415,14 @@ New finding: `DUM-AWS-EC2-HOST-SIZING-001`.
 The Dumcholu ECS-on-EC2 template previously defaulted its host to `t3.small` (2 GiB) while allocating a 1 GiB Java task, leaving inadequate OS/ECS/container-runtime headroom and conflicting with the approved shared pilot baseline. The template now defaults to `t3.medium` (4 GiB), allows `t3.large` only as an explicit upgrade, and has a regression assertion preventing reintroduction of the undersized default.
 
 This is a template/code readiness correction only. It does not provision AWS. The shared pilot still requires an explicitly approved monthly budget, funding/traction trigger, and live deployment qualification. Preserve DirectAdmin compatibility and the same portable container/configuration contract. ECS on EC2 remains the least-cost initial AWS service tier; Fargate is a later scaling option.
+
+
+---
+
+## Final follow-up — Dumcholu deployment-template regression (2026-10-30)
+
+Finding `DUM-AWS-EC2-HOST-SIZING-001` now includes a test-driven correction record. The ECS-on-EC2 template defaults to `t3.medium` with `t3.large` as an explicit upgrade; a 1 GiB Java task is no longer paired with an undersized 2 GiB host default.
+
+The first deployment-manifest run exposed an over-escaped regex in the new regression assertion (run #41084914908). The assertion was corrected without removing or weakening the test. Current Dumcholu candidate branch: `fix/cor-career-tenant-claim-binding-2026-10-30`; latest recorded source/test/documentation commit before this handover sync: `37561afbb27b22bc11acf9aa657efe815000112c`. Re-run the manifest and portable-runtime workflows on the final child head; earlier failure is retained as evidence and not hidden.
+
+This sizing change is template preparation only; it does not provision EC2/ECS or authorize spend.
