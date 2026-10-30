@@ -122,3 +122,13 @@ This handover is a coordination and change-control artifact. It is not a certifi
 ## CI queue correction
 
 The earlier Ugondu COR Certification run #40985028471 and CI/CD run #40985028411 were subsequently cancelled before job results became available. They are not passing receipts. The latest Ugondu source/test candidate therefore still requires fresh exact-head CI and COR runs. Do not infer a pass from the earlier 40/40 result on `c2238961...`.
+
+
+### Additional Ugondu finding — nested locale parity false-pass
+
+- **Finding:** `UG-COR-LOCALE-NESTED-KEY-PARITY-001`. D25-D28/E29-E33 previously compared only root-level keys, while `scripts/validate-locales.js` validates recursively flattened leaf paths.
+- **Physical fix:** Added shared `scripts/cor/locale-key-parity.js`; all nine locale objective verifiers now compare recursive nested leaf paths, including array indexes, and reject prototype-pollution keys. Empty-object handling matches the canonical locale validator.
+- **Regression tests:** All nine streams have adversarial nested leaf-key drift tests plus positive nested object/array parity tests. Existing baseline-missing tests remain.
+- **Status:** Code and tests committed on the dedicated branch; exact-head CI/COR must rerun. All previous 40/40 receipts are historical and cannot close this new candidate.
+- **Candidate change commits:** helper `79bf138b7baa2e25cc82a9cf5b39e9b27ea9e616`; regression suite `2c50fb32c5e7df668d569fb0076375e339364d0b`; semantic alignment `df3f9a0e1dbf9b0db0e134302dbd951a21bba733`; audit note `61163446f7fc610bbe827ae388b46c5be0eda721`.
+- **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
