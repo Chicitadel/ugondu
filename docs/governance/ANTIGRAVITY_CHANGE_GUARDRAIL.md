@@ -908,3 +908,19 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - A candidate change invalidates previous exact-head receipts. The current qualification artifact is bound to merge candidate `59e630d7aa1e94d3153db7462a89dcfdce49666f`, with PR head `b6f64f2bc207198851d7dea09747806279890802`. Any subsequent source or documentation commit requires a new exact-head evidence run.
 - `READY_FOR_COR_SIGNATURE` is not a signed certificate. A skipped trust-root check, skipped signature ceremony, skipped AWS physical qualification, or absent live federation evidence is not PASS.
 - No AWS resources were provisioned. Keep DirectAdmin-compatible portability until the explicit traction/funding migration trigger; ECS on EC2 is the low-cost AWS tier and Fargate remains the later scaling tier.
+
+
+---
+
+## 2026-10-30 runtime-verifier depth supplement
+
+**Finding IDs:** `UG-COR-A07-REGISTRY-RUNTIME-PROOF-001`, `UG-COR-B11-LOCALE-UPDATER-RUNTIME-PROOF-001`.
+
+- A07 was still marked `verificationMode: STATIC` and inspected source substrings in `check-cor-stream-registry.js`. That could report PASS without executing the registry validator. It is now `verificationMode: TEST`: it executes the real validator against the repository, then executes it in an isolated fixture with a tampered repository identity and requires a non-zero rejection.
+- The A07 fixture copies the manifest, source-integrity guard and all 40 executor files; it uses the repository's installed dependency path and deletes the temporary fixture after execution. No signing keys or production data are copied.
+- B11 was still marked `verificationMode: STATIC` and inspected implementation tokens in `update-locales.js`. It is now `verificationMode: TEST`: it invokes the actual CLI in isolated temporary repositories, proves existing translations are preserved, and proves missing and extra keys fail closed.
+- Regression suites: `tests/cor-a07-runtime-verifier.test.js` and `tests/cor-b11-locale-updater-runtime.test.js`. Both are wired into `npm run test:governance`.
+- Required local commands: `npm run test:cor-a07-runtime-verifier`, `npm run test:cor-b11-locale-updater-runtime`, then `npm run test:governance`.
+- This supplement does **not** close other source-inspection verifiers. B09, B10, B12-B16 and C22 remain individually subject to objective-specific adversarial review; static verification may be retained only where the objective is inherently a static artifact constraint and the test validates the complete relevant contract.
+- Exact-head CI/COR evidence is mandatory for this branch. The previous 40/40 receipt for `01498bfa` is historical and cannot certify this descendant.
+- Do not provision AWS during this remediation. Hosting migration remains conditional on the agreed traction, official-engagement or funding trigger; all code and deployment contracts must remain host-portable.
