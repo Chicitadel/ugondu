@@ -13,15 +13,14 @@ Parameters:
 
   InstanceType:
     Type: String
-    Default: t3.small
-    AllowedValues: [t3.nano, t3.micro, t3.small, t3.medium]
-    Description: Low-cost EC2 instance type for launch phase ($15-$25/mo).
+    Default: t3.medium
+    AllowedValues: [t3.medium, t3.large]
+    Description: Minimum shared-host memory profile for the Ugondu and Dumcholu pilot; verify live regional pricing before deployment.
 
   MonthlyBudgetLimit:
     Type: Number
-    Default: 25.0
     MinValue: 1
-    Description: Monthly budget threshold in USD for AWS Budgets notifications; this is not a hard spending cap.
+    Description: Required, explicitly approved monthly budget threshold in USD for AWS Budgets notifications; this is not a hard spending cap.
 
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
