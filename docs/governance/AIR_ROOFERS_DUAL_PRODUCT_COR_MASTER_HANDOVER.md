@@ -300,3 +300,62 @@ The CareerJourneyController fell back to caller-supplied `X-Authenticated-Princi
 - **Dumcholu Fail-Closed Uncertified Region Guard**: **VERIFIED PASS** in code (`NigeriaCalibrationGuardTest` 4/4 PASS; `CountryConfigurationController` returns HTTP 422 `COUNTRY_CALIBRATION_UNCERTIFIED` for uncertified region simulations).
 - **Empirical Nigeria Econometric Dataset Calibration & Policy Sign-Off**: **PENDING / RELEASE BLOCKER** (external empirical dataset ingestion, provenance attestation, and policy authority sign-off remain required before enabling Nigeria production simulations).
 - **Overall Release Verdict**: Both Ugondu and Dumcholu remain **`PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`** pending authorized physical AWS staging deployment, live AeroBill/Mandatag transactions, empirical Nigeria calibration sign-off, hardware WebAuthn/FIDO2 ceremonies, and final human COR signatory authorization.
+
+
+---
+
+## Exact-head v29 re-audit continuation — 2026-10-30 15:50 CET
+
+This update supersedes earlier branch/head assumptions. It is append-only and does not certify either product.
+
+### Reconciled parent evidence
+
+The v29 forensic checklist and execution record are now the controlling audit baseline for this cycle. Parent candidate receipts verified against exact SHAs:
+- Dumcholu PR #27 candidate `651746127b3e7278e63ede47b331cb551b66afc4`: Java 21 / 32-module Maven + Compose + Docker workflow #41081132942 SUCCESS; deployment manifest #41081132967 SUCCESS; product-name governance #41081132955 SUCCESS.
+- Ugondu candidate code commit `e6a5352a8c25f0c0860d87f0bd370ee1feb20cf5`: COR #41080032536 SUCCESS (40/40 TEST-mode streams); CI/CD #41080032558 SUCCESS.
+- These are parent-SHA receipts. Any subsequent child commit invalidates their use as exact-head proof until its own workflows pass.
+
+### New finding — Dumcholu tenant binding
+
+**Finding:** `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`
+
+The v29 code parsed `citizenId@TENANT` / `citizenId:TENANT` and rejected conflicting headers, but still accepted an unbound raw principal and used caller-controlled `X-Authenticated-Tenant` as the effective tenant. Discovery creation persisted that header rather than the principal-bound tenant; existing discovery cases could be reused without checking tenant equality.
+
+**Physical fix on child PR #28:**
+- A tenant-bound principal subject is mandatory. Raw subject names fail closed.
+- `enforceOwnership` returns only the tenant embedded in the authenticated principal.
+- Discovery creation and pathway confirmation receive that trusted tenant, not the request header.
+- Existing discovery cases reject tenant mismatch.
+- Regression tests cover unbound-principal spoofing, trusted-tenant persistence despite forged headers, and cross-tenant case reuse.
+
+Branch: `fix/cor-career-tenant-claim-binding-2026-10-30`; parent PR #27 head `651746127b3e7278e63ede47b331cb551b66afc4`; source/test head before handover sync: `c6982e03bdb8747ad9ecc26408c669fd5585a1aa`.
+
+### New finding — Ugondu TEST-mode silent skips
+
+**Finding:** `UG-COR-TEST-MODE-SILENT-SKIP-001`
+
+Although all 40 verifiers had been moved to TEST mode and the parent COR workflow passed, B13, B16 and C22 had optional runtime branches. A missing runtime dependency could skip the behavioral proof yet still permit PASS.
+
+**Physical fix on child PR #62:**
+- B13 now fails if the actual registry validator is missing; positive and adversarial runtime validation are mandatory.
+- B16 now fails if the compiled production RecoveryOrchestrator artifact is missing; in-bounds and adversarial out-of-bounds runtime behavior must execute.
+- C22 now fails if the locale bootstrap, Go runtime test or Go toolchain is missing; localized CLI behavior must execute.
+- Added regression tests for each missing-dependency path.
+
+Branch: `fix/cor-runtime-verifiers-fail-closed-2026-10-30`; parent PR #61 head `3ac182661b15059f3c372e5fcf8db6e5a659fe07`; source/test head before handover sync: `8016b305a17027fffc05678e07276abd4c50a33f`.
+
+### Exact-head evidence requirements
+
+Do not reuse parent workflow success as child proof. PR #28 and PR #62 must each pass their own exact-head Java/Maven or Ugondu CI/COR workflows. If a fail-closed verifier reveals a missing build artifact, fix workflow ordering/build production rather than making the runtime proof optional again.
+
+### Architecture and commercial boundaries
+
+- No duplicate career service, AI gateway, event bus, or billing/licensing implementation.
+- AeroBill remains the sole billing, pricing, metering and payment authority.
+- Mandatag remains the sole entitlement and licensing authority.
+- Preserve DirectAdmin/shared-host compatibility; VPS is unavailable.
+- AWS is conditional on traction/official engagement/funding and explicit cost approval. No resources were provisioned or changed in this re-audit.
+- Use the existing low-cost pilot template only after authorization; it is a single-host pilot, not HA. Fargate remains a later scale-up.
+- Keep Nigeria empirical calibration, live federation transactions, FIDO2 hardware ceremony, physical staging, independent review and human sign-off open until evidence exists.
+
+**Overall status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
