@@ -182,8 +182,11 @@ export function admitPassport(
   const normalized = passportId.trim();
   if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) return { status: 'REJECTED' };
 
-  const requestedTenant = context?.tenantId?.trim();
-  if (context?.tenantId !== undefined && !requestedTenant) return { status: 'REJECTED' };
+  if (context?.tenantId !== undefined
+      && (typeof context.tenantId !== 'string' || !context.tenantId.trim())) {
+    return { status: 'REJECTED' };
+  }
+  const requestedTenant = typeof context?.tenantId === 'string' ? context.tenantId.trim() : undefined;
 
   if (normalized.startsWith('pp_v1.')) {
     const verified = verifySignedPassport(normalized);
