@@ -79,6 +79,8 @@ let ENGINE_PORT = parseInt(process.env.ENGINE_PORT || '4001', 10);
 let serverProcess = null;
 let mockBillingServer = null;
 let engineModule = null;
+const { AdmissionController } = require('../server/engine-core/dist/passport/gatekeeper/admission-controller.js');
+const { passportGuardMiddleware } = require('../server/engine-core/dist/middleware/passport-guard.middleware.js');
 
 if (!process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY || process.env.UGONDU_SERVICE_IDENTITY_PRIVATE_KEY === '<placeholder>') {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -179,6 +181,57 @@ after(async () => {
   if (mockBillingServer) {
     await new Promise((resolve) => mockBillingServer.close(resolve));
   }
+});
+
+test('ENG-PASS-004: unconfigured AdmissionController denies by default', () => {
+  const denyByDefault = new AdmissionController({}, {}, {}, {}, {}, {}, {});
+  assert.deepStrictEqual(
+    denyByDefault.admit('plausible_but_unverified', { tenantId: 'tenant_a' }),
+    { status: 'REJECTED' }
+  );
+});
+
+test('ENG-PASS-005: passport middleware rejects repeated and comma-joined credential headers', () => {
+  for (const header of [
+    ['signed-token-a', 'signed-token-b'],
+    'signed-token-a, signed-token-b',
+  ]) {
+    let status = 0;
+    let payload = null;
+    let nextCalled = false;
+    const req = {
+      headers: { 'x-ugondu-passport-id': header },
+      body: { tenantId: 'tenant_test_default' },
+    };
+    const res = {
+      status(code) { status = code; return this; },
+      json(body) { payload = body; return this; },
+    };
+    passportGuardMiddleware(req, res, () => { nextCalled = true; });
+    assert.strictEqual(status, 403);
+    assert.strictEqual(payload.code, 'PASSPORT_REQUIRED');
+    assert.strictEqual(nextCalled, false);
+  }
+});
+
+test('ENG-PASS-006: rejected passport credentials are never echoed in the response', () => {
+  const secretLikeCredential = 'opaque-secret-passport-value';
+  let status = 0;
+  let payload = null;
+  let nextCalled = false;
+  const req = {
+    headers: { 'x-ugondu-passport-id': secretLikeCredential },
+    body: { tenantId: 'tenant_test_default' },
+  };
+  const res = {
+    status(code) { status = code; return this; },
+    json(body) { payload = body; return this; },
+  };
+  passportGuardMiddleware(req, res, () => { nextCalled = true; });
+  assert.strictEqual(status, 403);
+  assert.strictEqual(payload.code, 'PASSPORT_REJECTED');
+  assert.strictEqual(JSON.stringify(payload).includes(secretLikeCredential), false);
+  assert.strictEqual(nextCalled, false);
 });
 
 test('ENG-001: /health/live and /health/ready return 200 with zero static cor_level', async () => {
