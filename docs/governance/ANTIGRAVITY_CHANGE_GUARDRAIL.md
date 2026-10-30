@@ -961,3 +961,21 @@ The latest branch SHA and the Dumcholu principal-identity finding are recorded i
     - `Deployment Manifest Qualification` [#41081132967](https://github.com/Chicitadel/dumcholu/actions/runs/41081132967) & push [#41081122073](https://github.com/Chicitadel/dumcholu/actions/runs/41081122073): **SUCCESS** (24s).
     - `Dumcholu Product Name Governance Gate` [#41081132955](https://github.com/Chicitadel/dumcholu/actions/runs/41081132955): **SUCCESS** (25s).
 - **Overall release posture**: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` pending authorized physical AWS staging deployment, live AeroBill/Mandatag federation transactions, empirical Nigeria econometric dataset calibration sign-off, hardware WebAuthn/FIDO2 ceremonies, and final human COR signatory authorization.
+
+
+---
+
+## 11. v29 exact-head re-audit addendum — 2026-10-30
+
+Two additional source-level gaps were confirmed after the parent candidate CI passed:
+
+1. `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`: raw principal IDs could borrow tenant identity from caller-supplied headers. Child PR #28 requires a tenant-bound principal and propagates only the authenticated tenant to discovery persistence/confirmation.
+2. `UG-COR-TEST-MODE-SILENT-SKIP-001`: B13/B16/C22 could skip their runtime behavior checks when dependencies were missing. Child PR #62 makes the validator, compiled orchestrator, locale bootstrap, Go test and Go toolchain mandatory.
+
+**Mandatory evidence rule:** A TEST-mode verifier may never return PASS after skipping its objective's runtime proof. Missing runtime dependencies are blockers. Fix CI build/test ordering; do not weaken the assertion.
+
+Exact candidate branches and SHAs, parent CI receipts, regression scope and release boundaries are recorded in `AIR_ROOFERS_DUAL_PRODUCT_COR_MASTER_HANDOVER.md`.
+
+All child workflows must pass on their own exact head. Parent workflow receipts are historical context only. Do not merge child PRs until exact-head tests, COR, review and guardrail reconciliation pass.
+
+No AWS resources were provisioned. Keep shared-host portability, AeroBill billing authority, Mandatag entitlement authority, and all external operational release gates unchanged. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
