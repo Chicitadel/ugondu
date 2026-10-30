@@ -1043,3 +1043,9 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 - AeroBill exclusively owns billing/pricing/metering; Mandatag exclusively owns licensing/entitlements. Do not duplicate either domain in Ugondu or Dumcholu.
 
 **Release status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+### CI regression retention — passport guard refactor
+- CI run [#41129941871](https://github.com/Chicitadel/ugondu/actions/runs/41129941871) exposed a TypeScript syntax error caused by a stale fragment left during the deny-by-default method replacement.
+- The fragment was removed in commit `7d50cacebf0208725db9cce094a78d3ebc874fb8`; duplicate comment cleanup followed in `652a2cd5586a2ecc3b59e08f21875df0018a91e4`.
+- Keep the failed run and logs. Do not weaken tests or mark this fixed until a new full CI/COR run passes on the final post-handover SHA.
