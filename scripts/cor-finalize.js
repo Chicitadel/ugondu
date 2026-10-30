@@ -159,34 +159,34 @@ function verifyReceipt(receipt, commitSHA, treeSHA) {
 
 function finalize() {
     assertClean();
-    
+
     if (!fs.existsSync(MANIFEST)) {
         block(
             'qualification manifest missing'
         );
     }
-    
+
     if (!fs.existsSync(LEDGER)) {
         block(
             'qualification evidence ledger missing'
         );
     }
-    
+
     if (!fs.existsSync(GATE_SUMMARY)) {
         block(
             'gate-summary missing'
         );
     }
-    
+
     const manifest =
         readJson(MANIFEST);
-    
+
     const ledger =
         readJson(LEDGER);
-    
+
     const gateSummary =
         readJson(GATE_SUMMARY);
-    
+
     if (
         gateSummary.allGatesPassed !== true
     ) {
@@ -194,7 +194,7 @@ function finalize() {
             'allGatesPassed != true'
         );
     }
-    
+
     if (
         gateSummary.skippedGates &&
         gateSummary.skippedGates.length > 0
@@ -203,7 +203,7 @@ function finalize() {
             'skippedGates not empty'
         );
     }
-    
+
     if (
         gateSummary.notRunGates &&
         gateSummary.notRunGates.length > 0
@@ -212,7 +212,7 @@ function finalize() {
             'notRunGates not empty'
         );
     }
-    
+
     if (
         gateSummary.failedGates &&
         gateSummary.failedGates.length > 0
@@ -221,7 +221,7 @@ function finalize() {
             'failedGates not empty'
         );
     }
-    
+
     if (
         manifest.repository !==
         'Chicitadel/ugondu'
@@ -230,7 +230,7 @@ function finalize() {
             'manifest repository mismatch'
         );
     }
-    
+
     if (
         manifest.streams?.length !== 40
     ) {
@@ -238,12 +238,12 @@ function finalize() {
             'manifest does not contain exactly 40 streams'
         );
     }
-    
+
     const manifestIds =
         manifest.streams.map(
             stream => stream.id
         );
-    
+
     if (
         JSON.stringify(manifestIds) !==
         JSON.stringify(IDS)
@@ -252,7 +252,7 @@ function finalize() {
             'manifest stream registry mismatch'
         );
     }
-    
+
     if (
         manifest.streams.some(
             stream => stream.status !== 'PLANNED'
@@ -262,7 +262,7 @@ function finalize() {
             'manifest contains self-certified stream status'
         );
     }
-    
+
     if (
         ledger.result !==
         'QUALIFICATION_PASS'
@@ -271,13 +271,13 @@ function finalize() {
             'qualification result is not PASS'
         );
     }
-    
+
     const commitSHA =
         git(['rev-parse', 'HEAD']);
-    
+
     const treeSHA =
         git(['rev-parse', 'HEAD^{tree}']);
-    
+
     if (
         manifest.candidateCommit &&
         manifest.candidateCommit !== commitSHA
@@ -286,7 +286,7 @@ function finalize() {
             'manifest candidateCommit mismatch'
         );
     }
-    
+
     if (
         manifest.candidateTree &&
         manifest.candidateTree !== treeSHA
@@ -295,7 +295,7 @@ function finalize() {
             'manifest candidateTree mismatch'
         );
     }
-    
+
     if (
         ledger.candidate?.repository !==
         'Chicitadel/ugondu'
@@ -304,7 +304,7 @@ function finalize() {
             'ledger repository mismatch'
         );
     }
-    
+
     if (
         ledger.candidate.commitSHA !==
         commitSHA
@@ -313,7 +313,7 @@ function finalize() {
             'ledger commit differs from HEAD'
         );
     }
-    
+
     if (
         ledger.candidate.treeSHA !==
         treeSHA
@@ -322,7 +322,7 @@ function finalize() {
             'ledger tree differs from HEAD'
         );
     }
-    
+
     if (
         ledger.manifestDigest !==
         digest(manifest)
@@ -331,7 +331,7 @@ function finalize() {
             'ledger manifest digest mismatch'
         );
     }
-    
+
     if (
         gateSummary.commitSHA !== commitSHA ||
         gateSummary.treeSHA !== treeSHA
@@ -340,7 +340,7 @@ function finalize() {
             'gateSummary commitSHA or treeSHA differs from HEAD'
         );
     }
-    
+
     if (
         !Array.isArray(ledger.streams) ||
         ledger.streams.length !== 40
@@ -349,12 +349,12 @@ function finalize() {
             '40 qualification receipts required'
         );
     }
-    
+
     const executionIds =
         ledger.streams.map(
             receipt => receipt.executionId
         );
-    
+
     if (
         new Set(executionIds).size !== 40
     ) {
@@ -362,12 +362,12 @@ function finalize() {
             'duplicate stream executionId detected'
         );
     }
-    
+
     const receiptIds =
         ledger.streams.map(
             receipt => receipt.streamId
         );
-    
+
     if (
         new Set(receiptIds).size !== 40
     ) {
@@ -375,7 +375,7 @@ function finalize() {
             'duplicate stream receipts detected'
         );
     }
-    
+
     if (
         JSON.stringify(
             [...receiptIds].sort()
@@ -388,7 +388,7 @@ function finalize() {
             'receipt registry does not equal A01-F40'
         );
     }
-    
+
     for (
         const receipt of ledger.streams
     ) {
@@ -398,7 +398,7 @@ function finalize() {
             treeSHA
         );
     }
-    
+
     if (
         digest(ledger.streams) !==
         ledger.evidenceRoot
@@ -407,15 +407,15 @@ function finalize() {
             'qualification evidence root mismatch'
         );
     }
-    
+
     assertClean();
-    
+
     const finalCommitSHA =
         git(['rev-parse', 'HEAD']);
-    
+
     const finalTreeSHA =
         git(['rev-parse', 'HEAD^{tree}']);
-    
+
     if (
         finalCommitSHA !== commitSHA ||
         finalTreeSHA !== treeSHA
@@ -424,7 +424,7 @@ function finalize() {
             'candidate changed during finalization'
         );
     }
-    
+
     const finalization = {
         schemaVersion: '2.0.0',
         repository: 'Chicitadel/ugondu',
@@ -441,17 +441,17 @@ function finalize() {
         finalizedAt:
             new Date().toISOString()
     };
-    
+
     finalization.finalizationDigest =
         digest(finalization);
-    
+
     fs.mkdirSync(
         EVIDENCE_DIR,
         {
             recursive: true
         }
     );
-    
+
     fs.writeFileSync(
         OUTPUT,
         JSON.stringify(
@@ -464,7 +464,7 @@ function finalize() {
             mode: 0o600
         }
     );
-    
+
     console.log(
         'Independent COR finalization PASS'
     );
