@@ -626,8 +626,8 @@ In accordance with UAIGOS v3.0.0 and fail-closed COR governance, five specialize
 
 | Product | Repository / PR | Branch | Exact Commit SHA | Workflow Receipts & Posture |
 |---|---|---|---|---|
-| **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `94ff59cf664e56356e7ce1375320af9906f65278` | • **Portable Runtime Qualification** [#41129779006](https://github.com/Chicitadel/dumcholu/actions/runs/41129779006): IN PROGRESS (AeroBill protocol step PASS; Maven reactor running)<br>• **Deployment Manifest Qualification** [#41129779034](https://github.com/Chicitadel/dumcholu/actions/runs/41129779034): SUCCESS<br>• **Product Name Governance Gate** [#41129778992](https://github.com/Chicitadel/dumcholu/actions/runs/41129778992): SUCCESS |
-| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `652a2cd5586a2ecc3b59e08f21875df0018a91e4` (source candidate before this note update) | • **COR Certification** [#41129855326](https://github.com/Chicitadel/ugondu/actions/runs/41129855326): PENDING on exact head<br>• **CI/CD and Deployment Manifest:** previous candidate receipts are not reused; exact-head qualification required after source/test and handover changes |
+| **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `a9728c565d5291a9da16d7634d25284c10faa7b5` (source/test candidate before this receipt update) | • **Portable Runtime Qualification** [#41129779006](https://github.com/Chicitadel/dumcholu/actions/runs/41129779006): IN PROGRESS (AeroBill protocol step PASS; Maven reactor running)<br>• **Deployment Manifest Qualification** [#41129779034](https://github.com/Chicitadel/dumcholu/actions/runs/41129779034): SUCCESS<br>• **Product Name Governance Gate** [#41129778992](https://github.com/Chicitadel/dumcholu/actions/runs/41129778992): SUCCESS |
+| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `5c254e037a420aa15369c251715ef53284a0470a` (source/test candidate before this receipt update) | • **COR Certification** [#41129855326](https://github.com/Chicitadel/ugondu/actions/runs/41129855326): PENDING on exact head<br>• **CI/CD and Deployment Manifest:** previous candidate receipts are not reused; exact-head qualification required after source/test and handover changes |
 | **Platform Core** | [Chicitadel/platform-core](https://github.com/Chicitadel/platform-core) | `security/arf-002-003-zero-trust-hardening-2026-10-29` | `49f64dcc` | • Resolved administrative SSO redirect loop on `admin.airroofers.eu` and verified live session probes on `license.airroofers.eu` |
 
 
@@ -740,3 +740,21 @@ Physical remediation was committed on Dumcholu PR #28:
 - Source/test candidate before evidence-note update: `d5e2307d24d5248c5fe96cd150de6ac9c6bf7483`.
 
 The prior failed run and logs remain evidence. Exact-head Java 21 qualification must pass on the post-note candidate. The independent optimistic-lock gap remains open: entities still need a separate ORM-managed version column and concurrent-writer conflict/retry tests.
+
+
+## Final qualification receipts for current source/test candidates — 2026-10-30
+
+### Ugondu candidate `5c254e037a420aa15369c251715ef53284a0470a`
+- CI/CD [#41132521021](https://github.com/Chicitadel/ugondu/actions/runs/41132521021): **SUCCESS**. All 9 workspace jobs, 5 Go targets, engine-core build/lint/type-check/unit tests, all-workspace tests, integration tests and release-integrity/governance gates passed. Docker image validation and Build & Publish Release steps were skipped.
+- COR [#41132521069](https://github.com/Chicitadel/ugondu/actions/runs/41132521069): **SUCCESS / READY_FOR_COR_SIGNATURE**. Build, locales, I18N, architecture, imports, type check, workspace tests, COR remediation suite, pinned policy/evidence, stream registry, fresh COR qualification, independent finalization, final candidate integrity and evidence upload passed. Evidence-freshness, signing-trust-root and final authority signature steps were skipped.
+- Deployment Manifest [#41132521032](https://github.com/Chicitadel/ugondu/actions/runs/41132521032): **SUCCESS**.
+- AWS Physical Qualification Gate: **SKIPPED**; no AWS resources were provisioned.
+
+### Dumcholu candidate `a9728c565d5291a9da16d7634d25284c10faa7b5`
+- Deployment Manifest [#41132178331](https://github.com/Chicitadel/dumcholu/actions/runs/41132178331): **SUCCESS**.
+- Product Name Governance [#41132178472](https://github.com/Chicitadel/dumcholu/actions/runs/41132178472): **SUCCESS**.
+- Portable Runtime [#41132178535](https://github.com/Chicitadel/dumcholu/actions/runs/41132178535): Java 21 AeroBill regressions **PASS**, full Maven runtime/dependency reactor **PASS**, Compose contract **PASS**; portable Docker image build still **IN PROGRESS** at time of receipt update.
+
+**Exact-head discipline:** This append-only handover update creates a new documentation descendant on the Ugondu branch. The source/test receipts above belong to the stated candidate SHAs, not to the resulting documentation commit. Fresh checks on the post-note branch head are required wherever workflow path filters run.
+
+**Release posture:** Ugondu is `READY_FOR_COR_SIGNATURE`, not finally signed. Dumcholu portable runtime remains pending Docker image completion. The shared passport registry/revocation and Dumcholu ORM optimistic-lock gaps remain open. Overall ecosystem posture remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
