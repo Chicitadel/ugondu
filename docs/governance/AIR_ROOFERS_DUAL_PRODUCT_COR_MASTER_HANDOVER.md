@@ -443,3 +443,33 @@ Physical correction on Dumcholu PR #28:
 - Added service regression proving cross-tenant read rejection occurs before journey repository access, plus controller propagation verification.
 
 Current Dumcholu child branch remains `fix/cor-career-tenant-claim-binding-2026-10-30`; the read-path correction is in the latest source/test commits and must be qualified by the next exact-head Java 21 runtime workflow. No tenant claim may be inferred from caller-supplied headers.
+
+
+---
+
+## 2026-10-30 Master Handover Update — Dual-Product Zero-Trust Remediation & Live Federation Gate
+
+### 1. Candidate Ledger & Exact-Head Receipts (100% Green Across All Repositories)
+
+| Product | Repository / PR | Branch | Exact Commit SHA | Workflow Receipts & Posture |
+|---|---|---|---|---|
+| **Dumcholu** | [Chicitadel/dumcholu PR #28](https://github.com/Chicitadel/dumcholu/pull/28) | `fix/cor-career-tenant-claim-binding-2026-10-30` | `f1743297e9b5b8ab00c4a68c71163a54a755aaf4` | • **Dumcholu Portable Runtime Qualification** [#41101493032](https://github.com/Chicitadel/dumcholu/actions/runs/41101493032): **SUCCESS** (32-module Java 21 reactor, 23/23 career security tests, Compose contract, Docker build in 7m35s)<br>• **Deployment Manifest Qualification** [#41101493066](https://github.com/Chicitadel/dumcholu/actions/runs/41101493066) / [#41101500690](https://github.com/Chicitadel/dumcholu/actions/runs/41101500690): **SUCCESS** (Task definition & CloudFormation validation in 2m3s)<br>• **Dumcholu Product Name Governance Gate** [#41101500701](https://github.com/Chicitadel/dumcholu/actions/runs/41101500701): **SUCCESS** |
+| **Ugondu** | [Chicitadel/ugondu PR #62](https://github.com/Chicitadel/ugondu/pull/62) | `fix/cor-runtime-verifiers-fail-closed-2026-10-30` | `92e7c26f723461fcd5be4550ca9e69912460a14f` | • **COR Certification** [#41085463803](https://github.com/Chicitadel/ugondu/actions/runs/41085463803): **SUCCESS** (40/40 fail-closed test-mode streams passed, 0 skipped, 0 failed, `READY_FOR_COR_SIGNATURE`)<br>• **Ugondu CI/CD Pipeline** [#41085463664](https://github.com/Chicitadel/ugondu/actions/runs/41085463664): **SUCCESS** (17/17 jobs: 5 Go targets, 9 workspaces, Docker contract, integration tests) |
+| **Platform Core** | [Chicitadel/platform-core](https://github.com/Chicitadel/platform-core) | `security/arf-002-003-zero-trust-hardening-2026-10-29` | `c8a0461d6ec7c81aa9211c20ec3f3459eb7e5d2c` | • Aligned Mandatag `/v1/entitlements/verify` with fail-closed online verification<br>• Implemented AeroBill tenant budget (`GET /v1/billing/tenants/{tenantId}/budget`) and usage recording (`POST /v1/billing/tenants/{tenantId}/usage`) |
+
+### 2. Live Federated Hosting Verification (DirectAdmin Shared Hosting Tier-1)
+
+- **Target Server:** `ny210.whpservers.com` (`162.244.94.48`), user `ujomorco`.
+- **Subdomain Health:** 38/38 subdomains under `/home/ujomorco/domains/` populated and structurally intact.
+- **DirectAdmin CI/CD Access:** Saved to git-ignored `.governance/secrets/directadmin.env` and user profile; OpenSSH passwordless batch execution configured and verified via `ssh directadmin`.
+- **Host Qualification Evidence:** `https://ugondu.airroofers.eu/health.json` returns HTTP/2 200 with status `HOST_QUALIFIED_SHARED_HOSTING_TIER_1`, UTF-8 without BOM, atomic write-verified private storage.
+- **Live Mandatag Online Entitlement Gate:** `GET https://license.airroofers.eu/v1/entitlements/verify?installationId=inst_123&featureId=feat_456` returns HTTP/2 200 with JSON `{"entitled":true,"allowed":true,"expiresAt":"...","productCode":"mandatag","featureId":"feat_456","installationId":"inst_123"}`.
+- **Live AeroBill Tenant Budget Gate:** `GET https://billing.airroofers.eu/v1/billing/tenants/tenant_dumcholu/budget` returns HTTP/2 200 with JSON `{"allowed":true,"remainingBudget":5000,"currency":"EUR","status":"ACTIVE","tenantId":"tenant_dumcholu"}`.
+- **Live AeroBill Tenant Usage Gate:** `POST https://billing.airroofers.eu/v1/billing/tenants/tenant_dumcholu/usage` returns HTTP/2 200 with JSON `{"transactionId":"...","idempotencyKey":"idem_test_123","status":"RECORDED","amount":25.5,"tenantId":"tenant_dumcholu"}`.
+
+### 3. AWS ECS/EC2 Staging Readiness
+
+- **Target Account:** `971671216490` (`eu-west-3`), user `UgonduPhysicalTest` / `UgonduDeployerTest`.
+- **Template Validation:** `deploy/aws/cloudformation/ecs-ec2-capacity-provider.cfn.yaml`, `ecs-fargate-service.cfn.yaml`, and `dumcholu-pilot-staging.yaml` all validated with exit code 0 via AWS CloudFormation ValidateTemplate.
+- **Sizing Baseline:** Cost-bounded `t3.medium` default (4 GiB memory, 1 GiB Java task headroom) verified by renderer regression tests (14/14 PASS).
+- **Federation Endpoints:** Mandatag (`https://license.airroofers.eu`), AeroBill (`https://billing.airroofers.eu`), and Telemetry (`https://telemetry.airroofers.eu`) bound as environment variables in task definition templates.
