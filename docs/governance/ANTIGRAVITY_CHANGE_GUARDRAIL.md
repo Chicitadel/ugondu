@@ -1049,3 +1049,11 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 - CI run [#41129941871](https://github.com/Chicitadel/ugondu/actions/runs/41129941871) exposed a TypeScript syntax error caused by a stale fragment left during the deny-by-default method replacement.
 - The fragment was removed in commit `7d50cacebf0208725db9cce094a78d3ebc874fb8`; duplicate comment cleanup followed in `652a2cd5586a2ecc3b59e08f21875df0018a91e4`.
 - Keep the failed run and logs. Do not weaken tests or mark this fixed until a new full CI/COR run passes on the final post-handover SHA.
+
+
+### Passport-to-billing tenant binding
+- The tenant returned by cryptographic passport verification is the only passport tenant authority. Never substitute `req.body.tenantId` or a default tenant.
+- Before any deployment plan is created, compare the verified passport tenant with the tenant returned by the federated billing authority. Missing or mismatched tenant values must fail closed.
+- Carry the verified passport tenant through request-scoped response locals; do not recompute it from user input.
+- Keep a regression proving that a valid tenant-A passport paired with a tenant-B billing authorization is denied.
+- This adapter boundary does not move billing, pricing or metering logic into Ugondu. AeroBill remains the sole authority for those decisions.
