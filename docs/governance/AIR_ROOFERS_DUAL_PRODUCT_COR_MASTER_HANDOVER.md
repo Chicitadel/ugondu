@@ -38,8 +38,8 @@
 
 | Product | Repository / PR | Branch | Candidate baseline | Current posture |
 |---|---|---|---|---|
-| Ugondu | [Chicitadel/ugondu PR #57](https://github.com/Chicitadel/ugondu/pull/57) | `fix/cor-runner-mandatory-evidence-gate-2026-10-29` | `c22389617fc16abd71e5a8a54f34365ccf58612c`; locale remediation commits follow, latest known handover commit `2c59ed79c2111643c168efedf6534c615a17daee` | 20 stream verifiers committed; nine locale false-pass corrections and tests committed; exact-head checks for the new candidate pending |
-| Dumcholu | [Chicitadel/dumcholu PR #15](https://github.com/Chicitadel/dumcholu/pull/15) | `fix/cor-policy-service-endpoint-config-2026-10-29` | `3f662fb8c8b7491705e5f0b8fded8c4fc32c6f7a`; manifest-validator remediation commits follow, latest known workflow commit `472725bb29108c0c63f76d7d489c127ce8ce5066` | Mandatag/endpoint/manifest changes committed; strengthened manifest validation and negative tests committed; exact-head checks pending |
+| Ugondu | [Chicitadel/ugondu PR #57](https://github.com/Chicitadel/ugondu/pull/57) | `fix/cor-runner-mandatory-evidence-gate-2026-10-29` | `c22389617fc16abd71e5a8a54f34365ccf58612c`; locale remediation commits follow, latest known handover commit `c0077ff294633676400202fc0982bb586be9f425` | 20 stream verifiers committed; nine locale false-pass corrections and tests committed; exact-head checks for the new candidate pending |
+| Dumcholu | [Chicitadel/dumcholu PR #15](https://github.com/Chicitadel/dumcholu/pull/15) | `fix/cor-policy-service-endpoint-config-2026-10-29` | `3f662fb8c8b7491705e5f0b8fded8c4fc32c6f7a`; manifest-validator remediation commits follow, latest known security-test commit `6fed87132ad620084b423d700a95f7b49818b62f`; latest handover commit `8b13af23182fc7b15f0b463bdcb08c8eae33dd44` | Mandatag/endpoint/manifest changes committed; strengthened manifest validation and negative tests committed; exact-head checks pending |
 
 The commit hashes above are branch-specific receipts, not proof of current branch HEAD. Always query GitHub before starting a new actor or changing a file.
 
@@ -60,6 +60,7 @@ The commit hashes above are branch-specific receipts, not proof of current branc
 - `DUM-COR-RESIDUAL-LOCALHOST-DEFAULTS-001`: implicit localhost API defaults removed from client repositories.
 - Existing reported tests: Maven licensing and Gemini modules; Flutter shared/citizen/partner; task-definition render tests; previous exact-head workflows green on `3f662fb...`.
 - New independent validator tests reject database secret entries placed in Environment and endpoint-value drift. The exact-head workflow must run these tests before the strengthened manifest check is considered closed.
+- New security finding `DUM-COR-MANDATAG-JSON-SUBSTRING-GRANT-001`: regex substring matching could accept malformed/nested/ambiguous entitlement JSON. The adapter now parses strict JSON, requires a top-level boolean entitlement field, rejects duplicate/conflicting/non-boolean values, and has negative regression tests.
 - No live AeroBill/Mandatag production transaction is claimed by unit tests or mocked HTTP responses.
 
 ## 6. Required remaining COR evidence
