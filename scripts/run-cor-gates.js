@@ -44,6 +44,7 @@ const suites = [
   'tests/evidence-verification.test.js',
   'tests/billing-gateway.test.js',
   'tests/engine-core.test.js',
+  'tests/recovery-transaction-failure.test.js',
   'tests/plugin-manager.test.js',
   'tests/repository-adapter.test.js',
   'tests/security-regression.test.js',
