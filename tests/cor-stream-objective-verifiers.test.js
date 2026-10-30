@@ -142,17 +142,23 @@ test('A07 executes the registry validator and fails closed when the validator is
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
-test('B09 and B10 verify jest.setup.ts UPM bypass removal and unit-test translation fixture', async () => {
+test('B09 and B10 execute real Jest behavior and reject adversarial setup mutations', async () => {
+  assert.equal(b09.metadata.verificationMode, 'TEST');
+  assert.equal(b10.metadata.verificationMode, 'TEST');
+
   const r09 = await b09.run(context(REPO_ROOT, 'B09'));
   assert.equal(r09.status, 'PASS');
+  assert.ok(r09.observations.some((value) => value.includes('Adversarial Jest setup')));
+
   const r10 = await b10.run(context(REPO_ROOT, 'B10'));
   assert.equal(r10.status, 'PASS');
+  assert.ok(r10.observations.some((value) => value.includes('Adversarial setup returning [fr] values')));
 
   const f = fixture();
   try {
     writeFile(f.root, 'server/engine-core/jest.setup.ts', 'process.env.UGONDU_UPM_BYPASS = "1";\n');
-    await assert.rejects(b09.run(context(f.root, 'B09')), /B09_GLOBAL_UPM_BYPASS_PRESENT/);
-    await assert.rejects(b10.run(context(f.root, 'B10')), /B10_GLOBAL_TRANSLATION_FIXTURE_MISSING/);
+    await assert.rejects(b09.run(context(f.root, 'B09')), /COR_JEST_RUNTIME_CONFIG_MISSING/);
+    await assert.rejects(b10.run(context(f.root, 'B10')), /B10_JEST_CONFIG_MISSING/);
   } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
@@ -168,8 +174,10 @@ test('B12 verifies canonical locale validator contract and rejects an incomplete
 });
 
 test('B13 verifies Ugondu manifest has zero EAORCS inheritance and rejects contaminated manifests', async () => {
+  assert.equal(b13.metadata.verificationMode, 'TEST');
   const r13 = await b13.run(context(REPO_ROOT, 'B13'));
   assert.equal(r13.status, 'PASS');
+  assert.ok(r13.observations.some((obs) => obs.includes('Executed scripts/check-cor-stream-registry.js at runtime')));
 
   const f = fixture();
   try {
@@ -183,9 +191,14 @@ test('B13 verifies Ugondu manifest has zero EAORCS inheritance and rejects conta
 });
 
 test('B14, B15, and B16 verify capability duplicate rejection, diagnosis delegation, and absence of out-of-bounds bash execution', async () => {
+  assert.equal(b14.metadata.verificationMode, 'TEST');
+  assert.equal(b15.metadata.verificationMode, 'TEST');
+  assert.equal(b16.metadata.verificationMode, 'TEST');
   assert.equal((await b14.run(context(REPO_ROOT, 'B14'))).status, 'PASS');
   assert.equal((await b15.run(context(REPO_ROOT, 'B15'))).status, 'PASS');
-  assert.equal((await b16.run(context(REPO_ROOT, 'B16'))).status, 'PASS');
+  const r16 = await b16.run(context(REPO_ROOT, 'B16'));
+  assert.equal(r16.status, 'PASS');
+  assert.ok(r16.observations.some((obs) => obs.includes('Executed compiled RecoveryOrchestrator.analyzeBlastRadius at runtime')));
 
   const f = fixture();
   try {
@@ -201,7 +214,10 @@ test('B14, B15, and B16 verify capability duplicate rejection, diagnosis delegat
 });
 
 test('C22 verifies client repair CLI uses i18n.T without hardcoded fmt strings', async () => {
-  assert.equal((await c22.run(context(REPO_ROOT, 'C22'))).status, 'PASS');
+  assert.equal(c22.metadata.verificationMode, 'TEST');
+  const r22 = await c22.run(context(REPO_ROOT, 'C22'));
+  assert.equal(r22.status, 'PASS');
+  assert.ok(r22.observations.some((obs) => obs.includes('resolve in client/i18n/bootstrap.go')));
 
   const f = fixture();
   try {
@@ -246,7 +262,6 @@ test('F39 verifies atomic drift check and rollback on real RecoveryOrchestrator'
   assert.equal(receipt.rollbackInvoked, true);
   assert.ok(receipt.artifacts.includes('server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts'));
 });
-
 
 test('F39 proves drift refusal and rollback error propagation using the built orchestrator contract', async () => {
   const f = fixture();
@@ -307,7 +322,6 @@ test('F39 rejects an orchestrator that rolls back but silently returns after ato
   }
 });
 
-
 test('F35-F38 execute compiled recovery behaviors and reject adversarial conditions', async () => {
   for (const [id, verifier] of [['F35', f35], ['F36', f36], ['F37', f37], ['F38', f38]]) {
     const receipt = await verifier.run(context(REPO_ROOT, id));
@@ -317,7 +331,6 @@ test('F35-F38 execute compiled recovery behaviors and reject adversarial conditi
   }
 });
 
-
 test('A04-A06 execute engine/finalizer independence and cryptographic signer behavior', async () => {
   for (const [id, verifier] of [['A04', a04], ['A05', a05], ['A06', a06]]) {
     const receipt = await verifier.run(context(REPO_ROOT, id));
@@ -326,7 +339,6 @@ test('A04-A06 execute engine/finalizer independence and cryptographic signer beh
     assert.ok(receipt.artifacts.length > 0, id);
   }
 });
-
 
 test('Antigravity guardrail preserves behavioral verifier and certification boundaries', () => {
   const guardrail = fs.readFileSync(

@@ -924,3 +924,40 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - This supplement does **not** close other source-inspection verifiers. B09, B10, B12-B16 and C22 remain individually subject to objective-specific adversarial review; static verification may be retained only where the objective is inherently a static artifact constraint and the test validates the complete relevant contract.
 - Exact-head CI/COR evidence is mandatory for this branch. The previous 40/40 receipt for `01498bfa` is historical and cannot certify this descendant.
 - Do not provision AWS during this remediation. Hosting migration remains conditional on the agreed traction, official-engagement or funding trigger; all code and deployment contracts must remain host-portable.
+
+
+---
+
+## 10. Re-audit update — B09/B10 runtime proof requirement (2026-10-30)
+
+B09 and B10 have been converted from source-pattern checks to actual Jest runtime probes on branch `fix/cor-b09-b10-runtime-verifiers-2026-10-30`.
+
+- B09 must execute the actual engine-core Jest setup and prove the real `UpmExecutionGate` rejects when its secret is absent. An adversarial mocked gate must cause the probe to fail.
+- B10 must execute both global and shared-module translation fixtures and prove they return deterministic `[en]` values. An adversarial `[fr]` setup must cause the probe to fail.
+- Shared probe helper: `scripts/cor/run-jest-runtime-probe.js`.
+- Regression suite: `tests/cor-stream-objective-verifiers.test.js`.
+
+**Do not mark B09/B10 GREEN until exact-head tests and CI/COR pass.** Source token presence is not proof of runtime behavior. Apply the same objective-by-objective review to remaining STATIC verifiers; do not blindly convert checks whose objective is genuinely static, but never use static source scanning as proof of a runtime guarantee.
+
+The latest branch SHA and the Dumcholu principal-identity finding are recorded in the canonical dual-product handover. Residual tenant-claim trust and process-local career discovery/guidance persistence remain open. No AWS resources were provisioned; billing/entitlement authority remains AeroBill/Mandatag respectively.
+
+
+---
+
+## 11. Exact-head verification & complete TEST-mode verifier upgrade (2026-10-30 16:36 CET)
+
+- **Ugondu PR #61 (`fix/cor-b09-b10-runtime-verifiers-2026-10-30`) — Commit `e6a5352a8c25f0c0860d87f0bd370ee1feb20cf5`**:
+  - Resolved `ERR_PACKAGE_PATH_NOT_EXPORTED` in `scripts/cor/run-jest-runtime-probe.js` by resolving `jest/bin/jest` and making `B09.run` and `B10.run` `async`.
+  - Aligned `.github/workflows/ci.yml` (`docker-validate` job) readiness check port with `docker-compose.yml` (`127.0.0.1:${UGONDU_BIND_PORT:-8081}/health/ready`).
+  - Upgraded all remaining `STATIC` COR stream verifiers (`B13.js`, `B16.js`, `C22.js`) to `verificationMode: 'TEST'` (`verifierVersion: '3.0.0'`) with runtime execution and adversarial negative tests (`B12`, `B14`, and `B15` were already `TEST` mode). Added `client/cmd/repair_test.go` (`TestRepairCommandLocalizedExecution`) for Go thin-client repair command runtime localization verification.
+  - **Exact-head CI/COR receipts on `e6a5352a8c25f0c0860d87f0bd370ee1feb20cf5`**:
+    - `COR Certification` [#41080032536](https://github.com/Chicitadel/ugondu/actions/runs/41080032536): **SUCCESS** (40/40 streams PASS, zero `STATIC` verifiers remaining, `READY_FOR_COR_SIGNATURE`).
+    - `Ugondu CI/CD Pipeline` [#41080032558](https://github.com/Chicitadel/ugondu/actions/runs/41080032558): **SUCCESS** (all build, governance, integration, and Docker validation jobs PASS).
+- **Dumcholu PR #27 (`security/career-journey-principal-identity-hardening-2026-10-30`) — Commit `651746127b3e7278e63ede47b331cb551b66afc4`**:
+  - Hardened `CareerJourneyController` (`enforceOwnership`) to enforce principal-bound tenant claims (`citizenId@TENANT` / `citizenId:TENANT`) and fail closed (`SecurityException`) on conflicting caller-supplied `X-Authenticated-Tenant` / `X-Target-Tenant` headers (`CareerJourneyControllerSecurityTest`: 5/5 PASS).
+  - Replaced process-local-only discovery and guidance state with durable JPA persistence (`CareerDiscoveryCaseEntity`, `CareerDiscoveryCaseRepository`, `GuidanceCaseEntity`, `GuidanceCaseRepository`, and Flyway migration `V2__create_cs_discovery_and_guidance_tables.sql`; `CareerJourneyServiceTest`: 10/10 PASS; full 32-module reactor: PASS).
+  - **Exact-head CI receipts on `651746127b3e7278e63ede47b331cb551b66afc4`**:
+    - `Dumcholu Portable Runtime Qualification` [#41081132942](https://github.com/Chicitadel/dumcholu/actions/runs/41081132942): **SUCCESS** (6m14s).
+    - `Deployment Manifest Qualification` [#41081132967](https://github.com/Chicitadel/dumcholu/actions/runs/41081132967) & push [#41081122073](https://github.com/Chicitadel/dumcholu/actions/runs/41081122073): **SUCCESS** (24s).
+    - `Dumcholu Product Name Governance Gate` [#41081132955](https://github.com/Chicitadel/dumcholu/actions/runs/41081132955): **SUCCESS** (25s).
+- **Overall release posture**: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` pending authorized physical AWS staging deployment, live AeroBill/Mandatag federation transactions, empirical Nigeria econometric dataset calibration sign-off, hardware WebAuthn/FIDO2 ceremonies, and final human COR signatory authorization.

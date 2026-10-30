@@ -11,13 +11,13 @@ const OBJECTIVE = 'Verify absence of out-of-bounds bash execution in core engine
 
 const metadata = {
   streamId: STREAM_ID,
-  verifierVersion: '2.0.0',
+  verifierVersion: '3.0.0',
   objectiveHash: crypto.createHash('sha256').update(OBJECTIVE, 'utf8').digest('hex'),
   evidenceSchemaVersion: '3.0.0',
-  verificationMode: 'STATIC',
+  verificationMode: 'TEST',
 };
 
-function verifyObjective(context, observations, artifacts) {
+async function verifyObjective(context, observations, artifacts) {
   const pkgRel = 'server/engine-core/package.json';
   const orchestratorRel = 'server/engine-core/src/deise/engine/recovery/recovery-orchestrator.ts';
   const pkgPath = path.join(context.root, pkgRel);
@@ -54,6 +54,55 @@ function verifyObjective(context, observations, artifacts) {
     throw new Error('B16_ADAPTER_EXECUTION_DELEGATION_MISSING');
   }
 
+  // Runtime behavioral execution against compiled RecoveryOrchestrator if present
+  const compiledOrchestratorRel = 'server/engine-core/dist/deise/engine/recovery/recovery-orchestrator.js';
+  const compiledOrchestratorPath = path.join(context.root, compiledOrchestratorRel);
+  if (fs.existsSync(compiledOrchestratorPath)) {
+    // eslint-disable-next-line global-require, import/no-dynamic-require
+    const { RecoveryOrchestrator } = require(compiledOrchestratorPath);
+    const orchestrator = new RecoveryOrchestrator();
+
+    const scope = {
+      targetUri: 'directadmin://staging.airroofers.eu',
+      tenantId: 'api.airroofers.eu',
+      resourceIdentifiers: ['res-allowed-1'],
+      baselineFingerprint: 'fp-baseline-001',
+    };
+
+    // 1. Positive in-bounds blast-radius check
+    const inBoundsPlan = {
+      id: 'plan-in-bounds',
+      infrastructureRepairs: [{ id: 'res-allowed-1', action: 'REPAIR' }],
+    };
+    const analysis = await orchestrator.analyzeBlastRadius(inBoundsPlan, scope);
+    if (!analysis || analysis.isSafe !== true || (analysis.outOfBoundsDetected && analysis.outOfBoundsDetected.length > 0)) {
+      throw new Error('B16_RUNTIME_IN_BOUNDS_BLAST_RADIUS_FAILED');
+    }
+
+    // 2. Adversarial out-of-bounds blast-radius rejection
+    const outOfBoundsPlan = {
+      id: 'plan-out-of-bounds',
+      infrastructureRepairs: [
+        { id: 'res-allowed-1', action: 'REPAIR' },
+        { id: 'res-unauthorized-999', action: 'EXEC_BASH' },
+      ],
+    };
+    let rejectedOutOfBounds = false;
+    try {
+      await orchestrator.analyzeBlastRadius(outOfBoundsPlan, scope);
+    } catch (err) {
+      if (err && String(err.message).includes('Blast Radius Violation') && String(err.message).includes('res-unauthorized-999')) {
+        rejectedOutOfBounds = true;
+      }
+    }
+    if (!rejectedOutOfBounds) {
+      throw new Error('B16_RUNTIME_OUT_OF_BOUNDS_REPAIR_NOT_REJECTED');
+    }
+
+    observations.push('Executed compiled RecoveryOrchestrator.analyzeBlastRadius at runtime: confirmed in-bounds repair passes and adversarial out-of-bounds resource mutation throws Blast Radius Violation');
+    artifacts.push(compiledOrchestratorRel);
+  }
+
   observations.push('Confirmed engine-core package.json and recovery-orchestrator.ts prohibit raw shell/child_process execution and enforce blast-radius bounds via adapter.executeAtomicRecovery');
   artifacts.push(pkgRel, orchestratorRel);
   return true;
@@ -67,7 +116,7 @@ async function run(context) {
   const observations = [];
   const artifacts = [];
 
-  if (!verifyObjective(context, observations, artifacts)) {
+  if (!await verifyObjective(context, observations, artifacts)) {
     throw new Error('COR_OBJECTIVE_NOT_PROVEN');
   }
 

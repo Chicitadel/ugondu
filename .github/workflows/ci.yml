@@ -444,7 +444,7 @@ jobs:
             docker compose logs
             exit 1
           fi
-          wait_http "http://127.0.0.1:4001/health/ready" 60
+          wait_http "http://127.0.0.1:${UGONDU_BIND_PORT:-8081}/health/ready" 60
           for svc in billing-gateway engine-core plugin-manager event-bus repository-adapter; do
             docker compose exec -T "$svc" sh -c 'wget -qO- http://127.0.0.1:${PORT}/health/ready >/dev/null'
           done
