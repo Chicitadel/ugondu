@@ -91,7 +91,7 @@ export class AdmissionController {
      * engine bootstrap. This class has no authority to infer admission from string shape.
      * Until that authority is injected, deny by default.
      */
-    public admit(_passportId: string, _context: { tenantId: string }): { status: string } {
+    public admit(_passportId: string, _context: { tenantId: string }): { status: string; tenantId?: string } {
         return { status: 'REJECTED' };
     }
 }
