@@ -43,7 +43,7 @@
     "verify:attribution": "node scripts/governance/verify-ai-attribution.mjs",
     "verify:t03": "node scripts/governance/verify-tokenization-t03.mjs",
     "verify:t04": "node scripts/governance/verify-microservices-t04.mjs",
-    "test:governance": "node --test tests/governance-verifiers.test.mjs tests/cor-stream-k-contract.test.js tests/qualification/qualification-receipt-gate.test.mjs && npm run test:cor-build-preflight && npm run test:cor-runner-mandatory-gates && npm run test:cor-stream-objective-verifiers && npm run test:recovery-transaction-failure && npm run test:cor-locale-objective-verifiers && npm run test:aws-template-safety",
+    "test:governance": "node --test tests/governance-verifiers.test.mjs tests/cor-stream-k-contract.test.js tests/qualification/qualification-receipt-gate.test.mjs && npm run test:cor-build-preflight && npm run test:cor-runner-mandatory-gates && npm run test:cor-stream-objective-verifiers && npm run test:cor-a07-runtime-verifier && npm run test:recovery-transaction-failure && npm run test:cor-locale-objective-verifiers && npm run test:aws-template-safety",
     "bootstrap:validate": "node scripts/bootstrap/validate-bundle.mjs",
     "bootstrap:validate:strict": "node scripts/bootstrap/validate-bundle.mjs --strict",
     "test:bootstrap-bundle": "node --test tests/bootstrap-bundle-integrity.test.mjs",
@@ -53,6 +53,7 @@
     "test:cor-build-preflight": "node --test tests/cor-build-preflight.test.js",
     "test:cor-runner-mandatory-gates": "node --test tests/cor-runner-mandatory-gates.test.js",
     "test:cor-stream-objective-verifiers": "node --test tests/cor-stream-objective-verifiers.test.js",
+    "test:cor-a07-runtime-verifier": "node --test tests/cor-a07-runtime-verifier.test.js",
     "test:aws-template-safety": "node --test tests/qualification/aws-staging-template-safety.test.mjs",
     "test:cor-locale-objective-verifiers": "node --test tests/cor-locale-objective-verifiers.test.js",
     "test:recovery-transaction-failure": "node --test tests/recovery-transaction-failure.test.js"
