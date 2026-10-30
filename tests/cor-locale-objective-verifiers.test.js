@@ -101,3 +101,22 @@ test('recursive locale parity accepts identical nested leaf paths for every obje
     } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
   }
 });
+
+
+test('recursive locale parity rejects prototype-pollution dictionary keys', async () => {
+  const f = fixture();
+  try {
+    writeJson(f.dir, 'en.json', JSON.parse('{"greeting":"hello","__proto__":{"polluted":true}}'));
+    writeJson(f.dir, 'ar.json', { greeting: 'translated' });
+    await assert.rejects(localeVerifiers[0].verifier.run(context(f.root, 'D25')), /LOCALE_PROHIBITED_DICTIONARY_KEY/);
+  } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
+test('recursive locale parity follows canonical flatten semantics for empty nested objects', async () => {
+  const f = fixture();
+  try {
+    writeJson(f.dir, 'en.json', { greeting: 'hello', optional: {} });
+    writeJson(f.dir, 'ar.json', { greeting: 'translated' });
+    assert.equal((await localeVerifiers[0].verifier.run(context(f.root, 'D25'))).status, 'PASS');
+  } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
