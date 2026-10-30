@@ -27,6 +27,10 @@ const e30 = require('../scripts/cor/streams/E30');
 const e31 = require('../scripts/cor/streams/E31');
 const e32 = require('../scripts/cor/streams/E32');
 const e33 = require('../scripts/cor/streams/E33');
+const f35 = require('../scripts/cor/streams/F35');
+const f36 = require('../scripts/cor/streams/F36');
+const f37 = require('../scripts/cor/streams/F37');
+const f38 = require('../scripts/cor/streams/F38');
 const f39 = require('../scripts/cor/streams/F39');
 const { findVerifierStub, assertNoVerifierStub } = require('../scripts/cor/stream-source-integrity');
 
@@ -300,5 +304,15 @@ test('F39 rejects an orchestrator that rolls back but silently returns after ato
     );
   } finally {
     fs.rmSync(f.root, { recursive: true, force: true });
+  }
+});
+
+
+test('F35-F38 execute compiled recovery behaviors and reject adversarial conditions', async () => {
+  for (const [id, verifier] of [['F35', f35], ['F36', f36], ['F37', f37], ['F38', f38]]) {
+    const receipt = await verifier.run(context(REPO_ROOT, id));
+    assert.equal(receipt.status, 'PASS', id);
+    assert.ok(receipt.observations.length > 0, id);
+    assert.ok(receipt.artifacts.length > 0, id);
   }
 });
