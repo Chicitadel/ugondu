@@ -33,16 +33,28 @@ services:
     build:
       context: .
       dockerfile: ./server/billing-gateway/Dockerfile
-    container_name: ugondu-billing-gateway
     restart: unless-stopped
     networks:
       - ugondu-internal
+      - ugondu-external
+    mem_limit: 256m
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     environment:
       - PORT=4002
       - GOVERNANCE_ROOT=/usr/src/app/.governance
       - IDENTITY_AUTHORITY_URL=${IDENTITY_AUTHORITY_URL:-https://identity.airroofers.eu/api/v1}
       - BILLING_AUTHORITY_URL=${BILLING_AUTHORITY_URL:-https://billing.airroofers.eu/api/v1}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
+    mem_limit: 512m
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4002/health/ready"]
       interval: 5s
@@ -62,13 +74,13 @@ services:
     build:
       context: .
       dockerfile: ./server/engine-core/Dockerfile
-    container_name: ugondu-engine-core
     restart: unless-stopped
     networks:
       - ugondu-internal
       - ugondu-external
     ports:
-      - "4001:4001"
+      # Bind only to loopback. A reviewed local TLS edge/SSM tunnel owns external ingress.
+      - "127.0.0.1:${UGONDU_BIND_PORT:-8081}:4001"
     environment:
       - PORT=4001
       - GOVERNANCE_ROOT=/usr/src/app/.governance
@@ -100,7 +112,6 @@ services:
     build:
       context: .
       dockerfile: ./server/plugin-manager/Dockerfile
-    container_name: ugondu-plugin-manager
     restart: unless-stopped
     networks:
       - ugondu-internal
@@ -111,6 +122,12 @@ services:
       - GOVERNANCE_ROOT=/usr/src/app/.governance
       - PLUGINS_DIR=/usr/src/app/plugins
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
+    mem_limit: 256m
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4003/health/ready"]
       interval: 5s
@@ -130,7 +147,6 @@ services:
     build:
       context: .
       dockerfile: ./server/repository-adapter/Dockerfile
-    container_name: ugondu-repository-adapter
     restart: unless-stopped
     networks:
       - ugondu-internal
@@ -138,6 +154,12 @@ services:
       - PORT=4005
       - GOVERNANCE_ROOT=/usr/src/app/.governance
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://console.airroofers.eu}
+    mem_limit: 256m
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4005/health/ready"]
       interval: 5s
@@ -157,7 +179,6 @@ services:
     build:
       context: .
       dockerfile: ./server/event-bus/Dockerfile
-    container_name: ugondu-event-bus
     restart: unless-stopped
     networks:
       - ugondu-internal
