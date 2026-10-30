@@ -63,24 +63,26 @@ function verifyObjective(context, observations, artifacts) {
     artifacts.push(bootstrapRel);
   }
 
-  // Runtime behavioral execution via Go test suite if client/cmd/repair_test.go is present
+  // Runtime behavioral execution is mandatory for TEST mode; never silently skip it.
   const repairTestRel = 'client/cmd/repair_test.go';
   const repairTestPath = path.join(context.root, repairTestRel);
-  if (fs.existsSync(repairTestPath)) {
-    const goCheck = spawnSync('go', ['version'], { encoding: 'utf8', timeout: 5000 });
-    if (goCheck.status === 0) {
-      const testRes = spawnSync('go', ['test', '-run', 'TestRepairCommandLocalizedExecution', './cmd'], {
-        cwd: path.join(context.root, 'client'),
-        encoding: 'utf8',
-        timeout: 60000,
-      });
-      if (testRes.status !== 0) {
-        throw new Error(`C22_GO_REPAIR_RUNTIME_TEST_FAILED:${String(testRes.stderr || testRes.stdout).slice(0, 1000)}`);
-      }
-      observations.push('Executed go test -run TestRepairCommandLocalizedExecution ./cmd: confirmed runtime localized output and adversarial status handling');
-      artifacts.push(repairTestRel);
-    }
+  if (!fs.existsSync(repairTestPath)) {
+    throw new Error('C22_REPAIR_RUNTIME_TEST_MISSING');
   }
+  const goCheck = spawnSync('go', ['version'], { encoding: 'utf8', timeout: 5000 });
+  if (goCheck.status !== 0) {
+    throw new Error('C22_GO_TOOLCHAIN_MISSING');
+  }
+  const testRes = spawnSync('go', ['test', '-run', 'TestRepairCommandLocalizedExecution', './cmd'], {
+    cwd: path.join(context.root, 'client'),
+    encoding: 'utf8',
+    timeout: 60000,
+  });
+  if (testRes.status !== 0) {
+    throw new Error(`C22_GO_REPAIR_RUNTIME_TEST_FAILED:${String(testRes.stderr || testRes.stdout).slice(0, 1000)}`);
+  }
+  observations.push('Executed go test -run TestRepairCommandLocalizedExecution ./cmd: confirmed runtime localized output and adversarial status handling');
+  artifacts.push(repairTestRel);
 
   observations.push('Confirmed client/cmd/repair.go routes all user-facing output through i18n.T with zero hardcoded fmt strings');
   artifacts.push(relPath);
