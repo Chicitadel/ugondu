@@ -341,7 +341,7 @@ test('Antigravity guardrail preserves behavioral verifier and certification boun
     'Source substring presence is not behavioral proof',
     'A04-A06 are now runtime-tested',
     'F35-F38 are now runtime-tested',
-    'READY_FOR_COR_SIGNATURE is not a signed certificate',
+    '`READY_FOR_COR_SIGNATURE` is not a signed certificate',
     'No AWS resources were provisioned',
   ]) {
     assert.ok(guardrail.includes(requirement), 'Missing Antigravity guardrail requirement: ' + requirement);
