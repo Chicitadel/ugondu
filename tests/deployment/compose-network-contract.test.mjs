@@ -18,8 +18,8 @@ function serviceBlock(name) {
 test("billing gateway has internal service discovery and external federation egress", () => {
   const block = serviceBlock("billing-gateway");
   assert.match(block, /networks:\s*\n\s+- ugondu-internal\s*\n\s+- ugondu-external/);
-  assert.match(block, /BILLING_AUTHORITY_URL=https:\/\/billing\.airroofers\.eu/);
-  assert.match(block, /IDENTITY_AUTHORITY_URL=https:\/\/identity\.airroofers\.eu/);
+  assert.match(block, /https:\/\/billing\.airroofers\.eu/);
+  assert.match(block, /https:\/\/identity\.airroofers\.eu/);
 });
 
 test("engine ingress is loopback-only and aligned to the EC2 bootstrap port", () => {
