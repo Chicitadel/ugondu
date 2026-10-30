@@ -61,7 +61,7 @@ export function passportGuardMiddleware(req: Request, res: Response, next: NextF
     }
 
     const result = admissionController.admit(passportId, { tenantId: req.body?.tenantId });
-    if (result.status !== 'ADMITTED') {
+    if (result.status !== 'ADMITTED' || typeof result.tenantId !== 'string' || !result.tenantId.trim()) {
         // Never write bearer-like admission credentials to application logs.
         const fingerprint = createHash('sha256').update(passportId).digest('hex').slice(0, 16);
         Logger.warn(__t('messages.system.audit_passport_rejected_id', {
@@ -73,5 +73,8 @@ export function passportGuardMiddleware(req: Request, res: Response, next: NextF
         });
     }
 
+    // Carry only the tenant derived from the verified passport; downstream routes must
+    // compare it with the authoritative tenant returned by the billing authority.
+    res.locals['passportTenantId'] = result.tenantId.trim();
     return next();
 }
