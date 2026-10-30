@@ -924,3 +924,19 @@ No cloud resources were created. Do not expose public ingress or claim Ugondu/Du
 - This supplement does **not** close other source-inspection verifiers. B09, B10, B12-B16 and C22 remain individually subject to objective-specific adversarial review; static verification may be retained only where the objective is inherently a static artifact constraint and the test validates the complete relevant contract.
 - Exact-head CI/COR evidence is mandatory for this branch. The previous 40/40 receipt for `01498bfa` is historical and cannot certify this descendant.
 - Do not provision AWS during this remediation. Hosting migration remains conditional on the agreed traction, official-engagement or funding trigger; all code and deployment contracts must remain host-portable.
+
+
+---
+
+## 10. Re-audit update — B09/B10 runtime proof requirement (2026-10-30)
+
+B09 and B10 have been converted from source-pattern checks to actual Jest runtime probes on branch `fix/cor-b09-b10-runtime-verifiers-2026-10-30`.
+
+- B09 must execute the actual engine-core Jest setup and prove the real `UpmExecutionGate` rejects when its secret is absent. An adversarial mocked gate must cause the probe to fail.
+- B10 must execute both global and shared-module translation fixtures and prove they return deterministic `[en]` values. An adversarial `[fr]` setup must cause the probe to fail.
+- Shared probe helper: `scripts/cor/run-jest-runtime-probe.js`.
+- Regression suite: `tests/cor-stream-objective-verifiers.test.js`.
+
+**Do not mark B09/B10 GREEN until exact-head tests and CI/COR pass.** Source token presence is not proof of runtime behavior. Apply the same objective-by-objective review to remaining STATIC verifiers; do not blindly convert checks whose objective is genuinely static, but never use static source scanning as proof of a runtime guarantee.
+
+The latest branch SHA and the Dumcholu principal-identity finding are recorded in the canonical dual-product handover. Residual tenant-claim trust and process-local career discovery/guidance persistence remain open. No AWS resources were provisioned; billing/entitlement authority remains AeroBill/Mandatag respectively.
