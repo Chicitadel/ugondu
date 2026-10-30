@@ -404,3 +404,14 @@ After every source, test, workflow or handover commit, re-run the relevant exact
 No AWS infrastructure was provisioned. The launch posture remains DirectAdmin-compatible and portable; the low-cost AWS EC2/ECS-on-EC2 pilot is prepared but must await explicit funding/traction and budget approval. AeroBill owns billing/metering; Mandatag owns licensing/entitlements. Live federation, physical AWS qualification, Nigeria empirical calibration, WebAuthn/FIDO2 ceremony and human COR sign-off remain release gates.
 
 **Overall status: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+---
+
+## AWS portability sizing reconciliation — 2026-10-30
+
+New finding: `DUM-AWS-EC2-HOST-SIZING-001`.
+
+The Dumcholu ECS-on-EC2 template previously defaulted its host to `t3.small` (2 GiB) while allocating a 1 GiB Java task, leaving inadequate OS/ECS/container-runtime headroom and conflicting with the approved shared pilot baseline. The template now defaults to `t3.medium` (4 GiB), allows `t3.large` only as an explicit upgrade, and has a regression assertion preventing reintroduction of the undersized default.
+
+This is a template/code readiness correction only. It does not provision AWS. The shared pilot still requires an explicitly approved monthly budget, funding/traction trigger, and live deployment qualification. Preserve DirectAdmin compatibility and the same portable container/configuration contract. ECS on EC2 remains the least-cost initial AWS service tier; Fargate is a later scaling option.
