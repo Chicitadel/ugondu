@@ -7,6 +7,9 @@ const path = require('node:path');
 const test = require('node:test');
 
 const a02 = require('../scripts/cor/streams/A02');
+const a04 = require('../scripts/cor/streams/A04');
+const a05 = require('../scripts/cor/streams/A05');
+const a06 = require('../scripts/cor/streams/A06');
 const a03 = require('../scripts/cor/streams/A03');
 const a07 = require('../scripts/cor/streams/A07');
 const b09 = require('../scripts/cor/streams/B09');
@@ -310,6 +313,16 @@ test('F39 rejects an orchestrator that rolls back but silently returns after ato
 
 test('F35-F38 execute compiled recovery behaviors and reject adversarial conditions', async () => {
   for (const [id, verifier] of [['F35', f35], ['F36', f36], ['F37', f37], ['F38', f38]]) {
+    const receipt = await verifier.run(context(REPO_ROOT, id));
+    assert.equal(receipt.status, 'PASS', id);
+    assert.ok(receipt.observations.length > 0, id);
+    assert.ok(receipt.artifacts.length > 0, id);
+  }
+});
+
+
+test('A04-A06 execute engine/finalizer independence and cryptographic signer behavior', async () => {
+  for (const [id, verifier] of [['A04', a04], ['A05', a05], ['A06', a06]]) {
     const receipt = await verifier.run(context(REPO_ROOT, id));
     assert.equal(receipt.status, 'PASS', id);
     assert.ok(receipt.observations.length > 0, id);
