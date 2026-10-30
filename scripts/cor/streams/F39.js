@@ -80,6 +80,7 @@ async function verifyObjective(context, observations, artifacts) {
         observations.push(`Captured expected atomic failure exception: ${e.message}`);
     }
 
+    if (!expectedAtomicError) throw new Error("F39_ATOMIC_FAILURE_NOT_PROPAGATED: Failed atomic recovery did not reject");
     if (!executionRefused) throw new Error("F39_EXECUTION_NOT_REFUSED: Did not refuse execution on drift");
     if (!rollbackInvoked) throw new Error("F39_ROLLBACK_NOT_INVOKED: Rollback/recovery path was not invoked");
 
