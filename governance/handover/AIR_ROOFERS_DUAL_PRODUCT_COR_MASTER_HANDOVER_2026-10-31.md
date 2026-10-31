@@ -151,3 +151,19 @@ The supplied run records show COR #41187539093 and manifest #41187539163 succeed
 
 - Narrow exact-head Opportunity Map COR Regression #41188924304 completed successfully; its citizen integrity and Java 21 backend jobs both passed. Product Name Governance #41188924356 also succeeded.
 - This qualifies only the false-success guard and related backend regression on the recorded head. The application API and receipt contract remain open.
+
+
+### Dumcholu PR #33 — Opportunity Map default territory
+
+- PR: https://github.com/Chicitadel/dumcholu/pull/33
+- Branch: `fix/opportunity-map-remove-paris-default-2026-10-31`, stacked on PR #30.
+- Finding: despite fake GPS removal, the citizen map still hardcoded Paris/Île-de-France as the selected initial territory.
+- Physical fix: initial selection now uses the canonical Africa > Nigeria zone nodes as the product's primary launch market; code explicitly states this is not inferred device location. Manual territory selection remains.
+- Added regression coverage against reintroducing the Paris city default and updated branch filters so this stacked PR runs the Opportunity Map COR workflow.
+- Source `c0b03f6e9ece7882497da11ec5a1281553830acb`; test `b8e98a28ebb5d0e33a6a0958de6706f14550a711`; handover `f5fa13ed172d9413e25f23f86d56757edeea125d`; CI workflow `14157b5c1b3b471c1be71c127de1c1c6db130576`.
+- Opportunity Map COR Regression #41189241449 is in progress; Product Name Governance #41189241452 is queued. No pass claimed yet.
+- Real geolocation remains OPEN; product default is not a user-location signal.
+
+### Current branch and evidence rules
+
+Every candidate is stacked on its identified parent PR branch; review merge order before integrating. A green parent workflow does not qualify a child change. Every physical source/test change requires fresh exact-head evidence. No PR is merged by this automation, and no AWS resources are provisioned.
