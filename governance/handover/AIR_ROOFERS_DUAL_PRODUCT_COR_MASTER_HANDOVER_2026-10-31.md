@@ -293,3 +293,26 @@ Additional commits:
 - Latest PR #35 handover: `c949a156bb5555d76c5765ca8f8baee847c4c067`.
 
 PR #35 final recorded head at this update: `c949a156bb5555d76c5765ca8f8baee847c4c067`. Its comprehensive Flutter/Maven/OpenAPI qualification must be checked at this exact SHA; earlier CI runs on prior heads do not qualify this expanded change set.
+
+### PR #35 & PR #36 Full Qualification Breakthrough (13:34Z)
+
+1. **Dumcholu PR #35 (`fix/territory-registry-live-contract-2026-10-31` at HEAD `08c71e2`):**
+   - **Resolution:**
+     - Resolved Flutter 3.47 assertion (`ListTile background color or ink splashes may be invisible`) by providing explicit `Material(color: Colors.transparent)` boundaries in `DumcholuCard` across all portals.
+     - Provided explicit test resolver fixture in `opportunity_map_remediation_test.dart` to decouple unit controller state testing from unseeded live network endpoints.
+     - Reconciled default launch zone to `zone-country-ng` (Nigeria launch target).
+   - **Remote Workflow Verification:**
+     - `Dumcholu Comprehensive CI Qualification` ([#41205365357](https://github.com/Chicitadel/dumcholu/actions/runs/41205365357)): **100% SUCCESS** (10m 02s, 8/8 matrix jobs: Governance & Contracts, Backend Maven Reactor, and all 6 Flutter Portals).
+     - `Dumcholu Candidate UI Browser Evidence` ([#41205365244](https://github.com/Chicitadel/dumcholu/actions/runs/41205365244)): **100% SUCCESS** (2m 42s, 5/5 portals).
+     - `Dumcholu Product Name Governance Gate` ([#41205365279](https://github.com/Chicitadel/dumcholu/actions/runs/41205365279)): **100% SUCCESS** (22s).
+     - `Dumcholu UI Audit Tool Integrity` ([#41205365259](https://github.com/Chicitadel/dumcholu/actions/runs/41205365259)): **100% SUCCESS** (17s).
+
+2. **Dumcholu PR #36 (`fix/partner-map-no-synthetic-curriculum-2026-10-31` at HEAD `03ff3d3`):**
+   - **Status:** Rebased cleanly onto qualified PR #35 HEAD `08c71e2`.
+   - **Remote Workflow Verification:**
+     - Workflow runs queued on rebased HEAD `03ff3d3`: CI Qualification [#41206323311](https://github.com/Chicitadel/dumcholu/actions/runs/41206323311), Browser Evidence [#41206323292](https://github.com/Chicitadel/dumcholu/actions/runs/41206323292), Governance Gate [#41206323506](https://github.com/Chicitadel/dumcholu/actions/runs/41206323506).
+
+3. **Ugondu PR #66 (`fix/cor-passport-runtime-id-validation-2026-10-31` at HEAD `24c467ba`):**
+   - **Status: 100% QUALIFIED.**
+   - Remote Workflow Verification: CI/CD [#41198924315](https://github.com/Chicitadel/ugondu/actions/runs/41198924315) (SUCCESS), Manifest [#41198924240](https://github.com/Chicitadel/ugondu/actions/runs/41198924240) (SUCCESS), COR Certification [#41198924220](https://github.com/Chicitadel/ugondu/actions/runs/41198924220) (SUCCESS).
+
