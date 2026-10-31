@@ -167,3 +167,11 @@ The supplied run records show COR #41187539093 and manifest #41187539163 succeed
 ### Current branch and evidence rules
 
 Every candidate is stacked on its identified parent PR branch; review merge order before integrating. A green parent workflow does not qualify a child change. Every physical source/test change requires fresh exact-head evidence. No PR is merged by this automation, and no AWS resources are provisioned.
+
+
+### Dumcholu PR #33 — exact-head qualification result
+
+At head `14157b5c1b3b471c1be71c127de1c1c6db130576`:
+- Opportunity Map COR Regression [#41189241449](https://github.com/Chicitadel/dumcholu/actions/runs/41189241449): **SUCCESS** — citizen UI guard and Java 21 backend regression passed.
+- Product Name Governance [#41189241452](https://github.com/Chicitadel/dumcholu/actions/runs/41189241452): **SUCCESS**.
+This qualifies the narrow territory-default correction only. It does not close real geolocation, live authenticated feed, source evidence, legal/privacy or staging gates.
