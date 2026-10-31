@@ -151,4 +151,34 @@ describe('PortablePassportStore shared-writer contract', () => {
     expect((caught as PassportStoreError).code).toBe('PASSPORT_STORE_INVALID_DATA');
   });
 
+
+  it('rejects invalid runtime record fields before they can poison the durable store', () => {
+    const store = new PortablePassportStore(directory);
+    const invalidRecords: unknown[] = [
+      { passportId: 'passport-nan', tenantId: 'tenant-a', expiresAt: Number.NaN },
+      { passportId: 'passport-infinite', tenantId: 'tenant-a', updatedAt: Number.POSITIVE_INFINITY },
+      { passportId: 'passport-revoked', tenantId: 'tenant-a', revoked: 'false' },
+      { passportId: 'passport-workspace', tenantId: 'tenant-a', workspaceId: 42 },
+      { passportId: 'passport-reason', tenantId: 'tenant-a', revocationReason: {} },
+      { passportId: 'passport-blank', tenantId: '   ' },
+    ];
+
+    for (const record of invalidRecords) {
+      expect(() => store.set(record as Parameters<PortablePassportStore['set']>[0]))
+        .toThrow(PassportStoreError);
+      expect(store.isReady()).toBe(true);
+    }
+
+    store.set({ passportId: 'passport-valid-after-rejection', tenantId: 'tenant-valid' });
+    expect(store.get('passport-valid-after-rejection')?.tenantId).toBe('tenant-valid');
+  });
+
+  it('rejects blank revocation reasons without changing the passport state', () => {
+    const store = new PortablePassportStore(directory);
+    store.set({ passportId: 'passport-revoke-reason', tenantId: 'tenant-a' });
+
+    expect(() => store.revoke('passport-revoke-reason', '   ')).toThrow(PassportStoreError);
+    expect(store.isRevoked('passport-revoke-reason')).toBe(false);
+  });
+
 });
