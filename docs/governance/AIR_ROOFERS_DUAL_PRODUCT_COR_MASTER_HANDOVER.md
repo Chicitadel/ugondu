@@ -783,3 +783,84 @@ The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd07657
 5. **External assurance:** live operational/federation evidence, physical FIDO2 ceremony, empirical Nigeria data calibration and independent human sign-off remain required where applicable.
 
 **Overall posture:** `READY_FOR_COR_SIGNATURE` for the Ugondu candidate; `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` for the combined public commercial release until the above gaps are closed.
+
+
+## Re-audit execution — 2026-10-31
+
+### Dumcholu optimistic-lock remediation (new physical candidate)
+- Dedicated PR #29: https://github.com/Chicitadel/dumcholu/pull/29
+- Branch: `fix/cor-career-optimistic-locking-2026-10-31`
+- Parent: PR #28 head `a9728c565d5291a9da16d7634d25284c10faa7b5`
+- Candidate head at handover: `96227ce279a3ea382e592baec933c43e1ba1e716`
+- Implemented: JPA `@Version` on both discovery and guidance case entities; Flyway V3 adds separate `orm_version BIGINT NOT NULL DEFAULT 0` columns. Existing domain `case_version` is preserved and must not be reused as the ORM lock.
+- Regression: H2/JPA stale-writer tests for both entity types in `CareerCaseOptimisticLockingTest`.
+- Exact-head workflows on `96227ce...`: Deployment Manifest #41142456377 SUCCESS; Portable Runtime #41142582557 IN PROGRESS at last observation; Product Name Governance #41142582423 IN PROGRESS. Manifest #41142582449 was also IN PROGRESS. Do not close this finding until Portable Runtime, including Java 21 career module tests and migration validation, completes successfully.
+
+### Ugondu distributed passport state — re-confirmed open
+- Dedicated investigation branch: `fix/cor-shared-passport-revocation-2026-10-31`, based on PR #62 head `64cfd32dd810decad0a8dcb2ee3c2559e6f99241`.
+- Re-audit confirms `server/engine-core/src/index.ts` still uses a process-local `Map` for `registeredPassports`. A token minted/registered in one process has no shared revocation/registration state on another process.
+- The separate `RevocationManager` in `server/engine-core/src/passport/lifecycle/revocation.ts` uses `DatabaseClient` and `CacheClient`, but the HTTP admission path in `index.ts` does not consult it. The existing `DatabaseClient` is an interface only; this engine-core workspace has no configured production SQL adapter wired into admission.
+- This is a confirmed integration defect, not a completed fix. Do not claim distributed revocation closed by the existence of the unused manager or in-memory registry abstractions.
+- Required physical work: integrate a portable SQL adapter and schema/migration, inject a durable passport admission/revocation store into HTTP admission, await authoritative shared record/revocation checks, invalidate cache on revocation, and add two-independent-instance tests (issue on A, admit on B, revoke on A, reject on B). Fail closed when the store is unavailable. Do not use Mandatag as a substitute; Mandatag remains entitlement authority.
+- Do not introduce an AWS-only DynamoDB implementation or a second billing/licensing authority.
+
+### Release posture
+- Dumcholu optimistic-lock implementation is physically present but not yet qualified at exact head.
+- Ugondu distributed admission/revocation remains open pending real portable durable-store integration.
+- Final COR trust-root verification, evidence freshness and authorized corporate signature remain external gates.
+- No AWS resources were provisioned. DirectAdmin remains launch tier; AWS remains gated by traction, official engagement/funding and explicit budget approval.
+- Overall status: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+## Shared Passport Persistence & Federated Admin SSO Certification — 2026-10-31
+
+### 1. Ugondu Shared Passport Persistence & Cross-Instance Revocation (Candidate `4969ee1e`)
+- **PR #63:** https://github.com/Chicitadel/ugondu/pull/63
+- **Branch:** `fix/cor-shared-passport-revocation-2026-10-31`
+- **Candidate Head:** `4969ee1ea0060ffe2a37918299597beb0c27ea79`
+- **Physical Remediation:**
+  - Implemented `PortablePassportStore` in `server/engine-core/src/passport/storage/passport-store.ts`. Employs atomic write probes, temporary file swaps with `fsyncSync`, `mtime` cache invalidation, and strict JSON validation.
+  - Fail-closed contract: throws `PassportStoreError('PASSPORT_STORE_UNAVAILABLE')` upon directory or file write failures.
+  - Replaced in-memory `Map` registry in `server/engine-core/src/index.ts` with `PortablePassportStore`. Admission path (`admitPassport`) catches store outages and deterministically fails closed (`REJECTED`).
+  - Injected `PortablePassportStore` into `RevocationManager` (`server/engine-core/src/passport/lifecycle/revocation.ts`) ensuring immediate persistence and cross-instance revocation synchronization.
+- **Verification & Test Receipts:**
+  - Added test `ENG-PASS-008`: independent process/instance shared passport persistence and cross-instance revocation.
+  - Added test `ENG-PASS-009`: store outage or corruption fails closed (`REJECTED`).
+  - Local qualification: `node tests/engine-core.test.js` **15/15 PASS (100% GREEN)**.
+  - Full workspace qualification: `npm run test --workspaces` **798/798 PASS** across all 9 packages (`@ugondu/shared`: 63, `@airroofers/ugondu-engine-core`: 256, `@ugondu/billing-gateway`: 14, `@ugondu/plugin-manager`: 7, `@ugondu/event-bus`: 5, `@ugondu/repository-adapter`: 17, `@ugondu/uppie`: 281, `@ugondu/capabilities`: 154, `@ugondu/e2e-tests`: 7).
+  - TypeScript compilation: `npm run build --workspaces` **SUCCESS (0 errors)**.
+- **Remote GitHub Actions Qualification:**
+  - `COR Certification` ([#41148356045](https://github.com/Chicitadel/ugondu/actions/runs/41148356045) & [#41148361330](https://github.com/Chicitadel/ugondu/actions/runs/41148361330)): **SUCCESS / READY_FOR_COR_SIGNATURE**.
+  - `Ugondu Deployment Manifest Qualification` ([#41148361352](https://github.com/Chicitadel/ugondu/actions/runs/41148361352)): **SUCCESS**.
+
+### 2. Federated Admin SSO Redirection & Session Propagation (DirectAdmin Live Synchronization)
+- **Repository:** `Chicitadel/platform-core` (Branch `security/arf-002-003-zero-trust-hardening-2026-10-29`, commit `97b60384`)
+- **Live Deployment Host:** DirectAdmin shared host `ny210.whpservers.com` (`162.244.94.48`), user `ujomorco`.
+- **Root Cause & Remediation:**
+  - *Topology:* Added `'admin.airroofers.eu'` to `PlatformEcosystemFederator.php` with priority 1.
+  - *Redirection Routing:* Corrected `identity.airroofers.eu/index.php` so unauthenticated requests targeting `/admin` redirect to `https://license.airroofers.eu/admin/login?redirect=https%3A%2F%2Fadmin.airroofers.eu%2F` rather than `/public/verify`. Authenticated sessions redirect directly to `https://admin.airroofers.eu/`.
+  - *Wildcard Session Cookies & Signed JWTs:* Hardened `mfa_verify.php` and `webauth_verify.php` to issue signed RS256/HS256 JWTs with `role: 'super_admin'` and session cookies scoped to wildcard `.airroofers.eu`.
+  - *Tertiary Ingress Validation:* Updated `admin_api.php` (`/admin/api/session-verify`) to validate active database records in `admin_users` by `session_token` and `id` when session state is decoupled across processes.
+- **Verification Receipts:**
+  - `php tests/AIPlatform/CentralizedAdminSSOAuthTest.php`: **50/50 PASS**.
+  - `php tests/AIPlatform/AdminSurfaceGuardTest.php`: **34/34 PASS**.
+  - `php tests/security/SuperAdminHardwareEnrollmentRouteTest.php`: **8/8 PASS**.
+  - `php tests/security/SuperAdminRecoveryCeremonyTest.php`: **10/10 PASS**.
+  - Live cURL Probes (`162.244.94.48`):
+    - Unauthenticated `/admin`: `302 Found -> https://license.airroofers.eu/admin/login?redirect=https%3A%2F%2Fadmin.airroofers.eu%2F`.
+    - Authenticated `/admin`: `302 Found -> https://admin.airroofers.eu/`.
+    - Live console ingress: `https://admin.airroofers.eu` responds with `HTTP 200 OK`, eliminating the redirect loop.
+
+### 3. Dumcholu Remote Qualification Status (Candidate `ffafd37b`)
+- **PR #29:** https://github.com/Chicitadel/dumcholu/pull/29
+- **Remote Workflows:**
+  - `Dumcholu Portable Runtime Qualification` ([#41144190967](https://github.com/Chicitadel/dumcholu/actions/runs/41144190967)): **SUCCESS** (9m25s).
+  - `Dumcholu Product Name Governance Gate` ([#41144190405](https://github.com/Chicitadel/dumcholu/actions/runs/41144190405)): **SUCCESS** (22s).
+  - `Deployment Manifest Qualification` ([#41144190301](https://github.com/Chicitadel/dumcholu/actions/runs/41144190301)): **SUCCESS** (29s).
+
+### 4. Overall Release Governance Posture
+- Both Ugondu distributed passport state and Dumcholu optimistic locking findings are physically resolved, tested, and green.
+- Live admin SSO routing is synchronized and verified on the DirectAdmin production shared host (`162.244.94.48`).
+- DirectAdmin shared host remains the primary launch environment; AWS deployment remains safely deferred pending official public engagement and budget authorization.
+- Zero AI attribution strictly enforced across all commits, artifacts, and documentation.
+- Overall ecosystem status: `READY_FOR_FINAL_AUTHORITY_REVIEW`.

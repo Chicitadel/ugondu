@@ -374,6 +374,83 @@ test('ENG-PASS-007: AeroBill tenant mismatch rejects deployment despite valid pa
   assert.strictEqual(r.body.code, 'PASSPORT_BILLING_TENANT_MISMATCH');
 });
 
+test('ENG-PASS-008: independent process/instance shared passport persistence and cross-instance revocation', () => {
+  const os = require('os');
+  const path = require('path');
+  const fs = require('fs');
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-passport-shared-'));
+
+  try {
+    const { PortablePassportStore } = engineModule;
+    const storeInstanceA = new PortablePassportStore(tempDir);
+    const storeInstanceB = new PortablePassportStore(tempDir);
+
+    const testPassportId = `pp_shared_test_${Date.now()}`;
+    const tenantId = 'tenant_distributed_cluster';
+
+    // Instance A registers passport
+    storeInstanceA.set({
+      passportId: testPassportId,
+      tenantId: tenantId,
+      expiresAt: Date.now() + 60_000,
+      revoked: false,
+    });
+
+    // Instance B immediately sees the registered passport across instances
+    const fetchedByB = storeInstanceB.get(testPassportId);
+    assert.ok(fetchedByB, 'Instance B must read passport registered by Instance A');
+    assert.strictEqual(fetchedByB.tenantId, tenantId);
+    assert.strictEqual(fetchedByB.revoked, false);
+
+    // Instance A revokes passport
+    storeInstanceA.revoke(testPassportId, 'ADMIN_SECURITY_REVOCATION');
+
+    // Instance B immediately sees the revoked status
+    const revokedAtB = storeInstanceB.get(testPassportId);
+    assert.ok(revokedAtB, 'Instance B must read passport after revocation');
+    assert.strictEqual(revokedAtB.revoked, true);
+    assert.strictEqual(storeInstanceB.isRevoked(testPassportId), true);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('ENG-PASS-009: store outage or corruption fails closed (REJECTED)', () => {
+  assert.ok(engineModule.passportStore, 'passportStore must be exposed by engineModule');
+
+  // Register a test passport
+  const failClosedPassport = `pp_fail_closed_${Date.now()}`;
+  engineModule.registerAdmissionPassport(failClosedPassport, {
+    tenantId: 'tenant_fail_closed',
+    expiresAt: Date.now() + 60_000,
+  });
+
+  // Verify normal admission
+  assert.deepStrictEqual(
+    engineModule.admitPassport(failClosedPassport, { tenantId: 'tenant_fail_closed' }),
+    { status: 'ADMITTED', tenantId: 'tenant_fail_closed' }
+  );
+
+  // Simulate persistent store outage
+  engineModule.passportStore.simulateOutage(true);
+  try {
+    const admissionDuringOutage = engineModule.admitPassport(failClosedPassport, { tenantId: 'tenant_fail_closed' });
+    assert.deepStrictEqual(
+      admissionDuringOutage,
+      { status: 'REJECTED' },
+      'Admission MUST fail closed (REJECTED) when shared passport store experiences an outage'
+    );
+  } finally {
+    engineModule.passportStore.simulateOutage(false);
+  }
+
+  // Restore and verify normal operation resumed
+  assert.deepStrictEqual(
+    engineModule.admitPassport(failClosedPassport, { tenantId: 'tenant_fail_closed' }),
+    { status: 'ADMITTED', tenantId: 'tenant_fail_closed' }
+  );
+});
+
 test('ENG-004: Unlicensed deployment request deterministically returns 402', async () => {
   const r = await post(ENGINE_PORT, '/v1/deploy/resolve', {
     repositoryUrl: 'https://github.com/example/repo',

@@ -1057,3 +1057,27 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 - Carry the verified passport tenant through request-scoped response locals; do not recompute it from user input.
 - Keep a regression proving that a valid tenant-A passport paired with a tenant-B billing authorization is denied.
 - This adapter boundary does not move billing, pricing or metering logic into Ugondu. AeroBill remains the sole authority for those decisions.
+
+
+## 2026-10-31 re-audit addendum — mandatory handover rules
+
+### Dumcholu optimistic locking (PR #29)
+- Candidate branch: `fix/cor-career-optimistic-locking-2026-10-31`, head `96227ce279a3ea382e592baec933c43e1ba1e716`.
+- JPA `@Version` now applies independently to discovery and guidance cases; Flyway V3 adds `orm_version`. Keep existing domain `case_version` semantics intact.
+- H2/JPA stale-writer regressions are present. Exact-head Portable Runtime was still running when this note was authored; do not close or certify based on the source diff alone.
+- Optimistic conflicts intentionally surface. Do not add blind retries around non-idempotent writes or external side effects. Any retry must be bounded, idempotent, and separately qualified.
+
+### Ugondu distributed passport admission (PR #62 follow-on investigation)
+- Candidate branch: `fix/cor-shared-passport-revocation-2026-10-31`, based on `64cfd32dd810decad0a8dcb2ee3c2559e6f99241`.
+- `index.ts` still owns a process-local `registeredPassports` map. The existing DB-backed `RevocationManager` is not wired into HTTP admission; `DatabaseClient` is only an interface in this workspace with no production adapter injected.
+- Do not replace this with another process-local cache, a Git repository adapter, Mandatag entitlement calls, or an AWS-only persistence dependency.
+- Required acceptance test is cross-process: issue/register on instance A, admit on B; revoke on A, reject on B within the defined consistency bound. Database/cache outage must reject protected requests, not bypass revocation.
+- A spec, interface, schema-only migration, or in-memory unit test is not closure; implement and wire the actual portable SQL store.
+
+### Global no-drift controls
+- This file and `AIR_ROOFERS_DUAL_PRODUCT_COR_MASTER_HANDOVER.md` are the shared source of truth for Antigravity agents/actors.
+- Before any write: fetch latest remote head, compare with this ledger, create/continue only the assigned dedicated branch, inspect exact target file and tests, then patch.
+- After every write: record commit SHA, exact test command/results, exact-head workflow URLs and statuses, skipped steps, and residuals. Requalify the final changed head; do not inherit receipts from ancestors.
+- Never mark a checklist item PASS based on a plan, spec, mock, skipped test, local-only report, or unverified SHA.
+- Never rewrite history or force-push. Never modify `master`/`main` or merge without explicit authorization.
+- Preserve one-code/host-anywhere; DirectAdmin first, optional VPS, AWS only after commercial trigger and budget approval. AeroBill remains sole billing/pricing/metering authority and Mandatag remains sole licensing/entitlement authority.
