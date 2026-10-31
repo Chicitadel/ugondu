@@ -293,3 +293,25 @@ Additional commits:
 - Latest PR #35 handover: `c949a156bb5555d76c5765ca8f8baee847c4c067`.
 
 PR #35 final recorded head at this update: `c949a156bb5555d76c5765ca8f8baee847c4c067`. Its comprehensive Flutter/Maven/OpenAPI qualification must be checked at this exact SHA; earlier CI runs on prior heads do not qualify this expanded change set.
+
+
+---
+
+## Ugondu PR #66 — runtime passport identifier validation (2026-10-31 11:45Z)
+
+**Finding: UG-PASSPORT-RUNTIME-IDENTIFIER-VALIDATION-002.** PR #65 hardened record validation and cross-process filesystem locking, but runtime method inputs remained unsafe: get(), isRevoked() and revoke() could receive malformed JavaScript values and throw native TypeErrors. A lock owner-metadata write failure after a successful mkdir could also leave an ownerless directory.
+
+**Physical remediation on dedicated branch** fix/cor-passport-runtime-id-validation-2026-10-31, stacked on PR #65:
+- Added runtime normalizePassportId(unknown) and consistent PassportStoreError(PASSPORT_STORE_INVALID_DATA) behavior.
+- Validate revocation reason before lock acquisition/mutation.
+- Clean up a lock directory only when this process itself created it and owner metadata publication failed; normal stale/ownerless lock fail-closed rules and token-verified release remain intact.
+- Added regressions for malformed IDs, invalid reasons, unchanged state and simulated metadata-write failure.
+- Product handover: governance/handover/PASSPORT_RUNTIME_ID_VALIDATION_2026-10-31.md.
+
+Commits:
+- Source: be3fcbf72f1527e6a9c89da975ffc0d2143af663.
+- Runtime identifier tests: 3f4581dc45c2d3f783612e3336f7e3f04c0061f6.
+- Lock metadata failure regression: 8b7782ea008016709c2fcdfdb20ca95e0e1621ca.
+- Product handover: e84c9a163cd039284a6f8f2240e6789b305e60ef.
+
+Remote exact-head qualification is pending. This does not close the multi-host shared durable adapter gap. Keep the global verdict PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.
