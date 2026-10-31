@@ -308,9 +308,12 @@ PR #35 final recorded head at this update: `c949a156bb5555d76c5765ca8f8baee847c4
      - `Dumcholu UI Audit Tool Integrity` ([#41205365259](https://github.com/Chicitadel/dumcholu/actions/runs/41205365259)): **100% SUCCESS** (17s).
 
 2. **Dumcholu PR #36 (`fix/partner-map-no-synthetic-curriculum-2026-10-31` at HEAD `03ff3d3`):**
-   - **Status:** Rebased cleanly onto qualified PR #35 HEAD `08c71e2`.
+   - **Status: 100% QUALIFIED.**
+   - Cleanly rebased onto qualified PR #35 HEAD `08c71e2`.
    - **Remote Workflow Verification:**
-     - Workflow runs queued on rebased HEAD `03ff3d3`: CI Qualification [#41206323311](https://github.com/Chicitadel/dumcholu/actions/runs/41206323311), Browser Evidence [#41206323292](https://github.com/Chicitadel/dumcholu/actions/runs/41206323292), Governance Gate [#41206323506](https://github.com/Chicitadel/dumcholu/actions/runs/41206323506).
+     - `Dumcholu Comprehensive CI Qualification` ([#41206323311](https://github.com/Chicitadel/dumcholu/actions/runs/41206323311)): **100% SUCCESS** (9m 24s, 8/8 matrix jobs: Governance & Contracts, Backend Maven Reactor, and all 6 Flutter Portals).
+     - `Dumcholu Candidate UI Browser Evidence` ([#41206323292](https://github.com/Chicitadel/dumcholu/actions/runs/41206323292)): **100% SUCCESS** (2m 45s, 5/5 portals).
+     - `Dumcholu Product Name Governance Gate` ([#41206323506](https://github.com/Chicitadel/dumcholu/actions/runs/41206323506)): **100% SUCCESS** (21s).
 
 3. **Ugondu PR #66 (`fix/cor-passport-runtime-id-validation-2026-10-31` at HEAD `24c467ba`):**
    - **Status: 100% QUALIFIED.**
