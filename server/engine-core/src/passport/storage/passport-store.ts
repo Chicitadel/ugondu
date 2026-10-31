@@ -304,7 +304,8 @@ export class PortablePassportStore {
           throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         }
         if (code !== 'EEXIST' && code !== 'EPERM' && code !== 'EACCES' && code !== 'EBUSY') {
-          try { fs.rmdirSync(lockPath); } catch { /* another process owns or removed it */ }
+          // This process did not create the lock directory. Never remove it:
+          // another writer may be between atomic mkdir and owner metadata publication.
           throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         }
 
