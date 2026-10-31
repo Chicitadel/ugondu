@@ -48,20 +48,19 @@ import { aiRouter }                     from './routes/ai';
 import { passportGuardMiddleware }      from './middleware/passport-guard.middleware';
 import { admissionController }          from './passport/gatekeeper/admission-controller';
 
+import {
+  PortablePassportStore,
+  RegisteredPassportRecord,
+  PassportStoreError,
+} from './passport/storage/passport-store';
+
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 export const keyState            = loadOrGeneratePersistentKeys();
 export const BILLING_GATEWAY_URL = ProductRegistry.getServiceUrl('billing_gateway', '/v1');
 
-// ─── Admission Passport Registry & Signed Passport Helper ────────────────────
-interface RegisteredPassportRecord {
-  passportId: string;
-  tenantId: string;
-  workspaceId?: string;
-  expiresAt?: number;
-  revoked?: boolean;
-}
-
-const registeredPassports = new Map<string, RegisteredPassportRecord>();
+// ─── Shared Admission Passport Registry & Persistence ───────────────────────
+export { RegisteredPassportRecord, PassportStoreError, PortablePassportStore };
+export const passportStore = new PortablePassportStore();
 
 export function registerAdmissionPassport(
   passportId: string,
@@ -69,13 +68,19 @@ export function registerAdmissionPassport(
 ): void {
   const normalizedId = passportId.trim();
   if (!normalizedId) return;
-  registeredPassports.set(normalizedId, {
+  passportStore.set({
     passportId: normalizedId,
     tenantId: metadata?.tenantId ?? 'tenant_default',
     workspaceId: metadata?.workspaceId,
     expiresAt: metadata?.expiresAt,
     revoked: metadata?.revoked ?? false,
   });
+}
+
+export function revokeAdmissionPassport(passportId: string, reason?: string): void {
+  const normalizedId = passportId.trim();
+  if (!normalizedId) return;
+  passportStore.revoke(normalizedId, reason);
 }
 
 export function issueSignedPassport(claims: {
@@ -193,24 +198,34 @@ export function admitPassport(
     if (!verified.valid || !verified.tenantId) return { status: 'REJECTED' };
     if (requestedTenant && requestedTenant !== verified.tenantId) return { status: 'REJECTED' };
 
-    const registered = registeredPassports.get(normalized);
-    if (registered && (registered.revoked
-        || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)
-        || registered.tenantId !== verified.tenantId)) {
+    try {
+      const registered = passportStore.get(normalized);
+      if (registered && (registered.revoked
+          || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)
+          || registered.tenantId !== verified.tenantId)) {
+        return { status: 'REJECTED' };
+      }
+    } catch {
+      // Fail closed when persistent store is unavailable
       return { status: 'REJECTED' };
     }
     return { status: 'ADMITTED', tenantId: verified.tenantId };
   }
 
-  // Opaque identifiers are accepted only when explicitly registered. Prefix
+  // Opaque identifiers are accepted only when explicitly registered in the shared store. Prefix
   // shape is not evidence of issuance, tenant ownership, or entitlement.
-  const registered = registeredPassports.get(normalized);
-  if (!registered || registered.revoked
-      || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)) {
+  try {
+    const registered = passportStore.get(normalized);
+    if (!registered || registered.revoked
+        || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)) {
+      return { status: 'REJECTED' };
+    }
+    if (requestedTenant && requestedTenant !== registered.tenantId) return { status: 'REJECTED' };
+    return { status: 'ADMITTED', tenantId: registered.tenantId };
+  } catch {
+    // Fail closed when persistent store is unavailable
     return { status: 'REJECTED' };
   }
-  if (requestedTenant && requestedTenant !== registered.tenantId) return { status: 'REJECTED' };
-  return { status: 'ADMITTED', tenantId: registered.tenantId };
 }
 
 admissionController.admit = admitPassport;

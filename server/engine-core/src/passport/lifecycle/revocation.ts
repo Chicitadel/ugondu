@@ -36,6 +36,7 @@ import { __t } from '@ugondu/shared';
 
 import { CacheClient } from '../../infrastructure/cache/client';
 import { DatabaseClient } from '../../infrastructure/database/client';
+import { PortablePassportStore } from '../storage/passport-store';
 
 /**
  * @class RevocationManager
@@ -45,10 +46,14 @@ import { DatabaseClient } from '../../infrastructure/database/client';
 export class RevocationManager {
     constructor(
         private readonly cacheClient: CacheClient,
-        private readonly dbClient: DatabaseClient
+        private readonly dbClient: DatabaseClient,
+        private readonly passportStore?: PortablePassportStore
     ) {}
 
     public async isRevoked(passportId: string): Promise<boolean> {
+        if (this.passportStore?.isRevoked(passportId)) {
+            return true;
+        }
         const cacheKey = `passport:revocation:${passportId}`;
         const cachedRevocation = await this.cacheClient.get(cacheKey);
 
@@ -71,6 +76,9 @@ export class RevocationManager {
     }
 
     public async revoke(passportId: string, reason: string): Promise<void> {
+        if (this.passportStore) {
+            this.passportStore.revoke(passportId, reason);
+        }
         await this.dbClient.execute(
             __t('msg_update_passports_set_is_revoked_true_rev'),
             [reason, passportId]
