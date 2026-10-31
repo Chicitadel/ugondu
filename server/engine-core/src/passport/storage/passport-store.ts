@@ -27,6 +27,7 @@
 import path from 'path';
 import fs from 'fs';
 import { randomBytes } from 'crypto';
+import os from 'os';
 
 export interface RegisteredPassportRecord {
   passportId: string;
@@ -232,27 +233,67 @@ export class PortablePassportStore {
     const lockPath = path.join(this.dataDir, '.passports.write-lock');
     const maxWaitMs = Number(process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] ?? 2000);
     const staleAfterMs = Number(process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] ?? 30000);
+    if (!Number.isSafeInteger(maxWaitMs) || maxWaitMs < 1 || maxWaitMs > 60000 ||
+        !Number.isSafeInteger(staleAfterMs) || staleAfterMs < 1000) {
+      throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE', 'Invalid passport lock timing configuration');
+    }
     const deadline = Date.now() + maxWaitMs;
     const sleeper = new Int32Array(new SharedArrayBuffer(4));
+    const ownerToken = randomBytes(24).toString('hex');
+    const ownerPath = path.join(lockPath, 'owner.json');
+    const hostname = os.hostname();
     let acquired = false;
 
     while (!acquired) {
       try {
         fs.mkdirSync(this.dataDir, { recursive: true, mode: 0o700 });
         fs.mkdirSync(lockPath, { mode: 0o700 });
+        fs.writeFileSync(ownerPath, JSON.stringify({
+          pid: process.pid,
+          hostname,
+          token: ownerToken,
+          createdAt: Date.now(),
+        }), { mode: 0o600, flag: 'wx' });
         acquired = true;
       } catch (err) {
         const code = (err as NodeJS.ErrnoException).code;
-        const transient = code === 'EEXIST' || code === 'EPERM' || code === 'EACCES' || code === 'EBUSY';
-        if (!transient) {
+        if (code !== 'EEXIST' && code !== 'EPERM' && code !== 'EACCES' && code !== 'EBUSY') {
+          try { fs.rmdirSync(lockPath); } catch { /* another process owns or removed it */ }
           throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         }
+
+        // Never reclaim a lock based on age alone: a slow but live writer may
+        // legitimately hold it longer than the stale threshold.
         try {
-          if (code === 'EEXIST' && Date.now() - fs.statSync(lockPath).mtimeMs > staleAfterMs) {
-            fs.rmdirSync(lockPath);
-            continue;
+          const owner = JSON.parse(fs.readFileSync(ownerPath, 'utf8')) as {
+            pid?: unknown; hostname?: unknown; token?: unknown; createdAt?: unknown;
+          };
+          const age = Date.now() - Number(owner.createdAt);
+          if (owner.hostname === hostname &&
+              Number.isSafeInteger(owner.pid) &&
+              age > staleAfterMs) {
+            let processIsAlive = true;
+            try {
+              process.kill(owner.pid as number, 0);
+            } catch (probeError) {
+              const probeCode = (probeError as NodeJS.ErrnoException).code;
+              if (probeCode === 'ESRCH') processIsAlive = false;
+              // EPERM means the process exists but cannot be signalled.
+            }
+            if (!processIsAlive) {
+              const quarantine = path.join(this.dataDir, `.passports.write-lock.stale-${randomBytes(8).toString('hex')}`);
+              try {
+                fs.renameSync(lockPath, quarantine);
+                fs.rmSync(quarantine, { recursive: true, force: true });
+                continue;
+              } catch { /* a competing reaper or owner changed the lock; retry */ }
+            }
           }
-        } catch { /* lock released or raced; retry */ }
+        } catch {
+          // Missing, malformed, foreign-host or partially-created owner records
+          // are not safe to steal. They fail closed after the bounded wait.
+        }
+
         if (Date.now() >= deadline) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         Atomics.wait(sleeper, 0, 0, 10);
       }
@@ -261,7 +302,15 @@ export class PortablePassportStore {
     try {
       return operation();
     } finally {
-      try { fs.rmdirSync(lockPath); } catch { /* noop */ }
+      try {
+        const owner = JSON.parse(fs.readFileSync(ownerPath, 'utf8')) as { token?: unknown };
+        if (owner.token === ownerToken) {
+          fs.unlinkSync(ownerPath);
+          fs.rmdirSync(lockPath);
+        }
+      } catch {
+        // Do not remove a lock unless this writer can prove ownership.
+      }
     }
   }
 
@@ -309,15 +358,11 @@ export class PortablePassportStore {
   }
 
   public clear(): void {
-    this.records.clear();
-    try {
-      if (fs.existsSync(this.dbPath)) {
-        fs.unlinkSync(this.dbPath);
-      }
-      this.lastLoadedMtime = 0;
-      this.ready = true;
-    } catch {
-      this.ready = false;
-    }
+    if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+    this.withWriteLock(() => {
+      this.load(true);
+      this.records.clear();
+      this.persist();
+    });
   }
 }
