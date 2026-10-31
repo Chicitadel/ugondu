@@ -181,4 +181,25 @@ describe('PortablePassportStore shared-writer contract', () => {
     expect(store.isRevoked('passport-revoke-reason')).toBe(false);
   });
 
+  it('rejects non-string and blank passport identifiers at runtime', () => {
+    const store = new PortablePassportStore(directory);
+    store.set({ passportId: 'passport-runtime-id', tenantId: 'tenant-a' });
+
+    expect(() => store.get(null as unknown as string)).toThrow(PassportStoreError);
+    expect(() => store.get(42 as unknown as string)).toThrow(PassportStoreError);
+    expect(() => store.get('   ')).toThrow(PassportStoreError);
+    expect(() => store.isRevoked(undefined as unknown as string)).toThrow(PassportStoreError);
+    expect(store.get('passport-runtime-id')?.tenantId).toBe('tenant-a');
+  });
+
+  it('rejects invalid runtime revocation identifiers and reasons without mutating records', () => {
+    const store = new PortablePassportStore(directory);
+    store.set({ passportId: 'passport-runtime-revoke', tenantId: 'tenant-a' });
+
+    expect(() => store.revoke(null as unknown as string, 'SECURITY_REVIEW')).toThrow(PassportStoreError);
+    expect(() => store.revoke(7 as unknown as string, 'SECURITY_REVIEW')).toThrow(PassportStoreError);
+    expect(() => store.revoke('passport-runtime-revoke', null as unknown as string)).toThrow(PassportStoreError);
+    expect(store.isRevoked('passport-runtime-revoke')).toBe(false);
+  });
+
 });
