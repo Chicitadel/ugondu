@@ -202,6 +202,30 @@ describe('PortablePassportStore shared-writer contract', () => {
     expect(store.isRevoked('passport-runtime-revoke')).toBe(false);
   });
 
+  it('never removes another writer lock after a non-contention mkdir error', () => {
+    const store = new PortablePassportStore(directory);
+    const lockPath = path.join(directory, '.passports.write-lock');
+    const originalMkdirSync = fs.mkdirSync.bind(fs);
+    const mkdirSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation(((target: fs.PathLike, options?: fs.Mode | fs.MakeDirectoryOptions) => {
+      if (String(target) === lockPath) {
+        // Model a competing writer winning mkdir before this process receives
+        // an unrelated filesystem error. The directory is not ours to remove.
+        originalMkdirSync(target, options as fs.MakeDirectoryOptions);
+        throw Object.assign(new Error('simulated filesystem I/O error'), { code: 'EIO' });
+      }
+      return originalMkdirSync(target, options as fs.MakeDirectoryOptions);
+    }) as typeof fs.mkdirSync);
+
+    try {
+      expect(() => store.set({ passportId: 'passport-foreign-lock', tenantId: 'tenant-a' }))
+        .toThrow(PassportStoreError);
+      expect(fs.existsSync(lockPath)).toBe(true);
+    } finally {
+      mkdirSpy.mockRestore();
+      fs.rmSync(lockPath, { recursive: true, force: true });
+    }
+  });
+
   it('cleans up a lock directory when owner metadata publication fails after mkdir', () => {
     const store = new PortablePassportStore(directory);
     const lockPath = path.join(directory, '.passports.write-lock');
