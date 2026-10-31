@@ -293,3 +293,101 @@ Additional commits:
 - Latest PR #35 handover: `c949a156bb5555d76c5765ca8f8baee847c4c067`.
 
 PR #35 final recorded head at this update: `c949a156bb5555d76c5765ca8f8baee847c4c067`. Its comprehensive Flutter/Maven/OpenAPI qualification must be checked at this exact SHA; earlier CI runs on prior heads do not qualify this expanded change set.
+
+
+---
+
+## Ugondu PR #66 — runtime passport identifier validation (2026-10-31 11:45Z)
+
+**Finding: UG-PASSPORT-RUNTIME-IDENTIFIER-VALIDATION-002.** PR #65 hardened record validation and cross-process filesystem locking, but runtime method inputs remained unsafe: get(), isRevoked() and revoke() could receive malformed JavaScript values and throw native TypeErrors. A lock owner-metadata write failure after a successful mkdir could also leave an ownerless directory.
+
+**Physical remediation on dedicated branch** fix/cor-passport-runtime-id-validation-2026-10-31, stacked on PR #65:
+- Added runtime normalizePassportId(unknown) and consistent PassportStoreError(PASSPORT_STORE_INVALID_DATA) behavior.
+- Validate revocation reason before lock acquisition/mutation.
+- Clean up a lock directory only when this process itself created it and owner metadata publication failed; normal stale/ownerless lock fail-closed rules and token-verified release remain intact.
+- Added regressions for malformed IDs, invalid reasons, unchanged state and simulated metadata-write failure.
+- Product handover: governance/handover/PASSPORT_RUNTIME_ID_VALIDATION_2026-10-31.md.
+
+Commits:
+- Source: be3fcbf72f1527e6a9c89da975ffc0d2143af663.
+- Runtime identifier tests: 3f4581dc45c2d3f783612e3336f7e3f04c0061f6.
+- Lock metadata failure regression: 8b7782ea008016709c2fcdfdb20ca95e0e1621ca.
+- Product handover: e84c9a163cd039284a6f8f2240e6789b305e60ef.
+
+Remote exact-head qualification is pending. This does not close the multi-host shared durable adapter gap. Keep the global verdict PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.
+
+
+### Dumcholu PR #35 — live registry bootstrap wiring (2026-10-31 11:48Z)
+
+A further call-site audit found the live resolver would still not execute in the citizen app: the singleton had no ApiClient, the screen never invoked loadHierarchy(), and it resolved synchronously before data load. The canonical registry also omitted country-domain from citizen dependencies/service endpoints, and resolver defaults still targeted France/Paris.
+
+Physical corrections on PR #35:
+- Resolver singleton uses ApiClient.forService('country-domain').
+- Registered country-domain in canonical Dart registry and YAML asset for development/staging/production; added citizen service dependency and microservice catalog entry.
+- Changed launch defaults to NG / zone-country-ng.
+- Citizen Opportunity Map now awaits the live registry snapshot before zone resolution and map loading; retry awaits bootstrap.
+- Added widget test injecting an authoritative mock snapshot plus registry/singleton tests.
+
+Latest commits:
+- Resolver singleton/Nigeria defaults: 3d0d358fc08822595a3f2b9ba06e42071e1dc05f.
+- Screen async bootstrap: 4de8a8563f2199f0f3fde454ed7fb9c1564bdbae.
+- Citizen registry YAML: 18d61e31e83a7420c924bfcfea0224340571c096.
+- Static registry service wiring: bee36aacb75a12faa7644806516eed703cce28c4.
+- Resolver/registry tests: 18c2d72b495e2d2f3de3b9d20a246aa824553da5, 103602a3c1456c90db58668888d662b8714ff324, eb622cdc94ec33b55dc8c2decdaed22b1b281b59.
+- Citizen screen widget test: 577db68a5b85ecf48eb0419a1c633a67c50e3a58.
+- Product handover update: 48e26035a8fa717195cdba5f74cede584f6d4338.
+
+PR #35 latest candidate head: 48e26035a8fa717195cdba5f74cede584f6d4338. Re-run/check comprehensive CI on this exact SHA. Live gateway routing, authentication and populated production registry remain unverified; no COR certification claim.
+
+
+### Dumcholu PR #36 — Partner Opportunity Map synthetic curriculum removal
+
+**Finding: DUM-COR-PARTNER-CURRICULUM-SYNTHETIC-METRICS-001.** A further anti-mock review found four hardcoded partner curriculum records presenting fabricated vacancy counts, employer names, placement scores, cohort capacity, enrolment, CPF and state-subsidy figures. The screen had no live partner curriculum repository/API wiring.
+
+Physical remediation on dedicated branch `fix/partner-map-no-synthetic-curriculum-2026-10-31`, stacked on the territory candidate:
+- Removed all static curriculum/market records.
+- Replaced false forecasts/capacity metrics with localized honest empty state until a governed live partner source contract exists.
+- Added regression that asserts known fake names/numbers and derived forecast/capacity sections are absent.
+- Product handover: `docs/governance/PARTNER_MAP_SYNTHETIC_CURRICULUM_REMEDIATION_2026-10-31.md`.
+
+Commits:
+- Data removal/UI gate: `4719e516a257d0067cde9f101e25b5ef25c677f9`.
+- Widget regression: `3e13966c37b1bd44abdfd42afa1522f45e9df4e0`.
+- Conditional selection initialization: `645202d07fc2be288a9f7ecaff744243c5eff430`.
+- Product handover: `6a2d347292ae098f4483d556be8a835bcc582afa`.
+
+The partner feature is now honest but incomplete. Live partner curriculum API, tenant binding, employer evidence, cohort/capacity data, CPF/subsidy integration and forecast methodology remain OPEN. Exact-head Flutter and governance CI pending. Keep the global release state PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.
+
+Partner Opportunity Map follow-up: removed the now-dead hardcoded forecast/capacity widget scaffolding entirely (not merely hidden behind an empty-list condition). Public model types remain for a future typed source contract; no local curriculum records or static forecast calculators remain. Commit `c23347ed63ae58bcf2adaad63ffc5e65f1f6955f`; updated product handover `095a8da21c39a64b4fca147f6b33a39ce35330f0`. PR #36 latest candidate head after this update is `095a8da21c39a64b4fca147f6b33a39ce35330f0`; exact-head CI must be rechecked.
+
+PR #35 territory bootstrap follow-up: the `TerritoryConfiguration.fromMap` path still retained France/Paris defaults after the initial Nigeria switch. Removed those residual defaults, made the default region empty unless configured, updated the comments, and added parsed-default regression coverage. Commits: `3f62b83682df3c1f14ff86eae670ac7f043fde4e`, `24129a7f69fc93b3d9326ec0613cd2f26c2e0138`, `ff05eab741f9287750448d34d1ed1fae27aa5e76`; product handover update `815b370597d02188ced37eedff866507ccdb6a7d`. PR #35 latest head: `815b370597d02188ced37eedff866507ccdb6a7d`; exact-head CI must be rerun/checked.
+
+
+---
+
+## Exact-head execution snapshot — 2026-10-31 11:56Z
+
+| Candidate | Exact branch head | Current workflow evidence | Status |
+|---|---|---|---|
+| Dumcholu PR #35 — territory live contract/bootstrap | `815b370597d02188ced37eedff866507ccdb6a7d` | UI audit #41198796379 queued; product naming #41198796364 queued; browser evidence #41198796340 queued; comprehensive CI #41198796382 queued | CI pending |
+| Dumcholu PR #36 — partner synthetic curriculum removal | `b482d1b8d1609ccaeaea69a6aa108ffb72f6a5e0` | product naming #41198889035 queued; browser evidence #41198889074 queued; comprehensive CI #41198889056 queued | CI pending |
+| Ugondu PR #66 — runtime passport input/lock cleanup | `5325bf3b640b997066b012bd708cee569f8aa891` | CI/CD #41198806161 queued; manifest #41198806128 in progress; COR #41198806129 queued; AWS Physical Qualification Gate **SKIPPED** | CI pending; no AWS deployment |
+
+The PR #36 comprehensive CI run on head `b482d1b...` is the current rerun after the territory base branch advanced to `815b370...`; its merge tree must include the latest base changes. PR #35 itself has its own comprehensive run.
+
+PR #34 exact-head Java 21 runtime, manifest and naming receipts remain SUCCESS at `d9a5a6fc...`. Ugondu PR #65 narrow candidate receipts remain green at source/test candidate SHA `1afb0e8f...`; AWS physical qualification and final trust-root/signature stages were skipped.
+
+These statuses are workflow snapshots, not release certification. No AWS resources were provisioned. The overall verdict remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
+
+
+## Dumcholu PR #35 CI failure follow-up — 2026-10-31 12:42Z
+
+Reported comprehensive CI run #41198796382 failed in Flutter Portal Tests (dumcholu-citizen), with 46 passed, 21 failed, 1 skipped. PR #36 inherited this failure from the stacked base. These are **not qualified**.
+
+Physical changes committed directly to the PR #35 dedicated branch (no main/master writes):
+- `7bdfdbbcabe736deb8b64a962abab68fbb120e31`: legacy territory tests now expect Nigeria launch default (`zone-country-ng`) and use an explicit injected test-only geography fixture when asserting French region/department navigation. Production fail-closed behavior remains unchanged.
+- `3895e671fd7f28da6c20a25bb2580f3f77bbcece`: eleven Opportunity Map widget test setups now inject explicit test-only hierarchy roots and the fixture's Paris zone, allowing the new asynchronous bootstrap to run without an actual network registry.
+
+Evidence boundary: commits are physical writes, but no passing exact-head comprehensive CI receipt has yet been obtained. Other failing assertions, including FranceConnect guest mode, require independent root-cause verification. Do not rewrite guest/verified identity semantics merely to make tests pass.
+
+Agent guardrail: do not restore bundled geography to production, suppress tests, or conflate mocked test fixtures with authoritative live registry data. Verify the complete Flutter portal suite, backend contract, and stacked PR #36 merge tree after these commits. No AWS deployment or global COR certification is implied.
