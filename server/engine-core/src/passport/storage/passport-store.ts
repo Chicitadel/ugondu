@@ -102,12 +102,22 @@ export class PortablePassportStore {
   private readonly dbPath: string;
 
   constructor(dataDirectory?: string) {
-    try {
-      this.dataDir = resolvePassportStoreDirectory(dataDirectory ?? process.env['UGONDU_PASSPORT_DATA_DIR']);
+    if (dataDirectory) {
+      this.dataDir = resolvePassportStoreDirectory(dataDirectory);
       this.dbPath = path.join(this.dataDir, 'passports.json');
       this.load();
-    } catch {
-      this.dataDir = dataDirectory ? path.resolve(dataDirectory) : path.resolve(process.cwd(), 'var', 'data');
+      return;
+    }
+
+    try {
+      this.dataDir = resolvePassportStoreDirectory(process.env['UGONDU_PASSPORT_DATA_DIR']);
+      this.dbPath = path.join(this.dataDir, 'passports.json');
+      this.load();
+    } catch (err) {
+      if (err instanceof PassportStoreError && err.code === 'PASSPORT_STORE_INVALID_DATA') {
+        throw err;
+      }
+      this.dataDir = path.resolve(process.cwd(), 'var', 'data');
       this.dbPath = path.join(this.dataDir, 'passports.json');
       this.ready = false;
     }
