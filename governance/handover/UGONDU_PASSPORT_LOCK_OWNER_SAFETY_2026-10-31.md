@@ -51,3 +51,17 @@ Never automate deletion based only on lock age.
 7. Do not provision chargeable AWS infrastructure without explicit funding/budget authorization.
 
 **Status: PHYSICAL REMEDIATION COMMITTED / REGRESSION TESTS AUTHORED / EXACT-HEAD TESTS PENDING / MULTI-HOST DURABILITY OPEN.**
+
+
+## Exact-head CI correction — 2026-10-31
+
+The first PR #65 qualification attempt on the earlier head failed in the new passport shared-writer spec (3 failures, 260 passed). The logs identified two concrete test/implementation issues:
+
+- Publishing a candidate lock directory via rename could replace an existing empty lock directory on POSIX. The lock primitive has been corrected to use exclusive `mkdirSync(lockPath)` directly; an ownerless lock after process crash remains fail-closed for operator recovery.
+- Tests incorrectly expected the symbolic error code in the error message. Assertions now check the exported `PassportStoreError` type; the first contention test also verifies the error code directly.
+
+Follow-up commits:
+- `b48dac27227aa44fd3e76f6da7e0e1e9dd7e7e66` — safe exclusive lock acquisition.
+- `13d1bf0d06863c9650be815ce2ffe85d9c7f07f0` and `7e9a72fbb575d6073929f2c75c6c60e26a748583` — typed fail-closed assertions.
+
+The new head must be re-run through engine-core Jest, full workspace CI and COR qualification. **No successful rerun is yet confirmed.** The earlier failed run is retained as evidence and must not be overwritten in the ledger.
