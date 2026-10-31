@@ -451,6 +451,48 @@ test('ENG-PASS-009: store outage or corruption fails closed (REJECTED)', () => {
   );
 });
 
+test('ENG-PASS-010: concurrent OS processes sharing one store lose no writes', () => {
+  const os = require('os');
+  const path = require('path');
+  const fs = require('fs');
+  const { spawn } = require('child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-passport-mp-'));
+  const modulePath = require.resolve('../server/engine-core/dist/passport/storage/passport-store.js');
+  const workers = 6;
+  const perWorker = 15;
+  const script = `
+    const { PortablePassportStore } = require(${JSON.stringify(modulePath)});
+    const s = new PortablePassportStore(${JSON.stringify(dir)});
+    for (let i = 0; i < ${perWorker}; i++) {
+      s.set({ passportId: 'p_' + process.argv[1] + '_' + i, tenantId: 't_' + process.argv[1] });
+    }`;
+  return new Promise((resolve, reject) => {
+    let done = 0; let failed = 0;
+    for (let w = 0; w < workers; w++) {
+      const child = spawn(process.execPath, ['-e', script, String(w)], {
+        env: { ...process.env, UGONDU_PASSPORT_LOCK_WAIT_MS: '20000' },
+        stdio: 'ignore',
+      });
+      child.on('exit', (code) => {
+        if (code !== 0) failed++;
+        if (++done === workers) {
+          try {
+            assert.strictEqual(failed, 0, 'every writer process must succeed');
+            const { PortablePassportStore } = engineModule;
+            const verifier = new PortablePassportStore(dir);
+            for (let w2 = 0; w2 < workers; w2++) {
+              for (let i = 0; i < perWorker; i++) {
+                assert.ok(verifier.get(`p_${w2}_${i}`), `lost write p_${w2}_${i}`);
+              }
+            }
+            resolve();
+          } catch (e) { reject(e); } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+        }
+      });
+    }
+  });
+});
+
 test('ENG-004: Unlicensed deployment request deterministically returns 402', async () => {
   const r = await post(ENGINE_PORT, '/v1/deploy/resolve', {
     repositoryUrl: 'https://github.com/example/repo',

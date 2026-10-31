@@ -174,6 +174,21 @@ export class PortablePassportStore {
     }
   }
 
+  /** Atomic replace; retries transient sharing violations (e.g. Windows readers). */
+  private renameWithRetry(from: string, to: string): void {
+    const sleeper = new Int32Array(new SharedArrayBuffer(4));
+    for (let attempt = 0; ; attempt++) {
+      try {
+        fs.renameSync(from, to);
+        return;
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        if (attempt >= 200 || !(code === 'EPERM' || code === 'EACCES' || code === 'EBUSY')) throw err;
+        Atomics.wait(sleeper, 0, 0, 5);
+      }
+    }
+  }
+
   private persist(): void {
     if (this.outageSimulated) {
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
@@ -188,8 +203,14 @@ export class PortablePassportStore {
     const tmp = path.join(this.dataDir, `.passports.tmp-${process.pid}-${randomBytes(6).toString('hex')}`);
 
     try {
-      fs.writeFileSync(tmp, json, { encoding: 'utf8', mode: 0o600 });
-      fs.renameSync(tmp, this.dbPath);
+      const fd = fs.openSync(tmp, 'wx', 0o600);
+      try {
+        fs.writeSync(fd, json, 0, 'utf8');
+        fs.fsyncSync(fd);
+      } finally {
+        fs.closeSync(fd);
+      }
+      this.renameWithRetry(tmp, this.dbPath);
       const stat = fs.statSync(this.dbPath);
       this.lastLoadedMtime = stat.mtimeMs;
       this.ready = true;
@@ -197,6 +218,50 @@ export class PortablePassportStore {
       try { fs.unlinkSync(tmp); } catch { /* noop */ }
       this.ready = false;
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+    }
+  }
+
+  /**
+   * Serializes read-modify-write cycles across processes sharing the same data
+   * directory. Uses atomic mkdir as the mutual-exclusion primitive, a bounded
+   * wait, and stale-lock recovery. Fails closed when the lock cannot be taken.
+   * Coordinates only processes that share one filesystem; multi-host topologies
+   * require a shared durable adapter.
+   */
+  private withWriteLock<T>(operation: () => T): T {
+    const lockPath = path.join(this.dataDir, '.passports.write-lock');
+    const maxWaitMs = Number(process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] ?? 2000);
+    const staleAfterMs = Number(process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] ?? 30000);
+    const deadline = Date.now() + maxWaitMs;
+    const sleeper = new Int32Array(new SharedArrayBuffer(4));
+    let acquired = false;
+
+    while (!acquired) {
+      try {
+        fs.mkdirSync(this.dataDir, { recursive: true, mode: 0o700 });
+        fs.mkdirSync(lockPath, { mode: 0o700 });
+        acquired = true;
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        const transient = code === 'EEXIST' || code === 'EPERM' || code === 'EACCES' || code === 'EBUSY';
+        if (!transient) {
+          throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+        }
+        try {
+          if (code === 'EEXIST' && Date.now() - fs.statSync(lockPath).mtimeMs > staleAfterMs) {
+            fs.rmdirSync(lockPath);
+            continue;
+          }
+        } catch { /* lock released or raced; retry */ }
+        if (Date.now() >= deadline) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+        Atomics.wait(sleeper, 0, 0, 10);
+      }
+    }
+
+    try {
+      return operation();
+    } finally {
+      try { fs.rmdirSync(lockPath); } catch { /* noop */ }
     }
   }
 

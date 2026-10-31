@@ -42,7 +42,14 @@ describe('PortablePassportStore shared-writer contract', () => {
     const store = new PortablePassportStore(directory);
     fs.mkdirSync(path.join(directory, '.passports.write-lock'));
 
-    expect(() => store.set({ passportId: 'passport-d', tenantId: 'tenant-d' }))
-      .toThrow('PASSPORT_STORE_UNAVAILABLE');
+    let caught: unknown;
+    try {
+      store.set({ passportId: 'passport-d', tenantId: 'tenant-d' });
+    } catch (err) {
+      caught = err;
+    }
+    expect(caught).toBeInstanceOf(PassportStoreError);
+    expect((caught as PassportStoreError).code).toBe('PASSPORT_STORE_UNAVAILABLE');
+    expect(store.get('passport-d')).toBeNull();
   });
 });

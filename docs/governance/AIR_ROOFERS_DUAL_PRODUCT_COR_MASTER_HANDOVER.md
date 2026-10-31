@@ -863,4 +863,11 @@ The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd07657
 - Live admin SSO routing is synchronized and verified on the DirectAdmin production shared host (`162.244.94.48`).
 - DirectAdmin shared host remains the primary launch environment; AWS deployment remains safely deferred pending official public engagement and budget authorization.
 - Zero AI attribution strictly enforced across all commits, artifacts, and documentation.
-- Overall ecosystem status: `READY_FOR_FINAL_AUTHORITY_REVIEW`.
+- Overall ecosystem status: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` (see Audit Correction below; supersedes `READY_FOR_FINAL_AUTHORITY_REVIEW`).
+
+### Audit Correction — 2026-10-31 (supersedes "CERTIFIED" wording above)
+- The statement above that shared passport persistence is "CERTIFIED" was premature. Candidate `4969ee1e` had no inter-process writer lock (lost-update race) and its CI/CD run #41148356049 was **cancelled**, not passed. Only COR Certification and Deployment Manifest runs succeeded on it.
+- PR #64 (`fix/cor-passport-multiprocess-write-lock-2026-10-31`) as pushed did not compile (`withWriteLock` undefined, TS2339); CI/CD and COR runs on it failed.
+- Remediation (this commit): `withWriteLock` (atomic mkdir lock, bounded wait, stale-lock recovery, fail-closed), `fsync` before atomic rename, bounded retry of transient `EPERM/EACCES/EBUSY`. Evidence: `ENG-PASS-010` (6 OS processes x 15 writes, zero lost; 4 consecutive runs 16/16), Jest passport specs 3/3, engine-core Jest 43 suites / 259 tests.
+- **Still OPEN:** (1) multi-host durability — filesystem lock only coordinates processes sharing one filesystem; a shared DB-backed adapter and independent-host tests are required; (2) revoking a signed-but-unregistered passport now throws (no tombstone) — needs design decision; (3) exact-head CI/COR on the new commit; (4) trust-root, authority signature, live AeroBill/Mandatag, AWS physical, independent review gates remain skipped/outstanding.
+- No AWS or DirectAdmin deployment was performed for this change.
