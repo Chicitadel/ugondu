@@ -135,3 +135,19 @@ The supplied run records show COR #41187539093 and manifest #41187539163 succeed
 - Keep preferred region `eu-west-3`; preserve portable OCI/runtime artifacts and separate EC2/Fargate profiles. Do not add AWS-only domain logic.
 - AeroBill remains sole billing/pricing/metering authority; Mandatag remains sole licensing/entitlement authority.
 - Keep the overall state `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. Internal workflow success cannot waive live federation, trust-root, multi-host durability, privacy/legal, staging E2E or final authority gates.
+
+
+### Dumcholu PR #32 — career timeline evidence integrity
+
+- PR: https://github.com/Chicitadel/dumcholu/pull/32
+- Branch: `fix/career-timeline-no-unverified-range-2026-10-31`, stacked on PR #29.
+- Finding: `JourneyStage` carries a bare numeric duration without provider/source reference, verification state or evidence timestamp, while the estimator labeled it sourced and extrapolated best/extended ranges with uncalibrated 0.80/1.35 multipliers.
+- Physical fix: `TimelineEstimator.estimateFromSourcedStages` now returns `DURATION_NOT_YET_ESTIMABLE` until verifiable source provenance exists; unsupported range arithmetic removed.
+- Regression: `TimelineEstimatorEvidenceTest` asserts bare positive durations and empty stage lists cannot produce an estimate.
+- Source commit `dedc16ed4a4c4eadf30512a5ad07678982894726`; test commit `dbb8921c14e893cbc2d34638f349350fe4c0f130`; handover `67dd8fecdf3863919c1e634ed10341c63eed1a2e`.
+- Exact-head runtime, manifest and naming workflows are running; no pass is claimed until all finish.
+
+### Dumcholu PR #31 — false application success
+
+- Narrow exact-head Opportunity Map COR Regression #41188924304 completed successfully; its citizen integrity and Java 21 backend jobs both passed. Product Name Governance #41188924356 also succeeded.
+- This qualifies only the false-success guard and related backend regression on the recorded head. The application API and receipt contract remain open.
