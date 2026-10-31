@@ -391,3 +391,48 @@ Physical changes committed directly to the PR #35 dedicated branch (no main/mast
 Evidence boundary: commits are physical writes, but no passing exact-head comprehensive CI receipt has yet been obtained. Other failing assertions, including FranceConnect guest mode, require independent root-cause verification. Do not rewrite guest/verified identity semantics merely to make tests pass.
 
 Agent guardrail: do not restore bundled geography to production, suppress tests, or conflate mocked test fixtures with authoritative live registry data. Verify the complete Flutter portal suite, backend contract, and stacked PR #36 merge tree after these commits. No AWS deployment or global COR certification is implied.
+
+
+---
+
+## Re-audit reconciliation — 2026-10-31 13:55Z / verified 14:55Z
+
+This section supersedes the earlier 11:56Z and 12:42Z pending/failed workflow snapshots where later exact-head evidence is now available.
+
+### Current PR heads and exact-head receipts
+
+| Candidate | Current PR head | Exact-head workflows | Result |
+|---|---|---|---|
+| Dumcholu PR #35 — territory registry live contract | 08c71e2ba278e49180aa9379f19cb8eae1f112b2 | Comprehensive CI #41205365357; Browser Evidence #41205365244; Product Name Governance #41205365279; UI Audit Integrity #41205365259 | ALL SUCCESS |
+| Dumcholu PR #36 — partner synthetic curriculum removal | 03ff3d349c9cc35e9f92f7476b008a9f3287198f | Comprehensive CI #41206323311; Browser Evidence #41206323292; Product Name Governance #41206323506 | ALL SUCCESS |
+| Ugondu PR #66 — passport runtime input and lock-owner cleanup | 2087e14c90e5cf656912bf1710a4b1628b279614 | CI/CD #41202418868; Deployment Manifest #41202418924; COR Certification #41202418666 | ALL WORKFLOWS SUCCESS |
+
+PR #35 comprehensive matrix: Governance & Contracts, Backend Maven Reactor, and all six Flutter portals passed. PR #36 comprehensive matrix: same eight jobs passed, including citizen and partner portals. Browser evidence passed for all five candidate portals on both PRs.
+
+Ugondu PR #66 CI/CD matrix and integration tests passed. Docker-image validation and release publishing were skipped. In COR run #41202418666, AWS Physical Qualification Gate, evidence-freshness verification, trust-root verification and final signing steps were skipped; the workflow's final release-gate job reported success. This is not an AWS deployment, signed COR certificate or multi-host durability qualification.
+
+### Reconciliation of the 21 citizen test failures
+
+The earlier failures reported for PR #35/#36 were real at the earlier heads and were not to be waived. The subsequent PR #35 branch commits physically:
+- Retargeted the launch-default test to Nigeria (zone-country-ng) while preserving French geography tests with explicit test-only fixture roots.
+- Injected test-only hierarchy roots and the fixture's Paris zone into eleven Opportunity Map widget test setups so asynchronous initialization does not depend on an unseeded live network registry.
+
+These changes preserve production fail-closed behavior; they do not reintroduce bundled production geography. The later comprehensive exact-head runs above passed. PR #36 was rebased/updated onto the qualified PR #35 candidate and its own comprehensive suite passed.
+
+### Existing PR #36 partner integrity boundary
+
+Fabricated partner curricula and static forecast/capacity calculations remain removed. The empty state is intentional until an authenticated, tenant-bound and evidence-backed partner source is available. Passing portal tests does not close the missing live partner API, employer verification, cohort/capacity provenance, CPF/subsidy integration or forecast methodology.
+
+### Hosting / COR boundary
+
+No AWS resources were provisioned. DirectAdmin remains the current launch host. Keep portable deployment artifacts and cost-aware infrastructure definitions ready, but do not create chargeable resources without explicit budget authorization. ECS on EC2 can be evaluated for a low-cost pilot when authorized; Fargate remains a later scale option. Do not claim HA from a single EC2 instance.
+
+Still-open production gates:
+1. Shared durable multi-host passport storage for Ugondu.
+2. Live AeroBill billing/metering and Mandatag entitlement production transaction verification.
+3. Production trust-root custody, rotation and signing ceremony, with verifiable signed evidence.
+4. Live gateway routing/authentication and populated registry validation in the target production environment.
+5. Authenticated Opportunity Map and partner data contracts, provenance, tenant isolation and staging E2E.
+6. Operational monitoring, backup/restore and disaster-recovery evidence appropriate to public commercial service.
+
+**Current decision: narrow candidate code and CI qualifications are green at the listed PR heads; ecosystem COR remains PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.** No PR has been merged and no master/main branch has been modified by this remediation.
