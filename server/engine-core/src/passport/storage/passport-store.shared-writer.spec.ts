@@ -63,9 +63,7 @@ describe('PortablePassportStore shared-writer contract', () => {
       createdAt: Date.now() - 60000,
     }));
     const previousWait = process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
-    const previousStale = process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
     process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = '20';
-    process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = '1000';
     try {
       expect(() => store.set({ passportId: 'passport-live-lock', tenantId: 'tenant-live' }))
         .toThrow('PASSPORT_STORE_UNAVAILABLE');
@@ -73,34 +71,30 @@ describe('PortablePassportStore shared-writer contract', () => {
     } finally {
       if (previousWait === undefined) delete process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
       else process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = previousWait;
-      if (previousStale === undefined) delete process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
-      else process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = previousStale;
       fs.rmSync(lockPath, { recursive: true, force: true });
     }
   });
 
-  it('reclaims an aged lock only when its same-host owner process is confirmed dead', () => {
+  it('fails closed on an abandoned lock even when its recorded owner is dead', () => {
     const store = new PortablePassportStore(directory);
     const lockPath = path.join(directory, '.passports.write-lock');
     fs.mkdirSync(lockPath);
     fs.writeFileSync(path.join(lockPath, 'owner.json'), JSON.stringify({
       pid: 2147483647,
       hostname: require('os').hostname(),
-      token: 'dead-owner',
+      token: 'abandoned-owner',
       createdAt: Date.now() - 60000,
     }));
     const previousWait = process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
-    const previousStale = process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
-    process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = '1000';
-    process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = '1000';
+    process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = '20';
     try {
-      store.set({ passportId: 'passport-after-crash', tenantId: 'tenant-after-crash' });
-      expect(store.get('passport-after-crash')?.tenantId).toBe('tenant-after-crash');
+      expect(() => store.set({ passportId: 'passport-abandoned-lock', tenantId: 'tenant-abandoned' }))
+        .toThrow('PASSPORT_STORE_UNAVAILABLE');
+      expect(fs.existsSync(lockPath)).toBe(true);
     } finally {
       if (previousWait === undefined) delete process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
       else process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = previousWait;
-      if (previousStale === undefined) delete process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
-      else process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = previousStale;
+      fs.rmSync(lockPath, { recursive: true, force: true });
     }
   });
 
