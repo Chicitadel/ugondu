@@ -200,9 +200,11 @@ export function admitPassport(
 
     try {
       const registered = passportStore.get(normalized);
-      if (registered && (registered.revoked
+      // A valid signature proves issuer authenticity, not current admission:
+      // registration is mandatory so revocation and tenant state remain authoritative.
+      if (!registered || registered.revoked
           || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)
-          || registered.tenantId !== verified.tenantId)) {
+          || registered.tenantId !== verified.tenantId) {
         return { status: 'REJECTED' };
       }
     } catch {

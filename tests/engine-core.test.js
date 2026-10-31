@@ -442,3 +442,18 @@ test('ENG-006: Telemetry endpoint rejects missing fields', async () => {
   assert.strictEqual(r.status, 400, `[en] Expected 400 for missing telemetry fields, got ${r.status}`);
   console.log('[en] ✓ PASS: Telemetry endpoint rejects missing fields');
 });
+
+test('ENG-PASS-011: validly signed but unregistered passports fail closed', () => {
+  const token = engineModule.issueSignedPassport({
+    tenantId: 'tenant_signed_unregistered',
+    ttlMs: 60_000,
+  });
+  // Issuance registers the token; clearing the authoritative store models a
+  // missing registration on another host or after loss of durable state.
+  engineModule.passportStore.clear();
+  assert.deepStrictEqual(
+    engineModule.admitPassport(token, { tenantId: 'tenant_signed_unregistered' }),
+    { status: 'REJECTED' },
+    'A valid signature must not bypass mandatory registration'
+  );
+});
