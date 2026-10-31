@@ -151,17 +151,28 @@ export class PortablePassportStore {
 
       const nextMap = new Map<string, RegisteredPassportRecord>();
       for (const [key, val] of Object.entries(parsed as Record<string, unknown>)) {
-        if (!val || typeof val !== 'object' || Array.isArray(val)) continue;
+        if (!val || typeof val !== 'object' || Array.isArray(val)) {
+          throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+        }
         const row = val as Record<string, unknown>;
-        if (typeof row.passportId !== 'string' || typeof row.tenantId !== 'string') continue;
+        const passportId = typeof row.passportId === 'string' ? row.passportId.trim() : '';
+        const tenantId = typeof row.tenantId === 'string' ? row.tenantId.trim() : '';
+        if (!passportId || passportId !== key || !tenantId ||
+            (row.workspaceId !== undefined && typeof row.workspaceId !== 'string') ||
+            (row.expiresAt !== undefined && (typeof row.expiresAt !== 'number' || !Number.isFinite(row.expiresAt))) ||
+            (row.revoked !== undefined && typeof row.revoked !== 'boolean') ||
+            (row.revocationReason !== undefined && typeof row.revocationReason !== 'string') ||
+            (row.updatedAt !== undefined && (typeof row.updatedAt !== 'number' || !Number.isFinite(row.updatedAt)))) {
+          throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+        }
         nextMap.set(key, {
-          passportId: row.passportId,
-          tenantId: row.tenantId,
-          workspaceId: typeof row.workspaceId === 'string' ? row.workspaceId : undefined,
-          expiresAt: typeof row.expiresAt === 'number' ? row.expiresAt : undefined,
-          revoked: Boolean(row.revoked),
-          revocationReason: typeof row.revocationReason === 'string' ? row.revocationReason : undefined,
-          updatedAt: typeof row.updatedAt === 'number' ? row.updatedAt : undefined,
+          passportId,
+          tenantId,
+          workspaceId: row.workspaceId as string | undefined,
+          expiresAt: row.expiresAt as number | undefined,
+          revoked: row.revoked === true,
+          revocationReason: row.revocationReason as string | undefined,
+          updatedAt: row.updatedAt as number | undefined,
         });
       }
 
