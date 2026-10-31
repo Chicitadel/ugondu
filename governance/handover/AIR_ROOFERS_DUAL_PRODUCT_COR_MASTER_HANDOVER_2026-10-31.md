@@ -98,3 +98,40 @@ Do not close these based on the PR #30 static regression:
 - Dumcholu PR #30 citizen UI synthetic feed removed; backend and UI guard workflows passed; live API/SSE and remaining Opportunity Map work remain open.
 - AWS physical deployment: deferred, no resources provisioned.
 - Combined public commercial release: **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED** until multi-host durable passport state, live federation, Opportunity Map live-source/legal/privacy/E2E gates, trust-root and final authority signoff are complete.
+
+
+## 6. Re-audit continuation — 2026-10-31 09:30Z
+
+### Ugondu PR #65 — runtime input validation follow-up
+
+**New finding: UG-PASSPORT-RECORD-RUNTIME-VALIDATION-001.** The persisted-record loader rejected malformed optional fields, but `set()` only checked trimmed passport and tenant IDs. A JavaScript caller, deserialized value or unsafe cast could therefore write `NaN`/infinite timestamps, non-boolean revocation flags, non-string workspace/reason fields or blank tenant identifiers. JSON serialization can turn non-finite numbers into `null`, poisoning the store so subsequent strict loads fail closed.
+
+**Physical remediation on this branch:**
+- Added one shared `parsePassportRecord` runtime validator and reused it for persisted reads and `set()`.
+- Validates non-empty passport/tenant IDs, key-to-ID identity, optional field types and finite numeric timestamps before state mutation.
+- `revoke()` now rejects blank/non-string reasons and trims accepted reasons.
+- Corrected the lock lifecycle comment to describe fail-closed abandoned-lock handling rather than stale-lock recovery.
+- Added regressions for NaN, Infinity, wrong optional field types, blank tenant IDs, valid writes after rejected input, and blank revocation reasons.
+
+**Latest physical commits:** source `903cddcee02c8279d11145ac67dc484a90efbff5`; regression `8348ffb5a35b529a7fe0e86c0ce4bd69c64516c4`. Exact-head CI has not yet been observed for these commits. Do not mark this follow-up qualified until the current branch head has successful unit, workspace, COR and manifest receipts.
+
+### Ugondu CI evidence boundary
+
+The supplied run records show COR #41187539093 and manifest #41187539163 succeeded, and CI/CD #41187539099 plus push #41187534585 succeeded. In COR #41187539093, the AWS Physical Qualification Gate was **SKIPPED**. These receipts must be SHA-matched to the final source/test commit before being used as current-head evidence. They do not prove a physical AWS deployment.
+
+### Dumcholu PR #31 — false application-success removal
+
+- PR: https://github.com/Chicitadel/dumcholu/pull/31
+- Branch: `fix/opportunity-map-no-false-application-success-2026-10-31`
+- Stacked on PR #30 branch `fix/opportunity-map-no-synthetic-citizen-feed-2026-10-31`.
+- Confirmed finding: detail-sheet `onApply` displayed `consent_success` despite no authenticated application request or backend receipt.
+- Physical source commit: `fce418ffd87f07a719f1008fbe244e30ff36f11c`; regression test commit: `37687baeca34cc6c7f1cb93bc72365c03735541e`; handover commit: `72a029e806bfd0cadb65603442ef8e41f2a76113`; CI trigger qualification update: `17c4ab888323603a2b0201a179e236139ba4343d`.
+- Removed the success snackbar/token; callback remains fail-closed until the authenticated application API returns a server-confirmed receipt. Regression guard rejects reintroduction.
+- CI status pending. The application API, idempotency, consent capture, authorization, persistence, audit event and receipt contract remain OPEN.
+
+### Cross-product invariants
+
+- No AWS resource provisioning has occurred. Any future staging/production deployment requires traction/official engagement or funding plus explicit budget approval.
+- Keep preferred region `eu-west-3`; preserve portable OCI/runtime artifacts and separate EC2/Fargate profiles. Do not add AWS-only domain logic.
+- AeroBill remains sole billing/pricing/metering authority; Mandatag remains sole licensing/entitlement authority.
+- Keep the overall state `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. Internal workflow success cannot waive live federation, trust-root, multi-host durability, privacy/legal, staging E2E or final authority gates.
