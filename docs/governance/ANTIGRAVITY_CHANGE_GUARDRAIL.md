@@ -1091,3 +1091,12 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 - Regression `ENG-PASS-011` clears the store after issuance and proves that the still-valid signed token is rejected without its registration.
 - This is separate from distributed durability: the current filesystem store coordinates only processes sharing one filesystem. Do not claim multi-host consistency until a real portable SQL adapter is wired into admission and cross-host tests pass.
 - Never relax this registration requirement to make local tests or a staging demo pass.
+
+
+## 2026-10-31 dual-product candidate integration boundary
+
+- Dumcholu PR #35 head `08c71e2ba278e49180aa9379f19cb8eae1f112b2` and PR #29 head `ffafd37cce49d83e4216b2842cb18f9d5147d142` are on divergent histories. GitHub compare reports `diverged`, 282 commits ahead on PR #35 and 161 commits behind relative to PR #29, with merge base `2930d6f473234134a71a9fa4648ec0cb125ca029`.
+- PR #36 is stacked on PR #35. Its green CI therefore does not qualify PR #29's discovery/guidance optimistic-lock changes.
+- PR #29 adds `CareerDiscoveryCaseEntity`, `GuidanceCaseEntity`, migration `V3__add_orm_optimistic_lock_versions.sql`, and `CareerCaseOptimisticLockingTest`. These exact paths are absent from the PR #35 candidate tree. PR #35's existing `CareerJourney` entity has its own `@Version`, which is not evidence that PR #29's separate discovery/guidance case entities are integrated.
+- Do not describe PR #29 through #36 as one unified, release-integrated candidate. Require a deliberate integration/rebase branch, conflict review, migration compatibility review, full Maven + Flutter + governance qualification on the resulting exact head before release aggregation.
+- Never cherry-pick or recreate the PR #29 entity/migration into PR #35 without first resolving the authoritative domain model and migration history. Preserve existing domain `case_version` semantics; ORM version is separate.
