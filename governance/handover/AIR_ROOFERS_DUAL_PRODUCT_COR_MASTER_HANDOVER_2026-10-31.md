@@ -378,3 +378,16 @@ The PR #36 comprehensive CI run on head `b482d1b...` is the current rerun after 
 PR #34 exact-head Java 21 runtime, manifest and naming receipts remain SUCCESS at `d9a5a6fc...`. Ugondu PR #65 narrow candidate receipts remain green at source/test candidate SHA `1afb0e8f...`; AWS physical qualification and final trust-root/signature stages were skipped.
 
 These statuses are workflow snapshots, not release certification. No AWS resources were provisioned. The overall verdict remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
+
+
+## Dumcholu PR #35 CI failure follow-up — 2026-10-31 12:42Z
+
+Reported comprehensive CI run #41198796382 failed in Flutter Portal Tests (dumcholu-citizen), with 46 passed, 21 failed, 1 skipped. PR #36 inherited this failure from the stacked base. These are **not qualified**.
+
+Physical changes committed directly to the PR #35 dedicated branch (no main/master writes):
+- `7bdfdbbcabe736deb8b64a962abab68fbb120e31`: legacy territory tests now expect Nigeria launch default (`zone-country-ng`) and use an explicit injected test-only geography fixture when asserting French region/department navigation. Production fail-closed behavior remains unchanged.
+- `3895e671fd7f28da6c20a25bb2580f3f77bbcece`: eleven Opportunity Map widget test setups now inject explicit test-only hierarchy roots and the fixture's Paris zone, allowing the new asynchronous bootstrap to run without an actual network registry.
+
+Evidence boundary: commits are physical writes, but no passing exact-head comprehensive CI receipt has yet been obtained. Other failing assertions, including FranceConnect guest mode, require independent root-cause verification. Do not rewrite guest/verified identity semantics merely to make tests pass.
+
+Agent guardrail: do not restore bundled geography to production, suppress tests, or conflate mocked test fixtures with authoritative live registry data. Verify the complete Flutter portal suite, backend contract, and stacked PR #36 merge tree after these commits. No AWS deployment or global COR certification is implied.
