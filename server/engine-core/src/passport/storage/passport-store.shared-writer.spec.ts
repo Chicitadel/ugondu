@@ -120,4 +120,17 @@ describe('PortablePassportStore shared-writer contract', () => {
     }
   });
 
+  it('does not release a lock whose ownership token changed during the critical section', () => {
+    const store = new PortablePassportStore(directory);
+    const internal = store as unknown as { withWriteLock<T>(operation: () => T): T };
+    internal.withWriteLock(() => {
+      const ownerPath = path.join(directory, '.passports.write-lock', 'owner.json');
+      const owner = JSON.parse(fs.readFileSync(ownerPath, 'utf8')) as Record<string, unknown>;
+      owner.token = 'replacement-owner';
+      fs.writeFileSync(ownerPath, JSON.stringify(owner));
+    });
+    expect(fs.existsSync(path.join(directory, '.passports.write-lock'))).toBe(true);
+    fs.rmSync(path.join(directory, '.passports.write-lock'), { recursive: true, force: true });
+  });
+
 });
