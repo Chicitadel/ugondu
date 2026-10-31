@@ -245,23 +245,17 @@ export class PortablePassportStore {
     while (!acquired) {
       try {
         fs.mkdirSync(this.dataDir, { recursive: true, mode: 0o700 });
-        const candidatePath = path.join(this.dataDir, `.passports.write-lock-${ownerToken}`);
-        try {
-          fs.mkdirSync(candidatePath, { mode: 0o700 });
-          fs.writeFileSync(path.join(candidatePath, 'owner.json'), JSON.stringify({
-            pid: process.pid,
-            hostname,
-            token: ownerToken,
-            createdAt: Date.now(),
-          }), { mode: 0o600, flag: 'wx' });
-          // Publish a fully initialized lock in one directory rename; no
-          // observer can mistake a just-created, ownerless lock as stale.
-          fs.renameSync(candidatePath, lockPath);
-          acquired = true;
-        } catch (publishError) {
-          try { fs.rmSync(candidatePath, { recursive: true, force: true }); } catch { /* noop */ }
-          throw publishError;
-        }
+        fs.mkdirSync(lockPath, { mode: 0o700 });
+        // mkdir is the atomic exclusion primitive. If the process crashes
+        // before owner metadata is written, the ownerless lock intentionally
+        // remains fail-closed for operator recovery.
+        fs.writeFileSync(ownerPath, JSON.stringify({
+          pid: process.pid,
+          hostname,
+          token: ownerToken,
+          createdAt: Date.now(),
+        }), { mode: 0o600, flag: 'wx' });
+        acquired = true;
       } catch (err) {
         const code = (err as NodeJS.ErrnoException).code;
         if (code !== 'EEXIST' && code !== 'EPERM' && code !== 'EACCES' && code !== 'EBUSY') {
