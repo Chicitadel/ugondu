@@ -27,6 +27,7 @@
 import path from 'path';
 import fs from 'fs';
 import { randomBytes } from 'crypto';
+import os from 'os';
 
 export interface RegisteredPassportRecord {
   passportId: string;
@@ -46,6 +47,35 @@ export class PassportStoreError extends Error {
     this.name = 'PassportStoreError';
     this.code = code;
   }
+}
+
+/** Validate untrusted runtime values before they enter durable passport state. */
+function parsePassportRecord(value: unknown, expectedPassportId?: string): RegisteredPassportRecord {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+  }
+
+  const row = value as Record<string, unknown>;
+  const passportId = typeof row.passportId === 'string' ? row.passportId.trim() : '';
+  const tenantId = typeof row.tenantId === 'string' ? row.tenantId.trim() : '';
+  if (!passportId || !tenantId || (expectedPassportId !== undefined && passportId !== expectedPassportId) ||
+      (row.workspaceId !== undefined && typeof row.workspaceId !== 'string') ||
+      (row.expiresAt !== undefined && (typeof row.expiresAt !== 'number' || !Number.isFinite(row.expiresAt))) ||
+      (row.revoked !== undefined && typeof row.revoked !== 'boolean') ||
+      (row.revocationReason !== undefined && typeof row.revocationReason !== 'string') ||
+      (row.updatedAt !== undefined && (typeof row.updatedAt !== 'number' || !Number.isFinite(row.updatedAt)))) {
+    throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+  }
+
+  return {
+    passportId,
+    tenantId,
+    workspaceId: row.workspaceId as string | undefined,
+    expiresAt: row.expiresAt as number | undefined,
+    revoked: row.revoked as boolean | undefined,
+    revocationReason: row.revocationReason as string | undefined,
+    updatedAt: row.updatedAt as number | undefined,
+  };
 }
 
 function ensureWritableDirectory(directory: string): void {
@@ -101,12 +131,22 @@ export class PortablePassportStore {
   private readonly dbPath: string;
 
   constructor(dataDirectory?: string) {
-    try {
-      this.dataDir = resolvePassportStoreDirectory(dataDirectory ?? process.env['UGONDU_PASSPORT_DATA_DIR']);
+    if (dataDirectory) {
+      this.dataDir = resolvePassportStoreDirectory(dataDirectory);
       this.dbPath = path.join(this.dataDir, 'passports.json');
       this.load();
-    } catch {
-      this.dataDir = dataDirectory ? path.resolve(dataDirectory) : path.resolve(process.cwd(), 'var', 'data');
+      return;
+    }
+
+    try {
+      this.dataDir = resolvePassportStoreDirectory(process.env['UGONDU_PASSPORT_DATA_DIR']);
+      this.dbPath = path.join(this.dataDir, 'passports.json');
+      this.load();
+    } catch (err) {
+      if (err instanceof PassportStoreError && err.code === 'PASSPORT_STORE_INVALID_DATA') {
+        throw err;
+      }
+      this.dataDir = path.resolve(process.cwd(), 'var', 'data');
       this.dbPath = path.join(this.dataDir, 'passports.json');
       this.ready = false;
     }
@@ -150,18 +190,7 @@ export class PortablePassportStore {
 
       const nextMap = new Map<string, RegisteredPassportRecord>();
       for (const [key, val] of Object.entries(parsed as Record<string, unknown>)) {
-        if (!val || typeof val !== 'object' || Array.isArray(val)) continue;
-        const row = val as Record<string, unknown>;
-        if (typeof row.passportId !== 'string' || typeof row.tenantId !== 'string') continue;
-        nextMap.set(key, {
-          passportId: row.passportId,
-          tenantId: row.tenantId,
-          workspaceId: typeof row.workspaceId === 'string' ? row.workspaceId : undefined,
-          expiresAt: typeof row.expiresAt === 'number' ? row.expiresAt : undefined,
-          revoked: Boolean(row.revoked),
-          revocationReason: typeof row.revocationReason === 'string' ? row.revocationReason : undefined,
-          updatedAt: typeof row.updatedAt === 'number' ? row.updatedAt : undefined,
-        });
+        nextMap.set(key, parsePassportRecord(val, key));
       }
 
       this.records = nextMap;
@@ -224,35 +253,48 @@ export class PortablePassportStore {
   /**
    * Serializes read-modify-write cycles across processes sharing the same data
    * directory. Uses atomic mkdir as the mutual-exclusion primitive, a bounded
-   * wait, and stale-lock recovery. Fails closed when the lock cannot be taken.
+   * wait, and fail-closed abandoned-lock handling. Fails closed when the lock cannot be taken.
    * Coordinates only processes that share one filesystem; multi-host topologies
    * require a shared durable adapter.
    */
   private withWriteLock<T>(operation: () => T): T {
     const lockPath = path.join(this.dataDir, '.passports.write-lock');
     const maxWaitMs = Number(process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] ?? 2000);
-    const staleAfterMs = Number(process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] ?? 30000);
+    if (!Number.isSafeInteger(maxWaitMs) || maxWaitMs < 1 || maxWaitMs > 60000) {
+      throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE', 'Invalid passport lock timing configuration');
+    }
     const deadline = Date.now() + maxWaitMs;
     const sleeper = new Int32Array(new SharedArrayBuffer(4));
+    const ownerToken = randomBytes(24).toString('hex');
+    const ownerPath = path.join(lockPath, 'owner.json');
+    const hostname = os.hostname();
     let acquired = false;
 
     while (!acquired) {
       try {
         fs.mkdirSync(this.dataDir, { recursive: true, mode: 0o700 });
         fs.mkdirSync(lockPath, { mode: 0o700 });
+        // mkdir is the atomic exclusion primitive. If the process crashes
+        // before owner metadata is written, the ownerless lock intentionally
+        // remains fail-closed for operator recovery.
+        fs.writeFileSync(ownerPath, JSON.stringify({
+          pid: process.pid,
+          hostname,
+          token: ownerToken,
+          createdAt: Date.now(),
+        }), { mode: 0o600, flag: 'wx' });
         acquired = true;
       } catch (err) {
         const code = (err as NodeJS.ErrnoException).code;
-        const transient = code === 'EEXIST' || code === 'EPERM' || code === 'EACCES' || code === 'EBUSY';
-        if (!transient) {
+        if (code !== 'EEXIST' && code !== 'EPERM' && code !== 'EACCES' && code !== 'EBUSY') {
+          try { fs.rmdirSync(lockPath); } catch { /* another process owns or removed it */ }
           throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         }
-        try {
-          if (code === 'EEXIST' && Date.now() - fs.statSync(lockPath).mtimeMs > staleAfterMs) {
-            fs.rmdirSync(lockPath);
-            continue;
-          }
-        } catch { /* lock released or raced; retry */ }
+
+        // Do not auto-steal abandoned locks. PID reuse, slow I/O, clock skew,
+        // and cross-host ownership make age-based reclamation unsafe. Operators
+        // may remove a lock only after independently proving its owner is dead.
+
         if (Date.now() >= deadline) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         Atomics.wait(sleeper, 0, 0, 10);
       }
@@ -261,7 +303,15 @@ export class PortablePassportStore {
     try {
       return operation();
     } finally {
-      try { fs.rmdirSync(lockPath); } catch { /* noop */ }
+      try {
+        const owner = JSON.parse(fs.readFileSync(ownerPath, 'utf8')) as { token?: unknown };
+        if (owner.token === ownerToken) {
+          fs.unlinkSync(ownerPath);
+          fs.rmdirSync(lockPath);
+        }
+      } catch {
+        // Do not remove a lock unless this writer can prove ownership.
+      }
     }
   }
 
@@ -269,7 +319,9 @@ export class PortablePassportStore {
     if (this.outageSimulated) {
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
     }
-    this.load();
+    // Always refresh: filesystem mtime precision can be coarse or unchanged
+    // across rapid atomic replacements on shared volumes.
+    this.load(true);
     const normalized = passportId.trim();
     return this.records.get(normalized) || null;
   }
@@ -278,9 +330,8 @@ export class PortablePassportStore {
     if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
     this.withWriteLock(() => {
       this.load(true);
-      const normalized = record.passportId.trim();
-      if (!normalized || !record.tenantId.trim()) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
-      this.records.set(normalized, { ...record, passportId: normalized, updatedAt: Date.now() });
+      const validated = parsePassportRecord(record);
+      this.records.set(validated.passportId, { ...validated, updatedAt: Date.now() });
       this.persist();
     });
   }
@@ -290,11 +341,13 @@ export class PortablePassportStore {
     this.withWriteLock(() => {
       this.load(true);
       const normalized = passportId.trim();
-      if (!normalized) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+      if (!normalized || typeof reason !== 'string' || !reason.trim()) {
+        throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+      }
       const existing = this.records.get(normalized);
       if (!existing) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
       existing.revoked = true;
-      existing.revocationReason = reason;
+      existing.revocationReason = reason.trim();
       existing.updatedAt = Date.now();
       this.persist();
     });
@@ -309,15 +362,11 @@ export class PortablePassportStore {
   }
 
   public clear(): void {
-    this.records.clear();
-    try {
-      if (fs.existsSync(this.dbPath)) {
-        fs.unlinkSync(this.dbPath);
-      }
-      this.lastLoadedMtime = 0;
-      this.ready = true;
-    } catch {
-      this.ready = false;
-    }
+    if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+    this.withWriteLock(() => {
+      this.load(true);
+      this.records.clear();
+      this.persist();
+    });
   }
 }
