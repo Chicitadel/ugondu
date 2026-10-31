@@ -78,6 +78,14 @@ function parsePassportRecord(value: unknown, expectedPassportId?: string): Regis
   };
 }
 
+/** Normalize untrusted passport identifiers before any store lookup or mutation. */
+function normalizePassportId(value: unknown): string {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+  }
+  return value.trim();
+}
+
 function ensureWritableDirectory(directory: string): void {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const probe = path.join(directory, `.passport-write-probe-${process.pid}-${randomBytes(6).toString('hex')}`);
@@ -271,9 +279,11 @@ export class PortablePassportStore {
     let acquired = false;
 
     while (!acquired) {
+      let createdLockDirectory = false;
       try {
         fs.mkdirSync(this.dataDir, { recursive: true, mode: 0o700 });
         fs.mkdirSync(lockPath, { mode: 0o700 });
+        createdLockDirectory = true;
         // mkdir is the atomic exclusion primitive. If the process crashes
         // before owner metadata is written, the ownerless lock intentionally
         // remains fail-closed for operator recovery.
@@ -286,6 +296,13 @@ export class PortablePassportStore {
         acquired = true;
       } catch (err) {
         const code = (err as NodeJS.ErrnoException).code;
+        if (createdLockDirectory) {
+          // This process won the atomic mkdir but could not finish publishing
+          // owner metadata. It is therefore safe to clean up only this newly
+          // created directory instead of leaving an ownerless lock behind.
+          try { fs.rmSync(lockPath, { recursive: true, force: true }); } catch { /* fail closed */ }
+          throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+        }
         if (code !== 'EEXIST' && code !== 'EPERM' && code !== 'EACCES' && code !== 'EBUSY') {
           try { fs.rmdirSync(lockPath); } catch { /* another process owns or removed it */ }
           throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
@@ -319,10 +336,10 @@ export class PortablePassportStore {
     if (this.outageSimulated) {
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
     }
+    const normalized = normalizePassportId(passportId);
     // Always refresh: filesystem mtime precision can be coarse or unchanged
     // across rapid atomic replacements on shared volumes.
     this.load(true);
-    const normalized = passportId.trim();
     return this.records.get(normalized) || null;
   }
 
@@ -338,12 +355,12 @@ export class PortablePassportStore {
 
   public revoke(passportId: string, reason = 'REVOKED_BY_AUTHORITY'): void {
     if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+    const normalized = normalizePassportId(passportId);
+    if (typeof reason !== 'string' || !reason.trim()) {
+      throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+    }
     this.withWriteLock(() => {
       this.load(true);
-      const normalized = passportId.trim();
-      if (!normalized || typeof reason !== 'string' || !reason.trim()) {
-        throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
-      }
       const existing = this.records.get(normalized);
       if (!existing) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
       existing.revoked = true;
