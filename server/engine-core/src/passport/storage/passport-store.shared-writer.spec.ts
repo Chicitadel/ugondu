@@ -52,4 +52,78 @@ describe('PortablePassportStore shared-writer contract', () => {
     expect((caught as PassportStoreError).code).toBe('PASSPORT_STORE_UNAVAILABLE');
     expect(store.get('passport-d')).toBeNull();
   });
+  it('never steals an aged lock while its owning process is still alive', () => {
+    const store = new PortablePassportStore(directory);
+    const lockPath = path.join(directory, '.passports.write-lock');
+    fs.mkdirSync(lockPath);
+    fs.writeFileSync(path.join(lockPath, 'owner.json'), JSON.stringify({
+      pid: process.pid,
+      hostname: require('os').hostname(),
+      token: 'live-owner',
+      createdAt: Date.now() - 60000,
+    }));
+    const previousWait = process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
+    const previousStale = process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
+    process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = '20';
+    process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = '1000';
+    try {
+      expect(() => store.set({ passportId: 'passport-live-lock', tenantId: 'tenant-live' }))
+        .toThrow('PASSPORT_STORE_UNAVAILABLE');
+      expect(fs.existsSync(lockPath)).toBe(true);
+    } finally {
+      if (previousWait === undefined) delete process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
+      else process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = previousWait;
+      if (previousStale === undefined) delete process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
+      else process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = previousStale;
+      fs.rmSync(lockPath, { recursive: true, force: true });
+    }
+  });
+
+  it('reclaims an aged lock only when its same-host owner process is confirmed dead', () => {
+    const store = new PortablePassportStore(directory);
+    const lockPath = path.join(directory, '.passports.write-lock');
+    fs.mkdirSync(lockPath);
+    fs.writeFileSync(path.join(lockPath, 'owner.json'), JSON.stringify({
+      pid: 2147483647,
+      hostname: require('os').hostname(),
+      token: 'dead-owner',
+      createdAt: Date.now() - 60000,
+    }));
+    const previousWait = process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
+    const previousStale = process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
+    process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = '1000';
+    process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = '1000';
+    try {
+      store.set({ passportId: 'passport-after-crash', tenantId: 'tenant-after-crash' });
+      expect(store.get('passport-after-crash')?.tenantId).toBe('tenant-after-crash');
+    } finally {
+      if (previousWait === undefined) delete process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
+      else process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = previousWait;
+      if (previousStale === undefined) delete process.env['UGONDU_PASSPORT_LOCK_STALE_MS'];
+      else process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] = previousStale;
+    }
+  });
+
+  it('serializes clear and prevents another instance from resurrecting cleared records', () => {
+    const writer = new PortablePassportStore(directory);
+    const staleReader = new PortablePassportStore(directory);
+    writer.set({ passportId: 'passport-clear', tenantId: 'tenant-clear' });
+    writer.clear();
+    expect(staleReader.get('passport-clear')).toBeNull();
+    expect(fs.existsSync(path.join(directory, 'passports.json'))).toBe(true);
+  });
+
+  it('rejects invalid lock timing configuration instead of waiting indefinitely', () => {
+    const store = new PortablePassportStore(directory);
+    const previousWait = process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
+    process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = 'not-a-number';
+    try {
+      expect(() => store.set({ passportId: 'passport-invalid-config', tenantId: 'tenant-invalid' }))
+        .toThrow('Invalid passport lock timing configuration');
+    } finally {
+      if (previousWait === undefined) delete process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
+      else process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = previousWait;
+    }
+  });
+
 });
