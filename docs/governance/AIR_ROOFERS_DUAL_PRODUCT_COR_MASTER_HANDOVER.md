@@ -909,3 +909,24 @@ The existing filesystem-backed store proves shared-directory coordination, not i
 AeroBill remains sole authority for billing/pricing/invoicing/metering; Mandatag remains sole authority for licensing/entitlements. DirectAdmin remains launch hosting. VPS is unavailable. AWS provisioning remains deferred until traction, official engagement/funding and explicit budget authorization. Preserve portable OCI/runtime configuration and avoid AWS-specific business logic. No AWS resources were provisioned.
 
 **Overall posture: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No master/main branch modified; no PR merged.
+
+
+---
+
+## Dual-product candidate integration audit — 2026-10-31
+
+**Finding: DU-COR-CANDIDATE-BRANCH-DIVERGENCE-001 — CONFIRMED.**
+
+Dumcholu PR #35 territory candidate head `08c71e2ba278e49180aa9379f19cb8eae1f112b2` and PR #29 optimistic-lock candidate head `ffafd37cce49d83e4216b2842cb18f9d5147d142` are on divergent Git histories. GitHub compare reports 282 commits ahead on PR #35 and 161 commits behind relative to PR #29, with merge base `2930d6f473234134a71a9fa4648ec0cb125ca029`.
+
+PR #36 is stacked on PR #35. Therefore PR #35/#36 successful workflows do not qualify the PR #29 change set. PR #29 adds `CareerDiscoveryCaseEntity`, `GuidanceCaseEntity`, `V3__add_orm_optimistic_lock_versions.sql`, and `CareerCaseOptimisticLockingTest`; these exact paths are absent from the PR #35 candidate tree. The PR #35 tree does contain `CareerJourney` with its own `@Version`, but this is a different entity and does not prove the PR #29 discovery/guidance case concurrency fix is integrated.
+
+**Required action:** create an explicit integration/reconciliation candidate after resolving the authoritative career domain model and Flyway migration lineage. Do not blindly cherry-pick PR #29 files or claim that separate green workflows equal one integrated release candidate. Run complete Maven, Flutter, governance and exact-head COR qualification after integration. No physical integration change made because the target model/migration reconciliation is not yet established; fabricating parallel entities or duplicate migrations would be an unsafe architecture downgrade.
+
+**Candidate verification references:**
+- PR #29: https://github.com/Chicitadel/dumcholu/pull/29
+- PR #35: https://github.com/Chicitadel/dumcholu/pull/35
+- PR #36: https://github.com/Chicitadel/dumcholu/pull/36
+- Compare: `ffafd37cce49d83e4216b2842cb18f9d5147d142...08c71e2ba278e49180aa9379f19cb8eae1f112b2` (diverged, 282/161).
+
+**Overall posture remains:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. All changes remain on dedicated unmerged candidate branches. No master/main modification or AWS provisioning.
