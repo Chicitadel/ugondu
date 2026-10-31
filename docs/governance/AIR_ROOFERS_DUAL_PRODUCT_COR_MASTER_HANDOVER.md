@@ -941,3 +941,28 @@ PR #36 is stacked on PR #35. Therefore PR #35/#36 successful workflows do not qu
 - COR Certification [#41214532669](https://github.com/Chicitadel/ugondu/actions/runs/41214532669): COR Certification and COR Final Release Gate SUCCESS; AWS Physical Qualification Gate SKIPPED under the zero-spend policy.
 - These receipts are attached to source/test SHA `1f79c59...`, not the later documentation-only SHA `4bdf9f5...`. Re-run or otherwise qualify the exact final head before merge; no inherited receipt claim.
 - PR #68 remains draft/unmerged. No master/main change and no AWS resources provisioned.
+
+
+---
+
+## Verified continuation — 2026-10-31 17:18 UTC
+
+### Dumcholu finding DU-CAREER-PATHWAY-SYNTHETIC-GENERATION-001
+
+- Independently inspected `CareerJourneyService.generateJourney()` on the published territory candidate. It generated a fixed “Cloud Solutions Architect” progression, AWS Associate certification milestone, fixed stage/transition, 0.95 transition probability, 0.90 confidence, fixed policy/algo identifiers and calculated completion date from readiness alone.
+- No authoritative career-pathway provider is wired into this service. This is confirmed synthetic production behavior, not merely a documentation concern.
+- Physical remediation is committed on `Chicitadel/dumcholu` branch `fix/career-pathway-authority-required-2026-10-31`: service now returns no journey rather than persisting or publishing fabricated pathway data. Regression tests assert that timeline estimation, all persistence repositories and event publication are untouched.
+- Draft PR #37: https://github.com/Chicitadel/dumcholu/pull/37
+- Code commit: `7b2c2b2ab5ee91ce70a09213082f6a8ebe12e833`; test commit / PR head: `0eaa6259ab8355ec4c06a1d222e9b39e71974e0e`.
+- This is a truthful fail-closed mitigation, not completion of career intelligence. A tenant-scoped authoritative pathway contract/provider, evidence provenance, localized content, explainability and end-to-end tests remain required before this feature can be certified. Maven/remote workflow results were not yet available at handover creation.
+
+### Important reconciliation of supplied local execution report
+
+The supplied execution report describes local branches `integrate/cor-dumcholu-unified-stack-2026-10-31` and `feat/postgres-passport-store-adapter-2026-10-31`, including commits `eb3afe5` and `3b525044`. A fresh GitHub branch search at this handover check did **not** find either branch published on origin. The claimed test receipts and local commits are therefore recorded as **operator-supplied local evidence, not independently verified remote repository evidence**. Do not tell other agents those commits are shared/pushed until the branches are published and exact heads re-fetched.
+
+### Current integration / deployment boundaries
+
+- Dumcholu PR #35 / #36 candidate stack and PR #29–#34 are not proven integrated on origin. The local integration report must be pushed to a dedicated branch and compared against remote PR heads before its receipts can be attributed to a shared candidate.
+- Ugondu PostgreSQL adapter commit `3b5250447116f9fe21197a1377e5582f00e2bbbe` is likewise not proven published: branch search for `postgres` returned no branch. The published signed-passport candidate still contains the filesystem store; it does not prove multi-host PostgreSQL runtime wiring.
+- Keep DirectAdmin as the active launch tier. Do not provision AWS or incur charges without explicit authorization. Keep OCI/runtime templates and environment-driven deployment portable; AWS Paris `eu-west-3` remains a future option after traction, official engagement and funding.
+- Global status remains **`PARTIAL / RELEASE BLOCKED / NOT COR CERTIFIED`**. No master/main changes and no PR merges.
