@@ -361,3 +361,20 @@ The partner feature is now honest but incomplete. Live partner curriculum API, t
 Partner Opportunity Map follow-up: removed the now-dead hardcoded forecast/capacity widget scaffolding entirely (not merely hidden behind an empty-list condition). Public model types remain for a future typed source contract; no local curriculum records or static forecast calculators remain. Commit `c23347ed63ae58bcf2adaad63ffc5e65f1f6955f`; updated product handover `095a8da21c39a64b4fca147f6b33a39ce35330f0`. PR #36 latest candidate head after this update is `095a8da21c39a64b4fca147f6b33a39ce35330f0`; exact-head CI must be rechecked.
 
 PR #35 territory bootstrap follow-up: the `TerritoryConfiguration.fromMap` path still retained France/Paris defaults after the initial Nigeria switch. Removed those residual defaults, made the default region empty unless configured, updated the comments, and added parsed-default regression coverage. Commits: `3f62b83682df3c1f14ff86eae670ac7f043fde4e`, `24129a7f69fc93b3d9326ec0613cd2f26c2e0138`, `ff05eab741f9287750448d34d1ed1fae27aa5e76`; product handover update `815b370597d02188ced37eedff866507ccdb6a7d`. PR #35 latest head: `815b370597d02188ced37eedff866507ccdb6a7d`; exact-head CI must be rerun/checked.
+
+
+---
+
+## Exact-head execution snapshot — 2026-10-31 11:56Z
+
+| Candidate | Exact branch head | Current workflow evidence | Status |
+|---|---|---|---|
+| Dumcholu PR #35 — territory live contract/bootstrap | `815b370597d02188ced37eedff866507ccdb6a7d` | UI audit #41198796379 queued; product naming #41198796364 queued; browser evidence #41198796340 queued; comprehensive CI #41198796382 queued | CI pending |
+| Dumcholu PR #36 — partner synthetic curriculum removal | `b482d1b8d1609ccaeaea69a6aa108ffb72f6a5e0` | product naming #41198889035 queued; browser evidence #41198889074 queued; comprehensive CI #41198889056 queued | CI pending |
+| Ugondu PR #66 — runtime passport input/lock cleanup | `5325bf3b640b997066b012bd708cee569f8aa891` | CI/CD #41198806161 queued; manifest #41198806128 in progress; COR #41198806129 queued; AWS Physical Qualification Gate **SKIPPED** | CI pending; no AWS deployment |
+
+The PR #36 comprehensive CI run on head `b482d1b...` is the current rerun after the territory base branch advanced to `815b370...`; its merge tree must include the latest base changes. PR #35 itself has its own comprehensive run.
+
+PR #34 exact-head Java 21 runtime, manifest and naming receipts remain SUCCESS at `d9a5a6fc...`. Ugondu PR #65 narrow candidate receipts remain green at source/test candidate SHA `1afb0e8f...`; AWS physical qualification and final trust-root/signature stages were skipped.
+
+These statuses are workflow snapshots, not release certification. No AWS resources were provisioned. The overall verdict remains **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
