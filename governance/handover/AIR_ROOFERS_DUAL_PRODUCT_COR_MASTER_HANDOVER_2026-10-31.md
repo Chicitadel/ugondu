@@ -436,3 +436,31 @@ Still-open production gates:
 6. Operational monitoring, backup/restore and disaster-recovery evidence appropriate to public commercial service.
 
 **Current decision: narrow candidate code and CI qualifications are green at the listed PR heads; ecosystem COR remains PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.** No PR has been merged and no master/main branch has been modified by this remediation.
+
+
+---
+
+## Re-audit remediation — non-owner passport lock cleanup — 2026-10-31 15:01Z
+
+**Finding: UG-PASSPORT-LOCK-NONOWNER-CLEANUP-003 — CONFIRMED.**
+
+The `withWriteLock()` catch path attempted `rmdirSync(lockPath)` for non-contention filesystem errors even when the current process had not created the lock directory. A competing writer can win the atomic directory creation and be between `mkdir` and `owner.json` publication. If this process then receives an unrelated filesystem error, it could remove the competing writer's empty lock directory, allowing a second writer to enter the critical section.
+
+**Physical remediation — dedicated branch** `fix/passport-lock-nonowner-cleanup-2026-10-31`, based on PR #66 documentation head `95f66a1e5b5ba1239850838efdd71f04092e08b4`:
+
+- Removed the non-owner `rmdirSync(lockPath)` cleanup. A process that did not create the lock now fails closed without mutating the lock path.
+- Preserved cleanup only in the existing `createdLockDirectory === true` owner-metadata publication failure path.
+- Preserved atomic mkdir exclusion, owner-token verification, bounded contention wait and no automatic stale-lock stealing.
+- Added a regression that deterministically creates a competing empty lock directory, injects a non-contention `EIO`, and asserts the directory remains present.
+
+**Commits:** source `9cce3773141a561013c155a97fe31ab4650913de`; regression `942e472d06bb8356fc5c0a45890abeff92f4d646`.
+
+**Verification status:** Physical source and regression writes are committed. Local Jest/typecheck and exact-head remote CI have not yet been run from this environment; do not mark the new branch qualified until CI completes. The test implementation must also be validated against the repository's TypeScript/Jest versions.
+
+**Dumcholu boundary:** PR #35 territory registry candidate and PR #36 partner synthetic-data removal remain separate open candidate branches with exact-head workflows previously verified green. The partner Opportunity Map remains intentionally unavailable until a versioned, authenticated, tenant-bound partner data contract and evidence sources exist. Passing UI CI does not certify the missing live feature.
+
+**AWS / portability:** No AWS resources are provisioned. Continue DirectAdmin-compatible operation and portable deployment definitions. Do not provision billable AWS resources until explicit budget/traction authorization. When authorized, evaluate a low-cost ECS-on-EC2 pilot in `eu-west-3`; do not claim HA from a single node. Keep Fargate as a later scale path. No AWS-specific business logic.
+
+**Federated authority invariants:** AeroBill alone owns billing, pricing, invoicing and metering. Mandatag alone owns licensing and entitlements. Product adapters remain fail-closed and must not duplicate these domains.
+
+**Global COR posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. This correction closes one lock ownership defect only. Multi-host durable passport adapter implementation/deployment, live external transaction verification, trust-root custody/signing, live production gateway/registry verification, partner API/data provenance, and backup/restore/telemetry/DR evidence remain open. No master/main branch modified; no PR merged.
