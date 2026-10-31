@@ -318,7 +318,9 @@ export class PortablePassportStore {
     if (this.outageSimulated) {
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
     }
-    this.load();
+    // Always refresh: filesystem mtime precision can be coarse or unchanged
+    // across rapid atomic replacements on shared volumes.
+    this.load(true);
     const normalized = passportId.trim();
     return this.records.get(normalized) || null;
   }
