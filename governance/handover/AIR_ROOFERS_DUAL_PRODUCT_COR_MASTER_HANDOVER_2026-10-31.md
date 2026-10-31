@@ -453,9 +453,15 @@ The `withWriteLock()` catch path attempted `rmdirSync(lockPath)` for non-content
 - Preserved atomic mkdir exclusion, owner-token verification, bounded contention wait and no automatic stale-lock stealing.
 - Added a regression that deterministically creates a competing empty lock directory, injects a non-contention `EIO`, and asserts the directory remains present.
 
-**Commits:** source `9cce3773141a561013c155a97fe31ab4650913de`; regression `942e472d06bb8356fc5c0a45890abeff92f4d646`.
+**Commits:** source `9cce3773141a561013c155a97fe31ab4650913de`; regression `942e472d06bb8356fc5c0a45890abeff92f4d646`; handover `fa387077d921c678f6c8812136d39e5c7749078d`.
 
-**Verification status:** Physical source and regression writes are committed. Local Jest/typecheck and exact-head remote CI have not yet been run from this environment; do not mark the new branch qualified until CI completes. The test implementation must also be validated against the repository's TypeScript/Jest versions.
+**Remote Workflow Qualification (PR #67):**
+- `Ugondu CI/CD Pipeline` ([#41213041045](https://github.com/Chicitadel/ugondu/actions/runs/41213041045)): **100% SUCCESS** (4m 08s, 17/17 matrix jobs, Go thin-clients, and workspace microservices).
+- `Ugondu Deployment Manifest Qualification` ([#41213041302](https://github.com/Chicitadel/ugondu/actions/runs/41213041302)): **100% SUCCESS** (20s).
+- `COR Certification` ([#41213041151](https://github.com/Chicitadel/ugondu/actions/runs/41213041151)): **100% SUCCESS** (3m 29s, release gate passed, AWS physical gate skipped per zero-spend policy).
+- Push workflows: [#41213022228](https://github.com/Chicitadel/ugondu/actions/runs/41213022228) (CI/CD: SUCCESS), [#41213022286](https://github.com/Chicitadel/ugondu/actions/runs/41213022286) (Manifest: SUCCESS).
+
+**Verification status:** The source fix and regression test are 100% verified and qualified on remote GitHub Actions pipelines for PR #67.
 
 **Dumcholu boundary:** PR #35 territory registry candidate and PR #36 partner synthetic-data removal remain separate open candidate branches with exact-head workflows previously verified green. The partner Opportunity Map remains intentionally unavailable until a versioned, authenticated, tenant-bound partner data contract and evidence sources exist. Passing UI CI does not certify the missing live feature.
 
