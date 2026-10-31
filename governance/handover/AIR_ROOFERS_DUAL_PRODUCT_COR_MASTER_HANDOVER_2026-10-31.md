@@ -315,3 +315,26 @@ Commits:
 - Product handover: e84c9a163cd039284a6f8f2240e6789b305e60ef.
 
 Remote exact-head qualification is pending. This does not close the multi-host shared durable adapter gap. Keep the global verdict PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.
+
+
+### Dumcholu PR #35 — live registry bootstrap wiring (2026-10-31 11:48Z)
+
+A further call-site audit found the live resolver would still not execute in the citizen app: the singleton had no ApiClient, the screen never invoked loadHierarchy(), and it resolved synchronously before data load. The canonical registry also omitted country-domain from citizen dependencies/service endpoints, and resolver defaults still targeted France/Paris.
+
+Physical corrections on PR #35:
+- Resolver singleton uses ApiClient.forService('country-domain').
+- Registered country-domain in canonical Dart registry and YAML asset for development/staging/production; added citizen service dependency and microservice catalog entry.
+- Changed launch defaults to NG / zone-country-ng.
+- Citizen Opportunity Map now awaits the live registry snapshot before zone resolution and map loading; retry awaits bootstrap.
+- Added widget test injecting an authoritative mock snapshot plus registry/singleton tests.
+
+Latest commits:
+- Resolver singleton/Nigeria defaults: 3d0d358fc08822595a3f2b9ba06e42071e1dc05f.
+- Screen async bootstrap: 4de8a8563f2199f0f3fde454ed7fb9c1564bdbae.
+- Citizen registry YAML: 18d61e31e83a7420c924bfcfea0224340571c096.
+- Static registry service wiring: bee36aacb75a12faa7644806516eed703cce28c4.
+- Resolver/registry tests: 18c2d72b495e2d2f3de3b9d20a246aa824553da5, 103602a3c1456c90db58668888d662b8714ff324, eb622cdc94ec33b55dc8c2decdaed22b1b281b59.
+- Citizen screen widget test: 577db68a5b85ecf48eb0419a1c633a67c50e3a58.
+- Product handover update: 48e26035a8fa717195cdba5f74cede584f6d4338.
+
+PR #35 latest candidate head: 48e26035a8fa717195cdba5f74cede584f6d4338. Re-run/check comprehensive CI on this exact SHA. Live gateway routing, authentication and populated production registry remain unverified; no COR certification claim.
