@@ -175,3 +175,37 @@ At head `14157b5c1b3b471c1be71c127de1c1c6db130576`:
 - Opportunity Map COR Regression [#41189241449](https://github.com/Chicitadel/dumcholu/actions/runs/41189241449): **SUCCESS** — citizen UI guard and Java 21 backend regression passed.
 - Product Name Governance [#41189241452](https://github.com/Chicitadel/dumcholu/actions/runs/41189241452): **SUCCESS**.
 This qualifies the narrow territory-default correction only. It does not close real geolocation, live authenticated feed, source evidence, legal/privacy or staging gates.
+
+
+## 7. Re-audit continuation — 2026-10-31 10:01Z
+
+### Exact-head CI reconciliation against the uploaded Master Execution Audit Plan
+
+The uploaded plan reports all four candidate groups as exact-head green. This was independently rechecked against GitHub commit workflow runs:
+- Ugondu PR #65 head `1afb0e8f8a79518ae7a3613edeac6a803fe6522d`: COR #41189327925 **SUCCESS**, CI/CD #41189327821 **SUCCESS**, manifest #41189327786 **SUCCESS**.
+- Dumcholu PR #31 head `17c4ab888323603a2b0201a179e236139ba4343d`: Opportunity Map regression #41188924304 **SUCCESS**, naming #41188924356 **SUCCESS**.
+- Dumcholu PR #32 head `67dd8fecdf3863919c1e634ed10341c63eed1a2e`: portable runtime #41189121800 **SUCCESS**, manifest #41189121805 **SUCCESS**, naming #41189121808 **SUCCESS**.
+- Dumcholu PR #33 head `14157b5c1b3b471c1be71c127de1c1c6db130576`: Opportunity Map regression #41189241449 **SUCCESS**, naming #41189241452 **SUCCESS**.
+- Important: Ugondu COR #41189327925 reports the AWS Physical Qualification Gate **SKIPPED**, and the final trust-root/signature steps were skipped. A successful workflow summary is not a cryptographically signed public-release certificate and is not a physical AWS deployment.
+
+### Dumcholu PR #34 — second career timeline provenance bypass
+
+**Finding: DUM-COR-CAREER-READINESS-TAG-UNVERIFIED-001.** PR #32 correctly disabled numeric duration from bare `JourneyStage` records, but `TimelineEstimator.estimateDays` still trusted caller-writable `OpportunityReadiness.recommendations` strings prefixed `SOURCED_DURATION_DAYS:` and dimension names prefixed `SOURCED_STAGE_DAYS:`. Those fields are ordinary persisted strings and were not cryptographically or structurally bound to an authorized provider/source record.
+
+**Physical remediation:**
+- Removed both free-form metadata parsing paths.
+- Preserve zero only if the current readiness snapshot already meets the target; otherwise return `DURATION_NOT_YET_ESTIMABLE`.
+- Added regressions for forged recommendation and dimension tags, target-met behavior, and invalid targets.
+- Added `docs/governance/CAREER_TIMELINE_READINESS_TAG_PROVENANCE_2026-10-31.md`.
+
+PR: https://github.com/Chicitadel/dumcholu/pull/34
+Branch: `fix/career-timeline-reject-unverified-readiness-tags-2026-10-31`, stacked on PR #32.
+Source commit `036f2788faa4e0286d544b1da8268a3abeddc174`; regression commit `58c033eccde94197709105d39dca4dfb0a380505`; handover `d9a5a6fca0b199f10c9bd83b2dbccc294afdb6d4`.
+Exact-head Java 21 qualification not yet triggered/observed at this update. PR #34 is draft and unmerged.
+
+### Overall release and hosting state
+
+- The four candidate groups above are narrow-scope qualified on their exact recorded SHAs; PR #34 is a new pending candidate.
+- No AWS physical qualification occurred: the Ugondu AWS gate was skipped. No AWS resources were provisioned in this remediation.
+- Multi-host passport durability, live Opportunity Map service contract/SSE replay, verified career-source evidence, live AeroBill/Mandatag transactions, trust-root ceremony and physical staging/production E2E remain external/architectural release gates.
+- Preserve state: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
