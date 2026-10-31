@@ -218,3 +218,56 @@ At head `d9a5a6fca0b199f10c9bd83b2dbccc294afdb6d4`:
 - Deployment Manifest Qualification #41190938633: **SUCCESS**.
 - Dumcholu Portable Runtime Qualification #41190938648: **IN PROGRESS**, executing Java 21 runtime/dependency reactor tests.
 - PR #34 remains draft, unmerged, stacked on PR #32. Keep the readiness-tag finding pending until the runtime workflow succeeds.
+
+
+---
+
+## Consolidated re-audit update — 2026-10-31 11:40Z
+
+### PR #34 exact-head receipt reconciliation
+
+The previous 10:02Z note showing Java runtime qualification as in progress is superseded. Rechecked the exact candidate SHA `d9a5a6fca0b199f10c9bd83b2dbccc294afdb6d4`:
+- Dumcholu Portable Runtime Qualification #41190938648: **SUCCESS**.
+- Deployment Manifest Qualification #41190938633: **SUCCESS**.
+- Product Name Governance #41190938619: **SUCCESS**.
+
+PR #34 remains draft/unmerged. The caller-writable readiness-duration bypass is narrowly qualified; typed provider provenance and live source integration remain OPEN.
+
+### Dumcholu PR #35 — authoritative territorial registry route integration
+
+**Finding: DUM-COR-ZONE-HIERARCHY-FALLBACK-001.** Forensic review of the existing safety branch showed the previous fix was incomplete: the client still called legacy `/v1/territories/hierarchy`, while CountryController exposes `/api/v1/areas` and `/api/v1/areas/{id}/children`. Synchronous resolver helpers also retained `getPreloadedHierarchy()` fallback paths.
+
+**Physical remediation now committed on a dedicated branch:**
+- PR: https://github.com/Chicitadel/dumcholu/pull/35
+- Branch: `fix/territory-registry-live-contract-2026-10-31`
+- Base: `remediation/dumcholu-citizen-live-ui-2026-10-28` (not master/main).
+- Implementation commit: `2951ef51b9298578e667a834f0d725ff1b0e7e97`.
+- Remaining synchronous fallback removal: `f277a96bdcd9dc58b790f48565697694680e869a`.
+- Regression test commit: `0888b565c74266aee2204e54293ab8d130074c00`.
+- Agent guardrail: `docs/governance/TERRITORY_REGISTRY_LIVE_CONTRACT_REMEDIATION_2026-10-31.md`, commit `c3e74fcfb2ce4ef1db9d4b1542aeb6249fd02b8a`.
+
+The client now queries the actual country-domain route, builds a dynamic tree from live continent/country roots and child endpoints, rejects malformed/cyclic/over-depth/unsupported data, and returns an explicit empty hierarchy on registry failure. Resolver sync helpers no longer call the bundled hierarchy repository. New Flutter tests cover the route paths, multi-tier live tree, HTTP failure and no preloaded sync fallback.
+
+**Qualification status:** PR #35 is draft and unmerged. Remote CI and live staging/gateway/authentication checks have not yet been observed. Do not mark it qualified until exact-head workflows pass.
+
+### Current cross-product release ledger
+
+- Ugondu PR #65: narrow passport writer-safety/runtime-validation candidate has green COR/CI/manifest receipts at source/test candidate SHA `1afb0e8f8a79518ae7a3613edeac6a803fe6522d`; the AWS Physical Qualification Gate and final trust-root/signature steps were skipped. Multi-host passport durability remains OPEN.
+- Dumcholu PRs #29–#34: narrow findings and recorded workflow receipts as listed above; PR #34 exact-head Java 21 runtime now confirmed SUCCESS.
+- Dumcholu PR #35: territorial route mismatch and remaining resolver fallback paths physically corrected; exact-head CI pending.
+- Opportunity Map live authenticated API, SSE replay/fan-out, real permission-based geolocation, source provenance/rights, application submission API/receipt, career provider evidence, live AeroBill/Mandatag transactions, trust-root ceremony and independent final COR remain open.
+
+### Non-negotiable Antigravity agent execution contract
+
+1. Read this handover and the relevant PR-specific handover before editing.
+2. Verify the exact branch, base, current head SHA and clean worktree. Never write to master/main or merge without explicit authorization.
+3. Reproduce the finding against current code; distinguish an actual defect from an external dependency or unverified assumption.
+4. Implement the confirmed code correction and regression test in the same dedicated branch before handing off.
+5. Do not duplicate authoritative registries, identity, billing/pricing/metering (AeroBill), licensing/entitlement (Mandatag), or governance policy.
+6. Preserve superior existing architecture. No downgrade to mocks, stubs, hardcoded values, local-only authority, weaker crypto, weaker tenancy, weaker concurrency, or reduced tests.
+7. Keep one-code/host-anywhere portability. Runtime configuration and deployment manifests may vary; application business logic must not be AWS-bound.
+8. Do not provision chargeable AWS resources without explicit budget and deployment authorization. AWS remains deferred until traction/official engagement/funding; no AWS physical deployment is evidenced by the skipped gate.
+9. A workflow PASS applies only to its exact SHA and scope. Skipped jobs are not passes. Never infer live production or final COR certification from CI green.
+10. Update this central ledger and the product-specific handover with commit SHAs, exact-head workflow receipts, residual risks and release impact after every remediation.
+
+**Current ecosystem verdict: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
