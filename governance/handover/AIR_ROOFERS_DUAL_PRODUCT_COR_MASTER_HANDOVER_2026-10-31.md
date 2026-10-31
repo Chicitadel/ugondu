@@ -338,3 +338,22 @@ Latest commits:
 - Product handover update: 48e26035a8fa717195cdba5f74cede584f6d4338.
 
 PR #35 latest candidate head: 48e26035a8fa717195cdba5f74cede584f6d4338. Re-run/check comprehensive CI on this exact SHA. Live gateway routing, authentication and populated production registry remain unverified; no COR certification claim.
+
+
+### Dumcholu PR #36 — Partner Opportunity Map synthetic curriculum removal
+
+**Finding: DUM-COR-PARTNER-CURRICULUM-SYNTHETIC-METRICS-001.** A further anti-mock review found four hardcoded partner curriculum records presenting fabricated vacancy counts, employer names, placement scores, cohort capacity, enrolment, CPF and state-subsidy figures. The screen had no live partner curriculum repository/API wiring.
+
+Physical remediation on dedicated branch `fix/partner-map-no-synthetic-curriculum-2026-10-31`, stacked on the territory candidate:
+- Removed all static curriculum/market records.
+- Replaced false forecasts/capacity metrics with localized honest empty state until a governed live partner source contract exists.
+- Added regression that asserts known fake names/numbers and derived forecast/capacity sections are absent.
+- Product handover: `docs/governance/PARTNER_MAP_SYNTHETIC_CURRICULUM_REMEDIATION_2026-10-31.md`.
+
+Commits:
+- Data removal/UI gate: `4719e516a257d0067cde9f101e25b5ef25c677f9`.
+- Widget regression: `3e13966c37b1bd44abdfd42afa1522f45e9df4e0`.
+- Conditional selection initialization: `645202d07fc2be288a9f7ecaff744243c5eff430`.
+- Product handover: `6a2d347292ae098f4483d556be8a835bcc582afa`.
+
+The partner feature is now honest but incomplete. Live partner curriculum API, tenant binding, employer evidence, cohort/capacity data, CPF/subsidy integration and forecast methodology remain OPEN. Exact-head Flutter and governance CI pending. Keep the global release state PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.
