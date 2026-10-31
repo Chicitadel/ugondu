@@ -271,3 +271,25 @@ The client now queries the actual country-domain route, builds a dynamic tree fr
 10. Update this central ledger and the product-specific handover with commit SHAs, exact-head workflow receipts, residual risks and release impact after every remediation.
 
 **Current ecosystem verdict: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+### PR #35 implementation expansion — single-snapshot geography contract (11:44Z)
+
+PR #35 has been expanded beyond client route correction to include a scalable backend contract:
+- `GET /api/v1/areas/hierarchy` returns a flat active administrative-area snapshot with `parentId` relationships.
+- CountryService filters inactive areas and excludes postal/geospatial cells from the citizen administrative selector, with deterministic ordering.
+- Flutter constructs the tree locally from one snapshot, validates parent integrity/cycles/reachability, and does not perform N+1 child requests.
+- OpenAPI contract is recorded in `docs/api/openapi_specs.yaml`.
+- Java service/controller regressions and Flutter route/tree/failure/cycle regressions are included.
+
+Additional commits:
+- Country active snapshot service: `8253737c0bb65c42efe688234b034996ea3a3d94`.
+- Country snapshot controller: `fd6473aaf6880124ee4a734b212be9afe9551758`.
+- Flutter snapshot tree builder: `d530f28d61d5fe79b65cde4c7f7195d030eab3c7`.
+- Unreachable/cycle validation: `ec0d6598480bbd6614a0069c0509519685239af8`.
+- Java tests: `75b2051aaa5c5aedaac7cf6a926b9b8da775ab34`, `35c29d63fba49475f4c9417f3eafb327fe38f56b`.
+- Administrative-tier filter/test: `b744a2f2e920a7317e4b7bf02bf84c0f17b1ad2f`, `b72ac9e411875a1c4df0935ec71c2962d107f65c`.
+- OpenAPI: `1f291632b4fb65abf5012f8047fd88dc13b5daea`.
+- Latest PR #35 handover: `c949a156bb5555d76c5765ca8f8baee847c4c067`.
+
+PR #35 final recorded head at this update: `c949a156bb5555d76c5765ca8f8baee847c4c067`. Its comprehensive Flutter/Maven/OpenAPI qualification must be checked at this exact SHA; earlier CI runs on prior heads do not qualify this expanded change set.
