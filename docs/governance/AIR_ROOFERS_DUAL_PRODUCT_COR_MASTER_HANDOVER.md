@@ -875,3 +875,58 @@ The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd07657
   - `Ugondu Deployment Manifest Qualification` ([#41153048222](https://github.com/Chicitadel/ugondu/actions/runs/41153048222) push & [#41153053973](https://github.com/Chicitadel/ugondu/actions/runs/41153053973) PR): **SUCCESS** (34s).
 - **Still OPEN / Explicitly Tracked:** (1) multi-host durability — filesystem lock only coordinates processes sharing one filesystem; a shared DB-backed adapter and independent-host tests are required before claiming multi-host distributed cluster consistency; (2) revoking a signed-but-unregistered passport now throws (no tombstone) — needs design decision; (3) trust-root, authority signature, live AeroBill/Mandatag, AWS physical, independent review gates remain skipped/outstanding.
 - No AWS or DirectAdmin deployment was performed for this change.
+
+
+---
+
+## Re-audit remediation — signed-but-unregistered passport admission — 2026-10-31
+
+**Finding: UG-PASSPORT-SIGNED-UNREGISTERED-ADMISSION-004 — CONFIRMED.**
+
+### Root cause
+In `server/engine-core/src/index.ts`, the signed-token branch of `admitPassport()` rejected a registered passport only when its record was revoked, expired or tenant-mismatched. A missing record (`passportStore.get() === null`) fell through to `ADMITTED`. This contradicted the repository's earlier fail-closed unregistered-passport requirement and allowed cryptographic authenticity to substitute for authoritative admission registration.
+
+### Physical remediation
+- Changed signed-token admission to reject when the store returns no registration record, as well as for revoked, expired or tenant-mismatched records.
+- Preserved cryptographic signature and claims verification as a separate required step.
+- Added regression `ENG-PASS-011`: issue a signed token, clear the authoritative registry, then assert admission rejects the still-valid signature.
+- Updated `ANTIGRAVITY_CHANGE_GUARDRAIL.md` with the non-negotiable registration invariant.
+
+### Candidate
+- Dedicated branch: `fix/passport-signed-unregistered-fail-closed-2026-10-31`
+- Parent: PR #67 head `0d923240328d3f7d83edc7a2fad0df15f972a173`
+- Source commit: `46e33d1c872a532eb48a2ea6f8f0729e174154fc`
+- Regression commit: `8e3c7fbc9419f2b446ee0954f3ef7100ca02dfaf`
+- Guardrail commit: `2b0de8bc58305d2a44c97f9d18d0c92d54819623`
+
+### Qualification boundary
+Physical source, regression and guardrail writes are committed. Exact-head CI/COR is pending and must pass before this candidate is qualified. The regression intentionally leaves the test registry empty at the end of the test file; verify test order and full-suite isolation in CI.
+
+### Multi-host persistence remains OPEN
+The existing filesystem-backed store proves shared-directory coordination, not independent-host persistence. The historic ENG-PASS-008 test creates two store instances in one process against one temporary directory; it is not a multi-process or multi-host test. A production SQL adapter, schema/migration, runtime injection, connection lifecycle, fail-closed outage behavior, and independent-process/host admission/revocation tests remain required. No PostgreSQL adapter is represented as implemented by this change.
+
+### Product boundaries and hosting
+AeroBill remains sole authority for billing/pricing/invoicing/metering; Mandatag remains sole authority for licensing/entitlements. DirectAdmin remains launch hosting. VPS is unavailable. AWS provisioning remains deferred until traction, official engagement/funding and explicit budget authorization. Preserve portable OCI/runtime configuration and avoid AWS-specific business logic. No AWS resources were provisioned.
+
+**Overall posture: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No master/main branch modified; no PR merged.
+
+
+---
+
+## Dual-product candidate integration audit — 2026-10-31
+
+**Finding: DU-COR-CANDIDATE-BRANCH-DIVERGENCE-001 — CONFIRMED.**
+
+Dumcholu PR #35 territory candidate head `08c71e2ba278e49180aa9379f19cb8eae1f112b2` and PR #29 optimistic-lock candidate head `ffafd37cce49d83e4216b2842cb18f9d5147d142` are on divergent Git histories. GitHub compare reports 282 commits ahead on PR #35 and 161 commits behind relative to PR #29, with merge base `2930d6f473234134a71a9fa4648ec0cb125ca029`.
+
+PR #36 is stacked on PR #35. Therefore PR #35/#36 successful workflows do not qualify the PR #29 change set. PR #29 adds `CareerDiscoveryCaseEntity`, `GuidanceCaseEntity`, `V3__add_orm_optimistic_lock_versions.sql`, and `CareerCaseOptimisticLockingTest`; these exact paths are absent from the PR #35 candidate tree. The PR #35 tree does contain `CareerJourney` with its own `@Version`, but this is a different entity and does not prove the PR #29 discovery/guidance case concurrency fix is integrated.
+
+**Required action:** create an explicit integration/reconciliation candidate after resolving the authoritative career domain model and Flyway migration lineage. Do not blindly cherry-pick PR #29 files or claim that separate green workflows equal one integrated release candidate. Run complete Maven, Flutter, governance and exact-head COR qualification after integration. No physical integration change made because the target model/migration reconciliation is not yet established; fabricating parallel entities or duplicate migrations would be an unsafe architecture downgrade.
+
+**Candidate verification references:**
+- PR #29: https://github.com/Chicitadel/dumcholu/pull/29
+- PR #35: https://github.com/Chicitadel/dumcholu/pull/35
+- PR #36: https://github.com/Chicitadel/dumcholu/pull/36
+- Compare: `ffafd37cce49d83e4216b2842cb18f9d5147d142...08c71e2ba278e49180aa9379f19cb8eae1f112b2` (diverged, 282/161).
+
+**Overall posture remains:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. All changes remain on dedicated unmerged candidate branches. No master/main modification or AWS provisioning.
