@@ -133,4 +133,22 @@ describe('PortablePassportStore shared-writer contract', () => {
     fs.rmSync(path.join(directory, '.passports.write-lock'), { recursive: true, force: true });
   });
 
+  it('fails closed instead of silently dropping malformed persisted passport records', () => {
+    fs.writeFileSync(path.join(directory, 'passports.json'), JSON.stringify({
+      'passport-key': {
+        passportId: 'different-passport-id',
+        tenantId: 'tenant-a',
+        revoked: 'false',
+      },
+    }));
+    let caught: unknown;
+    try {
+      new PortablePassportStore(directory);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(PassportStoreError);
+    expect((caught as PassportStoreError).code).toBe('PASSPORT_STORE_INVALID_DATA');
+  });
+
 });
