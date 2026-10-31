@@ -875,3 +875,37 @@ The documentation-only receipt descendant `421a94a8506f5802419c4013870c35cd07657
   - `Ugondu Deployment Manifest Qualification` ([#41153048222](https://github.com/Chicitadel/ugondu/actions/runs/41153048222) push & [#41153053973](https://github.com/Chicitadel/ugondu/actions/runs/41153053973) PR): **SUCCESS** (34s).
 - **Still OPEN / Explicitly Tracked:** (1) multi-host durability — filesystem lock only coordinates processes sharing one filesystem; a shared DB-backed adapter and independent-host tests are required before claiming multi-host distributed cluster consistency; (2) revoking a signed-but-unregistered passport now throws (no tombstone) — needs design decision; (3) trust-root, authority signature, live AeroBill/Mandatag, AWS physical, independent review gates remain skipped/outstanding.
 - No AWS or DirectAdmin deployment was performed for this change.
+
+
+---
+
+## Re-audit remediation — signed-but-unregistered passport admission — 2026-10-31
+
+**Finding: UG-PASSPORT-SIGNED-UNREGISTERED-ADMISSION-004 — CONFIRMED.**
+
+### Root cause
+In `server/engine-core/src/index.ts`, the signed-token branch of `admitPassport()` rejected a registered passport only when its record was revoked, expired or tenant-mismatched. A missing record (`passportStore.get() === null`) fell through to `ADMITTED`. This contradicted the repository's earlier fail-closed unregistered-passport requirement and allowed cryptographic authenticity to substitute for authoritative admission registration.
+
+### Physical remediation
+- Changed signed-token admission to reject when the store returns no registration record, as well as for revoked, expired or tenant-mismatched records.
+- Preserved cryptographic signature and claims verification as a separate required step.
+- Added regression `ENG-PASS-011`: issue a signed token, clear the authoritative registry, then assert admission rejects the still-valid signature.
+- Updated `ANTIGRAVITY_CHANGE_GUARDRAIL.md` with the non-negotiable registration invariant.
+
+### Candidate
+- Dedicated branch: `fix/passport-signed-unregistered-fail-closed-2026-10-31`
+- Parent: PR #67 head `0d923240328d3f7d83edc7a2fad0df15f972a173`
+- Source commit: `46e33d1c872a532eb48a2ea6f8f0729e174154fc`
+- Regression commit: `8e3c7fbc9419f2b446ee0954f3ef7100ca02dfaf`
+- Guardrail commit: `2b0de8bc58305d2a44c97f9d18d0c92d54819623`
+
+### Qualification boundary
+Physical source, regression and guardrail writes are committed. Exact-head CI/COR is pending and must pass before this candidate is qualified. The regression intentionally leaves the test registry empty at the end of the test file; verify test order and full-suite isolation in CI.
+
+### Multi-host persistence remains OPEN
+The existing filesystem-backed store proves shared-directory coordination, not independent-host persistence. The historic ENG-PASS-008 test creates two store instances in one process against one temporary directory; it is not a multi-process or multi-host test. A production SQL adapter, schema/migration, runtime injection, connection lifecycle, fail-closed outage behavior, and independent-process/host admission/revocation tests remain required. No PostgreSQL adapter is represented as implemented by this change.
+
+### Product boundaries and hosting
+AeroBill remains sole authority for billing/pricing/invoicing/metering; Mandatag remains sole authority for licensing/entitlements. DirectAdmin remains launch hosting. VPS is unavailable. AWS provisioning remains deferred until traction, official engagement/funding and explicit budget authorization. Preserve portable OCI/runtime configuration and avoid AWS-specific business logic. No AWS resources were provisioned.
+
+**Overall posture: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.** No master/main branch modified; no PR merged.
