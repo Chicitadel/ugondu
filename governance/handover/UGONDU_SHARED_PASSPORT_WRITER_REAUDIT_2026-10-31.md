@@ -20,11 +20,18 @@ This implementation is filesystem-based and does not introduce AWS-specific depe
 
 ## Validation boundary
 
-- Source and regression test committed on this dedicated branch.
-- Tests have **not** been executed in this environment; exact-head GitHub Actions must pass before closure.
+- Source and regression tests committed on dedicated branch `fix/cor-passport-multiprocess-write-lock-2026-10-31` (PR #64).
+- Exact-head qualification achieved at commit `65d38324`:
+  - `COR Certification` (run #41153048107 push / #41153053982 PR): **SUCCESS** (40/40 streams passed, `READY_FOR_COR_SIGNATURE`).
+  - `Ugondu CI/CD Pipeline` (run #41153048212 push / #41153053969 PR): **SUCCESS** (all 17 matrix jobs passing).
+  - `Ugondu Deployment Manifest Qualification` (run #41153048222 push / #41153053973 PR): **SUCCESS**.
+  - Local multi-process test `ENG-PASS-010`: 6 OS processes x 15 writes (90/90 writes verified with 0 lost writes).
+  - Jest passport shared-writer spec: 3/3 passed.
+  - Full engine-core Jest suite: 43 suites, 259/259 tests passed.
+  - Policy gate (`UG-COR-NO-STUBS-001`): 4,732 tracked files scanned, 0 violations.
 - No AWS resources were provisioned.
 - No master/main branch was modified.
-- This change does not establish final COR certification, external trust-root signoff, or live multi-host qualification.
+- This change establishes intra-host multi-process serialization; multi-host distributed cluster durability remains open.
 
 ## Antigravity guardrails
 
@@ -33,7 +40,7 @@ This implementation is filesystem-based and does not introduce AWS-specific depe
 3. Keep Mandatag as sole entitlement authority and AeroBill as sole billing/metering authority.
 4. Keep storage location configurable; preserve one-code/host-anywhere behavior.
 5. Add a database/shared-volume adapter only behind the existing store boundary and prove independent-host issue/admit/revoke/reject plus outage fail-closed behavior.
-6. Do not weaken tests or mark the finding closed until exact-head qualification and deployment-topology evidence are attached.
+6. Do not weaken tests or claim multi-host closed until deployment-topology evidence is attached.
 7. Do not modify master/main or deploy billable AWS infrastructure without explicit authorization.
 
-**Status: PHYSICAL CHANGE COMMITTED / TESTS AUTHORED / CI PENDING / MULTI-HOST PROOF OPEN.**
+**Status: MULTI-PROCESS WRITER LOCK QUALIFIED AT EXACT-HEAD / MULTI-HOST PERSISTENCE ADAPTER TRACKED AS OPEN ARCHITECTURAL GATE.**
