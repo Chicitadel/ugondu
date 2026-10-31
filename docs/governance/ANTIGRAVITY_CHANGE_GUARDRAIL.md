@@ -1100,3 +1100,14 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 - PR #29 adds `CareerDiscoveryCaseEntity`, `GuidanceCaseEntity`, migration `V3__add_orm_optimistic_lock_versions.sql`, and `CareerCaseOptimisticLockingTest`. These exact paths are absent from the PR #35 candidate tree. PR #35's existing `CareerJourney` entity has its own `@Version`, which is not evidence that PR #29's separate discovery/guidance case entities are integrated.
 - Do not describe PR #29 through #36 as one unified, release-integrated candidate. Require a deliberate integration/rebase branch, conflict review, migration compatibility review, full Maven + Flutter + governance qualification on the resulting exact head before release aggregation.
 - Never cherry-pick or recreate the PR #29 entity/migration into PR #35 without first resolving the authoritative domain model and migration history. Preserve existing domain `case_version` semantics; ORM version is separate.
+
+
+## 2026-10-31 corroborated continuation rules
+
+- **Never accept local agent summaries as remote repository state.** Search origin branches and fetch exact files/commits before claiming a branch or commit is published. The supplied report's Dumcholu integration and Ugondu PostgreSQL adapter branches were absent from the origin branch search at this check.
+- **DU-CAREER-PATHWAY-SYNTHETIC-GENERATION-001:** the published Dumcholu territory candidate contained a fixed Cloud Solutions Architect pathway and invented stage/milestone/transition/confidence/policy metadata. The dedicated PR #37 branch physically removes this synthetic generation and adds no-side-effect regression tests. Do not mark the career intelligence feature complete: authoritative provider contract and tenant-bound evidence remain absent.
+- A fail-closed empty state is safer than fabricated data, but it is not a substitute for implementing the missing authoritative provider.
+- Keep local test receipts, remote workflow receipts, staging probes, live production probes, AWS physical qualification and cryptographic signing ceremony as separate evidence classes. Never promote one class into another.
+- Do not provision AWS resources until explicit budget/traction authorization. DirectAdmin remains current launch tier; portability must be achieved through configuration/adapters, not provider-specific business logic.
+- Billing/pricing/metering belong exclusively to AeroBill; licensing/entitlements belong exclusively to Mandatag. Product repos consume contracts and never duplicate these rules.
+- No agent may modify master/main, merge PRs, rewrite history, or replace architecture with duplicated entities/migrations without explicit authorization and an evidence-backed reconciliation plan.
