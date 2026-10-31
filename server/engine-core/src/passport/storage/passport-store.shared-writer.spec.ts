@@ -202,4 +202,20 @@ describe('PortablePassportStore shared-writer contract', () => {
     expect(store.isRevoked('passport-runtime-revoke')).toBe(false);
   });
 
+  it('cleans up a lock directory when owner metadata publication fails after mkdir', () => {
+    const store = new PortablePassportStore(directory);
+    const lockPath = path.join(directory, '.passports.write-lock');
+    const writeSpy = jest.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {
+      throw Object.assign(new Error('simulated metadata write failure'), { code: 'EACCES' });
+    });
+
+    try {
+      expect(() => store.set({ passportId: 'passport-owner-write-failure', tenantId: 'tenant-a' }))
+        .toThrow(PassportStoreError);
+      expect(fs.existsSync(lockPath)).toBe(false);
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
+
 });
