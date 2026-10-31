@@ -357,3 +357,5 @@ Commits:
 - Product handover: `6a2d347292ae098f4483d556be8a835bcc582afa`.
 
 The partner feature is now honest but incomplete. Live partner curriculum API, tenant binding, employer evidence, cohort/capacity data, CPF/subsidy integration and forecast methodology remain OPEN. Exact-head Flutter and governance CI pending. Keep the global release state PARTIAL / RELEASE BLOCKED / NOT CERTIFIED.
+
+Partner Opportunity Map follow-up: removed the now-dead hardcoded forecast/capacity widget scaffolding entirely (not merely hidden behind an empty-list condition). Public model types remain for a future typed source contract; no local curriculum records or static forecast calculators remain. Commit `c23347ed63ae58bcf2adaad63ffc5e65f1f6955f`; updated product handover `095a8da21c39a64b4fca147f6b33a39ce35330f0`. PR #36 latest candidate head after this update is `095a8da21c39a64b4fca147f6b33a39ce35330f0`; exact-head CI must be rechecked.
