@@ -232,9 +232,7 @@ export class PortablePassportStore {
   private withWriteLock<T>(operation: () => T): T {
     const lockPath = path.join(this.dataDir, '.passports.write-lock');
     const maxWaitMs = Number(process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] ?? 2000);
-    const staleAfterMs = Number(process.env['UGONDU_PASSPORT_LOCK_STALE_MS'] ?? 30000);
-    if (!Number.isSafeInteger(maxWaitMs) || maxWaitMs < 1 || maxWaitMs > 60000 ||
-        !Number.isSafeInteger(staleAfterMs) || staleAfterMs < 1000) {
+    if (!Number.isSafeInteger(maxWaitMs) || maxWaitMs < 1 || maxWaitMs > 60000) {
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE', 'Invalid passport lock timing configuration');
     }
     const deadline = Date.now() + maxWaitMs;
@@ -271,37 +269,9 @@ export class PortablePassportStore {
           throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         }
 
-        // Never reclaim a lock based on age alone: a slow but live writer may
-        // legitimately hold it longer than the stale threshold.
-        try {
-          const owner = JSON.parse(fs.readFileSync(ownerPath, 'utf8')) as {
-            pid?: unknown; hostname?: unknown; token?: unknown; createdAt?: unknown;
-          };
-          const age = Date.now() - Number(owner.createdAt);
-          if (owner.hostname === hostname &&
-              Number.isSafeInteger(owner.pid) &&
-              age > staleAfterMs) {
-            let processIsAlive = true;
-            try {
-              process.kill(owner.pid as number, 0);
-            } catch (probeError) {
-              const probeCode = (probeError as NodeJS.ErrnoException).code;
-              if (probeCode === 'ESRCH') processIsAlive = false;
-              // EPERM means the process exists but cannot be signalled.
-            }
-            if (!processIsAlive) {
-              const quarantine = path.join(this.dataDir, `.passports.write-lock.stale-${randomBytes(8).toString('hex')}`);
-              try {
-                fs.renameSync(lockPath, quarantine);
-                fs.rmSync(quarantine, { recursive: true, force: true });
-                continue;
-              } catch { /* a competing reaper or owner changed the lock; retry */ }
-            }
-          }
-        } catch {
-          // Missing, malformed, foreign-host or partially-created owner records
-          // are not safe to steal. They fail closed after the bounded wait.
-        }
+        // Do not auto-steal abandoned locks. PID reuse, slow I/O, clock skew,
+        // and cross-host ownership make age-based reclamation unsafe. Operators
+        // may remove a lock only after independently proving its owner is dead.
 
         if (Date.now() >= deadline) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
         Atomics.wait(sleeper, 0, 0, 10);
