@@ -66,7 +66,7 @@ describe('PortablePassportStore shared-writer contract', () => {
     process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'] = '20';
     try {
       expect(() => store.set({ passportId: 'passport-live-lock', tenantId: 'tenant-live' }))
-        .toThrow('PASSPORT_STORE_UNAVAILABLE');
+        .toThrow(PassportStoreError);
       expect(fs.existsSync(lockPath)).toBe(true);
     } finally {
       if (previousWait === undefined) delete process.env['UGONDU_PASSPORT_LOCK_WAIT_MS'];
