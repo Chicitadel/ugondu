@@ -120,7 +120,7 @@ export class PortablePassportStore {
     this.outageSimulated = enabled;
   }
 
-  private load(): void {
+  private load(force = false): void {
     if (this.outageSimulated) {
       this.ready = false;
       throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
@@ -138,7 +138,7 @@ export class PortablePassportStore {
       if (!stat.isFile()) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
 
       // Check if fresh
-      if (this.ready && stat.mtimeMs <= this.lastLoadedMtime) {
+      if (!force && this.ready && stat.mtimeMs <= this.lastLoadedMtime) {
         return;
       }
 
@@ -210,42 +210,29 @@ export class PortablePassportStore {
   }
 
   public set(record: RegisteredPassportRecord): void {
-    if (this.outageSimulated) {
-      throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
-    }
-    this.load();
-    const normalized = record.passportId.trim();
-    const toSave: RegisteredPassportRecord = {
-      ...record,
-      passportId: normalized,
-      updatedAt: Date.now(),
-    };
-    this.records.set(normalized, toSave);
-    this.persist();
+    if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+    this.withWriteLock(() => {
+      this.load(true);
+      const normalized = record.passportId.trim();
+      if (!normalized || !record.tenantId.trim()) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+      this.records.set(normalized, { ...record, passportId: normalized, updatedAt: Date.now() });
+      this.persist();
+    });
   }
 
   public revoke(passportId: string, reason = 'REVOKED_BY_AUTHORITY'): void {
-    if (this.outageSimulated) {
-      throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
-    }
-    this.load();
-    const normalized = passportId.trim();
-    const existing = this.records.get(normalized);
-    if (!existing) {
-      // Even if previously unpersisted, record revocation tombstone
-      this.set({
-        passportId: normalized,
-        tenantId: 'unknown',
-        revoked: true,
-        revocationReason: reason,
-      });
-      return;
-    }
-
-    existing.revoked = true;
-    existing.revocationReason = reason;
-    existing.updatedAt = Date.now();
-    this.persist();
+    if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
+    this.withWriteLock(() => {
+      this.load(true);
+      const normalized = passportId.trim();
+      if (!normalized) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+      const existing = this.records.get(normalized);
+      if (!existing) throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA');
+      existing.revoked = true;
+      existing.revocationReason = reason;
+      existing.updatedAt = Date.now();
+      this.persist();
+    });
   }
 
   public isRevoked(passportId: string): boolean {
