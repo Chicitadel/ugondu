@@ -50,3 +50,6 @@ sync_files.txt
 target_search.json
 tree.txt
 *.zip
+
+# Runtime passport store data (never commit)
+var/data/

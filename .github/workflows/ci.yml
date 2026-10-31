@@ -357,6 +357,9 @@ jobs:
       - name: Run Engine Core tests
         run: node tests/engine-core.test.js
 
+      - name: Run Passport Shared Store tests
+        run: node tests/passport-shared-store.test.js
+
       - name: Run Plugin Manager tests
         run: node tests/plugin-manager.test.js
 
