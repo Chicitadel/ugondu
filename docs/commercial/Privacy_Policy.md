@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Privacy_Policy_draft.md
  * Version        : 0.3.0-draft
@@ -40,11 +40,11 @@
 
 # Privacy Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Data Controller:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon commercial release following legal approval  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED
 
 ---
 

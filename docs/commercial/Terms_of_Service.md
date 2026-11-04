@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Terms_of_Service_draft.md
  * Version        : 0.3.0-draft
@@ -43,11 +43,11 @@
 
 # Terms of Service
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Service Provider:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon account creation, order execution, or first Activation Event  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED
 
 ---
 

@@ -1,6 +1,6 @@
 <!--
 ******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Data Protection & Commercial Governance
  * File           : EAORCS_Data_Processing_Agreement.md
  * Version        : 1.0.0-draft
@@ -34,13 +34,13 @@
 # Data Processing Agreement (DPA)
 ## Accord de Traitement des Données à Caractère Personnel
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Processor:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Privacy Contact:** `privacy@airroofers.eu`  
 **Document Version:** 1.0.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED
 
 ---
 

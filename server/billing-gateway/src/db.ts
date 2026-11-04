@@ -36,6 +36,8 @@ export interface TenantInfo {
     revoked_at?: string;
     suspended_reason?: string;
     entitlements?: string[];
+    organization_id?: string;
+    organization_class?: 'GOVERNMENT' | 'EDUCATION' | 'ENTERPRISE' | 'COMMERCIAL' | 'INDIVIDUAL';
 }
 
 export interface RegisterTokenOptions {
@@ -44,6 +46,8 @@ export interface RegisterTokenOptions {
     revokedAt?: string;
     suspendedReason?: string;
     entitlements?: string[];
+    organizationId?: string;
+    organizationClass?: 'GOVERNMENT' | 'EDUCATION' | 'ENTERPRISE' | 'COMMERCIAL' | 'INDIVIDUAL';
 }
 
 export class LicenseStoreError extends Error {
@@ -266,6 +270,8 @@ export class JsonLicenseDatabase {
             ...(options.revokedAt ? { revoked_at: options.revokedAt } : {}),
             ...(options.suspendedReason ? { suspended_reason: options.suspendedReason } : {}),
             ...(options.entitlements ? { entitlements: options.entitlements } : {}),
+            ...(options.organizationId ? { organization_id: options.organizationId } : {}),
+            ...(options.organizationClass ? { organization_class: options.organizationClass } : {}),
         };
         this.save({ ...this.data, [token]: record });
         return record;

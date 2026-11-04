@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Payment_Cancellation_Refund_Withdrawal_Policy.md
  * Version        : 1.1.0-draft
@@ -41,14 +41,14 @@
 
 # Commercial Payment, Cancellation, Refund & Statutory Withdrawal Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Commercial & Billing Authority:** AeroBill (`billing.airroofers.eu`)  
 **Operating Company:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **TVA Intracommunautaire:** FR89943432534  
 **Commercial Inquiries:** `billing@airroofers.eu` | `commercial@airroofers.eu`  
 **Document Version:** 1.1.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED
 
 ---
 

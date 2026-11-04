@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Billing Gateway — Service Entry Point
  * File           : index.ts
- * Version        : 2026.3.1-LTS
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Version        : 2026.3.2-LTS
+ * Author         : Ignatus Chika Ujomor / Enterprise Architecture Council
+ * Organization   : Air Roofers SASU / Enterprise Governance
  * Created Date   : 2026-10-03
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-11-04
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -15,17 +15,19 @@
  * - Architecture Controlled
  * - Protocol Frozen
  * - Modularization Enforced
+ * - Commercial Sovereignty: AeroBill APR Authority
+ * - Licensing Sovereignty: Mandatag Authority (Ed25519)
  *
  * Standards:
  * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import { createHash } from 'crypto';
+import { createHash, createPublicKey, verify as cryptoVerify } from 'crypto';
 import {
     __t,
     verifyServiceIdentityToken,
@@ -33,6 +35,7 @@ import {
     telemetryContextMiddleware,
     createOutboundPropagationHeaders,
     ProductRegistry,
+    globalTrustRegistry,
 } from '@ugondu/shared';
 import { tokenStore, computeTokenFingerprint, TenantInfo } from './db';
 import {
@@ -174,12 +177,147 @@ app.get('/v1/metadata', (_req: Request, res: Response) => {
     res.status(200).json({
         service: 'billing-gateway',
         product: 'ugondu',
-        version: '2026.3.1-LTS',
+        version: '2026.3.2-LTS',
         editions: Object.keys(CENTRAL_EDITION_TABLE),
-        endpoints: ['/health', '/health/live', '/health/ready', '/v1/metadata', '/v1/authorize'],
+        endpoints: ['/health', '/health/live', '/health/ready', '/v1/metadata', '/v1/authorize', '/v1/checkout', '/v1/upgrade'],
+        commercialAuthority: 'https://billing.airroofers.eu',
+        pricingModel: 'AeroBill APR (Central Commercial Authority)',
+        licensingAuthority: 'https://license.airroofers.eu (Mandatag)',
+        shadowBilling: 'eliminated',
         timestamp: new Date().toISOString(),
     });
 });
+
+app.all('/v1/checkout', (req: Request, res: Response) => {
+    const aerobillBase = process.env.AEROBILL_URL || 'https://billing.airroofers.eu';
+    const edition = req.query.edition || req.body?.edition || 'professional';
+    const redirectUrl = `${aerobillBase}/products/ugondu/checkout?edition=${encodeURIComponent(String(edition))}`;
+    return res.status(200).json({
+        delegatedTo: 'AeroBill APR',
+        commercialAuthority: aerobillBase,
+        checkoutUrl: redirectUrl,
+        message: 'Commercial checkout delegated to AeroBill APR (AeroBill Commercial Authority).'
+    });
+});
+
+app.all('/v1/upgrade', (req: Request, res: Response) => {
+    const aerobillBase = process.env.AEROBILL_URL || 'https://billing.airroofers.eu';
+    const tenantId = req.query.tenantId || req.body?.tenantId || '';
+    const targetEdition = req.query.edition || req.body?.edition || 'enterprise';
+    const redirectUrl = `${aerobillBase}/products/ugondu/upgrade?tenantId=${encodeURIComponent(String(tenantId))}&targetEdition=${encodeURIComponent(String(targetEdition))}`;
+    return res.status(200).json({
+        delegatedTo: 'AeroBill APR',
+        commercialAuthority: aerobillBase,
+        upgradeUrl: redirectUrl,
+        message: 'Plan upgrade flows delegated to AeroBill APR.'
+    });
+});
+
+export function verifyMandatagEntitlementToken(
+    token: string
+): { valid: boolean; record?: TenantInfo; error?: string } {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            return { valid: false, error: 'Token is not a three-part compact JWT' };
+        }
+        const [headerB64, payloadB64, signatureB64] = parts;
+        const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf8'));
+        if (header.alg !== 'EdDSA') {
+            return { valid: false, error: 'Mandatag tokens must use EdDSA (Ed25519) algorithm' };
+        }
+
+        const keyId = header.kid;
+        let publicKeyPem: string | undefined;
+
+        if (keyId) {
+            const keyRecord = globalTrustRegistry.getKey(keyId);
+            if (keyRecord && keyRecord.status === 'ACTIVE' && keyRecord.algorithm === 'ed25519') {
+                publicKeyPem = keyRecord.publicKey;
+            }
+        }
+        if (!publicKeyPem) {
+            const activeKey = globalTrustRegistry.getActiveKeyByPurpose('service-identity');
+            if (activeKey && activeKey.algorithm === 'ed25519') {
+                publicKeyPem = activeKey.publicKey;
+            }
+        }
+        if (!publicKeyPem && process.env.MANDATAG_PUBLIC_KEY) {
+            publicKeyPem = process.env.MANDATAG_PUBLIC_KEY;
+        }
+
+        if (!publicKeyPem) {
+            return { valid: false, error: 'No active Mandatag Ed25519 verification key found in Trust Registry' };
+        }
+
+        const publicKeyObj = createPublicKey(publicKeyPem);
+        const signedData = Buffer.from(`${headerB64}.${payloadB64}`);
+        const signatureBytes = Buffer.from(signatureB64, 'base64url');
+
+        const isSignatureValid = cryptoVerify(null, signedData, publicKeyObj, signatureBytes);
+        if (!isSignatureValid) {
+            return { valid: false, error: 'Mandatag Ed25519 signature verification failed' };
+        }
+
+        const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+        const now = Math.floor(Date.now() / 1000);
+
+        const validOrgClasses = ['GOVERNMENT', 'EDUCATION', 'ENTERPRISE', 'COMMERCIAL', 'INDIVIDUAL'];
+        const orgId = typeof payload.organizationId === 'string' ? payload.organizationId :
+                      typeof payload.orgId === 'string' ? payload.orgId :
+                      typeof payload.organization_id === 'string' ? payload.organization_id : undefined;
+        const rawOrgClass = typeof payload.organizationClass === 'string' ? payload.organizationClass.toUpperCase() :
+                            typeof payload.orgClass === 'string' ? payload.orgClass.toUpperCase() :
+                            typeof payload.organization_class === 'string' ? payload.organization_class.toUpperCase() : undefined;
+        const orgClass = rawOrgClass && validOrgClasses.includes(rawOrgClass) ? rawOrgClass as TenantInfo['organization_class'] : undefined;
+
+        if (typeof payload.exp === 'number' && payload.exp <= now) {
+            return {
+                valid: false,
+                error: 'Mandatag entitlement token has expired',
+                record: {
+                    token,
+                    token_fingerprint: computeTokenFingerprint(token),
+                    tenant_id: String(payload.tenantId || payload.tenant_id || payload.sub || 'unknown'),
+                    edition: String(payload.edition || payload.tier || payload.subscriptionTier || 'unspecified'),
+                    status: 'expired',
+                    created_at: new Date((payload.iat || now) * 1000).toISOString(),
+                    expires_at: new Date(payload.exp * 1000).toISOString(),
+                    organization_id: orgId,
+                    organization_class: orgClass,
+                }
+            };
+        }
+
+        const tenantId = String(payload.tenantId || payload.tenant_id || payload.sub || 'tenant_unknown');
+        const edition = String(payload.edition || payload.tier || payload.subscriptionTier || '');
+        if (!edition) {
+            return { valid: false, error: 'Mandatag entitlement token missing edition claim' };
+        }
+
+        const rawStatus = String(payload.status || 'active').toLowerCase();
+        const status = (['active', 'expired', 'revoked', 'suspended', 'invalid'].includes(rawStatus)
+            ? rawStatus
+            : 'active') as TenantInfo['status'];
+
+        const record: TenantInfo = {
+            token,
+            token_fingerprint: computeTokenFingerprint(token),
+            tenant_id: tenantId,
+            edition,
+            status,
+            created_at: new Date((payload.iat || now) * 1000).toISOString(),
+            ...(payload.exp ? { expires_at: new Date(payload.exp * 1000).toISOString() } : {}),
+            entitlements: Array.isArray(payload.entitlements) ? payload.entitlements : undefined,
+            organization_id: orgId,
+            organization_class: orgClass,
+        };
+
+        return { valid: true, record };
+    } catch (err: any) {
+        return { valid: false, error: err?.message || 'Token parsing or cryptographic error' };
+    }
+}
 
 function emitAuditDecision(
     level: 'INFO' | 'WARN' | 'ERROR',
@@ -236,6 +374,18 @@ function checkInsufficientEntitlement(
     if (typeof reqBody.requiredPluginsCount === 'number') {
         if (reqBody.requiredPluginsCount > capabilities.maxPlugins) {
             return `Requested plugin count (${reqBody.requiredPluginsCount}) exceeds edition limit (${capabilities.maxPlugins})`;
+        }
+    }
+
+    if (typeof reqBody.requiredConcurrentPipelines === 'number') {
+        if (capabilities.maxConcurrentPipelines !== null && reqBody.requiredConcurrentPipelines > capabilities.maxConcurrentPipelines) {
+            return `Requested concurrent pipeline count (${reqBody.requiredConcurrentPipelines}) exceeds edition limit (${capabilities.maxConcurrentPipelines})`;
+        }
+    }
+
+    if (typeof reqBody.requiredWorkers === 'number') {
+        if (capabilities.maxWorkers !== null && reqBody.requiredWorkers > capabilities.maxWorkers) {
+            return `Requested worker count (${reqBody.requiredWorkers}) exceeds edition limit (${capabilities.maxWorkers})`;
         }
     }
 
@@ -392,8 +542,25 @@ app.post(
 
         Logger.info(__t('auth_validating'), { tokenFingerprint, correlationId });
 
-        let record: TenantInfo | null = production ? null : tokenStore.verifyToken(token);
+        let record: TenantInfo | null = null;
 
+        // Step A: Cryptographically verify signed Mandatag entitlement tokens (Ed25519 JWT)
+        if (token.includes('.') && token.split('.').length === 3) {
+            const jwtVerification = verifyMandatagEntitlementToken(token);
+            if (jwtVerification.valid && jwtVerification.record) {
+                record = jwtVerification.record;
+                Logger.info('Mandatag signed entitlement token cryptographically verified', {
+                    tokenFingerprint,
+                    tenantId: record.tenant_id,
+                    edition: record.edition,
+                    correlationId,
+                });
+            } else if (jwtVerification.record && jwtVerification.record.status === 'expired') {
+                record = jwtVerification.record;
+            }
+        }
+
+        // Step B: Query upstream Mandatag Authority if token not verified by local Ed25519 signature
         if (!record) {
             const hasConfiguredUpstream = Boolean(authorityBaseUrl);
             const isAxiosMocked = Boolean(
@@ -402,118 +569,134 @@ app.post(
             const shouldQueryUpstream =
                 production || hasConfiguredUpstream || isAxiosMocked || body.requireUpstream === true;
 
-            if (!shouldQueryUpstream) {
-                emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                    tokenFingerprint,
-                    reason: 'unregistered_token',
-                    correlationId,
-                });
-                return res.status(402).json({
-                    error: __t('payment_required'),
-                    code: BillingErrorCode.LICENSE_INVALID,
-                    outcome: 'invalid',
-                    correlationId,
-                });
-            }
+            if (shouldQueryUpstream) {
+                const upstreamUrl =
+                    authorityBaseUrl || process.env.IDENTITY_AUTHORITY_URL || DEFAULT_IDENTITY_AUTHORITY_URL;
 
-            const upstreamUrl =
-                authorityBaseUrl || process.env.IDENTITY_AUTHORITY_URL || DEFAULT_IDENTITY_AUTHORITY_URL;
+                try {
+                    const outboundHeaders = createOutboundPropagationHeaders(req);
+                    const identityRes = await axios.post(
+                        `${upstreamUrl}/verify`,
+                        { token },
+                        { headers: outboundHeaders, timeout: 3000 }
+                    );
+                    const data = identityRes?.data || {};
+                    const upstreamStatus = String(data.status || 'active').toLowerCase();
 
-            try {
-                const outboundHeaders = createOutboundPropagationHeaders(req);
-                const identityRes = await axios.post(
-                    `${upstreamUrl}/verify`,
-                    { token },
-                    { headers: outboundHeaders, timeout: 3000 }
-                );
-                const data = identityRes?.data || {};
-                const upstreamStatus = String(data.status || 'active').toLowerCase();
-
-                if (data.valid === false || upstreamStatus === 'invalid') {
-                    emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                        tokenFingerprint,
-                        reason: 'upstream_rejected_invalid',
-                        correlationId,
-                    });
-                    return res.status(402).json({
-                        error: __t('payment_required'),
-                        code: BillingErrorCode.LICENSE_INVALID,
-                        outcome: 'invalid',
-                        correlationId,
-                    });
-                }
-
-                const resolvedTenantId = String(data.tenantId || 'tenant_unknown');
-                const resolvedTier = String(data.subscriptionTier || data.edition || '');
-                if (!resolvedTier) {
-                    emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                        tokenFingerprint,
-                        reason: 'upstream_missing_edition',
-                        correlationId,
-                    });
-                    return res.status(402).json({
-                        error: __t('payment_required'),
-                        code: BillingErrorCode.LICENSE_INVALID,
-                        outcome: 'invalid',
-                        correlationId,
-                    });
-                }
-
-                const normalizedStatus = (['active', 'expired', 'revoked', 'suspended', 'invalid'].includes(
-                    upstreamStatus
-                ) ? upstreamStatus : 'active') as TenantInfo['status'];
-
-                if (production) {
-                    // This response is authoritative for the current request only.
-                    // It is deliberately not persisted as a future production allow.
-                    record = {
-                        token,
-                        token_fingerprint: tokenFingerprint,
-                        tenant_id: resolvedTenantId,
-                        edition: resolvedTier,
-                        status: normalizedStatus,
-                        created_at: new Date().toISOString(),
-                        ...(data.expiresAt ? { expires_at: String(data.expiresAt) } : {}),
-                    };
-                } else {
-                    record = tokenStore.registerToken(token, resolvedTenantId, resolvedTier, {
-                        status: normalizedStatus,
-                        expiresAt: data.expiresAt,
-                    });
-                }
-            } catch (err: any) {
-                const httpStatus = err?.response?.status;
-                if (httpStatus === 401 || httpStatus === 402 || httpStatus === 404) {
-                    emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                        tokenFingerprint,
-                        upstreamStatus: httpStatus,
-                        correlationId,
-                    });
-                    return res.status(402).json({
-                        error: __t('payment_required'),
-                        code: BillingErrorCode.LICENSE_INVALID,
-                        outcome: 'invalid',
-                        correlationId,
-                    });
-                }
-
-                emitAuditDecision(
-                    'ERROR',
-                    'upstream_unavailable',
-                    BillingErrorCode.UPSTREAM_UNAVAILABLE,
-                    {
-                        tokenFingerprint,
-                        upstreamError: err?.code || err?.message || 'upstream_unreachable',
-                        correlationId,
+                    if (data.valid === false || upstreamStatus === 'invalid') {
+                        emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
+                            tokenFingerprint,
+                            reason: 'upstream_rejected_invalid',
+                            correlationId,
+                        });
+                        return res.status(402).json({
+                            error: __t('payment_required'),
+                            code: BillingErrorCode.LICENSE_INVALID,
+                            outcome: 'invalid',
+                            correlationId,
+                        });
                     }
-                );
-                return res.status(503).json({
-                    error: __t('auth_rejected'),
-                    code: BillingErrorCode.UPSTREAM_UNAVAILABLE,
-                    outcome: 'upstream_unavailable',
-                    correlationId,
-                });
+
+                    const resolvedTenantId = String(data.tenantId || 'tenant_unknown');
+                    const resolvedTier = String(data.subscriptionTier || data.edition || '');
+                    if (!resolvedTier) {
+                        emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
+                            tokenFingerprint,
+                            reason: 'upstream_missing_edition',
+                            correlationId,
+                        });
+                        return res.status(402).json({
+                            error: __t('payment_required'),
+                            code: BillingErrorCode.LICENSE_INVALID,
+                            outcome: 'invalid',
+                            correlationId,
+                        });
+                    }
+
+                    const normalizedStatus = (['active', 'expired', 'revoked', 'suspended', 'invalid'].includes(
+                        upstreamStatus
+                    ) ? upstreamStatus : 'active') as TenantInfo['status'];
+
+                    const validOrgClasses = ['GOVERNMENT', 'EDUCATION', 'ENTERPRISE', 'COMMERCIAL', 'INDIVIDUAL'];
+                    const resolvedOrgId = typeof data.organizationId === 'string' ? data.organizationId :
+                                          typeof data.orgId === 'string' ? data.orgId : undefined;
+                    const rawOrgClass = typeof data.organizationClass === 'string' ? data.organizationClass.toUpperCase() :
+                                        typeof data.orgClass === 'string' ? data.orgClass.toUpperCase() : undefined;
+                    const resolvedOrgClass = rawOrgClass && validOrgClasses.includes(rawOrgClass) ? rawOrgClass as TenantInfo['organization_class'] : undefined;
+
+                    if (production) {
+                        // This response is authoritative for the current request only.
+                        // It is deliberately not persisted as a future production allow.
+                        record = {
+                            token,
+                            token_fingerprint: tokenFingerprint,
+                            tenant_id: resolvedTenantId,
+                            edition: resolvedTier,
+                            status: normalizedStatus,
+                            organization_id: resolvedOrgId,
+                            organization_class: resolvedOrgClass,
+                            created_at: new Date().toISOString(),
+                            ...(data.expiresAt ? { expires_at: String(data.expiresAt) } : {}),
+                        };
+                    } else {
+                        record = tokenStore.registerToken(token, resolvedTenantId, resolvedTier, {
+                            status: normalizedStatus,
+                            expiresAt: data.expiresAt,
+                            organizationId: resolvedOrgId,
+                            organizationClass: resolvedOrgClass,
+                        });
+                    }
+                } catch (err: any) {
+                    const httpStatus = err?.response?.status;
+                    if (httpStatus === 401 || httpStatus === 402 || httpStatus === 404) {
+                        emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
+                            tokenFingerprint,
+                            upstreamStatus: httpStatus,
+                            correlationId,
+                        });
+                        return res.status(402).json({
+                            error: __t('payment_required'),
+                            code: BillingErrorCode.LICENSE_INVALID,
+                            outcome: 'invalid',
+                            correlationId,
+                        });
+                    }
+
+                    emitAuditDecision(
+                        'ERROR',
+                        'upstream_unavailable',
+                        BillingErrorCode.UPSTREAM_UNAVAILABLE,
+                        {
+                            tokenFingerprint,
+                            upstreamError: err?.code || err?.message || 'upstream_unreachable',
+                            correlationId,
+                        }
+                    );
+                    return res.status(503).json({
+                        error: __t('auth_rejected'),
+                        code: BillingErrorCode.UPSTREAM_UNAVAILABLE,
+                        outcome: 'upstream_unavailable',
+                        correlationId,
+                    });
+                }
+            } else if (process.env.NODE_ENV === 'test' && tokenStore.isReady()) {
+                // Preserved strictly for offline isolated test harness execution; forbidden in production
+                record = tokenStore.verifyToken(token);
             }
+        }
+
+        if (!record) {
+            emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
+                tokenFingerprint,
+                reason: 'unregistered_token',
+                correlationId,
+            });
+            return res.status(402).json({
+                error: __t('payment_required'),
+                code: BillingErrorCode.LICENSE_INVALID,
+                outcome: 'invalid',
+                correlationId,
+            });
         }
 
         // Fail closed on non-active license states
@@ -635,6 +818,8 @@ app.post(
         const responsePayload = {
             tenantId: record.tenant_id,
             edition: catalogEntry.edition,
+            ...(record.organization_id ? { organizationId: record.organization_id } : {}),
+            ...(record.organization_class ? { organizationClass: record.organization_class } : {}),
             outcome: 'authorized' as const,
             capabilities: catalogEntry.capabilities,
             message: __t('auth_success', catalogEntry.edition.toUpperCase()),

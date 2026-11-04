@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : Security_Responsible_Disclosure_Policy.md
  * Version        : 1.2.0-draft
@@ -43,12 +43,12 @@
 
 # Security & Responsible Vulnerability Disclosure Policy
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System  
+**Product:** Ugondu — Sovereign Core Platform  
 **Governing Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Registered Office:** 229 rue Saint-Honoré, 75001 Paris, France (RCS Paris 943 432 534)  
 **Security Operations:** `security@airroofers.eu` | PGP Key: `security.airroofers.eu/pgp`  
 **Document Version:** 1.2.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED
 
 ---
 

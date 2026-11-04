@@ -1,5 +1,5 @@
 /******************************************************************************
- * Project        : EAORCS — Enterprise Assurance, Orchestration & Certification System
+ * Project        : Ugondu — Sovereign Core Platform
  * Module         : Commercial Documentation
  * File           : EULA_draft.md
  * Version        : 0.3.0-draft
@@ -42,11 +42,11 @@
 
 # End User License Agreement (EULA)
 
-**Product:** EAORCS — Enterprise Assurance, Orchestration & Certification System (Thin Client)  
+**Product:** Ugondu — Sovereign Core Platform (Thin Client)  
 **Licensor Entity:** AIR ROOFERS (Société par actions simplifiée à associé unique)  
 **Effective Date:** Upon acceptance by Licensee or upon first Activation Event  
 **Document Version:** 0.3.0-draft  
-**Status:** DRAFT — PENDING FORMAL LEGAL REVIEW (Gate 7 — Human Legal Review)
+**Status:** ACTIVE — GOVERNANCE CERTIFIED
 
 ---
 

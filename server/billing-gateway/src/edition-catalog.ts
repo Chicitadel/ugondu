@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Billing Gateway — Central Edition Entitlement Catalog
  * File           : edition-catalog.ts
- * Version        : 2026.3.1-LTS
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers Ltd
+ * Version        : 2026.3.2-LTS
+ * Author         : Ignatus Chika Ujomor / Enterprise Architecture Council
+ * Organization   : Air Roofers SASU / Enterprise Governance
  * Created Date   : 2026-10-18
- * Last Modified  : 2026-10-18
+ * Last Modified  : 2026-11-04
  * Classification : ENTERPRISE | INTERNAL
  *
  * Governance:
@@ -16,7 +16,7 @@
  * - Protocol Frozen
  * - Modularization Enforced
  *
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 export type CanonicalEditionKey =
@@ -38,6 +38,8 @@ export interface EditionCapabilities {
     maxDeploymentsPerMonth: number | null;
     maxFleetNodes: number | null;
     maxAiRequestsPerMonth: number | null;
+    maxConcurrentPipelines: number | null;
+    maxWorkers: number | null;
 }
 
 export interface EditionCatalogEntry {
@@ -49,7 +51,8 @@ export interface EditionCatalogEntry {
 
 /**
  * Central edition table aligned with @ugondu/capabilities (EDITION_LIMITS, EDITION_RANK)
- * and .governance/product.definition.yaml (product: ugondu, version: 2026.3.1-LTS).
+ * and .governance/product.definition.yaml (product: ugondu, version: 2026.3.2-LTS).
+ * Enforces legitimate local runtime capabilities (pipelines, worker limits, plugins).
  */
 export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, EditionCatalogEntry>> = Object.freeze({
     community: {
@@ -67,6 +70,8 @@ export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, Edition
             maxDeploymentsPerMonth: 10,
             maxFleetNodes: 0,
             maxAiRequestsPerMonth: 0,
+            maxConcurrentPipelines: 1,
+            maxWorkers: 1,
         },
     },
     free: {
@@ -84,6 +89,8 @@ export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, Edition
             maxDeploymentsPerMonth: 10,
             maxFleetNodes: 0,
             maxAiRequestsPerMonth: 0,
+            maxConcurrentPipelines: 1,
+            maxWorkers: 1,
         },
     },
     professional: {
@@ -101,6 +108,8 @@ export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, Edition
             maxDeploymentsPerMonth: 100,
             maxFleetNodes: 0,
             maxAiRequestsPerMonth: 100,
+            maxConcurrentPipelines: 5,
+            maxWorkers: 4,
         },
     },
     business: {
@@ -118,6 +127,8 @@ export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, Edition
             maxDeploymentsPerMonth: null,
             maxFleetNodes: 50,
             maxAiRequestsPerMonth: 1000,
+            maxConcurrentPipelines: 20,
+            maxWorkers: 16,
         },
     },
     enterprise: {
@@ -135,6 +146,8 @@ export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, Edition
             maxDeploymentsPerMonth: null,
             maxFleetNodes: 500,
             maxAiRequestsPerMonth: 10000,
+            maxConcurrentPipelines: 100,
+            maxWorkers: 64,
         },
     },
     sovereign: {
@@ -152,6 +165,8 @@ export const CENTRAL_EDITION_TABLE: Readonly<Record<CanonicalEditionKey, Edition
             maxDeploymentsPerMonth: null,
             maxFleetNodes: null,
             maxAiRequestsPerMonth: null,
+            maxConcurrentPipelines: null,
+            maxWorkers: null,
         },
     },
 });
