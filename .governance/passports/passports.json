@@ -3,7 +3,7 @@
     "passportId": "valid_passport_id",
     "tenantId": "tenant_test_default",
     "revoked": false,
-    "updatedAt": 1793837219521,
-    "version": 2
+    "updatedAt": 1793837929568,
+    "version": 3
   }
 }
