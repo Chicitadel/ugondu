@@ -398,7 +398,6 @@ export {
   SqlQueryClient,
   PostgresPassportStoreAdapterOptions,
 } from './postgres-passport-store-adapter';
-
 import {
   PostgresPassportStoreAdapter,
   PostgresPassportStoreAdapterOptions,
@@ -425,39 +424,20 @@ export class PortablePassportStore implements IPassportStoreAdapter {
     }
   }
 
-  public get backend(): PassportStorageBackend {
-    return this.adapter.backend;
-  }
-
-  public isReady(): boolean {
-    return this.adapter.isReady();
-  }
-
+  public get backend(): PassportStorageBackend { return this.adapter.backend; }
+  public isReady(): boolean { return this.adapter.isReady(); }
   public simulateOutage(enabled: boolean): void {
-    if (this.adapter.simulateOutage) {
-      this.adapter.simulateOutage(enabled);
-    }
+    if (this.adapter.simulateOutage) this.adapter.simulateOutage(enabled);
   }
-
-  public get(passportId: string): RegisteredPassportRecord | null {
-    return this.adapter.get(passportId);
-  }
-
+  public get(passportId: string): RegisteredPassportRecord | null { return this.adapter.get(passportId); }
   public set(record: RegisteredPassportRecord, expectedVersion?: number): void | Promise<void> {
     return this.adapter.set(record, expectedVersion);
   }
-
   public revoke(passportId: string, reason = 'REVOKED_BY_AUTHORITY', expectedVersion?: number): void | Promise<void> {
     return this.adapter.revoke(passportId, reason, expectedVersion);
   }
-
-  public isRevoked(passportId: string): boolean {
-    return this.adapter.isRevoked(passportId);
-  }
-
-  public clear(): void | Promise<void> {
-    return this.adapter.clear();
-  }
+  public isRevoked(passportId: string): boolean { return this.adapter.isRevoked(passportId); }
+  public clear(): void | Promise<void> { return this.adapter.clear(); }
 
   public withWriteLock<T>(operation: () => T): T {
     if ('withWriteLock' in this.adapter && typeof (this.adapter as any).withWriteLock === 'function') {
@@ -477,43 +457,29 @@ export class PortablePassportStore implements IPassportStoreAdapter {
   }
 
   public async getAsync(passportId: string): Promise<RegisteredPassportRecord | null> {
-    if (this.adapter.getAsync) {
-      return this.adapter.getAsync(passportId);
-    }
-    return this.adapter.get(passportId);
+    return this.adapter.getAsync ? this.adapter.getAsync(passportId) : this.adapter.get(passportId);
   }
 
   public async setAsync(record: RegisteredPassportRecord, expectedVersion?: number): Promise<void> {
-    if (this.adapter.setAsync) {
-      return this.adapter.setAsync(record, expectedVersion);
-    }
+    if (this.adapter.setAsync) return this.adapter.setAsync(record, expectedVersion);
     await Promise.resolve(this.adapter.set(record, expectedVersion));
   }
 
   public async revokeAsync(passportId: string, reason = 'REVOKED_BY_AUTHORITY', expectedVersion?: number): Promise<void> {
-    if (this.adapter.revokeAsync) {
-      return this.adapter.revokeAsync(passportId, reason, expectedVersion);
-    }
+    if (this.adapter.revokeAsync) return this.adapter.revokeAsync(passportId, reason, expectedVersion);
     await Promise.resolve(this.adapter.revoke(passportId, reason, expectedVersion));
   }
 
   public async isRevokedAsync(passportId: string): Promise<boolean> {
-    if (this.adapter.isRevokedAsync) {
-      return this.adapter.isRevokedAsync(passportId);
-    }
-    return this.adapter.isRevoked(passportId);
+    return this.adapter.isRevokedAsync ? this.adapter.isRevokedAsync(passportId) : this.adapter.isRevoked(passportId);
   }
 
   public async clearAsync(): Promise<void> {
-    if (this.adapter.clearAsync) {
-      return this.adapter.clearAsync();
-    }
+    if (this.adapter.clearAsync) return this.adapter.clearAsync();
     await Promise.resolve(this.adapter.clear());
   }
 
   public async close(): Promise<void> {
-    if (this.adapter.close) {
-      await this.adapter.close();
-    }
+    if (this.adapter.close) await this.adapter.close();
   }
 }
