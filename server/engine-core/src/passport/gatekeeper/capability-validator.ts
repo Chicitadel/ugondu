@@ -2,11 +2,11 @@
  * Project        : Ugondu — Universal Delivery Operating System
  * Module         : Passport Gatekeeper
  * File           : capability-validator.ts
- * Version        : 1.0.0
- * Author         : Ujomor Systems Engineering & Governance Authority
- * Organization   : Air Roofers (Société par actions simplifiée, RCS Paris 943 432 534)
+ * Version        : 2026.3.2-LTS
+ * Author         : Ignatus Chika Ujomor
+ * Organization   : Air Roofers SASU / Ujomor Systems Engineering & Governance Authority
  * Created Date   : 2026-10-02
- * Last Modified  : 2026-10-02
+ * Last Modified  : 2026-11-05
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -21,11 +21,11 @@
  * - ISO 27001 / SOC 2 / OWASP ASVS 5.0 / NIST SP 800-53
  *
  * Signatures:
- * - Architecture Authority : Ujomor Systems Engineering
+ * - Architecture Authority : Ignatus Chika Ujomor
  * - Security Authority     : Ujomor Systems Governance
  * - Governance Authority   : Air Roofers Corporate Governance
  *
- * Copyright (c) 2026 Air Roofers. All Rights Reserved.
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 // @ts-ignore
@@ -34,7 +34,12 @@ import { __t } from '@ugondu/shared';
 import { PassportStatus, type DeliveryPassport } from '../model/passport';
 import { ExecutionContext } from '../../types/execution';
 
-export type CommercialTier = 'COMMUNITY' | 'PROFESSIONAL' | 'ENTERPRISE';
+export type CommercialTier =
+  | 'COMMUNITY'
+  | 'PROFESSIONAL'
+  | 'BUSINESS'
+  | 'ENTERPRISE'
+  | 'SOVEREIGN';
 
 export const TIER_CAPABILITY_MATRIX: Record<CommercialTier, readonly string[]> = {
   COMMUNITY: [
@@ -53,6 +58,19 @@ export const TIER_CAPABILITY_MATRIX: Record<CommercialTier, readonly string[]> =
     'DEPLOY.MULTI_ENV',
     'ROLLBACK.VERIFIED',
   ],
+  BUSINESS: [
+    'PROJECT.INIT',
+    'TWIN.DISCOVER',
+    'BUILD.LOCAL',
+    'DEPLOY.SINGLE_TARGET',
+    'DELIVERY.PREVIEW',
+    'MOVE.MIGRATE',
+    'DEPLOY.MULTI_ENV',
+    'ROLLBACK.VERIFIED',
+    'FLEET.COLLABORATION',
+    'TELEMETRY.ADVANCED',
+    'AI.STANDARD',
+  ],
   ENTERPRISE: [
     'PROJECT.INIT',
     'TWIN.DISCOVER',
@@ -62,10 +80,33 @@ export const TIER_CAPABILITY_MATRIX: Record<CommercialTier, readonly string[]> =
     'MOVE.MIGRATE',
     'DEPLOY.MULTI_ENV',
     'ROLLBACK.VERIFIED',
+    'FLEET.COLLABORATION',
+    'TELEMETRY.ADVANCED',
+    'AI.STANDARD',
     'DR.ASSURANCE',
     'AUTOPILOT.GOVERNED',
     'COMPLIANCE.PASSPORT_V2',
     'MULTI_REGION.FABRIC',
+  ],
+  SOVEREIGN: [
+    'PROJECT.INIT',
+    'TWIN.DISCOVER',
+    'BUILD.LOCAL',
+    'DEPLOY.SINGLE_TARGET',
+    'DELIVERY.PREVIEW',
+    'MOVE.MIGRATE',
+    'DEPLOY.MULTI_ENV',
+    'ROLLBACK.VERIFIED',
+    'FLEET.COLLABORATION',
+    'TELEMETRY.ADVANCED',
+    'AI.STANDARD',
+    'DR.ASSURANCE',
+    'AUTOPILOT.GOVERNED',
+    'COMPLIANCE.PASSPORT_V2',
+    'MULTI_REGION.FABRIC',
+    'AIR_GAPPED.ISOLATION',
+    'SOVEREIGN.CRYPTOGRAPHY',
+    'CUSTOM.POLICIES',
   ],
 };
 
@@ -125,7 +166,13 @@ export class ServerAuthoritativeEntitlementGate {
     if (TIER_CAPABILITY_MATRIX.PROFESSIONAL.includes(capability)) {
       return 'PROFESSIONAL';
     }
-    return 'ENTERPRISE';
+    if (TIER_CAPABILITY_MATRIX.BUSINESS.includes(capability)) {
+      return 'BUSINESS';
+    }
+    if (TIER_CAPABILITY_MATRIX.ENTERPRISE.includes(capability)) {
+      return 'ENTERPRISE';
+    }
+    return 'SOVEREIGN';
   }
 
   public authorizeCapability(
@@ -153,6 +200,12 @@ export class ServerAuthoritativeEntitlementGate {
     }
 
     const now = new Date();
+    const clearanceLevel =
+      currentTier === 'SOVEREIGN' ? 5 :
+      currentTier === 'ENTERPRISE' ? 4 :
+      currentTier === 'BUSINESS' ? 3 :
+      currentTier === 'PROFESSIONAL' ? 2 : 1;
+
     const passport: DeliveryPassport = {
       id: `pass-${tenantId}-${now.getTime()}`,
       version: '2.0',
@@ -162,7 +215,7 @@ export class ServerAuthoritativeEntitlementGate {
         subjectId: tenantId,
         issuedAt: now.toISOString(),
         expiresAt: new Date(now.getTime() + 15 * 60 * 1000).toISOString(),
-        clearanceLevel: currentTier === 'ENTERPRISE' ? 3 : currentTier === 'PROFESSIONAL' ? 2 : 1,
+        clearanceLevel,
         capabilities: [...granted],
       },
       evidence: [],
