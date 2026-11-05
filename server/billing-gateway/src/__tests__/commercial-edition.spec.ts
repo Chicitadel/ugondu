@@ -130,7 +130,7 @@ describe('Commercial Edition Entitlements and Organization Identity Binding', ()
     });
 
     beforeEach(() => {
-        tokenStore.clear();
+        tokenStore.clearForTesting();
         clearReplayCache();
     });
 
@@ -273,5 +273,25 @@ describe('Commercial Edition Entitlements and Organization Identity Binding', ()
             expect(res.body.organizationClass).toBe(orgClass);
             expect(res.body.capabilities.allowRollback).toBe(false);
         }
+    });
+
+    it('fails closed when token has missing or unknown edition (zero silent fallback to community)', async () => {
+        const privKey = createPrivateKey(privateKeyPem);
+        const now = Math.floor(Date.now() / 1000);
+
+        const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT', kid: TEST_KEY_ID })).toString('base64url');
+        const missingEditionPayload = Buffer.from(JSON.stringify({
+            iss: 'https://license.airroofers.eu',
+            sub: 'tenant_no_edition',
+            status: 'active',
+            iat: now,
+            exp: now + 3600,
+        })).toString('base64url');
+        const sig = sign(null, Buffer.from(`${header}.${missingEditionPayload}`), privKey).toString('base64url');
+        const invalidJwt = `${header}.${missingEditionPayload}.${sig}`;
+
+        const res = await requestJson(server, 'POST', '/v1/authorize', { token: invalidJwt }, makeServiceAuthHeader());
+        expect(res.status).toBe(402);
+        expect(res.body.code).toBe(BillingErrorCode.LICENSE_INVALID);
     });
 });

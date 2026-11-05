@@ -32,13 +32,11 @@
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import axios from 'axios';
 import { createHash } from 'crypto';
 import {
     __t,
     Logger,
     telemetryContextMiddleware,
-    createOutboundPropagationHeaders,
     ProductRegistry,
 } from '@ugondu/shared';
 import { tokenStore, computeTokenFingerprint, TenantInfo } from './db';
@@ -64,6 +62,7 @@ import {
 } from './mandatag-verifier';
 import { commercialRouter } from './commercial-routes';
 import { billingServiceIdentityGuard } from './service-identity-guard';
+import { resolveUpstreamMandatagToken } from './upstream-resolver';
 
 export {
     tokenStore,
@@ -102,8 +101,6 @@ app.use(
 );
 app.use(express.json());
 app.use(commercialRouter);
-
-const DEFAULT_IDENTITY_AUTHORITY_URL = 'https://identity.airroofers.eu/api/v1';
 
 app.post(
     '/v1/authorize',
@@ -246,121 +243,22 @@ app.post(
 
         // Step B: Query upstream Mandatag Authority if token not verified by local Ed25519 signature
         if (!record) {
-            const hasConfiguredUpstream = Boolean(authorityBaseUrl);
-            const isAxiosMocked = Boolean(
-                (axios.post as any)?._isMockFunction || (axios.post as any)?.mock
+            const upstreamResult = await resolveUpstreamMandatagToken(
+                req,
+                token,
+                tokenFingerprint,
+                authorityBaseUrl,
+                production,
+                body,
+                correlationId
             );
-            const shouldQueryUpstream =
-                production || hasConfiguredUpstream || isAxiosMocked || body.requireUpstream === true;
 
-            if (shouldQueryUpstream) {
-                const upstreamUrl =
-                    authorityBaseUrl || process.env.IDENTITY_AUTHORITY_URL || DEFAULT_IDENTITY_AUTHORITY_URL;
+            if (upstreamResult.errorStatus && upstreamResult.errorPayload) {
+                return res.status(upstreamResult.errorStatus).json(upstreamResult.errorPayload);
+            }
 
-                try {
-                    const outboundHeaders = createOutboundPropagationHeaders(req);
-                    const identityRes = await axios.post(
-                        `${upstreamUrl}/verify`,
-                        { token },
-                        { headers: outboundHeaders, timeout: 3000 }
-                    );
-                    const data = identityRes?.data || {};
-                    const upstreamStatus = String(data.status || 'active').toLowerCase();
-
-                    if (data.valid === false || upstreamStatus === 'invalid') {
-                        emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                            tokenFingerprint,
-                            reason: 'upstream_rejected_invalid',
-                            correlationId,
-                        });
-                        return res.status(402).json({
-                            error: __t('payment_required'),
-                            code: BillingErrorCode.LICENSE_INVALID,
-                            outcome: 'invalid',
-                            correlationId,
-                        });
-                    }
-
-                    const resolvedTenantId = String(data.tenantId || 'tenant_unknown');
-                    const resolvedTier = String(data.subscriptionTier || data.edition || '');
-                    if (!resolvedTier) {
-                        emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                            tokenFingerprint,
-                            reason: 'upstream_missing_edition',
-                            correlationId,
-                        });
-                        return res.status(402).json({
-                            error: __t('payment_required'),
-                            code: BillingErrorCode.LICENSE_INVALID,
-                            outcome: 'invalid',
-                            correlationId,
-                        });
-                    }
-
-                    const normalizedStatus = (['active', 'expired', 'revoked', 'suspended', 'invalid'].includes(
-                        upstreamStatus
-                    ) ? upstreamStatus : 'active') as TenantInfo['status'];
-
-                    const validOrgClasses = ['GOVERNMENT', 'EDUCATION', 'ENTERPRISE', 'COMMERCIAL', 'INDIVIDUAL'];
-                    const resolvedOrgId = typeof data.organizationId === 'string' ? data.organizationId :
-                                          typeof data.orgId === 'string' ? data.orgId : undefined;
-                    const rawOrgClass = typeof data.organizationClass === 'string' ? data.organizationClass.toUpperCase() :
-                                        typeof data.orgClass === 'string' ? data.orgClass.toUpperCase() : undefined;
-                    const resolvedOrgClass = rawOrgClass && validOrgClasses.includes(rawOrgClass) ? rawOrgClass as TenantInfo['organization_class'] : undefined;
-
-                    if (production) {
-                        record = {
-                            token,
-                            token_fingerprint: tokenFingerprint,
-                            tenant_id: resolvedTenantId,
-                            edition: resolvedTier,
-                            status: normalizedStatus,
-                            organization_id: resolvedOrgId,
-                            organization_class: resolvedOrgClass,
-                            created_at: new Date().toISOString(),
-                            ...(data.expiresAt ? { expires_at: String(data.expiresAt) } : {}),
-                        };
-                    } else {
-                        record = tokenStore.registerToken(token, resolvedTenantId, resolvedTier, {
-                            status: normalizedStatus,
-                            expiresAt: data.expiresAt,
-                            organizationId: resolvedOrgId,
-                            organizationClass: resolvedOrgClass,
-                        });
-                    }
-                } catch (err: any) {
-                    const httpStatus = err?.response?.status;
-                    if (httpStatus === 401 || httpStatus === 402 || httpStatus === 404) {
-                        emitAuditDecision('WARN', 'invalid', BillingErrorCode.LICENSE_INVALID, {
-                            tokenFingerprint,
-                            upstreamStatus: httpStatus,
-                            correlationId,
-                        });
-                        return res.status(402).json({
-                            error: __t('payment_required'),
-                            code: BillingErrorCode.LICENSE_INVALID,
-                            outcome: 'invalid',
-                            correlationId,
-                        });
-                    }
-
-                    emitAuditDecision(
-                        'ERROR',
-                        'upstream_unavailable',
-                        BillingErrorCode.UPSTREAM_UNAVAILABLE,
-                        {
-                            tokenFingerprint,
-                            upstreamError: err?.code || err?.message || 'upstream_unreachable',
-                            correlationId,
-                        }
-                    );
-                    return res.status(503).json({
-                        error: __t('auth_rejected'),
-                        code: BillingErrorCode.UPSTREAM_UNAVAILABLE,
-                        outcome: 'upstream_unavailable',
-                        correlationId,
-                    });
-                }
+            if (upstreamResult.record) {
+                record = upstreamResult.record;
             } else if (process.env.NODE_ENV === 'test' && tokenStore.isReady()) {
                 record = tokenStore.verifyToken(token);
             }
