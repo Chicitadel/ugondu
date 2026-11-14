@@ -206,7 +206,7 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
       }
       await client.query(`
         CREATE TABLE IF NOT EXISTS ${this.tableName} (
-          passport_id VARCHAR(255) PRIMARY KEY,
+          passport_id TEXT PRIMARY KEY,
           tenant_id VARCHAR(255) NOT NULL,
           workspace_id VARCHAR(255),
           expires_at BIGINT,
@@ -218,6 +218,9 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
           organization_class VARCHAR(50),
           organization_id VARCHAR(255)
         );
+      `);
+      await client.query(`
+        ALTER TABLE ${this.tableName} ALTER COLUMN passport_id TYPE TEXT;
       `);
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_${this.tableName}_tenant ON ${this.tableName} (tenant_id);

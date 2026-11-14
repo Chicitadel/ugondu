@@ -115,7 +115,7 @@ async function executeWorker(action, args) {
             { simulateFailureAfterWrite: true }
           );
         } catch (err) {
-          rollbackErr = err?.message;
+          rollbackErr = { code: err?.code, message: err?.message };
         }
         const after = await passportStore.getAsync(args.opaqueId);
         const rightTenantAdmit = await admitPassportAsync(args.opaqueId, { tenantId: args.ownerTenant });
@@ -276,7 +276,7 @@ function runTestSuite() {
       const workerA = await spawnWorker('issue-and-register', { opaqueId, signedJti, tenantId: 'tenant_alpha', workspaceId: 'ws_alpha' }, workerEnv());
       assert.equal(workerA.ok, true, workerA.message);
       const { signedToken } = workerA.res;
-      assert.ok(signedToken.startsWith('pp_v1.'));
+      assert.ok(signedToken.startsWith('pp_v1.') && signedToken.length > 255);
 
       const workerB = await spawnWorker('admit-and-get', { ids: [opaqueId, signedToken], tenantId: 'tenant_alpha' }, workerEnv());
       assert.equal(workerB.ok, true, workerB.message);
@@ -293,7 +293,8 @@ function runTestSuite() {
       assert.equal(signedRes.record?.version, 1);
       assert.deepEqual(signedRes.admission, { status: 'ADMITTED', tenantId: 'tenant_alpha' });
 
-      sharedState = { opaqueId, signedToken };
+      sharedState.opaqueId = opaqueId;
+      sharedState.signedToken = signedToken;
     });
 
     test('PG-LIVE-002: Concurrent registration and optimistic CAS locking across parallel OS processes', async (t) => {
@@ -456,8 +457,10 @@ function runTestSuite() {
       assert.equal(res.ok, true, res.message);
       assert.deepEqual(res.res.wrongTenantAdmit, { status: 'REJECTED' });
       assert.deepEqual(res.res.wrongSignedAdmit, { status: 'REJECTED' });
-      assert.equal(res.res.tenantGuardErr?.code, 'PASSPORT_STORE_UNAVAILABLE');
-      assert.match(res.res.rollbackErr || '', /SIMULATED_TX_FAILURE|PASSPORT_STORE/);
+      assert.equal(res.res.tenantGuardErr?.code, 'PASSPORT_STORE_INVALID_DATA');
+      assert.match(res.res.tenantGuardErr?.message || '', /Cross-tenant passport mutation denied/i);
+      assert.equal(res.res.rollbackErr?.code, 'PASSPORT_STORE_UNAVAILABLE');
+      assert.match(res.res.rollbackErr?.message || '', /Simulated mid-transaction failure after write/i);
       assert.equal(res.res.after?.tenantId, 'tenant_alpha');
       assert.equal(res.res.after?.workspaceId, 'ws_alpha');
       assert.equal(res.res.after?.revoked, false);
