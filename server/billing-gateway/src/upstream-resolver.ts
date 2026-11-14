@@ -34,8 +34,9 @@ import axios from 'axios';
 import { __t, createOutboundPropagationHeaders } from '@ugondu/shared';
 import { tokenStore, TenantInfo } from './db';
 import { emitAuditDecision } from './mandatag-verifier';
+import { DEFAULT_MANDATAG_AUTHORITY_URL } from './mandatag-client';
 
-export const DEFAULT_IDENTITY_AUTHORITY_URL = 'https://identity.airroofers.eu/api/v1';
+export { DEFAULT_MANDATAG_AUTHORITY_URL };
 
 export const UpstreamErrorCode = {
     LICENSE_INVALID: 'LICENSE_INVALID',
@@ -74,7 +75,11 @@ export async function resolveUpstreamMandatagToken(
     }
 
     const upstreamUrl =
-        authorityBaseUrl || process.env.IDENTITY_AUTHORITY_URL || DEFAULT_IDENTITY_AUTHORITY_URL;
+        authorityBaseUrl ||
+        process.env.MANDATAG_AUTHORITY_URL ||
+        process.env.MANDATAG_URL ||
+        process.env.IDENTITY_AUTHORITY_URL ||
+        DEFAULT_MANDATAG_AUTHORITY_URL;
 
     try {
         const outboundHeaders = createOutboundPropagationHeaders(req);

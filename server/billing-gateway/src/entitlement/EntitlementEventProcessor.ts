@@ -22,6 +22,35 @@
  ******************************************************************************/
 
 import { __t } from '@ugondu/shared';
+import { tokenStore, LicenseStatus } from '../db';
+import { MandatagClient, defaultMandatagClient } from '../mandatag-client';
+import { verifyMandatagEntitlementToken } from '../mandatag-verifier';
+
+export interface PaymentSyncResult {
+  synced: boolean;
+  deduplicated?: boolean;
+  tenantId: string;
+  invoiceId: string;
+  edition?: string;
+  entitlementToken?: string;
+}
+
+export interface CommercialLifecycleInput {
+  eventId: string;
+  eventType:
+    | 'payment.failed'
+    | 'invoice.payment_failed'
+    | 'subscription.canceled'
+    | 'charge.refunded'
+    | 'subscription.expired';
+  tenantId: string;
+  invoiceId?: string;
+  subscriptionId?: string;
+  reason?: string;
+  correlationId?: string;
+}
+
+export const tenantLifecycleOverrides = new Map<string, { status: LicenseStatus; reason?: string; updatedAt: string }>();
 
 export type EntitlementEventType =
   | 'SUBSCRIPTION_CHANGED'
@@ -97,6 +126,7 @@ export function isNewerThanCurrentVersion(
 
 export class EntitlementEventProcessor {
   private readonly processedEvents = new Set<string>();
+  private readonly processedPayments = new Map<string, PaymentSyncResult>();
   private readonly tenantVersions = new Map<string, { version: number; seq: number }>();
 
   constructor(
@@ -104,7 +134,8 @@ export class EntitlementEventProcessor {
     private readonly onCapabilityActivated: (tenantId: string, capabilityId: string) => void,
     private readonly onCapabilityDeactivated: (tenantId: string, capabilityId: string) => void,
     private readonly onEditionChanged: (tenantId: string, from: string, to: string) => void,
-    private readonly onSecurityAlert: (reason: string, eventId: string) => void
+    private readonly onSecurityAlert: (reason: string, eventId: string) => void,
+    private readonly mandatagClient: MandatagClient = defaultMandatagClient
   ) {}
 
   process(raw: unknown): boolean {
@@ -139,8 +170,119 @@ export class EntitlementEventProcessor {
     return true;
   }
 
-  onAeroBillPaymentConfirmed(_tenantId: string, _invoiceId: string): void {
-    // Payment confirmed — trigger Mandatag manifest refresh only.
+  async onAeroBillPaymentConfirmed(
+    tenantId: string,
+    invoiceId: string,
+    options?: { subscriptionId?: string; edition?: string; correlationId?: string }
+  ): Promise<PaymentSyncResult> {
+    const normalizedTenant = (tenantId || '').trim();
+    const normalizedInvoice = (invoiceId || '').trim();
+    if (!normalizedTenant || !normalizedInvoice) {
+      throw new Error('PAYMENT_SYNC_MISSING_IDENTIFIERS');
+    }
+
+    const dedupKey = `${normalizedTenant}:${normalizedInvoice}`;
+    const existing = this.processedPayments.get(dedupKey);
+    if (existing) {
+      return { ...existing, deduplicated: true };
+    }
+
+    const manifest = await this.mandatagClient.refreshEntitlementManifest({
+      tenantId: normalizedTenant,
+      invoiceId: normalizedInvoice,
+      subscriptionId: options?.subscriptionId,
+      edition: options?.edition,
+      triggerEvent: 'AEROBILL_PAYMENT_CONFIRMED',
+      correlationId: options?.correlationId,
+    });
+
+    let resolvedEdition = typeof manifest?.edition === 'string' ? manifest.edition : options?.edition;
+    const signedToken = typeof manifest?.token === 'string' ? manifest.token.trim() : undefined;
+
+    if (signedToken && signedToken.split('.').length === 3) {
+      const verified = verifyMandatagEntitlementToken(signedToken);
+      if (!verified.valid || !verified.record) {
+        this.onSecurityAlert(__t('messages.error.entitlement_signature_failed'), normalizedInvoice);
+        throw new Error('MANDATAG_ENTITLEMENT_TOKEN_INVALID');
+      }
+      resolvedEdition = verified.record.edition;
+      if (tokenStore.isReady()) {
+        tokenStore.registerToken(signedToken, verified.record.tenant_id, verified.record.edition, {
+          status: verified.record.status,
+          expiresAt: verified.record.expires_at,
+          entitlements: verified.record.entitlements,
+          organizationId: verified.record.organization_id,
+          organizationClass: verified.record.organization_class,
+        });
+      }
+    } else if (signedToken && resolvedEdition && tokenStore.isReady()) {
+      tokenStore.registerToken(signedToken, normalizedTenant, resolvedEdition, {
+        status: 'active',
+        expiresAt: typeof manifest?.expiresAt === 'string' ? manifest.expiresAt : undefined,
+      });
+    }
+
+    tenantLifecycleOverrides.delete(normalizedTenant);
+    if (tokenStore.isReady()) {
+      tokenStore.updateTenantStatus(normalizedTenant, 'active');
+    }
+
+    const result: PaymentSyncResult = {
+      synced: true,
+      tenantId: normalizedTenant,
+      invoiceId: normalizedInvoice,
+      edition: resolvedEdition,
+      ...(signedToken ? { entitlementToken: signedToken } : {}),
+    };
+    this.processedPayments.set(dedupKey, result);
+    return result;
+  }
+
+  async onAeroBillCommercialLifecycleEvent(
+    input: CommercialLifecycleInput
+  ): Promise<{ processed: boolean; status: LicenseStatus; deduplicated?: boolean }> {
+    const lifecycleKey = `${input.eventType}:${input.eventId}`;
+    if (this.processedEvents.has(lifecycleKey)) {
+      const current = tenantLifecycleOverrides.get(input.tenantId)?.status ?? 'suspended';
+      return { processed: true, status: current, deduplicated: true };
+    }
+
+    const nextStatus: LicenseStatus =
+      input.eventType === 'subscription.canceled' || input.eventType === 'charge.refunded'
+        ? 'revoked'
+        : input.eventType === 'subscription.expired'
+          ? 'expired'
+          : 'suspended';
+
+    const reason = input.reason || input.eventType;
+    if (nextStatus === 'revoked' || nextStatus === 'expired') {
+      await this.mandatagClient.revokeEntitlement({
+        tenantId: input.tenantId,
+        reason,
+        invoiceId: input.invoiceId,
+        subscriptionId: input.subscriptionId,
+        correlationId: input.correlationId,
+      });
+    } else {
+      await this.mandatagClient.refreshEntitlementManifest({
+        tenantId: input.tenantId,
+        invoiceId: input.invoiceId,
+        subscriptionId: input.subscriptionId,
+        triggerEvent: input.eventType.toUpperCase(),
+        correlationId: input.correlationId,
+      });
+    }
+
+    this.processedEvents.add(lifecycleKey);
+    tenantLifecycleOverrides.set(input.tenantId, {
+      status: nextStatus,
+      reason,
+      updatedAt: new Date().toISOString(),
+    });
+    if (tokenStore.isReady()) {
+      tokenStore.updateTenantStatus(input.tenantId, nextStatus, reason);
+    }
+    return { processed: true, status: nextStatus };
   }
 
   private route(event: EntitlementEvent): void {
@@ -159,6 +301,33 @@ export class EntitlementEventProcessor {
           String(p['previousEdition'] ?? ''),
           String(p['newEdition'] ?? '')
         );
+        break;
+      case 'ENTITLEMENT_REVOKED':
+        tenantLifecycleOverrides.set(event.tenantId, {
+          status: 'revoked',
+          reason: String(p['reason'] ?? 'entitlement_revoked'),
+          updatedAt: new Date().toISOString(),
+        });
+        if (tokenStore.isReady()) tokenStore.updateTenantStatus(event.tenantId, 'revoked');
+        break;
+      case 'ENTITLEMENT_SUSPENDED':
+        tenantLifecycleOverrides.set(event.tenantId, {
+          status: 'suspended',
+          reason: String(p['reason'] ?? 'entitlement_suspended'),
+          updatedAt: new Date().toISOString(),
+        });
+        if (tokenStore.isReady()) tokenStore.updateTenantStatus(event.tenantId, 'suspended', String(p['reason'] ?? 'entitlement_suspended'));
+        break;
+      case 'ENTITLEMENT_EXPIRED':
+        tenantLifecycleOverrides.set(event.tenantId, {
+          status: 'expired',
+          updatedAt: new Date().toISOString(),
+        });
+        if (tokenStore.isReady()) tokenStore.updateTenantStatus(event.tenantId, 'expired');
+        break;
+      case 'ENTITLEMENT_RESTORED':
+        tenantLifecycleOverrides.delete(event.tenantId);
+        if (tokenStore.isReady()) tokenStore.updateTenantStatus(event.tenantId, 'active');
         break;
       default:
         break;

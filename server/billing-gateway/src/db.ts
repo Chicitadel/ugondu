@@ -299,6 +299,27 @@ export class JsonLicenseDatabase {
         this.save(nextData);
     }
 
+    updateTenantStatus(tenantId: string, status: LicenseStatus, reason?: string): number {
+        this.assertReady();
+        let updatedCount = 0;
+        const nextData = { ...this.data };
+        for (const [key, entry] of Object.entries(nextData)) {
+            if (entry.tenant_id === tenantId) {
+                nextData[key] = {
+                    ...entry,
+                    status,
+                    ...(status === 'revoked' ? { revoked_at: new Date().toISOString() } : {}),
+                    ...(status === 'suspended' && reason ? { suspended_reason: reason } : {}),
+                };
+                updatedCount++;
+            }
+        }
+        if (updatedCount > 0) {
+            this.save(nextData);
+        }
+        return updatedCount;
+    }
+
     clearMemory(): void {
         this.memoryOnly = true;
         this.data = {};
@@ -340,6 +361,9 @@ export const tokenStore = {
     },
     removeToken(token: string): void {
         db.remove(token);
+    },
+    updateTenantStatus(tenantId: string, status: LicenseStatus, reason?: string): number {
+        return db.updateTenantStatus(tenantId, status, reason);
     },
     clearForTesting(): void {
         db.clearMemory();

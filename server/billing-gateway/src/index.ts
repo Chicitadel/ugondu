@@ -63,6 +63,11 @@ import {
 import { commercialRouter } from './commercial-routes';
 import { billingServiceIdentityGuard } from './service-identity-guard';
 import { resolveUpstreamMandatagToken } from './upstream-resolver';
+import { tenantLifecycleOverrides } from './entitlement/EntitlementEventProcessor';
+import { usageLedger } from './usage-ledger';
+import { defaultAeroBillClient } from './aerobill-client';
+import { defaultMandatagClient } from './mandatag-client';
+import { defaultEntitlementProcessor } from './webhook-verifier';
 
 export {
     tokenStore,
@@ -73,6 +78,11 @@ export {
     resolveAllowedOrigins,
     verifyMandatagEntitlementToken,
     LicenseOutcome,
+    tenantLifecycleOverrides,
+    usageLedger,
+    defaultAeroBillClient,
+    defaultMandatagClient,
+    defaultEntitlementProcessor,
 };
 
 export const BillingErrorCode = {
@@ -128,8 +138,13 @@ app.post(
 
         const tokenFingerprint = computeTokenFingerprint(token);
         const production = process.env.NODE_ENV === 'production';
-        const authorityBaseUrl =
-            (process.env.BILLING_AUTHORITY_URL || process.env.IDENTITY_AUTHORITY_URL || '').trim();
+        const authorityBaseUrl = (
+            process.env.MANDATAG_AUTHORITY_URL ||
+            process.env.MANDATAG_URL ||
+            process.env.BILLING_AUTHORITY_URL ||
+            process.env.IDENTITY_AUTHORITY_URL ||
+            ''
+        ).trim();
 
         if (production && !authorityBaseUrl) {
             emitAuditDecision('ERROR', 'upstream_unavailable', BillingErrorCode.UPSTREAM_UNAVAILABLE, {
@@ -276,6 +291,18 @@ app.post(
                 outcome: 'invalid',
                 correlationId,
             });
+        }
+
+        const lifecycleOverride = tenantLifecycleOverrides.get(record.tenant_id);
+        if (lifecycleOverride) {
+            record = {
+                ...record,
+                status: lifecycleOverride.status,
+                ...(lifecycleOverride.status === 'revoked' ? { revoked_at: lifecycleOverride.updatedAt } : {}),
+                ...(lifecycleOverride.status === 'suspended' && lifecycleOverride.reason
+                    ? { suspended_reason: lifecycleOverride.reason }
+                    : {}),
+            };
         }
 
         if (record.status === 'invalid') {

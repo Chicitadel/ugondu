@@ -368,6 +368,9 @@ jobs:
       - name: Run Billing Gateway tests
         run: node tests/billing-gateway.test.js
 
+      - name: Run Commercial Federation contract tests
+        run: node --test tests/commercial-federation-contract.test.js
+
       - name: Run Engine Core tests
         run: node tests/engine-core.test.js
 
