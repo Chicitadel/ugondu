@@ -271,6 +271,20 @@ jobs:
     permissions:
       contents: read
     needs: [build-services, release-integrity]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ugondu_test
+          POSTGRES_PASSWORD: ugondu_test_pg_pwd
+          POSTGRES_DB: ugondu_passport_qual
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ugondu_test -d ugondu_passport_qual"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
     env:
       UGONDU_PACK_PUBLIC_KEY: ${{ vars.UGONDU_PACK_PUBLIC_KEY }}
       UGONDU_EVIDENCE_PUBLIC_KEY: ${{ vars.UGONDU_EVIDENCE_PUBLIC_KEY }}
@@ -359,6 +373,15 @@ jobs:
 
       - name: Run Passport Shared Store tests
         run: node tests/passport-shared-store.test.js
+
+      - name: Run Postgres Passport Store unit tests
+        run: node --test tests/postgres-passport-store.test.js
+
+      - name: Run Live Multi-Process PostgreSQL Passport Qualification
+        env:
+          UGONDU_REQUIRE_LIVE_POSTGRES: "true"
+          UGONDU_TEST_POSTGRES_URL: postgresql://ugondu_test:ugondu_test_pg_pwd@127.0.0.1:5432/ugondu_passport_qual
+        run: node --test tests/postgres-passport-live-multiprocess.test.js
 
       - name: Run Plugin Manager tests
         run: node tests/plugin-manager.test.js

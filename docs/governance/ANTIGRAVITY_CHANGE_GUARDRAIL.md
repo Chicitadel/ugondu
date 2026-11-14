@@ -1116,4 +1116,8 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 
 - **Branch:** `fix/cor-final-release-qualification-2026-11-14` (integrates `feat/postgres-passport-store-adapter-2026-10-31` commits `3b525044`..`250dd7aa` plus `15751dc9`, `8fbfa596`, and `0d8cf799`).
 - **Confirmed defect fixed (`UG-BG-TEST-ENV-001`):** `tests/billing-gateway.test.js` now explicitly sets `NODE_ENV='test'` in `before()`, restores it in `after()`, and includes `BG-009` to prove non-test `NODE_ENV` fails closed (`402 LICENSE_INVALID`) without an upstream authority.
-- **Boundary:** `server/billing-gateway/src/index.ts` production fail-closed behavior is preserved; no protected branches modified.
+- **Milestone `UG-COR-POSTGRES-LIVE-MULTIHOST-001` (2026-11-14):**
+  - Added `"pg": "^8.13.1"` (`pg@8.23.1`) to `package.json` and `server/engine-core/package.json`.
+  - Hardened `PostgresPassportStoreAdapter`, `PortablePassportStore`, and `engine-core` async passport admission/guard paths (`pool.connect()` transactional isolation, `pg_advisory_xact_lock`, cross-tenant `expectedTenantId` check, `simulateFailureAfterWrite` rollback hook, idle pool `error` listener).
+  - Retained `tests/postgres-passport-store.test.js` unchanged as fast mock unit tests; added `tests/postgres-passport-live-multiprocess.test.js` (`PG-LIVE-001`..`PG-LIVE-006`) across spawned OS processes and wired `postgres:16-alpine` service + `UGONDU_REQUIRE_LIVE_POSTGRES=true` gate into `.github/workflows/ci.yml`.
+- **Boundary:** `server/billing-gateway/src/index.ts` production fail-closed behavior and existing `FILESYSTEM` admission paths remain preserved; no protected branches modified; zero AWS spend maintained.

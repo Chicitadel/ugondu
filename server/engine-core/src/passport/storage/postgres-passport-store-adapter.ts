@@ -83,7 +83,11 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
     this.client = options.client;
     this.pool = options.pool;
     this.connectionString = options.connectionString || process.env['UGONDU_PASSPORT_PG_CONNECTION_STRING'] || process.env['DATABASE_URL'];
-    this.tableName = options.tableName || 'ugondu_passports';
+    const rawTable = options.tableName || process.env['UGONDU_PASSPORT_PG_TABLE'] || 'ugondu_passports';
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]{0,62}$/.test(rawTable)) {
+      throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA', 'Invalid PostgreSQL table identifier');
+    }
+    this.tableName = rawTable;
     this.useAdvisoryLock = options.useAdvisoryLock !== false;
     this.maxRetries = options.maxRetries ?? 3;
     this.retryBaseDelayMs = options.retryBaseDelayMs ?? 25;
@@ -123,13 +127,22 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
   private async getClient(): Promise<SqlQueryClient> {
     if (this.client) return this.client;
     if (this.pool) return this.pool;
+    if (!this.connectionString) {
+      throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE', 'PostgreSQL connection string is not configured');
+    }
     try {
       const pg = require('pg');
       const Pool = pg.Pool || pg.default?.Pool;
       if (Pool) {
         this.pool = new Pool({
           connectionString: this.connectionString,
+          connectionTimeoutMillis: 3000,
         });
+        if (typeof this.pool.on === 'function') {
+          this.pool.on('error', () => {
+            // [en] Prevent uncaught EventEmitter crash on idle backend termination; pool reconnects on demand
+          });
+        }
         return this.pool;
       }
     } catch {
@@ -166,24 +179,31 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
 
   private async withTransaction<T>(operation: (client: SqlQueryClient) => Promise<T>): Promise<T> {
     return this.executeWithRetry(async (client) => {
-      await client.query('BEGIN');
+      const pool = client as SqlQueryClient & { connect?: () => Promise<SqlQueryClient & { release?: (destroy?: boolean) => void }> };
+      const conn = typeof pool.connect === 'function' ? await pool.connect() : client;
+      let txErr: unknown;
       try {
-        const result = await operation(client);
-        await client.query('COMMIT');
+        await conn.query('BEGIN');
+        const result = await operation(conn);
+        await conn.query('COMMIT');
         return result;
       } catch (err) {
-        try {
-          await client.query('ROLLBACK');
-        } catch {
-          // Dead connection rollback failure suppressed
-        }
+        txErr = err;
+        try { await conn.query('ROLLBACK'); } catch { /* Dead connection rollback failure suppressed */ }
         throw err;
+      } finally {
+        if (conn !== client && typeof (conn as any).release === 'function') {
+          (conn as any).release(Boolean(txErr && this.isTransientError(txErr)));
+        }
       }
     });
   }
 
   public async initSchema(): Promise<void> {
     await this.withTransaction(async (client) => {
+      if (this.useAdvisoryLock) {
+        await client.query('SELECT pg_advisory_xact_lock(2147483646);');
+      }
       await client.query(`
         CREATE TABLE IF NOT EXISTS ${this.tableName} (
           passport_id VARCHAR(255) PRIMARY KEY,
@@ -257,7 +277,11 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
     return Boolean(record?.revoked);
   }
 
-  public async setAsync(record: RegisteredPassportRecord, expectedVersion?: number): Promise<void> {
+  public async setAsync(
+    record: RegisteredPassportRecord,
+    expectedVersion?: number,
+    options?: { expectedTenantId?: string; simulateFailureAfterWrite?: boolean }
+  ): Promise<void> {
     if (this.outageSimulated) throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE');
     const validated = parsePassportRecord(record);
     if (expectedVersion !== undefined && (!Number.isInteger(expectedVersion) || expectedVersion < 0)) {
@@ -279,6 +303,13 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
     await this.withTransaction(async (client) => {
       if (this.useAdvisoryLock) {
         await client.query('SELECT pg_advisory_xact_lock(hashtext($1));', [`ugondu_passport_${passportId}`]);
+      }
+
+      if (options?.expectedTenantId) {
+        const tenantCheck = await client.query(`SELECT tenant_id FROM ${this.tableName} WHERE passport_id = $1`, [passportId]);
+        if (tenantCheck.rows.length > 0 && tenantCheck.rows[0].tenant_id !== options.expectedTenantId) {
+          throw new PassportStoreError('PASSPORT_STORE_INVALID_DATA', 'Cross-tenant passport mutation denied');
+        }
       }
 
       if (expectedVersion !== undefined) {
@@ -335,6 +366,9 @@ export class PostgresPassportStoreAdapter implements IPassportStoreAdapter {
           [passportId, tenantId, workspaceId, expiresAt, revoked, revocationReason, updatedAt, edition, organizationClass, organizationId]
         );
         validated.version = res.rows[0]?.version ?? 1;
+      }
+      if (options?.simulateFailureAfterWrite === true) {
+        throw new PassportStoreError('PASSPORT_STORE_UNAVAILABLE', 'Simulated mid-transaction failure after write');
       }
     });
 

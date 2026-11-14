@@ -20,7 +20,8 @@
     "crypto": "^1.0.1",
     "express": "^4.21.0",
     "keytar": "^7.9.0",
-    "node-ssh": "^13.2.1"
+    "node-ssh": "^13.2.1",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

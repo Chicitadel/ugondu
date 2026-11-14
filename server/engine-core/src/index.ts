@@ -95,18 +95,39 @@ export function registerAdmissionPassport(
   });
 }
 
+export async function registerAdmissionPassportAsync(
+  passportId: string,
+  metadata?: { tenantId?: string; workspaceId?: string; expiresAt?: number; revoked?: boolean }
+): Promise<void> {
+  const normalizedId = passportId.trim();
+  if (!normalizedId) return;
+  await passportStore.setAsync({
+    passportId: normalizedId,
+    tenantId: metadata?.tenantId ?? 'tenant_default',
+    workspaceId: metadata?.workspaceId,
+    expiresAt: metadata?.expiresAt,
+    revoked: metadata?.revoked ?? false,
+  });
+}
+
 export function revokeAdmissionPassport(passportId: string, reason?: string): void {
   const normalizedId = passportId.trim();
   if (!normalizedId) return;
   passportStore.revoke(normalizedId, reason);
 }
 
-export function issueSignedPassport(claims: {
+export async function revokeAdmissionPassportAsync(passportId: string, reason?: string): Promise<void> {
+  const normalizedId = passportId.trim();
+  if (!normalizedId) return;
+  await passportStore.revokeAsync(normalizedId, reason);
+}
+
+function buildSignedPassportToken(claims: {
   passportId?: string;
   tenantId: string;
   workspaceId?: string;
   ttlMs?: number;
-}): string {
+}): { token: string; expiresAt: number } {
   if (!claims || typeof claims.tenantId !== 'string' || !claims.tenantId.trim()) {
     throw new Error('PASSPORT_TENANT_REQUIRED');
   }
@@ -128,8 +149,32 @@ export function issueSignedPassport(claims: {
   };
   const payloadB64 = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
   const sigB64 = sign(null, Buffer.from(`pp_v1.${payloadB64}`, 'utf8'), keyState.privateKey).toString('base64url');
-  const token = `pp_v1.${payloadB64}.${sigB64}`;
+  return { token: `pp_v1.${payloadB64}.${sigB64}`, expiresAt };
+}
+
+export function issueSignedPassport(claims: {
+  passportId?: string;
+  tenantId: string;
+  workspaceId?: string;
+  ttlMs?: number;
+}): string {
+  const { token, expiresAt } = buildSignedPassportToken(claims);
   registerAdmissionPassport(token, {
+    tenantId: claims.tenantId,
+    workspaceId: claims.workspaceId,
+    expiresAt,
+  });
+  return token;
+}
+
+export async function issueSignedPassportAsync(claims: {
+  passportId?: string;
+  tenantId: string;
+  workspaceId?: string;
+  ttlMs?: number;
+}): Promise<string> {
+  const { token, expiresAt } = buildSignedPassportToken(claims);
+  await registerAdmissionPassportAsync(token, {
     tenantId: claims.tenantId,
     workspaceId: claims.workspaceId,
     expiresAt,
@@ -189,7 +234,7 @@ export function verifySignedPassport(token: string): {
   }
 }
 
-if (process.env['NODE_ENV'] === 'test') {
+if (process.env['NODE_ENV'] === 'test' && passportStore.backend === 'FILESYSTEM') {
   registerAdmissionPassport('valid_passport_id', {
     tenantId: 'tenant_test_default',
   });
@@ -197,63 +242,72 @@ if (process.env['NODE_ENV'] === 'test') {
 
 const REJECTED_PASSPORT_PATTERNS = /^(?:revoked|invalid|expired|tampered|untrusted|malformed|fake|bad|unauthorized)/i;
 
-export function admitPassport(
-  passportId: string,
-  context?: { tenantId?: string }
+function evaluateRegisteredPassport(
+  normalized: string,
+  registered: RegisteredPassportRecord | null,
+  verifiedTenantId?: string,
+  requestedTenant?: string
 ): { status: string; tenantId?: string } {
-  if (!passportId || typeof passportId !== 'string') return { status: 'REJECTED' };
-  const normalized = passportId.trim();
-  if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) return { status: 'REJECTED' };
-
-  if (context?.tenantId !== undefined
-      && (typeof context.tenantId !== 'string' || !context.tenantId.trim())) {
+  if (!registered || registered.revoked || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)) {
     return { status: 'REJECTED' };
   }
-  const requestedTenant = typeof context?.tenantId === 'string' ? context.tenantId.trim() : undefined;
+  if (verifiedTenantId) {
+    return registered.tenantId === verifiedTenantId ? { status: 'ADMITTED', tenantId: verifiedTenantId } : { status: 'REJECTED' };
+  }
+  if (requestedTenant && requestedTenant !== registered.tenantId) {
+    if (process.env['NODE_ENV'] === 'test' && normalized === 'valid_passport_id') {
+      return { status: 'ADMITTED', tenantId: requestedTenant };
+    }
+    return { status: 'REJECTED' };
+  }
+  return { status: 'ADMITTED', tenantId: registered.tenantId };
+}
 
+function precheckPassport(
+  passportId: string,
+  context?: { tenantId?: string }
+): { normalized: string; requestedTenant?: string; verifiedTenantId?: string } | null {
+  if (!passportId || typeof passportId !== 'string') return null;
+  const normalized = passportId.trim();
+  if (!normalized || REJECTED_PASSPORT_PATTERNS.test(normalized)) return null;
+  if (context?.tenantId !== undefined && (typeof context.tenantId !== 'string' || !context.tenantId.trim())) return null;
+  const requestedTenant = typeof context?.tenantId === 'string' ? context.tenantId.trim() : undefined;
   if (normalized.startsWith('pp_v1.')) {
     const verified = verifySignedPassport(normalized);
-    if (!verified.valid || !verified.tenantId) return { status: 'REJECTED' };
-    if (requestedTenant && requestedTenant !== verified.tenantId) return { status: 'REJECTED' };
-
-    try {
-      const registered = passportStore.get(normalized);
-      // A valid signature proves issuer authenticity, not current admission:
-      // registration is mandatory so revocation and tenant state remain authoritative.
-      if (!registered || registered.revoked
-          || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)
-          || registered.tenantId !== verified.tenantId) {
-        return { status: 'REJECTED' };
-      }
-    } catch {
-      // Fail closed when persistent store is unavailable
-      return { status: 'REJECTED' };
-    }
-    return { status: 'ADMITTED', tenantId: verified.tenantId };
+    if (!verified.valid || !verified.tenantId) return null;
+    if (requestedTenant && requestedTenant !== verified.tenantId) return null;
+    return { normalized, requestedTenant, verifiedTenantId: verified.tenantId };
   }
+  return { normalized, requestedTenant };
+}
 
-  // Opaque identifiers are accepted only when explicitly registered in the shared store. Prefix
-  // shape is not evidence of issuance, tenant ownership, or entitlement.
+export function admitPassport(passportId: string, context?: { tenantId?: string }): { status: string; tenantId?: string } {
+  const checked = precheckPassport(passportId, context);
+  if (!checked) return { status: 'REJECTED' };
   try {
-    const registered = passportStore.get(normalized);
-    if (!registered || registered.revoked
-        || (registered.expiresAt !== undefined && Date.now() >= registered.expiresAt)) {
-      return { status: 'REJECTED' };
-    }
-    if (requestedTenant && requestedTenant !== registered.tenantId) {
-      if (process.env['NODE_ENV'] === 'test' && normalized === 'valid_passport_id') {
-        return { status: 'ADMITTED', tenantId: requestedTenant };
-      }
-      return { status: 'REJECTED' };
-    }
-    return { status: 'ADMITTED', tenantId: registered.tenantId };
+    const registered = passportStore.get(checked.normalized);
+    return evaluateRegisteredPassport(checked.normalized, registered, checked.verifiedTenantId, checked.requestedTenant);
   } catch {
-    // Fail closed when persistent store is unavailable
+    return { status: 'REJECTED' };
+  }
+}
+
+export async function admitPassportAsync(
+  passportId: string,
+  context?: { tenantId?: string }
+): Promise<{ status: string; tenantId?: string }> {
+  const checked = precheckPassport(passportId, context);
+  if (!checked) return { status: 'REJECTED' };
+  try {
+    const registered = await passportStore.getAsync(checked.normalized);
+    return evaluateRegisteredPassport(checked.normalized, registered, checked.verifiedTenantId, checked.requestedTenant);
+  } catch {
     return { status: 'REJECTED' };
   }
 }
 
 admissionController.admit = admitPassport;
+admissionController.admitAsync = admitPassportAsync;
 
 // ─── Express App ─────────────────────────────────────────────────────────────
 export const app = express();

@@ -59,7 +59,8 @@
     "test:aws-template-safety": "node --test tests/qualification/aws-staging-template-safety.test.mjs",
     "test:cor-locale-objective-verifiers": "node --test tests/cor-locale-objective-verifiers.test.js",
     "test:recovery-transaction-failure": "node --test tests/recovery-transaction-failure.test.js",
-    "test:deployment:compose": "node --test tests/deployment/compose-network-contract.test.mjs"
+    "test:deployment:compose": "node --test tests/deployment/compose-network-contract.test.mjs",
+    "test:postgres-live": "node --test tests/postgres-passport-live-multiprocess.test.js"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -69,6 +70,7 @@
     "@aws-sdk/client-cloudtrail": "^3.1147.0",
     "@aws-sdk/client-ec2": "^3.1147.0",
     "@vitalets/google-translate-api": "^9.2.1",
+    "pg": "^8.13.1",
     "ssh2": "^1.17.0",
     "uuid": "^14.0.2",
     "zod": "^4.6.5"

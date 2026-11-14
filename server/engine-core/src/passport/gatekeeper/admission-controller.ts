@@ -94,6 +94,8 @@ export class AdmissionController {
     public admit(_passportId: string, _context: { tenantId: string }): { status: string; tenantId?: string } {
         return { status: 'REJECTED' };
     }
+
+    public admitAsync?: (passportId: string, context: { tenantId?: string }) => Promise<{ status: string; tenantId?: string }>;
 }
 
 export const admissionController = new AdmissionController(

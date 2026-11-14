@@ -141,7 +141,11 @@ export interface IPassportStoreAdapter {
   isRevoked(passportId: string): boolean;
   clear(): void | Promise<void>;
   getAsync?(passportId: string): Promise<RegisteredPassportRecord | null>;
-  setAsync?(record: RegisteredPassportRecord, expectedVersion?: number): Promise<void>;
+  setAsync?(
+    record: RegisteredPassportRecord,
+    expectedVersion?: number,
+    options?: { expectedTenantId?: string; simulateFailureAfterWrite?: boolean }
+  ): Promise<void>;
   revokeAsync?(passportId: string, reason?: string, expectedVersion?: number): Promise<void>;
   isRevokedAsync?(passportId: string): Promise<boolean>;
   clearAsync?(): Promise<void>;
@@ -460,8 +464,12 @@ export class PortablePassportStore implements IPassportStoreAdapter {
     return this.adapter.getAsync ? this.adapter.getAsync(passportId) : this.adapter.get(passportId);
   }
 
-  public async setAsync(record: RegisteredPassportRecord, expectedVersion?: number): Promise<void> {
-    if (this.adapter.setAsync) return this.adapter.setAsync(record, expectedVersion);
+  public async setAsync(
+    record: RegisteredPassportRecord,
+    expectedVersion?: number,
+    options?: { expectedTenantId?: string; simulateFailureAfterWrite?: boolean }
+  ): Promise<void> {
+    if (this.adapter.setAsync) return this.adapter.setAsync(record, expectedVersion, options);
     await Promise.resolve(this.adapter.set(record, expectedVersion));
   }
 
@@ -477,6 +485,10 @@ export class PortablePassportStore implements IPassportStoreAdapter {
   public async clearAsync(): Promise<void> {
     if (this.adapter.clearAsync) return this.adapter.clearAsync();
     await Promise.resolve(this.adapter.clear());
+  }
+
+  public async initSchema(): Promise<void> {
+    if ('initSchema' in this.adapter && typeof (this.adapter as any).initSchema === 'function') await (this.adapter as any).initSchema();
   }
 
   public async close(): Promise<void> {

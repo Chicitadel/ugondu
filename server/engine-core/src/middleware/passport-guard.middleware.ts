@@ -32,6 +32,7 @@
  ******************************************************************************/
 
 import { Request, Response, NextFunction } from 'express';
+import { resolvePassportStorageBackend } from '../passport/storage/passport-store';
 import { createHash } from 'crypto';
 import { admissionController } from '../passport/gatekeeper/admission-controller';
 import { __t } from '@ugondu/shared';
@@ -60,9 +61,7 @@ export function passportGuardMiddleware(req: Request, res: Response, next: NextF
         });
     }
 
-    const result = admissionController.admit(passportId, { tenantId: req.body?.tenantId });
-    if (result.status !== 'ADMITTED' || typeof result.tenantId !== 'string' || !result.tenantId.trim()) {
-        // Never write bearer-like admission credentials to application logs.
+    const rejectPassport = (): Response => {
         const fingerprint = createHash('sha256').update(passportId).digest('hex').slice(0, 16);
         Logger.warn(__t('messages.system.audit_passport_rejected_id', {
             'passportId': `sha256:${fingerprint}`
@@ -71,6 +70,24 @@ export function passportGuardMiddleware(req: Request, res: Response, next: NextF
             error: __t('err_passport_rejected'),
             code: 'PASSPORT_REJECTED'
         });
+    };
+
+    if (resolvePassportStorageBackend() === 'POSTGRES' && typeof admissionController.admitAsync === 'function') {
+        return admissionController.admitAsync(passportId, { tenantId: req.body?.tenantId })
+            .then((result) => {
+                if (result.status !== 'ADMITTED' || typeof result.tenantId !== 'string' || !result.tenantId.trim()) {
+                    return rejectPassport();
+                }
+                res.locals['passportTenantId'] = result.tenantId.trim();
+                return next();
+            })
+            .catch(() => rejectPassport());
+    }
+
+    const result = admissionController.admit(passportId, { tenantId: req.body?.tenantId });
+    if (result.status !== 'ADMITTED' || typeof result.tenantId !== 'string' || !result.tenantId.trim()) {
+        // Never write bearer-like admission credentials to application logs.
+        return rejectPassport();
     }
 
     // Carry only the tenant derived from the verified passport; downstream routes must
