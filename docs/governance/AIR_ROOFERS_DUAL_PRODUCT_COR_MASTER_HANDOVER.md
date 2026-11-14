@@ -966,3 +966,34 @@ The supplied execution report describes local branches `integrate/cor-dumcholu-u
 - Ugondu PostgreSQL adapter commit `3b5250447116f9fe21197a1377e5582f00e2bbbe` is likewise not proven published: branch search for `postgres` returned no branch. The published signed-passport candidate still contains the filesystem store; it does not prove multi-host PostgreSQL runtime wiring.
 - Keep DirectAdmin as the active launch tier. Do not provision AWS or incur charges without explicit authorization. Keep OCI/runtime templates and environment-driven deployment portable; AWS Paris `eu-west-3` remains a future option after traction, official engagement and funding.
 - Global status remains **`PARTIAL / RELEASE BLOCKED / NOT COR CERTIFIED`**. No master/main changes and no PR merges.
+
+
+---
+
+## Ugondu final release qualification reconciliation — 2026-11-14
+
+### 1. Branch & repository synchronization
+- **Dedicated qualification branch:** `fix/cor-final-release-qualification-2026-11-14`
+- **Integrated local work:** Preserved all 6 commits from `feat/postgres-passport-store-adapter-2026-10-31` (`3b525044`..`250dd7aa`), including `PostgresPassportStoreAdapter`, `UG-COM-001..003` (5 canonical editions, organization-class separation, fail-closed billing authorization, modularized billing gateway), and `PortablePassportStore` <= 500 LOC modularization.
+- **Integrated remote governance/audit commits:** Cherry-picked `15751dc9`, `8fbfa596` (from `origin/docs/dual-product-corroborated-handover-2026-10-31`), and `0d8cf799` (`governance/commercial/COMMERCIAL_EDITION_GOVERNANCE_AUDIT_2026-11-04.md` from `origin/audit/commercial-edition-governance-2026-11-04`).
+
+### 2. Confirmed defect remediated (`UG-BG-TEST-ENV-001`)
+- **Defect:** `tests/billing-gateway.test.js` failed 5/8 cases (`BG-003`..`BG-005`, `BG-007`..`BG-008`) when executed directly via `node tests/billing-gateway.test.js` (as invoked by `npm run test:integration` and `.github/workflows/ci.yml`), because `server/billing-gateway/src/index.ts` restricts local `tokenStore.verifyToken()` fallback to `process.env.NODE_ENV === 'test'`.
+- **Fix:** Updated `tests/billing-gateway.test.js` to set `process.env.NODE_ENV = 'test'` in `before()`, restore the prior value in `after()`, and added negative regression test `BG-009` proving non-test `NODE_ENV` fails closed (`402 LICENSE_INVALID`) without an upstream authority.
+
+### 3. Local verification receipts (prior to push)
+- `npm run build`: **PASS** (all 9 workspaces).
+- `npm run lint` & `npm run typecheck`: **PASS** (all 9 workspaces).
+- `npm run verify:release-integrity`, `npm run verify:attribution` (0 violations across 4,744 tracked files), `npm run verify:t03` (0 violations across 712 files / 1,533 call sites), `npm run verify:t04` (5/5 gates): **PASS**.
+- `npm run test:integration`: **PASS** (all 11 suites; `tests/billing-gateway.test.js` **9/9 PASS**).
+- `npm run test:e2e` (2/2 suites, 7/7 tests), `npm run test:security` (SEC-REG 6/6, SSRF 10/10, passport-cryptography), `npm run test:contract` (schema 4/4, UPLM 17/17): **PASS**.
+- `server/engine-core` Jest suite: **44/44 suites, 284/284 tests PASS**.
+- COR audit & qualification suites (`i18n_audit.js`, `depth_scan.js`, `import_scan.js`, `cor-remediation.test.js` 24/24, `evidence-pipeline-adversarial.test.js`, `shared-execution-and-mode-parity.test.js`, `cor-workflow-gates.test.js` 19/19, `aws-physical-opt-in-contract.test.mjs`, `release-gate-scope.test.mjs` 8/8, `cor-locale-objective-verifiers.test.js` 31/31, `compose-network-contract.test.mjs` 4/4, `aws-staging-template-safety.test.mjs` 7/7): **PASS**.
+- Local limitation: `test:cor-stream-objective-verifiers` passed 22/23 locally; `C22` failed closed with `C22_GO_TOOLCHAIN_MISSING` because Go is not installed on this Windows host (Go is provisioned in GitHub Actions CI).
+
+### 4. Remaining blockers before final commercial release certification
+1. **Exact-head remote CI/COR qualification:** Pending push and completion of GitHub Actions (`Ugondu CI/CD Pipeline`, `COR Certification`, `Deployment Manifest`) on `fix/cor-final-release-qualification-2026-11-14`.
+2. **Live PostgreSQL multi-host verification:** `PostgresPassportStoreAdapter` unit/integration tests currently run against mocked/in-memory pool contracts; live multi-host PostgreSQL cluster tests remain required.
+3. **Cryptographic COR signature & trust-root:** Final authority signing ceremony (`READY_FOR_COR_SIGNATURE` -> signed) remains an external gate.
+4. **Physical AWS & external assurances:** AWS physical qualification remains deferred under the DirectAdmin-first / zero-spend policy; AI model fleet (`CATALOG_OFFLINE`), non-VSCode IDEs, and immutable artifact lifecycle remain open.
+5. **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` (no `main`/`master` mutation).

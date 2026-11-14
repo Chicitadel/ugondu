@@ -1111,3 +1111,9 @@ Every authenticated career-journey read and recalculation endpoint must pass the
 - Do not provision AWS resources until explicit budget/traction authorization. DirectAdmin remains current launch tier; portability must be achieved through configuration/adapters, not provider-specific business logic.
 - Billing/pricing/metering belong exclusively to AeroBill; licensing/entitlements belong exclusively to Mandatag. Product repos consume contracts and never duplicate these rules.
 - No agent may modify master/main, merge PRs, rewrite history, or replace architecture with duplicated entities/migrations without explicit authorization and an evidence-backed reconciliation plan.
+
+## 2026-11-14 Final Release Qualification Reconciliation
+
+- **Branch:** `fix/cor-final-release-qualification-2026-11-14` (integrates `feat/postgres-passport-store-adapter-2026-10-31` commits `3b525044`..`250dd7aa` plus `15751dc9`, `8fbfa596`, and `0d8cf799`).
+- **Confirmed defect fixed (`UG-BG-TEST-ENV-001`):** `tests/billing-gateway.test.js` now explicitly sets `NODE_ENV='test'` in `before()`, restores it in `after()`, and includes `BG-009` to prove non-test `NODE_ENV` fails closed (`402 LICENSE_INVALID`) without an upstream authority.
+- **Boundary:** `server/billing-gateway/src/index.ts` production fail-closed behavior is preserved; no protected branches modified.

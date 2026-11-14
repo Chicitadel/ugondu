@@ -95,8 +95,11 @@ const post = (port, path, body, headers) => request(port, 'POST', path, body, he
 
 let server;
 let BILLING_PORT;
+let previousNodeEnv;
 
 before(async () => {
+  previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'test';
   delete process.env.IDENTITY_AUTHORITY_URL;
   clearReplayCache();
   seedTestTokens();
@@ -109,6 +112,11 @@ before(async () => {
 });
 
 after(async () => {
+  if (previousNodeEnv === undefined) {
+    delete process.env.NODE_ENV;
+  } else {
+    process.env.NODE_ENV = previousNodeEnv;
+  }
   if (server) {
     await new Promise((resolve) => server.close(resolve));
   }
@@ -207,4 +215,18 @@ test('BG-008: Expired and revoked tokens return 403', async () => {
   assert.strictEqual(revRes.body.code, 'LICENSE_REVOKED');
   assert.strictEqual(revRes.body.outcome, 'revoked');
   console.log('[en] ✓ PASS: Expired and revoked tokens return 403');
+});
+
+test('BG-009: Non-test NODE_ENV fails closed without upstream authority', async () => {
+  const saved = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'development';
+  try {
+    const r = await post(BILLING_PORT, '/v1/authorize', { token: 'community_token_123' });
+    assert.strictEqual(r.status, 402, `[en] Expected 402 when NODE_ENV!=test, got ${r.status}`);
+    assert.strictEqual(r.body.code, 'LICENSE_INVALID');
+    assert.strictEqual(r.body.outcome, 'invalid');
+  } finally {
+    process.env.NODE_ENV = saved;
+  }
+  console.log('[en] ✓ PASS: Non-test NODE_ENV fails closed without upstream authority');
 });
