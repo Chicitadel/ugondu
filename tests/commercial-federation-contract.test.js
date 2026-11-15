@@ -478,19 +478,7 @@ describe('UG-COR-COMMERCIAL-FEDERATION-001: AeroBill & Mandatag Commercial Lifec
   });
 
   test('FED-007: Live staging federation acceptance gate (fails closed when UGONDU_REQUIRE_LIVE_FEDERATION=true)', async (t) => {
-    const requireLive = process.env.UGONDU_REQUIRE_LIVE_FEDERATION === 'true';
-    const aeroStage = (process.env.AEROBILL_STAGING_URL || '').trim();
-    const mandatagStage = (process.env.MANDATAG_STAGING_URL || '').trim();
-    const hasCreds = Boolean(aeroStage && mandatagStage && process.env.AEROBILL_API_KEY && process.env.MANDATAG_API_KEY);
-    if (!hasCreds) {
-      const reason = 'Live authorized AeroBill/Mandatag staging credentials not configured (AEROBILL_STAGING_URL, MANDATAG_STAGING_URL, API keys)';
-      if (requireLive) assert.fail(`[FED-LIVE-FAIL-CLOSED] ${reason}`);
-      t.skip(reason);
-      return;
-    }
-    const aeroHealth = await fetch(`${aeroStage.replace(/\/+$/, '')}/health`);
-    assert.equal(aeroHealth.ok, true, `AeroBill staging health failed: ${aeroHealth.status}`);
-    const mandatagJwks = await fetch(`${mandatagStage.replace(/\/+$/, '')}/api/v1/keys/jwks`);
-    assert.equal(mandatagJwks.ok, true, `Mandatag staging JWKS failed: ${mandatagJwks.status}`);
+    const { runLiveStagingFederationAcceptance } = require('./commercial-federation-live-staging.test.js');
+    await runLiveStagingFederationAcceptance(t);
   });
 });
