@@ -371,6 +371,20 @@ jobs:
       - name: Run Commercial Federation contract tests
         run: node --test tests/commercial-federation-contract.test.js
 
+      # Live authority credentials are exposed only to an operator-dispatched run.
+      # Ordinary push/PR jobs retain isolated local contract tests and never receive
+      # commercial API credentials.
+      - name: Run required live AeroBill and Mandatag federation gate
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          UGONDU_REQUIRE_LIVE_FEDERATION: "true"
+          AEROBILL_STAGING_URL: ${{ vars.AEROBILL_STAGING_URL }}
+          MANDATAG_STAGING_URL: ${{ vars.MANDATAG_STAGING_URL }}
+          AEROBILL_API_KEY: ${{ secrets.AEROBILL_API_KEY }}
+          MANDATAG_API_KEY: ${{ secrets.MANDATAG_API_KEY }}
+          AEROBILL_WEBHOOK_SECRET: ${{ secrets.AEROBILL_WEBHOOK_SECRET }}
+        run: node --test tests/commercial-federation-contract.test.js
+
       - name: Run Engine Core tests
         run: node tests/engine-core.test.js
 
