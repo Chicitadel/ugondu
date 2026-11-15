@@ -1128,3 +1128,23 @@ The CI workflow has a `workflow_dispatch` trigger and the live federation step i
 - Candidate CI/COR/deployment evidence for `fd1c6b6...`: **PENDING / NOT YET OBSERVED**.
 - Live commercial federation: **NOT YET CERTIFIED**.
 - Release posture remains: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+---
+
+## FED-007 live staging execution & JWKS fix — 2026-11-15
+
+### Root cause & fix
+- After GitHub Actions secrets/variables (`AEROBILL_API_KEY`, `MANDATAG_API_KEY`, `AEROBILL_WEBHOOK_SECRET`, `AEROBILL_STAGING_URL=https://billing.airroofers.eu`, `MANDATAG_STAGING_URL=https://license.airroofers.eu`) were configured on `Chicitadel/ugondu`, the initial `workflow_dispatch` run (`43730181940` on `ef462cf636885387bba6fe59a276abbe086a8000`) passed AeroBill checkout, subscription, invoice, metering, replay, and 409 conflict checks, then failed at `POST /v1/keys/mandatag/sync` (`registeredKeys >= 1`).
+- Inspection of `https://license.airroofers.eu/api/v1/keys/jwks` confirmed it serves standard RFC 7517/8037 JWK entries (`kid`, `kty: "OKP"`, `crv: "Ed25519"`, `alg: "EdDSA"`, `x`, `publicKeyPem`), whereas `MandatagClient.discoverAndSyncPublicKeys` in `server/billing-gateway/src/mandatag-client.ts` only accepted custom fields (`keyId`, `publicKey`, `algorithm: "ed25519"`, `status: "ACTIVE"`).
+- Updated `MandatagClient.discoverAndSyncPublicKeys` (`805750e269f85450b5c8a3307b8f2aaaad0f1f0d`) to accept both custom key descriptors and standard RFC 7517/8037 Ed25519 JWKS entries (including `publicKeyPem` and JWK `x` SPKI conversion).
+
+### Verified exact-head results on `805750e269f85450b5c8a3307b8f2aaaad0f1f0d`
+- Local build & unit/contract tests: `npm --prefix server/billing-gateway run build` PASS; `node --test tests/commercial-federation-contract.test.js` (`6` pass, `FED-007` skipped when staging env vars unset).
+- Local governance gates: `npm run verify:release-integrity` PASS; `npm run verify:attribution` PASS (`4752` files, `0` violations); `node scripts/governance/validate-repository.mjs` PASS (`4752` files, `0` violations).
+- GitHub Actions `Ugondu CI/CD Pipeline` (`workflow_dispatch`, run `43730954456`): **PASS** — `Run required live AeroBill and Mandatag federation gate` executed `tests 7, suites 1, pass 7, fail 0, cancelled 0, skipped 0, todo 0`, with `FED-007` passing in `1574.18ms`.
+- GitHub Actions `COR Certification` (`push`, run `43730953908`): **PASS** (AWS physical qualification and final authority signing remain deferred/skipped per workflow configuration).
+- GitHub Actions `Ugondu Deployment Manifest Qualification` (`push`, run `43730953907`): **PASS**.
+
+### Current disposition
+- `FED-007` (live AeroBill + Mandatag commercial federation): **PASS** on `805750e269f85450b5c8a3307b8f2aaaad0f1f0d`.
+- Remaining open/deferred items for full release certification: AWS Physical Qualification (when explicitly authorized), final COR authority signature, and PR #70 review/merge.
