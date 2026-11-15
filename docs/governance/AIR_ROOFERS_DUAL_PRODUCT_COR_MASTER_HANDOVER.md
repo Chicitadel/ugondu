@@ -1007,3 +1007,40 @@ The supplied execution report describes local branches `integrate/cor-dumcholu-u
 3. **Cryptographic COR signature & trust-root:** Final authority signing ceremony (`READY_FOR_COR_SIGNATURE` -> signed) remains an external gate.
 4. **Physical AWS & external assurances:** AWS physical qualification remains deferred under the DirectAdmin-first / zero-spend policy; AI model fleet (`CATALOG_OFFLINE`), non-VSCode IDEs, and immutable artifact lifecycle remain open.
 5. **Release posture:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` (no `main`/`master` mutation).
+
+
+---
+
+## Ugondu commercial federation CI gate — 2026-11-15
+
+### Verified repository state
+- Target: `Chicitadel/ugondu`.
+- Qualification branch: `fix/cor-final-release-qualification-2026-11-14`.
+- Pre-change branch head inspected: `6236b19d00291c7a157c98eda111f38778d38a27`.
+- PR #70 remains open and draft; no protected/default branch was modified.
+- Existing exact-head workflows on `6236b19d...` were successful: CI/CD run [43632987642](https://github.com/Chicitadel/ugondu/actions/runs/43632987642), COR run [43632987655](https://github.com/Chicitadel/ugondu/actions/runs/43632987655), deployment-manifest run [43632987685](https://github.com/Chicitadel/ugondu/actions/runs/43632987685). These results predate this CI workflow change and do not qualify the new head.
+
+### Physical CI change
+- Updated `.github/workflows/ci.yml` to add an operator-dispatched live federation step.
+- The step sets `UGONDU_REQUIRE_LIVE_FEDERATION=true` and maps `AEROBILL_STAGING_URL`, `MANDATAG_STAGING_URL`, `AEROBILL_API_KEY`, `MANDATAG_API_KEY`, and `AEROBILL_WEBHOOK_SECRET` from GitHub Variables/Secrets.
+- The live-credential step runs only for `workflow_dispatch`; ordinary push/PR workflows do not receive commercial API credentials. Existing isolated FED-001..FED-006 contract tests continue to run in normal CI.
+- Change commit: `92afc46f872010942f21f5e5ce94c037b3aef280`.
+- This is CI wiring only. No secret values were added or exposed in source.
+
+### FED-007 verification boundary
+- The existing FED-007 implementation currently checks AeroBill `/health` and Mandatag `/api/v1/keys/jwks`; it does not yet execute a live checkout, subscription, invoice or usage transaction.
+- FED-001..FED-006 exercise the corresponding integration lifecycle against local mock HTTP contract servers. They are not evidence of live authority transactions.
+- The operator reports that the required GitHub Actions Secrets/Variables are not configured. This was not independently inspectable through the available GitHub connector. A manual live-gate run will fail closed until all required values are configured.
+
+### External hosting blocker — operator-supplied evidence
+- Operator reports both encrypted credential vaults exist on `ny210` with `0600` permissions and that AeroBill health and Mandatag JWKS endpoints return HTTP 200.
+- Operator also reports that the live AeroBill PHP front controller does not yet call `AdminAeroBillCredentialHelper::verifyAeroBillApiKey()`, and that its exposed `/v1/billing/*` route family does not match Ugondu's `/api/v1/*` client contract.
+- These host-side findings have not been independently re-read or changed in this session. No SSH/DirectAdmin host execution or deployment capability is available here; no change was made on `ny210`.
+- Required external remediation: deploy a reviewed AeroBill compatibility patch on `ny210` that authenticates Bearer API keys using the credential helper and implements the agreed versioned checkout-session, subscription, invoice and metering contracts. Preserve the existing public `/v1/billing/*` API if it is already consumed by other clients; add explicit compatibility routes or a versioned adapter rather than silently breaking it.
+- After deployment, verify authenticated success and unauthenticated rejection for each route, plus idempotency, tenant isolation, validation and failure responses. Use a dedicated staging tenant and ensure checkout testing cannot create a charge.
+
+### Current disposition
+- Mandatag client, JWKS discovery, signed entitlement lifecycle, AeroBill client, webhook verification, and usage ledger are present in the qualification branch; live production/staging federation is not yet established.
+- CI live-gate wiring is implemented but has not been dispatched with credentials.
+- Awaiting: GitHub Actions Variables/Secrets provisioning; AeroBill host compatibility patch and deployment; actual live transaction acceptance; exact-new-head CI/COR/deployment workflows; final trust-root/signature and independent release gates.
+- Overall: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
