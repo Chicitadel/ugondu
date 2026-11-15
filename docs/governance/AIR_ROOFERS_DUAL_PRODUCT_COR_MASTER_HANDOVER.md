@@ -1092,3 +1092,39 @@ The CI workflow has a `workflow_dispatch` trigger and the live federation step i
 - COR authority signature and AWS physical qualification: **OPEN / DEFERRED**.
 - Local D: drive repository state: **not accessible in this session**; only the GitHub branch was inspected.
 - Release posture: **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
+
+
+---
+
+## FED-007 live staging test contract review — 2026-11-15
+
+### Candidate and source review
+- Initial FED-007 implementation: `985eab6a98134b9281722594045eccc119b0018e`.
+- Review confirmed the first draft contained deterministic contract mismatches that would prevent a successful live run even with valid staging credentials:
+  1. It sent `x-ugondu-service-auth`, while `billingServiceIdentityGuard` requires an Ed25519 service identity in `Authorization: Bearer <token>`.
+  2. Its AeroBill webhook body used `type`; `commercial-routes.ts` requires `eventType`.
+  3. It used unsupported `invoice.refunded`; the gateway lifecycle contract accepts `charge.refunded`.
+  4. It expected response fields (`outcome: ENTITLEMENT_ACTIVATED/REVOKED`, `authorized`) that the current gateway does not return. The actual contracts expose `synced` / `entitlementToken`, `processed` / `status`, and authorization `outcome` / `code`.
+  5. The duplicate metering request generated a new timestamp, so its payload was not identical to the original request.
+- These are code-inspection findings, not observed staging failures.
+
+### Corrective source changes
+- Updated `tests/commercial-federation-live-staging.test.js` to create an ephemeral Ed25519 service identity keypair, register its public key in the shared trust registry, and sign the gateway's expected service identity Bearer token.
+- Aligned payment/refund webhook field names and event type with the live gateway route.
+- Aligned response assertions with `commercial-routes.ts` and `EntitlementEventProcessor.ts`.
+- Reused one timestamp for the identical metering replay and conflict variants.
+- Removed the unused direct Mandatag header variable; the gateway's `MandatagClient` uses the injected `MANDATAG_API_KEY` for the authenticated refresh/revoke calls.
+- Corrective commit: `fd1c6b6ca595bbe8b7f0294ad82af04d9b6b8545`.
+
+### Verification boundary
+- Source review confirms the new service-auth helper now follows `billingServiceIdentityGuard`, webhook payloads match the live route, and response assertions match the implementation.
+- The operator's reported FED-001..FED-006 pass, fail-closed test, release-integrity, attribution and repository-governance checks were executed on the prior candidate `985eab6...`; they are not evidence for corrective commit `fd1c6b6...`.
+- No local Windows execution is available in this session. No live staging credentials or dispatched FED-007 execution result were available. The corrected suite is **not yet execution-verified**.
+- The suite creates uniquely named staging tenants, leaves hosted checkout sessions open, and does not follow the checkout URL or complete payment. It writes usage events and creates subscription/entitlement lifecycle records in the configured staging authorities; staging-side retention/cleanup policy must account for these test records.
+- The test's live authority URLs are supplied through staging-named GitHub variables. Before dispatch, confirm they resolve to non-production staging environments and that the checkout provider is configured not to capture payment.
+
+### Current disposition
+- FED-007 source contract: **CORRECTED — EXECUTION PENDING**.
+- Candidate CI/COR/deployment evidence for `fd1c6b6...`: **PENDING / NOT YET OBSERVED**.
+- Live commercial federation: **NOT YET CERTIFIED**.
+- Release posture remains: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
