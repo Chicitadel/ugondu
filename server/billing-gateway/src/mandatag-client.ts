@@ -23,6 +23,7 @@
  * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
+import { createPublicKey } from 'crypto';
 import axios from 'axios';
 import { __t, globalTrustRegistry } from '@ugondu/shared';
 
@@ -175,19 +176,44 @@ export class MandatagClient {
             const keys = Array.isArray(res.data?.keys) ? res.data.keys : [];
             let registeredCount = 0;
             for (const entry of keys) {
-                if (
-                    entry &&
-                    typeof entry.keyId === 'string' &&
-                    typeof entry.publicKey === 'string' &&
-                    entry.algorithm === 'ed25519' &&
-                    entry.status === 'ACTIVE'
-                ) {
+                if (!entry || typeof entry !== 'object') {
+                    continue;
+                }
+                const keyId =
+                    typeof entry.keyId === 'string' && entry.keyId
+                        ? entry.keyId
+                        : typeof entry.kid === 'string' && entry.kid
+                            ? entry.kid
+                            : '';
+                const isEd25519 =
+                    entry.algorithm === 'ed25519' ||
+                    (entry.kty === 'OKP' && entry.crv === 'Ed25519') ||
+                    entry.alg === 'EdDSA';
+                const isActive =
+                    entry.status === undefined || entry.status === 'ACTIVE';
+
+                let publicKey =
+                    typeof entry.publicKey === 'string' && entry.publicKey
+                        ? entry.publicKey
+                        : typeof entry.publicKeyPem === 'string' && entry.publicKeyPem
+                            ? entry.publicKeyPem
+                            : '';
+                if (!publicKey && entry.kty === 'OKP' && entry.crv === 'Ed25519' && typeof entry.x === 'string' && entry.x) {
+                    publicKey = createPublicKey({
+                        key: { kty: 'OKP', crv: 'Ed25519', x: entry.x },
+                        format: 'jwk',
+                    })
+                        .export({ type: 'spki', format: 'pem' })
+                        .toString();
+                }
+
+                if (keyId && publicKey && isEd25519 && isActive) {
                     globalTrustRegistry.registerKey({
-                        keyId: entry.keyId,
+                        keyId,
                         algorithm: 'ed25519',
                         status: 'ACTIVE',
                         purpose: entry.purpose || 'service-identity',
-                        publicKey: entry.publicKey,
+                        publicKey,
                     });
                     registeredCount++;
                 }
