@@ -1,19 +1,40 @@
 /******************************************************************************
  * Project        : Ugondu — Universal Deployment Intelligence Platform
- * Module         : Server / Engine Core / Migration
+ * Module         : Engine Core / Migration
  * File           : parsers.ts
  * Version        : 2.0.0
- * Author         : CI/CD Migration Engineering Authority
- * Organization   : Air Roofers Ltd
+ * Author         : Enterprise Architecture Council / Ujomor Systems Engineering Authority
+ * Organization   : Air Roofers SASU
  * Created Date   : 2026-09-30
- * Classification : ENTERPRISE | INTERNAL
+ * Last Modified  : 2026-10-25
+ * Classification : ENTERPRISE
  *
- * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
- * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
+ *
+ * Signatures:
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
+ *
+ * Copyright (c) 2026 Air Roofers SASU. All Rights Reserved.
  ******************************************************************************/
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface MigrationPlanResult
+ * @description Corporate Governed interface implementation for MigrationPlanResult
+ * @classification ENTERPRISE
+ */
 export interface MigrationPlanResult {
     sourceType: 'jenkins' | 'github-actions' | 'gitlab-ci' | 'docker-compose';
     extractedActions: Array<{ action: string; payload: Record<string, any> }>;
@@ -21,6 +42,11 @@ export interface MigrationPlanResult {
     suggestedStrategy: 'atomic' | 'quota-sync' | 'container-swap';
 }
 
+/**
+ * @class MigrationEngine
+ * @description Corporate Governed class implementation for MigrationEngine
+ * @classification ENTERPRISE
+ */
 export class MigrationEngine {
     public static parseJenkinsfile(content: string): MigrationPlanResult {
         const warnings: string[] = [];
@@ -28,10 +54,10 @@ export class MigrationEngine {
 
         actions.push({ action: 'FETCH_REPOSITORY', payload: { branch: 'main' } });
 
-        if (content.includes('npm install') || content.includes('npm ci')) {
+        if (content.includes(__t('npm_install')) || content.includes(__t('npm_ci'))) {
             actions.push({ action: 'NODE_INSTALL', payload: { workingDirectory: '.' } });
         }
-        if (content.includes('composer install')) {
+        if (content.includes(__t('composer_install'))) {
             actions.push({ action: 'COMPOSER_INSTALL', payload: { workingDirectory: '.' } });
         }
         if (content.includes('sh ') || content.includes('bat ')) {

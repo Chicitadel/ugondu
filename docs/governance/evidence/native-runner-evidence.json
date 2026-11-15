@@ -1,0 +1,171 @@
+{
+  "$schema": "https://specs.airroofers.eu/governance/native-runner-evidence-2.0.0.json",
+  "schemaVersion": "2.0.0",
+  "evidenceType": "UGONDU_NATIVE_RUNNER_QUALIFICATION_EVIDENCE",
+  "authority": "Ujomor Systems Engineering & Governance Authority",
+  "organization": "Air Roofers SASU",
+  "generatedAt": "2026-10-25T17:39:36.140Z",
+  "gitHeadSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
+  "verdict": "NATIVE_EXECUTION_VERIFIED_FOR_RECORDED_TARGETS_ONLY",
+  "universalClaim": false,
+  "tier1NativeRunners": [
+    {
+      "target": "windows/amd64",
+      "scope": "node-qualification-suite (tests/qualification/*.test.js)",
+      "classification": "NATIVE_EXECUTION_VERIFIED",
+      "record": {
+        "recordType": "UGONDU_NATIVE_EXECUTION_RECORD",
+        "gitSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
+        "startedAt": "2026-10-25T17:34:26.343Z",
+        "finishedAt": "2026-10-25T17:36:33.857Z",
+        "host": {
+          "platform": "win32",
+          "arch": "x64",
+          "osType": "Windows_NT",
+          "osRelease": "10.0.19045",
+          "nodeVersion": "v24.17.0",
+          "cpuModel": "Intel(R) Xeon(R) CPU           X3470  @ 2.93GHz",
+          "cpuCores": 8,
+          "totalMemoryBytes": 34349445120
+        },
+        "ci": null,
+        "suite": {
+          "fileCount": 20,
+          "totalTests": 232,
+          "passingTests": 232,
+          "failingTests": 0,
+          "exitCode": 0,
+          "status": "PASSED"
+        }
+      },
+      "verificationDigestSha256": "492d7dbe45285137d50eb4cb47f7a72001e1731373d810290f53f742c3a8edef"
+    },
+    {
+      "target": "linux/amd64",
+      "scope": "go-thin-client & governance gates (ubuntu-latest — linux/amd64)",
+      "classification": "NATIVE_EXECUTION_VERIFIED",
+      "ciRunId": "40216812646",
+      "ciJob": "Build Go Thin-Client (ubuntu-latest — linux/amd64)",
+      "verificationDigestSha256": "b91199ee352d908ef33ee8973acfec4ef2935f30323bb19bbae890bbc8546f8c"
+    },
+    {
+      "target": "darwin/arm64",
+      "scope": "go-thin-client (go vet, go test, binary --help/version on macOS arm64 runner)",
+      "classification": "NATIVE_EXECUTION_VERIFIED_THIN_CLIENT_ONLY",
+      "ciRunId": "40216812646",
+      "ciJob": "Build Go Thin-Client (macos-latest — darwin/arm64)",
+      "limitation": "The Node qualification suite was not executed on darwin/arm64; only the Go thin-client was.",
+      "verificationDigestSha256": "af38ad43e42d93807384fe349deb6472e562b369d59dec9bd7639bc2fb5ba3de"
+    }
+  ],
+  "tier2CrossCompiledTargets": [
+    {
+      "target": "linux/arm64",
+      "classification": "CROSS_COMPILED_NOT_NATIVELY_QUALIFIED",
+      "nativeExecutionVerified": false,
+      "rationale": "Binary is built for this target but never executed on native hardware.",
+      "verificationDigestSha256": "c5c99caa8d481d1b72bf8f1ad16150b92e29d4b62fb68c7ad2c1b7d75d7ff5cc"
+    },
+    {
+      "target": "darwin/amd64",
+      "classification": "CROSS_COMPILED_NOT_NATIVELY_QUALIFIED",
+      "nativeExecutionVerified": false,
+      "rationale": "Binary is built for this target but never executed on native hardware.",
+      "verificationDigestSha256": "dfe09f6724cf957e5da6f2f11395e4e89c009b9b7876fdf9467ce64603cf116c"
+    }
+  ],
+  "ideIntegrations": [
+    {
+      "ide": "vscode",
+      "status": "experimental",
+      "classification": "EXPERIMENTAL_NOT_QUALIFIED",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "verificationDigestSha256": "ad70f4efe8026631194a11aea7fddd955f3a22eab276d705c328d0b0888dfbbe"
+    },
+    {
+      "ide": "jetbrains",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_BY_MATRIX",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "verificationDigestSha256": "2eb4b59a0642e15b8555c6115898ce3e7e78ad96a51c8fe2bd3cce07ffa231d1"
+    },
+    {
+      "ide": "cursor",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_BY_MATRIX",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "verificationDigestSha256": "3a87705d4b7bcf0f506194ab80efb4313761eecb9c6c06241f3828442bb87a84"
+    },
+    {
+      "ide": "windsurf",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_BY_MATRIX",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "verificationDigestSha256": "0143cb6a7bfd1e148ab168735f932bdf28b554a69052eca7102d1f7d72ffd390"
+    },
+    {
+      "ide": "neovim",
+      "status": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_BY_MATRIX",
+      "failClosedBehavior": "FAIL_CLOSED_UNSUPPORTED_CAPABILITY",
+      "verificationDigestSha256": "588beaaa1bbefd91c023627cd79c1fa08f6be4f0c5bc86fa2643d3a02e3ccdcd"
+    }
+  ],
+  "hostProviders": [
+    {
+      "provider": "aws",
+      "matrixStatus": "tested",
+      "classification": "PHYSICAL_GATE_VERIFIED",
+      "limitation": "Verified via live AWS physical gate execution (eu-west-3); cost and guardrail parameters enforced.",
+      "verificationDigestSha256": "9011496d2c60bcf0a8121e82de0d3a063f1dc246cb6c7aae17ec608a59182229"
+    },
+    {
+      "provider": "directadmin",
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "bc214a0a8a0bd65be425faa5e4e3380ce2de96d99fda2aa7f4e58a722716c154"
+    },
+    {
+      "provider": "cpanel",
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "1353e53e82341f2466ecad87eead19b36556dcf323eefe6f8caf70de89d22db1"
+    },
+    {
+      "provider": "ssh-vps",
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "b309ef14e6d5aa3286fdf109e1496a9e724b824938d2cfc2ae4a5c0c7279622b"
+    },
+    {
+      "provider": "docker",
+      "matrixStatus": "tested",
+      "classification": "CONTAINER_COMPOSE_SPEC_VERIFIED",
+      "limitation": "Local container configuration validated via compose spec verification.",
+      "verificationDigestSha256": "024f5f9683f0a108b335734a710e2d2175dc6a683c32a3124422415e53521d94"
+    },
+    {
+      "provider": "kubernetes",
+      "matrixStatus": "partial",
+      "classification": "PARTIAL_DISPOSABLE_RECEIPTS_PENDING",
+      "limitation": "Per-operation disposable-infrastructure receipts are pending and not attached.",
+      "verificationDigestSha256": "72ffde9afb15502fcb8b02f3e873783b134243637df48cd6e8b05afb56656c08"
+    },
+    {
+      "provider": "gcp",
+      "matrixStatus": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_BY_MATRIX",
+      "verificationDigestSha256": "82f483722a356c7bc84cd0699ee6c1903b69ec55713affa5513655ca26e043b1"
+    },
+    {
+      "provider": "azure",
+      "matrixStatus": "unsupported",
+      "classification": "UNSUPPORTED_FAIL_CLOSED_BY_MATRIX",
+      "verificationDigestSha256": "df517f114a67f9b3f8fe47afb187c8f37993e77db78e844e71ea690ea59b8dff"
+    }
+  ],
+  "evidenceDigestSha256": "ad7575f860bcb387ccc470002b565d16d21bd0ac02ccc0446719915907167cba"
+}

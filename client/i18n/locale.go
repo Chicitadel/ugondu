@@ -3,13 +3,14 @@
  * Module         : client/i18n
  * File           : locale.go
  * Version        : 2.2.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Air Roofers Global Localization Standard (STREAM AA / LP-02 & LP-07)
  * - Zero String Hardcoding Law (Canonical Token Dictionaries)
  * - Supply-Chain Signed Language Pack Fabric
@@ -43,144 +44,6 @@ var (
 	installedPacks = map[string]*LanguagePack{}
 	availablePacks = map[string]*LanguagePack{}
 )
-
-// Minimal core bootstrap dictionary (LP-02: only bootstrap/fallback in core)
-var bootstrapDict = map[string]string{
-	"cli_title":                "Ugondu Universal Delivery Client v1.2.0",
-	"cli_subtitle":             "Air Roofers - Commercial Delivery Platform",
-	"err_not_repo":             "Error: Must be run inside a valid git repository.",
-	"err_no_command":           "Error: No command provided.",
-	"err_unknown_cmd":          "Error: Unknown command '%s'.",
-	"did_you_mean":             "Did you mean '%s'?",
-	"cmd_usage":                "Usage: ugondu <command>",
-	"cmd_deploy_desc":          "Execute a deployment for the current repository",
-	"cmd_rollback_desc":        "Rollback to a previous atomic release",
-	"cmd_plugins_desc":         "Manage and list available deployment plugins",
-	"cmd_version_desc":         "Print the client version",
-	"cmd_help_desc":            "Print this comprehensive help message",
-	"cmd_resume_desc":          "Resume a previously interrupted deployment",
-	"cmd_status_desc":          "Inspect status of a deployment transaction",
-	"cmd_locale_desc":          "Manage language packs, locale resolution, and translations",
-	"cmd_locale_help":          "  locale    - Manage language packs and view localization diagnostics",
-	"env_vars":                 "Environment Variables:",
-	"env_token":                "UGONDU_TOKEN        - Your commercial license token (ugp_ or uge_ prefix)",
-	"env_api_url":              "UGONDU_API_URL      - Override the Governance Server URL",
-	"env_target_env":           "UGONDU_TARGET_ENV   - Override target environment (cpanel|directadmin|cloud|kubernetes|baremetal)",
-	"env_locale":               "UGONDU_LOCALE       - Active language (en-US|fr-FR|de-DE|es-ES|it-IT|ar-SA)",
-	"community_fallback":       "Notice: UGONDU_TOKEN not set. Operating in Community mode.",
-	"repo_info":                "Repository : %s\nBranch      : %s\nEnvironment : %s",
-	"req_recipe":               "Requesting execution recipe from Ugondu Governance Server...",
-	"recipe_resolved":          "Recipe resolved. TX: %s | Edition: %s | Strategy: %s",
-	"exec_failed":              "Execution Failed: %v",
-	"dep_complete":             "✔ Deployment Complete.",
-	"step_info":                "Step %d/%d: %s",
-	"sync_git":                 "Syncing from %s @ %s",
-	"sync_files":               "Syncing files using '%s' strategy (Universal OS Engine)",
-	"atomic_release":           "Atomic release created at %s",
-	"pruning":                  "Pruning releases. Retaining last %d.",
-	"prune_skip":               "Notice: Release pruning skipped (no old releases to remove).",
-	"upsell_notice":            "💰 UPGRADE REQUIRED: %s",
-	"telemetry_warn":           "Warning: Telemetry report failed (non-fatal): %v",
-	"telemetry_ok":             "Telemetry reported. Status: %s",
-	"prompt_destructive":       "WARNING: Destructive Action. This will wipe existing files in %s. Continue? [y/N]: ",
-	"aborting":                 "Operation aborted by user.",
-	"resuming_deployment":      "Resuming deployment for transaction %s...",
-	"no_prev_deployment":       "No previous deployment found to resume.",
-	"resume_parse_fail":        "Failed to parse previous recipe: %v",
-	"step_skipped_idempotent":  "Skipping already completed step %d (%s) due to idempotency",
-	"unknown_action_error":     "Unknown action in recipe: %s",
-	"persistence_failure_error": "State persistence failure: %v",
-	"locked_error":             "Transaction is currently locked by another process: %v",
-	"warn_persist_recipe":      "Warning: failed to persist transaction recipe: %v",
-	"err_no_tx_found":          "No transactions found: %v",
-	"err_tx_state_not_found":   "Transaction %s: state file not found.",
-	"err_tx_state_corrupt":     "Transaction %s: state file is CORRUPT (quarantined).",
-	"err_tx_state_load":        "Error loading state for transaction %s: %v",
-	"err_cannot_resume":        "Cannot resume: %v",
-	"cli_divider":              "─────────────────────────────────────────────────────────────",
-	"status_border":            "════════════════════════════════════════════════════════════",
-	"status_divider":           "────────────────────────────────────────────────────────────",
-	"status_lbl_tx_id":         " Transaction ID : %s",
-	"status_lbl_status":        " Status         : %s",
-	"status_lbl_tenant_id":     " Tenant ID      : %s",
-	"status_lbl_project_id":    " Project ID     : %s",
-	"status_lbl_env_id":        " Environment ID : %s",
-	"status_lbl_plan_hash":     " Plan Hash      : %s",
-	"status_lbl_policy_hash":   " Policy Hash    : %s",
-	"status_lbl_state_hash":    " State Hash     : %s",
-	"status_lbl_last_updated":  " Last Updated   : %s",
-	"status_lbl_steps":         " Steps:",
-	"status_lbl_no_steps":      "   (No steps recorded)",
-	"status_lbl_step_item":     "   [%d] %-20s : %s",
-	"status_lbl_log_item":      "         > %s",
-	"upsell_rollback":          "Upgrade to Ugondu Professional to enable one-click atomic rollbacks.",
-	"upsell_plugins":           "Upgrade to Ugondu Professional to remotely manage plugins via CLI.",
-	"strategy_atomic_or_quota": "atomic-or-quota",
-	"node_install_running":     "Running Node.js package install (%s) in %s",
-	"composer_install_running": "Running PHP Composer %s in %s",
-	"warn_prune_failed":        "Warning: prune failed: %v",
-	"fatal_tx_success":         "FATAL: Recipe %s has already been successfully executed",
-	"step_skipped_done":        "Skipping already completed step",
-	"cmd_deploy_help":          "  deploy    - Execute a deployment for the current repository",
-	"cmd_resume_help":          "  resume    - Resume a previously interrupted deployment",
-	"cmd_status_help":          "  status    - Inspect status of a deployment transaction",
-	"cmd_rollback_help":        "  rollback  - Rollback to a previous atomic release",
-	"cmd_plugins_help":         "  plugins   - Manage and list available deployment plugins",
-	"cmd_version_help":         "  version   - Print the client version",
-	"cmd_help_help":            "  help      - Print this comprehensive help message",
-	"locale_title":             "Ugondu Universal Language Pack & Locale Fabric",
-	"locale_current_header":    "Current Locale Status:",
-	"locale_lbl_current":       "  Current Locale : %s (%s)",
-	"locale_lbl_source":        "  Source         : %s",
-	"locale_lbl_status":        "  Status         : %s",
-	"locale_lbl_fallback":      "  Fallback       : %s",
-	"locale_lbl_direction":     "  Direction      : %s",
-	"locale_lbl_pack_id":       "  Pack ID        : %s",
-	"locale_lbl_pack_ver":      "  Pack Version   : %s",
-	"locale_lbl_coverage":      "  Coverage       : %.1f%% (%d/%d tokens)",
-	"locale_lbl_sig":           "  Signature      : %s",
-	"locale_detect_header":     "Locale Environment Detection",
-	"locale_detect_os":         "  OS Culture / Language : %s",
-	"locale_detect_env":        "  Environment Variables : LANG=%s, LC_ALL=%s, LC_MESSAGES=%s",
-	"locale_detect_norm":       "  Normalized Candidate  : %s",
-	"locale_detect_installed":  "  Installed Language Packs:",
-	"locale_detect_recom":      "Recommendation:",
-	"locale_detect_recom_use":  "  ugondu locale use %s",
-	"locale_detect_recom_install": "  ugondu locale install %s\n  ugondu locale use %s",
-	"locale_list_header":       "Installed Language Packs:",
-	"locale_list_empty":        "  (No external language packs installed. Operating with core bootstrap en-US)",
-	"locale_list_item":         "  %-10s [%s] v%-8s %-20s %-8s %s",
-	"locale_avail_header":      "Available Language Packs:",
-	"locale_avail_empty":       "  (No additional language packs available in registry)",
-	"locale_avail_item":        "  %-10s [%s] v%-8s %-20s %s",
-	"locale_use_success":       "Locale '%s' is now active and set as persistent preference.",
-	"locale_use_system":        "Persistent preference cleared. Now using system auto-detected locale '%s'.",
-	"locale_not_installed":     "Locale '%s' is not installed.",
-	"locale_prompt_install":    "Language pack '%s' is available but not installed.\nTo install and activate it, run:\n  ugondu locale install %s\n  ugondu locale use %s",
-	"locale_install_success":   "✔ Language pack '%s' (v%s) installed and verified successfully.",
-	"locale_install_failed":    "Error installing language pack: %v",
-	"locale_remove_success":    "Language pack '%s' removed successfully.",
-	"locale_remove_failed":     "Error removing language pack: %v",
-	"locale_remove_bootstrap":  "Cannot remove core bootstrap locale '%s'.",
-	"locale_verify_header":     "Verifying Language Pack '%s':",
-	"locale_verify_pass":       "✔ PASS: Language pack '%s' integrity, signature, and compatibility verified.",
-	"locale_verify_fail":       "✗ FAIL: Language pack '%s' verification failed: %v",
-	"locale_reset_success":     "Persistent locale preference removed. Automatic OS/environment detection restored.",
-	"locale_doctor_header":     "Ugondu Locale Fabric Diagnostics",
-	"locale_doctor_core":       "Core Runtime:",
-	"locale_doctor_core_ver":   "  Platform Version  : %s",
-	"locale_doctor_schema":     "  Token Schema      : %s",
-	"locale_doctor_env":        "Environment State:",
-	"locale_doctor_user_pref":  "User Preference:",
-	"locale_doctor_pref_val":   "  Stored Preference : %s",
-	"locale_doctor_pref_auto":  "  Auto-Detect Mode  : %t",
-	"locale_doctor_active":     "Active Locale Resolution:",
-	"locale_doctor_active_val": "  Effective Locale  : %s",
-	"locale_doctor_active_src": "  Effective Source  : %s",
-	"locale_doctor_pack":       "Active Pack Health:",
-	"locale_doctor_ok":         "✔ All locale subsystems healthy and cryptographically verified.",
-	"locale_doctor_warn":       "⚠ Notice: Active locale '%s' has missing tokens or warnings.",
-}
 
 func init() {
 	ReloadAllPacks()
@@ -219,7 +82,7 @@ func ReloadAllPacks() {
 		MinCoreVersion:  "1.0.0",
 		MaxCoreVersion:  "2.x",
 		SchemaVersion:   "1",
-		Publisher:       "Air Roofers Ltd",
+		Publisher:       "air_roofers_ltd",
 		FallbackLocale:  "en-US",
 		Direction:       "ltr",
 		Tokens:          bootstrapDict,
@@ -358,13 +221,13 @@ func InstallPack(source string) (*LanguagePack, error) {
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("language pack '%s' not found", source)
+			return nil, fmt.Errorf(T("language_pack_not_found"), source)
 		}
 	}
 
 	pack, err := LoadPackFromFile(packPath, "1.2.0")
 	if err != nil {
-		return nil, fmt.Errorf("failed to verify pack: %w", err)
+		return nil, fmt.Errorf(T("failed_to_verify_pack"), err)
 	}
 
 	userDir, err := GetUserPacksDir()
@@ -389,7 +252,7 @@ func InstallPack(source string) (*LanguagePack, error) {
 func RemovePack(locale string) error {
 	norm := NormalizeLocale(locale)
 	if norm == "en-US" {
-		return errors.New("cannot remove bootstrap en-US")
+		return errors.New(T("cannot_remove_bootstrap_enus"))
 	}
 
 	userDir, err := GetUserPacksDir()
@@ -407,7 +270,7 @@ func RemovePack(locale string) error {
 	}
 
 	if !removed {
-		return fmt.Errorf("language pack '%s' is not installed", locale)
+		return fmt.Errorf(T("language_pack_is_not_installed"), locale)
 	}
 
 	ReloadAllPacks()

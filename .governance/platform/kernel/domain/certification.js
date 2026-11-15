@@ -22,7 +22,7 @@ class ProductCertification {
         report.checks.manifestValid = !!executionPlan.product;
 
         // 2. Check if any provider is experimental (requires explicit cert bypass)
-        // For the domain mock, we assume the resolution engine already blocked non-explicit experimentals,
+        // For the domain stub, we assume the resolution engine already blocked non-explicit experimentals,
         // but the Product Certification ensures no experimental slipped into a Production build.
         report.checks.allProvidersCertified = true; 
 

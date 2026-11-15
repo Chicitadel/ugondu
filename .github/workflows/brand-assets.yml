@@ -1,0 +1,80 @@
+# /******************************************************************************
+#  * Project        : Ugondu Platform
+#  * Module         : Brand Assets & Visual Identity Pipeline
+#  * File           : brand-assets.yml
+#  * Version        : 1.0.0
+#  * Author         : Ujomor Systems Engineering & Governance Authority
+#  * Organization   : Air Roofers SASU / Ujomor Systems
+#  * Created Date   : 2026-10-20
+#  * Last Modified  : 2026-10-20
+#  * Classification : COMMERCIAL | INTERNAL
+#  *
+#  * Governance:
+#  * - Corporate Policy Governed
+#  * - Security Reviewed
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - Modularization Enforced
+#  ******************************************************************************/
+
+name: Brand Asset Integrity & Usage Audit
+
+on:
+  push:
+    paths:
+      - 'assets/brand/**'
+      - 'docs/branding/**'
+      - 'scripts/branding/**'
+      - 'tests/branding/**'
+  pull_request:
+    paths:
+      - 'assets/brand/**'
+      - 'docs/branding/**'
+      - 'scripts/branding/**'
+      - 'tests/branding/**'
+  workflow_dispatch:
+
+concurrency:
+  group: brand-assets-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-brand:
+    name: Validate Brand Assets & Conformance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build foundational workspaces
+        run: npm run build
+
+      - name: Validate brand asset integrity and checksums
+        run: node scripts/branding/validate-assets.mjs
+
+      - name: Audit brand logo usage across manifests
+        run: node scripts/branding/audit-logo-usage.mjs
+
+      - name: Run asset integrity test suite
+        run: node tests/branding/asset-integrity.test.js
+
+      - name: Run transparent background test suite
+        run: node tests/branding/transparent-background.test.js
+
+      - name: Run brand consistency test suite
+        run: node tests/branding/brand-consistency.test.js

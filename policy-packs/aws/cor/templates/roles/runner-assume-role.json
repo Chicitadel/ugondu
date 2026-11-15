@@ -1,0 +1,22 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowRunnerToAssumeExecutionRoleWithTransactionTag",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/UgonduTransactionId": "false"
+        },
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true"
+        }
+      }
+    }
+  ]
+}

@@ -17,6 +17,11 @@ import { DoraAnalyticsEngine, DoraMetricsResult, DoraTier } from './dora';
 
 export type DoraPerformanceTier = 'ELITE' | 'HIGH' | 'MEDIUM' | 'LOW';
 
+/**
+ * @interface DoraMetricsInput
+ * @description Corporate Governed interface implementation for DoraMetricsInput
+ * @classification ENTERPRISE
+ */
 export interface DoraMetricsInput {
     leadTimeHours: number;
     deploymentFrequencyDays: number;
@@ -25,6 +30,11 @@ export interface DoraMetricsInput {
     reworkRate: number;
 }
 
+/**
+ * @interface DoraBenchmarkReport
+ * @description Corporate Governed interface implementation for DoraBenchmarkReport
+ * @classification ENTERPRISE
+ */
 export interface DoraBenchmarkReport {
     timestamp: number;
     metrics: DoraMetricsInput;
@@ -37,6 +47,11 @@ export interface DoraBenchmarkReport {
     };
 }
 
+/**
+ * @class DoraTrendsEngine
+ * @description Corporate Governed class implementation for DoraTrendsEngine
+ * @classification ENTERPRISE
+ */
 export class DoraTrendsEngine {
     public static computeBenchmarkReport(metrics: DoraMetricsInput): DoraBenchmarkReport {
         // Industry benchmark classification rules (DORA State of DevOps)

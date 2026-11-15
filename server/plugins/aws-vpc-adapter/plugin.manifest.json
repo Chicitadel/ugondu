@@ -1,0 +1,14 @@
+{
+  "name": "@ugondu/aws-vpc-adapter",
+  "version": "1.0.0",
+  "description": "AWS Physical Infrastructure Adapter - Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "enterprise",
+  "capabilities": [
+    "reconcile",
+    "validateSafetyGates"
+  ],
+  "hooks": [
+    "reconcile"
+  ]
+}

@@ -1,12 +1,12 @@
 product:
   name: Ugondu
-  version: "1.0.0"
+  version: "4.0.0"
   codename: Universal Deployment Intelligence Platform
   organization: Air Roofers Ltd
   authority: Ujomor Systems Engineering Authority
   classification: COMMERCIAL
-  status: PRODUCTION_READY
-  released: "2026-09-29"
+  status: CODE_FREEZE
+  released: "2026-10-03"
   supersedes: smart_deploy.sh
 
 architecture:
@@ -105,3 +105,5 @@ frozen_decisions:
   - ADR-002: signed-recipe-enforcement
   - ADR-003: microservice-isolation
   - ADR-004: quota-sync-for-cpanel
+  - ADR-005: canonical-release-distribution
+  - ADR-006: intent-driven-execution-and-upm-gating

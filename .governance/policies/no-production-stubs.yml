@@ -1,0 +1,117 @@
+# /******************************************************************************
+#  * Project        : Ugondu Platform
+#  * Module         : Governance Policy-as-Code
+#  * File           : no-production-stubs.yml
+#  * Version        : 1.0.0
+#  * Author         : Ujomor Systems Engineering & Governance Authority
+#  * Organization   : Air Roofers Ltd / Ujomor Systems
+#  * Created Date   : 2026-10-18
+#  * Last Modified  : 2026-10-18
+#  * Classification : ENTERPRISE | INTERNAL
+#  *
+#  * Governance:
+#  * - Corporate Policy Governed
+#  * - Security Reviewed
+#  * - Architecture Controlled
+#  * - Protocol Frozen
+#  * - Modularization Enforced
+#  *
+#  * Standards:
+#  * - ISO 27001
+#  * - SOC 2
+#  * - OWASP ASVS
+#  * - NIST
+#  *
+#  * Copyright (c) 2026 Air Roofers Ltd / Ujomor Systems
+#  * All Rights Reserved.
+#  ******************************************************************************/
+
+policyId: UG-COR-NO-STUBS-001
+name: Production Integrity and Zero-Stub Enforcement Policy
+version: 1.0.0
+status: ENFORCED
+severity: CRITICAL
+authority: Ujomor Systems Engineering & Governance Authority
+
+rules:
+  productionMocksForbidden:
+    enabled: true
+    severity: CRITICAL
+    description: >-
+      Production runtime services and libraries must not contain mock responses,
+      simulated execution adapters, placeholder translations, or stubbed handlers.
+    prohibitedPatterns:
+      - "\\[AR\\]|\\[FR\\]|\\[DE\\]"
+      - "MOCK_MODE"
+      - "stubResponse"
+
+  silentFallbacksForbidden:
+    enabled: true
+    severity: CRITICAL
+    description: >-
+      Cryptographic verification, licensing validation, and authorization checks
+      must fail closed and must never silently degrade or bypass on error.
+    prohibitedPatterns:
+      - "&&\\s*false"
+      - "catch\\s*\\([^)]*\\)\\s*\\{\\s*return\\s+true"
+
+  hardcodedOperationalConfigurationForbidden:
+    enabled: true
+    severity: CRITICAL
+    description: >-
+      Private keys, signing secrets, and environment-specific operational secrets
+      must never be committed to source control or hardcoded in workflows.
+    prohibitedFiles:
+      - "*_private.pem"
+      - "private.pem"
+      - "cor-evidence-bundle.json"
+      - "cor-test-results.json"
+      - ".service_replay_ledger.json"
+    prohibitedPatterns:
+      - "-----BEGIN\\s+(RSA\\s+|EC\\s+|OPENSSH\\s+|PRIVATE\\s+)?PRIVATE\\s+KEY-----"
+      - "ci-test-key-not-for-production"
+
+  fakeSuccessResponsesForbidden:
+    enabled: true
+    severity: HIGH
+    description: >-
+      API handlers, CLI commands, and build targets must not return synthetic
+      success responses or echo placeholder completion without executing real logic.
+    prohibitedPatterns:
+      - "Linting not yet configured for all workspaces"
+
+  mandatoryChecksMayNotBeSkipped:
+    enabled: true
+    severity: HIGH
+    description: >-
+      Mandatory build, lint, typecheck, and test gates in root and workspace
+      pipelines must not be skipped via conditional flags.
+    prohibitedFlags:
+      - "--if-present"
+      - "--passWithNoTests"
+
+  healthMustNotAssertComplianceGrade:
+    enabled: true
+    severity: HIGH
+    description: >-
+      Service liveness and readiness endpoints must report operational dependency
+      readiness only and must not assert static compliance certification grades.
+    prohibitedPatterns:
+      - "cor_level:\\s*['\"]A['\"]"
+      - "\"cor_level\":\\s*\"A\""
+
+  noAiAttributionRequired:
+    enabled: true
+    severity: CRITICAL
+    description: >-
+      All source files and governance headers must reference human corporate
+      engineering authority and must not contain non-human authorship attribution.
+
+exceptionRules:
+  allowProductionExceptions: false
+  requireExpirationDate: true
+  maxExceptionDurationDays: 14
+  requireTicketReference: true
+  requireArchitectureAuthorityApproval: true
+  expiredExceptionAction: FAIL_BUILD
+  exceptions: []

@@ -1,0 +1,12 @@
+{
+  "name": "@ugondu/plugin-recovery-database",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Live Database State Reconstruction Recovery Capability Plugin",
+  "main": "src/live-database-state-reconstruction.ts",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@ugondu/shared": "^1.0.0"
+  }
+}

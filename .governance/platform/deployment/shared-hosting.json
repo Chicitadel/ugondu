@@ -1,14 +1,86 @@
 {
   "profile": "shared_hosting",
-  "description": "Primary deployment environment for legacy compatibility",
+  "description": "Cost-minimizing launch profile for a qualified DirectAdmin/cPanel shared host; hosting is an adapter/configuration choice, never a billing or entitlement authority.",
+  "platform_strategy": "portable_one_code_host_anywhere",
+  "authority_boundaries": {
+    "billing_entitlement_source_of_truth": "Air Roofers federated authority (AeroBill/Mandatag)",
+    "local_license_store": "non-production development cache only",
+    "legal_policy_source": "https://policies.airroofers.eu",
+    "provider_adapters": "capability-qualified; never infer support from a platform name"
+  },
   "capabilities": {
-    "storage": "mysql",
     "runtime": "node",
-    "webserver": "apache"
+    "webserver": "apache_or_litespeed",
+    "database": "mysql_or_mariadb",
+    "persistent_storage": "account_private_filesystem",
+    "background_tasks": "cron_only",
+    "reverse_proxy": "host_managed",
+    "docker": "not_required",
+    "root_access": "not_required",
+    "systemd": "not_required"
+  },
+  "requirements": {
+    "node_runtime": "Host-provided supported Node.js runtime with process environment injection",
+    "https": "TLS must be managed by the host or reverse proxy",
+    "data_dir": "Private, writable, outside public_html/web document root",
+    "billing_authority": "BILLING_AUTHORITY_URL or IDENTITY_AUTHORITY_URL must be configured for production authorization",
+    "secrets": "Inject via hosting environment/secret facility; never commit secrets",
+    "health": "Host must route health/readiness probes to the application service"
   },
   "constraints": {
-    "memory_limit": "512M",
-    "disk_limit": "10G",
-    "background_tasks": "cron_only"
-  }
+    "memory_limit_mb": 512,
+    "disk_limit_gb": 10,
+    "background_tasks": "cron_only",
+    "public_writable_data": "prohibited",
+    "process_supervisor": "hosting_panel_or_provider_managed",
+    "external_authority_required_in_production": true
+  },
+  "tiers": [
+    {
+      "id": "shared_hosting",
+      "purpose": "lowest-cost initial launch when Node runtime, private persistent storage and authority connectivity are supported",
+      "features": [
+        "web UI/API",
+        "authority-backed entitlement checks",
+        "MySQL/MariaDB integration when configured",
+        "cron-based maintenance"
+      ],
+      "excludes": [
+        "Docker-dependent deployment",
+        "root/systemd operations",
+        "unqualified autonomous app deployment",
+        "local file cache as production entitlement authority"
+      ]
+    },
+    {
+      "id": "vps",
+      "purpose": "upgrade when shared-host constraints block resource isolation or process control",
+      "features": [
+        "same application code and env contract",
+        "optional container runtime",
+        "managed process supervision"
+      ],
+      "migration_changes": [
+        "runtime configuration",
+        "process supervision",
+        "backups",
+        "DNS/reverse proxy"
+      ]
+    },
+    {
+      "id": "aws",
+      "purpose": "upgrade after traction, official engagement, or funding",
+      "features": [
+        "same application code and env contract",
+        "managed AWS resources via explicitly qualified adapters"
+      ],
+      "migration_changes": [
+        "infrastructure provisioning",
+        "IAM and secrets",
+        "database/object-store endpoints",
+        "observability and deployment pipeline"
+      ]
+    }
+  ],
+  "invariant": "Moving between shared hosting, VPS and AWS must not change AeroBill/Mandatag entitlement semantics, product policy, API contracts or the canonical capability registry."
 }

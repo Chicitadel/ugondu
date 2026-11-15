@@ -1,0 +1,60 @@
+{
+  "reportType": "AI_MODEL_QUALIFICATION_REPORT",
+  "version": "1.0.0",
+  "generatedAt": "2026-10-25T17:40:16.543Z",
+  "gitSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
+  "qualificationMode": "CATALOG_OFFLINE",
+  "summary": {
+    "totalDiscovered": 12,
+    "qualifiedCount": 0,
+    "activeCount": 0,
+    "disabledCount": 12,
+    "pendingCount": 0
+  },
+  "reconciliation": {
+    "catalogScope": "Offline governance catalog inspects 12 statically governed platform models",
+    "endpointScope": "Live sovereign endpoint (/v1/ai/models) dynamically discovers up to 30 provider models when provisioned",
+    "deltaExplanation": "Live canary reports 30 endpoint-available models from dynamic GET /v1/ai/models discovery, while offline qualification inspects 12 statically governed models in config/model-catalog.json; all unproven models fail closed",
+    "status": "RECONCILED"
+  },
+  "receipts": [
+    {
+      "receiptType": "AI_MODEL_QUALIFICATION_RECEIPT",
+      "version": "1.0.0",
+      "modelAlias": "catalog-offline",
+      "providerId": "airroofers-ai",
+      "timestamp": "2026-10-25T17:40:16.540Z",
+      "gitSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
+      "status": "UNQUALIFIED",
+      "liveExecution": false,
+      "verification": "CATALOG_OFFLINE_PROHIBITED_FROM_ACTIVATION",
+      "reason": "Offline catalog inspection only; live execution prohibited"
+    }
+  ],
+  "diagnostics": [
+    {
+      "alias": "catalog-offline-fleet",
+      "providerId": "airroofers-ai",
+      "state": "DISABLED",
+      "canRoute": false,
+      "liveInferenceReceipt": null,
+      "history": [
+        {
+          "from": null,
+          "to": "DISCOVERED",
+          "timestamp": "2026-10-25T17:40:16.543Z",
+          "reason": "Discovered 12 catalog models"
+        },
+        {
+          "from": "DISCOVERED",
+          "to": "DISABLED",
+          "timestamp": "2026-10-25T17:40:16.543Z",
+          "reason": "Offline candidate evaluation: live credentials absent; all models fail closed"
+        }
+      ],
+      "receipt": null,
+      "failureReason": "Live credentials absent or offline mode active; zero models qualified or activated",
+      "errorCode": "CREDENTIALS_ABSENT"
+    }
+  ]
+}

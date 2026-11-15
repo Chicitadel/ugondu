@@ -19,12 +19,12 @@
     "targetId": { "type": "string", "minLength": 1 },
     "targetType": {
       "type": "string",
-      "enum": ["cpanel", "directadmin", "ssh", "docker", "kubernetes", "cloud", "baremetal"]
+      "enum": ["cpanel", "directadmin", "ssh", "docker", "kubernetes", "azure", "cloud", "baremetal"]
     },
     "endpoint": { "type": "string" },
     "authType": {
       "type": "string",
-      "enum": ["service_token", "ssh_key", "api_token", "tls_client_cert"]
+      "enum": ["service_token", "ssh_key", "api_token", "tls_client_cert", "managed_identity", "workload_federation", "service_principal"]
     },
     "status": {
       "type": "string",

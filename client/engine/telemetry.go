@@ -3,13 +3,14 @@
  * Module         : client/engine
  * File           : telemetry.go
  * Version        : 2.0.0
- * Author         : Ujomor Systems Engineering Authority
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE
  *
  * Governance:
+ * - Corporate Policy Governed
  * - Security Reviewed
  * - Architecture Controlled
  * - Protocol Frozen
@@ -31,6 +32,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"ugondu/client/i18n"
 )
@@ -44,19 +46,32 @@ func ReportTelemetry(apiURL, transactionId, status string, logs []string) {
 	}
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Printf("%s\n", i18n.T("telemetry_warn", err.Error()))
+		fmt.Println(i18n.T("telemetry_warn", err.Error()))
 		return
 	}
 
-	resp, err := http.Post(apiURL+"/telemetry/report", "application/json", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", apiURL+"/telemetry/report", bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println(i18n.T("telemetry_warn", err.Error()))
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	attachGovernanceHeaders(req, nil)
+
+	httpClient := &http.Client{Timeout: 15 * time.Second}
+	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != 201 {
-		errStr := "unknown error"
+		errStr := i18n.T("unknown_error")
 		if err != nil {
 			errStr = err.Error()
 		}
-		fmt.Printf("%s\n", i18n.T("telemetry_warn", errStr))
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+		fmt.Println(i18n.T("telemetry_warn", errStr))
 		return
 	}
+	defer resp.Body.Close()
 
-	fmt.Printf("%s\n", i18n.T("telemetry_ok", status))
+	fmt.Println(i18n.T("telemetry_ok", status))
 }

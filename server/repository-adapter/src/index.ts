@@ -1,133 +1,522 @@
-import express, { Request, Response } from 'express';
-import { __t } from '@ugondu/shared';
+/******************************************************************************
+ * Project        : Ugondu — Universal Deployment Intelligence Platform
+ * Module         : Server / Repository Adapter / HTTP Service Entrypoint
+ * File           : index.ts
+ * Version        : 2.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
+ * Organization   : Air Roofers Ltd / Ujomor Systems
+ * Created Date   : 2026-10-18
+ * Last Modified  : 2026-10-18
+ * Classification : ENTERPRISE | INTERNAL
+ *
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST SP 800-53
+ *
+ * Copyright (c) 2026 Air Roofers Ltd / Ujomor Systems. All Rights Reserved.
+ ******************************************************************************/
 
-const app = express();
-app.use(express.json());
+import express, { NextFunction, Request, Response } from 'express';
+import cors from 'cors';
+import * as fs from 'fs';
+import * as path from 'path';
+import { randomBytes, randomUUID } from 'crypto';
+import { __t, NetworkDestinationPolicy, Logger, ProductRegistry } from '@ugondu/shared';
+import {
+    CredentialContext,
+    parseAndValidateRepositoryUrl,
+    RepositoryAuthMode,
+    RepositoryRef,
+    RepositoryUrlValidationError,
+    RequestContext
+} from './contracts';
+import { RepositoryAdapterRegistry } from './adapters';
 
-app.get('/health', (req: Request, res: Response) => {
-    res.json({ status: 'ok', service: 'repository-adapter', cor_level: 'A' });
-});
+export * from './contracts';
+export * from './adapters';
 
-type RepositoryProvider =
-    | 'github'
-    | 'gitlab'
-    | 'bitbucket'
-    | 'gitea'
-    | 'gogs'
-    | 'azure-devops'
-    | 'aws-codecommit'
-    | 'generic-https'
-    | 'generic-ssh';
-
-interface RepositoryMetadata {
-    provider: RepositoryProvider;
-    normalizedUrl: string;
-    cloneUrl: string;
-    apiUrl: string | null;
-    credentialEnvKey: string;
+interface TraceRequest extends Request {
+    correlationId?: string;
+    traceparent?: string;
 }
 
-function detectProvider(url: string): RepositoryProvider {
-    const lower = url.toLowerCase();
-    if (lower.includes('github.com')) return 'github';
-    if (lower.includes('gitlab.com') || lower.includes('/gitlab/')) return 'gitlab';
-    if (lower.includes('bitbucket.org')) return 'bitbucket';
-    if (lower.includes('gitea')) return 'gitea';
-    if (lower.includes('gogs')) return 'gogs';
-    if (lower.includes('dev.azure.com') || lower.includes('visualstudio.com')) return 'azure-devops';
-    if (lower.includes('codecommit') || lower.includes('amazonaws.com/v1/repos')) return 'aws-codecommit';
-    if (lower.startsWith('git@') || lower.startsWith('ssh://')) return 'generic-ssh';
-    return 'generic-https';
-}
+const W3C_TRACEPARENT_RE = /^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$/i;
 
-function normalizeCloneUrl(url: string, provider: RepositoryProvider): string {
-    if (url.startsWith('git@')) {
-        const sshPattern = /^git@([^:]+):(.+)$/;
-        const match = url.match(sshPattern);
-        if (match) {
-            return `https://${match[1]}/${match[2]}`;
-        }
+function resolveTraceparent(incoming?: string): string {
+    if (incoming && W3C_TRACEPARENT_RE.test(incoming.trim())) {
+        return incoming.trim().toLowerCase();
     }
-    return url;
+    const traceId = randomBytes(16).toString('hex');
+    const spanId = randomBytes(8).toString('hex');
+    return `00-${traceId}-${spanId}-01`;
 }
 
-function buildApiUrl(url: string, provider: RepositoryProvider): string | null {
-    switch (provider) {
-        case 'github': return 'https://api.github.com';
-        case 'gitlab': {
-            const match = url.match(/https?:\/\/([^/]+)/);
-            const host = match ? match[1] : 'gitlab.com';
-            return `https://${host}/api/v4`;
-        }
-        case 'bitbucket': return 'https://api.bitbucket.org/2.0';
-        case 'azure-devops': return 'https://dev.azure.com';
-        case 'gitea':
-        case 'gogs': {
-            const match = url.match(/https?:\/\/([^/]+)/);
-            const host = match ? match[1] : null;
-            return host ? `https://${host}/api/v1` : null;
-        }
-        default: return null;
+function resolveCorrelationId(incoming?: string, traceparent?: string): string {
+    if (incoming && incoming.trim().length > 0 && /^[a-zA-Z0-9._:-]{1,128}$/.test(incoming.trim())) {
+        return incoming.trim();
     }
-}
-
-function buildCredentialEnvKey(provider: RepositoryProvider): string {
-    const keyMap: Record<RepositoryProvider, string> = {
-        'github': 'UGONDU_GITHUB_TOKEN',
-        'gitlab': 'UGONDU_GITLAB_TOKEN',
-        'bitbucket': 'UGONDU_BITBUCKET_TOKEN',
-        'gitea': 'UGONDU_GITEA_TOKEN',
-        'gogs': 'UGONDU_GOGS_TOKEN',
-        'azure-devops': 'UGONDU_AZURE_DEVOPS_TOKEN',
-        'aws-codecommit': 'AWS_SECRET_ACCESS_KEY',
-        'generic-https': 'UGONDU_GIT_TOKEN',
-        'generic-ssh': 'UGONDU_SSH_KEY_PATH'
-    };
-    return keyMap[provider];
-}
-
-app.post('/v1/repository/resolve', (req: Request, res: Response): any => {
-    const { repositoryUrl } = req.body;
-
-    if (!repositoryUrl) {
-        return res.status(400).json({ error: __t('missing_repo') });
+    if (traceparent && W3C_TRACEPARENT_RE.test(traceparent)) {
+        return traceparent.split('-')[1];
     }
+    return randomUUID();
+}
 
-    const provider = detectProvider(repositoryUrl);
-    const cloneUrl = normalizeCloneUrl(repositoryUrl, provider);
-    const apiUrl = buildApiUrl(repositoryUrl, provider);
-    const credentialEnvKey = buildCredentialEnvKey(provider);
+function loadAllowedCorsOrigins(): string[] {
+    return ProductRegistry.getAllowedOrigins();
+}
 
-    const metadata: RepositoryMetadata = {
-        provider,
-        normalizedUrl: repositoryUrl,
-        cloneUrl,
-        apiUrl,
-        credentialEnvKey
+function buildRequestContext(req: TraceRequest, body: Record<string, unknown>): RequestContext {
+    const authMode = body['authMode'] as RepositoryAuthMode | undefined;
+    const rawCreds = (body['credentials'] as Record<string, unknown> | undefined) ?? body;
+
+    const credentials: CredentialContext = {
+        providerId: typeof rawCreds['providerId'] === 'string' ? rawCreds['providerId'] : undefined,
+        authMode: (rawCreds['authMode'] as RepositoryAuthMode | undefined) ?? authMode,
+        token: typeof rawCreds['token'] === 'string' ? rawCreds['token'] : undefined,
+        sshPrivateKeyPath:
+            typeof rawCreds['sshPrivateKeyPath'] === 'string' ? rawCreds['sshPrivateKeyPath'] : undefined,
+        awsRoleArn: typeof rawCreds['awsRoleArn'] === 'string' ? rawCreds['awsRoleArn'] : undefined,
+        awsWebIdentityTokenFile:
+            typeof rawCreds['awsWebIdentityTokenFile'] === 'string'
+                ? rawCreds['awsWebIdentityTokenFile']
+                : undefined,
+        awsRegion: typeof rawCreds['awsRegion'] === 'string' ? rawCreds['awsRegion'] : undefined,
+        awsAccessKeyId:
+            typeof rawCreds['awsAccessKeyId'] === 'string' ? rawCreds['awsAccessKeyId'] : undefined,
+        awsSecretAccessKey:
+            typeof rawCreds['awsSecretAccessKey'] === 'string'
+                ? rawCreds['awsSecretAccessKey']
+                : undefined,
+        awsSessionToken:
+            typeof rawCreds['awsSessionToken'] === 'string' ? rawCreds['awsSessionToken'] : undefined
     };
 
-    console.log(__t('repo_resolved', repositoryUrl, provider.toUpperCase()));
+    return {
+        correlationId: req.correlationId,
+        traceparent: req.traceparent,
+        tenantId: typeof req.headers['x-tenant-id'] === 'string' ? req.headers['x-tenant-id'] : undefined,
+        authMode,
+        credentials
+    };
+}
 
-    return res.status(200).json({
-        metadata,
-        message: __t('repo_detected', provider.toUpperCase(), credentialEnvKey)
+export function createRepositoryAdapterApp(
+    registry: RepositoryAdapterRegistry = new RepositoryAdapterRegistry()
+): express.Express {
+    const app = express();
+    const allowedOrigins = loadAllowedCorsOrigins();
+
+    app.use((req: TraceRequest, res: Response, next: NextFunction) => {
+        const incomingTrace =
+            typeof req.headers['traceparent'] === 'string' ? req.headers['traceparent'] : undefined;
+        const incomingCorr =
+            typeof req.headers['x-correlation-id'] === 'string'
+                ? req.headers['x-correlation-id']
+                : typeof req.headers['x-request-id'] === 'string'
+                  ? req.headers['x-request-id']
+                  : undefined;
+
+        const traceparent = resolveTraceparent(incomingTrace);
+        const correlationId = resolveCorrelationId(incomingCorr, traceparent);
+
+        req.traceparent = traceparent;
+        req.correlationId = correlationId;
+
+        res.setHeader('traceparent', traceparent);
+        res.setHeader('x-correlation-id', correlationId);
+        next();
     });
-});
 
-app.get('/v1/repository/providers', (req: Request, res: Response): any => {
-    const supported: RepositoryProvider[] = [
-        'github', 'gitlab', 'bitbucket', 'gitea', 'gogs',
-        'azure-devops', 'aws-codecommit', 'generic-https', 'generic-ssh'
-    ];
-    return res.status(200).json({
-        providers: supported,
-        count: supported.length,
-        message: __t('repo_all_providers')
+    app.use(
+        cors({
+            origin: (origin, callback) => {
+                if (!origin) return callback(null, true);
+                if (allowedOrigins.includes(origin)) return callback(null, true);
+                return callback(new Error(__t('messages.error.cors_policy_violation')), false);
+            },
+            credentials: true
+        })
+    );
+
+    app.use(express.json({ limit: '1mb' }));
+
+    app.get('/health', (req: TraceRequest, res: Response) => {
+        res.status(200).json({
+            status: 'ok',
+            service: 'repository-adapter',
+            version: '2.0.0',
+            timestamp: new Date().toISOString(),
+            correlationId: req.correlationId
+        });
     });
-});
 
-const PORT = process.env.PORT || 4005;
-app.listen(PORT, () => {
-    console.log(__t('listening_port', 'Repository Adapter', PORT));
-    console.log(__t('repo_supported'));
-});
+    app.get('/health/live', (req: TraceRequest, res: Response) => {
+        res.status(200).json({
+            status: 'alive',
+            service: 'repository-adapter',
+            version: '2.0.0',
+            uptimeSeconds: Math.floor(process.uptime()),
+            timestamp: new Date().toISOString(),
+            correlationId: req.correlationId
+        });
+    });
+
+    app.get('/health/ready', async (req: TraceRequest, res: Response) => {
+        try {
+            const adapterChecks = await registry.checkAllHealth();
+            const ssrfEnforced =
+                NetworkDestinationPolicy.isDisallowedIP('169.254.169.254') &&
+                NetworkDestinationPolicy.isDisallowedIP('127.0.0.1');
+            const allHealthy = ssrfEnforced && adapterChecks.every((c) => c.status === 'healthy');
+
+            res.status(allHealthy ? 200 : 503).json({
+                status: allHealthy ? 'ready' : 'not_ready',
+                service: 'repository-adapter',
+                version: '2.0.0',
+                ready: allHealthy,
+                checks: {
+                    ssrfPolicy: ssrfEnforced ? 'operational' : 'degraded',
+                    adapters: adapterChecks
+                },
+                timestamp: new Date().toISOString(),
+                correlationId: req.correlationId
+            });
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            res.status(503).json({
+                status: 'not_ready',
+                service: 'repository-adapter',
+                ready: false,
+                error: msg,
+                correlationId: req.correlationId
+            });
+        }
+    });
+
+    app.get('/v1/metadata', (req: TraceRequest, res: Response) => {
+        res.status(200).json({
+            service: 'repository-adapter',
+            serviceId: 'repository_adapter',
+            displayName: 'Ugondu Repository Adapter',
+            version: '2.0.0',
+            apiVersion: 'v1',
+            port: Number(process.env['PORT'] || ProductRegistry.getServiceConfig('repository_adapter').port),
+            endpoints: {
+                liveness: '/health/live',
+                readiness: '/health/ready',
+                health: '/health',
+                metadata: '/v1/metadata',
+                resolve: '/v1/repository/resolve',
+                providers: '/v1/repository/providers',
+                validateCredentials: '/v1/repository/validate-credentials',
+                repositoryMetadata: '/v1/repository/metadata',
+                refs: '/v1/repository/refs',
+                fetch: '/v1/repository/fetch'
+            },
+            providers: registry.listProviderSummaries(),
+            security: {
+                ssrfProtection: 'NetworkDestinationPolicy',
+                strictUrlParsing: true,
+                awsCodeCommitAuth: 'aws-iam-role-oidc-sigv4'
+            },
+            timestamp: new Date().toISOString(),
+            correlationId: req.correlationId
+        });
+    });
+
+    app.post('/v1/repository/resolve', (req: TraceRequest, res: Response): void => {
+        const body = (req.body ?? {}) as Record<string, unknown>;
+        const repositoryUrl = body['repositoryUrl'];
+        const authMode = body['authMode'] as RepositoryAuthMode | undefined;
+
+        if (!repositoryUrl || typeof repositoryUrl !== 'string') {
+            res.status(400).json({
+                error: __t('missing_repo'),
+                code: 'MISSING_REPOSITORY_URL',
+                correlationId: req.correlationId
+            });
+            return;
+        }
+
+        try {
+            const parsedUrl = parseAndValidateRepositoryUrl(repositoryUrl, authMode);
+            const adapter = registry.resolveAdapter(parsedUrl);
+            const normalized = adapter.normalize(parsedUrl);
+
+            const metadata = {
+                provider: normalized.legacyProvider,
+                providerId: normalized.providerId,
+                normalizedUrl: normalized.normalizedUrl,
+                cloneUrl: normalized.cloneUrl,
+                httpsCloneUrl: normalized.httpsCloneUrl,
+                sshCloneUrl: normalized.sshCloneUrl,
+                apiUrl: normalized.apiUrl,
+                credentialEnvKey: normalized.credentialEnvKey,
+                authMode: normalized.authMode,
+                protocol: normalized.protocol,
+                host: normalized.host,
+                owner: normalized.owner,
+                repository: normalized.repository,
+                fullName: normalized.fullName,
+                verifiedSshHttpsMapping: normalized.verifiedSshHttpsMapping,
+                capabilities: { ...adapter.capabilities },
+                ...(normalized.credentialContract ? { credentialContract: normalized.credentialContract } : {}),
+                ...(normalized.region ? { region: normalized.region } : {})
+            };
+
+            Logger.info(__t('repo_resolved', repositoryUrl, normalized.legacyProvider.toUpperCase()), {
+                correlationId: req.correlationId,
+                providerId: normalized.providerId
+            });
+
+            res.status(200).json({
+                metadata,
+                message: __t('repo_detected', normalized.legacyProvider.toUpperCase(), normalized.credentialEnvKey),
+                correlationId: req.correlationId
+            });
+        } catch (err: unknown) {
+            if (err instanceof RepositoryUrlValidationError) {
+                Logger.warn(err.message, { code: err.code, correlationId: req.correlationId });
+                res.status(err.statusCode).json({
+                    error: err.message,
+                    code: err.code,
+                    correlationId: req.correlationId
+                });
+                return;
+            }
+            const msg = err instanceof Error ? err.message : String(err);
+            res.status(400).json({
+                error: msg,
+                code: 'INVALID_REPOSITORY_URL',
+                correlationId: req.correlationId
+            });
+        }
+    });
+
+    app.get('/v1/repository/providers', (req: TraceRequest, res: Response): void => {
+        const supported = registry.listProviderIds();
+        res.status(200).json({
+            providers: supported,
+            adapters: registry.listProviderSummaries(),
+            count: supported.length,
+            message: __t('repo_all_providers'),
+            correlationId: req.correlationId
+        });
+    });
+
+    app.post('/v1/repository/validate-credentials', async (req: TraceRequest, res: Response): Promise<void> => {
+        const body = (req.body ?? {}) as Record<string, unknown>;
+        const repositoryUrl = typeof body['repositoryUrl'] === 'string' ? body['repositoryUrl'] : undefined;
+        const providerId = typeof body['providerId'] === 'string' ? body['providerId'] : undefined;
+        const context = buildRequestContext(req, body);
+
+        try {
+            const adapter = repositoryUrl
+                ? registry.resolveAdapter(parseAndValidateRepositoryUrl(repositoryUrl, context.authMode))
+                : providerId
+                  ? registry.getAdapterById(providerId)
+                  : undefined;
+
+            if (!adapter) {
+                res.status(400).json({
+                    error: __t('repository.error.url_or_provider_required'),
+                    code: 'INVALID_PROVIDER',
+                    correlationId: req.correlationId
+                });
+                return;
+            }
+
+            const validation = await adapter.validateCredentials(context.credentials ?? {});
+            res.status(validation.valid ? 200 : 400).json({
+                valid: validation.valid,
+                validation,
+                ...(validation.valid ? {} : { error: validation.reason, code: validation.code }),
+                correlationId: req.correlationId
+            });
+        } catch (err: unknown) {
+            if (err instanceof RepositoryUrlValidationError) {
+                res.status(err.statusCode).json({
+                    valid: false,
+                    error: err.message,
+                    code: err.code,
+                    correlationId: req.correlationId
+                });
+                return;
+            }
+            const msg = err instanceof Error ? err.message : String(err);
+            res.status(400).json({
+                valid: false,
+                error: msg,
+                code: 'CREDENTIAL_VALIDATION_FAILED',
+                correlationId: req.correlationId
+            });
+        }
+    });
+
+    app.post('/v1/repository/metadata', async (req: TraceRequest, res: Response): Promise<void> => {
+        const body = (req.body ?? {}) as Record<string, unknown>;
+        const repositoryUrl = body['repositoryUrl'];
+
+        if (!repositoryUrl || typeof repositoryUrl !== 'string') {
+            res.status(400).json({
+                error: __t('missing_repo'),
+                code: 'MISSING_REPOSITORY_URL',
+                correlationId: req.correlationId
+            });
+            return;
+        }
+
+        try {
+            const context = buildRequestContext(req, body);
+            const parsedUrl = parseAndValidateRepositoryUrl(repositoryUrl, context.authMode);
+            const adapter = registry.resolveAdapter(parsedUrl);
+            const normalized = adapter.normalize(parsedUrl);
+            const metadata = await adapter.getMetadata(normalized, context);
+
+            res.status(200).json({
+                metadata,
+                correlationId: req.correlationId
+            });
+        } catch (err: unknown) {
+            if (err instanceof RepositoryUrlValidationError) {
+                res.status(err.statusCode).json({
+                    error: err.message,
+                    code: err.code,
+                    correlationId: req.correlationId
+                });
+                return;
+            }
+            const msg = err instanceof Error ? err.message : String(err);
+            res.status(400).json({
+                error: msg,
+                code: 'METADATA_RESOLUTION_FAILED',
+                correlationId: req.correlationId
+            });
+        }
+    });
+
+    app.post('/v1/repository/refs', async (req: TraceRequest, res: Response): Promise<void> => {
+        const body = (req.body ?? {}) as Record<string, unknown>;
+        const repositoryUrl = body['repositoryUrl'];
+
+        if (!repositoryUrl || typeof repositoryUrl !== 'string') {
+            res.status(400).json({
+                error: __t('missing_repo'),
+                code: 'MISSING_REPOSITORY_URL',
+                correlationId: req.correlationId
+            });
+            return;
+        }
+
+        try {
+            const context = buildRequestContext(req, body);
+            const parsedUrl = parseAndValidateRepositoryUrl(repositoryUrl, context.authMode);
+            const adapter = registry.resolveAdapter(parsedUrl);
+            const normalized = adapter.normalize(parsedUrl);
+            const refs = await adapter.listRefs(normalized, context);
+
+            res.status(200).json({
+                refs,
+                count: refs.length,
+                repository: normalized,
+                correlationId: req.correlationId
+            });
+        } catch (err: unknown) {
+            if (err instanceof RepositoryUrlValidationError) {
+                res.status(err.statusCode).json({
+                    error: err.message,
+                    code: err.code,
+                    correlationId: req.correlationId
+                });
+                return;
+            }
+            const msg = err instanceof Error ? err.message : String(err);
+            res.status(400).json({
+                error: msg,
+                code: 'REFS_LISTING_FAILED',
+                correlationId: req.correlationId
+            });
+        }
+    });
+
+    app.post('/v1/repository/fetch', async (req: TraceRequest, res: Response): Promise<void> => {
+        const body = (req.body ?? {}) as Record<string, unknown>;
+        const repositoryUrl = body['repositoryUrl'];
+
+        if (!repositoryUrl || typeof repositoryUrl !== 'string') {
+            res.status(400).json({
+                error: __t('missing_repo'),
+                code: 'MISSING_REPOSITORY_URL',
+                correlationId: req.correlationId
+            });
+            return;
+        }
+
+        try {
+            const context = buildRequestContext(req, body);
+            const parsedUrl = parseAndValidateRepositoryUrl(repositoryUrl, context.authMode);
+            const adapter = registry.resolveAdapter(parsedUrl);
+            const normalized = adapter.normalize(parsedUrl);
+
+            const rawRef = body['ref'] as Partial<RepositoryRef> | string | undefined;
+            const branchName = typeof body['branch'] === 'string' ? body['branch'] : 'main';
+            const targetRef: RepositoryRef =
+                typeof rawRef === 'object' && rawRef !== null && typeof rawRef.name === 'string'
+                    ? {
+                          name: rawRef.name,
+                          ref: rawRef.ref ?? `refs/heads/${rawRef.name}`,
+                          type: rawRef.type ?? 'branch',
+                          sha: rawRef.sha ?? ''
+                      }
+                    : {
+                          name: typeof rawRef === 'string' ? rawRef : branchName,
+                          ref: `refs/heads/${typeof rawRef === 'string' ? rawRef : branchName}`,
+                          type: 'branch',
+                          sha: typeof body['sha'] === 'string' ? body['sha'] : ''
+                      };
+
+            const artifact = await adapter.fetchSource(normalized, targetRef, context);
+            res.status(200).json({
+                artifact,
+                correlationId: req.correlationId
+            });
+        } catch (err: unknown) {
+            if (err instanceof RepositoryUrlValidationError) {
+                res.status(err.statusCode).json({
+                    error: err.message,
+                    code: err.code,
+                    correlationId: req.correlationId
+                });
+                return;
+            }
+            const msg = err instanceof Error ? err.message : String(err);
+            res.status(400).json({
+                error: msg,
+                code: 'SOURCE_FETCH_FAILED',
+                correlationId: req.correlationId
+            });
+        }
+    });
+
+    return app;
+}
+
+export const defaultRegistry = new RepositoryAdapterRegistry();
+export const app = createRepositoryAdapterApp(defaultRegistry);
+
+if (require.main === module) {
+    const PORT = process.env['PORT'] || ProductRegistry.getServiceConfig('repository_adapter').port;
+    app.listen(Number(PORT), '0.0.0.0', () => {
+        Logger.info(__t('listening_port', __t('repository_adapter'), PORT));
+        Logger.info(__t('repo_supported'));
+    });
+}

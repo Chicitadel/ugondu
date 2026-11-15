@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.com/schemas/aws-target.schema.json",
+  "title": "Ugondu AWS Qualification Target Boundary Schema",
+  "type": "object",
+  "required": ["schemaVersion", "targets"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "region",
+          "executionRoleName",
+          "purpose",
+          "allowedActions",
+          "residualsPolicy"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]{2,63}$"
+          },
+          "accountId": {
+            "type": "string",
+            "pattern": "^\\d{12}$"
+          },
+          "region": {
+            "type": "string",
+            "pattern": "^[a-z]{2}-[a-z]+-\\d$"
+          },
+          "executionRoleName": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": ["qualification", "production", "staging"]
+          },
+          "allowedActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "residualsPolicy": {
+            "type": "object",
+            "required": ["prohibitResidualResources", "allowlistTags"],
+            "properties": {
+              "prohibitResidualResources": {
+                "type": "boolean"
+              },
+              "allowlistTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

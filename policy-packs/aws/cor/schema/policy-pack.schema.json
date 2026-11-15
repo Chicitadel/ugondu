@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ugondu.airroofers.com/schemas/uplm/policy-pack.schema.json",
+  "title": "Ugondu UPLM Policy Pack Schema",
+  "description": "Strict JSON Schema for Ugondu Universal Policy Lifecycle Manager (UPLM) Policy Pack manifests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "provenance",
+    "provider",
+    "targetScope",
+    "roles",
+    "policies",
+    "quotas",
+    "safetyGuardrails",
+    "ownershipRules",
+    "riskPolicy",
+    "verification",
+    "migration",
+    "retirement",
+    "audit"
+  ],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "enum": ["uplm.ugondu.io/v1"]
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["PolicyPack"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "description", "version", "owner", "classification", "tags"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9.-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "owner": { "type": "string", "minLength": 1 },
+        "classification": { "type": "string", "enum": ["ENTERPRISE", "SOVEREIGN", "GOVERNMENT", "INTERNAL"] },
+        "tags": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "trustedRelease", "packDigestSha256", "signatureAlgorithm", "signingKeyId"],
+      "properties": {
+        "source": { "type": "string" },
+        "trustedRelease": { "type": "boolean" },
+        "packDigestSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "signatureAlgorithm": { "type": "string", "enum": ["Ed25519", "RSA-4096"] },
+        "signingKeyId": { "type": "string" }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "adapterType", "supportedAdapterVersions", "requiredCapabilities"],
+      "properties": {
+        "id": { "type": "string", "enum": ["aws", "azure", "gcp", "kubernetes", "linux", "cpanel"] },
+        "adapterType": { "type": "string" },
+        "supportedAdapterVersions": { "type": "string" },
+        "requiredCapabilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "optionalCapabilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "targetScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["partition", "accountId", "region", "requiredSessionTags"],
+      "properties": {
+        "partition": { "type": "string" },
+        "accountId": { "type": "string", "pattern": "^[0-9]{12}$" },
+        "region": { "type": "string" },
+        "requiredSessionTags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["logicalId", "physicalName", "arn", "roleKind", "templatePath", "sha256", "description"],
+        "properties": {
+          "logicalId": { "type": "string" },
+          "physicalName": { "type": "string" },
+          "arn": { "type": "string" },
+          "roleKind": { "type": "string", "enum": ["EXECUTION_ROLE", "RUNNER_ROLE"] },
+          "templatePath": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "description": { "type": "string" },
+          "trustedPrincipalArn": { "type": "string" },
+          "prohibitExecutionPolicyAttachment": { "type": "boolean" }
+        }
+      }
+    },
+    "policies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "logicalId",
+          "physicalName",
+          "templatePath",
+          "sha256",
+          "statementCount",
+          "compactCharLength",
+          "targetRoleLogicalId",
+          "description",
+          "sids"
+        ],
+        "properties": {
+          "logicalId": { "type": "string" },
+          "physicalName": { "type": "string" },
+          "templatePath": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "statementCount": { "type": "integer", "minimum": 1 },
+          "compactCharLength": { "type": "integer", "minimum": 1, "maximum": 6144 },
+          "targetRoleLogicalId": { "type": "string" },
+          "description": { "type": "string" },
+          "sids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "quotas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxManagedPolicySizeChars",
+        "maxManagedPoliciesPerRole",
+        "requiredManagedPolicySlots",
+        "maxVersionsPerManagedPolicy",
+        "totalStatementsInPack"
+      ],
+      "properties": {
+        "maxManagedPolicySizeChars": { "type": "integer" },
+        "maxManagedPoliciesPerRole": { "type": "integer" },
+        "requiredManagedPolicySlots": { "type": "integer" },
+        "maxVersionsPerManagedPolicy": { "type": "integer" },
+        "totalStatementsInPack": { "type": "integer" }
+      }
+    },
+    "safetyGuardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preserveUnattachedTestFixture",
+        "firstRunReadOnly",
+        "prohibitRunnerExecutionAttachment",
+        "prohibitInlinePaste",
+        "prohibitSelfEscalation",
+        "blockOnUnknownTrustPrincipal",
+        "requireInspectAndPlanBeforeAttach"
+      ],
+      "properties": {
+        "preserveUnattachedTestFixture": { "type": "boolean", "const": true },
+        "firstRunReadOnly": { "type": "boolean", "const": true },
+        "prohibitRunnerExecutionAttachment": { "type": "boolean", "const": true },
+        "prohibitInlinePaste": { "type": "boolean", "const": true },
+        "prohibitSelfEscalation": { "type": "boolean", "const": true },
+        "blockOnUnknownTrustPrincipal": { "type": "boolean", "const": true },
+        "requireInspectAndPlanBeforeAttach": { "type": "boolean", "const": true }
+      }
+    },
+    "ownershipRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["defaultInstallOwnership", "adoptedRoleRetirementBehavior", "requireLedgerProofForDelete", "tagsAloneInsufficientForDelete"],
+      "properties": {
+        "defaultInstallOwnership": { "type": "string", "enum": ["UGONDU_CREATED", "UGONDU_ADOPTED"] },
+        "adoptedRoleRetirementBehavior": { "type": "string", "const": "PRESERVE" },
+        "requireLedgerProofForDelete": { "type": "boolean", "const": true },
+        "tagsAloneInsufficientForDelete": { "type": "boolean", "const": true }
+      }
+    },
+    "riskPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inspectRisk", "createPolicyRisk", "attachPolicyRisk", "trustChangeRisk", "retirePolicyRisk"],
+      "properties": {
+        "inspectRisk": { "type": "string", "const": "R0" },
+        "createPolicyRisk": { "type": "string", "const": "R1" },
+        "attachPolicyRisk": { "type": "string", "const": "R2" },
+        "trustChangeRisk": { "type": "string", "const": "R3" },
+        "retirePolicyRisk": { "type": "string", "const": "R4" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requireDocumentHashMatch", "requireAttachmentVerification", "requireTrustPolicyVerification", "requireNegativeIsolationTests"],
+      "properties": {
+        "requireDocumentHashMatch": { "type": "boolean" },
+        "requireAttachmentVerification": { "type": "boolean" },
+        "requireTrustPolicyVerification": { "type": "boolean" },
+        "requireNegativeIsolationTests": { "type": "boolean" }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "supportedSourceVersions", "retainOldUntilNewVerified"],
+      "properties": {
+        "strategy": { "type": "string", "const": "ADDITIVE_FIRST" },
+        "supportedSourceVersions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "retainOldUntilNewVerified": { "type": "boolean", "const": true }
+      }
+    },
+    "retirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preserveAdoptedObjects", "preserveSharedObjects", "preserveExternalObjects", "blockOnUnknownOwnership", "forceFlagCannotBypassSafety"],
+      "properties": {
+        "preserveAdoptedObjects": { "type": "boolean", "const": true },
+        "preserveSharedObjects": { "type": "boolean", "const": true },
+        "preserveExternalObjects": { "type": "boolean", "const": true },
+        "blockOnUnknownOwnership": { "type": "boolean", "const": true },
+        "forceFlagCannotBypassSafety": { "type": "boolean", "const": true }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceRequired", "retentionDays", "redactSecrets"],
+      "properties": {
+        "evidenceRequired": { "type": "boolean", "const": true },
+        "retentionDays": { "type": "integer", "minimum": 365 },
+        "redactSecrets": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}

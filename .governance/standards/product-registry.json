@@ -7,6 +7,7 @@
   "organization": "Ujomor Systems & Enterprise Governance",
   "createdDate": "2026-08-19",
   "classification": "ENTERPRISE | GOVERNMENT",
+  "activeProductId": "UGONDU",
   "governance": {
     "zeroDomainContamination": true,
     "decoupledEcosystem": true,
@@ -276,17 +277,344 @@
     },
     {
       "productId": "UGONDU",
-      "name": "Ugondu Universal Identity, Ledger & Data Gateway",
+      "id": "ugondu",
+      "slug": "ugondu",
+      "name": "Ugondu Universal Deployment Intelligence Platform",
+      "fullName": "Ugondu Universal Deployment Intelligence Platform",
       "code": "UGONDU",
+      "version": "4.0.0",
+      "publisher": "AIR ROOFERS",
       "classification": "COMMERCIAL_PRODUCT",
       "tier": "SOVEREIGN_LEDGER",
-      "description": "Decentralized identity gateway, tamper-proof audit ledger, and high-throughput data federation bus.",
+      "description": "Universal Deployment Intelligence Platform, decentralized identity gateway, tamper-proof audit ledger, and high-throughput data federation bus.",
       "endpoints": {
         "baseUrl": "https://ugondu.airroofers.eu",
-        "health": "/health",
-        "readiness": "/ready",
+        "health": "/health/live",
+        "liveness": "/health/live",
+        "readiness": "/health/ready",
+        "metadata": "/v1/metadata",
+        "legacyHealth": "/health",
         "metrics": "/metrics",
         "apiDocs": "/v1/swagger.json"
+      },
+      "healthContracts": {
+        "liveness": "/health/live",
+        "readiness": "/health/ready",
+        "metadata": "/v1/metadata",
+        "legacyHealth": "/health",
+        "metrics": "/metrics"
+      },
+      "ports": {
+        "engine_core": 4001,
+        "billing_gateway": 4002,
+        "plugin_manager": 4003,
+        "event_bus": 4004,
+        "repository_adapter": 4005
+      },
+      "services": {
+        "engine_core": {
+          "serviceId": "engine_core",
+          "name": "engine-core",
+          "displayName": "Ugondu Engine Core",
+          "port": 4001,
+          "host": "localhost",
+          "dockerHost": "engine-core",
+          "protocol": "http",
+          "basePath": "/v1",
+          "health": {
+            "liveness": "/health/live",
+            "readiness": "/health/ready",
+            "metadata": "/v1/metadata",
+            "legacy": "/health"
+          }
+        },
+        "billing_gateway": {
+          "serviceId": "billing_gateway",
+          "name": "billing-gateway",
+          "displayName": "Ugondu Billing Gateway",
+          "port": 4002,
+          "host": "localhost",
+          "dockerHost": "billing-gateway",
+          "protocol": "http",
+          "basePath": "/v1",
+          "health": {
+            "liveness": "/health/live",
+            "readiness": "/health/ready",
+            "metadata": "/v1/metadata",
+            "legacy": "/health"
+          }
+        },
+        "plugin_manager": {
+          "serviceId": "plugin_manager",
+          "name": "plugin-manager",
+          "displayName": "Ugondu Plugin Manager",
+          "port": 4003,
+          "host": "localhost",
+          "dockerHost": "plugin-manager",
+          "protocol": "http",
+          "basePath": "/v1",
+          "health": {
+            "liveness": "/health/live",
+            "readiness": "/health/ready",
+            "metadata": "/v1/metadata",
+            "legacy": "/health"
+          }
+        },
+        "event_bus": {
+          "serviceId": "event_bus",
+          "name": "event-bus",
+          "displayName": "Ugondu Event Bus",
+          "port": 4004,
+          "host": "localhost",
+          "dockerHost": "event-bus",
+          "protocol": "http",
+          "basePath": "/v1",
+          "health": {
+            "liveness": "/health/live",
+            "readiness": "/health/ready",
+            "metadata": "/v1/metadata",
+            "legacy": "/health"
+          }
+        },
+        "repository_adapter": {
+          "serviceId": "repository_adapter",
+          "name": "repository-adapter",
+          "displayName": "Ugondu Repository Adapter",
+          "port": 4005,
+          "host": "localhost",
+          "dockerHost": "repository-adapter",
+          "protocol": "http",
+          "basePath": "/v1",
+          "health": {
+            "liveness": "/health/live",
+            "readiness": "/health/ready",
+            "metadata": "/v1/metadata",
+            "legacy": "/health"
+          }
+        }
+      },
+      "editions": [
+        "community",
+        "professional",
+        "business",
+        "enterprise",
+        "sovereign"
+      ],
+      "editionCatalog": {
+        "community": {
+          "id": "community",
+          "code": "COMMUNITY",
+          "legacyAlias": "FREE",
+          "rank": 1,
+          "tokenPrefix": "(none)",
+          "strategy": "quota-sync",
+          "maxPlugins": 1,
+          "rollbacks": false,
+          "atomic": false,
+          "telemetry": false,
+          "limits": {
+            "maxWorkspaces": 1,
+            "maxEnvironments": 1,
+            "maxTargets": 3,
+            "maxDeploymentsPerMonth": 10,
+            "maxFleetNodes": 0,
+            "maxAiRequestsPerMonth": 0
+          }
+        },
+        "professional": {
+          "id": "professional",
+          "code": "PROFESSIONAL",
+          "rank": 2,
+          "tokenPrefix": "ugp_",
+          "strategy": "atomic",
+          "maxPlugins": 5,
+          "rollbacks": true,
+          "atomic": true,
+          "telemetry": false,
+          "limits": {
+            "maxWorkspaces": 5,
+            "maxEnvironments": 10,
+            "maxTargets": 25,
+            "maxDeploymentsPerMonth": 100,
+            "maxFleetNodes": 0,
+            "maxAiRequestsPerMonth": 100
+          }
+        },
+        "business": {
+          "id": "business",
+          "code": "BUSINESS",
+          "rank": 3,
+          "tokenPrefix": "ugb_",
+          "strategy": "atomic",
+          "maxPlugins": 50,
+          "rollbacks": true,
+          "atomic": true,
+          "telemetry": true,
+          "limits": {
+            "maxWorkspaces": 50,
+            "maxEnvironments": 500,
+            "maxTargets": null,
+            "maxDeploymentsPerMonth": null,
+            "maxFleetNodes": 50,
+            "maxAiRequestsPerMonth": 1000
+          }
+        },
+        "enterprise": {
+          "id": "enterprise",
+          "code": "ENTERPRISE",
+          "rank": 4,
+          "tokenPrefix": "uge_",
+          "strategy": "atomic",
+          "maxPlugins": 999,
+          "rollbacks": true,
+          "atomic": true,
+          "telemetry": true,
+          "limits": {
+            "maxWorkspaces": 250,
+            "maxEnvironments": 2500,
+            "maxTargets": null,
+            "maxDeploymentsPerMonth": null,
+            "maxFleetNodes": 500,
+            "maxAiRequestsPerMonth": 10000
+          }
+        },
+        "sovereign": {
+          "id": "sovereign",
+          "code": "SOVEREIGN",
+          "rank": 5,
+          "tokenPrefix": "ugs_",
+          "strategy": "atomic",
+          "maxPlugins": 999,
+          "rollbacks": true,
+          "atomic": true,
+          "telemetry": true,
+          "limits": {
+            "maxWorkspaces": null,
+            "maxEnvironments": null,
+            "maxTargets": null,
+            "maxDeploymentsPerMonth": null,
+            "maxFleetNodes": null,
+            "maxAiRequestsPerMonth": null
+          }
+        }
+      },
+      "capabilities": [
+        {
+          "capabilityId": "SECURITY_KERNEL",
+          "displayName": "Security Kernel",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Identity"
+        },
+        {
+          "capabilityId": "BASIC_VERIFICATION",
+          "displayName": "Basic Verification",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Observability"
+        },
+        {
+          "capabilityId": "CORE_RECOVERY_SAFETY",
+          "displayName": "Core Recovery Safety",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Recovery"
+        },
+        {
+          "capabilityId": "COR_EXECUTION_INTEGRITY",
+          "displayName": "COR Execution Integrity",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Compute"
+        },
+        {
+          "capabilityId": "BASIC_AUDIT_TRAIL",
+          "displayName": "Basic Audit Trail",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Observability"
+        },
+        {
+          "capabilityId": "EMERGENCY_ROLLBACK",
+          "displayName": "Emergency Rollback",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Recovery"
+        },
+        {
+          "capabilityId": "BASIC_DEPLOYMENT",
+          "displayName": "Basic Deployment",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Compute"
+        },
+        {
+          "capabilityId": "AUTHENTICATION",
+          "displayName": "Workload Authentication",
+          "capabilityClass": "CORE",
+          "minimumEdition": "community",
+          "kind": "Identity"
+        },
+        {
+          "capabilityId": "ATOMIC_DEPLOYMENT",
+          "displayName": "Atomic Zero-Downtime Deployment",
+          "capabilityClass": "EDITION",
+          "minimumEdition": "professional",
+          "kind": "Compute"
+        },
+        {
+          "capabilityId": "ROLLBACK",
+          "displayName": "Automated Transactional Rollback",
+          "capabilityClass": "EDITION",
+          "minimumEdition": "professional",
+          "kind": "Recovery"
+        },
+        {
+          "capabilityId": "PLUGIN_SANDBOX",
+          "displayName": "Signed Plugin Sandbox Execution",
+          "capabilityClass": "METERED",
+          "minimumEdition": "community",
+          "kind": "Compute"
+        },
+        {
+          "capabilityId": "EVENT_FEDERATION",
+          "displayName": "Event Bus & Webhook Federation",
+          "capabilityClass": "EDITION",
+          "minimumEdition": "business",
+          "kind": "Network"
+        },
+        {
+          "capabilityId": "TELEMETRY_STREAMING",
+          "displayName": "Distributed Telemetry Streaming",
+          "capabilityClass": "EDITION",
+          "minimumEdition": "business",
+          "kind": "Observability"
+        },
+        {
+          "capabilityId": "ENTERPRISE_GOVERNANCE",
+          "displayName": "Enterprise Policy & Compliance Gate",
+          "capabilityClass": "EDITION",
+          "minimumEdition": "enterprise",
+          "kind": "Identity"
+        },
+        {
+          "capabilityId": "SOVEREIGN_ATTESTATION",
+          "displayName": "Sovereign Air-Gapped Cryptographic Attestation",
+          "capabilityClass": "EDITION",
+          "minimumEdition": "sovereign",
+          "kind": "Secrets"
+        }
+      ],
+      "cors": {
+        "allowedOrigins": [
+          "https://admin.airroofers.eu",
+          "https://governance.airroofers.eu",
+          "https://license.airroofers.eu",
+          "https://ugondu.airroofers.eu",
+          "http://localhost:3000",
+          "http://localhost:4001"
+        ],
+        "allowCredentials": true
       },
       "iam": {
         "authProtocol": "OAuth2_mTLS",
@@ -323,7 +651,8 @@
       "metadata": {
         "boundedContext": "IDENTITY_AND_LEDGER",
         "domainContaminationRisk": "ZERO",
-        "repositoryPath": "products/ugondu"
+        "repositoryPath": "products/ugondu",
+        "docsRoot": "products/ugondu/docs/commercial"
       }
     },
     {

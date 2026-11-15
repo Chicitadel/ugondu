@@ -2,11 +2,11 @@
  * Project        : Ugondu
  * Module         : Analytics
  * File           : dora.ts
- * Version        : 1.0.0
+ * Version        : 2.0.0
  * Author         : Delivery Intelligence Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
- * Last Modified  : 2026-09-30
+ * Last Modified  : 2026-10-01
  * Classification : ENTERPRISE
  *
  * Governance:
@@ -36,12 +36,24 @@ export enum DoraTier {
   LOW = "LOW"
 }
 
+export enum EvidenceKind {
+  MEASURED    = 'MEASURED',
+  CALCULATED  = 'CALCULATED',
+  BENCHMARK   = 'BENCHMARK',
+  PROJECTED   = 'PROJECTED'
+}
+
 export enum DeploymentStatus {
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
   DEGRADED = "DEGRADED"
 }
 
+/**
+ * @interface DeploymentEvent
+ * @description Corporate Governed interface implementation for DeploymentEvent
+ * @classification ENTERPRISE
+ */
 export interface DeploymentEvent {
   id: string;
   status: DeploymentStatus;
@@ -51,6 +63,11 @@ export interface DeploymentEvent {
   hotfixCompletionTimestampMs?: number;
 }
 
+/**
+ * @interface DoraMetricsResult
+ * @description Corporate Governed interface implementation for DoraMetricsResult
+ * @classification ENTERPRISE
+ */
 export interface DoraMetricsResult {
   changeLeadTimeMs: number;
   deploymentFrequencyPerDay: number;
@@ -58,8 +75,21 @@ export interface DoraMetricsResult {
   changeFailureRatePercentage: number;
   deploymentReworkRatePercentage: number;
   performanceTier: DoraTier;
+  evidenceKinds: {
+    changeLeadTimeMs:               EvidenceKind;
+    deploymentFrequencyPerDay:      EvidenceKind;
+    failedDeploymentRecoveryTimeMs: EvidenceKind;
+    changeFailureRatePercentage:    EvidenceKind;
+    deploymentReworkRatePercentage: EvidenceKind;
+    performanceTier:                EvidenceKind;
+  };
 }
 
+/**
+ * @class DoraAnalyticsEngine
+ * @description Corporate Governed class implementation for DoraAnalyticsEngine
+ * @classification ENTERPRISE
+ */
 export class DoraAnalyticsEngine {
   private static readonly MS_PER_DAY = 86400000;
   private static readonly HOURS_24_MS = 86400000;
@@ -72,7 +102,15 @@ export class DoraAnalyticsEngine {
         failedDeploymentRecoveryTimeMs: 0,
         changeFailureRatePercentage: 0,
         deploymentReworkRatePercentage: 0,
-        performanceTier: DoraTier.LOW
+        performanceTier: DoraTier.LOW,
+        evidenceKinds: {
+          changeLeadTimeMs:               EvidenceKind.MEASURED,
+          deploymentFrequencyPerDay:      EvidenceKind.MEASURED,
+          failedDeploymentRecoveryTimeMs: EvidenceKind.CALCULATED,
+          changeFailureRatePercentage:    EvidenceKind.CALCULATED,
+          deploymentReworkRatePercentage: EvidenceKind.CALCULATED,
+          performanceTier:                EvidenceKind.BENCHMARK
+        }
       };
     }
 
@@ -128,7 +166,15 @@ export class DoraAnalyticsEngine {
       failedDeploymentRecoveryTimeMs,
       changeFailureRatePercentage,
       deploymentReworkRatePercentage,
-      performanceTier
+      performanceTier,
+      evidenceKinds: {
+        changeLeadTimeMs:               EvidenceKind.MEASURED,
+        deploymentFrequencyPerDay:      EvidenceKind.MEASURED,
+        failedDeploymentRecoveryTimeMs: EvidenceKind.CALCULATED,
+        changeFailureRatePercentage:    EvidenceKind.CALCULATED,
+        deploymentReworkRatePercentage: EvidenceKind.CALCULATED,
+        performanceTier:                EvidenceKind.BENCHMARK
+      }
     };
   }
 
@@ -138,16 +184,16 @@ export class DoraAnalyticsEngine {
     mttrMs: number,
     cfrPercentage: number
   ): DoraTier {
-    const isEliteFreq = freqPerDay >= 1; 
-    const isEliteLeadTime = leadTimeMs <= this.MS_PER_DAY; 
-    const isEliteMttr = mttrMs <= 3600000; 
-    const isEliteCfr = cfrPercentage <= 15; 
+    const isEliteFreq = freqPerDay >= 1;
+    const isEliteLeadTime = leadTimeMs <= this.MS_PER_DAY;
+    const isEliteMttr = mttrMs <= 3600000;
+    const isEliteCfr = cfrPercentage <= 15;
 
     if (isEliteFreq && isEliteLeadTime && isEliteMttr && isEliteCfr) {
       return DoraTier.ELITE;
     }
 
-    const isHighFreq = freqPerDay >= (1 / 7); 
+    const isHighFreq = freqPerDay >= (1 / 7);
     const isHighLeadTime = leadTimeMs <= (7 * this.MS_PER_DAY);
     const isHighMttr = mttrMs <= (24 * 3600000);
     const isHighCfr = cfrPercentage <= 30;

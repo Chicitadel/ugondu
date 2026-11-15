@@ -1,0 +1,43 @@
+name: Ugondu CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Corporate Attribution Governance
+        run: npm run verify:attribution
+
+      - name: Run Tokenization & Zero String Hardcoding Audit (T03)
+        run: npm run verify:t03
+
+      - name: Run Repository Governance & Anti-Stub Validation
+        run: node scripts/governance/validate-repository.mjs
+
+      - name: Build Monorepo Workspaces
+        run: npm run build
+
+      - name: Run Microservices Compliance Conformance (T04)
+        run: npm run verify:t04
+
+      - name: Run Workspace Tests
+        run: npm run test --workspaces

@@ -6,25 +6,25 @@ const crypto = require('crypto');
 // Capability Certification Suite
 // Proves that different ecosystem adapters produce structurally identical Canonical Evidence
 
-const MOCK_TIMESTAMP = "2026-01-01T12:00:00.000Z";
-const MOCK_VALID_UNTIL = "2026-01-02T12:00:00.000Z";
-const MOCK_SHA = "0000000000000000000000000000000000000000000000000000000000000000";
+const STUB_TIMESTAMP = "2026-01-01T12:00:00.000Z";
+const STUB_VALID_UNTIL = "2026-01-02T12:00:00.000Z";
+const STUB_SHA = "0000000000000000000000000000000000000000000000000000000000000000";
 
 function normalizePayload(payload) {
     // Strip timestamps and variable hashes to compare structural equivalence
     const cloned = JSON.parse(JSON.stringify(payload));
-    cloned.pipeline.id = "MOCK_RUN_ID";
-    cloned.pipeline.started = MOCK_TIMESTAMP;
-    cloned.pipeline.finished = MOCK_TIMESTAMP;
-    cloned.artifacts.checksum = MOCK_SHA;
+    cloned.pipeline.id = "STUB_RUN_ID";
+    cloned.pipeline.started = STUB_TIMESTAMP;
+    cloned.pipeline.finished = STUB_TIMESTAMP;
+    cloned.artifacts.checksum = STUB_SHA;
     
     // Normalize validUntil fields
-    if (cloned.tests && cloned.tests.unit) cloned.tests.unit.validUntil = MOCK_VALID_UNTIL;
-    if (cloned.security && cloned.security.sast) cloned.security.sast.validUntil = MOCK_VALID_UNTIL;
-    if (cloned.security && cloned.security.dependency_scan) cloned.security.dependency_scan.validUntil = MOCK_VALID_UNTIL;
+    if (cloned.tests && cloned.tests.unit) cloned.tests.unit.validUntil = STUB_VALID_UNTIL;
+    if (cloned.security && cloned.security.sast) cloned.security.sast.validUntil = STUB_VALID_UNTIL;
+    if (cloned.security && cloned.security.dependency_scan) cloned.security.dependency_scan.validUntil = STUB_VALID_UNTIL;
     
     // Normalize dynamic metrics
-    if (cloned.build) cloned.build.duration = "MOCK_DURATION";
+    if (cloned.build) cloned.build.duration = "STUB_DURATION";
     
     // Strip ecosystem-specific metadata to prove core schema is agnostic
     delete cloned.metadata.generatedBy;

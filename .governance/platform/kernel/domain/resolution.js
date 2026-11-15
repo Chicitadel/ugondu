@@ -71,7 +71,7 @@ class ResolutionEngine {
             }
         }
 
-        // 2. Deployment Profile (Mocked skip for now, but would check env vars)
+        // 2. Deployment Profile (Stubed skip for now, but would check env vars)
         // 3. Preferred Certified Provider
         const preferred = providers.find(p => p.status === 'Preferred');
         if (preferred) return preferred;
