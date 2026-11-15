@@ -4,17 +4,24 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const http = require('node:http');
+const { signServiceIdentity, globalTrustRegistry } = require('../server/shared/dist/identity');
+
+const serviceKeys = crypto.generateKeyPairSync('ed25519');
+const servicePrivateKey = serviceKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
+const servicePublicKey = serviceKeys.publicKey.export({ type: 'spki', format: 'pem' }).toString();
+const SERVICE_KEY_ID = 'key_fed_live_staging_v1';
+
+globalTrustRegistry.registerKey({
+  keyId: SERVICE_KEY_ID,
+  algorithm: 'ed25519',
+  status: 'ACTIVE',
+  purpose: 'service-identity',
+  publicKey: servicePublicKey,
+});
 
 function svcAuthHeader() {
-  const secret = (process.env.INTERNAL_SERVICE_SECRET || 'ugondu-test-internal-secret-0001').trim();
-  const payload = JSON.stringify({
-    serviceId: 'engine-core',
-    iat: Math.floor(Date.now() / 1000),
-    nonce: crypto.randomBytes(12).toString('hex'),
-  });
-  const encoded = Buffer.from(payload, 'utf8').toString('base64url');
-  const sig = crypto.createHmac('sha256', secret).update(encoded).digest('base64url');
-  return { 'x-ugondu-service-auth': `${encoded}.${sig}` };
+  const token = signServiceIdentity('engine-core', 'billing-gateway', 'execute', servicePrivateKey, SERVICE_KEY_ID);
+  return { Authorization: `Bearer ${token}` };
 }
 
 function httpJson(port, method, reqPath, body, headers = {}) {
@@ -89,8 +96,6 @@ async function runLiveStagingFederationAcceptance(t) {
   const tenantA = `tenant_cor_staging_${runId}`;
   const tenantB = `tenant_cor_iso_${runId}`;
   const aeroHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${aeroKey}` };
-  const mndHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${mandatagKey}` };
-
   // 1. Authority health & JWKS
   const aeroHealth = await fetchJson(`${aeroStage}/health`);
   assert.equal(aeroHealth.ok, true, `AeroBill health failed: ${aeroHealth.status}`);
@@ -160,22 +165,23 @@ async function runLiveStagingFederationAcceptance(t) {
 
   // 5. Usage metering + idempotency + conflict
   const meterEvt = `meter_live_${runId}`;
+  const meterTimestamp = new Date().toISOString();
   const m1 = await fetchJson(`${aeroStage}/api/v1/metering/usage`, {
     method: 'POST',
     headers: aeroHeaders,
-    body: JSON.stringify({ eventId: meterEvt, tenantId: tenantA, metric: 'deployments', quantity: 1, timestamp: new Date().toISOString() }),
+    body: JSON.stringify({ eventId: meterEvt, tenantId: tenantA, metric: 'deployments', quantity: 1, timestamp: meterTimestamp }),
   });
   assert.ok(m1.status === 200 || m1.status === 202);
   const mDup = await fetchJson(`${aeroStage}/api/v1/metering/usage`, {
     method: 'POST',
     headers: aeroHeaders,
-    body: JSON.stringify({ eventId: meterEvt, tenantId: tenantA, metric: 'deployments', quantity: 1, timestamp: new Date().toISOString() }),
+    body: JSON.stringify({ eventId: meterEvt, tenantId: tenantA, metric: 'deployments', quantity: 1, timestamp: meterTimestamp }),
   });
   assert.equal(mDup.status, 200);
   const mConflict = await fetchJson(`${aeroStage}/api/v1/metering/usage`, {
     method: 'POST',
     headers: aeroHeaders,
-    body: JSON.stringify({ eventId: meterEvt, tenantId: tenantA, metric: 'deployments', quantity: 99, timestamp: new Date().toISOString() }),
+    body: JSON.stringify({ eventId: meterEvt, tenantId: tenantA, metric: 'deployments', quantity: 99, timestamp: meterTimestamp }),
   });
   assert.equal(mConflict.status, 409);
 
@@ -201,11 +207,11 @@ async function runLiveStagingFederationAcceptance(t) {
   try {
     const syncRes = await httpJson(gwPort, 'POST', '/v1/keys/mandatag/sync', {}, svcAuthHeader());
     assert.equal(syncRes.status, 200);
-    assert.ok(syncRes.body.registered >= 1);
+    assert.ok(syncRes.body.registeredKeys >= 1);
 
     const payEvt = {
       eventId: `evt_pay_live_${runId}`,
-      type: 'payment.succeeded',
+      eventType: 'payment.succeeded',
       tenantId: tenantA,
       invoiceId: `inv_live_${runId}`,
       edition: 'enterprise',
@@ -216,7 +222,8 @@ async function runLiveStagingFederationAcceptance(t) {
       'x-aerobill-timestamp': String(Math.floor(Date.now() / 1000)),
     });
     assert.equal(payRes.status, 200);
-    assert.equal(payRes.body.outcome, 'ENTITLEMENT_ACTIVATED');
+    assert.equal(payRes.body.synced, true);
+    assert.ok(typeof payRes.body.entitlementToken === 'string' && payRes.body.entitlementToken.split('.').length === 3);
 
     const authOk = await httpJson(
       gwPort,
@@ -226,11 +233,12 @@ async function runLiveStagingFederationAcceptance(t) {
       svcAuthHeader()
     );
     assert.equal(authOk.status, 200);
-    assert.equal(authOk.body.authorized, true);
+    assert.equal(authOk.body.outcome, 'authorized');
+    assert.equal(authOk.body.tenantId, tenantA);
 
     const refEvt = {
       eventId: `evt_ref_live_${runId}`,
-      type: 'invoice.refunded',
+      eventType: 'charge.refunded',
       tenantId: tenantA,
       invoiceId: `inv_live_${runId}`,
       reason: 'staging_acceptance_refund',
@@ -241,7 +249,8 @@ async function runLiveStagingFederationAcceptance(t) {
       'x-aerobill-timestamp': String(Math.floor(Date.now() / 1000)),
     });
     assert.equal(refRes.status, 200);
-    assert.equal(refRes.body.outcome, 'ENTITLEMENT_REVOKED');
+    assert.equal(refRes.body.processed, true);
+    assert.equal(refRes.body.status, 'revoked');
 
     const authBlocked = await httpJson(
       gwPort,
@@ -251,7 +260,8 @@ async function runLiveStagingFederationAcceptance(t) {
       svcAuthHeader()
     );
     assert.equal(authBlocked.status, 403);
-    assert.equal(authBlocked.body.authorized, false);
+    assert.equal(authBlocked.body.code, 'LICENSE_REVOKED');
+    assert.equal(authBlocked.body.outcome, 'revoked');
   } finally {
     await new Promise((r) => server.close(r));
     for (const [k, v] of Object.entries(prevEnv)) {
