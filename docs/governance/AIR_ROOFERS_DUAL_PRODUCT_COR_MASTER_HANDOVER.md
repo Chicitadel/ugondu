@@ -1044,3 +1044,51 @@ The supplied execution report describes local branches `integrate/cor-dumcholu-u
 - CI live-gate wiring is implemented but has not been dispatched with credentials.
 - Awaiting: GitHub Actions Variables/Secrets provisioning; AeroBill host compatibility patch and deployment; actual live transaction acceptance; exact-new-head CI/COR/deployment workflows; final trust-root/signature and independent release gates.
 - Overall: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## Ugondu ny210 federation deployment & exact-head CI reassessment — 2026-11-15
+
+### Operator-reported host deployment evidence (not independently host-verified in this session)
+
+The operator reports that the following changes were deployed on `ny210`:
+
+- AeroBill compatibility router `src/Federation/AeroBillFederationRouter.php`, hooked into the billing front controller while preserving legacy `/v1/billing/*`, `/health` and `/ready` routes.
+- Versioned routes: checkout session, subscription upgrade/read, invoice read and usage metering.
+- Bearer-key verification through `AdminAeroBillCredentialHelper::verifyAeroBillApiKey()`, scope checks, tenant isolation, idempotency and a file-backed ledger protected by `flock` and mode `0600`.
+- Mandatag authenticated entitlement refresh/revoke routes, with refresh issuing Ed25519-signed entitlement JWTs.
+
+Reported verification:
+- PHP lint passed for the router, billing front controller and Mandatag API front controller.
+- Public probes: billing health HTTP 200; unauthenticated checkout HTTP 401; Mandatag JWKS HTTP 200; unauthenticated entitlement refresh HTTP 401.
+- Isolated router contract probes: invalid key HTTP 401; missing scope HTTP 403; tenant subscription read HTTP 200; tenant invoice read HTTP 200.
+- The operator also reports an earlier router-hook verification command exited 1. The cause and whether the failed step was fully rerun are not established by the supplied summary.
+- These results are operator-supplied. This session has no SSH/DirectAdmin access and did not independently inspect the deployed PHP files, vault, ledger or live host.
+
+### Repository inspection — FED-007 gap remains
+
+The current `tests/commercial-federation-contract.test.js` FED-007 block was re-read from this branch. It:
+- requires both staging URLs and both API keys when live mode is mandatory;
+- checks only AeroBill `/health` and Mandatag `/api/v1/keys/jwks`;
+- does not perform live checkout, subscription upgrade/read, invoice read, metering, authenticated Mandatag refresh, or revoke transactions.
+
+Therefore the operator's host probes and isolated router tests do not close the repository's live federation acceptance gate. Authenticated write-path and lifecycle acceptance remains outstanding. Do not run a real checkout unless the endpoint is confirmed to be a non-charging staging environment and a dedicated test tenant is used.
+
+### GitHub workflow evidence on the inspected candidate
+
+For candidate `4adeed1086a6177897508d228ac5f546dfea4fa0`, the workflow job records were re-read:
+- CI/CD run `43714463417`: all listed build, release-integrity, integration-test and Docker validation jobs completed successfully; release publication was skipped as expected for a non-tag candidate.
+- COR Certification run `43714463352`: COR Certification and COR Final Release Gate completed successfully. AWS Physical Qualification was skipped; evidence freshness, signing trust-root and final authority-signing steps were skipped. A successful COR workflow conclusion is not equivalent to completed authority signing or AWS physical qualification.
+- Deployment Manifest Qualification run `43714463526`: manifest render/validation completed successfully.
+
+The CI workflow has a `workflow_dispatch` trigger and the live federation step is guarded to run only on that event. No dispatched live-federation run or authenticated staging transaction evidence was available during this reassessment. GitHub Actions secrets/variables were not inspectable through the available repository actions in this session.
+
+### Updated disposition
+
+- Host compatibility deployment: **operator-reported deployed; not independently host-verified**.
+- Standard CI/CD, COR workflow and deployment manifest: **PASS on candidate 4adeed1086a6177897508d228ac5f546dfea4fa0**, subject to the explicitly skipped gates above.
+- Live federation FED-007: **BLOCKED / INCOMPLETE** until the test executes authenticated, non-charging staging lifecycle transactions and is run through operator-dispatched CI.
+- COR authority signature and AWS physical qualification: **OPEN / DEFERRED**.
+- Local D: drive repository state: **not accessible in this session**; only the GitHub branch was inspected.
+- Release posture: **PARTIAL / RELEASE BLOCKED / NOT CERTIFIED**.
