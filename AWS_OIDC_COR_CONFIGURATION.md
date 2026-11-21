@@ -15,70 +15,32 @@ If your AWS account does not already have a GitHub OIDC provider, you must creat
 5. **Audience**: `sts.amazonaws.com`
 6. Click **Add provider**.
 
-## Step 2: Create the Ugondu COR IAM Role
+## Step 2: Create the Two-Role Ugondu COR IAM Architecture
 
-1. Go to **AWS IAM Console** -> **Roles** -> **Create role**.
-2. Select **Web identity**.
-3. **Identity provider**: Select the `token.actions.githubusercontent.com` provider you just created.
-4. **Audience**: Select `sts.amazonaws.com`.
-5. **GitHub organization**: Enter `Chicitadel`
-6. **GitHub repository**: Enter `ugondu`
-7. **GitHub branch**: Enter `phase4/production-hardening`
-8. Click **Next**.
+`.github/workflows/cor.yml` uses a two-role OIDC + tagged execution session model (`UG-COR-AWS-TAGGED-SESSION`):
 
-## Step 3: Attach Least-Privilege Permissions
+1. **Base OIDC Role (`AWS_ROLE_TO_ASSUME_OIDC_BASE`)**:
+   - **Trusted entity**: Web identity (`token.actions.githubusercontent.com`, audience `sts.amazonaws.com`).
+   - **Repository / branch trust**: `repo:Chicitadel/ugondu:ref:refs/heads/main` and `repo:Chicitadel/ugondu:ref:refs/heads/phase4/production-hardening`.
+   - **Permissions**: `sts:AssumeRole` and `sts:TagSession` on the execution role (`AWS_ROLE_TO_ASSUME_EXECUTION`), plus bootstrap policy-pack reconciliation permissions used by `scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs`.
+2. **Tagged Execution Role (`AWS_ROLE_TO_ASSUME_EXECUTION`)**:
+   - **Trusted entity**: Base OIDC Role (`AWS_ROLE_TO_ASSUME_OIDC_BASE`) with `sts:AssumeRole` and `sts:TagSession` requiring session tags `UgonduTransactionId` and `UgonduCOR=true`.
+   - **Permissions**: Least-privilege policy for ECR, ECS/Fargate, IAM `PassRole`, CloudWatch Logs, and conformance probes (`run-aws-conformance.mjs`, `physical-certification.ts`, `physical-fargate-certification.ts`, `residual-scanner.ts`) scoped to `eu-west-3` (or `vars.AWS_REGION`).
 
-Do not grant AdministratorAccess. The physical COR needs permissions to discover, create, verify, and delete specific resources for certification.
-
-1. On the **Add permissions** page, select **Create policy**.
-2. Switch to the **JSON** tab and paste the following policy (adjust based on the exact services your Fargate adapter touches):
-   ```json
-   {
-       "Version": "2012-10-17",
-       "Statement": [
-           {
-               "Effect": "Allow",
-               "Action": [
-                   "ecr:CreateRepository",
-                   "ecr:DeleteRepository",
-                   "ecr:DescribeRepositories",
-                   "ecr:GetAuthorizationToken",
-                   "ecr:InitiateLayerUpload",
-                   "ecr:UploadLayerPart",
-                   "ecr:CompleteLayerUpload",
-                   "ecr:PutImage",
-                   "ecr:BatchCheckLayerAvailability",
-                   "ecs:CreateCluster",
-                   "ecs:DeleteCluster",
-                   "ecs:DescribeClusters",
-                   "ecs:RegisterTaskDefinition",
-                   "ecs:DeregisterTaskDefinition",
-                   "ecs:DescribeTaskDefinition",
-                   "ecs:CreateService",
-                   "ecs:DeleteService",
-                   "ecs:DescribeServices",
-                   "ecs:UpdateService",
-                   "iam:PassRole"
-               ],
-               "Resource": "*"
-           }
-       ]
-   }
-   ```
-3. Name the policy `UgonduCORPolicy` and click **Create policy**.
-4. Return to the Role creation tab, refresh the policies, select `UgonduCORPolicy`, and click **Next**.
-5. Name the role **`UgonduCORRunner`** and click **Create role**.
-
-## Step 4: Configure GitHub Secrets
+## Step 3: Configure GitHub Secrets and Variables
 
 1. Open the Ugondu GitHub repository: **Settings** -> **Secrets and variables** -> **Actions**.
-2. Add a new **Repository secret**:
-   - **Name**: `AWS_ROLE_TO_ASSUME`
-   - **Secret**: The ARN of the role you just created (e.g., `arn:aws:iam::123456789012:role/UgonduCORRunner`).
+2. Configure **Repository secrets**:
+   - `AWS_ROLE_TO_ASSUME_OIDC_BASE`: ARN of the base GitHub OIDC role.
+   - `AWS_ROLE_TO_ASSUME_EXECUTION`: ARN of the tagged execution role.
+   - `COR_PUBLIC_KEY` and `COR_SIGNING_KEY`: Ed25519 trust-root and authority signing keys.
+3. Configure **Repository variables**:
+   - `AWS_REGION`: Target AWS region (for example `eu-west-3`).
+   - `AWS_PHYSICAL_QUALIFICATION_ENABLED`: Set to `true` only when explicitly authorized for physical qualification.
 
-## Step 5: Verify the GitHub Actions Configuration
+## Step 4: Verify the GitHub Actions Configuration
 
-Ensure that `.github/workflows/cor.yml` (or your active certification workflow) uses the OIDC model properly.
+`.github/workflows/cor.yml` requires `workflow_dispatch` with `inputs.run_aws_physical_qualification == true`, `vars.AWS_PHYSICAL_QUALIFICATION_ENABLED == 'true'`, and a trusted release branch (`main` or `phase4/production-hardening`):
 
 ```yaml
 permissions:
@@ -86,24 +48,20 @@ permissions:
   contents: read
 
 steps:
-  - name: Configure AWS credentials from OIDC
-    uses: aws-actions/configure-aws-credentials@v4
+  - name: Configure Base OIDC Credentials
+    uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
     with:
-      role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-      aws-region: us-east-1
-      audience: sts.amazonaws.com
+      role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME_OIDC_BASE }}
+      aws-region: ${{ vars.AWS_REGION }}
 ```
 
-*(Note: Ugondu's current `cor.yml` workflow is already configured to read this input; it just needs the secret populated.)*
+The workflow then runs `reconcile-bootstrap-policy-pack.mjs --phase bootstrap-provision`, assumes `AWS_ROLE_TO_ASSUME_EXECUTION` with mandatory session tags (`UgonduTransactionId`, `UgonduCOR=true`), verifies effective permissions, executes read-only conformance probes, runs `physical-certification.ts` and `physical-fargate-certification.ts`, and asserts zero residual resources via `residual-scanner.ts`.
 
-## Step 6: Rerun the Physical COR
+## Step 5: Trigger Physical COR
 
-Once the AWS Role ARN is stored in GitHub Secrets:
-
-1. Navigate to the **Actions** tab in GitHub.
-2. Select the **COR Certification** workflow.
-3. Click **Run workflow** (ensure you select the `phase4/production-hardening` branch).
-4. The workflow will now exchange a secure, short-lived OIDC token for temporary AWS STS credentials and execute the physical tests safely.
+```powershell
+gh workflow run cor.yml --repo Chicitadel/ugondu --ref main -f run_aws_physical_qualification=true
+```
 
 ---
 
