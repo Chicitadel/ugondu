@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "ugondu.bootstrap.policy-pack-contract",
+  "status": "policy-contract-runtime-implementation-required",
+  "policy_pack_required_fields": [
+    "policy_pack_id",
+    "version",
+    "provider",
+    "capability_ids",
+    "role_id",
+    "target_scope",
+    "plan_digest",
+    "generated_at",
+    "expires_at_or_session_limit",
+    "policy_documents",
+    "validation_receipts",
+    "approval_requirements",
+    "rollback_strategy"
+  ],
+  "target_scope_required_fields": [
+    "tenant_or_account_or_project",
+    "partition_or_cloud",
+    "region_or_location",
+    "environment",
+    "resource_families",
+    "resource_names_or_tags",
+    "operation_ids",
+    "identity_ids",
+    "network_or_namespace_scope_when_applicable"
+  ],
+  "generation_pipeline": [
+    {
+      "step": "derive",
+      "requirements": [
+        "derive permissions from normalized operation graph, not product name or user prose alone",
+        "map every operation to provider API actions, resource types, and prerequisite reads",
+        "include read-only discovery, preflight, mutation, wait/poll, rollback, verification, and evidence actions required by the approved lifecycle"
+      ]
+    },
+    {
+      "step": "constrain",
+      "requirements": [
+        "restrict resource ARNs/IDs/names, regions, tags, project/subscription, namespace and conditions where provider supports them",
+        "separate control-plane and data-plane access",
+        "separate bootstrap, execution, service, runtime and verifier roles",
+        "use explicit role allowlists for pass-role/delegation operations",
+        "respect permission boundaries, SCPs, organization policy, tenant policy and explicit denies"
+      ]
+    },
+    {
+      "step": "render",
+      "requirements": [
+        "render native provider policy formats deterministically",
+        "emit one or more minimal policy documents grouped by role and lifecycle stage",
+        "include schema/version metadata and bundle/registry digest",
+        "do not include credentials, secret values, access keys or tokens"
+      ]
+    },
+    {
+      "step": "validate",
+      "requirements": [
+        "JSON/schema validation",
+        "provider-native policy syntax and semantic validation where available",
+        "action/resource compatibility checks",
+        "resource-scope and condition checks",
+        "wildcard/privilege escalation detector",
+        "role trust and delegation graph validation",
+        "policy size/statement limits",
+        "plan coverage: every required operation authorized and no unplanned operation authorized",
+        "deny precedence and effective-authority analysis when available"
+      ]
+    },
+    {
+      "step": "review",
+      "requirements": [
+        "produce human-readable policy diff and machine-readable operation-to-permission traceability",
+        "require approval for privilege expansion, destructive changes, wildcard actions/resources, trust-policy changes, and state migration",
+        "bind approval to exact plan and rendered policy digests"
+      ]
+    },
+    {
+      "step": "install",
+      "requirements": [
+        "use only an already authorized principal",
+        "apply in reversible, idempotent steps",
+        "never use policy creation as proof of effective authority",
+        "if denied, stop and emit AUTHORITY_GAP with exact missing authority and operator handoff"
+      ]
+    },
+    {
+      "step": "read_back",
+      "requirements": [
+        "read back role trust, inline/managed policy attachments, versions, boundaries, and provider-specific effective constraints",
+        "compare observed state against desired digest and approved plan",
+        "detect concurrent drift or policy replacement"
+      ]
+    },
+    {
+      "step": "execute",
+      "requirements": [
+        "execute only operations listed in the approved plan",
+        "short-lived credentials and bounded session duration where supported",
+        "checkpoint each irreversible boundary",
+        "stop on scope drift, principal change, target mismatch, expired approval, or stale plan digest"
+      ]
+    },
+    {
+      "step": "verify_and_revoke",
+      "requirements": [
+        "verify deployed resource state and health",
+        "remove temporary bootstrap grants when authorized and safe",
+        "retain necessary runtime role only",
+        "write immutable or tamper-evident evidence receipt and sanitized execution ledger"
+      ]
+    }
+  ],
+  "coverage_model": {
+    "coverage_unit": "provider + capability + lifecycle_operation + resource_type + role + scope",
+    "must_prove_all_required_operations_authorized": true,
+    "must_prove_no_unplanned_mutation_authorized": true,
+    "missing_mapping_behavior": "AUTHORITY_GAP",
+    "unknown_action_behavior": "fail-closed",
+    "unknown_resource_type_behavior": "fail-closed",
+    "unsupported_provider_behavior": "UNQUALIFIED",
+    "coverage_claim_requires_receipt": true
+  },
+  "policy_safety_invariants": {
+    "administrator_access_default": false,
+    "wildcard_action_default": false,
+    "wildcard_resource_default": false,
+    "self_escalation": false,
+    "arbitrary_pass_role": false,
+    "unreviewed_trust_policy_mutation": false,
+    "secret_values_in_artifact": false,
+    "apply_without_plan_digest_match": false,
+    "apply_without_required_approval": false,
+    "success_without_readback": false,
+    "success_on_permission_denial": false,
+    "success_for_unqualified_adapter": false
+  },
+  "policy_pack_types": [
+    {
+      "id": "discovery",
+      "purpose": "Read-only identity, target, existing-resource, policy and capability discovery."
+    },
+    {
+      "id": "bootstrap-delegation",
+      "purpose": "Explicitly approved role/trust/policy bootstrap only; requires privileged operator or delegated bootstrap authority."
+    },
+    {
+      "id": "iac-orchestration",
+      "purpose": "Native IaC plan/apply/status/events/state/rollback operations for the selected engine."
+    },
+    {
+      "id": "network-compute",
+      "purpose": "Only network and compute resource operations in the approved graph."
+    },
+    {
+      "id": "registry-artifacts",
+      "purpose": "Only required image/package/artifact operations for the selected deployment."
+    },
+    {
+      "id": "data-storage",
+      "purpose": "Only required database, object/file storage, encryption and backup operations."
+    },
+    {
+      "id": "dns-tls-edge",
+      "purpose": "Only approved DNS records, certificate domains and edge/CDN configuration."
+    },
+    {
+      "id": "observability-verification",
+      "purpose": "Read-only status, logs/metrics/events/health and evidence read-back."
+    },
+    {
+      "id": "rollback-cleanup",
+      "purpose": "Only approved reversible rollback or explicitly approved destructive cleanup."
+    }
+  ],
+  "required_outputs": [
+    "policy-pack.json",
+    "provider-native-policy-files",
+    "role-trust-document-when-required",
+    "operation-permission-map.json",
+    "scope-binding.json",
+    "policy-diff.md",
+    "validation-report.json",
+    "approval-record.json-when-required",
+    "readback-receipt.json",
+    "rollback-plan.json",
+    "execution-ledger.json-without-secrets"
+  ],
+  "important_limitation": "A generic policy pack cannot be guaranteed to be sufficient for every future deployment without knowing provider, target, resource graph and lifecycle. Sufficiency must be proven per approved plan by complete operation mapping; otherwise return AUTHORITY_GAP. Broad standing privilege is not an acceptable substitute.",
+  "schema_uri": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,1130 @@
+# Ugondu — Antigravity Shared Change Guardrail & Handover
+
+**Document ID:** AR-UG-ENG-ANTIGRAVITY-GUARDRAIL-2026-10-25  
+**Repository:** https://github.com/Chicitadel/ugondu  
+**Protected production branch:** `phase4/production-hardening`  
+**Protected branch policy:** Never commit, push, reset, force-push, or merge directly to `master`. Do not change protected production branches except through an explicitly reviewed PR.  
+**Purpose:** One canonical handover for Antigravity agents/actors so parallel work remains coordinated and does not duplicate, overwrite, regress, fork, or downgrade an existing implementation.
+
+## 1. Non-negotiable operating rules
+
+1. **Branch isolation:** Every actor works on a dedicated branch from the declared current base SHA. No direct writes to `master`, `phase4/production-hardening`, or another actor's branch. Use a PR for integration.
+2. **One change owner per file/concern:** Before editing, declare the task ID, files owned, base SHA, intended behavior, tests, and dependencies in the PR description or handover ledger below. If a file is already owned by another active task, coordinate rather than overwrite.
+3. **Inspect before implement:** Read the current implementation, tests, ADRs, contracts, and related guardrails first. Reuse and improve the existing architecture; do not introduce parallel abstractions, duplicate services, shadow registries, or replacement implementations without an approved ADR.
+4. **No architecture downgrades:** Do not weaken type safety, security boundaries, tenancy isolation, fail-closed behavior, localization, evidence freshness, idempotency, observability, or error contracts to make a test pass. Do not delete a failing test instead of fixing the cause.
+5. **No fake completeness:** No placeholders, synthetic fixtures in production paths, mocked integrations presented as live, stubs, TODO-based completion, hardcoded product/provider/OS lists where the registry is authoritative, or claims of 100% coverage without reproducible evidence. Tests may use explicit isolated fixtures, never as proof of live-provider qualification.
+6. **Evidence is candidate-bound:** Any source, script, dependency, workflow, policy, runtime configuration, or build change requires a new implementation candidate and rerunning affected checks. Documentation-only descendants must not edit source or weaken freshness rules. Never rewrite an old receipt to imply it tested a new SHA.
+7. **Keep certified findings closed:** F-23 and F-24 remain closed unless a reproducible regression demonstrates failure. Add regression tests; do not reopen them merely because unrelated product-wide gaps remain.
+8. **Fail closed:** A missing verifier, missing dictionary, malformed manifest, skipped mandatory test, unqualified provider, unsupported target, stale receipt, or unknown status is FAIL/UNQUALIFIED—not PASS. Report partial coverage honestly.
+9. **No silent scope change:** Preserve the intended behavior and API contracts. If a scope change is necessary, explain it, update the ADR/specification, add migration/backward-compatibility tests, and obtain review before implementation.
+10. **No secret leakage:** Never commit credentials, private keys, tokens, production payloads, customer data, or raw environment dumps. Use approved secret references and redacted diagnostics.
+
+## 2. Mandatory change protocol
+
+For each task, the actor must:
+
+1. Record task ID, owner/agent, base SHA, scope, files, risk, and acceptance criteria.
+2. Inspect implementation and existing tests before coding; cite the exact evidence or reproduce the defect.
+3. Make the smallest coherent fix in the owning module. Avoid unrelated refactors.
+4. Add a regression test that fails on the defect before the fix and passes after it. Add negative/adversarial tests for security and boundary checks.
+5. Run focused tests, module tests, typecheck/lint, localization/governance checks, and relevant integration/E2E suites. Record exact commands, exit codes, runtime, commit SHA, and logs/receipts.
+6. Run repository integrity, anti-stub/scaffolding, dependency, secret, and evidence-freshness checks when applicable.
+7. Review the final diff for duplicate logic, accidental scope, API drift, removed tests, untracked files, secrets, and architecture regression.
+8. Open a PR with the defect, root cause, changed files, before/after behavior, tests/evidence, residual risks, and rollback notes. Keep draft until evidence is complete.
+9. Require independent review and green mandatory CI. Never self-certify a skipped or unavailable check.
+10. Update this shared note or its task ledger in the same PR. Do not mark a gap closed until the acceptance evidence is reproducible on the candidate SHA.
+
+## 3. Required acceptance states
+
+- **GREEN / CLOSED:** Code and tests exist on the candidate; mandatory checks pass; evidence is current, traceable, and independently reviewable.
+- **YELLOW / PARTIAL:** Some implementation/evidence exists, but a defined acceptance criterion remains unproven.
+- **RED / BLOCKED:** Confirmed defect, missing evidence, failed mandatory check, unsafe behavior, or unsupported target.
+- **N/A:** Explicitly out of scope, approved and documented; never use N/A to hide a gap.
+
+Overall release readiness is the least-ready mandatory dimension. A green AWS lifecycle does not imply universal OS, IDE, host, cloud, or AI-provider qualification. No aggregate “100% COR gap close” claim is permitted while any mandatory item is yellow/red.
+
+## 4. Current verified defects addressed by this branch
+
+- **T03 dictionary false-pass path:** The prior verifier silently returned an empty dictionary when a required locale file was absent or malformed. That could suppress placeholder mismatch detection while still allowing a PASS. This branch changes missing/malformed/non-object dictionaries into a fail-closed error.
+- **T03 unknown-token false-pass:** The prior verifier did not require each statically extracted token key to exist in the merged canonical dictionaries. This branch reports missing dictionary tokens and exits non-zero.
+- **T04 workspace prefix boundary flaw:** The prior verifier used `resolvedPath.startsWith(wsDir)`; a sibling such as `server/shared2` can share the prefix `server/shared` and be incorrectly accepted. This branch uses canonical `path.relative` containment and adds adversarial tests.
+- **Production-branch integration gap:** The prior production branch did not contain the reported T03/T04 verifiers. This branch brings reviewed verifier scripts into the implementation candidate and wires explicit root scripts. Their results must be executed on CI before they can be treated as certification evidence.
+- **Governance gate wiring gap:** The attribution, T03, and T04 verifier commands existed as standalone package scripts but were not invoked by the aggregate `governance:validate` command or the CI release-integrity job. The remediation branch now wires them into both places and adds a regression test to prevent future removal. This finding is only GREEN after the latest-head CI run proves those exact steps pass.
+
+## 5. Current release blockers — do not paper over
+
+- AI model fleet report currently records `CATALOG_OFFLINE`, zero qualified and zero active models; only models with authentic live candidate-bound receipts may be activated.
+- Native full-lifecycle qualification is incomplete for some OS/architecture combinations; cross-compilation is not native lifecycle evidence.
+- JetBrains, Cursor, Windsurf, Neovim and other non-VSCode integrations remain unsupported until each has an end-to-end receipt.
+- Universal multi-cloud/host/provider support and immutable commercial artifact install/upgrade/rollback/uninstall lifecycle are not granted until their acceptance suites pass.
+- T03's static scan is a heuristic, not a mathematical proof of zero hardcoded user-facing strings. Treat findings as bounded by its scanner rules and supplement with AST/runtime/UI tests.
+- T04's static checks complement, but do not replace, independent workspace builds, package export tests, dependency graph checks, and integration/E2E execution.
+
+## 6. Shared work ledger
+
+| Task ID | Owner/agent | Base SHA | Files/concern | Status | Evidence / PR |
+|---|---|---|---|---|---|
+| COR-REM-001 | Enterprise Architecture Council | `87ac04242b4d55f38b4ef644549cea9ff38f57c7` | T03/T04 verifiers, 12-locale parity, tokenization, plugin manifests, anti-stub validation, attribution gate | GREEN / IMPLEMENTED | PR #24 (`verify:t03`, `verify:t04`, `verify:attribution`, `test:governance`, 55/55 test suites pass) |
+| COR-REM-002 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | AI provider fleet qualification | RED / Blocked (Fail-Closed) | Catalog offline; live canary proves single endpoint; universal commercial release withheld |
+| COR-REM-003 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Native OS/IDE/host/cloud qualification | YELLOW / Partial (Fail-Closed) | Windows amd64 native pass; Linux thin-client pass; GCP/Azure & non-VSCode IDEs fail-closed |
+| COR-REM-004 | Systems Engineering & Governance Authority | `fix/whole-product-cor-remediation-2026-10-25` | Immutable customer artifact lifecycle | RED / Blocked (Fail-Closed) | Clean install → upgrade → rollback → uninstall digest chain pending disposable environment receipts |
+| COR-REM-005 | Systems Engineering & Governance Authority | `fb8f66d34ef66fa253452d19d5079a892d35925d` | COR workflow PR-vs-release gate semantics (`.github/workflows/cor.yml`, `tests/qualification/cor-workflow-gates.test.js`) | GREEN / PR VALIDATION VERIFIED | PR #24 (COR run #408: 40223142347 passed with PR validation notice; CI/CD run #521: 40223142249 passed 16/16 jobs; COR-WF-017 & COR-WF-018 verified passing in CI; Universal release remains fail-closed) |
+| COR-REM-006 | Systems Engineering & Governance Authority | `3267d637b1473ab02aff906e697aefafb297040e` | Mandatory attribution/T03/T04 verifier CI wiring (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | GREEN / PR CI verified | CI/CD run #541 `40236147953`: attribution PASS, T03 PASS, T04 PASS, governance verifier regression suite 8/8 PASS; COR run #428 `40236147971` passed PR validation only; AWS gate skipped as required for PR |
+| COR-REM-007 | Systems Engineering & Governance Authority | `3267d637b1473ab02aff906e697aefafb297040e` | T04 CI build prerequisite (`package.json`, `.github/workflows/ci.yml`, `tests/governance-verifiers.test.mjs`) | GREEN / PR CI verified | Run #533 failure reproduced and fixed; CI/CD run #541 `40236147953` proves locked install/build prerequisite, T04 5/5 gates PASS, regression suite 8/8 PASS |
+
+Before taking a task, update the ledger in the same PR and check for an existing owner. After completion, record the PR, commit SHA, test commands/results, and remaining limitations.
+
+## 7. Anti-drift merge checklist
+
+- [ ] Base SHA and branch protection confirmed; no `master` mutation.
+- [ ] No overlapping file ownership or duplicate implementation.
+- [ ] Regression tests prove the original defect is caught.
+- [ ] Focused and full required CI checks pass on the exact PR head.
+- [ ] All source/policy/dependency/config/workflow changes have fresh evidence; stale receipts are not reused.
+- [ ] No failing/skipped required gate is described as green.
+- [ ] API contracts, localization, security, tenancy, rollback and compatibility reviewed.
+- [ ] Diff contains no unrelated changes, secrets, generated junk, or removed safeguards.
+- [ ] Release matrix updated with evidence links and honest residual status.
+- [ ] Independent review completed; merge only through reviewed PR.
+
+## 8. Change summary for handover
+
+This branch integrates the previously reported T03/T04 verifier scripts, seals dictionary/boundary false-pass gaps, completes whole-product tokenization (0 raw strings, 0 concats, 0 param mismatches across 704 files and 1,516 callsites), establishes 100% dictionary key parity across all 12 supported enterprise languages (2,184 keys each), adds independent package.json manifests for capability plugins (11/11 tests pass), adds non-destructive archival integrity tests (6/6 pass, 1,273 source imports verified), introduces the corporate attribution verification gate (`verify-ai-attribution.mjs`, 0 violations across 4,611 files), and verifies 0 typecheck errors across all 9 monorepo workspaces. In strict accordance with UAIGOS 3.0.0, Tier-1 AWS lifecycle in `eu-west-3` remains certified; universal commercial release remains withheld until unverified targets achieve genuine physical qualification.
+
+
+## 9. Newly confirmed CI orchestration defect — COR-REM-005
+
+**Root cause:** `.github/workflows/cor.yml` intentionally skips `aws-physical-gate` on `pull_request` events to avoid live infrastructure mutation from unmerged code, while `cor-final-release-gate` unconditionally required both `cor` and `aws-physical-gate` to be `success`. Consequently, a pull request could pass the COR Certification job and still fail the final release gate solely because the AWS job was deliberately skipped. This made PR validation and release certification semantics inconsistent.
+
+**Direct implementation:** The final gate now has an explicit `pull_request` branch. It requires COR result `success` and AWS result `skipped`, emits a notice stating that this is PR validation only and **NOT RELEASE CERTIFIED**, then exits successfully. For push/workflow-dispatch release qualification, both COR and AWS physical gates must still be `success`; skipped/failure/cancelled/missing remain failures.
+
+**Regression protection:** Added `COR-WF-017` in `tests/qualification/cor-workflow-gates.test.js` to assert the explicit PR-only branch and non-certification notice. The test assertion was corrected in the follow-up commit to match the actual shell condition.
+
+**Evidence boundary:** The workflow and test were changed after the candidate recorded in the current evidence manifest. The existing candidate-bound evidence is therefore stale for this new workflow code until the approved candidate-freeze/requalification/evidence-descendant process completes. Do not treat the upcoming CI result as final COR certification.
+
+### COR-REM-005 follow-up: release-only evidence freshness
+
+A second workflow defect was confirmed: the candidate-bound freshness check ran on unmerged pull requests even though PR code is expected to differ from the last frozen release candidate. This caused the PR to fail the release evidence-binding step before the PR-specific final-gate semantics could be exercised.
+
+**Direct fix:** The `Verify evidence freshness (candidate-bound, evidence-only descendant)` step now runs only when `github.event_name != 'pull_request'`. The check remains mandatory for push and workflow-dispatch release qualification. The PR workflow still runs build, typecheck, locale/I18N, architecture/import, workspace tests, governance, release-integrity and COR qualification checks, but its successful result is explicitly **PR validation only**, never release certification.
+
+**Regression:** `COR-WF-018` asserts the freshness step's event condition and the explicit non-certification wording. `COR-WF-017` preserves the PR final-gate semantics. Both assertions passed in local regression (18/18 PASS) and on GitHub Actions CI.
+
+This separation does not weaken release certification: the release event still requires fresh candidate-bound evidence and both COR and AWS physical gate success.
+
+### COR-REM-005 CI Verification Result — 2026-10-25 18:55 UTC
+
+- **PR Head:** `c6cb12f03bb69c40c07d4165309968c53b89ed36`
+- **COR Certification Run #408 ([40223142347](https://github.com/Chicitadel/ugondu/actions/runs/40223142347)):** **SUCCESS**.
+  - `COR Certification` job: ✓ Passed in 2m5s (clean execution of all 24 COR tests, 19 adversarial evidence tests, 6 mode-parity tests, and 18 workflow gate tests including `COR-WF-017` and `COR-WF-018`).
+  - `AWS Physical Qualification Gate`: Intentionally skipped for PR events (0s).
+  - `COR Final Release Gate`: ✓ Passed in 2s with verified notice: `PR VALIDATION PASSED for f915ba665dbaf1dc13fd546b895e0c3da115060a; AWS physical qualification was intentionally skipped. NOT RELEASE CERTIFIED.`
+- **Ugondu CI/CD Pipeline Run #521 ([40223142249](https://github.com/Chicitadel/ugondu/actions/runs/40223142249)):** **SUCCESS (16/16 jobs green)**:
+  - `Release Integrity & Governance Gates`: ✓ Passed in 16s.
+  - `Build Go Thin-Client` (all 5 targets: darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64): ✓ Passed.
+  - `Build Microservices & Workspaces` (all 9 workspaces): ✓ Passed.
+  - `Integration Tests` (11 test suites): ✓ Passed in 1m9s.
+- **Fail-Closed Release Boundary:** Universal commercial release remains strictly withheld. Only Tier-1 AWS lifecycle in `eu-west-3` is certified under candidate `45b07518e82c9089d68a38d87b4566b0dd0bcba9` / evidence descendant `fb8f66d34ef66fa253452d19d5079a892d35925d`. Unverified targets remain fail-closed until physical qualification receipts are produced.
+
+
+## Latest-head verification update — 2026-10-25 20:25 UTC
+
+- **Observed PR head:** `a5f978e177c54762daccdc5d785c772abc372339` (PR #24 remains open, draft, unmerged).
+- **COR workflow:** [run 40230376169](https://github.com/Chicitadel/ugondu/actions/runs/40230376169) completed successfully. Its COR Certification job passed; the AWS Physical Qualification Gate was intentionally skipped for the PR; the final gate passed with the explicit notice `NOT RELEASE CERTIFIED`.
+- **CI/CD pipeline:** [run 40230376160](https://github.com/Chicitadel/ugondu/actions/runs/40230376160) completed successfully. All 16 substantive build, governance, workspace and integration jobs passed; Docker validation and release publishing were skipped.
+- **Regression evidence from COR job logs:** COR remediation suite 24/24, adversarial evidence suite 19/19, mode-parity suite 6/6, workflow gate suite 18/18. Both `COR-WF-017` and `COR-WF-018` passed on this run's tested PR merge candidate `ecfec790d411bbffec270f1d700350bb3f26243c`.
+- **Scope limitation:** These are PR validation results, not a fresh non-PR AWS physical qualification or universal commercial release certification. Existing AI fleet, native target and customer artifact lifecycle blockers remain open.
+
+
+## Latest re-audit addendum — mandatory governance verifier wiring
+
+**Finding COR-REM-006 (confirmed):** `package.json` exposed `verify:attribution`, `verify:t03`, and `verify:t04`, but the aggregate `governance:validate` command did not execute them and `.github/workflows/ci.yml` did not invoke them in the Release Integrity & Governance Gates job. Thus a green existing CI run could not prove these standalone policy checks were enforced in CI.
+
+**Direct code remediation on this branch:**
+- `package.json`: `governance:validate` now runs attribution, T03, and T04 verifiers before the remaining governance validators.
+- `.github/workflows/ci.yml`: added explicit required steps for attribution, T03, T04, and `test:governance`.
+- `tests/governance-verifiers.test.mjs`: added a regression test asserting that both aggregate command wiring and CI workflow steps remain present.
+
+**Acceptance state:** YELLOW until a CI run on the resulting PR merge candidate passes these steps and the expanded regression suite. No evidence manifests were edited or rebound. No direct change to `master` or `phase4/production-hardening`.
+
+
+## Latest re-audit addendum — T04 clean-runner build prerequisite
+
+**Finding COR-REM-007 (confirmed by CI run #533, 40235932762):** The T04 verifier requires generated `dist/` artifacts, but the isolated Release Integrity & Governance Gates job invoked `verify:t04` on a clean checkout before building workspaces. T04 therefore failed with `Missing dist/ directory` for eight runtime workspaces. Attribution and T03 passed; the governance regression suite was skipped because the job stopped at T04.
+
+**Direct remediation on the dedicated branch:**
+- `package.json` commit `8841996f0367d12e3ec72ffb3e45d8429c56ca8f`: aggregate `governance:validate` now builds workspaces before T04.
+- `.github/workflows/ci.yml` commit `5313447ccecae303b75f2d2fc1ce2b7d49128c69`: added `npm ci && npm run build` immediately before T04 in the same CI job.
+- `tests/governance-verifiers.test.mjs` commit `8b637c47fcddc6430f1f08c5d47e2f966b8048e9`: asserts aggregate build-before-T04 ordering and the CI build prerequisite step.
+
+**Acceptance state:** YELLOW until latest-head CI confirms dependency installation/build succeeds, T04 passes, and the expanded regression suite runs and passes. Do not skip T04 or weaken its dist-artifact requirement. Keep the release fail-closed; universal commercial release remains not certified.
+
+
+## Latest-head verification — 2026-10-25 21:35 UTC
+
+**Observed PR source head:** `3267d637b1473ab02aff906e697aefafb297040e`. PR #24 remains draft/open/unmerged. The latest CI/CD run [#541 / `40236147953`](https://github.com/Chicitadel/ugondu/actions/runs/40236147953) and COR run [#428 / `40236147971`](https://github.com/Chicitadel/ugondu/actions/runs/40236147971) completed successfully for PR validation.
+
+- Attribution verifier: PASS.
+- T03 tokenization: PASS.
+- Workspace build prerequisite before T04: PASS.
+- T04 microservice/workspace conformance: `ALL 5/5 GATES PASSED`.
+- Governance verifier regression suite: `8 tests, 8 pass, 0 fail`.
+- COR certification tests passed; the AWS Physical Qualification Gate was intentionally skipped on the PR event; the final gate explicitly says `PR VALIDATION PASSED ... NOT RELEASE CERTIFIED`.
+
+This closes the CI acceptance state for COR-REM-006 and COR-REM-007 on this PR validation run. It does **not** certify universal commercial release or rebind the older evidence manifest. AI model qualification remains `CATALOG_OFFLINE` (0 qualified, 0 active, 12 disabled); broader native target/IDE/host/cloud support and immutable artifact lifecycle qualification remain open. No evidence receipts or manifests were manually edited. Do not merge until the release authority's remaining gates and candidate-freeze protocol are satisfied.
+
+
+## 16. Re-audit addendum — workspace coverage validator path containment (2026-10-25)
+
+**Task:** UG-GOV-PATH-001  
+**Implementation branch:** `fix/cor-workspace-coverage-path-containment-2026-10-25`  
+**Scope:** `scripts/governance/validate-test-coverage.mjs` and `tests/governance-verifiers.test.mjs` only.
+
+### Confirmed defect
+The workspace coverage verifier joined each `package.json` workspace declaration to the repository root without first proving the resolved workspace path remained inside that root. A malformed or adversarial declaration such as `../outside-workspace` could make the verifier inspect a package manifest outside the repository and report on it as if it were an in-repository workspace. This undermined the verifier's repository-boundary contract.
+
+### Direct remediation
+- Added exported `isWorkspacePathWithinRoot(root, workspacePath)` using canonical `path.resolve` and `path.relative` containment.
+- Rejects empty/non-string paths, absolute paths, parent traversal and any resolved path outside the root before reading a workspace manifest.
+- Added regression coverage for valid relative paths, traversal, absolute paths, empty values and null values.
+- No production branch or `master` was modified. No existing workspace architecture or script contract was replaced.
+
+### Verification and release boundary
+- Source and regression test changes are committed on the dedicated branch; CI execution is required to establish test PASS.
+- Do not mark this finding GREEN until the workflow run checks out the exact branch head and the governance regression suite passes.
+- This targeted verifier fix does not close AI fleet, native OS/IDE/host/cloud, immutable artifact lifecycle, or universal commercial qualification gaps. Overall release remains **NOT CERTIFIED** until the current candidate and all mandatory scope evidence pass.
+
+## 2026-10-26 Task Ledger: UG-COR-SEC-012 — Policy-pack template path containment
+
+- **Task ID:** UG-COR-SEC-012
+- **Concern:** Policy-pack verifier (`scripts/governance/verify-policy-pack-digests.mjs`) allowed `templatePath` entries to escape policy-pack directory via traversal (`../`), absolute paths, or symlinks.
+- **Owning Subagent / Authority:** Lead System Architect Ignatus Chika UJOMOR & Enterprise Architecture Council.
+- **Code Changes:** Implemented `resolvePolicyTemplatePath()` with lexical containment, realpath containment, and regular file validation in `scripts/governance/verify-policy-pack-digests.mjs`.
+- **Regression Tests:** Added `tests/policy-pack-path-containment.test.mjs` (3/3 tests pass).
+- **Gate Wiring:** Added `npm run test:policy-pack-boundary` to `package.json` (`governance:validate`) and `.github/workflows/ci.yml`.
+- **Status:** PASS locally (3/3 tests). Pushed to PR #24 branch for whole-product validation. Universal commercial release remains **NOT CERTIFIED**.
+
+
+
+## 2026-10-26 Whole-Product Re-audit Addendum — consolidated implementation ledger
+
+**Integration branch:** `fix/whole-product-cor-remediation-2026-10-25`  
+**Base:** `phase4/production-hardening` at `87ac04242b4d55f38b4ef644549cea9ff38f57c7`  
+**Rule:** Keep all findings below on this integration branch and in the canonical PR #24; do not create competing copies of the same remediation on parallel branches. Close or mark superseded any duplicate PR only after this branch contains the same code and its exact-head checks are recorded.
+
+### UG-COR-AWS-BOOTSTRAP-001 — false-success AWS mutation paths
+
+- **Owner scope:** `scripts/aws-conformance/reconcile-bootstrap-policy-pack.mjs` and `tests/qualification/bootstrap-fail-closed.test.mjs`.
+- **Change:** Require verified RDS service-linked-role read-back; fail closed on generic policy update/attachment failures; require policy create/attach read-back; verify the final required-policy inventory.
+- **Gate:** `npm run test:bootstrap-fail-closed`, added to `governance:validate` and CI Release Integrity & Governance Gates.
+- **Acceptance:** Pending exact-head CI; no live AWS mutation is performed by unit tests.
+
+### UG-COR-IMPL-001 — tenant policy digest placeholder
+
+- **Owner scope:** `server/engine-core/src/tenant/policy/digest.ts` and `digest.spec.ts`.
+- **Change:** Replace constant `digest-hash` with SHA-256; canonicalize JSON using the existing engine-core `canonicalize` dependency; validate unsupported/circular/non-finite input fail-closed.
+- **Gate:** Engine-core Jest suite, all-workspaces tests and build.
+- **Acceptance:** Pending exact-head CI; no digest result may be described as certified before tests pass.
+
+### UG-COR-POLICY-REGION-001 / UG-COR-POLICY-DIGEST-001 — renderer scope and canonical digest
+
+- **Owner scope:** `server/capabilities/src/continuity/RegionPolicyRenderer.ts` and `src/tests/region-policy-renderer.spec.ts`.
+- **Change:** Accept multi-segment region naming forms; expand `aws:RequestedRegion` consistently with explicitly allowed multi-region resource rendering; delegate renderer digest to `CanonicalPolicyRegistry.computePolicyDigest`.
+- **Gate:** Capabilities workspace tests, all-workspaces tests and build.
+- **Acceptance:** Pending exact-head CI. Syntax acceptance is not live region-availability proof. Explicit allowed regions remain mandatory.
+
+### Consolidated anti-drift requirements
+
+1. Treat this file as the canonical coordination contract; update this ledger instead of creating alternate governance authorities.
+2. Preserve the original baseline and keep `master` and `phase4/production-hardening` untouched directly.
+3. Re-run affected suites after any source, package, test, workflow or evidence change; record exact candidate SHA and workflow URL.
+4. Do not mark any finding GREEN until exact-head CI passes. Mocked AWS responses test error handling only and do not constitute live cloud qualification.
+5. Universal COR remains **NOT CERTIFIED** while account/region portability of the signed pack, physical target matrix, AI model fleet, and immutable artifact lifecycle remain open.
+
+
+### UG-COR-IMPL-002 — tenant policy resolver default-allow defect
+
+- **Owner scope:** `server/engine-core/src/tenant/policy/resolver.ts` and `resolver.spec.ts`.
+- **Confirmed defect:** missing rules could produce ALLOW; rule effects were not scoped to action/resource; the resource argument was ignored.
+- **Change:** default deny for missing/malformed/unmatched input; scoped action/resource/principal/attribute matching; explicit DENY overrides ALLOW; wildcard matching escapes regex metacharacters.
+- **Gate:** engine-core resolver Jest suite and all-workspaces build/test.
+- **Acceptance:** Pending latest exact-head CI.
+
+### UG-COR-IMPL-003 — policy impact analysis count-only defect
+
+- **Owner scope:** `server/engine-core/src/tenant/policy/impact.ts` and `impact.spec.ts`.
+- **Confirmed defect:** rule-array length differences missed same-length content mutations and could incorrectly report LOW risk/no approval.
+- **Change:** recursively canonical rule fingerprints and multiset comparison; additions require approval; removals/changes are HIGH risk; unsupported rule values fail conservatively.
+- **Gate:** engine-core impact Jest suite and all-workspaces build/test.
+- **Acceptance:** Pending latest exact-head CI.
+
+- **Handover:** `docs/audit/REAUDIT_HANDOVER_TENANT_POLICY_RESOLUTION_2026-10-26.md`.
+
+
+## 2026-10-26 Addendum — Portable Shared-Host Launch & Federated Billing Boundary
+
+**Task ID:** UG-PORTABILITY-BILLING-001  
+**Owner branch:** `fix/hosting-portability-billing-persistence-2026-10-26`  
+**Stacked PR:** [#29](https://github.com/Chicitadel/ugondu/pull/29), based on the whole-product candidate at `4cabc3533e81e0fb0e3890a9290489414984439c`.  
+**Release posture:** implementation candidate only; exact-head CI/COR and target qualification pending.
+
+### Required architecture invariants
+
+1. **One codebase, host by configuration.** Hosting provider selection must not alter billing/entitlement semantics, policy contracts, service APIs, or canonical capability registry.
+2. **AeroBill/Mandatag remain the entitlement authority.** In production the billing gateway must query the configured federated authority for each authorization. A local cache, local JSON file, replay cache, or stale idempotency response must not grant entitlement after authority revocation.
+3. **Authority failure is fail-closed.** Missing production authority configuration, corrupt storage required by the current mode, or failed persistence must not be reported as ready and must not create a fallback authorization.
+4. **Shared-host constraints are explicit.** Do not require Docker, root, systemd, or arbitrary background daemons for the shared-host profile. Use host-managed Node runtime/process supervisor, host TLS, private persistent storage, and cron only for bounded scheduled tasks. If prerequisites are absent, report the host unsupported/unqualified; do not emulate unsupported capabilities.
+5. **DirectAdmin filesystem safety.** Shell quoting is not path containment. Validate path-segment identifiers before any remote filesystem mutation. Never delete a customer's domain tree unless ownership and created-resource provenance are independently verified.
+6. **Truthful lifecycle status.** A directory existing does not prove an application has deployed, started, or passed health checks. The current native DirectAdmin application operation remains unqualified until installation/start/HTTP health is genuinely implemented and independently tested.
+7. **Legal-policy source of truth.** Legal policies live at https://policies.airroofers.eu. Keep links and authority references in the repository; do not fork central legal text into parallel repo-owned versions.
+
+### UG-PORTABILITY-BILLING-001 implementation ledger
+
+- `server/engine-core/src/fabric/providers/directadmin-native-client.ts`: identifier and SSH-port validation; refused false app-deployment success; unqualified application deletion without ownership proof; safe identifier requirements on DB/storage/snapshot operations.
+- `server/billing-gateway/src/db.ts`: strict load validation, no silent temporary fallback, atomic private-file writes, explicit readiness and write failures, preserve corrupt evidence, typed/localized storage errors.
+- `server/billing-gateway/src/index.ts`: production authority required; production authorization bypasses cached local tokens and queries Air Roofers authority for each decision; no in-process idempotency authorization cache in production.
+- `server/billing-gateway/src/__tests__/license-store-portability.spec.ts`: private file mode, reload persistence, corrupt-store behavior, configured path failure, write-failure mutation safety.
+- `server/billing-gateway/src/__tests__/billing-gateway.spec.ts`: production authority freshness, missing-authority fail-closed cases.
+- `server/engine-core/src/targets/__tests__/directadmin.spec.ts`: path traversal, SSH-port bounds, unqualified app deploy/delete behavior.
+- `.governance/platform/deployment/shared-hosting.json` and `docs/deployment/SHARED_HOSTING_LAUNCH_AND_MIGRATION.md`: portable shared-host launch requirements and shared-host → VPS → AWS migration contract.
+- Server and root locale catalogs: 7 new error keys across all 12 locale files; locale parity and T03 remain mandatory gates.
+
+### Acceptance criteria
+
+- Run all workspace builds/typechecks/tests on exact PR head, including the new billing/store and DirectAdmin suites.
+- Run locale-parity and T03 checks; all 12 locales in both catalogs must contain each new key and preserve placeholders.
+- Verify billing production tests prove a stale local token cannot authorize and upstream outage returns 503.
+- Verify DirectAdmin negative tests run without connecting to a production host and no destructive command is performed for an unqualified application.
+- Keep PR #29 draft until exact-head CI/COR results are fully known.
+- Do not claim a live DirectAdmin deployment or shared-host support receipt without a non-destructive probe and authorized smoke test on the actual host.
+
+### Qualification gaps intentionally left open
+
+The profile is a deployment contract, not a claim that the current hosting account meets it. The actual hosting runtime and outbound authority connectivity need qualification. GCP/Azure physical qualification, AI model fleet receipts, and immutable release-artifact lifecycle remain separate universal-COR blockers.
+
+
+## 2026-10-26 Addendum — UG-UPLM-BOOTSTRAP-UNIVERSAL-001 (Immediate Action)
+
+**Owner branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26`  
+**Base:** `fix/hosting-portability-billing-persistence-2026-10-26`  
+**Status:** IMMEDIATE ACTION / SPECIFICATION ADDED / RUNTIME IMPLEMENTATION AND PHYSICAL QUALIFICATION OPEN  
+**Canonical specification:** [Universal Bootstrap & Cloud Provisioning Remediation](../audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md)  
+**Canonical capability registry:** [universal-bootstrap-capabilities.json](../../.governance/platform/bootstrap/universal-bootstrap-capabilities.json)
+
+### Task boundary and anti-drift rules
+
+- This task owns the canonical bootstrap capability manifest and its implementation blueprint. Before source edits, inspect and reuse the current UPLM/COR bootstrap, policy-pack registry, signer/digest logic, and tests. Do not add a second policy engine, duplicate capability registry, or interface-specific authorization.
+- Root cause is an authority gap during first physical AWS staging deployment. Do not solve it by self-escalation or by granting `cloudformation:*` to the current IAM user or OIDC runner as the default.
+- Bootstrap must return `AUTHORITY_GAP`, non-zero status and a durable checkpoint on denied required mutation. No dependent mutation, success status, or resume may occur before read-only reconciliation and authorization.
+- Preserve separation between OIDC/base runner, execution role, CloudFormation service role, and workload runtime roles. Restrict `iam:PassRole` to explicitly approved service roles. Verify existing provider, trust, policies, boundaries, SCPs, region and account before create/change.
+- Terraform, Route 53, ACM, CloudFront, CloudFormation and all other providers must use the same plan/approval/apply/verify/evidence lifecycle. CloudFront ACM viewer certificates require `us-east-1`; regional services use their target region.
+- Community retains a safe useful deployment route. Higher editions add scale, automation breadth, policy granularity and governance depth; no tier bypasses safety or Air Roofers AeroBill/Mandatag entitlement authority.
+- Do not mark a capability supported or this task GREEN until exact-head CI, positive/negative policy tests, and relevant physical provider receipts are fresh and independently reviewable.
+
+### Task ledger
+
+| Task ID | Owner branch | Concern | Status | Acceptance evidence |
+|---|---|---|---|---|
+| UG-UPLM-BOOTSTRAP-UNIVERSAL-001 | `fix/universal-bootstrap-cloud-provisioning-2026-10-26` | Single bootstrap manifest; IAM authority handoff; CloudFormation/Terraform/DNS/ACM/CloudFront; provider-neutral adapter contract; edition matrix; UI/CLI/IDE/agent parity | YELLOW / SPECIFIED, NOT IMPLEMENTED OR CERTIFIED | Source audit, regression tests, policy validation, exact-head CI/COR, authorized staging receipts, DNS/TLS checks, independent UAIGOS review |
+
+### Immediate execution order
+
+1. Re-audit source entrypoints, existing bootstrap/policy files and test coverage on the branch head; reconcile against the uploaded V9 policy bundle and existing UPLM specification.
+2. Reproduce the exact denied AWS API operation and distinguish IAM policy denial from trust, SCP, permission-boundary, service-role, subnet/prerequisite and region/account failures.
+3. Implement typed fail-closed authority handling and no-false-success regression tests before broadening permissions.
+4. Integrate the single manifest into the existing capability registry and generate target-scoped AWS policy/handoff output; do not create an independent runtime registry.
+5. Add governed Terraform, Route 53, ACM and CloudFront adapter paths, then additional provider/host adapters only when implemented.
+6. Run focused tests, all relevant workspace/governance checks and exact-head CI/COR. Physical cloud tests must be authorized, isolated, cost-bounded and cleanup-safe.
+7. Keep release certification withheld until authentic evidence covers each advertised capability. Existing AWS evidence does not certify the new candidate or other providers.
+
+
+
+## 4. Universal bootstrap bundle completeness gate — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+**Canonical package manifest:** `.governance/platform/bootstrap/universal-bootstrap-bundle.json`
+
+The bundle manifest is the single required-artifact inventory for the universal bootstrap specification. The coordinated role and policy contracts are:
+- `.governance/platform/bootstrap/universal-bootstrap-capabilities.json` — capability/provider/lifecycle registry.
+- `.governance/platform/bootstrap/role-catalog.json` — logical role boundaries and role-binding invariants.
+- `.governance/platform/bootstrap/policy-pack-contract.json` — plan-derived policy generation, validation, approval, installation, read-back, and rollback contract.
+- `docs/audit/UNIVERSAL_DEPLOYMENT_RESOURCE_AUTHORIZATION_CATALOGUE_2026-10-26.md` — cross-platform resource/authorization inventory.
+- `docs/audit/UNIVERSAL_BOOTSTRAP_CLOUD_PROVISIONING_REMEDIATION_2026-10-26.md` — implementation and remediation specification.
+- `scripts/bootstrap/validate-bundle.mjs` and `tests/bootstrap-bundle-integrity.test.mjs` — structural validator and regression coverage.
+
+### Mandatory implementation rules
+1. Every runnable operation must map to a provider capability, lifecycle step, logical role, provider-native permission/action, target scope, prerequisite reads, mutation, wait/poll, rollback, verification and evidence action. Missing or ambiguous mapping is `AUTHORITY_GAP`.
+2. Generate policy from the normalized approved operation graph and bind it to exact provider, account/tenant/project, region/location, environment, resource identifiers/tags, role identifiers, plan digest and approval. Do not use a static universal super-policy to claim coverage.
+3. Maintain separate runner/base, bootstrap authority, execution, IaC service, workload runtime, DNS/TLS, state/artifact and verifier roles where applicable. A role may be collapsed only with explicit provider support and a proof that least privilege is preserved.
+4. Verify effective authority including trust policies, identity/resource policies, permission boundaries, organization/SCP/tenant restrictions, session policies, service-role delegation and explicit denies. An attached policy alone is not proof of effective authority.
+5. For every provider, distinguish `implemented`, `capability-probed`, `physically-qualified`, `unsupported` and `AUTHORITY_GAP`. Unknown must never become PASS. No provider is certified solely by a registry entry or JSON artifact.
+6. The integrity validator is not a provider runtime or physical qualification test. Keep the PR draft until the validator and regression tests run on the exact candidate SHA, then implement and test provider adapters and produce target-bound execution receipts.
+7. Never commit secrets or live credentials. Never grant standing administrator access, permit self-escalation, or broaden permissions merely to suppress an authorization failure.
+
+### Validation commands
+- `npm run bootstrap:validate` — manifest and cross-artifact integrity only.
+- `npm run test:bootstrap-bundle` — bundle regression tests (6/6 PASS including runtime `UniversalBootstrapRuntime` derivation and validation).
+- `npm run test:bootstrap-fail-closed` — existing fail-closed qualification tests plus bundle regressions (10/10 PASS).
+- `npm run bootstrap:validate:strict` — intentionally exits nonzero until separate runtime/provider qualification is available; it must not be reported as a passing live qualification.
+
+### 2026-10-26 Runtime Integration & Defect Remediation Update — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+1. **Defect Fix — `.governance/platform/bootstrap/role-catalog.json` (`runner_base.scope`):**
+   - *Root cause:* `runner_base` omitted the mandatory `scope` field required by `role-catalog.schema.json` and `scripts/bootstrap/validate-bundle.mjs`, causing `npm run bootstrap:validate` to exit with `ROLE_CONTRACT_INCOMPLETE: runner_base`.
+   - *Fix:* Added `"scope": "approved caller identity, OIDC issuer/audience/repository/environment, and read-only target discovery plus scoped assume-role targets"` to `runner_base`. Verified `npm run bootstrap:validate` exits `0`.
+2. **Defect Fix — `server/billing-gateway/src/__tests__/license-store-portability.spec.ts` (`./db` import):**
+   - *Root cause:* Import path referenced `./db` instead of `../db`, failing TypeScript compilation under Jest (`TS2307`).
+   - *Fix:* Updated import to `../db`. Verified `npm --workspace=server/billing-gateway test` passes `2/2 suites (14/14 tests)`.
+3. **Runtime Integration — `server/capabilities/src/continuity/UniversalBootstrapRuntime.ts` & `CanonicalPolicyRegistry.ts`:**
+   - Wired `.governance/platform/bootstrap/universal-bootstrap-bundle.json`, `universal-bootstrap-capabilities.json`, `role-catalog.json`, `policy-pack-contract.json`, and the 3 JSON schemas directly into `CanonicalPolicyRegistry` (`getUniversalBootstrapGovernance`, `listUniversalCatalogRoles`) and `UniversalBootstrapRuntime` without introducing duplicate policy engines or shadow registries.
+   - Implemented CloudFormation template resource parser (`parseCloudFormationTemplateResources`) and plan-derived operation graph compiler (`derivePlanOperationGraph`) supporting `infrastructure/aws/dumcholu-pilot-staging.yaml` (all 14 resources + stack control-plane lifecycle + scoped `iam:PassRole`), Terraform S3/DynamoDB/KMS state backend and resources, Route 53 DNS record changes, ACM certificate region validation (`us-east-1` required for `CLOUDFRONT_VIEWER`; target region required for `REGIONAL_ALB_OR_APIGW`), and CloudFront distributions.
+   - Implemented `generatePlanBoundPolicyPack`, `validatePolicyPackAgainstContract`, `diagnoseBootstrapDenial` (classifying IAM policy missing, explicit deny, SCP deny, permissions boundary deny, session policy deny, trust policy deny, missing `iam:PassRole`, and missing service-linked role into `AUTHORITY_GAP` with `exitCode: 1` and 0 subsequent mutations), and `resolveUniversalCapabilityAccess` across `community`, `professional`, and `enterprise` editions.
+   - Added unit and adversarial regression tests in `server/capabilities/src/tests/universal-bootstrap-runtime.spec.ts` (`8/8 PASS`) and `tests/bootstrap-bundle-integrity.test.mjs` (`6/6 PASS`).
+
+**Current evidence status:** Runtime integration, defect fixes, and regression suites pass locally; exact-head CI/COR verification on PR #30 is required before marking CI gates green. Physical cloud roles/policies and multi-provider live targets remain uncertified until candidate-bound physical receipts are produced.
+
+### 2026-10-26 Exact-head verification — UG-UPLM-BOOTSTRAP-UNIVERSAL-001
+
+- **Candidate:** `8f4a8244781e05a6d911e4ad67c49d46ad9219bf` (PR #30 branch; integrated via PR #31, draft, base `phase4/production-hardening`).
+- **Ugondu CI/CD Pipeline:** run 40355055649 (pull_request) SUCCESS; run 40348557767 (workflow_dispatch) SUCCESS. Earlier run 40347263796 on `225f2ec1` failed on two tests (billing replay headers, DirectAdmin repair executor); both corrected in `8f4a8244`.
+- **COR Certification:** run 40355055685 SUCCESS in PR-validation mode; AWS Physical Qualification Gate intentionally skipped. **NOT RELEASE CERTIFIED.**
+- **Open (fail-closed):** authorised AWS staging receipts for the bootstrap runtime, GCP/Azure, AI model fleet (CATALOG_OFFLINE), actual DirectAdmin host qualification, immutable artifact lifecycle. Universal commercial release remains withheld.
+
+
+## 2026-10-27 Addendum — UG-DIRECTADMIN-STAGING-PATH-001
+
+**Owner branch:** `fix/directadmin-staging-path-containment-2026-10-27`  
+**Parent candidate:** `326a7f75272ecbcfabc60cc19ba3b9c3c182a15e`  
+**Finding status:** IMPLEMENTED IN CODE / REGRESSION WORKFLOW ADDED / EXACT-HEAD WORKFLOW PENDING  
+**Canonical handover:** [DirectAdmin staging path containment](../audit/REAUDIT_HANDOVER_DIRECTADMIN_STAGING_PATH_CONTAINMENT_2026-10-27.md)
+
+### Confirmed defect and physical remediation
+
+- `tools/deploy-directadmin-staging.ps1` previously joined an untrusted `TargetSubdomain` to a path without validating DNS labels or verifying canonical path containment.
+- The staging script and committed `health.json` used `STAGING_READY`, although the script does not upload, deploy, probe or physically qualify the live host.
+- The script now validates DNS label syntax/length, resolves the staging root and target, requires the target to be a direct child of the canonical root, rejects path escapes, and verifies that `.htaccess` is a file resolved inside the target directory.
+- Generated and committed health evidence now states `ARTIFACT_STAGED_NOT_HOST_QUALIFIED`, `host_qualification: NOT_RUN`, and `evidence_scope: artifact-only`.
+- Added `tools/tests/Test-DeployDirectAdminStaging.ps1` for positive staging, traversal rejection, malformed DNS rejection and truthful evidence assertions.
+- Added `.github/workflows/directadmin-staging-safety.yml` to execute the regression test on Windows without Pester or live-host credentials.
+
+### Acceptance and anti-drift
+
+1. Wait for the dedicated Windows workflow on the exact branch head; do not claim the new tests passed before the run completes.
+2. Re-run repository CI and COR for the exact candidate SHA after all code, test, workflow and handover commits.
+3. Treat this fix as local staging-path safety only. It does not qualify the actual DirectAdmin account or make the DirectAdmin application adapter production-ready.
+4. Never claim live deployment/health from a staged artifact, a directory, or generated JSON alone.
+5. Do not modify `master` or `phase4/production-hardening` directly; keep the work isolated in the dedicated branch and PR.
+6. Universal COR remains **NOT CERTIFIED** until authentic, candidate-bound AWS, GCP/Azure, AI fleet, DirectAdmin host and immutable artifact lifecycle evidence is reviewed.
+
+
+### UG-DIRECTADMIN-RESOURCE-LIFECYCLE-002 — fail closed on unqualified provider operations
+
+- **Confirmed risks:** DirectAdmin database create/delete reported success without provider read-back/ownership proof; storage removal used `rm -rf` based only on a validated identifier; capability metadata overstated compute/database/delete/rollback support.
+- **Code:** `server/engine-core/src/fabric/providers/directadmin-native-client.ts` now refuses unqualified database create/delete and storage deletion. Storage creation rejects an existing target and verifies directory presence/writability before returning. `server/engine-core/src/fabric/providers/directadmin.ts` now accurately marks hosted-app and database operations unsupported, storage conditional, and rollback/delete unsupported.
+- **Tests:** `server/engine-core/src/targets/__tests__/directadmin.spec.ts` adds negative regression assertions for unqualified mutations. Run the engine-core workspace suite and full CI/COR on the final exact SHA.
+- **Anti-drift:** Do not re-enable these operations by removing the fail-closed checks. Re-enable only after a durable ownership/provenance ledger, provider-native read-back, safe rollback, localized typed errors, positive/negative adapter tests, and authorized physical qualification exist.
+- **Status:** IMPLEMENTED IN CODE / EXACT-HEAD FULL CI-COR PENDING. No DirectAdmin DB/app lifecycle certification is implied.
+
+
+## 2026-10-27 Addendum — UG-GCP-BOOTSTRAP-UX-001
+
+**Branch:** `feat/gcp-one-step-bootstrap-2026-10-27`  
+**Handover:** [GCP One-Step Bootstrap Re-audit Handover](../audit/REAUDIT_HANDOVER_GCP_ONE_STEP_BOOTSTRAP_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD TESTS AND COR PENDING / GCP DEPLOYMENT NOT QUALIFIED
+
+### Finding
+The GCP setup path depended on manual console navigation and did not provide a one-command, plan-bound WIF bootstrap comparable to the AWS bootstrap bundle. The operator-facing experience risked confusing inherited organization-level IAM grants with the project's intended least-privilege configuration.
+
+### Physical changes
+- Added `scripts/bootstrap/gcp-one-step-bootstrap.mjs` with read-only plan generation and digest-approved apply.
+- Added a canonical GCP bootstrap profile and registered its runtime, tests and workflow in the universal bundle.
+- Added `npm run bootstrap:gcp` and `npm run test:bootstrap:gcp`.
+- Added regression tests and `.github/workflows/gcp-bootstrap-safety.yml`.
+- Apply mode enables only the bootstrap APIs, creates/reuses a repository-restricted GitHub OIDC provider and dedicated service account, grants only `roles/iam.workloadIdentityUser` to the exact repository principal, and verifies read-back.
+- The bootstrap does not grant Owner, Editor, or workload deployment roles and does not create service-account keys.
+
+### Mandatory invariants
+1. Plan/apply must use the same stable SHA-256 plan digest. Any plan change requires fresh approval.
+2. Never silently switch the active gcloud project. Require explicit target and verify project identity before mutation.
+3. Never widen roles to bypass organization policy, IAM deny, permission boundary or missing mapping. Return a typed authority gap and stop.
+4. Provider configuration and IAM bindings require post-mutation read-back; failed read-back is not success.
+5. No user-supplied key material in chat, source control, bundle, or evidence.
+6. WIF bootstrap success is not GCP workload deployment qualification. Workload services, scoped IAM synthesis, deployment, rollback and physical receipts remain outstanding.
+7. Preserve central legal authority `https://policies.airroofers.eu` and Air Roofers AeroBill/Mandatag entitlement authority.
+8. Keep changes on this dedicated branch; do not directly modify `master` or `phase4/production-hardening`.
+
+### Required verification
+Run `npm run test:bootstrap:gcp`, `npm run bootstrap:validate`, full CI, and COR on the exact final SHA. Then conduct authorized GCP staging qualification with read-back evidence before making any deployment-support claim.
+
+- **Additional hardening:** read back enabled APIs and the WIF pool; verify the repository-restricted provider before adding the impersonation binding; refuse to attach federation to an existing service account with direct project-level grants. Prefer a fresh dedicated account and inspect inherited organization/folder IAM before any workload use.
+- **Regression coverage:** a mocked successful bootstrap must pass API/pool/provider/IAM read-back; an existing privileged service account must be rejected before the WIF binding is added.
+
+## 2026-10-27 Integration Head — Commit 2d44914
+
+- **Candidate Branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` (PR #30)
+- **Merged PRs:** Integrated `feat/gcp-one-step-bootstrap-2026-10-27` (PR #33 / `43dc2129`) containing GCP one-step WIF bootstrap, DirectAdmin staging path containment, truthful qualification labeling, and regression suites.
+- **Verification Summary on Local HEAD:**
+  - `npm run test:bootstrap:gcp`: 8/8 PASS
+  - `npm run bootstrap:validate`: PASS (structural and schema cross-artifact integrity)
+  - `node --test tests/deploy-directadmin-config.test.mjs`: 5/5 PASS
+  - `node --test tests/policy-pack-path-containment.test.mjs`: 3/3 PASS
+  - `powershell -ExecutionPolicy Bypass -File tools/tests/Test-DeployDirectAdminStaging.ps1`: PASS
+  - `node scripts/governance/verify-ai-attribution.mjs`: PASS (0 prohibited phrases across 4,676 files)
+  - `node scripts/governance/verify-tokenization-t03.mjs`: PASS (704 files, 1,527 callsites, 0 raw strings, 0 concats, 0 missing tokens)
+  - `node scripts/governance/verify-microservices-t04.mjs`: PASS (5/5 gates conformant across 9 workspaces)
+  - `node scripts/governance/validate-repository.mjs`: PASS (4,676 files verified with 0 violations)
+  - `node scripts/governance/validate-capability-registry.mjs`: PASS (4 registries verified with 0 conflicts)
+  - `node scripts/governance/validate-test-coverage.mjs`: PASS (9 workspaces verified)
+  - `npm run test --workspaces`: 81/81 test suites PASS (798/798 tests pass)
+  - `npm run test:security`: 24/24 PASS
+  - `npm run test:integration`: 17/17 PASS
+  - `npm run test:locales`: PASS (12 languages synchronized)
+- **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
+
+## 2026-10-27 Integration Head — Azure Target Routing & Portability (PR #34)
+
+- **Candidate Branch:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` (PR #30, PR #31)
+- **Merged PRs:** Integrated `fix/azure-portability-cor-remediation-2026-10-27` (PR #34) delivering Azure Target Planning Adapter, TargetFabric routing for Kubernetes and Azure, target schema extension (`target.v1.json`), cost-gated fail-closed planning, and full 12-language localization.
+- **Physical Changes:**
+  - Added `server/engine-core/src/targets/azure.ts` with `AzureTargetAdapter` (<= 500 LOC, tokenized via `__t`, fail-closed executor registration requirement, cost-approval gates, and path traversal rejection).
+  - Extended `server/engine-core/src/targets/fabric.ts` and `server/engine-core/src/targets/index.ts` to wire Kubernetes and Azure target adapters alongside DirectAdmin and Docker.
+  - Extended `server/shared/schemas/target.v1.json` with `azure` targetType and `managed_identity`, `workload_federation`, `service_principal` authTypes.
+  - Added 9 new Azure localization keys across all 12 supported languages in both `server/shared/locales/` and `locales/`.
+  - Added regression tests in `tests/roadmap-r1-targets.test.js` (5/5 PASS).
+  - Maintained zero raw strings across all 705 scanned files and 1,531 token callsites (Track T03 PASS).
+- **Verification Summary on Local HEAD:**
+  - `node tests/roadmap-r1-targets.test.js`: 5/5 PASS
+  - `npm run verify:attribution`: PASS (0 prohibited phrases across 4,679 files)
+  - `npm run verify:t03`: PASS (0 raw strings, 0 concats, 0 missing tokens across 705 files)
+  - `npm run verify:t04`: PASS (5/5 gates conformant across 9 workspaces)
+  - `node scripts/governance/validate-repository.mjs`: PASS (4,679 files verified with 0 violations)
+  - `npm run test:bootstrap:gcp`: 8/8 PASS
+  - `npm run test:bootstrap-fail-closed`: 10/10 PASS
+  - `node --test tests/policy-pack-path-containment.test.mjs`: 3/3 PASS
+  - `node --test tests/deploy-directadmin-config.test.mjs`: 5/5 PASS
+  - `powershell -ExecutionPolicy Bypass -File tools/tests/Test-DeployDirectAdminStaging.ps1`: PASS
+  - `npm run test:security`: 24/24 PASS
+  - `npm run test:integration`: 17/17 PASS
+  - `npm run test:locales`: PASS (12 languages synchronized)
+- **Status:** Integrated, clean, verified, fail-closed boundaries preserved. Universal release withheld until authorized physical cloud staging receipts exist.
+
+
+## 2026-10-27 Addendum — UG-GO-CLIENT-VET-001
+
+**Owner branch:** `fix/go-thin-client-vet-and-module-imports-2026-10-27`  
+**Handover:** [Go thin-client vet remediation](../audit/REAUDIT_HANDOVER_GO_CLIENT_VET_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE / EXACT-HEAD CI PENDING
+
+### Confirmed finding
+Integrated CI/CD run [40526372443](https://github.com/Chicitadel/ugondu/actions/runs/40526372443) failed all Go thin-client platform jobs at `go vet ./...` because `client/i18n/pack.go` used `strings.TrimSpace` without importing `strings`, and `client/engine/executor_test.go` imported a package path inconsistent with `client/go.mod`'s module declaration `ugondu/client`.
+
+### Physical remediation
+- Added the standard-library `strings` import in `client/i18n/pack.go`.
+- Corrected the engine test import to `ugondu/client/i18n` matching `client/go.mod`.
+- Aligned `ExecutionState` struct literal in `client/engine/executor_test.go` (`StateSequence: 1`, removed non-existent fields).
+- Completed `VerifyCryptographicBindings` in `client/engine/executor.go` to enforce `ExecutionId` and `TransactionId` parity check against tampered states.
+- Synchronized cryptographic binding mismatch tokens (`msg_cryptographic_binding_mismatch_executionid`, `msg_cryptographic_binding_mismatch_transactionid`) across all 12 corporate languages in `locales/` and `server/shared/locales/`.
+- Added regression tests for trusted public-key override trimming and fallback behavior in `client/i18n/pack_test.go`.
+- Added a focused handover note with exact failed-run evidence and mandatory verification commands.
+- Verified locally in Docker container (`golang:1.22-alpine`):
+  - `go vet ./...`: PASS (0 errors)
+  - `go test ./...`: PASS (`cmd`, `engine`, `i18n` all passing)
+  - Cross-compilation across all 5 target architectures (`linux/amd64`, `linux/arm64`, `windows/amd64`, `darwin/amd64`, `darwin/arm64`): PASS (`CROSS_BUILD_SUCCESS`)
+
+### Non-negotiable follow-up
+1. Re-run Go vet, tests, and cross-platform builds on the exact final SHA through CI.
+2. Do not remove Go vet or skip affected packages to force green.
+3. Keep the module path authoritative; fix imports rather than renaming the module as a workaround.
+4. Cross-compilation is not native platform lifecycle qualification.
+5. No direct changes to `master` or protected production branches. COR PR validation does not imply physical cloud qualification or public-release certification.
+
+
+## 2026-10-27 Addendum — UG-COR-BINDING-001
+
+**Owner branches:** `fix/universal-bootstrap-cloud-provisioning-2026-10-26` & `fix/cor-binding-reaudit-2026-10-27` (PR #37)  
+**Handover:** [Cryptographic binding fail-closed handover](../audit/REAUDIT_HANDOVER_GO_CLIENT_VET_2026-10-27.md)  
+**Status:** IMPLEMENTED IN CODE & REGRESSION TESTED IN DOCKER CONTAINER
+
+### Confirmed defect
+`VerifyCryptographicBindings` in `client/engine/executor.go` returned nil success when `state` or `env` was nil, and skipped comparisons when the envelope value was empty. This allowed empty envelope inputs to bypass persisted state verification upon resume.
+
+### Physical remediation
+- In `client/engine/executor.go`: nil inputs fail closed with `invalid_envelope_format`. Populated persisted bindings (`ExecutionId`, `TransactionId`, `PlanHash`, `TenantId`, `ProjectId`, `EnvironmentId`, `PolicyHash`) are strictly verified against supplied envelope values; empty supplied envelope values trigger mismatch errors.
+- In `client/engine/executor_test.go`: added `TestVerifyCryptographicBindingsFailsClosedOnMissingInputs` covering nil state, nil envelope, empty executionId, and empty transactionId.
+- In `client/engine/state.go`: `GetTransactionDir` sanitizes input by trimming whitespace and rejecting empty values.
+- Verified in Docker container (`golang:1.22-alpine`):
+  - `go vet ./...`: PASS (0 errors)
+  - `go test -v -run TestVerifyCryptographicBindings ./engine`: PASS (both tests green)
+  - Full client test suite (`cmd`, `engine`, `i18n`): PASS (0.190s)
+
+
+## 7. Re-audit update — UG-COR-BINDING-001 (2026-10-27 17:39Z)
+
+**Candidate commit examined:** `99d89092739cd7ff2cb7e0c43e394d12019005e0`  
+**Remediation branch:** `fix/cor-binding-reaudit-2026-10-27`  
+**Related PR:** [#37 — Fail-closed execution binding remediation](https://github.com/Chicitadel/ugondu/pull/37)
+
+### Code and regression scope
+- `client/engine/executor.go`: `VerifyCryptographicBindings` fails closed for nil state/envelope and compares each populated persisted binding against the envelope, including an empty supplied value. Localized error tokens are retained.
+- `client/engine/executor_test.go`: fail-closed tests cover nil inputs and missing/mismatched binding cases.
+- `client/engine/state.go`: `GetTransactionDir` validates the transaction identifier against empty/path traversal inputs in the candidate source. Do not count this as a new change without a candidate diff proving it changed in this remediation.
+
+### Candidate-bound GitHub workflow evidence
+- [COR Certification run 40545111554](https://github.com/Chicitadel/ugondu/actions/runs/40545111554): completed successfully for commit `99d89092739cd7ff2cb7e0c43e394d12019005e0`. Workspace build/tests, locale validation, I18N audit, architecture/import scans, typecheck, COR regression suite, evidence integrity and fresh COR qualification steps reported success.
+- [Ugondu CI run 40545111529](https://github.com/Chicitadel/ugondu/actions/runs/40545111529): completed successfully; attribution, T03 tokenization, repository governance/anti-stub validation, workspace builds, T04 conformance and workspace tests reported success.
+- [DirectAdmin Staging Safety run 40545111655](https://github.com/Chicitadel/ugondu/actions/runs/40545111655): path-containment and evidence-scope safety tests passed. This is a safety test, not proof of a completed live deployment.
+- COR evidence artifact: `ugondu-cor-evidence-1e3a5488a719bc8c335a071e7d8a58f1db62e11a`, SHA-256 `f639183c5de286f499363e8cac1225d0db9df693a0851cf7b816ad53c9bcad56`.
+
+### Mandatory limitations
+- The COR workflow's **AWS Physical Qualification Gate was skipped**. Its signing-trust-root step was also skipped. The successful workflow is not a signed, complete multi-host production release certification.
+- The uploaded Antigravity execution log reports Go `vet`, Go tests and five-target cross-compilation as passing, but it also records earlier failed/cancelled attempts and does not include the complete raw command logs. Treat those Go results as reported, not independently reproducible evidence, until exact-head CI artifacts or complete logs are attached.
+- Live, candidate-bound physical execution receipts remain required for DirectAdmin and any AWS/GCP target included in the release scope.
+- Public commercial release remains **BLOCKED / NOT FULLY CERTIFIED** until every mandatory physical gate and the final authorized COR decision passes on the release candidate.
+
+### Required next action
+PR #37 was merged into `fix/go-thin-client-vet-and-module-imports-2026-10-27` (not `master`/`main`). The merge does not waive exact-head Go `go vet ./...`, `go test ./...`, race tests where supported, cross-build results, repository governance checks, or required physical staging receipts. Any descendant source or test change invalidates prior candidate-bound evidence and requires rerunning affected checks.
+
+
+## 8. Whole-product re-audit follow-up — localization test integrity (2026-10-27)
+
+**Audit base:** `d283132258d9f7240eb1d71b1cc61630b3edfa85`  
+**Dedicated remediation branch:** `audit/whole-product-cor-reaudit-2026-10-27`
+
+### Confirmed defect: localization regression checks were permissive and mutated shared repository state
+
+- The drop-in localization test accepted either the exact localized value or a debug-prefixed variant, and some assertions used broad substring alternatives. This could allow unintended output formatting or incomplete positional interpolation to pass.
+- The test wrote `sw.json` into the repository's shared `locales/` directory. If a run terminated before its later cleanup section, the file could leak into a subsequent run and make results order-dependent.
+
+### Physical remediation on the dedicated branch
+
+- Replaced permissive OR/substring assertions with exact assertions for English, French, German, custom drop-in interpolation, English fallback, and unknown-token fallback.
+- Moved the custom locale fixture into a unique operating-system temporary directory selected through `UGONDU_LOCALES_DIR`; added exit-time cleanup and restoration of the prior environment variable. The repository's shared locale directory is no longer written by this test.
+- This is a regression-test integrity fix, not proof of complete product COR closure.
+
+### Evidence and release boundary
+
+- The changes are committed on the dedicated branch and are proposed through a draft PR; exact-head CI is still required.
+- The reported 65 local COR suites are not equivalent to all physical provider/host qualification gates. The previously recorded AWS physical qualification and signing-trust-root steps were skipped, and the uploaded Antigravity log does not provide complete raw output for every Go command.
+- Overall COR remains **PARTIAL / RELEASE BLOCKED** until mandatory exact-head checks and authorized physical qualification receipts are complete.
+
+
+## 9. Whole-product re-audit follow-up — persisted state integrity (2026-10-27)
+
+**Finding ID:** UG-COR-STATE-INTEGRITY-001  
+**Audit base:** d283132258d9f7240eb1d71b1cc61630b3edfa85  
+**Dedicated branch:** audit/whole-product-cor-reaudit-2026-10-27
+
+### Confirmed defect
+
+ExecutionState.ComputeHash and SaveState generated a deterministic SHA-256 state digest, but LoadState did not recompute or compare it before returning persisted state to the execution resume path. A changed state field could therefore be consumed without the existing integrity digest detecting the inconsistency. The digest is an integrity checksum, not a keyed signature; it detects inconsistent modification but is not proof against an attacker able to rewrite both state and digest.
+
+### Physical remediation
+
+- client/engine/state.go: LoadState now quarantines and rejects persisted state when stateHash is missing or differs from a freshly computed digest.
+- client/engine/state_test.go: added regression cases for a modified state field and a missing digest; each requires ErrStateCorrupt and quarantine.
+- The prior localization test-integrity changes remain in this same dedicated branch.
+
+### Verification boundary
+
+These code and regression changes are committed on the branch, but exact-head Go tests, go vet, race tests, and CI have not yet been independently observed as passing for this new head. The new test code must be formatted and run with gofmt, go test ./..., go test -race ./..., and go vet ./... before this finding can be marked GREEN.
+
+This check validates the consistency of the stored digest. It does not make an unkeyed SHA-256 digest tamper-proof against an actor able to rewrite the entire state file. A stronger authenticity requirement would need a separately governed keyed MAC or signature design and key lifecycle, not a misleading claim about this digest.
+
+Overall COR remains **PARTIAL / RELEASE BLOCKED** pending exact-head CI and mandatory physical qualification.
+
+## 2026-10-28 re-audit addendum — persisted-state permissions and replacement safety
+
+**Finding:** `UG-COR-STATE-IO-SECURITY-001` (confirmed in `client/engine/state.go`). The state writer ignored errors from `os.Chmod` when securing the transaction directory and temporary state file. It also deleted the prior `state.json` after a generic `os.Rename` failure before attempting a fallback rename. A permission-setting failure could therefore be treated as success, and an unrelated replacement error could destroy the last known-good state.
+
+**Physical remediation on `audit/whole-product-cor-reaudit-2026-10-27`:**
+- Check and propagate directory/file permission-setting failures; do not promote a state file when required permissions cannot be established.
+- Replace the delete-before-retry path with `replaceStateFile`, preserving the previous state on failure.
+- Use same-directory atomic rename on non-Windows systems and Windows `MoveFileExW` via `kernel32.dll` with `MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH` for replacement semantics.
+- Extend `state_test.go` to assert POSIX directory mode `0700` and state-file mode `0600`; Windows ACL qualification is not inferred from POSIX mode bits.
+
+**Acceptance:** `YELLOW / EXACT-HEAD CI PENDING`. This connector session authored the code and regression assertions but did not execute Go locally. Require `gofmt`, `go vet ./...`, `go test ./...`, Windows native build/test, and supported race tests on the resulting exact head. A failed replacement must leave the previous state intact. The unkeyed state digest remains a consistency check, not an authenticity guarantee.
+
+Do not close whole-product COR from this focused fix. AI fleet qualification, provider/host/IDE coverage, physical lifecycle receipts, and immutable commercial artifact qualification remain separately gated.
+
+
+## 2026-10-28 re-audit addendum — failed-save in-memory state rollback
+
+**Finding:** `UG-COR-STATE-COMMIT-ATOMICITY-001` (confirmed in `client/engine/state.go`). `SaveState` previously advanced `StateSequence`, `PrevStateHash`, `UpdatedAt`, and `StateHash` on the caller's object before the new file had been durably replaced. If persistence failed, disk retained the old state while the in-memory state advanced, allowing a later retry to create a broken or misleading hash chain.
+
+**Physical remediation:** `SaveState` now prepares a `nextState` copy, serializes and persists that candidate, and copies it back to the caller only after `stateFileReplacer` succeeds. A package-private replacement seam enables deterministic failure injection. `TestSaveStateReplacementFailurePreservesCommittedState` verifies that injected replacement failure leaves the previously committed file and persistence metadata unchanged while preserving the caller's intended domain mutation.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed; full Go tests/vet and CI have not been run in this session. Do not mark this finding GREEN until exact-head tests and platform builds pass.
+
+
+## 2026-10-28 re-audit addendum — concurrent state-save temporary-file collision
+
+**Finding:** `UG-COR-STATE-TEMP-COLLISION-001` (confirmed in `client/engine/state.go`). The fixed `state.json.tmp` name allowed concurrent writers for the same transaction to truncate or rename the same in-progress file. `SaveState` now uses `os.CreateTemp` in the transaction directory, sets explicit private permissions before replacement, and cleans up its unique temporary path. `TestConcurrentSaveStateUsesDistinctTemporaryFiles` injects replacement failures after both concurrent writers reach the replacement boundary, asserts distinct temporary paths, and verifies the previously committed file remains byte-for-byte unchanged. This prevents temp-file collision; it does not provide serialized multi-writer transaction semantics or resolve last-writer-wins business conflicts. Status remains `YELLOW / EXACT-HEAD TESTS PENDING`.
+
+## 2026-10-28 re-audit addendum — persisted transaction identity binding
+
+**Finding ID:** `UG-COR-STATE-IDENTITY-BINDING-001`.
+
+**Confirmed defect:** `LoadState(txID)` opened the requested transaction's `state.json` and validated that the stored transaction ID was non-empty, but did not require it to equal the requested ID. A validly hashed state copied or placed under another transaction directory could therefore be returned as the requested transaction's state.
+
+**Physical remediation:** `client/engine/state.go` now rejects empty or mismatched transaction IDs before digest verification, quarantines the offending file, and returns `ErrStateCorrupt`. `client/engine/state_test.go` adds `TestLoadStateRejectsTransactionIDMismatch`, using a valid self-consistent hash stored beneath a different transaction directory and asserting fail-closed rejection plus quarantine.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Source and regression test are committed on this dedicated branch; Go formatting, vet, tests, race tests, and platform builds have not been executed in this session. Do not close the finding until exact-head CI proves the test passes.
+
+This identity check is not a substitute for an authenticated state MAC/signature or process-level concurrency control. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 re-audit addendum — dot-segment transaction path
+
+**Finding ID:** `UG-COR-STATE-PATH-SEGMENT-001`.
+
+**Confirmed defect:** `GetTransactionDir` rejected empty IDs, `..`, and path separators, but accepted the exact ID `.`. Joining this ID to the transaction root resolves to the root itself, so `state.json` would not be isolated under a transaction-specific directory.
+
+**Physical remediation:** `client/engine/state.go` now rejects `.` in `GetTransactionDir` using the existing invalid-transaction-ID error path. `client/engine/state_test.go` adds `TestGetTransactionDirRejectsDotTransactionID` and verifies rejection by both path helpers and `SaveState`.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. The source and regression test are committed on the dedicated branch; no Go test/vet/race/platform run has been executed in this session. Do not close without exact-head evidence.
+
+Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 re-audit addendum — canonical transaction ID on save
+
+**Finding ID:** `UG-COR-STATE-CANONICAL-ID-001`.
+
+**Confirmed defect:** `GetTransactionDir` trims transaction IDs for path construction, while `SaveState` serialized the original untrimmed ID. A save using a whitespace-padded ID could write to the canonical directory and return success, but `LoadState` would reject the saved payload because its embedded ID did not match the canonical transaction identity.
+
+**Physical remediation:** `SaveState` now rejects IDs whose surrounding whitespace would be removed by `strings.TrimSpace`. `TestSaveStateRejectsWhitespacePaddedTransactionID` verifies the save fails and does not create the canonical transaction directory.
+
+**Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — nil execution-envelope constructor guard
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-NIL-001`
+
+- **Confirmed defect:** `InitStateFromEnvelope(env)` dereferenced `env` without validating it. A nil envelope caused a panic instead of a controlled fail-closed outcome.
+- **Physical remediation:** `client/engine/state.go` now returns `nil` when `env == nil`, before constructing execution state. This avoids fabricating an unbound state when the required envelope is absent.
+- **Regression coverage:** `client/engine/state_test.go` adds `TestInitStateFromEnvelopeRejectsNil`.
+- **Contract note:** The existing constructor signature returns only a pointer and has no error channel. Returning nil preserves the public signature; callers must treat a nil result as invalid and must not proceed with execution.
+- **Verification:** Source and regression test were committed to `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, tests, vet, race, and platform builds have **not** been executed in this session. Do not close the finding until exact-head CI evidence exists.
+- **Release status:** This is a targeted fix only. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — envelope transaction identity validation
+
+**Finding ID:** `UG-COR-STATE-ENVELOPE-IDENTITY-001`
+
+- **Confirmed defect:** The nil-envelope guard did not prevent a non-nil envelope with an empty or whitespace-padded `TransactionId` from producing an execution state that cannot be consistently persisted and reloaded.
+- **Physical remediation:** `InitStateFromEnvelope` now returns nil when `TransactionId` is empty or is not canonical under `strings.TrimSpace`. The constructor's existing signature is preserved; callers must treat nil as a rejected envelope and stop execution.
+- **Regression coverage:** `TestInitStateFromEnvelopeRejectsInvalidTransactionID` covers empty, whitespace-only, and whitespace-padded transaction IDs.
+- **Verification:** Source and test committed on `audit/whole-product-cor-reaudit-2026-10-27`. Go formatting, unit tests, vet, race detector, and cross-platform builds have not been executed in this session. Do not close the finding until exact-head CI output is captured.
+- **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+## 2026-10-28 follow-up — Go CI verification coverage
+
+**Finding ID:** `UG-COR-CI-GO-QUALITY-GATES-001`
+
+- **Confirmed gap:** The Go client CI job ran vet and tests but did not enforce repository Go formatting or run the race detector.
+- **Physical remediation:** `.github/workflows/ci.yml` now fails the Go client job if `gofmt -s -l .` reports files needing formatting, and runs `go test -race ./...` on the Linux amd64 matrix leg. Race testing is deliberately not run on unsupported matrix legs.
+- **Evidence boundary:** Workflow changes are committed on the dedicated branch, but this session has not observed a completed run for the resulting exact head. A workflow definition is not test evidence; the finding remains pending until the exact-head run and logs are inspected.
+- **Release status:** Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 re-audit — PR trigger coverage and AWS boundary
+
+**Finding ID:** `UG-COR-CI-PR-BASE-FILTER-001`
+
+- **Confirmed gap:** Both `.github/workflows/ci.yml` and `.github/workflows/cor.yml` included `audit/**` in PR base filters but omitted `fix/**`, while PR #39 targets `fix/go-thin-client-vet-and-module-imports-2026-10-27`. This made the workflow definitions in this branch insufficient to enable PR-triggered checks for that base pattern.
+- **Physical change:** Added `fix/**` to the `pull_request.branches` filters in both workflow files on the dedicated audit branch. Commits: `9a2563bb61dec8eaf303ee832db6b1eae3d11cff` (`ci.yml`) and `84065ccba005b7318a29d3046960fd0e45694904` (`cor.yml`).
+- **Important GitHub behavior:** A PR-triggered workflow is evaluated using the workflow definition available from its base branch. Since PR #39's current base does not yet contain this trigger change, this head-only edit does not by itself prove or guarantee that PR #39 will run those workflows. Do not modify the base branch outside the reviewed PR. Push-triggered runs on the audit branch should be inspected directly in GitHub Actions; the available workflow lookup here does not expose push-triggered runs.
+- **Acceptance:** Keep this finding YELLOW until workflow runs are observed and their tested SHA equals the candidate SHA. Workflow YAML edits are not execution evidence.
+
+**AWS and portability boundary:** Ugondu's Go thin client and its existing TypeScript workspaces remain this repository's scope. Dumcholu's Flutter/Spring Boot implementation belongs in `Chicitadel/dumcholu`; do not transplant Java/Flutter tasks into Ugondu. Any AWS deployment design must preserve configuration-driven provider adapters, keep Air Roofers Aerobill/Mandatag as the sole billing/entitlement authority, and avoid making AWS-specific assumptions mandatory for DirectAdmin/VPS portability. No AWS deployment or live physical qualification is claimed by this workflow change.
+
+## 2026-10-28 re-audit addendum — multi-process transactional locking and stale state prevention
+
+**Finding ID:** `UG-COR-STATE-LOCKING-001` (COR Track 7)
+
+- **Confirmed defect:** Unique temporary files in `client/engine/state.go` prevented temporary filename collisions during concurrent writes, but did not provide multi-process transactional serialization or prevent stale writers from overwriting newer state. A process with a stale in-memory state could overwrite a newer sequence committed by another process.
+- **Physical remediation:**
+  - Implemented cross-platform transactional file locking for `SaveState` via an exclusive lock on `<txDir>/.lock` (`state_lock_unix.go` using `syscall.Flock`, `state_lock_windows.go` using `LockFileEx` via `kernel32.dll`).
+  - Added package-private `stateLockAcquirer` hook in `client/engine/state.go` and defined `ErrStateStale`.
+  - Inside the exclusive lock, `SaveState` checks committed disk state: if disk sequence exceeds caller sequence or if base hashes mismatch, it rejects the write with `ErrStateStale`, protecting committed state from stale or divergent overwrites.
+  - Added comprehensive regression tests in `client/engine/state_test.go`: `TestConcurrentSaveStateSerializesWritersAndPreventsStaleState` and `TestStateFileLockAcquireAndRelease`.
+- **Verification:** `YELLOW / EXACT-HEAD TESTS PENDING`. All Node.js governance, security, and contract test suites pass (attribution 0 violations across 4,690 files, T03 PASS, T04 PASS, 9/9 governance tests, 24/24 security tests, 21/21 contract tests). Go CI toolchain run is required on the exact candidate SHA before marking GREEN. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+## 2026-10-28 re-audit addendum — fail-closed writes over invalid committed state
+
+**Finding ID:** `UG-COR-STATE-OVERWRITE-CORRUPT-001`
+
+- **Confirmed defect:** `SaveState` previously ignored errors reading `state.json`, ignored malformed JSON, and skipped integrity/identity checks when parsing failed or the embedded transaction ID differed. A subsequent save could therefore replace an unreadable, corrupt, or foreign state file and erase evidence rather than fail closed.
+- **Physical remediation on this branch:**
+  - `SaveState` now treats only `os.IsNotExist` as a valid first-save condition.
+  - Empty content, malformed JSON, foreign transaction identity, missing hash, or a mismatched recomputed digest return an error wrapping `ErrStateCorrupt`.
+  - Other read failures are propagated and cannot fall through to a write.
+  - Existing valid state must match both caller base sequence and hash exactly; divergence returns `ErrStateStale`.
+  - The implementation leaves the rejected existing file bytes in place for forensic recovery; it does not silently overwrite or quarantine them from this path.
+- **Regression coverage:** Added `TestSaveStateFailsClosedOnInvalidCommittedState` with malformed JSON, empty content, missing digest, digest mismatch, and foreign transaction identity cases. Each case asserts `ErrStateCorrupt` and bit-for-bit preservation of the existing file.
+- **Commits:** `edf5bd7d0362d2daf7cc60aafc33eb0fa53fab87` (runtime fix); `0f98d9db43affcacfdccf7f6dae3e0be298308ba` (regression test).
+- **Verification status:** YELLOW / exact-head Go execution pending. This session wrote the source and test via the repository API but did not execute `gofmt`, `go vet`, `go test`, race tests, or platform builds. The new tests must not be described as passing until CI evidence exists for the exact candidate SHA.
+
+## 2026-10-28 re-audit addendum — Go formatting and test modularization (UG-COR-GO-FORMATTING-001 & UG-COR-NO-STUBS-001)
+
+**Finding IDs:** `UG-COR-GO-FORMATTING-001`, `UG-COR-NO-STUBS-001`
+
+- **Confirmed defect:**
+  1. `Verify Go formatting` failed on CI because `gofmt -s -l .` detected line-ending and whitespace differences in 9 client source files.
+  2. `Validate repository policy (UG-COR-NO-STUBS-001)` failed because `client/engine/state_test.go` grew to 728 lines (exceeding the 500 LOC maximum file limit).
+- **Physical remediation:**
+  - Formatted all client Go files with `gofmt -s -w .` via containerized toolchain; `gofmt -s -l .` verified completely clean.
+  - Split `client/engine/state_test.go` into `client/engine/state_test.go` (407 LOC) and `client/engine/state_concurrency_test.go` (359 LOC), ensuring all test files comply with the 500 LOC limit.
+  - Removed unused imports (`path/filepath`, `sync`) in `state_test.go`.
+- **Verification evidence:**
+  - `validate-repository.mjs`: `[PASS] Repository governance validation (UG-COR-NO-STUBS-001): 4691 tracked files verified with 0 violations.`
+  - `go test -v ./...` in container: `ok ugondu/client/cmd 0.040s`, `ok ugondu/client/engine 0.363s`, `ok ugondu/client/i18n 0.144s` (100% pass, 0 failures).
+  - `go vet ./...` in container: exit code 0.
+  - Node.js governance suite: 10/10 gates passed.
+- **Status:** GREEN (CONTAINER VERIFIED) / CI WORKFLOW COMPLETION PENDING. Whole-product COR remains `PARTIAL / RELEASE BLOCKED`.
+
+
+
+## UG-COR-WINDOWS-LOCK-OVERLAPPED-001 — Windows lock/unlock identity
+
+**Finding:** The Windows lock helper used a different `syscall.Overlapped` object for `UnlockFileEx` than the one passed to `LockFileEx`, and discarded the unlock API result.
+
+**Physical fix:** `client/engine/state_lock_windows.go` now retains and reuses the same OVERLAPPED field for lock/unlock and returns unlock/close errors. Calls are behind package-private seams to permit deterministic tests.
+
+**Regression tests:** `TestWindowsStateFileLockReusesOverlappedForUnlock` and `TestWindowsStateFileLockPropagatesUnlockFailure` in Windows-only `client/engine/state_lock_windows_test.go`.
+
+**Commits:** `9ddea7cb607c31d434243277c30654ef644c17d0`; `2e1e06f3ff34ba2665b3f4f7c06a72be03f7e676`.
+
+**Status:** YELLOW / exact-head CI pending. Do not close until the Windows test job passes on the current head and other required CI checks remain green. No AWS deployment or whole-product certification is implied.
+
+
+## 2026-10-29 execution addendum — COR build preflight and AWS portability
+
+**Active handover:** [UGONDU_COR_REAUDIT_HANDOVER_2026-10-29.md](../audit/UGONDU_COR_REAUDIT_HANDOVER_2026-10-29.md)  
+**Dedicated branch:** `audit/cor-remediation-aws-portability-2026-10-29`  
+**Base candidate:** `5b6774ef2a1b41ae00b795a5656c876f30de89eb`  
+**Disposition:** source fix implemented; exact-head tests pending; commercial release remains blocked.
+
+### New confirmed finding: `UG-COR-BUILD-PREFLIGHT-FAIL-OPEN-001`
+
+The prior `scripts/run-cor-gates.js` warned when engine-core TypeScript compilation failed but continued to execute qualification suites, risking stale `dist/` use. This branch now delegates build preflight to `scripts/cor/build-preflight.js`, exits non-zero before suites on missing configuration or failed/terminated build, writes a machine-readable failure summary, and adds `tests/cor-build-preflight.test.js` to `npm run test:governance`.
+
+Implementation commits:
+- `465523d189d0dcbdf39c364eea2563d8bae1e380`
+- `4753345ef92f9e88c504e7d4070b016c15d6bc6c`
+- `ab62eb6ff9522bfe4762f225d31a93c86f3d64e2`
+- `71bdb44bdee292322f3ed303fa91d00c7e863046`
+
+Do not mark the finding closed until exact-head tests pass. Test source has been authored and wired; this session did not execute it in a local checkout.
+
+### AWS and Dumcholu cross-product guardrails
+
+- Preserve one-code/host-anywhere architecture. AWS-specific differences belong in IaC, deployment adapters and external configuration, not product business logic.
+- Keep AeroBill billing and Mandatag entitlement authority in the Air Roofers federation; do not duplicate those decisions in Ugondu or Dumcholu.
+- The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a proposal, not proof of a live stack. Review AMI/AZ portability, effective security-group rules, public backend exposure, SSM-only administration, UserData secrets, durable state, budget alarms and least-privilege IAM before provisioning.
+- No AWS resource was created or changed in this execution. Any physical cloud mutation requires explicit approval, verified account/region/role, an approved change set, a cost estimate, health tests, rollback and cleanup evidence.
+- Do not claim production release, 100% COR closure, or universal certification while exact-head evidence, live target qualification, independent verification, or any mandatory receipt is missing.
+
+### 2026-10-29 AWS pilot template hardening
+
+The existing `infrastructure/aws/dumcholu-pilot-staging.yaml` is a host bootstrap, not an application deployment. This branch added AWS Budgets email notifications (80% actual / 100% forecast), SSM-resolved AMI, parameterized AZ, pinned Docker Compose version plus required SHA-256 verification, and closed public ingress until an approved TLS edge exists. Regression coverage is in `tests/qualification/aws-staging-template-safety.test.mjs`, wired into `npm run test:governance`.
+
+No cloud resources were created. Do not expose public ingress or claim Ugondu/Dumcholu deployment until immutable image digests, secrets/runtime contracts, TLS edge, CloudFormation validation, health/E2E, rollback and cleanup evidence are available. Budget notifications alert; they do not cap spending.
+
+
+**Fail-closed follow-up:** `UGONDU_SKIP_BUILD=true` is now rejected because no independent exact-candidate build receipt is validated by the runner. Do not reintroduce a build-skip path unless an approved signed build receipt contract is implemented and tested against the current commit and tree. The latest diagnostic newline correction and skip-path change invalidate all earlier candidate CI/COR results; rerun against current HEAD.
+
+
+## 2026-10-29 re-audit guardrails — mandatory evidence and template drift
+
+- The COR evidence-verification suite is mandatory. Do not introduce environment-variable switches that remove required evidence, security, tenant-isolation, or release-gate suites from qualification.
+- A build or test that is skipped, missing, terminated, stale, or unexecuted is not PASS. Mandatory missing suites must force a non-zero process exit.
+- Any new CloudFormation resource requires updating and strengthening resource-graph tests; expected counts must reflect real resources and must assert the newly added logical ID rather than only changing a numeric count.
+- A CI failure is a confirmed defect signal that must be fixed in source/tests before handover. Never mark a failed exact-head run as evidence of closure.
+- Current follow-up branch: `fix/cor-runner-mandatory-evidence-gate-2026-10-29`, stacked on PR #56; do not edit protected branches directly.
+
+- Every CloudFormation resource type in a reviewed launch template must have an explicit resource mapping, least-privilege provider actions, scoped resource ARN derivation, read-back/rollback actions, and a regression test. Updating template resource counts without closing the resulting `AUTHORITY_GAP` is not remediation.
+- For dynamic names, parse the approved template value and bind it to the environment; unresolved substitutions must fail closed rather than widening the resource ARN to `*`.
+
+
+## Budget mapping test contract correction
+
+- The first budget-mapping regression attempt correctly resolved the exact scoped ARN and mapped create/modify actions, but the test incorrectly expected `budgets:DescribeBudget` in `providerActions` instead of the separate `verificationActions` field.
+- Corrected the test to assert create/modify in `providerActions`, describe/read-back in `verificationActions`, and delete in `rollbackActions`. The implementation's lifecycle separation remains intact.
+- The failed run is not a pass; rerun the capabilities workspace and full CI/COR on the newest head.
+
+
+## 2026-10-30 re-audit — AWS bootstrap region portability
+
+**Finding ID:** `UG-COR-AWS-BOOTSTRAP-REGION-PINNING-001`
+
+- **Confirmed defect:** The pilot CloudFormation template parameterized the Availability Zone but retained a default of `eu-west-3a`; the VPC Region tag and output description also hardcoded Paris-specific values. Deploying the same template into another AWS region could select an invalid AZ or report incorrect region metadata, contrary to the one-template/multi-region portability rule.
+- **Physical remediation:** Removed the fixed AZ default so the deployment must supply a valid `AWS::EC2::AvailabilityZone::Name` in the stack's region; changed the resource Region tag to the `AWS::Region` pseudo parameter; generalized the template description and subnet output to the selected region.
+- **Regression coverage:** Extended `tests/qualification/aws-staging-template-safety.test.mjs` to require no AZ default, require the Region tag to use `!Ref AWS::Region`, and reject hardcoded `eu-west-3a`/region tag values.
+- **Verification:** Source and test changes are committed to the dedicated PR #57 branch. Exact-head CI/COR must rerun; prior successful receipts for `1826e14e` do not apply to this newer candidate.
+- **Scope boundary:** This corrects infrastructure portability only. The template still bootstraps a host; it does not deploy application containers, configure a TLS edge, or establish persistent production data services. No AWS resources were provisioned.
+
+
+## 2026-10-30 follow-up — AWS Budgets IAM/ARN contract defect
+
+**Finding ID:** `UG-COR-AWS-BUDGET-IAM-ARN-CONTRACT-001`
+
+- **Confirmed defect:** The first `cap.cost.aws_budget` mapping used a colon after `budget` in the resource ARN and IAM action names `budgets:CreateBudget`, `budgets:DescribeBudget`, and `budgets:DeleteBudget`. AWS's current Service Authorization Reference maps the CreateBudget, UpdateBudget, and DeleteBudget API operations to `budgets:ModifyBudget`; the read operations use `budgets:ViewBudget`. The canonical budget ARN separator is a slash: `arn:PARTITION:budgets::ACCOUNT:budget/BUDGET_NAME`.
+- **Physical remediation:** Updated the mapping to use `budget/${budgetName}`, `budgets:ModifyBudget` for create/update and rollback, and `budgets:ViewBudget` for read-back. Kept least-privilege account/name scoping and fail-closed unresolved-name handling.
+- **Regression coverage:** Updated the plan-graph test to assert the canonical slash-form ARN and valid IAM action names; explicitly rejects the prior nonexistent action strings and colon-form ARN.
+- **Authoritative reference:** AWS Service Authorization Reference: https://docs.aws.amazon.com/service-authorization/latest/reference/list_budgets.html ; AWS Budget API ARN pattern: https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_Budget.html
+- **Verification:** Code and test committed on PR #57 branch. Exact-head CI/COR must pass; previous receipts predate this fix and cannot close the finding.
+
+
+## 2026-10-30 re-audit — COR stream executor placeholder evidence
+
+**Finding IDs:** `UG-COR-STREAM-EXECUTOR-STUBS-001`, `UG-COR-STREAM-A02-WILDCARD-VERIFIER-001`, `UG-COR-STREAM-A03-ENVELOPE-BINDING-VERIFIER-001`.
+
+- **Confirmed defects:** A02 only checked whether the source contained the words `wildcard` and `reject`, but did not fail if either was absent; it then invoked `assertCheck() { return true; }`. A03 inspected the wrong file (`policy-gate.ts` rather than `recovery.ts`), searched only for generic words, and used the same always-true assertion. Both could emit candidate-bound PASS receipts without verifying their stated objectives.
+- **Physical fixes:** Replaced A02 with explicit source verification of the exact wildcard predicate and fail-closed error. Replaced A03 with checks that the recovery route hashes the active capability envelope, passes that expected hash to `verifyAuthorization`, and the policy gate compares it and includes it in the seal payload.
+- **Regression coverage:** Added `tests/cor-stream-objective-verifiers.test.js` for positive and negative A02/A03 cases, identity mismatch, and shared stub detection; wired it into `npm run test:governance`.
+- **Systemic guard:** Added `scripts/cor/stream-source-integrity.js`; both `scripts/cor-engine.js` and `scripts/check-cor-stream-registry.js` now reject known always-true `assertCheck`, “pretend to check”, synthetic `verified_source`, and `mock-fingerprint` patterns before a verifier can be treated as eligible.
+- **Additional open executor findings from the same source scan:** The source scan also found obvious placeholder patterns in A07, B09-B16, C22, D25-D28, E29-E33, and a mock fingerprint in F39. These are now rejected by the shared guard where the matching patterns occur, but their objectives have **not** been implemented by this change. Each must be replaced with a real verifier and regression test; do not claim all 40 streams qualified.
+- **Verification:** Source/test wiring is committed on PR #57. Exact-head CI/COR must rerun. The registry gate is expected to remain blocked until the remaining placeholder executors are replaced; this is an intentional fail-closed result, not a regression to hide.
+- **Release status:** `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`. No AWS resources were provisioned.
+
+
+## 2026-10-30 independent re-audit addendum — verifier truthfulness
+
+- Finding `UG-COR-LOCALE-BASELINE-OPTIONAL-001` is physically fixed on the current remediation branch: D25-D28 and E29-E33 now require the English baseline before they can report locale parity.
+- Regression suite `tests/cor-locale-objective-verifiers.test.js` covers all nine locale verifiers for missing-baseline rejection and positive parity; the governance script now invokes it.
+- A passing stream count, metadata hash, or source-token scan is not proof of the stream's business objective. Every objective must have a positive test and an adversarial negative test that mutates the behavior, not merely the source text.
+- Verifiers that inspect source must establish semantic behavior or invoke the actual validator; substring-only evidence is provisional and cannot support COR certification.
+- New candidate commits invalidate all earlier CI/COR receipts. The locale fix is not GREEN until the newly wired test and all mandatory exact-head workflows pass.
+- No AWS resources were provisioned. The launch architecture remains provider-neutral; DirectAdmin-compatible deployment is retained until traction/official engagement justifies cost-bounded AWS staging. ECS EC2 is the initial low-cost AWS backend target; Fargate remains an upgrade tier, not a code fork.
+- Air Roofers federated services remain authoritative: AeroBill owns billing/metering and Mandatag owns license/entitlement decisions. Product code must integrate through configured contracts and must not duplicate those business rules.
+
+
+## 2026-10-30 verifier-strengthening guardrail
+
+- For a behavior objective, `verificationMode: TEST` must execute the real compiled implementation or actual CLI in an isolated fixture. Source substring presence is not behavioral proof.
+- Every runtime verifier must have an observed positive path and an adversarial negative path that would fail if the behavior regressed.
+- A04-A06 are now runtime-tested: engine/finalizer module independence, receipt verification, cryptographic signing and mismatched trust-root rejection. Preserve the `require.main === module` entrypoint guards; importing these modules must not run their CLI.
+- F35-F38 are now runtime-tested against compiled recovery logic and governed route behavior. Do not replace them with source token scans.
+- D25-D28/E29-E33 must use the shared recursive `scripts/cor/locale-key-parity.js`; do not reintroduce top-level-only `Object.keys` parity or skip the English baseline.
+- A candidate change invalidates previous exact-head receipts. The current qualification artifact is bound to merge candidate `59e630d7aa1e94d3153db7462a89dcfdce49666f`, with PR head `b6f64f2bc207198851d7dea09747806279890802`. Any subsequent source or documentation commit requires a new exact-head evidence run.
+- `READY_FOR_COR_SIGNATURE` is not a signed certificate. A skipped trust-root check, skipped signature ceremony, skipped AWS physical qualification, or absent live federation evidence is not PASS.
+- No AWS resources were provisioned. Keep DirectAdmin-compatible portability until the explicit traction/funding migration trigger; ECS on EC2 is the low-cost AWS tier and Fargate remains the later scaling tier.
+
+
+---
+
+## 2026-10-30 runtime-verifier depth supplement
+
+**Finding IDs:** `UG-COR-A07-REGISTRY-RUNTIME-PROOF-001`, `UG-COR-B11-LOCALE-UPDATER-RUNTIME-PROOF-001`.
+
+- A07 was still marked `verificationMode: STATIC` and inspected source substrings in `check-cor-stream-registry.js`. That could report PASS without executing the registry validator. It is now `verificationMode: TEST`: it executes the real validator against the repository, then executes it in an isolated fixture with a tampered repository identity and requires a non-zero rejection.
+- The A07 fixture copies the manifest, source-integrity guard and all 40 executor files; it uses the repository's installed dependency path and deletes the temporary fixture after execution. No signing keys or production data are copied.
+- B11 was still marked `verificationMode: STATIC` and inspected implementation tokens in `update-locales.js`. It is now `verificationMode: TEST`: it invokes the actual CLI in isolated temporary repositories, proves existing translations are preserved, and proves missing and extra keys fail closed.
+- Regression suites: `tests/cor-a07-runtime-verifier.test.js` and `tests/cor-b11-locale-updater-runtime.test.js`. Both are wired into `npm run test:governance`.
+- Required local commands: `npm run test:cor-a07-runtime-verifier`, `npm run test:cor-b11-locale-updater-runtime`, then `npm run test:governance`.
+- This supplement does **not** close other source-inspection verifiers. B09, B10, B12-B16 and C22 remain individually subject to objective-specific adversarial review; static verification may be retained only where the objective is inherently a static artifact constraint and the test validates the complete relevant contract.
+- Exact-head CI/COR evidence is mandatory for this branch. The previous 40/40 receipt for `01498bfa` is historical and cannot certify this descendant.
+- Do not provision AWS during this remediation. Hosting migration remains conditional on the agreed traction, official-engagement or funding trigger; all code and deployment contracts must remain host-portable.
+
+
+---
+
+## 10. Re-audit update — B09/B10 runtime proof requirement (2026-10-30)
+
+B09 and B10 have been converted from source-pattern checks to actual Jest runtime probes on branch `fix/cor-b09-b10-runtime-verifiers-2026-10-30`.
+
+- B09 must execute the actual engine-core Jest setup and prove the real `UpmExecutionGate` rejects when its secret is absent. An adversarial mocked gate must cause the probe to fail.
+- B10 must execute both global and shared-module translation fixtures and prove they return deterministic `[en]` values. An adversarial `[fr]` setup must cause the probe to fail.
+- Shared probe helper: `scripts/cor/run-jest-runtime-probe.js`.
+- Regression suite: `tests/cor-stream-objective-verifiers.test.js`.
+
+**Do not mark B09/B10 GREEN until exact-head tests and CI/COR pass.** Source token presence is not proof of runtime behavior. Apply the same objective-by-objective review to remaining STATIC verifiers; do not blindly convert checks whose objective is genuinely static, but never use static source scanning as proof of a runtime guarantee.
+
+The latest branch SHA and the Dumcholu principal-identity finding are recorded in the canonical dual-product handover. Residual tenant-claim trust and process-local career discovery/guidance persistence remain open. No AWS resources were provisioned; billing/entitlement authority remains AeroBill/Mandatag respectively.
+
+
+---
+
+## 11. Exact-head verification & complete TEST-mode verifier upgrade (2026-10-30 16:36 CET)
+
+- **Ugondu PR #61 (`fix/cor-b09-b10-runtime-verifiers-2026-10-30`) — Commit `e6a5352a8c25f0c0860d87f0bd370ee1feb20cf5`**:
+  - Resolved `ERR_PACKAGE_PATH_NOT_EXPORTED` in `scripts/cor/run-jest-runtime-probe.js` by resolving `jest/bin/jest` and making `B09.run` and `B10.run` `async`.
+  - Aligned `.github/workflows/ci.yml` (`docker-validate` job) readiness check port with `docker-compose.yml` (`127.0.0.1:${UGONDU_BIND_PORT:-8081}/health/ready`).
+  - Upgraded all remaining `STATIC` COR stream verifiers (`B13.js`, `B16.js`, `C22.js`) to `verificationMode: 'TEST'` (`verifierVersion: '3.0.0'`) with runtime execution and adversarial negative tests (`B12`, `B14`, and `B15` were already `TEST` mode). Added `client/cmd/repair_test.go` (`TestRepairCommandLocalizedExecution`) for Go thin-client repair command runtime localization verification.
+  - **Exact-head CI/COR receipts on `e6a5352a8c25f0c0860d87f0bd370ee1feb20cf5`**:
+    - `COR Certification` [#41080032536](https://github.com/Chicitadel/ugondu/actions/runs/41080032536): **SUCCESS** (40/40 streams PASS, zero `STATIC` verifiers remaining, `READY_FOR_COR_SIGNATURE`).
+    - `Ugondu CI/CD Pipeline` [#41080032558](https://github.com/Chicitadel/ugondu/actions/runs/41080032558): **SUCCESS** (all build, governance, integration, and Docker validation jobs PASS).
+- **Dumcholu PR #27 (`security/career-journey-principal-identity-hardening-2026-10-30`) — Commit `651746127b3e7278e63ede47b331cb551b66afc4`**:
+  - Hardened `CareerJourneyController` (`enforceOwnership`) to enforce principal-bound tenant claims (`citizenId@TENANT` / `citizenId:TENANT`) and fail closed (`SecurityException`) on conflicting caller-supplied `X-Authenticated-Tenant` / `X-Target-Tenant` headers (`CareerJourneyControllerSecurityTest`: 5/5 PASS).
+  - Replaced process-local-only discovery and guidance state with durable JPA persistence (`CareerDiscoveryCaseEntity`, `CareerDiscoveryCaseRepository`, `GuidanceCaseEntity`, `GuidanceCaseRepository`, and Flyway migration `V2__create_cs_discovery_and_guidance_tables.sql`; `CareerJourneyServiceTest`: 10/10 PASS; full 32-module reactor: PASS).
+  - **Exact-head CI receipts on `651746127b3e7278e63ede47b331cb551b66afc4`**:
+    - `Dumcholu Portable Runtime Qualification` [#41081132942](https://github.com/Chicitadel/dumcholu/actions/runs/41081132942): **SUCCESS** (6m14s).
+    - `Deployment Manifest Qualification` [#41081132967](https://github.com/Chicitadel/dumcholu/actions/runs/41081132967) & push [#41081122073](https://github.com/Chicitadel/dumcholu/actions/runs/41081122073): **SUCCESS** (24s).
+    - `Dumcholu Product Name Governance Gate` [#41081132955](https://github.com/Chicitadel/dumcholu/actions/runs/41081132955): **SUCCESS** (25s).
+- **Overall release posture**: `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED` pending authorized physical AWS staging deployment, live AeroBill/Mandatag federation transactions, empirical Nigeria econometric dataset calibration sign-off, hardware WebAuthn/FIDO2 ceremonies, and final human COR signatory authorization.
+
+
+---
+
+## 11. v29 exact-head re-audit addendum — 2026-10-30
+
+Two additional source-level gaps were confirmed after the parent candidate CI passed:
+
+1. `DUM-COR-CAREER-TENANT-HEADER-FALLBACK-002`: raw principal IDs could borrow tenant identity from caller-supplied headers. Child PR #28 requires a tenant-bound principal and propagates only the authenticated tenant to discovery persistence/confirmation.
+2. `UG-COR-TEST-MODE-SILENT-SKIP-001`: B13/B16/C22 could skip their runtime behavior checks when dependencies were missing. Child PR #62 makes the validator, compiled orchestrator, locale bootstrap, Go test and Go toolchain mandatory.
+
+**Mandatory evidence rule:** A TEST-mode verifier may never return PASS after skipping its objective's runtime proof. Missing runtime dependencies are blockers. Fix CI build/test ordering; do not weaken the assertion.
+
+Exact candidate branches and SHAs, parent CI receipts, regression scope and release boundaries are recorded in `AIR_ROOFERS_DUAL_PRODUCT_COR_MASTER_HANDOVER.md`.
+
+All child workflows must pass on their own exact head. Parent workflow receipts are historical context only. Do not merge child PRs until exact-head tests, COR, review and guardrail reconciliation pass.
+
+No AWS resources were provisioned. Keep shared-host portability, AeroBill billing authority, Mandatag entitlement authority, and all external operational release gates unchanged. Release remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 12. Final exact-head enforcement — 2026-10-30
+
+The current child candidates are Dumcholu PR #28 and Ugondu PR #62. Their exact heads and finding status are recorded in the canonical dual-product handover.
+
+- Dumcholu requires tenant-bound principal syntax, strict tenant claim parsing, trusted-tenant propagation, existing-case tenant matching, and legacy-operation tenant preservation.
+- Ugondu B13/B16/C22 require runtime dependencies and must fail closed if the validator, compiled production artifact, localization registry, Go test or toolchain is missing.
+- Re-run complete product-specific qualification after every code, test, workflow or handover commit. Parent SHAs and previously successful workflows are not evidence for a new child head.
+- Do not merge, deploy or certify on a skipped or pending test. Missing runtime prerequisites are blockers.
+
+No AWS resources were provisioned. Preserve portability and the explicit capital authorization gate. AeroBill and Mandatag remain the sole billing and entitlement authorities respectively. External operational gates remain open. Release is still `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.
+
+
+---
+
+## 13. AWS pilot sizing guardrail — 2026-10-30
+
+The Dumcholu ECS-on-EC2 host must not default to `t3.small` while hosting a 1 GiB Java task. The current template defaults to `t3.medium` with `t3.large` as an explicit measured-demand upgrade. This remains a prepared deployment profile, not authorization to provision AWS. Require an approved monthly budget, private networking, secrets, TLS edge, health-gated rollout and rollback evidence before physical deployment.
+
+
+---
+
+## 14. Test-driven AWS template corrections — 2026-10-30
+
+The Dumcholu ECS-on-EC2 default is now `t3.medium` for a 1 GiB Java task, with `t3.large` as an explicit upgrade. The first new regression run exposed an over-escaped assertion regex; the regex was corrected and the test retained. Preserve the failed run in the evidence history and require successful manifest lint/tests on the final exact head. Never delete or weaken the test to hide the failure. No AWS resources were provisioned.
+
+
+---
+
+## 15. Tenant-aware journey read guardrail — 2026-10-30
+
+Every authenticated career-journey read and recalculation endpoint must pass the principal-bound tenant into the service layer and validate any existing discovery case against that tenant before reading journey records. A principal check at the controller boundary alone is insufficient when durable discovery state carries tenant ownership. Never use citizen-only service reads from an authenticated multi-tenant HTTP route.
+
+
+---
+
+## 16. Latest source re-audit guardrails — 2026-10-30
+
+### Passport admission and middleware
+- Never admit an opaque passport based on a prefix or string shape. The default `AdmissionController.admit` implementation must deny unless the cryptographic authority is installed.
+- Reject repeated, comma-joined, malformed and oversized `X-Ugondu-Passport-Id` header values; never choose the first duplicate.
+- Never log passport credentials, bearer tokens, signatures or full credential payloads. Use a non-reversible, truncated SHA-256 fingerprint for security correlation.
+- `registeredPassports` is still process-local. Do not represent local revocation as cluster-wide revocation. Shared durable issuance/revocation is an explicit open gate and must be designed against an approved persistence/authority contract before deployment.
+
+### Dumcholu durable career state
+- When a JPA repository is configured, it is the source of truth for discovery and guidance reads. A process-local cache must never authorize stale state or preserve consent after durable withdrawal/deletion.
+- In-memory maps may be used only in explicit repository-absent test/development modes.
+- The current JPA entities do not yet expose a separate ORM-managed optimistic-lock version. Do not repurpose the domain case version. Before multi-instance production, add a dedicated persistence version/migration and verify conflict/retry semantics with concurrent integration tests.
+
+### Exact-head evidence
+- The local report's Dumcholu `4210a174...` and Ugondu `f85b0bfe...` references did not resolve through GitHub commit lookup at the time of this re-audit. Treat these as unverified local receipts until pushed and independently retrievable.
+- Latest source/test candidates before the handover update were Dumcholu `6720dba7c3d82d37772a7fed98f59fd0942abb8f` and Ugondu `c6e02b055e276f1ef951167b2bb61581c824e36b`. The subsequent handover/guardrail commits change the exact heads and therefore require fresh CI/COR receipts.
+- Dumcholu portable runtime #41129597856 was CANCELLED; manifest #41129597863 and product-name #41129597872 passed. Ugondu manifest #41129703904 passed while CI #41129703767 and COR #41129703696 were pending. Do not close findings until all required checks pass on the post-note SHA.
+
+### Hosting and authority
+- DirectAdmin remains current launch hosting; VPS is not available.
+- AWS staging/production provisioning remains conditional on traction, official engagement/funding and explicit budget approval. Do not create resources or incur spend without that approval.
+- ECS-on-EC2 `t3.medium` is the proposed minimal Java pilot baseline; Fargate is a later scale-up, not a prerequisite for portable application code.
+- AeroBill exclusively owns billing/pricing/metering; Mandatag exclusively owns licensing/entitlements. Do not duplicate either domain in Ugondu or Dumcholu.
+
+**Release status remains `PARTIAL / RELEASE BLOCKED / NOT CERTIFIED`.**
+
+
+### CI regression retention — passport guard refactor
+- CI run [#41129941871](https://github.com/Chicitadel/ugondu/actions/runs/41129941871) exposed a TypeScript syntax error caused by a stale fragment left during the deny-by-default method replacement.
+- The fragment was removed in commit `7d50cacebf0208725db9cce094a78d3ebc874fb8`; duplicate comment cleanup followed in `652a2cd5586a2ecc3b59e08f21875df0018a91e4`.
+- Keep the failed run and logs. Do not weaken tests or mark this fixed until a new full CI/COR run passes on the final post-handover SHA.
+
+
+### Passport-to-billing tenant binding
+- The tenant returned by cryptographic passport verification is the only passport tenant authority. Never substitute `req.body.tenantId` or a default tenant.
+- Before any deployment plan is created, compare the verified passport tenant with the tenant returned by the federated billing authority. Missing or mismatched tenant values must fail closed.
+- Carry the verified passport tenant through request-scoped response locals; do not recompute it from user input.
+- Keep a regression proving that a valid tenant-A passport paired with a tenant-B billing authorization is denied.
+- This adapter boundary does not move billing, pricing or metering logic into Ugondu. AeroBill remains the sole authority for those decisions.
+
+
+## 2026-10-31 re-audit addendum — mandatory handover rules
+
+### Dumcholu optimistic locking (PR #29)
+- Candidate branch: `fix/cor-career-optimistic-locking-2026-10-31`, head `96227ce279a3ea382e592baec933c43e1ba1e716`.
+- JPA `@Version` now applies independently to discovery and guidance cases; Flyway V3 adds `orm_version`. Keep existing domain `case_version` semantics intact.
+- H2/JPA stale-writer regressions are present. Exact-head Portable Runtime was still running when this note was authored; do not close or certify based on the source diff alone.
+- Optimistic conflicts intentionally surface. Do not add blind retries around non-idempotent writes or external side effects. Any retry must be bounded, idempotent, and separately qualified.
+
+### Ugondu distributed passport admission (PR #62 follow-on investigation)
+- Candidate branch: `fix/cor-shared-passport-revocation-2026-10-31`, based on `64cfd32dd810decad0a8dcb2ee3c2559e6f99241`.
+- `index.ts` still owns a process-local `registeredPassports` map. The existing DB-backed `RevocationManager` is not wired into HTTP admission; `DatabaseClient` is only an interface in this workspace with no production adapter injected.
+- Do not replace this with another process-local cache, a Git repository adapter, Mandatag entitlement calls, or an AWS-only persistence dependency.
+- Required acceptance test is cross-process: issue/register on instance A, admit on B; revoke on A, reject on B within the defined consistency bound. Database/cache outage must reject protected requests, not bypass revocation.
+- A spec, interface, schema-only migration, or in-memory unit test is not closure; implement and wire the actual portable SQL store.
+
+### Global no-drift controls
+- This file and `AIR_ROOFERS_DUAL_PRODUCT_COR_MASTER_HANDOVER.md` are the shared source of truth for Antigravity agents/actors.
+- Before any write: fetch latest remote head, compare with this ledger, create/continue only the assigned dedicated branch, inspect exact target file and tests, then patch.
+- After every write: record commit SHA, exact test command/results, exact-head workflow URLs and statuses, skipped steps, and residuals. Requalify the final changed head; do not inherit receipts from ancestors.
+- Never mark a checklist item PASS based on a plan, spec, mock, skipped test, local-only report, or unverified SHA.
+- Never rewrite history or force-push. Never modify `master`/`main` or merge without explicit authorization.
+- Preserve one-code/host-anywhere; DirectAdmin first, optional VPS, AWS only after commercial trigger and budget approval. AeroBill remains sole billing/pricing/metering authority and Mandatag remains sole licensing/entitlement authority.
+
+
+## 2026-10-31 signed passport registration enforcement — mandatory
+
+- A valid cryptographic signature proves issuer authenticity only. It does not establish that the passport is currently registered, active, tenant-bound or not revoked.
+- For `pp_v1.*` tokens, `admitPassport` MUST reject when the authoritative passport store returns no record, a revoked record, an expired record, or a tenant mismatch. Store errors MUST reject.
+- Passport issuance must persist the registration before returning the token. If persistence fails, issuance must fail; never return a token that cannot be admitted consistently.
+- Regression `ENG-PASS-011` clears the store after issuance and proves that the still-valid signed token is rejected without its registration.
+- This is separate from distributed durability: the current filesystem store coordinates only processes sharing one filesystem. Do not claim multi-host consistency until a real portable SQL adapter is wired into admission and cross-host tests pass.
+- Never relax this registration requirement to make local tests or a staging demo pass.
+
+
+## 2026-10-31 dual-product candidate integration boundary
+
+- Dumcholu PR #35 head `08c71e2ba278e49180aa9379f19cb8eae1f112b2` and PR #29 head `ffafd37cce49d83e4216b2842cb18f9d5147d142` are on divergent histories. GitHub compare reports `diverged`, 282 commits ahead on PR #35 and 161 commits behind relative to PR #29, with merge base `2930d6f473234134a71a9fa4648ec0cb125ca029`.
+- PR #36 is stacked on PR #35. Its green CI therefore does not qualify PR #29's discovery/guidance optimistic-lock changes.
+- PR #29 adds `CareerDiscoveryCaseEntity`, `GuidanceCaseEntity`, migration `V3__add_orm_optimistic_lock_versions.sql`, and `CareerCaseOptimisticLockingTest`. These exact paths are absent from the PR #35 candidate tree. PR #35's existing `CareerJourney` entity has its own `@Version`, which is not evidence that PR #29's separate discovery/guidance case entities are integrated.
+- Do not describe PR #29 through #36 as one unified, release-integrated candidate. Require a deliberate integration/rebase branch, conflict review, migration compatibility review, full Maven + Flutter + governance qualification on the resulting exact head before release aggregation.
+- Never cherry-pick or recreate the PR #29 entity/migration into PR #35 without first resolving the authoritative domain model and migration history. Preserve existing domain `case_version` semantics; ORM version is separate.
+
+
+## 2026-10-31 corroborated continuation rules
+
+- **Never accept local agent summaries as remote repository state.** Search origin branches and fetch exact files/commits before claiming a branch or commit is published. The supplied report's Dumcholu integration and Ugondu PostgreSQL adapter branches were absent from the origin branch search at this check.
+- **DU-CAREER-PATHWAY-SYNTHETIC-GENERATION-001:** the published Dumcholu territory candidate contained a fixed Cloud Solutions Architect pathway and invented stage/milestone/transition/confidence/policy metadata. The dedicated PR #37 branch physically removes this synthetic generation and adds no-side-effect regression tests. Do not mark the career intelligence feature complete: authoritative provider contract and tenant-bound evidence remain absent.
+- A fail-closed empty state is safer than fabricated data, but it is not a substitute for implementing the missing authoritative provider.
+- Keep local test receipts, remote workflow receipts, staging probes, live production probes, AWS physical qualification and cryptographic signing ceremony as separate evidence classes. Never promote one class into another.
+- Do not provision AWS resources until explicit budget/traction authorization. DirectAdmin remains current launch tier; portability must be achieved through configuration/adapters, not provider-specific business logic.
+- Billing/pricing/metering belong exclusively to AeroBill; licensing/entitlements belong exclusively to Mandatag. Product repos consume contracts and never duplicate these rules.
+- No agent may modify master/main, merge PRs, rewrite history, or replace architecture with duplicated entities/migrations without explicit authorization and an evidence-backed reconciliation plan.
+
+## 2026-11-14 Final Release Qualification Reconciliation
+
+- **Branch:** `fix/cor-final-release-qualification-2026-11-14` (integrates `feat/postgres-passport-store-adapter-2026-10-31` commits `3b525044`..`250dd7aa` plus `15751dc9`, `8fbfa596`, and `0d8cf799`).
+- **Confirmed defect fixed (`UG-BG-TEST-ENV-001`):** `tests/billing-gateway.test.js` now explicitly sets `NODE_ENV='test'` in `before()`, restores it in `after()`, and includes `BG-009` to prove non-test `NODE_ENV` fails closed (`402 LICENSE_INVALID`) without an upstream authority.
+- **Milestone `UG-COR-POSTGRES-LIVE-MULTIHOST-001` (2026-11-14):**
+  - Added `"pg": "^8.13.1"` (`pg@8.23.1`) to `package.json` and `server/engine-core/package.json`.
+  - Hardened `PostgresPassportStoreAdapter`, `PortablePassportStore`, and `engine-core` async passport admission/guard paths (`pool.connect()` transactional isolation, `pg_advisory_xact_lock`, cross-tenant `expectedTenantId` check, `simulateFailureAfterWrite` rollback hook, idle pool `error` listener).
+  - Retained `tests/postgres-passport-store.test.js` unchanged as fast mock unit tests; added `tests/postgres-passport-live-multiprocess.test.js` (`PG-LIVE-001`..`PG-LIVE-006`) across spawned OS processes and wired `postgres:16-alpine` service + `UGONDU_REQUIRE_LIVE_POSTGRES=true` gate into `.github/workflows/ci.yml`.
+  - Remediated live-PostgreSQL finding `UG-PG-SCHEMA-255-001` (exposed on PostgreSQL 16.16 run `43614180788`): migrated `passport_id` schema from `VARCHAR(255)` to `TEXT PRIMARY KEY` (with idempotent `ALTER TABLE ... ALTER COLUMN passport_id TYPE TEXT`) so >255-character signed `pp_v1` passport tokens persist cleanly.
+  - Verified exact-head on `0ad029ca0e1df1d3b5fc286aae95f43f1f313b8d` across all 3 GitHub Actions workflows (`43615216456`, `43615216371`, `43615216404`).
+- **Milestone `UG-COR-COMMERCIAL-FEDERATION-001` (2026-11-14):**
+  - Added `server/billing-gateway/src/aerobill-client.ts`, `mandatag-client.ts`, `usage-ledger.ts`, and `webhook-verifier.ts`; updated `upstream-resolver.ts`, `db.ts`, `entitlement/EntitlementEventProcessor.ts`, `commercial-routes.ts`, and `index.ts`.
+  - Remediated Findings A/B/C: real HTTP AeroBill checkout/upgrade/subscription/invoice & metering APIs, async `onAeroBillPaymentConfirmed` -> Mandatag manifest refresh & token verification, separated Mandatag (`MANDATAG_AUTHORITY_URL` / `https://license.airroofers.eu/api/v1`) from `identity.airroofers.eu` and AeroBill, added JWKS key rotation sync (`POST /v1/keys/mandatag/sync`), signed AeroBill/Mandatag webhooks with replay protection, and durable tenant-bound usage metering.
+  - Added `tests/commercial-federation-contract.test.js` (`FED-001`..`FED-007`) and wired it into `package.json` (`test:federation`, `test:integration`) and `.github/workflows/ci.yml`.
+  - Live staging acceptance (`FED-007`) remains **BLOCKED** pending authorized AeroBill & Mandatag staging endpoints/credentials (`NOT COMMERCIALLY CERTIFIED`).
+- **Boundary:** `server/billing-gateway/src/index.ts` production fail-closed behavior and existing `FILESYSTEM` admission paths remain preserved; no protected branches modified; zero AWS spend maintained.

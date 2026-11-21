@@ -1,0 +1,39 @@
+import { Logger } from '@ugondu/shared';
+
+describe(__t('credential_redaction_security'), () => {
+    it(__t('must_redact_passwords_and_toke'), () => {
+        const sensitiveContext = {
+            request: {
+                username: 'admin',
+                password: 'MySecretPassword123!',
+                auth_token: 'abc-def-ghi'
+            },
+            metadata: {
+                target: 'AWS',
+                secretKey: 'AKIA...SECRET'
+            }
+        };
+
+        const originalConsoleLog = console.log;
+        let interceptedLog = '';
+        console.log = (msg: string) => {
+            interceptedLog = msg;
+        };
+
+        const originalNodeEnv = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'development';
+
+        try {
+            Logger.info(__t('authenticating_to_provider'), sensitiveContext);
+        } finally {
+            console.log = originalConsoleLog;
+            process.env.NODE_ENV = originalNodeEnv;
+        }
+
+        expect(interceptedLog).toContain('[REDACTED]');
+        expect(interceptedLog).not.toContain('MySecretPassword123!');
+        expect(interceptedLog).not.toContain('abc-def-ghi');
+        expect(interceptedLog).not.toContain('AKIA...SECRET');
+        expect(interceptedLog).toContain('admin'); // Non-sensitive fields should remain
+    });
+});

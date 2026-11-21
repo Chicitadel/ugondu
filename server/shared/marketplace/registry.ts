@@ -66,17 +66,17 @@ export class GovernedMarketplaceRegistry {
     public registerPackage(manifest: MarketplacePackageManifest): PackageValidationResult {
         const publisher = this.publishers.get(manifest.publisherId);
         if (!publisher) {
-            return { valid: false, reason: 'UNKNOWN_PUBLISHER', status: 'REVOKED' };
+            return { valid: false, reason: __t('ui.responses.unknown_publisher'), status: 'REVOKED' };
         }
         if (publisher.status === 'REVOKED') {
-            return { valid: false, reason: 'REVOKED_PUBLISHER', status: 'REVOKED' };
+            return { valid: false, reason: __t('ui.responses.revoked_publisher'), status: 'REVOKED' };
         }
 
         // Verify signature over canonical manifest payload without signature field
         const { signature, ...canonicalData } = manifest;
         const canonicalString = canonicalize(canonicalData);
         if (!canonicalString) {
-            return { valid: false, reason: 'CANONICALIZATION_FAILED', status: 'PENDING_REVIEW' };
+            return { valid: false, reason: __t('ui.responses.canonicalization_failed'), status: 'PENDING_REVIEW' };
         }
 
         try {
@@ -89,15 +89,15 @@ export class GovernedMarketplaceRegistry {
             );
 
             if (!verified) {
-                return { valid: false, reason: 'INVALID_SIGNATURE', status: 'PENDING_REVIEW' };
+                return { valid: false, reason: __t('ui.responses.invalid_signature'), status: 'PENDING_REVIEW' };
             }
         } catch (err: any) {
-            return { valid: false, reason: 'CRYPTOGRAPHIC_VERIFICATION_ERROR', status: 'PENDING_REVIEW' };
+            return { valid: false, reason: __t('ui.responses.cryptographic_verification_error'), status: 'PENDING_REVIEW' };
         }
 
         // Zero-trust check: Reject packages demanding forbidden shell capabilities
         if (manifest.requiredCapabilities.includes('SHELL_EXEC') || manifest.requiredCapabilities.includes('EXEC_RAW')) {
-            return { valid: false, reason: 'FORBIDDEN_CAPABILITY_REQUESTED', status: 'REVOKED' };
+            return { valid: false, reason: __t('ui.responses.forbidden_capability_requested'), status: 'REVOKED' };
         }
 
         this.packages.set(manifest.packageId, {

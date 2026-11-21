@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "organization": "Air Roofers SASU",
+  "authority": "Ujomor Systems Engineering & Governance Authority",
+  "policyId": "UG-COR-NO-STUBS-001",
+  "activeExceptions": 0,
+  "exceptions": [],
+  "reviewedBy": "Enterprise Architecture & Security Council",
+  "lastReviewedAt": "2026-10-20T00:00:00Z"
+}

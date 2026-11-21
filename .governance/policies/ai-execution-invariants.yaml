@@ -1,0 +1,55 @@
+# Universal Autonomous AI Governance Operating System (UAIGOS)
+# Policy: AI-Execution Invariants
+# Classification: ENTERPRISE/PROTECTED
+
+invariants:
+  model_independence:
+    id: INV-AI-001
+    name: Model Independence Invariant
+    description: >
+      Ugondu MUST remain operationally capable of discovering, inspecting, planning,
+      executing, verifying, recovering, rolling back, and producing evidence for every
+      capability classified as deterministic and commercially released without requiring
+      an AI model, LLM, agent, external reasoning service, or network connection to an AI service.
+    enforcement: BLOCKING
+    cor_gate: true
+
+  ai_augmentation:
+    id: INV-AI-002
+    name: AI Augmentation Invariant
+    description: >
+      AI MAY augment discovery, diagnosis, planning, navigation, explanation, optimization,
+      autonomous orchestration, and decision support, but AI MUST NOT be the sole implementation
+      of any Ugondu capability required for deterministic execution.
+    enforcement: BLOCKING
+    cor_gate: true
+
+  execution_authority:
+    id: INV-AI-003
+    name: Execution Authority Invariant
+    description: >
+      All infrastructure mutation MUST ultimately pass through Ugondu's governed execution pipeline
+      regardless of whether the originating intent came from a human, CLI, UI, API, SDK, CI/CD system,
+      or AI agent.
+    enforcement: BLOCKING
+    cor_gate: true
+
+  agent_equivalence:
+    id: INV-AI-004
+    name: Agent Equivalence Invariant
+    description: >
+      AI-originated execution and human-originated execution MUST converge on the same Intent -> 
+      Plan -> Policy -> Authorization -> Execution -> Verification -> Evidence -> Recovery/Passport pipeline.
+    enforcement: BLOCKING
+    cor_gate: true
+
+operating_modes:
+  - id: MODE-1-DETERMINISTIC
+    description: Human -> CLI/UI -> Ugondu -> Infrastructure
+    requirement: MUST WORK
+  - id: MODE-2-AI-ASSISTED
+    description: Human -> Air Roofers AI -> Ugondu -> Infrastructure
+    requirement: MUST WORK
+  - id: MODE-3-AUTONOMOUS-AI
+    description: Air Roofers AI -> Ugondu -> Infrastructure
+    requirement: MUST WORK WITHIN POLICY/AUTHORIZATION BOUNDARIES

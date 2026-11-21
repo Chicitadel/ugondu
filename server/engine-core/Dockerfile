@@ -1,34 +1,49 @@
-# =============================================================================
-# Ugondu Engine Core — Governance Server Microservice
-# Air Roofers Ltd — Ujomor Systems Engineering Authority
-# Classification: COMMERCIAL | INTERNAL
-# =============================================================================
-FROM node:20-alpine AS builder
+# Stage 1: Build
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
+
+# Copy root configurations
 COPY package*.json ./
-RUN npm ci --frozen-lockfile
-COPY tsconfig.json ./
-COPY src ./src
+COPY tsconfig*.json ./
+COPY .governance/ ./.governance/
+COPY config/ ./config/
+
+# Copy all workspaces
+COPY server/ ./server/
+
+# Install all dependencies (including dev)
+RUN npm ci
+
+# Build the workspaces
 RUN npm run build
 
-# =============================================================================
-FROM node:20-alpine AS runtime
+# Stage 2: Production
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS runner
 
-RUN addgroup -S ugondu && adduser -S ugondu -G ugondu
-WORKDIR /app
+WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN npm ci --only=production --frozen-lockfile && \
-    npm cache clean --force
+# Set production environment
+ENV NODE_ENV=production
 
-COPY --from=builder /app/dist ./dist
+# Copy necessary files from builder stage
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node .governance/ ./.governance/
+COPY --chown=node:node config/ ./config/
+COPY --chown=node:node --from=builder /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /usr/src/app/server ./server
 
-USER ugondu
+RUN mkdir -p /usr/src/app/server/data /usr/src/app/.ugondu && chown -R node:node /usr/src/app
+
+# Switch to non-root user
+USER node
+
+# Expose standard port
 ENV PORT=4001
 EXPOSE 4001
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:4001/ || exit 1
+HEALTHCHECK --interval=5s --timeout=3s --start-period=15s --retries=5 \
+    CMD wget -qO- http://127.0.0.1:4001/health/ready || exit 1
 
-CMD ["node", "dist/index.js"]
+# Start engine core
+CMD ["npm", "run", "start:engine"]

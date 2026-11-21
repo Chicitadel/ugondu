@@ -1,0 +1,13 @@
+{
+  "name": "@ugondu/plugin-recovery-network",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Multi-Region Failover Orchestration Recovery Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "multi-region-failover-orchestration"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}

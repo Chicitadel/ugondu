@@ -1,0 +1,703 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowRegionIndependentSSM",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters"
+            ],
+            "Resource": "arn:aws:ssm:*::parameter/aws/service/ami-amazon-linux-latest/*"
+        },
+        {
+            "Sid": "CreateTaggedVpc",
+            "Effect": "Allow",
+            "Action": "ec2:CreateVpc",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:vpc/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTaggedSubnet",
+            "Effect": "Allow",
+            "Action": "ec2:CreateSubnet",
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:subnet/*",
+                "arn:aws:ec2:eu-west-3:971671216490:vpc/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTaggedInternetGateway",
+            "Effect": "Allow",
+            "Action": "ec2:CreateInternetGateway",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:internet-gateway/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTaggedRouteTable",
+            "Effect": "Allow",
+            "Action": "ec2:CreateRouteTable",
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:route-table/*",
+                "arn:aws:ec2:eu-west-3:971671216490:vpc/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTaggedSecurityGroup",
+            "Effect": "Allow",
+            "Action": "ec2:CreateSecurityGroup",
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:security-group/*",
+                "arn:aws:ec2:eu-west-3:971671216490:vpc/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTaggedSnapshot",
+            "Effect": "Allow",
+            "Action": "ec2:CreateSnapshot",
+            "Resource": [
+                "arn:aws:ec2:eu-west-3::snapshot/*",
+                "arn:aws:ec2:eu-west-3:971671216490:volume/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "LaunchTaggedInstanceTags",
+            "Effect": "Allow",
+            "Action": "ec2:RunInstances",
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:instance/*",
+                "arn:aws:ec2:eu-west-3:971671216490:volume/*",
+                "arn:aws:ec2:eu-west-3:971671216490:network-interface/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "LaunchTaggedInstanceReadOnly",
+            "Effect": "Allow",
+            "Action": "ec2:RunInstances",
+            "Resource": [
+                "arn:aws:ec2:*::image/*",
+                "arn:aws:ec2:eu-west-3:971671216490:key-pair/*",
+                "arn:aws:ec2:eu-west-3:971671216490:security-group/*",
+                "arn:aws:ec2:eu-west-3:971671216490:subnet/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowTaggingDuringCreation",
+            "Effect": "Allow",
+            "Action": "ec2:CreateTags",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:CreateAction": [
+                        "CreateVpc",
+                        "CreateSubnet",
+                        "CreateInternetGateway",
+                        "CreateRouteTable",
+                        "CreateSecurityGroup",
+                        "RunInstances",
+                        "CreateSnapshot"
+                    ],
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowECRTaggingDuringCreation",
+            "Effect": "Allow",
+            "Action": "ecr:TagResource",
+            "Resource": "arn:aws:ecr:eu-west-3:971671216490:repository/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowECSTaggingDuringCreation",
+            "Effect": "Allow",
+            "Action": "ecs:TagResource",
+            "Resource": [
+                "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+                "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+                "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ecs:CreateAction": [
+                        "CreateCluster",
+                        "CreateService",
+                        "RegisterTaskDefinition"
+                    ],
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowRDSTaggingDuringCreation",
+            "Effect": "Allow",
+            "Action": "rds:AddTagsToResource",
+            "Resource": [
+                "arn:aws:rds:eu-west-3:971671216490:db:ugondu-db-${aws:PrincipalTag/UgonduTransactionId}-*",
+                "arn:aws:rds:eu-west-3:971671216490:snapshot:ugondu-rds-snap-${aws:PrincipalTag/UgonduTransactionId}-*",
+                "arn:aws:rds:eu-west-3:971671216490:subgrp:ugondu-rds-subnet-${aws:PrincipalTag/UgonduTransactionId}-*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "DenyRemovalOfUgonduOwnershipTags",
+            "Effect": "Deny",
+            "Action": "ec2:DeleteTags",
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:vpc/*",
+                "arn:aws:ec2:eu-west-3:971671216490:subnet/*",
+                "arn:aws:ec2:eu-west-3:971671216490:internet-gateway/*",
+                "arn:aws:ec2:eu-west-3:971671216490:route-table/*",
+                "arn:aws:ec2:eu-west-3:971671216490:security-group/*",
+                "arn:aws:ec2:eu-west-3:971671216490:instance/*",
+                "arn:aws:ec2:eu-west-3:971671216490:volume/*",
+                "arn:aws:ec2:eu-west-3:971671216490:network-interface/*",
+                "arn:aws:ec2:eu-west-3::snapshot/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true"
+                }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteVpc",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteVpc",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:vpc/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteSubnet",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteSubnet",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:subnet/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteInternetGateway",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteInternetGateway",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:internet-gateway/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteRouteTable",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteRouteTable",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:route-table/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteSecurityGroup",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteSecurityGroup",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:security-group/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceTerminateInstances",
+            "Effect": "Allow",
+            "Action": "ec2:TerminateInstances",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:instance/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteNetworkInterface",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteNetworkInterface",
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:network-interface/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDeleteSnapshot",
+            "Effect": "Allow",
+            "Action": "ec2:DeleteSnapshot",
+            "Resource": "arn:aws:ec2:eu-west-3::snapshot/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowAttachDetachGateway",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AttachInternetGateway",
+                "ec2:DetachInternetGateway"
+            ],
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:vpc/*",
+                "arn:aws:ec2:eu-west-3:971671216490:internet-gateway/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowRouteTableAssoc",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AssociateRouteTable",
+                "ec2:DisassociateRouteTable"
+            ],
+            "Resource": [
+                "arn:aws:ec2:eu-west-3:971671216490:route-table/*",
+                "arn:aws:ec2:eu-west-3:971671216490:subnet/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "AllowRouteOps",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateRoute",
+                "ec2:DeleteRoute"
+            ],
+            "Resource": "arn:aws:ec2:eu-west-3:971671216490:route-table/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTransactionTaggedDBInstance",
+            "Effect": "Allow",
+            "Action": "rds:CreateDBInstance",
+            "Resource": "arn:aws:rds:eu-west-3:971671216490:db:ugondu-db-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTransactionTaggedDBSnapshot",
+            "Effect": "Allow",
+            "Action": "rds:CreateDBSnapshot",
+            "Resource": "arn:aws:rds:eu-west-3:971671216490:db:ugondu-db-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateTransactionTaggedDBSubnetGroup",
+            "Effect": "Allow",
+            "Action": "rds:CreateDBSubnetGroup",
+            "Resource": "arn:aws:rds:eu-west-3:971671216490:subgrp:ugondu-rds-subnet-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDBInstanceDestructiveBounds",
+            "Effect": "Allow",
+            "Action": [
+                "rds:DeleteDBInstance",
+                "rds:ModifyDBInstance"
+            ],
+            "Resource": "arn:aws:rds:eu-west-3:971671216490:db:ugondu-db-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDBSnapshotDestructiveBounds",
+            "Effect": "Allow",
+            "Action": "rds:DeleteDBSnapshot",
+            "Resource": "arn:aws:rds:eu-west-3:971671216490:snapshot:ugondu-rds-snap-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceDBSubnetGroupDestructiveBounds",
+            "Effect": "Allow",
+            "Action": "rds:DeleteDBSubnetGroup",
+            "Resource": "arn:aws:rds:eu-west-3:971671216490:subgrp:ugondu-rds-subnet-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceS3BucketCreation",
+            "Effect": "Allow",
+            "Action": "s3:CreateBucket",
+            "Resource": "arn:aws:s3:::ugondu-cor-bucket-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:LocationConstraint": "eu-west-3"
+                }
+            }
+        },
+        {
+            "Sid": "EnforceS3BucketTagging",
+            "Effect": "Allow",
+            "Action": "s3:PutBucketTagging",
+            "Resource": "arn:aws:s3:::ugondu-cor-bucket-${aws:PrincipalTag/UgonduTransactionId}-*"
+        },
+        {
+            "Sid": "EnforceS3BucketOperations",
+            "Effect": "Allow",
+            "Action": [
+                "s3:DeleteBucket",
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::ugondu-cor-bucket-${aws:PrincipalTag/UgonduTransactionId}-*"
+        },
+        {
+            "Sid": "EnforceS3ObjectOperations",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::ugondu-cor-bucket-${aws:PrincipalTag/UgonduTransactionId}-*/*"
+        },
+        {
+            "Sid": "CreateECROperations",
+            "Effect": "Allow",
+            "Action": "ecr:CreateRepository",
+            "Resource": "arn:aws:ecr:eu-west-3:971671216490:repository/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "EnforceECROperations",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:DeleteRepository",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:CompleteLayerUpload",
+                "ecr:InitiateLayerUpload",
+                "ecr:PutImage",
+                "ecr:UploadLayerPart"
+            ],
+            "Resource": "arn:aws:ecr:eu-west-3:971671216490:repository/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateECSTaskDefinition",
+            "Effect": "Allow",
+            "Action": "ecs:RegisterTaskDefinition",
+            "Resource": "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateECSCluster",
+            "Effect": "Allow",
+            "Action": "ecs:CreateCluster",
+            "Resource": "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "CreateECSService",
+            "Effect": "Allow",
+            "Action": "ecs:CreateService",
+            "Resource": "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestTag/UgonduCOR": "true",
+                    "aws:RequestTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "DeregisterECSTaskDefinition",
+            "Effect": "Allow",
+            "Action": "ecs:DeregisterTaskDefinition",
+            "Resource": "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*"
+        },
+        {
+            "Sid": "DeleteECSCluster",
+            "Effect": "Allow",
+            "Action": "ecs:DeleteCluster",
+            "Resource": "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "ModifyECSService",
+            "Effect": "Allow",
+            "Action": [
+                "ecs:UpdateService",
+                "ecs:DeleteService"
+            ],
+            "Resource": "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-${aws:PrincipalTag/UgonduTransactionId}-*/*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true",
+                    "aws:ResourceTag/UgonduTransactionId": "${aws:PrincipalTag/UgonduTransactionId}",
+                    "aws:RequestedRegion": "eu-west-3"
+                },
+                "Null": { "aws:PrincipalTag/UgonduTransactionId": "false" }
+            }
+        },
+        {
+            "Sid": "DenyECSTagStripping",
+            "Effect": "Deny",
+            "Action": "ecs:UntagResource",
+            "Resource": [
+                "arn:aws:ecs:eu-west-3:971671216490:task-definition/ugondu-cor-fargate-*",
+                "arn:aws:ecs:eu-west-3:971671216490:cluster/ugondu-cor-fargate-*",
+                "arn:aws:ecs:eu-west-3:971671216490:service/ugondu-cor-fargate-*/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:ResourceTag/UgonduCOR": "true"
+                }
+            }
+        },
+        {
+            "Sid": "AllowPassRoleForECS",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::971671216490:role/ecsTaskExecutionRole",
+            "Condition": {
+                "StringLike": {
+                    "iam:PassedToService": "ecs-tasks.amazonaws.com"
+                }
+            }
+        },
+        {
+            "Sid": "AllowGlobalReadDiscovery",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeInstances",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribeTags",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeVolumes",
+                "rds:DescribeDBInstances",
+                "rds:DescribeDBSubnetGroups",
+                "rds:DescribeDBSnapshots",
+                "rds:ListTagsForResource",
+                "ecr:DescribeRepositories",
+                "ecr:GetAuthorizationToken",
+                "ecr:ListTagsForResource",
+                "ecs:DescribeTaskDefinition",
+                "ecs:DescribeServices",
+                "ecs:DescribeClusters",
+                "ecs:ListTagsForResource"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

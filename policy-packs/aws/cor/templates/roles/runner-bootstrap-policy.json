@@ -1,0 +1,61 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowRunnerAssumeExecutionRoleWithTags",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/UgonduTransactionId": "false"
+        },
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true"
+        }
+      }
+    },
+    {
+      "Sid": "AllowBootstrapInspectExecutionRoleAttachments",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRolePolicies",
+        "iam:GetRolePolicy",
+        "iam:GetRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+        "arn:aws:iam::971671216490:role/UgonduCORRunner"
+      ]
+    },
+    {
+      "Sid": "AllowBootstrapAttachCanonicalCORPolicies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::971671216490:role/UgonduCORExecutionRole",
+      "Condition": {
+        "ArnLike": {
+          "iam:PolicyARN": "arn:aws:iam::971671216490:policy/UgonduCOR-V9-*"
+        }
+      }
+    },
+    {
+      "Sid": "AllowBootstrapInspectAndReconcileCanonicalCORPolicies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:CreatePolicy",
+        "iam:CreatePolicyVersion",
+        "iam:ListPolicyVersions"
+      ],
+      "Resource": "arn:aws:iam::971671216490:policy/UgonduCOR-V9-*"
+    }
+  ]
+}

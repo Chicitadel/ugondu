@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "evaluatedAt": "2026-10-20T19:29:38.193Z",
+  "executionId": "exec-qual-1792524571571-724432c4",
+  "commitHash": "50ca98b6dd3672ef473b425d74e66e60e163470d",
+  "treeHash": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3",
+  "scriptsExecuted": [
+    {
+      "script": "scripts/governance/validate-repository.mjs",
+      "durationSec": "6.268",
+      "exitCode": 0
+    },
+    {
+      "script": "scripts/branding/validate-assets.mjs",
+      "durationSec": "0.209",
+      "exitCode": 0
+    },
+    {
+      "script": "scripts/governance/verify-action-pins.mjs",
+      "durationSec": "0.139",
+      "exitCode": 0
+    }
+  ],
+  "rawLogSha256": "13a8b6cf51f349dcdf671a26c057d24911446c71b8eb4eecf8b5809ec63fdb2e",
+  "status": "PASS"
+}

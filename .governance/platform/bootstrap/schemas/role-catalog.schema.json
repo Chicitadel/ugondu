@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policies.airroofers.eu/schemas/ugondu/bootstrap/role-catalog.schema.json",
+  "title": "Ugondu Bootstrap Role Catalog",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "catalog_id",
+    "status",
+    "role_separation_required",
+    "roles",
+    "role_binding_rules",
+    "provider_mapping_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "catalog_id": {
+      "const": "ugondu.bootstrap.role-catalog"
+    },
+    "status": {
+      "type": "string"
+    },
+    "role_separation_required": {
+      "type": "boolean"
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "role_id",
+          "required",
+          "purpose",
+          "may_mutate_cloud_workloads",
+          "credential_mode",
+          "scope",
+          "constraints"
+        ],
+        "properties": {
+          "role_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "may_mutate_cloud_workloads": {
+            "type": "boolean"
+          },
+          "credential_mode": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "role_binding_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "provider_mapping_status": {
+      "type": "object",
+      "minProperties": 1
+    }
+  },
+  "additionalProperties": true
+}

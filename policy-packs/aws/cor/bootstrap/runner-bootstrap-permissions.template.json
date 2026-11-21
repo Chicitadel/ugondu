@@ -1,0 +1,142 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeCanonicalExecutionRoleWithRequiredSessionTags",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": "arn:aws:iam::${ACCOUNT_ID}:role/${EXECUTION_ROLE_NAME}",
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/UgonduTransactionId": "false"
+        },
+        "StringNotEquals": {
+          "aws:RequestTag/UgonduTransactionId": ""
+        },
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduTransactionId",
+            "UgonduCOR"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "InspectCanonicalExecutionRoleAttachments",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListAttachedRolePolicies"
+      ],
+      "Resource": "arn:aws:iam::${ACCOUNT_ID}:role/${EXECUTION_ROLE_NAME}"
+    },
+    {
+      "Sid": "AttachOnlyCanonicalCORV9Policies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::${ACCOUNT_ID}:role/${EXECUTION_ROLE_NAME}",
+      "Condition": {
+        "ArnEquals": {
+          "iam:PolicyARN": [
+            "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-Discovery",
+            "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Creation",
+            "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Cleanup",
+            "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-RDS-S3",
+            "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-ECR-ECS"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ReadCanonicalCORV9PolicyVersions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:ListPolicyVersions"
+      ],
+      "Resource": [
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-Discovery",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Creation",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Cleanup",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-RDS-S3",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-ECR-ECS"
+      ]
+    },
+    {
+      "Sid": "RepairCanonicalCORV9PolicyVersions",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicyVersion",
+        "iam:DeletePolicyVersion",
+        "iam:SetDefaultPolicyVersion"
+      ],
+      "Resource": [
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-Discovery",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Creation",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Cleanup",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-RDS-S3",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-ECR-ECS"
+      ]
+    },
+    {
+      "Sid": "CreateOnlyCanonicalTaggedCORV9Policies",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreatePolicy"
+      ],
+      "Resource": [
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-Discovery",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Creation",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-EC2-Cleanup",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-RDS-S3",
+        "arn:aws:iam::${ACCOUNT_ID}:policy/UgonduCOR-V9-ECR-ECS"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/UgonduCOR": "true"
+        }
+      }
+    },
+    {
+      "Sid": "InspectRunnerInlinePolicyForDelegation",
+      "Effect": "Allow",
+      "Action": [
+        "iam:ListRolePolicies",
+        "iam:GetRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::${ACCOUNT_ID}:role/${RUNNER_ROLE_NAME}"
+    },
+    {
+      "Sid": "InspectRDSServiceLinkedRole",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::${ACCOUNT_ID}:role/AWSServiceRoleForRDS",
+        "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS"
+      ]
+    },
+    {
+      "Sid": "CreateRDSServiceLinkedRoleIfMissing",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateServiceLinkedRole"
+      ],
+      "Resource": "arn:aws:iam::${ACCOUNT_ID}:role/aws-service-role/rds.amazonaws.com/AWSServiceRoleForRDS",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "rds.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

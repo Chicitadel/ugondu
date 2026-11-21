@@ -1,0 +1,72 @@
+{
+  "schema": "ugondu.evidence-manifest/1",
+  "gitHeadSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
+  "candidateSha": "45b07518e82c9089d68a38d87b4566b0dd0bcba9",
+  "bindingProtocol": "CANDIDATE_PLUS_EVIDENCE_ONLY_DESCENDANT",
+  "evidenceFiles": [
+    {
+      "path": "config/qualification/target-matrix.json",
+      "sha256": "871318a028429784438a0e2ebab758d8530a2257493c6a757905188ff38c24ca"
+    },
+    {
+      "path": "docs/governance/evidence/native-runner-evidence.json",
+      "sha256": "a3940a1819699d244f153ce001f5a5863fbfc6239ef1189c7f49797add7764d8"
+    },
+    {
+      "path": "docs/security/evidence/admin_portal_provisioning_receipt.json",
+      "sha256": "6f9b3ecefb3d2604d54483be9c537d996e22c6f423894214aaeb390b830be7fb"
+    },
+    {
+      "path": "docs/security/evidence/ai_model_qualification_report.json",
+      "sha256": "c5fa6f82e3462e12bd05729c4a6f2d739f8a46685f6bba03290671c201ca5661"
+    },
+    {
+      "path": "docs/security/evidence/live_ai_canary_receipt.json",
+      "sha256": "037867dd318103ad775480c06c3e12ec1ce3231801e8d986cf375336aed52be8"
+    }
+  ],
+  "testCommands": [
+    {
+      "command": "node --test tests/qualification/airroofers-ai-credential-canary.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/evidence-manifest.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/target-matrix-fail-closed.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/native-runner-evidence.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/evidence-freshness.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/model-lifecycle-qualification.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/model-lifecycle-adversarial-qualification.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node --test tests/qualification/ai-barrel-export-qualification.test.js",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/governance/validate-repository.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "gh run view 40216812646 (Ugondu CI/CD Pipeline)",
+      "exitCode": 0
+    }
+  ],
+  "allTestCommandsPassed": true,
+  "unproven": []
+}

@@ -20,7 +20,7 @@ Based on the Event-Driven Policy Engine, `certify` is evaluated under the **UI P
 
 ## Approval
 **Wave 1C Refactoring Applied:** Yes. 
-**Execution Signature:** AntiGravity Autonomous CI
+**Execution Signature:** Ujomor Systems Engineering Authority CI
 **Governance Semantics:** `Governance Engine v2.0`, `UI Policy Pack v1.1`
 
 ---

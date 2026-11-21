@@ -1,0 +1,12 @@
+{
+  "name": "@ugondu/plugin-recovery-http",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Frontend Validation & HTTP Recovery Capability Plugin",
+  "main": "src/frontend-validation.ts",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@ugondu/shared": "^1.0.0"
+  }
+}

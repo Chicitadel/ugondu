@@ -1,0 +1,22 @@
+title = "Ugondu Security - Secret Detection Rules"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-private-key"
+description = "Unencrypted Private Key"
+regex = '''-----BEGIN ((EC|PGP|DSA|RSA|OPENSSH) )?PRIVATE KEY( BLOCK)?-----'''
+keywords = ["-----BEGIN"]
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+keywords = ["AKIA", "ASIA"]
+
+[[rules]]
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+keywords = ["ghp_"]

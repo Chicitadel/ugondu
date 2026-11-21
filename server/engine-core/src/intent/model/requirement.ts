@@ -1,0 +1,50 @@
+/******************************************************************************
+ * Project        : Air Roofers Platform
+ * Module         : Intent Engine
+ * File           : requirement.ts
+ * Version        : 1.0.0
+ * Author         : Engineering Lead
+ * Organization   : Air Roofers
+ * Created Date   : 2026-10-01
+ * Last Modified  : 2026-10-01
+ * Classification : ENTERPRISE
+ *
+ * Governance:
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001
+ * - SOC 2
+ * - OWASP ASVS
+ * - NIST
+ *
+ * Signatures:
+ * - Architecture Authority
+ * - Security Authority
+ * - Governance Authority
+ * - Deployment Authority
+ *
+ * Copyright (c) 2026 Air Roofers
+ * All Rights Reserved.
+ ******************************************************************************/
+
+export enum Provenance {
+    USER_EXPLICIT = "USER_EXPLICIT",
+    LLM_INFERRED = "LLM_INFERRED"
+}
+
+/**
+ * @interface Requirement
+ * @description Corporate Governed interface implementation for Requirement
+ * @classification ENTERPRISE
+ */
+export interface Requirement {
+    id: string;
+    description: string;
+    provenance: Provenance;
+    priority: "MUST" | "SHOULD" | "COULD" | "WON'T";
+    category: "BUDGET" | "ARCHITECTURE" | "SECURITY" | "PERFORMANCE" | "FUNCTIONAL";
+}

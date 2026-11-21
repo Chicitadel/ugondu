@@ -1,0 +1,92 @@
+{
+  "family": "ugondu-backend-${ENVIRONMENT_NAME}",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "EC2",
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ugonduEcsExecutionRole",
+  "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ugonduEcsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "backend-api",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/ugondu-runtime:${IMAGE_TAG}",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 4001,
+          "hostPort": 8081,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "${ENVIRONMENT_NAME}"
+        },
+        {
+          "name": "PORTABILITY_TIER",
+          "value": "${PORTABILITY_TIER}"
+        },
+        {
+          "name": "PORT",
+          "value": "4001"
+        },
+        {
+          "name": "UGONDU_BIND_PORT",
+          "value": "8081"
+        },
+        {
+          "name": "IDENTITY_AUTHORITY_URL",
+          "value": "https://identity.airroofers.eu/api/v1"
+        },
+        {
+          "name": "BILLING_AUTHORITY_URL",
+          "value": "https://billing.airroofers.eu/api/v1"
+        },
+        {
+          "name": "TELEMETRY_ENDPOINT",
+          "value": "https://telemetry.airroofers.eu"
+        },
+        {
+          "name": "MANDATAG_LICENSE_ENDPOINT",
+          "value": "https://license.airroofers.eu"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "UGONDU_DB_URL",
+          "valueFrom": "${DB_URL_SECRET_ARN}"
+        },
+        {
+          "name": "UGONDU_DB_USER",
+          "valueFrom": "${DB_USERNAME_SECRET_ARN}"
+        },
+        {
+          "name": "UGONDU_DB_PASS",
+          "valueFrom": "${DB_PASSWORD_SECRET_ARN}"
+        }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:4001/health/ready || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/ugondu-backend-${ENVIRONMENT_NAME}",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "backend"
+        }
+      }
+    }
+  ]
+}

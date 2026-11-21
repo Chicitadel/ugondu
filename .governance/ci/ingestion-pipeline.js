@@ -30,7 +30,7 @@ async function run() {
 
     // In CI, token is injected via secrets
     const client = new EvidenceCollectorClient({
-        token: 'ingestion-token', // Matches MOCK_VALID_TOKENS in auth.js
+        token: 'ingestion-token', // Matches STUB_VALID_TOKENS in auth.js
         baseUrl: 'http://localhost:3000'
     });
 

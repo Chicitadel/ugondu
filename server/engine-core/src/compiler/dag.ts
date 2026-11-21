@@ -16,6 +16,11 @@ import { createHash } from 'crypto';
 import canonicalize from 'canonicalize';
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface DagNode
+ * @description Corporate Governed interface implementation for DagNode
+ * @classification ENTERPRISE
+ */
 export interface DagNode {
     id: string;
     action: string;
@@ -25,11 +30,21 @@ export interface DagNode {
     payload: Record<string, any>;
 }
 
+/**
+ * @interface DagEdge
+ * @description Corporate Governed interface implementation for DagEdge
+ * @classification ENTERPRISE
+ */
 export interface DagEdge {
     from: string;
     to: string;
 }
 
+/**
+ * @interface ExecutionGraphDAG
+ * @description Corporate Governed interface implementation for ExecutionGraphDAG
+ * @classification ENTERPRISE
+ */
 export interface ExecutionGraphDAG {
     schemaVersion: '1.0.0';
     graphId: string;
@@ -40,6 +55,11 @@ export interface ExecutionGraphDAG {
     terminalNodeIds: string[];
 }
 
+/**
+ * @class PlanCompiler
+ * @description Corporate Governed class implementation for PlanCompiler
+ * @classification ENTERPRISE
+ */
 export class PlanCompiler {
     public static compileExecutionGraph(actions: Array<{ action: string; payload: Record<string, any> }>): ExecutionGraphDAG {
         if (!Array.isArray(actions) || actions.length === 0) {

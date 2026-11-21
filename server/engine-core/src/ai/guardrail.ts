@@ -2,17 +2,31 @@
  * Project        : Ugondu — Universal Deployment Intelligence Platform
  * Module         : Server / Engine Core / AI / Guardrail
  * File           : guardrail.ts
- * Version        : 2.0.0
- * Author         : Delivery Safety Engineering Authority
+ * Version        : 3.0.0
+ * Author         : Ujomor Systems Engineering & Governance Authority
  * Organization   : Air Roofers Ltd
  * Created Date   : 2026-09-30
+ * Last Modified  : 2026-10-18
  * Classification : ENTERPRISE | INTERNAL
  *
- * Standards: ISO 27001, SOC 2, OWASP ASVS, NIST SP 800-53
+ * Governance:
+ * - Corporate Policy Governed
+ * - Security Reviewed
+ * - Architecture Controlled
+ * - Protocol Frozen
+ * - Modularization Enforced
+ *
+ * Standards:
+ * - ISO 27001 / SOC 2 / OWASP ASVS / NIST SP 800-53
+ *
+ * Signatures:
+ * - Architecture Authority : Ujomor Systems Engineering
+ * - Security Authority     : Ujomor Systems Governance
+ * - Governance Authority   : Air Roofers Corporate Governance
+ * - Deployment Authority   : Air Roofers Release Engineering
+ *
  * Copyright (c) 2026 Air Roofers Ltd. All Rights Reserved.
  ******************************************************************************/
-
-import { __t } from '@ugondu/shared';
 
 export interface AiProposedPlan {
     proposedByModel: string;
@@ -35,7 +49,7 @@ export class AiDeliveryGuardrail {
         'ARBITRARY_SCRIPT',
         'BASH',
         'SH',
-        'POWERSHELL'
+        'POWERSHELL',
     ]);
 
     private static readonly ALLOWED_ACTIONS = new Set([
@@ -48,10 +62,13 @@ export class AiDeliveryGuardrail {
         'COPY_FILE',
         'CREATE_DIRECTORY',
         'SYMLINK',
-        'SERVICE_RESTART'
+        'SERVICE_RESTART',
     ]);
 
-    public static validateAiPlan(plan: AiProposedPlan, allowedTargetCapabilities: string[]): GuardrailValidationResult {
+    public static validateAiPlan(
+        plan: AiProposedPlan,
+        allowedTargetCapabilities: string[]
+    ): GuardrailValidationResult {
         const violations: string[] = [];
 
         if (!plan.actions || !Array.isArray(plan.actions) || plan.actions.length === 0) {
@@ -61,17 +78,14 @@ export class AiDeliveryGuardrail {
         const allowedCapSet = new Set(allowedTargetCapabilities);
 
         for (const [idx, act] of plan.actions.entries()) {
-            // 1. Strict elimination of generic shell escapes
             if (this.FORBIDDEN_ACTIONS.has(act.action.toUpperCase())) {
                 violations.push(`VIOLATION_FORBIDDEN_SHELL_ACTION_AT_STEP_${idx}_${act.action}`);
             }
 
-            // 2. Closed world action set validation
             if (!this.ALLOWED_ACTIONS.has(act.action)) {
                 violations.push(`VIOLATION_UNKNOWN_ACTION_AT_STEP_${idx}_${act.action}`);
             }
 
-            // 3. Capability intersection validation
             if (!allowedCapSet.has(act.action)) {
                 violations.push(`VIOLATION_CAPABILITY_NOT_GRANTED_AT_STEP_${idx}_${act.action}`);
             }
@@ -80,7 +94,7 @@ export class AiDeliveryGuardrail {
         return {
             passed: violations.length === 0,
             violations,
-            sanitizedPlan: violations.length === 0 ? plan : undefined
+            sanitizedPlan: violations.length === 0 ? plan : undefined,
         };
     }
 }

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0.0",
+  "evidenceId": "ev-d0c410cd-1d03-4e28-89e1-a81ea7d1a7e3",
+  "executionId": "exec-qual-1792524571571-724432c4",
+  "gateId": "COR-PLATFORM-WINDOWS-AMD64",
+  "status": "PASS",
+  "source": {
+    "repository": "Chicitadel/ugondu",
+    "commit": "50ca98b6dd3672ef473b425d74e66e60e163470d",
+    "tree": "9fdd338d53fe5ae0d23ea503c3fceb088a5bd2d3",
+    "workflowRunId": "local-1792524571572"
+  },
+  "target": {
+    "os": "windows",
+    "architecture": "amd64",
+    "runtime": "node/v24.17.0",
+    "provider": "local-win32",
+    "mode": "headless-ci"
+  },
+  "startedAt": "2026-10-20T19:29:31.573Z",
+  "completedAt": "2026-10-20T19:30:36.910Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "scripts/release/collect-qualification-evidence.mjs"
+  ],
+  "exitCode": 0,
+  "rawLogSha256": "13a8b6cf51f349dcdf671a26c057d24911446c71b8eb4eecf8b5809ec63fdb2e",
+  "artifacts": [
+    {
+      "path": "governance/policy-results.json",
+      "sha256": "4a459aab79e5163eb666a8c6a159b02fcf8b15a3d0ee4bd0351f05c2f58d513d",
+      "sizeBytes": 748
+    }
+  ],
+  "limitations": [
+    "Host runtime verification executed on windows/amd64; other OS targets require native matrix runners."
+  ]
+}

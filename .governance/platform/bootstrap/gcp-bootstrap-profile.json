@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "profile_id": "ugondu.gcp.one-step-bootstrap",
+  "provider": "gcp",
+  "status": "bootstrap-wif-implemented-deployment-unqualified",
+  "intent": "One-command, repository-bound bootstrap for short-lived GitHub Actions identity without granting workload permissions.",
+  "entrypoint": "npm run bootstrap:gcp -- --project PROJECT_ID --github-repo OWNER/REPO [--region REGION]",
+  "plan": {
+    "command_suffix": "--plan",
+    "read_only": true,
+    "outputs": ["target-bound-plan", "sha256-plan-digest", "required-api-list", "WIF-resource-plan", "authority-boundary-report"]
+  },
+  "apply": {
+    "command_suffix": "--apply --approve-plan-digest SHA256_FROM_PLAN",
+    "requires_explicit_digest_approval": true,
+    "requires_active_gcloud_identity": true,
+    "requires_active_project_match": true,
+    "operations": ["enable-bootstrap-apis", "create-or-reuse-wif-pool", "create-or-reuse-repository-restricted-oidc-provider", "create-or-reuse-dedicated-service-account", "bind-workload-identity-user", "read-back-verify"],
+    "workload_roles_granted": [],
+    "long_lived_service_account_keys": "prohibited"
+  },
+  "security_invariants": {
+    "repository_condition_exact_match": true,
+    "owner_editor_grants": false,
+    "deployment_roles_by_default": false,
+    "plan_digest_required": true,
+    "readback_required": true,
+    "authority_gap_fails_nonzero": true,
+    "inherited_org_iam_remains_authoritative": true
+  },
+  "required_environment": ["gcloud CLI", "active user authentication", "explicit GCP project ID", "repository OWNER/REPO"],
+  "non_claims": [
+    "This profile does not qualify GCP workload deployment.",
+    "This profile does not override organization policy, IAM deny policies, permission boundaries or inherited grants.",
+    "API enablement and identity federation setup require the caller to already possess those permissions.",
+    "Cloud Run, Cloud DNS, Artifact Registry, Compute Engine and workload-specific APIs/roles are not enabled or granted by this bootstrap."
+  ],
+  "governance": {
+    "legal_policy_authority": "https://policies.airroofers.eu",
+    "billing_entitlement_authority": "Air Roofers AeroBill/Mandatag",
+    "no_direct_master_mutation": true
+  }
+}

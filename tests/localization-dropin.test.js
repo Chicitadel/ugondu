@@ -28,6 +28,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 let passed = 0;
 let failed = 0;
@@ -43,6 +44,15 @@ function reportFail(name, err) {
 }
 
 async function runLocalizationTests() {
+    const previousLocalesDir = process.env.UGONDU_LOCALES_DIR;
+    const isolatedLocalesDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ugondu-locales-dropin-'));
+    process.env.UGONDU_LOCALES_DIR = isolatedLocalesDir;
+    process.once('exit', () => {
+        try { fs.rmSync(isolatedLocalesDir, { recursive: true, force: true }); } catch (_) { /* best-effort temp cleanup */ }
+        if (previousLocalesDir === undefined) delete process.env.UGONDU_LOCALES_DIR;
+        else process.env.UGONDU_LOCALES_DIR = previousLocalesDir;
+    });
+
     console.log('══════════════════════════════════════════════════════════════');
     console.log(' Ugondu Air Roofers Global Governance: Localization Suite    ');
     console.log(' Standards: Zero String Hardcoding & Drop-In [lang] Locales   ');
@@ -68,82 +78,81 @@ async function runLocalizationTests() {
     try {
         setLocale('en');
         const enMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.strictEqual(enMsg, '[en] Ugondu Engine listening on port 4001');
+        assert.strictEqual(enMsg, 'Ugondu Engine listening on port 4001', 'English token must resolve exactly and interpolate both positional parameters');
 
         setLocale('fr');
         const frMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.strictEqual(frMsg, '[fr] Ugondu Engine en écoute sur le port 4001');
+        assert.strictEqual(frMsg, 'Ugondu Engine en écoute sur le port 4001', 'French token must resolve exactly and interpolate both positional parameters');
 
         setLocale('de');
         const deMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.strictEqual(deMsg, '[de] Ugondu Engine lauscht auf Port 4001');
+        assert.strictEqual(deMsg, 'Ugondu Engine lauscht auf Port 4001', 'German token must resolve exactly and interpolate both positional parameters');
 
         reportPass('[lang] token prefix and printf interpolation correctly applied across multiple languages');
     } catch (e) {
         reportFail('[lang] token injection and formatting', e);
     }
 
-    // Test 3: Drop-in Activation (Drop Japanese ja.json on server with ZERO code change)
-    const localesDir = path.resolve(__dirname, '../locales');
-    const jaPath = path.join(localesDir, 'ja.json');
+    // Test 3: Drop-in Activation (add a non-core locale without mutating repository files)
+    const localesDir = isolatedLocalesDir;
+    const customLang = 'sw';
+    const dropinPath = path.join(localesDir, `${customLang}.json`);
 
     try {
-        const jaTokens = {
-            "cli_title": "Ugondu ユニバーサル配信クライアント",
-            "event_req": "イベント名が必要です。",
-            "listening": "%s はポート %d でリッスン中"
+        const customTokens = {
+            "cli_title": "Ugondu Universal Delivery Client (Swahili)",
+            "event_req": "Jina la tukio linahitajika.",
+            "listening": "%s inasikiliza kwenye bandari %d"
         };
-        fs.writeFileSync(jaPath, JSON.stringify(jaTokens, null, 2), 'utf-8');
+        fs.writeFileSync(dropinPath, JSON.stringify(customTokens, null, 2), 'utf-8');
 
         // Dynamically reload
         reloadLocales();
-        assert.strictEqual(isLocaleSupported('ja'), true, 'Drop-in Japanese locale ja.json should be immediately active');
-        assert.ok(getSupportedLocales().includes('ja'), 'getSupportedLocales() must include newly dropped "ja" locale');
+        assert.strictEqual(isLocaleSupported(customLang), true, 'Drop-in custom locale sw.json should be immediately active');
+        assert.ok(getSupportedLocales().includes(customLang), 'getSupportedLocales() must include newly dropped custom locale');
 
-        setLocale('ja');
-        assert.strictEqual(getLocale(), 'ja');
+        setLocale(customLang);
+        assert.strictEqual(getLocale(), customLang);
 
-        const jaEventMsg = __t('event_req');
-        assert.strictEqual(jaEventMsg, '[ja] イベント名が必要です。');
+        const customEventMsg = __t('event_req');
+        assert.strictEqual(customEventMsg, 'Jina la tukio linahitajika.', 'Drop-in locale must resolve its exact token value without debug prefixes');
 
-        const jaListenMsg = __t('listening', 'Ugondu Engine', 4001);
-        assert.strictEqual(jaListenMsg, '[ja] Ugondu Engine はポート 4001 でリッスン中');
+        const customListenMsg = __t('listening', 'Ugondu Engine', 4001);
+        assert.strictEqual(customListenMsg, 'Ugondu Engine inasikiliza kwenye bandari 4001', 'Drop-in locale must interpolate both positional parameters exactly');
 
-        reportPass('Drop-in language activation (ja.json) succeeded with zero code modification or rebuild');
+        reportPass('Drop-in language activation (sw.json) succeeded with zero code modification or rebuild');
     } catch (e) {
         reportFail('Drop-in language activation', e);
     }
 
     // Test 4: Missing Key Graceful Fallback (Purity & Zero Crash)
     try {
-        setLocale('ja');
-        // 'auth_missing' is not defined in ja.json, so it must fall back to 'en' while retaining [ja] tag
+        setLocale(customLang);
+        // 'auth_missing' is not defined in the custom locale, so it must fall back exactly to English.
         const fallbackMsg = __t('auth_missing');
-        assert.strictEqual(fallbackMsg, '[ja] Missing authentication token. Deployment rejected.');
+        assert.strictEqual(fallbackMsg, 'Missing authentication token. Deployment rejected.', 'Missing locale token must use the exact English fallback');
 
         // Completely unknown token falls back to key itself
         const unknownMsg = __t('nonexistent_token_xyz');
-        assert.strictEqual(unknownMsg, '[ja] nonexistent_token_xyz');
+        assert.strictEqual(unknownMsg, 'nonexistent_token_xyz', 'Unknown token must fall back to the unchanged token key');
 
         reportPass('Missing tokens fall back gracefully to English dictionary and raw token without crashing');
     } catch (e) {
         reportFail('Graceful fallback resilience', e);
     }
 
-    // Test 5: Drop-in Deactivation (Delete ja.json)
+    // Test 5: Drop-in Deactivation (delete the isolated custom locale)
     try {
-        if (fs.existsSync(jaPath)) {
-            fs.unlinkSync(jaPath);
-        }
+        if (fs.existsSync(dropinPath)) { fs.unlinkSync(dropinPath); }
 
         // Dynamically reload
         reloadLocales();
-        assert.strictEqual(isLocaleSupported('ja'), false, 'Removed ja.json should no longer be supported');
-        assert.ok(!getSupportedLocales().includes('ja'), 'getSupportedLocales() must not include removed "ja"');
+        assert.strictEqual(isLocaleSupported(customLang), false, 'Removed sw.json should no longer be supported');
+        assert.ok(!getSupportedLocales().includes(customLang), 'getSupportedLocales() must not include removed custom locale');
 
         // Reset locale
         setLocale('en');
-        reportPass('Drop-in language deactivation (delete ja.json) succeeded with zero code modification');
+        reportPass('Drop-in language deactivation (delete sw.json) succeeded with zero code modification');
     } catch (e) {
         reportFail('Drop-in language deactivation', e);
     }

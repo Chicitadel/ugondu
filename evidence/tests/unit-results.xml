@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="unit" tests="19" failures="0" errors="0" skipped="0" time="1.711" commit="50ca98b6dd3672ef473b425d74e66e60e163470d">
+  <testsuite name="tests/passport-cryptography.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.625">
+    <testcase name="CRYPTO-001: Ed25519 digital signature generation and verification" classname="test" time="0.010033" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-002: Deterministic SHA-256 digest computation" classname="test" time="0.001912" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-003: AES-256-GCM encryption, decryption, and authentication tag verification" classname="test" time="0.003629" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-004: AES-256-GCM authentication failure on tampered ciphertext" classname="test" time="0.001818" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-005: RSA-2048 PKCS#1 v1.5 / PSS digital signature validation" classname="test" time="0.233193" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-006: Verification of external evidence public trust anchor key format" classname="test" time="0.002371" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-007: Verification of UPLM pack authority public key format" classname="test" time="0.001288" file="tests/passport-cryptography.test.js"/>
+    <testcase name="CRYPTO-008: Deterministic object key sorting for RFC 8785 hash stability" classname="test" time="0.000733" file="tests/passport-cryptography.test.js"/>
+  </testsuite>
+  <testsuite name="tests/language-packs.test.js" tests="8" failures="0" errors="0" skipped="0" time="0.709">
+    <testcase name="L10N-001: Authentic Language Pack Validation across 12 Locales" classname="test" time="0.022811" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-002: Adversarial Content Tampering Defense" classname="test" time="0.002048" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-003: Adversarial Signature Forgery Defense" classname="test" time="0.002263" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-004: Security-Critical Token Completeness Enforcement" classname="test" time="0.005833" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-005: RTL Direction Metadata Preservation" classname="test" time="0.001535" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-006: Server-Side HTTP Accept-Language Negotiation Middleware" classname="test" time="0.037766" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-007: Offline Pack Verification &amp; Installation Workflow" classname="test" time="0.005164" file="tests/language-packs.test.js"/>
+    <testcase name="L10N-008: Thin-Client IP Leakage &amp; Secret Scanning Defense" classname="test" time="0.048352" file="tests/language-packs.test.js"/>
+  </testsuite>
+  <testsuite name="tests/provider-compilation.test.js" tests="3" failures="0" errors="0" skipped="0" time="0.377">
+    <testcase name="PROV-001: AWS provider compilation emits valid implementation" classname="test" time="0.004408" file="tests/provider-compilation.test.js"/>
+    <testcase name="PROV-002: GCP provider compilation emits valid implementation" classname="test" time="0.000646" file="tests/provider-compilation.test.js"/>
+    <testcase name="PROV-003: Provider implementations are isolated and non-identical" classname="test" time="0.000567" file="tests/provider-compilation.test.js"/>
+  </testsuite>
+</testsuites>

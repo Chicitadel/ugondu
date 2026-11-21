@@ -14,6 +14,11 @@
 
 import { __t } from '@ugondu/shared';
 
+/**
+ * @interface UpmComponent
+ * @description Corporate Governed interface implementation for UpmComponent
+ * @classification ENTERPRISE
+ */
 export interface UpmComponent {
     id: string;
     name: string;
@@ -21,12 +26,22 @@ export interface UpmComponent {
     runtime: string;
 }
 
+/**
+ * @interface UpmDependency
+ * @description Corporate Governed interface implementation for UpmDependency
+ * @classification ENTERPRISE
+ */
 export interface UpmDependency {
     source: string;
     target: string;
     relation: 'requires' | 'supports' | 'depends-on' | 'conflicts-with';
 }
 
+/**
+ * @interface UniversalProjectModel
+ * @description Corporate Governed interface implementation for UniversalProjectModel
+ * @classification ENTERPRISE
+ */
 export interface UniversalProjectModel {
     schemaVersion: '1.0.0';
     projectId: string;
@@ -40,6 +55,11 @@ export interface UniversalProjectModel {
     policies: string[];
 }
 
+/**
+ * @class UpmManager
+ * @description Corporate Governed class implementation for UpmManager
+ * @classification ENTERPRISE
+ */
 export class UpmManager {
     public static createProjectModel(params: {
         projectId: string;
@@ -51,7 +71,7 @@ export class UpmManager {
         policies?: string[];
     }): UniversalProjectModel {
         if (!params.projectId || !params.projectName || !params.targetEnvironment) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
 
         return {
@@ -73,7 +93,7 @@ export class UpmManager {
             throw new Error(__t('error_schema_invalid'));
         }
         if (!model.projectId || !model.projectName || !model.infrastructure || !model.infrastructure.targetEnvironment) {
-            throw new Error(__t('invalid_ctx'));
+            throw new Error(__t('msg_invalid_deploymentcontext_missing_requir'));
         }
         return true;
     }

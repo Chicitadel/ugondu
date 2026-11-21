@@ -1,0 +1,13 @@
+{
+  "name": "@ugondu/plugin-recovery-http",
+  "version": "1.0.0",
+  "description": "Ugondu Sovereign Frontend Validation Recovery Capability Plugin",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "minEdition": "community",
+  "capabilities": [
+    "frontend-validation"
+  ],
+  "hooks": [
+    "recover"
+  ]
+}

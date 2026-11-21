@@ -1,0 +1,12 @@
+{
+  "name": "@ugondu/plugin-recovery-network",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ugondu Multi-Region Failover Orchestration Recovery Capability Plugin",
+  "main": "src/multi-region-failover-orchestration.ts",
+  "author": "Enterprise Architecture Council / Ujomor Systems Engineering Authority",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@ugondu/shared": "^1.0.0"
+  }
+}

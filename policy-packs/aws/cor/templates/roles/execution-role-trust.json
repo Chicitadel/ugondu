@@ -1,0 +1,27 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowUgonduCORRunnerAssumeRoleWithSessionTag",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::971671216490:role/UgonduCORRunner"
+      },
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Condition": {
+        "Null": {
+          "aws:RequestTag/UgonduTransactionId": "false"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": [
+            "UgonduTransactionId",
+            "UgonduCOR"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+ci-target	https://github.com/Chicitadel/ugondu-ci-target.git (fetch)
+ci-target	https://github.com/Chicitadel/ugondu-ci-target.git (push)
+origin	https://github.com/Chicitadel/ugondu.git (fetch)
+origin	https://github.com/Chicitadel/ugondu.git (push)

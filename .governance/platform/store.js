@@ -48,7 +48,7 @@ class FilesystemStore extends EvidenceStore {
 }
 
 /**
- * Mock Memory Implementation for tests/upgrades
+ * Stub Memory Implementation for tests/upgrades
  */
 class MemoryStore extends EvidenceStore {
     constructor() {
